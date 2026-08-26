@@ -1,0 +1,108 @@
+// ============================================================
+// GrowthGarden 视图测试 - 成长庭院
+// 现绑定：modules/goal（目标花园）/ modules/garden（点缀）/ modules/seasonal（光茧）
+// 采用真实实现 + 模拟 storage；storage 状态用 vi.hoisted 保证在 import 前就绪。
+// ============================================================
+import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { mount } from '@vue/test-utils'
+import { ref } from 'vue'
+
+// ---- 模拟 storage（vi.hoisted 确保在 import 前初始化） ----
+const h = vi.hoisted(() => {
+  const mockStore: Record<string, any> = {}
+  const mockGetKV = (key: string, def: any) => mockStore[key] ?? def
+  const mockSetKV = (key: string, val: any) => { mockStore[key] = val }
+  return { mockStore, mockGetKV, mockSetKV }
+})
+
+vi.mock('../../engine/storage', () => ({
+  storage: {
+    getKV: (...args: any[]) => (h.mockGetKV as any)(...args),
+    setKV: (...args: any[]) => (h.mockSetKV as any)(...args),
+    getGoals: () => h.mockStore['__goals'] ?? [],
+    setGoals: (v: any) => { h.mockStore['__goals'] = v },
+  },
+}))
+
+// ---- 模拟 useViewEntrance ----
+vi.mock('../../composables/useViewEntrance', () => ({
+  useViewEntrance: () => ({ entranceRef: ref(null), entranceClass: ref('') }),
+}))
+
+// 真实模块（依赖已模拟的 storage）
+import { useGoal } from '../../modules/goal'
+import { useGardenFlourish } from '../../modules/garden'
+import { useCocoonStore } from '../../modules/seasonal/cocoon-store'
+
+async function getWrapper() {
+  const { default: GrowthGarden } = await import('../GrowthGarden.vue')
+  return mount(GrowthGarden, {
+    global: { stubs: { Teleport: true, Transition: true } },
+  })
+}
+
+describe('GrowthGarden 成长庭院', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(h.mockStore).forEach(k => delete h.mockStore[k])
+    if (typeof localStorage !== 'undefined') localStorage.clear()
+    useGoal().load()
+    const f = useGardenFlourish()
+    f.seeds.value = []
+    f.habits.value = []
+    f.compass.value = []
+    useCocoonStore().cocoons.value = []
+    ;(window as any).confirm = vi.fn(() => true)
+  })
+
+  it('渲染标题"成长庭院"', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('成长庭院')
+  })
+
+  it('统计概览显示四个维度（目标/已开花/生长中/休眠）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('目标')
+    expect(wrapper.text()).toContain('已开花')
+    expect(wrapper.text()).toContain('生长中')
+    expect(wrapper.text()).toContain('休眠')
+  })
+
+  it('无目标时显示空状态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('还没有目标')
+  })
+
+  it('种下目标后出现在目标花园', async () => {
+    const wrapper = await getWrapper()
+    const input = wrapper.find('.gw-goal-form-row input')
+    await input.setValue('学会放手')
+    await wrapper.find('.gw-goal-form-row .gw-btn').trigger('click')
+    expect(wrapper.text()).toContain('学会放手')
+  })
+
+  it('渲染种子 / 习惯 / 罗盘 区域标题', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('种子')
+    expect(wrapper.text()).toContain('习惯追踪')
+    expect(wrapper.text()).toContain('人生罗盘')
+  })
+
+  it('种下种子后显示种子文本', async () => {
+    const wrapper = await getWrapper()
+    const seedInput = wrapper.findAll('.gw-seed-row input')[0]
+    await seedInput.setValue('每天走路')
+    await wrapper.findAll('.gw-seed-row .gw-btn')[0].trigger('click')
+    expect(wrapper.text()).toContain('每天走路')
+  })
+
+  it('开花目标显示"记录蜕变光茧"钩子', async () => {
+    useGoal().goals.value.push({
+      id: 'g1', title: '完成书稿', description: '', tier: 'target', domain: 'growth',
+      status: 'bloom', parentId: undefined, order: 0, anchorCount: 0, anchorDone: 0,
+      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
+    })
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('记录蜕变光茧')
+  })
+})

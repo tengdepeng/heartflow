@@ -1,0 +1,51 @@
+{
+  "name": "heartflow",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview --host",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "check:circular": "madge --circular --extensions ts --ts-config tsconfig.json src",
+    "guard": "vue-tsc --noEmit && eslint . --quiet && madge --circular --extensions ts --ts-config tsconfig.json src && vitest run --no-file-parallelism && vite build --outDir node_modules/.hf-guard-dist",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev --project-dir ../src-tauri",
+    "tauri:build": "tauri build --project-dir ../src-tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-notification": "^2.3.3",
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-shell": "^2.3.5",
+    "@types/three": "^0.169.0",
+    "jsqr": "^1.4.0",
+    "pinia": "^3.0.4",
+    "qrcode-generator": "^2.0.4",
+    "three": "^0.169.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^26.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vitest/coverage-v8": "^4.1.10",
+    "@vue/test-utils": "^2.4.11",
+    "eslint": "^9.39.5",
+    "happy-dom": "^20.11.0",
+    "madge": "^8.0.0",
+    "typescript": "~5.6.2",
+    "typescript-eslint": "^8.67.0",
+    "vite": "^6.0.3",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^2.1.10"
+  }
+}

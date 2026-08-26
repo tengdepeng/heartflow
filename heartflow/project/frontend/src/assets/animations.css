@@ -1,0 +1,323 @@
+/* ============================================================
+   心流工坊 · 全局动画系统
+   深夜食堂 · 暖琥珀主题
+   ============================================================ */
+
+/* ============================================================
+   通用动画关键帧
+   ============================================================ */
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(var(--accent-rgb), 0); }
+  50% { box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.1); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) translateX(0); }
+  25% { transform: translateY(-20px) translateX(10px); }
+  50% { transform: translateY(-10px) translateX(-5px); }
+  75% { transform: translateY(-25px) translateX(8px); }
+}
+
+@keyframes dust-float {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.4; }
+  100% { transform: translateY(-120px) translateX(40px); opacity: 0; }
+}
+
+/* 环境微尘层缓慢漂移（与 dust-float 的区别：连续环形漂移、不淡出，作为常驻氛围层） */
+@keyframes dust-drift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-3%, 2%); }
+  50%  { transform: translate(2%, -3%); }
+  75%  { transform: translate(3%, 2%); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -5%); }
+  20% { transform: translate(-10%, 5%); }
+  30% { transform: translate(5%, -10%); }
+  40% { transform: translate(-5%, 15%); }
+  50% { transform: translate(-10%, 5%); }
+  60% { transform: translate(15%, 0); }
+  70% { transform: translate(0, 10%); }
+  80% { transform: translate(-15%, 0); }
+  90% { transform: translate(10%, 5%); }
+}
+
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes summon-fade-in {
+  from { opacity: 0; transform: scale(0.5) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes summon-glow {
+  0%, 100% { filter: drop-shadow(0 0 4px rgba(var(--accent-rgb), 0.2)); }
+  50% { filter: drop-shadow(0 0 12px rgba(var(--accent-rgb), 0.4)); }
+}
+
+/* ============================================================
+   页面切换动画
+   ============================================================ */
+
+.page-fade-enter-active {
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.page-fade-leave-active {
+  transition: opacity 0.08s ease, transform 0.08s ease;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.page-fade-enter-from {
+  opacity: 0;
+  transform: translateY(16px) scale(0.98);
+}
+.page-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+/* ============================================================
+   光门过渡动画 — 方向区分进出
+   ============================================================ */
+
+/* ---- 共享离开过渡：即时隐藏避免旧内容闪烁 ---- */
+.light-gate-forward-leave-active,
+.light-gate-backward-leave-active,
+.light-gate-branch-leave-active,
+.light-gate-return-leave-active {
+  transition: opacity 0.08s ease, transform 0.08s ease;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+/* ---- 方向区分的离开位置 ---- */
+.light-gate-forward-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+.light-gate-backward-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+.light-gate-branch-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+.light-gate-return-leave-to {
+  opacity: 0;
+  transform: scale(0.98);
+}
+
+/* ---- 共享进入过渡 ---- */
+.light-gate-forward-enter-active,
+.light-gate-backward-enter-active,
+.light-gate-branch-enter-active,
+.light-gate-return-enter-active {
+  position: relative;
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---- 方向区分的进入初始位置 ---- */
+.light-gate-forward-enter-from {
+  opacity: 0;
+  transform: scale(0.92) translateX(30px);
+}
+.light-gate-backward-enter-from {
+  opacity: 0;
+  transform: scale(0.92) translateX(-30px);
+}
+.light-gate-branch-enter-from {
+  opacity: 0;
+  transform: scale(0.92) translateY(30px);
+}
+.light-gate-return-enter-from {
+  opacity: 0;
+  transform: scale(0.92) translateY(-30px);
+}
+
+/* 显式定义 enter-to 确保 transition 正确完成 */
+.light-gate-forward-enter-to,
+.light-gate-backward-enter-to,
+.light-gate-branch-enter-to,
+.light-gate-return-enter-to {
+  opacity: 1;
+  transform: scale(1) translate(0, 0);
+}
+
+/* ---- 光门遮罩：方向区分的扫光效果 ---- */
+/* 前进：光从左到右扫过（门向右开） */
+.light-gate-forward-enter-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--accent-rgb), 0.05) 20%,
+    rgba(var(--accent-rgb), 0.12) 45%,
+    rgba(var(--accent-rgb), 0.05) 70%,
+    transparent 100%
+  );
+  background-size: 300% 100%;
+  animation: light-gate-sweep-right 0.55s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 后退：光从右到左扫过（门向左开） */
+.light-gate-backward-enter-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    270deg,
+    transparent 0%,
+    rgba(var(--accent-rgb), 0.05) 20%,
+    rgba(var(--accent-rgb), 0.12) 45%,
+    rgba(var(--accent-rgb), 0.05) 70%,
+    transparent 100%
+  );
+  background-size: 300% 100%;
+  animation: light-gate-sweep-left 0.55s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 分支：光从底部向上展开 */
+.light-gate-branch-enter-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    transparent 0%,
+    rgba(var(--accent-rgb), 0.05) 20%,
+    rgba(var(--accent-rgb), 0.12) 45%,
+    rgba(var(--accent-rgb), 0.05) 70%,
+    transparent 100%
+  );
+  background-size: 100% 300%;
+  animation: light-gate-sweep-up 0.55s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 回归：光从顶部向下收敛 */
+.light-gate-return-enter-active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(var(--accent-rgb), 0.05) 20%,
+    rgba(var(--accent-rgb), 0.12) 45%,
+    rgba(var(--accent-rgb), 0.05) 70%,
+    transparent 100%
+  );
+  background-size: 100% 300%;
+  animation: light-gate-sweep-down 0.55s ease-out forwards;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes light-gate-sweep-right {
+  0%   { background-position: 0% 0%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { background-position: 100% 0%; opacity: 0; }
+}
+@keyframes light-gate-sweep-left {
+  0%   { background-position: 100% 0%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { background-position: 0% 0%; opacity: 0; }
+}
+@keyframes light-gate-sweep-up {
+  0%   { background-position: 0% 0%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { background-position: 0% 100%; opacity: 0; }
+}
+@keyframes light-gate-sweep-down {
+  0%   { background-position: 0% 100%; opacity: 0; }
+  10%  { opacity: 1; }
+  60%  { opacity: 1; }
+  100% { background-position: 0% 0%; opacity: 0; }
+}
+
+/* ---- 光门入场后光晕脉冲 ---- */
+.light-gate-forward-enter-active::after,
+.light-gate-backward-enter-active::after,
+.light-gate-branch-enter-active::after,
+.light-gate-return-enter-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%,
+    rgba(var(--accent-rgb), 0.06) 0%,
+    transparent 60%);
+  animation: light-gate-aura 0.7s ease-out forwards 0.15s;
+  pointer-events: none;
+  z-index: 10;
+}
+
+@keyframes light-gate-aura {
+  0%   { opacity: 0; transform: scale(0.2); }
+  15%  { opacity: 0.8; }
+  100% { opacity: 0; transform: scale(3); }
+}
+
+/* ============================================================
+   视图入场动画系统
+   ============================================================ */
+
+/* 视图容器使用 data-enter 属性实现分段入场 */
+.view-entrance {
+  --enter-delay: 0ms;
+}
+
+.view-entrance > [data-enter] {
+  opacity: 0;
+  transform: translateY(16px);
+  /* 宪法视觉接线：--hf-animate-speed（默认1，启用0.9更从容）以除法缩放全局入场时长 */
+  transition: opacity calc(0.5s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+              transform calc(0.5s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: calc((var(--enter-delay) + 0ms) / var(--hf-animate-speed, 1));
+}
+
+.view-entrance.enter-to > [data-enter] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.view-entrance.enter-to > [data-enter]:nth-child(1) { transition-delay: calc((var(--enter-delay) + 0ms) / var(--hf-animate-speed, 1)); }
+.view-entrance.enter-to > [data-enter]:nth-child(2) { transition-delay: calc((var(--enter-delay) + 60ms) / var(--hf-animate-speed, 1)); }
+.view-entrance.enter-to > [data-enter]:nth-child(3) { transition-delay: calc((var(--enter-delay) + 120ms) / var(--hf-animate-speed, 1)); }
+.view-entrance.enter-to > [data-enter]:nth-child(4) { transition-delay: calc((var(--enter-delay) + 180ms) / var(--hf-animate-speed, 1)); }
+.view-entrance.enter-to > [data-enter]:nth-child(5) { transition-delay: calc((var(--enter-delay) + 240ms) / var(--hf-animate-speed, 1)); }
+.view-entrance.enter-to > [data-enter]:nth-child(6) { transition-delay: calc((var(--enter-delay) + 300ms) / var(--hf-animate-speed, 1)); }
+.view-entrance.enter-to > [data-enter]:nth-child(7) { transition-delay: calc((var(--enter-delay) + 360ms) / var(--hf-animate-speed, 1)); }
+.view-entrance.enter-to > [data-enter]:nth-child(8) { transition-delay: calc((var(--enter-delay) + 420ms) / var(--hf-animate-speed, 1)); }
+
+/* 平滑过渡后的微悬浮状态 */
+.view-entrance.enter-to > [data-enter].enter-float {
+  animation: gentle-float 6s ease-in-out infinite 1s;
+}

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <!-- viewport-fit=cover 让 env(safe-area-inset-*) 在刘海/挖孔设备上返回真实内缩值，
+         否则 GlowOverlay/MirrorSelf/Sanctuary 等已写的安全区内边距会静默失效、内容被状态栏/凹槽遮挡 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>心流工坊 · Heartflow</title>
+    <!-- Anthropic 品牌字体：Poppins（标题）Lora（正文英文） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- 中文品牌字体：Noto Serif SC（标题衬线·品牌灵魂）Noto Sans SC（正文无衬线） -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;600;700&family=Noto+Sans+SC:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

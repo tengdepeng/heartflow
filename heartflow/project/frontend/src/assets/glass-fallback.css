@@ -1,0 +1,34 @@
+/* ============================================================
+   毛玻璃兜底（glass-fallback）
+   当运行环境不支持 backdrop-filter（部分旧浏览器 / 某些 Tauri webview /
+   低配置移动设备）时，把关键常驻玻璃面的背景提升为近不透明，
+   保证文字可读、不被背景吞没。
+   仅在 @supports not 时生效，不影响支持 backdrop-filter 的环境（T6.2）。
+   ============================================================ */
+@supports not ((backdrop-filter: blur(2px)) or (-webkit-backdrop-filter: blur(2px))) {
+  :root {
+    --glass-fallback-bg: rgba(14, 16, 24, 0.94);
+    --glass-fallback-bg-soft: rgba(20, 24, 34, 0.92);
+  }
+
+  /* 常驻 chrome 玻璃面：侧栏 / 浮动导航 / 幕僚状态面板 / 恢复药丸 / 遮罩 / 模态 */
+  .nav-bar,
+  .floating-nav,
+  .bar-cluster,
+  .ms-tooltip,
+  .ms-bubble,
+  .ms-restore-pill,
+  .sidebar-overlay,
+  .base-modal,
+  .advisor-dock,
+  .pending-actions-tray {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--glass-fallback-bg) !important;
+  }
+
+  .floating-nav,
+  .bar-cluster {
+    background: var(--glass-fallback-bg-soft) !important;
+  }
+}

@@ -1,0 +1,222 @@
+/* ============================================================
+   遗志堂 · 共享面板样式
+   WillHeritagePanel / TestamentPanel 共用
+   ============================================================ */
+
+.will-panel {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(14, 16, 24, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+.will-panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.will-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(240, 242, 255, 0.92);
+}
+
+.will-panel-sub {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--text-low);
+}
+
+.will-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.will-block-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--text-medium);
+}
+
+.will-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.will-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.will-stat-num {
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(240, 242, 255, 0.92);
+}
+
+.will-stat-label {
+  font-size: 10px;
+  color: var(--text-low);
+}
+
+.will-empty {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--text-low);
+  text-align: center;
+}
+
+.will-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.will-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.will-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.will-item-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(240, 242, 255, 0.9);
+}
+
+.will-item-meta {
+  font-size: 10px;
+  color: var(--text-low);
+}
+
+.will-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.will-btn {
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 5px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.35);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: rgba(var(--accent-rgb), 0.9);
+  cursor: pointer;
+}
+
+.will-btn:hover {
+  background: rgba(var(--accent-rgb), 0.22);
+}
+
+.will-btn.danger {
+  border-color: rgba(196, 106, 90, 0.4);
+  background: rgba(196, 106, 90, 0.12);
+  color: rgba(196, 106, 90, 0.9);
+}
+
+.will-btn.danger:hover {
+  background: rgba(196, 106, 90, 0.22);
+}
+
+.will-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.will-input,
+.will-select {
+  font-size: 11px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(240, 242, 255, 0.9);
+  outline: none;
+}
+
+.will-input::placeholder {
+  color: var(--text-low);
+}
+
+.will-input:focus,
+.will-select:focus {
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.will-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.will-chip {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-medium);
+}
+
+.will-chain {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  font-size: 10px;
+  color: var(--text-low);
+}
+
+.will-chain-node {
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-medium);
+}
+
+.will-chain-arrow {
+  color: var(--text-low);
+}

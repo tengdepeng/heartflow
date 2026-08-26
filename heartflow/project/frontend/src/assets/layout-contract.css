@@ -1,0 +1,125 @@
+/* ============================================================
+   心流工坊 · 布局契约（壳层 z 栈 / 响应式浮层）
+   ------------------------------------------------------------
+   单一事实源：本文件定义「position: fixed 浮层」必须遵守的
+   响应式偏移约定，避免浮层压在侧边栏上、或避让移动端顶/底栏。
+   已在 main.ts 注入（紧随 design-tokens.css / animations.css）。
+
+   与 App.vue 壳层实现完全一致，此处仅作「可强制执行的契约」。
+   ============================================================ */
+
+/*
+  ── 契约要点 ───────────────────────────────────────────────
+  1) 壳层 z 栈（已在 App.vue 落地，此列备查，勿漂移）：
+       .app-base-bg / .canvas-room   → z:0   （注意：绝不能用 -1，负 z 会被父级底色盖死）
+       .ambient-layer / .main-content → z:1   （唯一滚动容器）
+       宪法叠层 night-dim → z:60 ；sabbath → z:61 （pointer-events:none，透传点击）
+       浮层（canvas-controls 等）→ 默认 z:90 ；唤出按钮 → z:100
+       模态/遮罩 overlay → inset:0，z 由各自组件决定（多为 90+，但须低于宪法叠层语义冲突时谨慎）
+
+  2) 令牌（定义在 .app-shell，被所有 fixed 后代继承）：
+       --sidebar-w : clamp(200px, 17vw, 280px)  （桌面侧栏宽；移动端 --sidebar-w:0）
+       --edge-bar-h: clamp(44px, 6vw, 56px)      （平板/移动端 顶栏与底栏高度）
+
+  3) 浮层规则：
+       · 全屏遮罩 / 模态 → position: fixed; inset: 0;  （无需偏移）
+       · 贴左内容浮层   → left: calc(var(--sidebar-w, 220px) + Npx);
+       · 顶部角部浮层   → 桌面顶边即可；移动端须 top: calc(var(--edge-bar-h) + Npx) 避让顶栏
+       · 底部浮层       → 桌面 bottom: Npx；移动端须 bottom: calc(var(--edge-bar-h) + Npx) 避让底栏
+       · 严禁 HARD height:100vh（视图根用 min-height:100% / 100dvh）
+  ─────────────────────────────────────────────────────────
+*/
+
+/* ---- 可复用浮层工具类（自带响应式避让，开箱即用；现有浮层可逐步迁移）---- */
+
+/* 基类：固定定位 + 默认浮层层级 */
+.hf-fixed-floating {
+  position: fixed;
+  z-index: 90;
+}
+
+/* 顶部右侧浮层（如画布控制簇）：桌面贴右上角；平板/移动端避让顶栏 */
+.hf-float-top-right {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 90;
+}
+@media (max-width: 1023px) {
+  .hf-float-top-right {
+    top: calc(var(--edge-bar-h, 48px) + 8px);
+  }
+}
+
+/* 顶部左侧浮层：桌面避让侧边栏；平板/移动端避让顶栏 */
+.hf-float-top-left {
+  position: fixed;
+  left: calc(var(--sidebar-w, 220px) + 24px);
+  top: 12px;
+  z-index: 90;
+}
+@media (max-width: 1023px) {
+  .hf-float-top-left {
+    left: 16px;
+    top: calc(var(--edge-bar-h, 48px) + 8px);
+  }
+}
+
+/* 底部居中浮层（如宪法箴言条）：桌面 bottom:24px；移动端避让底栏 */
+.hf-float-bottom-center {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 24px;
+  z-index: 90;
+}
+@media (max-width: 639px) {
+  .hf-float-bottom-center {
+    bottom: calc(var(--edge-bar-h, 56px) + 16px);
+  }
+}
+
+/* 底部左侧浮层：桌面避让侧边栏；移动端避让底栏 */
+.hf-float-bottom-left {
+  position: fixed;
+  left: calc(var(--sidebar-w, 220px) + 24px);
+  bottom: 24px;
+  z-index: 90;
+}
+@media (max-width: 639px) {
+  .hf-float-bottom-left {
+    left: 16px;
+    bottom: calc(var(--edge-bar-h, 56px) + 16px);
+  }
+}
+/* ≤375px 小微屏：贴边贴角、收缩外距，避免控件溢出/遮挡 */
+@media (max-width: 374px) {
+  .hf-float-bottom-left {
+    left: 10px;
+    right: 10px;
+    bottom: calc(var(--edge-bar-h, 56px) + 10px);
+  }
+}
+
+/* ---- ≤375px 小微屏统一收缩档（包D·任务④子任务②）----
+   375px 及以下为最窄主流手机屏；在 639px 避让顶/底栏基础上进一步
+   贴边、收缩外距与控件尺寸，避免浮层溢出视口或被圆角/安全区遮挡。
+   仅收缩定位外距与尺寸，不改层级与语义。 */
+@media (max-width: 374px) {
+  .hf-float-top-right {
+    top: calc(var(--edge-bar-h, 48px) + 6px);
+    right: 8px;
+  }
+  .hf-float-top-left {
+    left: 10px;
+    top: calc(var(--edge-bar-h, 48px) + 6px);
+    right: 10px;
+  }
+  .hf-float-bottom-center {
+    left: 10px;
+    right: 10px;
+    transform: none;
+    bottom: calc(var(--edge-bar-h, 56px) + 10px);
+    text-align: center;
+  }
+}

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" width="1200" height="900">
+  <rect width="1200" height="900" fill="#0d1b2a"/>
+  <g fill="rgba(91,143,176,0.12)" stroke="#5b8fb0" stroke-width="2">
+    <rect x="50" y="50" width="200" height="200" rx="6"/>
+    <rect x="50" y="300" width="200" height="200" rx="6"/>
+    <rect x="50" y="520" width="200" height="130" rx="6"/>
+    <rect x="250" y="300" width="200" height="350" rx="6"/>
+    <rect x="450" y="300" width="400" height="350" rx="6"/>
+    <rect x="850" y="300" width="300" height="200" rx="6"/>
+    <rect x="850" y="520" width="150" height="130" rx="6"/>
+    <rect x="1000" y="520" width="150" height="130" rx="6"/>
+    <rect x="250" y="700" width="900" height="180" rx="6"/>
+  </g>
+  <g fill="#e0e1dd" font-family="'PingFang SC','Microsoft YaHei',sans-serif" font-size="22" text-anchor="middle">
+    <text x="150" y="158">玄关</text>
+    <text x="150" y="408">厨房</text>
+    <text x="150" y="592">衣帽间</text>
+    <text x="350" y="485">餐厅</text>
+    <text x="650" y="485">客厅</text>
+    <text x="1000" y="408">卧室</text>
+    <text x="925" y="592">浴室</text>
+    <text x="1075" y="592">书房</text>
+    <text x="700" y="795">庭院（溯源树 · 习惯树 · 人生罗盘）</text>
+  </g>
+  <g fill="#778da9" font-size="13" text-anchor="middle">
+    <text x="650" y="515">家的 1:1 复刻 · 蓝图9房间</text>
+  </g>
+  <text x="1075" y="615" fill="#9bb8d3" font-size="11" text-anchor="middle">经略阁 · 辞典入口</text>
+</svg>

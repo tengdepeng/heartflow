@@ -1,0 +1,199 @@
+{
+  "generatedAt": "2026-07-27T03:29:21.820Z",
+  "environment": {
+    "node": "v22.16.0",
+    "platform": "win32"
+  },
+  "suites": [
+    {
+      "name": "对象操作",
+      "results": [
+        {
+          "name": "浅对象合并",
+          "durationMs": 3.89,
+          "iterations": 10000,
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 0.62
+        },
+        {
+          "name": "深对象合并（3层）",
+          "durationMs": 17.26,
+          "iterations": 5000,
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 0.29
+        },
+        {
+          "name": "数组查找（1000项）",
+          "durationMs": 1139.81,
+          "iterations": 10000,
+          "avgMs": 0.11,
+          "minMs": 0.06,
+          "maxMs": 12.46
+        },
+        {
+          "name": "数组过滤（1000项）",
+          "durationMs": 929.52,
+          "iterations": 10000,
+          "avgMs": 0.09,
+          "minMs": 0.04,
+          "maxMs": 24.52
+        },
+        {
+          "name": "数组排序（1000项）",
+          "durationMs": 368.91,
+          "iterations": 1000,
+          "avgMs": 0.37,
+          "minMs": 0.24,
+          "maxMs": 5.69
+        },
+        {
+          "name": "Map 查找（1000项）",
+          "durationMs": 15814.96,
+          "iterations": 100000,
+          "avgMs": 0.16,
+          "minMs": 0.08,
+          "maxMs": 54.07
+        }
+      ],
+      "timestamp": "2026-07-27T03:29:21.820Z"
+    },
+    {
+      "name": "字符串操作",
+      "results": [
+        {
+          "name": "正则匹配（10000字符）",
+          "durationMs": 0.25,
+          "iterations": 1000,
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 0
+        },
+        {
+          "name": "字符串分割",
+          "durationMs": 14.14,
+          "iterations": 100000,
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 0.04
+        },
+        {
+          "name": "模板字符串拼接",
+          "durationMs": 29.05,
+          "iterations": 100000,
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 3.78
+        }
+      ],
+      "timestamp": "2026-07-27T03:29:21.820Z"
+    },
+    {
+      "name": "数组操作",
+      "results": [
+        {
+          "name": "Array.push（10000次）",
+          "durationMs": 4.95,
+          "iterations": 100,
+          "avgMs": 0.05,
+          "minMs": 0.03,
+          "maxMs": 0.67
+        },
+        {
+          "name": "Array.map（10000项）",
+          "durationMs": 876.84,
+          "iterations": 1000,
+          "avgMs": 0.88,
+          "minMs": 0.48,
+          "maxMs": 1.57
+        },
+        {
+          "name": "Array.reduce（10000项）",
+          "durationMs": 846.79,
+          "iterations": 1000,
+          "avgMs": 0.85,
+          "minMs": 0.48,
+          "maxMs": 22
+        },
+        {
+          "name": "Array.includes（10000项、尾部）",
+          "durationMs": 775.13,
+          "iterations": 1000,
+          "avgMs": 0.78,
+          "minMs": 0.44,
+          "maxMs": 8.64
+        },
+        {
+          "name": "Set.has（10000项）",
+          "durationMs": 150037.58,
+          "iterations": 100000,
+          "avgMs": 1.5,
+          "minMs": 0.86,
+          "maxMs": 109.5
+        }
+      ],
+      "timestamp": "2026-07-27T03:29:21.820Z"
+    },
+    {
+      "name": "存储性能",
+      "results": [
+        {
+          "name": "JSON.stringify（10KB 数据）",
+          "durationMs": 81.64,
+          "iterations": 1000,
+          "avgMs": 0.08,
+          "minMs": 0.05,
+          "maxMs": 1.67
+        },
+        {
+          "name": "JSON.parse（10KB 数据）",
+          "durationMs": 65.74,
+          "iterations": 1000,
+          "avgMs": 0.07,
+          "minMs": 0.04,
+          "maxMs": 0.55
+        },
+        {
+          "name": "JSON.stringify（100KB 数据）",
+          "durationMs": 130.87,
+          "iterations": 100,
+          "avgMs": 1.31,
+          "minMs": 1.11,
+          "maxMs": 4.02
+        },
+        {
+          "name": "JSON.parse（100KB 数据）",
+          "durationMs": 267.34,
+          "iterations": 100,
+          "avgMs": 2.67,
+          "minMs": 2.27,
+          "maxMs": 5.76
+        }
+      ],
+      "timestamp": "2026-07-27T03:29:21.820Z"
+    },
+    {
+      "name": "房间图操作",
+      "results": [
+        {
+          "name": "房间查找（按 ID，34 间）",
+          "durationMs": 23.39,
+          "iterations": 100000,
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 0.42
+        },
+        {
+          "name": "路径查找（5 层深度）",
+          "durationMs": 29.79,
+          "iterations": 10000,
+          "avgMs": 0,
+          "minMs": 0,
+          "maxMs": 0.61
+        }
+      ],
+      "timestamp": "2026-07-27T03:29:21.820Z"
+    }
+  ]
+}

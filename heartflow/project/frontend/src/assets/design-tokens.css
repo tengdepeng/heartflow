@@ -1,0 +1,202 @@
+/* ============================================================
+   心流工坊 · 设计 Token 系统
+   深夜食堂 · 暖琥珀主题
+   ============================================================ */
+
+/* ---- 基础色调 — 温暖深色 ---- */
+:root {
+  --bg-primary: #0d0b09;
+  --bg-primary-rgb: 13, 11, 9;
+  --bg-secondary: rgba(var(--accent-rgb), 0.04);
+  --bg-card: rgba(var(--bg-card-rgb), 0.6);
+  --bg-card-hover: rgba(55, 48, 40, 0.7);
+  --bg-surface: rgba(255, 255, 255, 0.03);
+  --bg-elevated: rgba(35, 30, 24, 0.8);
+
+  /* 文字色 — 温暖白 */
+  --text-primary: #e8e0d8;
+  --text-primary-rgb: 232, 224, 216;
+  --text-secondary: rgba(232, 224, 216, 0.55);
+  --text-muted: rgba(232, 224, 216, 0.3);
+  --text-high: rgba(232, 224, 216, 0.88);
+  --text-medium: rgba(232, 224, 216, 0.5);
+  --text-dim: rgba(232, 224, 216, 0.4);
+  --text-bright: rgba(232, 224, 216, 0.7);
+  --text-faint: rgba(232, 224, 216, 0.2);
+  --text-low: rgba(232, 224, 216, 0.35);
+  --text-disabled: #e0e0e0;
+  --text-muted-alt: #8a8a8a;
+
+  /* 强调色 — 暖琥珀（核心品牌色） */
+  --accent: #d4a574;
+  --accent-rgb: 212, 165, 116;
+  --accent-dim: rgba(var(--accent-rgb), 0.2);
+  --accent-glow: rgba(var(--accent-rgb), 0.08);
+  --accent-cyan: #5ab8a0;
+  --accent-blue: #6b9fc4;
+  --accent-purple: #a07c8c;
+
+  /* 语义化状态色 */
+  --success: #34d399;
+  --success-light: #6aba7a;
+  --danger: #ff6b6b;
+  --error: #ef4444;
+  --warning: #f0c040;
+
+  /* 背景深度变体 */
+  --bg-deep: #14100b;
+  --bg-deepest: #0a0806;
+  --bg-surface-alt: #0f0c09;
+  --bg-panel: #1a1612;
+  --bg-card-rgb: 42, 36, 30;
+
+  /* 边框色 */
+  --border-color: rgba(var(--accent-rgb), 0.12);
+  --border: rgba(var(--accent-rgb), 0.12);
+  --border-light: rgba(var(--accent-rgb), 0.06);
+
+  /* Anthropic 品牌色 — 补充点缀 */
+  --brand-dark: #141413;
+  --brand-light: #faf9f5;
+  --brand-mid-gray: #b0aea5;
+  --brand-light-gray: #e8e6dc;
+  --brand-orange: #d97757;
+  --brand-blue: #6a9bcc;
+  --brand-green: #788c5d;
+
+  /* 圆角 */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* 间距 */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  --spacing-2xl: 64px;
+
+  /* 阴影 */
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 40px rgba(var(--accent-rgb), 0.06);
+
+  /* 通用卡片别名 */
+  --card-bg: rgba(var(--bg-card-rgb), 0.4);
+  --card-border: rgba(var(--accent-rgb), 0.08);
+
+  /* 画布（CanvasRoom 粒子层）全局透明度，0–1；由「设置 · 视觉强度」滑块控制，
+     让全局引力场画布可在 0%（完全透出自定义背景）到 1（满强度）之间调节 */
+  --canvas-alpha: 1;
+
+  /* 环境氛围层各项强度（0–1），由「设置 · 视觉强度」滑块控制；
+     与 --canvas-alpha 同族，独立于宪法 --hf-* 软效果倍率，乘法叠加不冲突 */
+  --ambient-glow-alpha: 1;
+  --ambient-grain-alpha: 0.5;
+  --ambient-dust-alpha: 0.3;
+  --app-bg-alpha: 1;
+
+  /* ---- z 轴令牌层（空间容器布局契约基线，2026-08-26 补齐落地） ----
+     所有浮层/遮罩/抽屉/拖动态必须消费 var(--z-*)，禁止裸 z-index。
+     层级（自下而上）：base(0) < ambient/content(1) < overlay(8) < jade(20) < drawer-backdrop(30) < navbar(40) < navbar-drag(50) < mask(60) < floating(90) < popover(95) < modal(9999)
+     新增浮层请先评估归属层，再申请新令牌，禁裸值散落。 */
+  --z-base: 0;
+  --z-ambient: 1;
+  --z-content: 1;
+  --z-overlay: 8;
+  --z-jade: 20;
+  --z-drawer-backdrop: 30;
+  --z-navbar: 40;
+  --z-navbar-drag: 50;
+  --z-mask: 60;
+  --z-floating: 90;
+  --z-popover: 95;
+  --z-modal: 9999;
+
+  /* 琥珀色阶 — 暖光 3500K 系列 */
+  --amber-50: #fde8c8;
+  --amber-100: #f5d5a0;
+  --amber-200: #e8c078;
+  --amber-300: #dbaa58;
+  --amber-400: #cf9640;
+  --amber-500: #c28130;
+  --amber-600: #a66a24;
+  --amber-700: #8a541c;
+  --amber-800: #6e4016;
+  --amber-900: #523010;
+
+  /* 过渡 */
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* 字体 — 中英文混合排版 */
+  --font-heading-en: 'Poppins', 'Arial', sans-serif;
+  --font-body-en: 'Lora', 'Georgia', serif;
+  --font-heading-zh: 'Noto Serif SC', 'Noto Sans SC', 'Source Han Serif SC', serif;
+  --font-body-zh: 'Noto Sans SC', 'Noto Sans', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body-zh);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---- 全局重置 ---- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* ---- 全局滚动条风格 ---- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(var(--accent-rgb), 0.15);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--accent-rgb), 0.3);
+}
+
+/* ---- 浅底适配：环境编辑器「明亮清新」背景 ----
+   data-bg="light" 时，未被 deriveVars 内联的令牌在此翻转，保证浅底可读。
+   被 deriveVars 内联的 --text-primary/--bg-card/--border-color 等由 style.ts JS 翻转。
+   置于 :root 之后，同特异性后定义胜；移除 data-bg 即回退深色默认。 */
+[data-bg="light"] {
+  --text-high: rgba(31, 27, 22, 0.92);
+  --text-medium: rgba(31, 27, 22, 0.62);
+  --text-dim: rgba(31, 27, 22, 0.5);
+  --text-bright: rgba(31, 27, 22, 0.72);
+  --text-faint: rgba(31, 27, 22, 0.25);
+  --text-low: rgba(31, 27, 22, 0.4);
+  --text-disabled: #8a8a8a;
+  --text-muted-alt: #6a6a6a;
+
+  --card-bg: rgba(255, 255, 255, 0.65);
+  --card-border: rgba(31, 27, 22, 0.08);
+  --border-light: rgba(31, 27, 22, 0.06);
+
+  --bg-elevated: rgba(255, 255, 255, 0.85);
+
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}

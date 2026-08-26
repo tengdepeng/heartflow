@@ -1,0 +1,67 @@
+# Repo-root scratch (keep on disk, out of baseline)
+nul
+rustup-init.exe
+package-lock.json
+# 分析报告：整目录默认忽略；以下三份为经确认的基线文档例外
+分析报告/*
+!分析报告/蓝图文件vs代码比对报告-2026-08-17.md
+!分析报告/蓝图与实现差距清单.md
+!分析报告/蓝图76_P1P2状态审计.md
+历史蓝图（归档）/
+产品意愿.txt
+蓝图*.txt
+# 蓝图18 主蓝图全文，经确认纳入基线
+!蓝图/蓝图18-主蓝图全文与APK规格合订.txt
+融合版*.txt
+
+# Tool/workspace dirs
+.claude/
+.superpowers/
+.trae/
+.trae-html-share-packages/
+
+# One-shot analysis outputs at repo root
+apk-analysis/
+dogfood-output/
+blueprint-gap-analysis/
+blueprint-gap-analysis-20260801/
+blueprint-gap-analysis-20260805/
+blueprint-gap-analysis-20260806/
+gap-analysis-blueprint/
+feature-borrow-analysis/
+lifeup-analysis/
+nav-refactor-complete/
+offscreen-data-overview/
+
+# Test coverage output
+coverage/
+
+# Build / dependency artifacts (never commit)
+node_modules/
+dist/
+target/
+.hf-dist*
+
+# WorkBuddy agent workspace (memory, skills, artifacts) — not project source
+.workbuddy/
+# Git 恢复产物与瞬态日志（2026-08-19 事故恢复）
+.git-recovery-backup/
+*.log
+
+# ---- Session / agent artifacts (never commit) ----
+# 旧分叉树归档(legacy_root_src)，留盘不入库
+_archive/
+# 循环删除看门狗脚本(会话辅助)
+_watchdog.ps1
+# 看门狗快照
+_kill_*.txt
+# present_files 产物
+_预览页/
+预览页/
+命令文件/
+文档目录/
+# 验证截图(根级)
+screenshots/
+screenshot-*.png
+screenshot-*.jpg
+annotated_screenshot.png

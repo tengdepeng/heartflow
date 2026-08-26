@@ -1,0 +1,636 @@
+<template>
+  <div class="view-entrance dw" ref="entranceRef">
+    <!-- 装饰性头部 -->
+    <div data-enter class="dw-header">
+      <div class="header-ornament">
+        <span class="orn-line"></span>
+        <span class="orn-diamond">✦</span>
+        <span class="orn-line"></span>
+      </div>
+      <p class="header-kicker">习惯养成 · 挑战自我 · 成就收集</p>
+      <h1 class="dw-title">自律工坊</h1>
+    </div>
+
+    <!-- 概览卡片 -->
+    <div data-enter class="overview-cards">
+      <div class="overview-card">
+        <span class="ov-icon">🔥</span>
+        <span class="ov-value">{{ stats?.activeHabits ?? 0 }}</span>
+        <span class="ov-label">活跃习惯</span>
+      </div>
+      <div class="overview-card">
+        <span class="ov-icon">🏆</span>
+        <span class="ov-value">{{ stats?.unlockedBadges ?? 0 }}</span>
+        <span class="ov-label">已解锁徽章</span>
+      </div>
+      <div class="overview-card">
+        <span class="ov-icon">⚡</span>
+        <span class="ov-value">{{ stats?.totalPoints ?? 0 }}</span>
+        <span class="ov-label">工坊积分</span>
+      </div>
+      <div class="overview-card">
+        <span class="ov-icon">💪</span>
+        <span class="ov-value">{{ healthScore }}</span>
+        <span class="ov-label">健康度</span>
+      </div>
+    </div>
+
+    <!-- 标签导航 -->
+    <div data-enter class="dw-tabs">
+      <button
+        v-for="tab in tabs"
+        :key="tab.key"
+        :class="['dw-tab', { active: activeTab === tab.key }]"
+        @click="activeTab = tab.key"
+      >
+        <span class="tab-icon">{{ tab.icon }}</span>
+        <span class="tab-label">{{ tab.label }}</span>
+      </button>
+    </div>
+
+    <!-- 今日打卡 -->
+    <section v-if="activeTab === 'checkin'" data-enter class="dw-section">
+      <h3>📋 今日习惯</h3>
+      <div v-if="todayHabits.length === 0" class="empty-state">
+        <p>还没有创建习惯，从预设模板开始吧</p>
+        <div class="quick-templates">
+          <button
+            v-for="tpl in quickTemplates"
+            :key="tpl.title"
+            class="quick-tpl-btn"
+            @click="createFromTemplate(tpl)"
+          >
+            {{ tpl.icon }} {{ tpl.title }}
+          </button>
+        </div>
+      </div>
+      <div v-else class="habit-list">
+        <div
+          v-for="habit in todayHabits"
+          :key="habit.id"
+          :class="['habit-card', { completed: isHabitCompletedToday(habit) }]"
+        >
+          <div class="habit-info">
+            <span class="habit-icon">{{ getHabitIcon(habit) }}</span>
+            <div class="habit-detail">
+              <span class="habit-name">{{ habit.title }}</span>
+              <span class="habit-streak">
+                🔥 {{ habit.streak }} 天连续
+                <span v-if="habit.bestStreak > 0" class="best-streak">（最佳 {{ habit.bestStreak }} 天）</span>
+              </span>
+            </div>
+          </div>
+          <button
+            :class="['habit-check-btn', { done: isHabitCompletedToday(habit) }]"
+            @click="toggleHabit(habit)"
+            :disabled="isHabitCompletedToday(habit)"
+          >
+            {{ isHabitCompletedToday(habit) ? '✓ 已完成' : '打卡' }}
+          </button>
+          <label class="habit-auto" :title="'完成一次专注（计时器）后自动打卡此习惯'">
+            <input
+              type="checkbox"
+              :checked="!!habit.autoCheckInOnFocus"
+              @change="toggleAutoCheckIn(habit)"
+            />
+            <span>专注自动打卡</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 挑战赛 -->
+    <section v-if="activeTab === 'challenges'" data-enter class="dw-section">
+      <h3>⚔️ 挑战赛</h3>
+      <div v-if="activeChallenges.length === 0" class="empty-state">
+        <p>暂无进行中的挑战</p>
+        <div class="quick-templates">
+          <button
+            v-for="tpl in challengeTemplates"
+            :key="tpl.title"
+            class="quick-tpl-btn"
+            @click="createChallengeFromTpl(tpl)"
+          >
+            {{ tpl.title }}
+          </button>
+        </div>
+      </div>
+      <div v-else class="challenge-list">
+        <div
+          v-for="ch in activeChallenges"
+          :key="ch.id"
+          class="challenge-card"
+        >
+          <div class="ch-header">
+            <span class="ch-icon">{{ getChallengeIcon(ch) }}</span>
+            <div class="ch-info">
+              <span class="ch-name">{{ ch.title }}</span>
+              <span class="ch-desc">{{ ch.description }}</span>
+            </div>
+            <span class="ch-difficulty" :class="getChallengeDifficulty(ch)">{{ getChallengeDifficulty(ch) }}</span>
+          </div>
+          <div class="ch-progress">
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                :style="{ width: getChallengeProgress(ch) + '%' }"
+              ></div>
+            </div>
+            <span class="progress-text">
+              {{ ch.currentDay }} / {{ ch.duration }} 天
+            </span>
+          </div>
+          <div class="ch-reward" v-if="ch.reward">
+            <span class="reward-icon">🎁</span>
+            <span>奖励：{{ ch.reward }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 徽章墙 -->
+    <section v-if="activeTab === 'badges'" data-enter class="dw-section">
+      <h3>🏅 徽章墙</h3>
+      <div class="badge-stats">
+        <span>已解锁 {{ unlockedBadges.length }} / {{ allBadges.length }} 个徽章</span>
+        <div class="badge-category-filter">
+          <button
+            v-for="cat in badgeCategories"
+            :key="cat.key"
+            :class="['badge-filter-btn', { active: badgeFilter === cat.key }]"
+            @click="badgeFilter = badgeFilter === cat.key ? 'all' : cat.key"
+          >
+            {{ cat.label }}
+          </button>
+        </div>
+      </div>
+      <div class="badge-grid">
+        <div
+          v-for="badge in filteredBadges"
+          :key="badge.id"
+          :class="['badge-item', { locked: !badge.unlocked, unlocked: badge.unlocked }]"
+        >
+          <div class="badge-icon-wrap">
+            <span class="badge-icon">{{ badge.icon }}</span>
+            <span v-if="badge.unlocked" class="badge-glow"></span>
+          </div>
+          <span class="badge-name">{{ badge.name }}</span>
+          <span class="badge-desc">{{ badge.description }}</span>
+          <span v-if="badge.unlocked" class="badge-date">{{ formatDate(badge.unlockedAt) }}</span>
+          <span v-else class="badge-locked-overlay">🔒</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 统计 -->
+    <section v-if="activeTab === 'stats'" data-enter class="dw-section">
+      <h3>📊 工坊统计</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-label">习惯健康度</span>
+          <div class="health-score-ring">
+            <svg viewBox="0 0 120 120" class="score-ring">
+              <circle cx="60" cy="60" r="52" class="ring-bg" />
+              <circle
+                cx="60" cy="60" r="52"
+                class="ring-fill"
+                :style="{ strokeDashoffset: 327 - (327 * healthScore) / 100 }"
+              />
+            </svg>
+            <span class="score-value">{{ healthScore }}</span>
+          </div>
+          <span class="health-label">{{ healthAssessment }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">连续打卡</span>
+          <div class="streak-display">
+            <span class="streak-number">{{ topStreakCount }}</span>
+            <span class="streak-unit">天</span>
+          </div>
+          <span class="streak-rank">{{ topStreakHabit }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">习惯分布</span>
+          <div class="habit-distribution">
+            <div v-for="cat in habitCategories" :key="cat.key" class="dist-row">
+              <span class="dist-label">{{ cat.label }}</span>
+              <div class="dist-bar-bg">
+                <div
+                  class="dist-bar-fill"
+                  :style="{ width: getCategoryPercent(cat.key) + '%', backgroundColor: cat.color }"
+                ></div>
+              </div>
+              <span class="dist-count">{{ getCategoryCount(cat.key) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">完成率趋势</span>
+          <div class="completion-rate">
+            <span class="rate-number">{{ completionRate }}%</span>
+            <span class="rate-label">今日完成率</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- 番茄树园 -->
+    <section v-if="activeTab === 'forest'" data-enter class="dw-section">
+      <PomodoroForestPanel />
+    </section>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useDisciplineBridge } from '../modules/discipline/workshop-bridge'
+import type { Habit, DisciplineChallenge } from '../modules/discipline/types'
+import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
+import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
+import PomodoroForestPanel from '../components/discipline/PomodoroForestPanel.vue'
+
+const bridge = useDisciplineBridge()
+
+// 标签状态
+const tabs = [
+  { key: 'checkin', icon: '📋', label: '今日打卡' },
+  { key: 'challenges', icon: '⚔️', label: '挑战赛' },
+  { key: 'badges', icon: '🏅', label: '徽章墙' },
+  { key: 'stats', icon: '📊', label: '统计' },
+  { key: 'forest', icon: '🌳', label: '番茄树园' },
+]
+const activeTab = ref('checkin')
+
+// 徽章筛选
+const badgeFilter = ref('all')
+const badgeCategories = [
+  { key: 'all', label: '全部' },
+  { key: 'streak', label: '连续' },
+  { key: 'milestone', label: '里程碑' },
+  { key: 'variety', label: '多样' },
+  { key: 'challenge', label: '挑战' },
+  { key: 'special', label: '特殊' },
+]
+
+// 习惯分类
+const habitCategories = [
+  { key: 'health', label: '健康', color: '#8a9a7a' },
+  { key: 'learning', label: '学习', color: '#6b9fc4' },
+  { key: 'productivity', label: '效率', color: '#f59e0b' },
+  { key: 'mindfulness', label: '正念', color: '#a07c8c' },
+  { key: 'social', label: '社交', color: '#b5707a' },
+  { key: 'creative', label: '创造', color: '#5ab8a0' },
+]
+
+// 从模板库构建标题→分类映射
+const habitCategoryMap = computed<Record<string, string>>(() => {
+  const map: Record<string, string> = {}
+  for (const tpl of bridge.HABIT_TEMPLATES) {
+    map[tpl.title] = tpl.category
+  }
+  return map
+})
+
+// 挑战标题→难度映射
+const challengeDifficultyMap = computed<Record<string, string>>(() => {
+  const map: Record<string, string> = {}
+  for (const tpl of bridge.CHALLENGE_TEMPLATES) {
+    map[tpl.title] = tpl.difficulty
+  }
+  return map
+})
+
+// 快速模板
+const quickTemplates = computed(() => {
+  return getHabitTemplatesByCategory('productivity').slice(0, 4)
+})
+
+const challengeTemplates = computed(() => {
+  return getChallengeTemplatesByDifficulty('easy').slice(0, 3)
+})
+
+// 数据
+const stats = ref(bridge.getStats())
+const healthScore = computed(() => bridge.getHabitHealthScore())
+const healthAssessment = computed(() => {
+  const s = healthScore.value
+  if (s >= 90) return '优秀'
+  if (s >= 75) return '良好'
+  if (s >= 60) return '一般'
+  if (s >= 40) return '需关注'
+  return '需改善'
+})
+
+const todayHabits = ref<Habit[]>([])
+const activeChallenges = ref<DisciplineChallenge[]>([])
+const allBadges = ref<any[]>([])
+const unlockedBadges = computed(() => allBadges.value.filter(b => b.unlocked))
+
+// 最长连续打卡
+const topStreakCount = computed(() => {
+  if (bridge.streaks.value.length === 0) return 0
+  return Math.max(...bridge.streaks.value.map(s => s.currentStreak))
+})
+
+const topStreakHabit = computed(() => {
+  if (bridge.streaks.value.length === 0) return '—'
+  const top = bridge.streaks.value.reduce((a, b) =>
+    a.currentStreak > b.currentStreak ? a : b
+  )
+  return top.habitName || '—'
+})
+
+const completionRate = computed(() => {
+  if (todayHabits.value.length === 0) return 0
+  const completed = todayHabits.value.filter(h => isHabitCompletedToday(h)).length
+  return Math.round((completed / todayHabits.value.length) * 100)
+})
+
+const filteredBadges = computed(() => {
+  if (badgeFilter.value === 'all') return allBadges.value
+  return allBadges.value.filter(b => b.category === badgeFilter.value)
+})
+
+// ---- 辅助函数 ----
+
+function isHabitCompletedToday(habit: Habit): boolean {
+  const today = new Date().toISOString().split('T')[0]
+  return habit.completedDates.includes(today)
+}
+
+function getHabitCategory(habit: Habit): string {
+  return habitCategoryMap.value[habit.title] || 'productivity'
+}
+
+function getHabitIcon(habit: Habit): string {
+  const icons: Record<string, string> = {
+    health: '💪', learning: '📚', productivity: '⚡',
+    mindfulness: '🧘', social: '🤝', creative: '🎨',
+  }
+  return icons[getHabitCategory(habit)] || habit.icon || '📌'
+}
+
+function getChallengeDifficulty(ch: DisciplineChallenge): string {
+  return challengeDifficultyMap.value[ch.title] || 'medium'
+}
+
+function getChallengeIcon(ch: DisciplineChallenge): string {
+  const icons: Record<string, string> = {
+    easy: '🌟', medium: '🔥', hard: '💎', extreme: '👑',
+  }
+  return icons[getChallengeDifficulty(ch)] || '⚔️'
+}
+
+function getChallengeProgress(ch: DisciplineChallenge): number {
+  if (ch.duration === 0) return 0
+  return Math.round((ch.currentDay / ch.duration) * 100)
+}
+
+function getCategoryCount(category: string): number {
+  return todayHabits.value.filter(h => getHabitCategory(h) === category).length
+}
+
+function getCategoryPercent(category: string): number {
+  if (todayHabits.value.length === 0) return 0
+  return Math.round((getCategoryCount(category) / todayHabits.value.length) * 100)
+}
+
+function formatDate(dateStr?: string): string {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return `${d.getMonth() + 1}/${d.getDate()}`
+}
+
+// ---- 数据加载与操作 ----
+
+function loadData() {
+  stats.value = bridge.getStats()
+  todayHabits.value = bridge.getTodayHabits()
+  activeChallenges.value = bridge.getActiveChallenges()
+  allBadges.value = bridge.badges.value
+}
+
+function toggleHabit(habit: Habit) {
+  if (isHabitCompletedToday(habit)) return
+  bridge.completeHabit(habit.id)
+  loadData()
+}
+
+function toggleAutoCheckIn(habit: Habit) {
+  bridge.updateHabit(habit.id, { autoCheckInOnFocus: !habit.autoCheckInOnFocus })
+  loadData()
+}
+
+function createFromTemplate(template: HabitTemplate) {
+  bridge.createHabitFromTemplate(template)
+  loadData()
+}
+
+function createChallengeFromTpl(template: ChallengeTemplate) {
+  bridge.createChallengeFromTemplate(template, todayHabits.value)
+  loadData()
+}
+
+onMounted(() => {
+  bridge.init()
+  loadData()
+})
+</script>
+
+<style scoped>
+/* ============================================================
+   自律工坊 - 视图样式
+   ============================================================ */
+
+.dw { padding: 2rem; max-width: 900px; margin: 0 auto; }
+
+/* 头部 */
+.dw-header { text-align: center; margin-bottom: 2rem; }
+.header-ornament { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+.orn-line { width: 40px; height: 1px; background: var(--color-border, #334155); }
+.orn-diamond { color: var(--color-accent, #f59e0b); font-size: 0.75rem; }
+.header-kicker { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); margin: 0 0 0.25rem; text-transform: uppercase; letter-spacing: 0.1em; }
+.dw-title { font-size: 1.75rem; font-weight: 700; margin: 0; color: var(--color-text, #e2e8f0); }
+
+/* 概览卡片 */
+.overview-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.overview-card {
+  display: flex; flex-direction: column; align-items: center; gap: 0.25rem;
+  padding: 1rem; border-radius: 12px;
+  background: var(--color-surface, rgba(30, 41, 59, 0.6));
+  border: 1px solid var(--color-border, #334155);
+}
+.ov-icon { font-size: 1.5rem; }
+.ov-value { font-size: 1.5rem; font-weight: 700; color: var(--color-text, #e2e8f0); }
+.ov-label { font-size: 0.75rem; color: var(--color-text-muted, #94a3b8); }
+
+/* 标签导航 */
+.dw-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--color-border, #334155); padding-bottom: 0; }
+.dw-tab {
+  padding: 0.6rem 1.2rem; border: none; background: none; cursor: pointer;
+  font-size: 0.9rem; color: var(--color-text-muted, #94a3b8);
+  border-bottom: 2px solid transparent; transition: all 0.2s;
+  display: flex; align-items: center; gap: 0.4rem;
+}
+.dw-tab:hover { color: var(--color-text, #e2e8f0); }
+.dw-tab.active { color: var(--color-accent, #f59e0b); border-bottom-color: var(--color-accent, #f59e0b); }
+.tab-icon { font-size: 1rem; }
+
+/* 区块 */
+.dw-section { margin-bottom: 2rem; }
+.dw-section h3 { font-size: 1.1rem; margin: 0 0 1rem; color: var(--color-text, #e2e8f0); }
+
+/* 空状态 */
+.empty-state { text-align: center; padding: 2rem; color: var(--color-text-muted, #94a3b8); }
+.quick-templates { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+.quick-tpl-btn {
+  padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--color-border, #334155);
+  background: var(--color-surface, rgba(30, 41, 59, 0.6)); cursor: pointer;
+  color: var(--color-text, #e2e8f0); font-size: 0.85rem; transition: all 0.2s;
+}
+.quick-tpl-btn:hover { border-color: var(--color-accent, #f59e0b); background: rgba(245, 158, 11, 0.1); }
+
+/* 习惯列表 */
+.habit-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.habit-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem; border-radius: 10px;
+  background: var(--color-surface, rgba(30, 41, 59, 0.6));
+  border: 1px solid var(--color-border, #334155);
+  transition: all 0.2s;
+}
+.habit-card.completed { opacity: 0.7; border-color: rgba(16, 185, 129, 0.3); }
+.habit-info { display: flex; align-items: center; gap: 0.75rem; }
+.habit-icon { font-size: 1.25rem; }
+.habit-detail { display: flex; flex-direction: column; }
+.habit-name { font-weight: 600; color: var(--color-text, #e2e8f0); }
+.habit-streak { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); }
+.best-streak { color: var(--color-accent, #f59e0b); }
+.habit-check-btn {
+  padding: 0.5rem 1.25rem; border-radius: 8px; border: 1px solid var(--color-accent, #f59e0b);
+  background: transparent; cursor: pointer; color: var(--color-accent, #f59e0b);
+  font-size: 0.85rem; font-weight: 600; transition: all 0.2s;
+}
+.habit-check-btn:hover:not(:disabled) { background: rgba(245, 158, 11, 0.15); }
+.habit-check-btn.done { background: rgba(16, 185, 129, 0.15); border-color: #10b981; color: #10b981; cursor: default; }
+.habit-check-btn:disabled { cursor: not-allowed; }
+
+.habit-auto {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  margin-top: 0.5rem; padding: 0.25rem 0.5rem; border-radius: 6px;
+  font-size: 0.7rem; color: var(--color-text-soft, #9aa0a6);
+  background: rgba(var(--accent-rgb, 245, 158, 11), 0.08);
+  cursor: pointer; user-select: none; white-space: nowrap;
+}
+.habit-auto input { width: 0.85rem; height: 0.85rem; accent-color: var(--color-accent, #f59e0b); cursor: pointer; }
+
+/* 挑战赛 */
+.challenge-list { display: flex; flex-direction: column; gap: 1rem; }
+.challenge-card {
+  padding: 1rem; border-radius: 10px;
+  background: var(--color-surface, rgba(30, 41, 59, 0.6));
+  border: 1px solid var(--color-border, #334155);
+}
+.ch-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.ch-icon { font-size: 1.5rem; }
+.ch-info { flex: 1; display: flex; flex-direction: column; }
+.ch-name { font-weight: 600; color: var(--color-text, #e2e8f0); }
+.ch-desc { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); }
+.ch-difficulty {
+  font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 4px; text-transform: uppercase;
+  background: rgba(100, 116, 139, 0.2); color: var(--color-text-muted, #94a3b8);
+}
+.ch-difficulty.easy { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+.ch-difficulty.medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+.ch-difficulty.hard { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+.ch-difficulty.extreme { background: rgba(160, 124, 140, 0.2); color: #a07c8c; }
+.ch-progress { margin-bottom: 0.5rem; }
+.progress-bar { height: 6px; background: rgba(100, 116, 139, 0.2); border-radius: 3px; overflow: hidden; margin-bottom: 0.35rem; }
+.progress-fill { height: 100%; background: var(--color-accent, #f59e0b); border-radius: 3px; transition: width 0.5s ease; }
+.progress-text { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); }
+.ch-reward { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--color-accent, #f59e0b); }
+
+/* 徽章墙 */
+.badge-stats { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; font-size: 0.85rem; color: var(--color-text-muted, #94a3b8); }
+.badge-category-filter { display: flex; gap: 0.35rem; }
+.badge-filter-btn {
+  padding: 0.25rem 0.6rem; border-radius: 6px; border: 1px solid var(--color-border, #334155);
+  background: transparent; cursor: pointer; font-size: 0.75rem; color: var(--color-text-muted, #94a3b8);
+  transition: all 0.2s;
+}
+.badge-filter-btn:hover, .badge-filter-btn.active { border-color: var(--color-accent, #f59e0b); color: var(--color-accent, #f59e0b); }
+.badge-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 0.75rem;
+}
+.badge-item {
+  position: relative; display: flex; flex-direction: column; align-items: center;
+  padding: 1rem 0.5rem; border-radius: 10px; text-align: center;
+  background: var(--color-surface, rgba(30, 41, 59, 0.6));
+  border: 1px solid var(--color-border, #334155);
+  transition: all 0.3s;
+}
+.badge-item.locked { opacity: 0.5; filter: grayscale(0.8); }
+.badge-item.unlocked { border-color: rgba(245, 158, 11, 0.3); }
+.badge-icon-wrap { position: relative; font-size: 2rem; margin-bottom: 0.35rem; }
+.badge-glow {
+  position: absolute; inset: -4px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.3), transparent);
+  animation: badgeGlow 2s ease-in-out infinite;
+}
+@keyframes badgeGlow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+.badge-name { font-size: 0.8rem; font-weight: 600; color: var(--color-text, #e2e8f0); }
+.badge-desc { font-size: 0.7rem; color: var(--color-text-muted, #94a3b8); margin-top: 0.15rem; }
+.badge-date { font-size: 0.65rem; color: var(--color-accent, #f59e0b); margin-top: 0.25rem; }
+.badge-locked-overlay { position: absolute; top: 0.35rem; right: 0.35rem; font-size: 0.8rem; }
+
+/* 统计 */
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+.stat-card {
+  padding: 1.25rem; border-radius: 10px; text-align: center;
+  background: var(--color-surface, rgba(30, 41, 59, 0.6));
+  border: 1px solid var(--color-border, #334155);
+}
+.stat-label { display: block; font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); margin-bottom: 0.75rem; }
+
+/* 健康度圆环 */
+.health-score-ring { position: relative; width: 100px; height: 100px; margin: 0 auto; }
+.score-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-bg { fill: none; stroke: rgba(100, 116, 139, 0.2); stroke-width: 8; }
+.ring-fill {
+  fill: none; stroke: var(--color-accent, #f59e0b); stroke-width: 8;
+  stroke-dasharray: 327; stroke-dashoffset: 100; stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease;
+}
+.score-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: 700; color: var(--color-text, #e2e8f0); }
+.health-label { display: block; font-size: 0.85rem; color: var(--color-accent, #f59e0b); margin-top: 0.4rem; }
+
+/* 连续打卡 */
+.streak-display { margin: 0.5rem 0; }
+.streak-number { font-size: 2.5rem; font-weight: 700; color: var(--color-text, #e2e8f0); }
+.streak-unit { font-size: 1rem; color: var(--color-text-muted, #94a3b8); }
+.streak-rank { display: block; font-size: 0.85rem; color: var(--color-accent, #f59e0b); }
+
+/* 习惯分布 */
+.habit-distribution { display: flex; flex-direction: column; gap: 0.5rem; }
+.dist-row { display: flex; align-items: center; gap: 0.5rem; }
+.dist-label { width: 40px; font-size: 0.75rem; color: var(--color-text-muted, #94a3b8); text-align: right; }
+.dist-bar-bg { flex: 1; height: 8px; background: rgba(100, 116, 139, 0.2); border-radius: 4px; overflow: hidden; }
+.dist-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.dist-count { width: 20px; font-size: 0.75rem; color: var(--color-text-muted, #94a3b8); text-align: left; }
+
+/* 完成率 */
+.completion-rate { margin: 0.5rem 0; }
+.rate-number { font-size: 2.5rem; font-weight: 700; color: var(--color-text, #e2e8f0); display: block; }
+.rate-label { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); }
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .overview-cards { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: 1fr; }
+  .badge-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .dw-tabs { flex-wrap: wrap; }
+}
+</style>

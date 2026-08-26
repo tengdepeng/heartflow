@@ -1,0 +1,51 @@
+{
+  "version": 1,
+  "unit": "m",
+  "camera": {
+    "position": [10, 16, 30],
+    "target": [10, 0, 5]
+  },
+  "rooms": [
+    {
+      "id": "living-room",
+      "name": "客厅",
+      "model": "/home-replica/living-room.glb",
+      "position": [0, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": 1
+    },
+    {
+      "id": "bedroom",
+      "name": "卧室",
+      "model": "/home-replica/bedroom.glb",
+      "position": [10, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": 1
+    },
+    {
+      "id": "kitchen",
+      "name": "厨房",
+      "model": "/home-replica/kitchen.glb",
+      "position": [20, 0, 0],
+      "rotation": [0, 0, 0],
+      "scale": 1
+    },
+    {
+      "id": "study",
+      "name": "书房",
+      "model": "/home-replica/study.glb",
+      "position": [0, 0, 10],
+      "rotation": [0, 0, 0],
+      "scale": 1
+    },
+    {
+      "id": "balcony",
+      "name": "阳台",
+      "model": "/home-replica/balcony.glb",
+      "position": [10, 0, 10],
+      "rotation": [0, 0, 0],
+      "scale": 1
+    }
+  ],
+  "note": "占位资产：程序化生成的简版房间几何（地面+墙+基础家具）。仅本机引用，绝不外传。拿到真实家 3D 扫描/模型后，直接替换 public/home-replica/ 下同名 .glb 即可，无需改 manifest。"
+}

@@ -1,0 +1,400 @@
+<template>
+  <div class="nav-tree-node">
+    <div
+      class="nav-item nav-item-core"
+      :class="{
+        active: isActive,
+        'is-adjacent': isAdjacent,
+        'nav-item-constitution': node.id === 'constitution',
+        'can-drag': canDrag,
+        'is-drop-target': isDropTarget,
+        'is-dragging': isDragging,
+      }"
+      :style="indentStyle"
+      :data-node-id="node.id"
+      @pointerdown="onPointerDown"
+      @pointermove="onPointerMove"
+      @pointerup="onPointerUp"
+      @pointercancel="onPointerCancel"
+    >
+      <button
+        v-if="hasChildren"
+        type="button"
+        class="nav-caret"
+        :class="{ open: isOpen }"
+        :aria-label="isOpen ? '收起' : '展开'"
+        :title="isOpen ? '收起' : '展开'"
+        @click.stop="toggle"
+      >▾</button>
+      <span v-else class="nav-caret-spacer" aria-hidden="true" />
+
+      <router-link v-if="node.path" :to="node.path" class="nav-link-row" @click="onNavClick">
+        <span class="nav-icon">{{ node.icon }}</span>
+        <span class="nav-label">{{ node.name }}</span>
+        <span v-if="node.id === 'sanctuary'" class="nav-pill pill-silent">静默</span>
+        <span v-else-if="node.id === 'constitution'" class="constitution-foundation-seal">基石</span>
+        <span v-else-if="hasChildren && !isOpen" class="nav-child-count">{{ node.children.length }}</span>
+      </router-link>
+      <div v-else class="nav-link-row nav-group-head" @click="hasChildren && toggle()">
+        <span class="nav-icon">{{ node.icon }}</span>
+        <span class="nav-label">{{ node.name }}</span>
+        <span v-if="hasChildren && !isOpen" class="nav-child-count">{{ node.children.length }}</span>
+      </div>
+    </div>
+
+    <div v-if="hasChildren && isOpen" class="nav-children">
+      <NavTreeNode
+        v-for="child in node.children"
+        :key="child.id"
+        :node="child"
+        :depth="depth + 1"
+        :active-id="activeId"
+        :adjacent-ids="adjacentIds"
+        :expanded-ids="expandedIds"
+        :toggle-expand="toggleExpand"
+        :draggable="child.path ? true : false"
+        @move-node="(id, target) => emit('moveNode', id, target)"
+        @close="emit('close')"
+      />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, reactive } from 'vue'
+
+export interface NavTreeNodeData {
+  id: string
+  name: string
+  icon: string
+  color: string
+  path: string
+  group: string
+  children: NavTreeNodeData[]
+}
+
+const props = defineProps<{
+  node: NavTreeNodeData
+  depth: number
+  activeId: string
+  adjacentIds: string[]
+  expandedIds: Set<string>
+  toggleExpand: (id: string) => void
+  /** 是否允许拖拽（叶子房间可拖，分组头不可作为拖拽源） */
+  draggable?: boolean
+}>()
+
+const emit = defineEmits<{
+  close: []
+  /** 长按拖拽落到本节点：draggedId 被移到 targetId 之前（targetId 可能是房间或分组头 id） */
+  moveNode: [draggedId: string, targetId: string]
+}>()
+
+const hasChildren = computed(() => props.node.children.length > 0)
+const isOpen = computed(() => props.expandedIds.has(props.node.id))
+const isActive = computed(() => props.activeId === props.node.id)
+const isAdjacent = computed(() => props.adjacentIds.includes(props.node.id))
+// 每层缩进 14px，呈现「包含」层级；根层（depth 0）保持与原侧栏一致的左内边距
+const indentStyle = computed(() => ({ paddingLeft: `${10 + props.depth * 14}px` }))
+
+const canDrag = computed(() => (props.draggable ?? true) && !!props.node.path && props.node.id !== 'home-space')
+
+// ---- 长按拖拽重排（触屏/桌面统一：去 HTML5 draggable，T5.1）----
+// 跨整棵导航树共享同一拖拽态（同一时刻仅一处拖拽）
+const navDrag = reactive<{ active: boolean; draggedId: string; targetId: string; consumed: boolean }>({
+  active: false,
+  draggedId: '',
+  targetId: '',
+  consumed: false,
+})
+
+const isDropTarget = computed(() => navDrag.active && navDrag.targetId === props.node.id && navDrag.draggedId !== props.node.id)
+const isDragging = computed(() => navDrag.active && navDrag.draggedId === props.node.id)
+
+let pressTimer: number | null = null
+let pressX = 0
+let pressY = 0
+let dragging = false
+
+function clearPress() {
+  if (pressTimer !== null) {
+    clearTimeout(pressTimer)
+    pressTimer = null
+  }
+}
+
+function onPointerDown(e: PointerEvent) {
+  if (!canDrag.value) return
+  pressX = e.clientX ?? 0
+  pressY = e.clientY ?? 0
+  clearPress()
+  // 长按 400ms 进入拖拽；期间若移动超阈值则视为滑动/点击，取消
+  pressTimer = window.setTimeout(() => startDrag(e), 400)
+}
+
+function startDrag(e: PointerEvent) {
+  if (!canDrag.value) return
+  navDrag.active = true
+  navDrag.draggedId = props.node.id
+  navDrag.targetId = ''
+  dragging = true
+  try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) } catch { /* noop */ }
+}
+
+function onPointerMove(e: PointerEvent) {
+  if (!dragging && pressTimer !== null) {
+    const dx = (e.clientX ?? 0) - pressX
+    const dy = (e.clientY ?? 0) - pressY
+    if (Math.hypot(dx, dy) > 10) clearPress()
+    return
+  }
+  if (!dragging) return
+  const el = document.elementFromPoint(e.clientX ?? 0, e.clientY ?? 0) as HTMLElement | null
+  const item = el?.closest('.nav-item-core') as HTMLElement | null
+  navDrag.targetId = item?.getAttribute('data-node-id') ?? ''
+}
+
+function onPointerUp(e: PointerEvent) {
+  clearPress()
+  if (!dragging) return
+  dragging = false
+  try { (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId) } catch { /* noop */ }
+  if (navDrag.active) {
+    if (navDrag.targetId && navDrag.targetId !== navDrag.draggedId) {
+      emit('moveNode', navDrag.draggedId, navDrag.targetId)
+      navDrag.consumed = true
+    }
+    navDrag.active = false
+    navDrag.draggedId = ''
+    navDrag.targetId = ''
+  }
+}
+
+function onPointerCancel() {
+  clearPress()
+  dragging = false
+  navDrag.active = false
+  navDrag.draggedId = ''
+  navDrag.targetId = ''
+}
+
+// 拖拽结束后松手会触发一次 click，需拦截以免误跳转
+function onNavClick(e: MouseEvent) {
+  if (navDrag.consumed) {
+    e.preventDefault()
+    e.stopPropagation()
+    navDrag.consumed = false
+    return
+  }
+  emit('close')
+}
+
+function toggle() {
+  if (!hasChildren.value) return
+  props.toggleExpand(props.node.id)
+}
+</script>
+
+<style scoped>
+.nav-tree-node {
+  display: block;
+}
+
+/* ---- 导航项视觉（与侧栏 .nav-item 一致，自包含以保证子组件内生效） ---- */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--nav-item-py, 9px) clamp(10px, 1vw, 14px);
+  border-radius: 8px;
+  font-size: var(--nav-item-font, 13px);
+  color: var(--text-secondary);
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 0;
+  border-radius: 0 2px 2px 0;
+  background: var(--accent);
+  transition: height var(--transition);
+  opacity: 0;
+}
+
+.nav-item:hover {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background: var(--accent-glow);
+  color: var(--accent);
+}
+
+.nav-item.active::before {
+  height: 60%;
+  opacity: 1;
+}
+
+/* 拖拽落点高亮（虚线描边，提示可放下） */
+.nav-item.is-drop-target {
+  outline: 1px dashed var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-glow);
+}
+.nav-item.can-drag {
+  cursor: grab;
+  touch-action: none;
+}
+.nav-item.can-drag:active {
+  cursor: grabbing;
+}
+.nav-item.is-dragging {
+  opacity: 0.55;
+  outline: 1px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.nav-item.is-adjacent {
+  opacity: 1;
+}
+
+.nav-item-core {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.nav-icon {
+  font-size: clamp(14px, 1.3vw, 16px);
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.nav-item.active .nav-icon {
+  opacity: 1;
+}
+
+.nav-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-pill {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.nav-item.active .nav-pill,
+.nav-item-core:hover .nav-pill {
+  border-color: rgba(var(--accent-rgb), 0.2);
+  color: var(--accent);
+}
+
+.pill-silent {
+  border-color: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.nav-item-constitution {
+  position: relative;
+}
+
+.constitution-foundation-seal {
+  font-size: 9px;
+  letter-spacing: 1px;
+  color: var(--accent);
+  opacity: 0.3;
+  margin-left: 2px;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* ---- 树形专用：展开箭头 / 链接行 / 子层导光线 ---- */
+.nav-caret {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 9px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-caret:hover {
+  opacity: 0.95;
+  color: var(--accent);
+}
+.nav-caret.open {
+  transform: rotate(0deg);
+}
+.nav-caret:not(.open) {
+  transform: rotate(-90deg);
+}
+.nav-caret-spacer {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+.nav-link-row {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.nav-child-count {
+  margin-left: auto;
+  font-size: 9px;
+  opacity: 0.45;
+  color: var(--text-secondary);
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+/* 子层级左侧导光线，强化「包含」关系（更漏 ⊃ 息壤 等） */
+.nav-children {
+  position: relative;
+}
+.nav-children::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 0;
+  bottom: 6px;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    rgba(var(--accent-rgb), 0.14),
+    rgba(var(--accent-rgb), 0.04)
+  );
+}
+</style>

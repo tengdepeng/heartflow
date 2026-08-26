@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>宪法透明度账本 · 预览</title>
+<style>
+  :root{
+    --accent:#d4a574;
+    --accent-rgb:212,165,116;
+    --text-primary:#efe6d6;
+    --text-secondary:#a99e8c;
+    --bg-card-rgb:42,36,29;
+    --border-color:rgba(212,165,116,0.18);
+    --radius-lg:16px;
+    --transition:.25s;
+    --font-heading-zh:"Noto Serif SC","Songti SC",serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(212,165,116,.06), transparent 55%),
+      radial-gradient(ellipse at 80% 90%, rgba(212,165,116,.04), transparent 55%),
+      linear-gradient(160deg,#1a1611,#120f0c);
+    color:var(--text-primary);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC",sans-serif;
+    min-height:100vh;
+  }
+  .constitution-page{max-width:840px;margin:0 auto;padding:48px 32px 80px;position:relative;}
+
+  .section-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:24px;}
+  .section-header-icon{font-size:20px;color:var(--accent);opacity:.5;margin-top:2px;}
+  .section-title{font-size:20px;font-weight:600;color:var(--text-primary);font-family:var(--font-heading-zh);letter-spacing:1px;margin:0;}
+  .section-subtitle{font-size:12px;color:var(--text-secondary);display:block;margin-top:4px;}
+  .section-header-actions{display:flex;gap:6px;align-items:center;margin-left:auto;}
+  .stylus-btn{font-size:13px;padding:8px 16px;border:1px solid var(--border-color);border-radius:10px;cursor:pointer;transition:all var(--transition);font-family:inherit;display:inline-flex;align-items:center;gap:6px;background:transparent;color:var(--text-secondary);}
+  .stylus-btn:hover{background:rgba(var(--bg-card-rgb),.5);color:var(--text-primary);border-color:rgba(var(--accent-rgb),.2);}
+  .stylus-btn-primary{background:rgba(var(--accent-rgb),.12);color:var(--accent);border-color:rgba(var(--accent-rgb),.2);}
+  .stylus-icon{font-size:16px;font-weight:300;}
+
+  .status-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+  .summary-card{padding:20px 22px;border-radius:var(--radius-lg);background:linear-gradient(160deg,rgba(var(--bg-card-rgb),.5),rgba(26,22,18,.7));border:1px solid var(--border-color);position:relative;overflow:hidden;display:flex;flex-direction:column;gap:4px;}
+  .summary-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;opacity:.5;}
+  .summary-card--active::before{background:linear-gradient(90deg,transparent,#5fd99a,transparent);}
+  .summary-card--idle::before{background:linear-gradient(90deg,transparent,#d4b464,transparent);}
+  .summary-card--decl::before{background:linear-gradient(90deg,transparent,#9a9aa6,transparent);}
+  .summary-num{font-size:34px;font-weight:600;line-height:1;font-family:var(--font-heading-zh);}
+  .summary-card--active .summary-num{color:#5fd99a;}
+  .summary-card--idle .summary-num{color:#d4b464;}
+  .summary-card--decl .summary-num{color:#9a9aa6;}
+  .summary-label{font-size:14px;font-weight:500;color:var(--text-primary);}
+  .summary-sub{font-size:11px;color:var(--text-secondary);letter-spacing:.3px;}
+
+  .status-filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;}
+  .filter-chip{padding:7px 14px;border:1px solid var(--border-color);border-radius:999px;background:transparent;color:var(--text-secondary);font-size:12px;font-family:inherit;cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px;}
+  .filter-chip:hover{border-color:var(--accent);color:var(--accent);}
+  .filter-chip.active{background:rgba(var(--accent-rgb),.15);color:var(--accent);border-color:rgba(var(--accent-rgb),.3);}
+  .filter-chip-count{font-size:10px;padding:1px 7px;border-radius:999px;background:rgba(var(--accent-rgb),.1);color:var(--accent);font-weight:600;}
+
+  .status-group{margin-bottom:28px;}
+  .status-group-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border-color);}
+  .status-group-icon{font-size:16px;color:var(--accent);opacity:.6;}
+  .status-group-title{font-size:15px;font-weight:600;color:var(--text-primary);font-family:var(--font-heading-zh);letter-spacing:.5px;margin:0;}
+  .status-group-count{font-size:11px;padding:2px 9px;border-radius:999px;background:rgba(var(--accent-rgb),.08);color:var(--accent);}
+
+  .status-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;}
+  .status-card{padding:16px 18px;border-radius:12px;background:rgba(var(--bg-card-rgb),.3);border:1px solid var(--border-color);border-left:3px solid var(--border-color);transition:all var(--transition);display:flex;flex-direction:column;gap:8px;}
+  .status-card--active{border-left-color:rgba(95,217,154,.5);}
+  .status-card--idle{border-left-color:rgba(212,180,100,.5);}
+  .status-card--decl{border-left-color:rgba(154,154,166,.4);}
+  .status-card:hover{background:rgba(55,48,40,.4);border-color:rgba(var(--accent-rgb),.15);transform:translateY(-2px);}
+  .status-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;}
+  .status-card-label{font-size:14px;font-weight:500;color:var(--text-primary);}
+  .status-badge{font-size:10px;padding:2px 8px;border-radius:999px;font-weight:500;white-space:nowrap;flex-shrink:0;}
+  .badge-active{background:rgba(95,217,154,.14);color:#5fd99a;border:1px solid rgba(95,217,154,.28);}
+  .badge-wired-idle{background:rgba(212,180,100,.14);color:#d4b464;border:1px solid rgba(212,180,100,.28);}
+  .badge-declarative{background:rgba(154,154,166,.12);color:#9a9aa6;border:1px solid rgba(154,154,166,.22);}
+  .status-card-target{font-size:11px;font-family:ui-monospace,Menlo,monospace;color:var(--accent);opacity:.7;letter-spacing:.3px;}
+  .status-card-consumer{display:flex;gap:8px;font-size:11px;line-height:1.5;}
+  .sc-key{flex-shrink:0;color:var(--text-secondary);opacity:.6;}
+  .sc-val{color:var(--text-secondary);word-break:break-word;}
+  .status-card-note{font-size:11px;line-height:1.6;color:var(--text-secondary);opacity:.85;padding-top:8px;border-top:1px dashed var(--border-color);margin:0;}
+
+  .preview-hint{position:fixed;bottom:16px;right:18px;font-size:11px;color:var(--text-secondary);opacity:.5;}
+
+  @media(max-width:640px){
+    .status-summary{grid-template-columns:1fr;}
+    .status-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="constitution-page">
+  <div class="section-header">
+    <div class="section-header-icon">◈</div>
+    <div>
+      <h2 class="section-title">宪法透明度账本</h2>
+      <span class="section-subtitle" id="subtitle">— 项效果目标 · 名实对照 · 零假消费</span>
+    </div>
+    <div class="section-header-actions">
+      <button class="stylus-btn stylus-btn-primary" onclick="alert('导出逻辑同组件：生成 heartflow.constitution.status/v1 JSON 本地下载')">
+        <span class="stylus-icon">↓</span><span class="stylus-label">导出账本</span>
+      </button>
+    </div>
+  </div>
+  <div class="status-summary" id="summary"></div>
+  <div class="status-filter" id="filter"></div>
+  <div id="groups"></div>
+  <div class="preview-hint">静态预览 · 数据取自 effect-consumer-map.ts（默认态：consumed→生效中）</div>
+</div>
+
+<script>
+// 真实账本数据（与 effect-consumer-map.ts 一致；默认态下 consumed 即 active）
+const DATA = [
+  ["ui:particle-density","粒子密度","visual",true,"components/CanvasParticles.vue + modules/canvas/CanvasRoom.vue","A2.3 批1 已接线"],
+  ["ui:animate-speed","动画速度","visual",true,"assets/animations.css","A2.3 批1 已接线"],
+  ["ui:breathing-speed","呼吸速度","visual",true,"views/HomeSpace.vue + modules/breathing/breathing-core.ts","A2.3 批1 已接线"],
+  ["ui:silence","静默留白","visual",true,"components/CanvasParticles.vue","A2.3 批1 已接线"],
+  ["ui:empty-space","空白余量","visual",true,"views/HomeSpace.vue","A2.3 批1 已接线"],
+  ["scene:transition","场景切换","visual",true,"views/HomeSpace.vue","A2.3 批1 已接线"],
+  ["scene:night-dim","夜静调暗","visual",true,"composables/useNightDim.ts + views/App.vue","A2.3 批1 已接线"],
+  ["scene:sabbath","数字安息日","visual",true,"composables/useDigitalSabbath.ts + views/App.vue","A2.3 批1 已接线"],
+  ["scene:preset","场景预设","visual",false,"（未接线）","A2 批④ 审计：场景预设切换无对应可门控运行时特征（应用按用户设定渲染，无宪法门控点），保持声明式·不伪造宪法之实"],
+  ["advisor:enabled","幕僚问候","identity",true,"engine/constitution-effect.ts (EFFECT_TO_OVERRIDE_MAP) → advisorEnabled","A2.3 治理门控已消费"],
+  ["advisor:forbidden-patterns","文案中立性","identity",true,"engine/constitution-effect.ts (EFFECT_TO_OVERRIDE_MAP) → forbiddenPatterns","A2.3 治理门控已消费"],
+  ["advisor:comparative","比较性文案","identity",true,"engine/constitution-effect.ts (EFFECT_TO_OVERRIDE_MAP) → comparativePhrases","A2.3 治理门控已消费"],
+  ["advisor:personification","拟人化表达","identity",true,"engine/constitution-effect.ts (EFFECT_TO_OVERRIDE_MAP) → personification","A2.3 治理门控已消费"],
+  ["advisor:long-dormancy","长眠守护","identity",true,"modules/advisor/longDormancy.ts + composables/useLongDormancy.ts","A2.3 已接线"],
+  ["timer:auto-start","计时器自动开始","behavior",true,"engine/constitution-effect.ts (EFFECT_TO_OVERRIDE_MAP) → autoStartOverwrite","A2.3 治理门控已消费"],
+  ["timer:pause-interval","暂停间隔","behavior",false,"（未接线）","A2 批① 审计：基础 UX 已允许随时 pause/resume；「暂停间隔」属新增产品特性（需产品决策），非纯宪法开关，故保持声明式"],
+  ["haptic:feedback","触觉反馈","behavior",true,"engine/constitution-effect.ts (EFFECT_TO_OVERRIDE_MAP) → hapticFeedbackOverwrite","A2.3 治理门控已消费"],
+  ["ui:notification","通知频率","behavior",true,"engine/constitution-effect.ts (EFFECT_TO_OVERRIDE_MAP) → notificationBlocked + modules/touchpoints/push-channel.ts:356","A2.3 治理门控 + 推送通道已消费"],
+  ["gesture:enable","手势导航","behavior",true,"composables/useGesture.ts (attach 门控 isTargetActive)","A2.3 批2 已接线（复用 elastic-exploration）"],
+  ["gesture:haptic","手势触觉","behavior",false,"（未接线）","A2 审计：手势触觉反馈无对应可门控运行时特征（haptic:feedback 已由治理门控消费，gesture:haptic 独立无消费点），保持声明式·不伪造宪法之实"],
+  ["focus:auto-start","专注自动开始","behavior",true,"stores/timer.ts (setMode 自动开始门控)","A2 批① 已接线：disable 型默认约束生效→不自动开始"],
+  ["focus:interrupt","允许中断","behavior",false,"（基础 UX 已保障）","A2 批① 审计：interrupt() 始终允许中断，基础 UX 已无条件保障；接入反向门控会制造宪法陷阱，故保持声明式"],
+  ["focus:return","返回入口","behavior",false,"（基础 UX 已保障）","A2 批① 审计：基础 UX 已提供专注返回/再进入入口；接入反向门控会剥夺用户返回能力，故保持声明式"],
+  ["data:auto-archive","自动归档","data",false,"（未接线）","A2 批③ 审计：自动归档无对应可门控运行时逻辑（无 auto-archive 实现），保持声明式·不伪造宪法之实"],
+  ["data:cleanup","数据清理","data",false,"（未接线）","A2 批③ 审计：数据清理无对应可门控运行时逻辑（无 auto-cleanup 实现），保持声明式·不伪造宪法之实"],
+  ["data:unfinished","未完成状态","data",false,"（未接线）","A2.3 批3：经诚实审计无对应可门控特征（仅手动 confirmCleanup），保持声明式，不伪造宪法之实"],
+  ["behavior:tracking","行为追踪","behavior",false,"（未接线）","A2 批② 审计：行为追踪无对应可门控运行时逻辑（无 tracking 实现），保持声明式·不伪造宪法之实"],
+  ["behavior:reminder","行为提醒","behavior",true,"modules/anchor/celebration.ts (checkReminders 门控默认诱导型提醒)","A2 批② 已接线：isTargetActive 活跃时抑制默认诱导型提醒，用户自建规则不受影响"],
+  ["emotion:visualization","情绪可视化","data",true,"views/EmotionGarden.vue (v-if 门控 isTargetActive)","A2.3 批3 已接线（默认启用零行为变化）"],
+  ["emotion:neutral","情绪中性","data",false,"（未接线）","A2 批③ 审计：情绪中性呈现无对应可门控运行时特征，保持声明式·不伪造宪法之实"],
+  ["relation:auto-analyze","关系分析","data",true,"modules/relation/bond-bridge.ts (bondRecommendations 门控 isTargetActive)","A2.3 批3 已接线（默认抑制、用户关闭约束后放开）"],
+  ["relation:unbounded","关系留白","data",false,"（未接线）","A2 批③ 审计：关系留白无对应可门控运行时特征（relation:auto-analyze 已消费），保持声明式·不伪造宪法之实"],
+  ["note:auto-categorize","笔记自动分类","data",false,"（未接线）","A2 批③ 审计：笔记自动分类无对应可门控运行时逻辑，保持声明式·不伪造宪法之实"],
+  ["note:fragment","片段记录","data",false,"（未接线）","A2 批③ 审计：片段记录无对应可门控运行时特征，保持声明式·不伪造宪法之实"],
+  ["stats:comparison","统计比较","data",false,"（未接线）","A2 批③ 审计：无排行/比较 UI，第45条禁攀比由 elastic-no-comparison 约束，保持声明式·不伪造宪法之实"],
+  ["stats:show-panel","统计面板","data",true,"components/StatsPanel.vue (root v-if 门控 isTargetActive)","A2.3 批3 已接线（默认启用零行为变化）"],
+  ["sanctuary:enable","安全岛","behavior",false,"（未接线）","A2 批④/B2：安全岛由规则级 useRuleEnabled(\"elastic-sanctuary\") 门控（非 isTargetActive），账本与引擎一致"],
+  ["sanctuary:auto-exit","安全岛自动退出","behavior",false,"（未接线）","A2 批④ 审计：仅类型联合占位（DEFAULT_EFFECT_MAP 无条目、无消费点），保持声明式·不伪造宪法之实"],
+  ["share:local-only","本地分享边界","sharing",true,"modules/share/share-local.ts","A2.3 已接线"],
+  ["seed:inherit","时间种子·遗传","sharing",true,"modules/play/seed-transfer.ts","A2.3 已接线"],
+  ["seed:scope","时间种子·范围","sharing",true,"modules/play/seed-transfer.ts","A2.3 已接线"],
+  ["seed:revoke","时间种子·收回","sharing",true,"modules/play/seed-transfer.ts","A2.3 已接线"],
+].map(([target,label,form,consumed,consumer,note])=>({target,label,form,consumed,consumer,note,
+  // 默认态：consumed 即 active
+  state: consumed ? "active" : "declarative"
+}));
+
+const STATE_LABEL={active:"生效中",wired:"已接线·未启用",declarative:"声明式"};
+let filter="all";
+
+function summary(){const s={total:DATA.length,consumed:DATA.filter(i=>i.consumed).length,
+  active:DATA.filter(i=>i.state==="active").length,wired:DATA.filter(i=>i.state==="wired").length,
+  decl:DATA.filter(i=>i.state==="declarative").length};return s;}
+
+function renderSummary(){
+  const s=summary();
+  document.getElementById("summary").innerHTML=`
+   <div class="summary-card summary-card--active"><span class="summary-num">${s.active}</span><span class="summary-label">生效中</span><span class="summary-sub">已接线且当前启用</span></div>
+   <div class="summary-card summary-card--idle"><span class="summary-num">${s.wired}</span><span class="summary-label">已接线·未启用</span><span class="summary-sub">有消费点 · 开关未触发</span></div>
+   <div class="summary-card summary-card--decl"><span class="summary-num">${s.decl}</span><span class="summary-label">声明式</span><span class="summary-sub">待建设 · 不伪造宪法之实</span></div>`;
+  document.getElementById("subtitle").textContent=`${s.total} 项效果目标 · 名实对照 · 零假消费（生效中 ${s.active} / 声明式 ${s.decl}）`;
+}
+
+function renderFilter(){
+  const s=summary();
+  const opts=[["all","全部",s.total],["active","生效中",s.active],["wired","已接线·未启用",s.wired],["declarative","声明式",s.decl]];
+  document.getElementById("filter").innerHTML=opts.map(([v,l,c])=>
+    `<button class="filter-chip ${filter===v?'active':''}" onclick="setFilter('${v}')">${l}<span class="filter-chip-count">${c}</span></button>`).join("");
+}
+function setFilter(v){filter=v;renderFilter();renderGroups();}
+
+function renderGroups(){
+  const order=[["visual","视觉 / 氛围","❉"],["identity","幕僚身份 / 表达","◈"],["behavior","行为 / 交互","✛"],["data","数据 / 记录","❖"],["sharing","传递 / 分享边界","⇄"]];
+  const list=filter==="all"?DATA:DATA.filter(i=>i.state===filter);
+  const html=order.map(([form,title,icon])=>{
+    const its=list.filter(i=>i.form===form);if(!its.length)return"";
+    const cards=its.map(i=>`
+      <div class="status-card status-card--${i.state}">
+        <div class="status-card-top">
+          <span class="status-card-label">${i.label}</span>
+          <span class="status-badge badge-${i.state}">${STATE_LABEL[i.state]}</span>
+        </div>
+        <code class="status-card-target">${i.target}</code>
+        <div class="status-card-consumer"><span class="sc-key">消费点</span><span class="sc-val">${i.consumer}</span></div>
+        <p class="status-card-note">${i.note}</p>
+      </div>`).join("");
+    return `<div class="status-group"><div class="status-group-head"><span class="status-group-icon">${icon}</span><h3 class="status-group-title">${title}</h3><span class="status-group-count">${its.length}</span></div><div class="status-grid">${cards}</div></div>`;
+  }).join("");
+  document.getElementById("groups").innerHTML=html||`<p style="color:var(--text-secondary);text-align:center;padding:40px">当前过滤条件下没有匹配的效果目标</p>`;
+}
+
+renderSummary();renderFilter();renderGroups();
+</script>
+</body>
+</html>

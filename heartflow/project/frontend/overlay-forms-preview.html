@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>桌面静默覆盖 · 多形态预览（B2-EXT-1）</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at 30% 20%, #241a14, #0c0907 70%);
+      color: #e8c8a8;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      padding: 32px;
+    }
+    h1 { font-size: 18px; font-weight: 600; letter-spacing: 2px; margin-bottom: 4px; }
+    .sub { font-size: 12px; color: #9a8c7a; margin-bottom: 28px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 22px; }
+    .card {
+      width: 300px;
+      border-radius: 16px;
+      border: 1px solid rgba(232, 200, 168, 0.18);
+      background: rgba(10, 8, 6, 0.5);
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+    }
+    .win {
+      position: relative;
+      height: 200px;
+      /* 模拟真实桌面壁纸：覆盖层为透明 always-on-top 浮窗，叠在桌面之上 */
+      background:
+        radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.06), transparent 60%),
+        linear-gradient(135deg, #2c2620, #14110d);
+    }
+    .win iframe {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
+    }
+    .meta { padding: 12px 14px; }
+    .meta .name { font-size: 13px; color: #f0dcc0; letter-spacing: 1px; }
+    .meta .desc { font-size: 11px; color: #9a8c7a; margin-top: 4px; line-height: 1.5; }
+    .meta .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <h1>桌面静默覆盖 · 多形态预览</h1>
+  <p class="sub">B2-EXT-1 · 三种「静」场景形态（仅视觉，不动宪法/平台 fail-closed 门控）。iframe 加载真实 overlay.html。</p>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const FORMS = [
+      { id: 'silent', label: '静默暖光', glow: '#d8a866', desc: '暖琥珀呼吸光环，默认的静默陪伴。' },
+      { id: 'breath', label: '息壤呼吸', glow: '#7fae9b', desc: '青绿息壤呼吸光痕，如大地缓缓吐纳。' },
+      { id: 'timeline', label: '时间长廊', glow: '#9bb4d8', desc: '冷蓝横向流光长廊，沉入时间之外。' },
+    ]
+    const grid = document.getElementById('grid')
+    for (const f of FORMS) {
+      const card = document.createElement('div')
+      card.className = 'card'
+      const win = document.createElement('div')
+      win.className = 'win'
+      const iframe = document.createElement('iframe')
+      // 复用真实 overlay.html（读 ?form= / ?color=），与真机预览一致
+      iframe.src = `./public/overlay.html?form=${f.id}&color=${encodeURIComponent(f.glow)}`
+      win.appendChild(iframe)
+      const meta = document.createElement('div')
+      meta.className = 'meta'
+      meta.innerHTML = `<div class="name"><span class="dot" style="background:${f.glow}"></span>${f.label}</div><div class="desc">${f.desc}</div>`
+      card.appendChild(win)
+      card.appendChild(meta)
+      grid.appendChild(card)
+    }
+  </script>
+</body>
+</html>

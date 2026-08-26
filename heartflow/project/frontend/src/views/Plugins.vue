@@ -1,0 +1,527 @@
+<template>
+  <div :class="entranceClass" ref="entranceRef" class="view-entrance pl">
+    <!-- Header -->
+    <header data-enter class="pl-header">
+      <div class="header-ornament">
+        <span class="orn-line"></span>
+        <span class="orn-diamond">✦</span>
+        <span class="orn-line"></span>
+      </div>
+      <p class="header-kicker">管理你的插件</p>
+      <h1 class="pl-title">插件管理</h1>
+    </header>
+
+    <!-- Overview Cards -->
+    <div data-enter class="pl-overview">
+      <div class="pl-overview-card">
+        <span class="pl-overview-num">{{ officialPlugins.length }}</span>
+        <span class="pl-overview-label">核心插件</span>
+      </div>
+      <div class="pl-overview-card">
+        <span class="pl-overview-num">{{ thirdParty.length }}</span>
+        <span class="pl-overview-label">第三方插件</span>
+      </div>
+      <div class="pl-overview-card">
+        <span class="pl-overview-num">{{ plugins.length }}</span>
+        <span class="pl-overview-label">总计</span>
+      </div>
+    </div>
+
+    <!-- 核心插件 -->
+    <section data-enter class="pl-core-section">
+      <h2 class="pl-section-title">核心插件（内置）</h2>
+      <div class="pl-plugin-grid">
+        <div
+          v-for="p in officialPlugins"
+          :key="p.manifest.meta.id"
+          class="pl-plugin-card"
+          :class="{ disabled: !p.enabled }"
+        >
+          <div class="pl-plugin-icon">{{ p.manifest.meta.icon }}</div>
+          <div class="pl-plugin-info">
+            <div class="pl-plugin-name">
+              {{ p.manifest.meta.name }}
+              <span class="pl-plugin-version">v{{ p.manifest.meta.version }}</span>
+            </div>
+            <div class="pl-plugin-desc">{{ p.manifest.meta.description }}</div>
+            <div class="plugin-perms">
+              <span
+                v-for="perm in p.manifest.permissions"
+                :key="perm"
+                class="perm-badge"
+              >{{ perm }}</span>
+            </div>
+          </div>
+          <div class="plugin-status">
+            <span v-if="p.enabled" class="status-on">● 运行中</span>
+            <span v-else class="status-off">○ 已禁用</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第三方插件 -->
+    <section class="pl-third-section" v-if="thirdParty.length > 0">
+      <h2 class="pl-section-title">已安装插件</h2>
+      <div class="pl-plugin-grid">
+        <div
+          v-for="p in thirdParty"
+          :key="p.manifest.meta.id"
+          class="pl-plugin-card"
+          :class="[{ disabled: !p.enabled }, `tier-${p.manifest.meta.tier}`]"
+        >
+          <div class="pl-plugin-icon">{{ p.manifest.meta.icon }}</div>
+          <div class="pl-plugin-info">
+            <div class="pl-plugin-name">
+              {{ p.manifest.meta.name }}
+              <span class="pl-plugin-version">v{{ p.manifest.meta.version }}</span>
+              <span class="tier-badge" :class="`tier-${p.manifest.meta.tier}`">
+                {{ tierLabel(p.manifest.meta.tier) }}
+              </span>
+            </div>
+            <div class="pl-plugin-desc">{{ p.manifest.meta.description }}</div>
+            <div v-if="p.manifest.meta.author" class="plugin-author">
+              by {{ p.manifest.meta.author }}
+            </div>
+            <div class="plugin-perms">
+              <span
+                v-for="perm in p.manifest.permissions"
+                :key="perm"
+                class="perm-badge"
+              >{{ perm }}</span>
+            </div>
+          </div>
+          <div class="pl-plugin-actions">
+            <button
+              class="pl-btn-toggle"
+              :class="{ active: p.enabled }"
+              @click="pluginBridge.toggle(p.manifest.meta.id)"
+            >
+              {{ p.enabled ? '禁用' : '启用' }}
+            </button>
+            <button
+              class="pl-btn-uninstall"
+              @click="uninstall(p.manifest.meta.id)"
+              title="卸载"
+            >✕</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 空状态 -->
+    <section class="pl-core-section" v-if="plugins.length === 0">
+      <div class="pl-empty-hint">
+        <span class="empty-icon">🔌</span>
+        <p>插件管理器尚未初始化</p>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, onMounted } from 'vue'
+import { usePlugin } from '../resonance/bridges/plugin'
+import type { PluginTier } from '../modules/plugin/types'
+import { useViewEntrance } from '../composables/useViewEntrance'
+
+const { entranceRef, entranceClass } = useViewEntrance()
+const pluginBridge = usePlugin()
+const { plugins, officialPlugins } = pluginBridge
+
+onMounted(() => {
+  pluginBridge.init()
+})
+
+const thirdParty = computed(() =>
+  plugins.value.filter(p => p.manifest.meta.tier !== 'official')
+)
+
+function tierLabel(t: PluginTier): string {
+  const map: Record<PluginTier, string> = {
+    official: '官方',
+    community: '社区',
+    experimental: '实验',
+  }
+  return map[t] ?? t
+}
+
+function uninstall(id: string) {
+  if (confirm('确定要卸载此插件吗？卸载后数据不受影响。')) {
+    pluginBridge.uninstallPlugin(id)
+  }
+}
+</script>
+
+<style scoped>
+/* ===== Global ===== */
+.pl {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  min-height: 100vh;
+}
+
+/* Ambient glow pseudo-elements */
+.pl::before,
+.pl::after {
+  content: '';
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pl::before {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.07) 0%, transparent 70%);
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.pl::after {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%);
+  bottom: -80px;
+  right: -80px;
+}
+
+/* ===== Header ===== */
+.pl-header {
+  text-align: center;
+  margin-bottom: 36px;
+  position: relative;
+  z-index: 1;
+}
+
+.header-ornament {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.orn-line {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.4), transparent);
+}
+
+.orn-diamond {
+  font-size: 12px;
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+.header-kicker {
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.55);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin: 0 0 8px 0;
+}
+
+.pl-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+/* ===== Overview Cards ===== */
+.pl-overview {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 1;
+}
+
+.pl-overview-card {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+  border-radius: 10px;
+  padding: 16px 12px;
+  text-align: center;
+  backdrop-filter: blur(4px);
+  transition: border-color 0.3s;
+}
+
+.pl-overview-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+.pl-overview-num {
+  display: block;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.pl-overview-label {
+  display: block;
+  font-size: 11px;
+  color: rgba(232, 221, 208, 0.45);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+/* ===== Sections ===== */
+.pl-core-section,
+.pl-third-section {
+  margin-bottom: 36px;
+  position: relative;
+  z-index: 1;
+}
+
+.pl-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 14px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(var(--accent-rgb), 0.12);
+  letter-spacing: 0.5px;
+}
+
+/* ===== Plugin Grid ===== */
+.pl-plugin-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pl-plugin-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+  border-radius: 10px;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.pl-plugin-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.pl-plugin-card:hover {
+  border-color: rgba(var(--accent-rgb), 0.25);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.pl-plugin-card.disabled {
+  opacity: 0.5;
+}
+
+.pl-plugin-card.tier-experimental {
+  border-color: rgba(var(--accent-rgb), 0.15);
+}
+
+.pl-plugin-icon {
+  font-size: 26px;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(var(--accent-rgb), 0.06);
+  position: relative;
+  z-index: 1;
+}
+
+.pl-plugin-info {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.pl-plugin-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pl-plugin-version {
+  font-size: 11px;
+  color: rgba(232, 221, 208, 0.35);
+  font-weight: 400;
+}
+
+.tier-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.tier-badge.tier-community {
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+}
+
+.tier-badge.tier-experimental {
+  background: rgba(255, 193, 7, 0.12);
+  color: #ffc107;
+}
+
+.pl-plugin-desc {
+  font-size: 12px;
+  color: rgba(232, 221, 208, 0.45);
+  margin-bottom: 4px;
+}
+
+.plugin-author {
+  font-size: 11px;
+  color: rgba(232, 221, 208, 0.3);
+  margin-bottom: 4px;
+}
+
+.plugin-perms {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.perm-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(var(--accent-rgb), 0.06);
+  color: rgba(232, 221, 208, 0.4);
+  font-family: var(--font-mono, monospace);
+}
+
+.plugin-status {
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.status-on {
+  font-size: 12px;
+  color: #a5d6a7;
+}
+
+.status-off {
+  font-size: 12px;
+  color: rgba(232, 221, 208, 0.3);
+}
+
+/* ===== Actions ===== */
+.pl-plugin-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.pl-btn-toggle {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid rgba(var(--accent-rgb), 0.15);
+  background: transparent;
+  color: rgba(232, 221, 208, 0.55);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s;
+}
+
+.pl-btn-toggle:hover {
+  background: rgba(var(--accent-rgb), 0.08);
+  color: var(--text-primary);
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+.pl-btn-toggle.active {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.35);
+  color: var(--accent);
+}
+
+.pl-btn-uninstall {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(232, 221, 208, 0.3);
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.pl-btn-uninstall:hover {
+  color: #ef9a9a;
+  border-color: rgba(239, 154, 154, 0.3);
+  background: rgba(239, 154, 154, 0.08);
+}
+
+/* ===== Empty ===== */
+.pl-empty-hint {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(232, 221, 208, 0.35);
+}
+
+.empty-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* === Entrance Animation === */
+@keyframes fade-slide-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* === Responsive === */
+@media (max-width: 860px) {
+  .pl { padding: 32px 20px 64px; }
+  .pl-overview { gap: 8px; }
+  .pl-overview-card { padding: 12px 8px; }
+  .pl-plugin-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .pl { padding: 24px 14px 56px; }
+  .pl-overview { flex-direction: column; }
+  .pl-section-title { font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+  .pl { padding: 12px; }
+  .pl-overview { flex-direction: column; gap: 6px; }
+  .pl-section-title { font-size: 13px; }
+}
+</style>

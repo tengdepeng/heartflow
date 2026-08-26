@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>静默覆盖</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      /* 透明底：后端 cmd_open_overlay_window 会通过 eval 把 body 背景平涂为传入的暖色
+         （带 alpha），形成半透明静默覆盖；此处 transparent 仅作未注入时的兜底。 */
+      background: transparent;
+      border-radius: 16px;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
+    /* 辉光舞台（B2-EXT-2）：承载环境柔光 + 呼吸光环，整层受辉光强度调节 */
+    .glow-stage {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.6s ease, filter 0.6s ease;
+    }
+
+    /* 报点显隐（B2-EXT-2）：隐藏中心呼吸光点 */
+    body.no-beacon .glow-ring { display: none; }
+    /* 落款显隐（B2-EXT-2）：隐藏底部静/息/廊字样 */
+    body.no-hint .hint { display: none; }
+
+    /* 环境柔光层：居中径向光晕，与主窗口安全岛氛围呼应 */
+    .ambient {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(
+        circle at 50% 50%,
+        rgba(var(--glow-rgb), 0.12) 0%,
+        rgba(var(--glow-rgb), 0.05) 35%,
+        transparent 70%
+      );
+      animation: ambient-pulse 8s ease-in-out infinite;
+    }
+
+    /* 呼吸光环：像一簇缓慢明灭的余烬（silent 默认形态） */
+    .glow-ring {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
+      opacity: 0.18;
+      filter: blur(2px);
+      animation: breathe 3.2s ease-in-out infinite;
+      transition: width 0.6s ease, height 0.6s ease, border-radius 0.6s ease;
+    }
+    .glow-ring::after {
+      content: '';
+      position: absolute;
+      inset: -40%;
+      border-radius: 50%;
+      border: 1px solid rgba(var(--glow-rgb), 0.12);
+      animation: ring-rotate 24s linear infinite;
+    }
+
+    /* 息壤呼吸（breath）：更柔、更大的吐纳光团 */
+    body[data-form="breath"] .glow-ring {
+      width: 150px;
+      height: 150px;
+      transform: scaleY(1.12);
+      opacity: 0.15;
+      animation: breathe-slow 4.6s ease-in-out infinite;
+    }
+    body[data-form="breath"] .glow-ring::after {
+      animation: ring-rotate 36s linear infinite;
+      border-style: dashed;
+      opacity: 0.7;
+    }
+
+    /* 时间长廊（timeline）：横向流光长廊，沉入时间之外 */
+    body[data-form="timeline"] .glow-ring {
+      width: 230px;
+      height: 64px;
+      border-radius: 50%;
+      opacity: 0.14;
+      animation: corridor 5.2s ease-in-out infinite;
+    }
+    body[data-form="timeline"] .ambient {
+      background: radial-gradient(
+        ellipse 70% 45% at 50% 50%,
+        rgba(var(--glow-rgb), 0.14) 0%,
+        rgba(var(--glow-rgb), 0.05) 40%,
+        transparent 72%
+      );
+      animation: ambient-pulse 10s ease-in-out infinite;
+    }
+    body[data-form="timeline"] .glow-ring::after {
+      inset: -18%;
+      border-radius: 50%;
+      animation: ring-rotate 60s linear infinite;
+    }
+
+    /* 静 · 落款，极淡（文本由脚本按形态注入） */
+    .hint {
+      position: absolute;
+      bottom: 14px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: rgba(var(--glow-rgb), 0.35);
+      pointer-events: none;
+      user-select: none;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(0.82); opacity: 0.10; }
+      50%      { transform: scale(1.18); opacity: 0.24; }
+    }
+    @keyframes breathe-slow {
+      0%, 100% { transform: scaleY(1.12) scale(0.86); opacity: 0.08; }
+      50%      { transform: scaleY(1.12) scale(1.12); opacity: 0.20; }
+    }
+    @keyframes corridor {
+      0%, 100% { transform: scaleX(0.92) scaleY(0.9); opacity: 0.08; }
+      50%      { transform: scaleX(1.08) scaleY(1.05); opacity: 0.20; }
+    }
+    @keyframes ambient-pulse {
+      0%, 100% { opacity: 0.7; }
+      50%      { opacity: 1; }
+    }
+    @keyframes ring-rotate {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="glow-stage">
+    <div class="ambient"></div>
+    <div class="glow-ring"></div>
+  </div>
+  <div class="hint">静</div>
+  <script>
+    // 形态来源优先级：
+    //   1) URL 参数 ?form= / ?color=（预览 / 静态打开时）
+    //   2) 后端经 eval 注入的 window.__OVERLAY_FORM__ / __OVERLAY_GLOW__（原生窗口加载后设置）
+    // 内容偏好来源优先级（B2-EXT-2：beacon/hint/intensity）：
+    //   1) URL 参数 ?beacon= / ?hint= / ?intensity=（预览）
+    //   2) 后端经 eval 注入的 window.__OVERLAY_SHOW_BEACON__ / __OVERLAY_SHOW_HINT__ / __OVERLAY_GLOW_INTENSITY__
+    // 以上仅决定视觉（辉光色 + 落款字 + 布局变体 + 报点/落款显隐 + 辉光强度），不改变半透明深色底。
+    const HINT_MAP = { silent: '静', breath: '息', timeline: '廊' }
+    const params = new URLSearchParams(window.location.search)
+
+    function hexToRgb(hex) {
+      const m = (hex || '').replace('#', '')
+      const full = m.length === 3 ? m.split('').map(c => c + c).join('') : m
+      const int = parseInt(full, 16)
+      if (Number.isNaN(int)) return '216,168,102'
+      return [(int >> 16) & 255, (int >> 8) & 255, int & 255].join(',')
+    }
+
+    function applyForm(form, glow) {
+      form = form || 'silent'
+      const color = glow || '#d8a866'
+      const root = document.documentElement
+      root.style.setProperty('--glow-color', color)
+      root.style.setProperty('--glow-rgb', hexToRgb(color))
+      document.body.dataset.form = form
+      const hint = document.querySelector('.hint')
+      if (hint) hint.textContent = HINT_MAP[form] || '静'
+    }
+
+    // B2-EXT-2：应用内容偏好（显隐报点/落款 + 辉光强度）
+    function applyContent(showBeacon, showHint, glowIntensity) {
+      document.body.classList.toggle('no-beacon', showBeacon === false)
+      document.body.classList.toggle('no-hint', showHint === false)
+      const stage = document.querySelector('.glow-stage')
+      if (stage) {
+        const intensity = Number.isFinite(glowIntensity) ? glowIntensity : 1
+        // 0~1 用 opacity 调暗（0 即完全隐去）；>1 用 brightness 提亮（上限 2）
+        const clamped = Math.min(2, Math.max(0, intensity))
+        stage.style.opacity = String(Math.min(1, clamped))
+        stage.style.filter = 'brightness(' + clamped + ')'
+      }
+    }
+
+    // 读取 URL 预览参数（缺省走后端注入 / 默认值）
+    const formParam = params.get('form')
+    const glowParam = params.get('color') || params.get('glow')
+    const beaconParam = params.has('beacon') ? params.get('beacon') !== '0' && params.get('beacon') !== 'false' : null
+    const hintParam = params.has('hint') ? params.get('hint') !== '0' && params.get('hint') !== 'false' : null
+    const intensityParam = params.has('intensity') ? parseFloat(params.get('intensity')) : null
+
+    // 先按 URL 参数应用（预览/静态打开即生效）
+    applyForm(formParam, glowParam)
+    applyContent(beaconParam, hintParam, intensityParam)
+
+    // 后端可能（在页面加载后）经 eval 注入全局，轮询采纳，超时即止
+    const wantForm = !formParam || !glowParam
+    const wantContent = beaconParam === null || hintParam === null || intensityParam === null || Number.isNaN(intensityParam)
+    if (wantForm || wantContent) {
+      const timer = setInterval(() => {
+        const f = window.__OVERLAY_FORM__
+        const g = window.__OVERLAY_GLOW__
+        const b = window.__OVERLAY_SHOW_BEACON__
+        const h = window.__OVERLAY_SHOW_HINT__
+        const i = window.__OVERLAY_GLOW_INTENSITY__
+        const hasForm = (f && !formParam) || formParam
+        const hasGlow = (g && !glowParam) || glowParam
+        const hasContent = (b !== undefined || beaconParam !== null)
+          && (h !== undefined || hintParam !== null)
+          && (i !== undefined || intensityParam !== null)
+        if ((!wantForm || (hasForm && hasGlow)) && (!wantContent || hasContent)) {
+          applyForm(f || formParam, g || glowParam)
+          applyContent(
+            b !== undefined ? b : beaconParam,
+            h !== undefined ? h : hintParam,
+            i !== undefined ? i : intensityParam,
+          )
+          clearInterval(timer)
+        }
+      }, 60)
+      setTimeout(() => clearInterval(timer), 2000)
+    }
+  </script>
+</body>
+</html>
