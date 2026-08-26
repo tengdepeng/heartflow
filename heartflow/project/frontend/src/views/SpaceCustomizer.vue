@@ -295,8 +295,10 @@ import {
   getSpaceConfigs, getActiveConfig, setActiveConfigId,
   createSpaceConfig, deleteSpaceConfig, duplicateSpaceConfig, updateSpaceConfig,
 } from '../modules/customization/index'
+import { useAppSpaceManager } from '../modules/space/app-space-manager'
 
 const { entranceRef, entranceClass } = useViewEntrance()
+const { recordActivity } = useAppSpaceManager()
 
 // ============================================================
 // 常量
@@ -494,9 +496,11 @@ function toggleScene(sceneKey: string) {
 /** 保存维度修改 */
 function saveDimensionChanges() {
   if (!editingConfig.value) return
-  updateSpaceConfig(editingConfig.value.id, {
-    dimensions: JSON.parse(JSON.stringify(editingConfig.value.dimensions)),
+  const cfg = editingConfig.value
+  updateSpaceConfig(cfg.id, {
+    dimensions: JSON.parse(JSON.stringify(cfg.dimensions)),
   })
+  recordActivity('dimension_edited', `编辑了「${cfg.name}」的维度配置`, cfg.id)
   stopEditing()
   refresh()
 }
