@@ -224,6 +224,11 @@
         </li>
       </ul>
     </section>
+
+    <!-- 思维导图（note mind-map 模块） -->
+    <div class="mindmap-mount">
+      <MindMapPanel />
+    </div>
   </div>
 </template>
 
@@ -234,6 +239,7 @@ import { getSpineColor, formatNoteDate } from '../modules/study/types'
 import { storage } from '../engine/storage'
 import NoteEditor from '../components/NoteEditor.vue'
 import QuickCapture from '../components/QuickCapture.vue'
+import MindMapPanel from '../components/MindMapPanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
@@ -1279,6 +1285,13 @@ function toggleArchive(note: Note) {
   border-radius: 14px;
   background: var(--card-bg);
   border: 1px solid rgba(var(--accent-rgb), 0.12);
+}
+
+/* ---- 思维导图挂载 ---- */
+.mindmap-mount {
+  position: relative;
+  z-index: 1;
+  margin: 28px 32px 0;
 }
 .climate-title {
   margin: 0 0 12px;

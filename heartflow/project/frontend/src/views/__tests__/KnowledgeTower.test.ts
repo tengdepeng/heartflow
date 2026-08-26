@@ -419,6 +419,80 @@ describe('KnowledgeTower AI管家', () => {
     expect(wrapper.text()).toContain('分类分布')
     expect(wrapper.find('.steward-cat-row').exists()).toBe(true)
   })
+
+  it('AI管家面板显示聚焦节点选择器', async () => {
+    mockStore['hf:knowledge'] = [
+      { id: 'kn1', title: '节点一', desc: '', cat: 'concept', links: [] },
+      { id: 'kn2', title: '节点二', desc: '', cat: 'concept', links: [] },
+    ]
+    const wrapper = await getWrapper()
+    const stewardBtn = wrapper.find('.kt-steward-btn')
+    await stewardBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.steward-select').exists()).toBe(true)
+    const options = wrapper.findAll('.steward-select option')
+    expect(options.length).toBe(2)
+  })
+
+  it('AI管家面板显示连接建议（同分类节点）', async () => {
+    mockStore['hf:knowledge'] = [
+      { id: 'kn1', title: '函数式编程', desc: '', cat: 'concept', links: [] },
+      { id: 'kn2', title: '不可变数据', desc: '', cat: 'concept', links: [] },
+    ]
+    const wrapper = await getWrapper()
+    const stewardBtn = wrapper.find('.kt-steward-btn')
+    await stewardBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.steward-suggestion').exists()).toBe(true)
+    expect(wrapper.text()).toContain('连接建议')
+    expect(wrapper.text()).toContain('不可变数据')
+  })
+
+  it('AI管家面板显示深度追问', async () => {
+    mockStore['hf:knowledge'] = [
+      { id: 'kn1', title: '概念节点', desc: '', cat: 'concept', links: [] },
+    ]
+    const wrapper = await getWrapper()
+    const stewardBtn = wrapper.find('.kt-steward-btn')
+    await stewardBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('深度追问')
+    expect(wrapper.findAll('.steward-question').length).toBeGreaterThan(0)
+    expect(wrapper.text()).toContain('这个概念的核心前提是什么？')
+  })
+
+  it('AI管家面板显示盲区检测', async () => {
+    mockStore['hf:knowledge'] = [
+      { id: 'kn1', title: '概念节点', desc: '', cat: 'concept', links: [] },
+    ]
+    const wrapper = await getWrapper()
+    const stewardBtn = wrapper.find('.kt-steward-btn')
+    await stewardBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('盲区检测')
+    expect(wrapper.findAll('.steward-blind-row').length).toBe(6)
+    // 空分类应显示覆盖度为 0
+    expect(wrapper.text()).toContain('比喻')
+  })
+
+  it('切换聚焦节点后连接建议随之更新', async () => {
+    mockStore['hf:knowledge'] = [
+      { id: 'kn1', title: '概念A', desc: '', cat: 'concept', links: [] },
+      { id: 'kn2', title: '概念B', desc: '', cat: 'concept', links: [] },
+      { id: 'kn3', title: '法则C', desc: '', cat: 'rule', links: [] },
+    ]
+    const wrapper = await getWrapper()
+    const stewardBtn = wrapper.find('.kt-steward-btn')
+    await stewardBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 默认选中第一个节点 kn1，建议应包含同分类的 kn2
+    expect(wrapper.text()).toContain('概念B')
+    // 切换到 kn3（法则），建议应包含同分类节点（无），此时建议区消失
+    const select = wrapper.find('.steward-select')
+    await select.setValue('kn3')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.steward-suggestion').exists()).toBe(false)
+  })
 })
 
 describe('KnowledgeTower 关系编辑', () => {

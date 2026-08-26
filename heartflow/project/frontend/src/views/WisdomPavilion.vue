@@ -125,6 +125,9 @@
 
     <!-- 掌握度 -->
     <MasteryPanel />
+
+    <!-- 词书背单词 -->
+    <VocabPanel />
   </div>
 </template>
 
@@ -141,6 +144,7 @@ import { useRelation } from '../modules/relation'
 import { useBodyGreenhouse } from '../modules/body'
 import RecitePanel from '../components/RecitePanel.vue'
 import MasteryPanel from '../components/MasteryPanel.vue'
+import VocabPanel from '../components/VocabPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const statsStore = useStatsStore()

@@ -49,6 +49,52 @@
               </div>
             </div>
           </div>
+
+          <!-- 聚焦节点：驱动连接建议与深度追问 -->
+          <div class="steward-section" v-if="nodes.length > 0">
+            <h4 class="steward-section-title">🎯 聚焦节点</h4>
+            <select class="steward-select" :value="selectedNodeId" @change="onSelectNode">
+              <option v-for="n in nodes" :key="n.id" :value="n.id">{{ n.title }}</option>
+            </select>
+          </div>
+
+          <!-- 连接建议 (ai-steward suggestConnections) -->
+          <div class="steward-section" v-if="suggestions.length > 0">
+            <h4 class="steward-section-title">🔗 连接建议</h4>
+            <div class="steward-suggestions">
+              <div v-for="s in suggestions" :key="s.targetId" class="steward-suggestion">
+                <div class="steward-sug-head">
+                  <span class="steward-sug-title">{{ nodeTitle(s.targetId) }}</span>
+                  <span class="steward-sug-score">{{ s.score }}</span>
+                </div>
+                <p class="steward-sug-reason">{{ s.reason }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 深度追问 (ai-steward generateQuestions) -->
+          <div class="steward-section" v-if="questions.length > 0">
+            <h4 class="steward-section-title">❓ 深度追问</h4>
+            <div class="steward-questions">
+              <p v-for="(q, i) in questions" :key="i" class="steward-question">{{ i + 1 }}. {{ q }}</p>
+            </div>
+          </div>
+
+          <!-- 盲区检测 (ai-steward detectBlindSpots) -->
+          <div class="steward-section" v-if="blindSpots.length > 0">
+            <h4 class="steward-section-title">🗺 盲区检测</h4>
+            <div class="steward-blindspots">
+              <div v-for="b in blindSpots" :key="b.category" class="steward-blind-row">
+                <span class="steward-blind-icon">{{ b.icon }}</span>
+                <span class="steward-blind-name">{{ b.label }}</span>
+                <div class="steward-blind-bar-wrap">
+                  <div class="steward-blind-bar" :style="{ width: b.coverageScore + '%', background: catColor(b.category) }"></div>
+                </div>
+                <span class="steward-blind-count">{{ b.nodeCount }}</span>
+              </div>
+            </div>
+          </div>
+
           <div class="steward-section">
             <h4 class="steward-section-title">📈 分类分布</h4>
             <div class="steward-cat-list">
@@ -74,7 +120,14 @@
     </Transition>
 </template>
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import { useKtUi } from '../../modules/knowledge/useKnowledgeTowerUi'
+import {
+  suggestConnections,
+  generateQuestions,
+  detectBlindSpots,
+} from '../../modules/knowledge/ai-steward'
+import type { KnowledgeNode, KnowledgeCategory } from '../../modules/knowledge/types'
 const {
   showSteward,
   nodes,
@@ -87,5 +140,49 @@ const {
   healthLevel,
   stewardTips,
 } = useKtUi()
+
+// 塔节点 (KNode) 无 tags，适配为 ai-steward 所需 KnowledgeNode 形状
+const stewardNodes = computed<KnowledgeNode[]>(() =>
+  nodes.value.map((n) => ({
+    id: n.id,
+    title: n.title,
+    desc: n.desc,
+    cat: n.cat as KnowledgeCategory,
+    tags: [],
+    createdAt: '',
+    updatedAt: '',
+  })),
+)
+
+const selectedNodeId = ref('')
+watch(
+  () => nodes.value.length,
+  (len) => {
+    if (len > 0 && !nodes.value.some((n) => n.id === selectedNodeId.value)) {
+      selectedNodeId.value = nodes.value[0].id
+    }
+  },
+  { immediate: true },
+)
+
+function onSelectNode(e: Event) {
+  selectedNodeId.value = (e.target as HTMLSelectElement).value
+}
+
+function nodeTitle(id: string): string {
+  return nodes.value.find((n) => n.id === id)?.title ?? id
+}
+
+const suggestions = computed(() => {
+  if (!selectedNodeId.value) return []
+  return suggestConnections(selectedNodeId.value, stewardNodes.value, computedRelations.value)
+})
+
+const questions = computed(() => {
+  if (!selectedNodeId.value) return []
+  return generateQuestions(selectedNodeId.value, stewardNodes.value)
+})
+
+const blindSpots = computed(() => detectBlindSpots(stewardNodes.value))
 </script>
 <style scoped src="./knowledge-shared.css"></style>

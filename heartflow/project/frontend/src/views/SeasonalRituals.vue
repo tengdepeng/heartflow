@@ -351,6 +351,9 @@
         <button @click="handleAddRitualLegacy" class="sr-btn" :disabled="!rform.name">+</button>
       </div>
     </section>
+
+    <!-- 季节日志 -->
+    <JournalPanel />
   </div>
 </template>
 
@@ -360,6 +363,7 @@ import { useSeasonalRituals, usePrivateRituals, useSolarTerms } from '../modules
 import { SOLAR_TERMS, SEASON_META, getTermCustoms, getFestivalInfo } from '../modules/seasonal'
 import type { SolarTerm, Festival } from '../modules/seasonal/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import JournalPanel from '../components/JournalPanel.vue'
 
 // ---- 模块化 composables ----
 const { entranceRef, entranceClass } = useViewEntrance()

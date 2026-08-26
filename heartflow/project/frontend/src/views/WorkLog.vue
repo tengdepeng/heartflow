@@ -304,6 +304,9 @@
       </div>
     </section>
 
+    <!-- 导出留档（worklog-export 模块） -->
+    <WorklogExportPanel />
+
     <!-- 月度汇总 -->
     <section class="wl-summary-section" v-if="shifts.length > 0">
       <h3>月度汇总</h3>
@@ -376,6 +379,7 @@ import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useWorklogAnalytics, useWorkLog } from '../modules/worklog'
 import type { WorkShift } from '../modules/worklog'
+import WorklogExportPanel from '../components/WorklogExportPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

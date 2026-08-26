@@ -187,6 +187,9 @@
         @click="goToPage(currentPage + 1)"
       >下一页 ›</button>
     </div>
+
+    <!-- 版本快照 -->
+    <OutputSnapshotsPanel :records="allRecords" @restored="onSnapshotsRestored" />
   </div>
 </template>
 
@@ -195,6 +198,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useOutputManager } from '../modules/output'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import type { OutputRecord, OutputRecordType } from '../modules/output'
+import OutputSnapshotsPanel from '../components/OutputSnapshotsPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -330,6 +334,11 @@ function deleteOne(id: string) {
   manager.delete(id)
   allRecords.value = manager.getAll()
   selectedIds.value = selectedIds.value.filter(sid => sid !== id)
+}
+
+function onSnapshotsRestored() {
+  allRecords.value = manager.getAll()
+  currentPage.value = 1
 }
 
 function batchArchive() {

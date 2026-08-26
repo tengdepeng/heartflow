@@ -55,6 +55,9 @@
       </div>
     </header>
 
+    <!-- 自动锁定（vault auto-lock 模块） -->
+    <VaultAutoLockPanel :settings="autoLockSettings" @update="handleAutoLockUpdate" />
+
     <!-- 资产分布 -->
     <section data-enter class="vt-section">
       <h3 class="vt-section-title">📊 资产分布</h3>
@@ -146,7 +149,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, watch, onUnmounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import {
   encryptWithPassphrase,
@@ -154,6 +157,8 @@ import {
   VaultDecryptError,
 } from '../modules/safety/vault-cipher'
 import { useVault, type Asset, type Archive, type VaultData } from '../modules/vault'
+import { useVaultAutoLock, type AutoLockSettings } from '../modules/vault/auto-lock'
+import VaultAutoLockPanel from '../components/VaultAutoLockPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -298,6 +303,18 @@ function lockVault() {
   activePass.value = ''
   unlockInput.value = ''
   phase.value = 'locked'
+}
+
+// ---- 自动锁定（空闲计时 + 切页保护） ----
+const autoLock = useVaultAutoLock(lockVault)
+const autoLockSettings = computed(() => autoLock.settings.value)
+watch(unlocked, (u) => {
+  if (u) autoLock.arm()
+  else autoLock.disarm()
+})
+onUnmounted(() => autoLock.disarm())
+function handleAutoLockUpdate(patch: Partial<AutoLockSettings>) {
+  autoLock.updateSettings(patch)
 }
 
 function fmt(iso: string) { const d = new Date(iso); return `${d.getMonth() + 1}/${d.getDate()}` }

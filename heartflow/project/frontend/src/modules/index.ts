@@ -506,8 +506,8 @@ export { useTransformGallery } from './transform'
 export type { Transformation, TransformType } from './transform'
 
 // ---- vault（保险库）----
-export { useVault, VAULT_CIPHER_KEY, VAULT_LEGACY_K, VAULT_LEGACY_KA } from './vault'
-export type { Asset, Archive, VaultData } from './vault'
+export { useVault, VAULT_CIPHER_KEY, VAULT_LEGACY_K, VAULT_LEGACY_KA, useVaultAutoLock, DEFAULT_AUTO_LOCK, IDLE_OPTIONS, AUTO_LOCK_KEY } from './vault'
+export type { Asset, Archive, VaultData, AutoLockSettings } from './vault'
 
 // ---- workhub（工作台）----
 export { useWorkHub } from './workhub'

@@ -213,6 +213,12 @@
 
     <!-- AI管家面板（内部自管 showSteward + Transition） -->
     <StewardPanel />
+
+    <!-- 决策分析 -->
+    <DecisionAnalysisPanel />
+
+    <!-- 间隔复习 -->
+    <FlashcardsPanel />
     </div>
   </div>
 </template>
@@ -243,6 +249,8 @@ import LettersMode from '../components/knowledge-tower/LettersMode.vue'
 import TapesMode from '../components/knowledge-tower/TapesMode.vue'
 import StewardPanel from '../components/knowledge-tower/StewardPanel.vue'
 import NodeEditModal from '../components/knowledge-tower/NodeEditModal.vue'
+import DecisionAnalysisPanel from '../components/DecisionAnalysisPanel.vue'
+import FlashcardsPanel from '../components/FlashcardsPanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
 
 // 视图级 UI 实例（每挂载实例全新状态），经 provide 下发，子面板 inject 共享同一实例。

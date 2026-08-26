@@ -94,6 +94,10 @@ export type {
   VersionStats,
 } from './version-history'
 
+// ---- P19-5 思维导图 ----
+export { useMindMap, NODE_COLORS, MIND_MAP_STORAGE_KEYS } from './mind-map'
+export type { MindNode, MindMap, NodeConnection, MindMapStats } from './mind-map'
+
 // ---- 存储键 ----
 const STICKY_KV_KEY = 'hf:note_sticky_state'
 const RING_KV_KEY = 'hf:note_knowledge_rings'
