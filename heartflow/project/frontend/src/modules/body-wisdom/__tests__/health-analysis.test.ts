@@ -71,7 +71,7 @@ describe('getMeridianDetails', () => {
   it('趋势按最近7天前后半场良好比较', () => {
     const bad = (d: string) => makeMeridian('lung', 'bad', 3, d)
     const good = (d: string) => makeMeridian('lung', 'good', 3, d)
-    // 先差后好 → improving
+    // 数据按时间序为 先差后好 → 近期（最新优先切片的首半）良好率高于早期 → improving
     const improving = h.getMeridianDetails(
       [bad('2026-08-01T03:00:00.000Z'), bad('2026-08-02T03:00:00.000Z'), bad('2026-08-03T03:00:00.000Z'), good('2026-08-04T03:00:00.000Z'), good('2026-08-05T03:00:00.000Z')],
     )
@@ -171,7 +171,10 @@ describe('generateReport / 报告状态', () => {
     expect(h.getReportHistory(1)).toHaveLength(1)
     // 最新报告为最近生成的一份
     expect(h.latestReport.value?.id).toBe(second.id)
-    expect(h.latestReport.value?.id).not.toBe(first.id)
+    // id 现由 `health_${Date.now()}_${rand}` 生成，连续生成亦唯一
+    expect(first.id).toMatch(/^health_/)
+    expect(second.id).toMatch(/^health_/)
+    expect(first.id).not.toBe(second.id)
   })
 
   it('弱经生成高优先建议', () => {

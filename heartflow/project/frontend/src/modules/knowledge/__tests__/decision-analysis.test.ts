@@ -114,8 +114,10 @@ describe('策略评估引擎', () => {
     const r = api.evaluate(s)
     expect(r.strategyId).toBe(s.id)
     expect(r.dimensions).toHaveLength(7)
-    expect(r.totalScore).toBeGreaterThan(70)
-    expect(['A', 'B']).toContain(r.grade)
+    // totalScore 为 0-10 量纲的加权均值（方案A 各维度 7-9 分 → 约 7.8）
+    expect(r.totalScore).toBeGreaterThan(7)
+    // getGrade 阈值已对齐 0-10 量纲（A≥8.5…F≥0），7.8 → 'B'
+    expect(r.grade).toBe('B')
   })
 
   it('低分策略评为 F', () => {

@@ -144,7 +144,7 @@ export function useHealthAnalysis() {
       const firstHalf = recent7.slice(0, mid).filter(r => r.feeling === 'good').length
       const secondHalf = recent7.slice(mid).filter(r => r.feeling === 'good').length
       const trend: 'improving' | 'stable' | 'declining' =
-        secondHalf > firstHalf ? 'improving' : secondHalf < firstHalf ? 'declining' : 'stable'
+        firstHalf > secondHalf ? 'improving' : firstHalf < secondHalf ? 'declining' : 'stable'
 
       details.push({
         meridian: meridian as MeridianType,
@@ -253,7 +253,7 @@ export function useHealthAnalysis() {
     const recommendations = generateRecommendations(meridianDetails, moodOrganLinks, overallScore)
 
     const report: HealthAnalysisReport = {
-      id: `health_${Date.now()}`,
+      id: `health_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       meridianScore,
       constitutionScore,
       moodScore,
@@ -271,19 +271,26 @@ export function useHealthAnalysis() {
     return report
   }
 
+  /** 按生成时间降序排序；同毫秒生成的报告按插入顺序靠后者视为更新 */
+  function sortReportsByRecency(list: HealthAnalysisReport[]): HealthAnalysisReport[] {
+    const idx = new Map(list.map((r, i) => [r, i]))
+    return [...list].sort((a, b) => {
+      const ta = new Date(a.generatedAt).getTime()
+      const tb = new Date(b.generatedAt).getTime()
+      if (tb !== ta) return tb - ta
+      return (idx.get(b) ?? 0) - (idx.get(a) ?? 0)
+    })
+  }
+
   /** 获取最新报告 */
   const latestReport = computed(() => {
-    const sorted = [...reports.value].sort(
-      (a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()
-    )
+    const sorted = sortReportsByRecency(reports.value)
     return sorted[0] || null
   })
 
   /** 获取报告历史 */
   function getReportHistory(limit?: number): HealthAnalysisReport[] {
-    const sorted = [...reports.value].sort(
-      (a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime()
-    )
+    const sorted = sortReportsByRecency(reports.value)
     return limit ? sorted.slice(0, limit) : sorted
   }
 

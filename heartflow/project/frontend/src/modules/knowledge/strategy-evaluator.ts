@@ -161,15 +161,15 @@ const DEFAULT_WEIGHTS: DimensionWeights = {
 
 const DEFAULT_CONFIG: EvaluatorConfig = {
   weights: { ...DEFAULT_WEIGHTS },
-  passThreshold: 60,
-  excellentThreshold: 80,
+  passThreshold: 6,
+  excellentThreshold: 8,
 }
 
 const GRADE_THRESHOLDS: { grade: EvalGrade; min: number; label: string; color: string }[] = [
-  { grade: 'A', min: 85, label: '优秀', color: '#34d399' },
-  { grade: 'B', min: 70, label: '良好', color: '#6b9fc4' },
-  { grade: 'C', min: 55, label: '一般', color: '#f0c040' },
-  { grade: 'D', min: 40, label: '较差', color: '#e0a96d' },
+  { grade: 'A', min: 8.5, label: '优秀', color: '#34d399' },
+  { grade: 'B', min: 7, label: '良好', color: '#6b9fc4' },
+  { grade: 'C', min: 5.5, label: '一般', color: '#f0c040' },
+  { grade: 'D', min: 4, label: '较差', color: '#e0a96d' },
   { grade: 'F', min: 0, label: '不建议', color: '#ef4444' },
 ]
 
@@ -373,7 +373,7 @@ export function useStrategyEvaluator() {
     }
 
     // 机会与威胁
-    if (result.totalScore >= 70) {
+    if (result.totalScore >= 7) {
       opportunities.push({ content: '高评分策略，可优先执行', weight: 0.9 })
     }
     if (strategy.knowledgeNodeIds.length < 3) {
@@ -452,7 +452,7 @@ export function useStrategyEvaluator() {
         rank: i + 1,
         reasons: [
           ...highDims.map(d => `${d.label}维度表现优秀(${d.score}分)`),
-          ...(r.totalScore >= 80 ? ['综合评分优秀，强烈推荐'] : []),
+          ...(r.totalScore >= 8 ? ['综合评分优秀，强烈推荐'] : []),
         ],
         bestScenarios: determineScenarios(r),
         risks: lowDims.map(d => `${d.label}维度得分偏低(${d.score}分)，需关注`),
@@ -582,7 +582,7 @@ export function useStrategyEvaluator() {
     if (impact >= 8) scenarios.push('需要产生显著影响时')
     if (risk >= 7) scenarios.push('风险可控的稳定推进场景')
     if (sustainability >= 7) scenarios.push('长期战略规划')
-    if (result.totalScore >= 80) scenarios.push('追求卓越成果的关键项目')
+    if (result.totalScore >= 8) scenarios.push('追求卓越成果的关键项目')
 
     if (scenarios.length === 0) scenarios.push('一般性探索或备选方案')
 
