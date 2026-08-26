@@ -93,11 +93,11 @@ describe('CourtyardShell.getScreenRect（屏侧玉珠契约）', () => {
   it('mount 后布局出居中屏风矩形（三进默认最宽）', () => {
     const shell = mountAt(1000, 800)
     const r = shell.screenRect
-    // ZONES[0]: x=0.5,w=0.34 → 宽 340；y=0.32,h=0.22 → 高 176，居中
-    expect(r.w).toBeCloseTo(340, 0)
-    expect(r.h).toBeCloseTo(176, 0)
+    // ZONES[0]: x=0.5,w=0.4 → 宽 400；y=0.82,h=0.16 → 高 128，居中
+    expect(r.w).toBeCloseTo(400, 0)
+    expect(r.h).toBeCloseTo(128, 0)
     expect(r.x + r.w / 2).toBeCloseTo(500, 0) // 居中
-    expect(r.y + r.h / 2).toBeCloseTo(256, 0) // 0.32 * 800
+    expect(r.y + r.h / 2).toBeCloseTo(656, 0) // 0.82 * 800
   })
 
   it('getScreenRect 返回与 screenRect 一致的 rect，并含屏侧玉珠位', () => {
@@ -106,8 +106,8 @@ describe('CourtyardShell.getScreenRect（屏侧玉珠契约）', () => {
     expect(out.x).toBe(shell.screenRect.x)
     expect(out.w).toBe(shell.screenRect.w)
     expect(out.jade).toBeDefined()
-    // 玉珠位应在计时器圆右侧（x 大于矩形中线）、与矩形同高
-    expect(out.jade!.x).toBeGreaterThan(shell.screenRect.x + shell.screenRect.w / 2)
+    // 玉珠位为影壁中心（courtyard.getScreenRect 约定返回屏中心，见 courtyard.ts L168 注释）
+    expect(out.jade!.x).toBeCloseTo(shell.screenRect.x + shell.screenRect.w / 2, 0)
     expect(out.jade!.y).toBeCloseTo(shell.screenRect.y + shell.screenRect.h / 2, 0)
   })
 
@@ -124,7 +124,7 @@ describe('CourtyardShell.getScreenRect（屏侧玉珠契约）', () => {
     })
     const full = mountAt(1000, 800)
     expect(narrow.screenRect.w).toBeLessThan(full.screenRect.w)
-    expect(narrow.screenRect.w).toBeCloseTo(340 * 0.7, 0)
+    expect(narrow.screenRect.w).toBeCloseTo(280, 0)
   })
 
   it('resize 后矩形随视口重算', () => {

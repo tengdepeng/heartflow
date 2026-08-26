@@ -9,6 +9,7 @@ import { createPinia, setActivePinia } from 'pinia'
 const mockPush = vi.fn()
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
+  useRoute: () => ({ params: {}, query: {}, name: '', path: '', meta: {} }),
 }))
 
 // 模拟 advisor bridge
@@ -27,6 +28,7 @@ vi.mock('../../resonance/bridges/advisor', () => ({
     currentBubble: mockCurrentBubble(),
     getQuickStats: mockGetQuickStats,
     getAllDingyinProgress: mockGetAllDingyinProgress,
+    advisors: [],
   }),
 }))
 
@@ -87,24 +89,18 @@ describe('MirrorSelf', () => {
     expect(wrapper.find('.ms-orb').classes()).not.toContain('active')
   })
 
-  it('长按后显示 tooltip', async () => {
-    vi.useFakeTimers()
+  it('点击 ⓘ 按钮显示状态面板（ms-tooltip）', async () => {
     const wrapper = await getWrapper()
-    await wrapper.find('button.mirror-self').trigger('pointerdown')
-    vi.advanceTimersByTime(600)
+    await wrapper.find('.ms-info-btn').trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.ms-tooltip').exists()).toBe(true)
-    vi.useRealTimers()
   })
 
-  it('tooltip 显示定音锤进度条', async () => {
-    vi.useFakeTimers()
+  it('状态面板显示定音锤进度条', async () => {
     const wrapper = await getWrapper()
-    await wrapper.find('button.mirror-self').trigger('pointerdown')
-    vi.advanceTimersByTime(600)
+    await wrapper.find('.ms-info-btn').trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.ms-progress-bar').exists()).toBe(true)
-    vi.useRealTimers()
   })
 
   it('渲染定音锤四幕入口按钮', async () => {
@@ -112,45 +108,37 @@ describe('MirrorSelf', () => {
     expect(wrapper.find('.dingyin-entry-btn').exists()).toBe(true)
   })
 
-  it('长按面板显示今日专注时段时间轴', async () => {
-    vi.useFakeTimers()
+  it('状态面板显示今日专注时段时间轴', async () => {
     const wrapper = await getWrapper()
-    await wrapper.find('button.mirror-self').trigger('pointerdown')
-    vi.advanceTimersByTime(600)
+    await wrapper.find('.ms-info-btn').trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.ms-timeline').exists()).toBe(true)
     expect(wrapper.find('.ms-timeline-title').text()).toContain('今日专注时段')
-    vi.useRealTimers()
   })
 
-  it('左滑切房间 emit update:activeRoomId', async () => {
-    const wrapper = await getWrapper()
-    const btn = wrapper.find('button.mirror-self')
-    await btn.trigger('pointerdown', { clientX: 0, clientY: 0 })
-    await btn.trigger('pointerup', { clientX: -120, clientY: 0 })
-    expect(wrapper.emitted('update:activeRoomId')).toBeTruthy()
-  })
-
-  it('右滑唤对话 emit 且展开对话面板', async () => {
-    const wrapper = await getWrapper()
-    const btn = wrapper.find('button.mirror-self')
-    await btn.trigger('pointerdown', { clientX: 0, clientY: 0 })
-    await btn.trigger('pointerup', { clientX: 120, clientY: 0 })
-    expect(wrapper.emitted('update:activeRoomId')).toBeFalsy()
-    await wrapper.vm.$nextTick()
-    expect(wrapper.find('.mirror-self--active').exists()).toBe(true)
-  })
-
-  it('有房间上下文时长按面板显示键盘可切换的房间按钮', async () => {
-    vi.useFakeTimers()
+  it('状态面板房间切换按钮 emit update:activeRoomId', async () => {
     const wrapper = await getWrapper({ props: { activeRoomId: 'study' } })
-    await wrapper.find('button.mirror-self').trigger('pointerdown')
-    vi.advanceTimersByTime(600)
+    await wrapper.find('.ms-info-btn').trigger('click')
     await wrapper.vm.$nextTick()
     const btns = wrapper.findAll('.ms-room-switch-btn')
     expect(btns.length).toBe(2)
-    await btns[1].trigger('click') // 下一间
+    await btns[1].trigger('click') // 切换到下一间
     expect(wrapper.emitted('update:activeRoomId')).toBeTruthy()
-    vi.useRealTimers()
+  })
+
+  it('点击光球唤对话并展开对话面板', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('button.mirror-self').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('update:activeRoomId')).toBeFalsy()
+    expect(wrapper.find('.mirror-self--active').exists()).toBe(true)
+  })
+
+  it('有房间上下文时状态面板显示键盘可切换的房间按钮', async () => {
+    const wrapper = await getWrapper({ props: { activeRoomId: 'study' } })
+    await wrapper.find('.ms-info-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    const btns = wrapper.findAll('.ms-room-switch-btn')
+    expect(btns.length).toBe(2)
   })
 })

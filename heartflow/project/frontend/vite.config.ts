@@ -39,6 +39,7 @@ export default defineConfig(async () => ({
   },
   test: {
     environment: "happy-dom",
+    setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,js}"],
     testTimeout: 15000,
     // 274 个测试文件，forks 池每文件孵化新进程 + 重导整模块图，轻文件累积开销巨大。

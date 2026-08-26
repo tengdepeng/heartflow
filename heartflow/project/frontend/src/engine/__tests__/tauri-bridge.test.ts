@@ -12,6 +12,13 @@ vi.mock('@tauri-apps/api/core', () => ({
   invoke: mockInvoke,
 }))
 
+// 测试环境模拟 Tauri 运行时：使 hasCapability('tauriApi') 返回 true，
+// 从而命令封装函数走 invoke 分支而非 Web 降级（否则 cmd_* 永不触发）。
+// 注意：路径相对本测试文件（src/engine/__tests__/）应为 ../../utils/platform
+vi.mock('../../utils/platform', () => ({
+  hasCapability: () => true,
+}))
+
 // 每个测试重新导入以获取 fresh mock
 let tauriBridge: typeof import('../tauri-bridge')
 

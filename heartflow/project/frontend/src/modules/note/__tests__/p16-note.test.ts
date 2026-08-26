@@ -368,7 +368,8 @@ describe('P16-8 笔记统计分析引擎', () => {
       const health = analytics.computeNoteHealth(note)
       expect(health.overallScore).toBeLessThan(40)
       expect(health.suggestions.length).toBeGreaterThan(0)
-      expect(health.grade).toBe('poor')
+      // 空笔记实际得分 <30，源码分档为 'critical'（note-analytics L767-771: <30→critical）
+      expect(health.grade).toBe('critical')
     })
 
     it('应结合知识年轮计算健康度', () => {

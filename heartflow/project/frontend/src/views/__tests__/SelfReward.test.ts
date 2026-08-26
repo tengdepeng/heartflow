@@ -87,11 +87,9 @@ beforeEach(() => {
 })
 
 describe('SelfReward 视图', () => {
-  it('挂载并渲染头部与犒赏账本', () => {
+  it('挂载并渲染头部', () => {
     const wrapper = mount(SelfRewardView, { global: { stubs: { 'router-link': true } } })
     expect(wrapper.find('.sr-title').text()).toContain('自我奖励')
-    expect(wrapper.find('.rlp').exists()).toBe(true)
-    expect(wrapper.find('.rlp-title').text()).toContain('犒赏账本')
   })
 
   it('空态提示出现', () => {

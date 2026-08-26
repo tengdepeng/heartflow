@@ -326,6 +326,9 @@ describe('宪法合规 · 数据主权 （第1条）', () => {
       'engine/ai/tauri-provider.ts',
       'modules/visualization/datasource-connector.ts',
       'modules/sync/transport.ts',
+      // 书签剪藏：用户显式粘贴/剪入 URL 后，由 fetchClipMeta 抓取 OG 元信息（标题/描述/预览图）。
+      // 请求目标恒为用户提供的原始 URL，无默认外联，属用户主动触发的本地私有边界收发。
+      'modules/bookmarks/clip.ts',
     ]
 
     const violations: string[] = []

@@ -19,6 +19,8 @@ function mockCtx(): CanvasRenderingContext2D {
     lineTo: noop,
     arc: noop,
     arcTo: noop,
+    rect: noop,
+    quadraticCurveTo: noop,
     closePath: noop,
     fill: noop,
     stroke: noop,
@@ -80,11 +82,11 @@ describe('world-shell 工厂与策略', () => {
     const shell = new CourtyardShell()
     const c = ctxWithRooms()
     shell.mount(c)
-    // 影壁位于画布 50%×32%，宽 34%×800=272，高 22%×600=132
-    expect(shell.screenRect.w).toBeCloseTo(272, 0)
-    expect(shell.screenRect.h).toBeCloseTo(132, 0)
-    expect(shell.screenRect.x).toBeCloseTo(400 - 136, 0)
-    expect(shell.screenRect.y).toBeCloseTo(192 - 66, 0)
+    // 影壁（ZONES[0]）位于画布 50%×82%，宽 40%×800=320，高 16%×600=96
+    expect(shell.screenRect.w).toBeCloseTo(320, 0)
+    expect(shell.screenRect.h).toBeCloseTo(96, 0)
+    expect(shell.screenRect.x).toBeCloseTo(400 - 160, 0)
+    expect(shell.screenRect.y).toBeCloseTo(492 - 48, 0)
   })
 
   it('CourtyardShell.render 不抛错且消费房间锚点', () => {
@@ -98,8 +100,8 @@ describe('world-shell 工厂与策略', () => {
     const shell = new CourtyardShell()
     shell.mount(ctxWithRooms())
     shell.resize(1000, 700)
-    expect(shell.screenRect.w).toBeCloseTo(340, 0)
-    expect(shell.screenRect.x).toBeCloseTo(500 - 170, 0)
+    expect(shell.screenRect.w).toBeCloseTo(400, 0)
+    expect(shell.screenRect.x).toBeCloseTo(500 - 200, 0)
   })
 
   it('CourtyardShell.updateContext 更新强度/静谧态', () => {
@@ -145,10 +147,10 @@ describe('world-shell 工厂与策略', () => {
   it('CourtyardShell.hitTest 命中 zone 空白返回 slot（无 roomPath）', () => {
     const shell = new CourtyardShell()
     shell.mount(ctxWithRooms())
-    // 正堂中心 (400, 72) 附近空白（锚点在 y=0.62*zh 处，中心上方为空白）
+    // 画布顶部 (400, 72) 落在 corner zone（ZONES[5] y=0.14, h=0.08*1.15）内
     const res = shell.hitTest!(400, 72)
     expect(res).not.toBeNull()
-    expect(res!.slot).toBe('hall')
+    expect(res!.slot).toBe('corner')
     // 正堂有房间，但此处命中的是空白区（非精确墨点）
     expect(res!.roomPath).toBeUndefined()
   })

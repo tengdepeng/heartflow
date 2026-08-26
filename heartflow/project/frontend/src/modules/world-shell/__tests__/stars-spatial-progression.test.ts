@@ -297,10 +297,10 @@ describe('宅院壳递进回归（星辰壳改动不破坏既有层级）', () =
   it('CourtyardShell.hitTest zone 空白仍返回 slot（无 roomPath）', () => {
     const shell = new CourtyardShell()
     shell.mount(makeCtx())
-    // 正堂中心 (400, 72) 附近空白
+    // 画布顶部 (400, 72) 落在 corner zone 内
     const res = shell.hitTest!(400, 72)
     expect(res).not.toBeNull()
-    expect(res!.slot).toBe('hall')
+    expect(res!.slot).toBe('corner')
     expect(res!.roomPath).toBeUndefined()
   })
 
@@ -325,13 +325,13 @@ describe('宅院壳递进回归（星辰壳改动不破坏既有层级）', () =
     const shell = new CourtyardShell()
     shell.mount(makeCtx())
     const r = shell.screenRect
-    // 三进默认：宽 0.34*800=272，高 0.22*600=132，居中 50%/32%
-    expect(r.w).toBeCloseTo(272, 0)
-    expect(r.h).toBeCloseTo(132, 0)
-    expect(r.x).toBeCloseTo(400 - 136, 0)
+    // 三进默认：宽 0.4*800=320，高 0.16*600=96，居中 50%/82%
+    expect(r.w).toBeCloseTo(320, 0)
+    expect(r.h).toBeCloseTo(96, 0)
+    expect(r.x).toBeCloseTo(400 - 160, 0)
     const out = shell.getScreenRect()
     expect(out.jade).toBeDefined()
-    expect(out.jade!.x).toBeGreaterThan(r.x + r.w / 2)
+    expect(out.jade!.x).toBeCloseTo(r.x + r.w / 2, 0)
   })
 })
 

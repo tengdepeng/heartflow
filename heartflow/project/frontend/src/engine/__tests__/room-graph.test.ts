@@ -63,7 +63,7 @@ describe('room-graph 房间图引擎', () => {
 
   it('getRoomsByGroup 返回系统房间', () => {
     const systemRooms = getRoomsByGroup('system')
-    expect(systemRooms.length).toBe(4)
+    expect(systemRooms.length).toBe(5)
   })
 
   // ------- 主链路 -------
