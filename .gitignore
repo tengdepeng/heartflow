@@ -80,3 +80,5 @@ heartflow/_astrolabe_*.png
 heartflow/_home_preview.png
 heartflow/_*.png
 heartflow/_vite_dev.log
+# 沙箱临时构建产物（vite 绕过 safe-delete 用的干净 outDir，非真源）
+heartflow/project/frontend/dist-*-test/

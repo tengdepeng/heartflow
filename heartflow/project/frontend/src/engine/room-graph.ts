@@ -943,6 +943,19 @@ const ROOM_GRAPH: Record<string, RoomNode> = {
     mainPathOrder: -1,
     branchFrom: 'home-space',
   },
+  'launcher': {
+    id: 'launcher',
+    path: '/launcher',
+    name: '启动器',
+    icon: '🚀',
+    color: '#d4a574',
+    group: 'system',
+    description: '桌面启动台 · 外部应用入口（仅找入口启动，深链跳子页，不嵌入外部窗口）',
+    adjacentTo: ['home-space', 'app-space'],
+    isMainPath: false,
+    mainPathOrder: -1,
+    domain: 'system',
+  },
 }
 
 // ---- 主链路顺序列表 ----

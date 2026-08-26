@@ -443,6 +443,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '应用空间' },
   }),
   withRoomMeta({
+    path: '/launcher',
+    name: 'launcher',
+    component: () => import('../modules/launcher/Launcher.vue'),
+    meta: { title: '启动器' },
+  }),
+  withRoomMeta({
     path: '/interaction-config',
     name: 'interaction-config',
     component: () => import('../views/InteractionConfig.vue'),

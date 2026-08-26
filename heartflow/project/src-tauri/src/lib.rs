@@ -9,6 +9,7 @@ use std::fs;
 use std::path::PathBuf;
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Modifiers, Shortcut, Code};
+use tauri_plugin_shell;
 
 mod touchpoints;
 
@@ -70,6 +71,8 @@ pub fn run() {
     tauri::Builder::default()
         // 全局热键插件：用于切换 AuraLayer 透明窗显隐
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        // shell 插件：Launcher 启动外部应用（open URI / 路径）
+        .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             touchpoints::init();
 

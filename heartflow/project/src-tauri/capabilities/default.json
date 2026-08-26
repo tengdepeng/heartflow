@@ -4,6 +4,7 @@
   "description": "Heartflow 默认能力：核心配对命令与快照事件",
   "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "shell:allow-open"
   ]
 }
