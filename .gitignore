@@ -65,3 +65,18 @@ screenshots/
 screenshot-*.png
 screenshot-*.jpg
 annotated_screenshot.png
+
+# ---- 仓库损坏恢复产物 / 废弃分叉树 / 运行时数据（2026-08-26 事故恢复） ----
+# 对象库损坏前的 .git 备份（含损坏 pack，供将来可能的深度恢复，不入库）
+.git-corrupt-backup/
+# 临时产物目录
+_临时产物/
+# 废弃的 backend 分叉树（7.5G target/debug，非真源；真源 = project/frontend + project/src-tauri）
+heartflow/project/backend/
+# 运行时本地数据库（明文存储引擎写入，非源码）
+heartflow/database/
+# 会话/验证截图产物（heartflow 顶层）
+heartflow/_astrolabe_*.png
+heartflow/_home_preview.png
+heartflow/_*.png
+heartflow/_vite_dev.log

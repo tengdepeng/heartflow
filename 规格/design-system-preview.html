@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>心流工坊 · 设计系统预览 · DESIGN.md Living Styleguide</title>
+<style>
+  /* =========================================================
+     心流工坊 · 设计 Token（与 src/assets/design-tokens.css 一致）
+     离线安全：不引用任何外部字体/CDN，字体栈走系统回退。
+     ========================================================= */
+  :root {
+    --bg-primary: #0d0b09;
+    --bg-deep: #14100b;
+    --bg-deepest: #0a0806;
+    --bg-panel: #1a1612;
+    --bg-surface: rgba(255,255,255,.03);
+    --bg-elevated: rgba(35,30,24,.8);
+    --bg-card: rgba(42,36,30,.6);
+    --bg-card-hover: rgba(55,48,40,.7);
+
+    --text-primary: #e8e0d8;
+    --text-secondary: rgba(232,224,216,.55);
+    --text-medium: rgba(232,224,216,.5);
+    --text-dim: rgba(232,224,216,.4);
+    --text-low: rgba(232,224,216,.35);
+    --text-faint: rgba(232,224,216,.2);
+    --text-muted: rgba(232,224,216,.3);
+    --text-muted-alt: #8a8a8a;
+
+    --accent: #d4a574;
+    --accent-rgb: 212,165,116;
+    --accent-dim: rgba(212,165,116,.2);
+    --accent-glow: rgba(212,165,116,.08);
+    --accent-cyan: #5ab8a0;
+    --accent-blue: #6b9fc4;
+    --accent-purple: #a07c8c;
+
+    --success: #34d399;
+    --danger: #ff6b6b;
+    --error: #ef4444;
+    --warning: #f0c040;
+
+    --border: rgba(212,165,116,.12);
+    --border-light: rgba(212,165,116,.06);
+
+    --amber-50:#fde8c8; --amber-100:#f5d5a0; --amber-200:#e8c078; --amber-300:#dbaa58;
+    --amber-400:#cf9640; --amber-500:#c28130; --amber-600:#a66a24; --amber-700:#8a541c;
+    --amber-800:#6e4016; --amber-900:#523010;
+
+    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 16px;
+    --spacing-xs: 4px; --spacing-sm: 8px; --spacing-md: 16px;
+    --spacing-lg: 24px; --spacing-xl: 40px; --spacing-2xl: 64px;
+
+    --shadow: 0 4px 24px rgba(0,0,0,.4);
+    --shadow-glow: 0 0 40px rgba(212,165,116,.06);
+    --shadow-xs: 0 1px 4px rgba(0,0,0,.3);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.45);
+    --shadow-2xl: 0 16px 48px rgba(0,0,0,.5);
+
+    --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+
+    --font-heading-zh: 'Noto Serif SC','Noto Sans SC','Source Han Serif SC',serif;
+    --font-body-zh: 'Noto Sans SC',system-ui,-apple-system,sans-serif;
+    --font-heading-en: 'Poppins','Arial',sans-serif;
+    --font-body-en: 'Lora','Georgia',serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body-zh);
+    font-size: 14px; line-height: 1.6;
+    color: var(--text-primary);
+    background: var(--bg-primary);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  /* 氛围辉光（模拟画布/环境层，非真实 canvas） */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(60vw 60vw at 12% -10%, rgba(212,165,116,.10), transparent 60%),
+      radial-gradient(50vw 50vw at 100% 0%, rgba(90,184,160,.05), transparent 55%),
+      radial-gradient(70vw 70vw at 50% 120%, rgba(160,124,140,.05), transparent 60%);
+  }
+  .wrap { position: relative; z-index: 1; max-width: 1120px; margin: 0 auto; padding: 0 var(--spacing-lg) var(--spacing-2xl); }
+
+  /* 顶部锚点导航 */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    background: rgba(13,11,9,.8); border-bottom: 1px solid var(--border-light);
+    margin-bottom: var(--spacing-xl);
+  }
+  .topbar-inner { max-width: 1120px; margin: 0 auto; padding: 12px var(--spacing-lg);
+    display: flex; gap: var(--spacing-md); align-items: center; flex-wrap: wrap; }
+  .topbar a { color: var(--text-secondary); text-decoration: none; font-size: 13px; transition: var(--transition); }
+  .topbar a:hover { color: var(--accent); }
+  .topbar .brand { font-family: var(--font-heading-zh); font-weight: 600; color: var(--accent); margin-right: auto; }
+
+  section { margin-bottom: var(--spacing-2xl); }
+  h1, h2, h3, h4 { font-family: var(--font-heading-zh); font-weight: 600; color: var(--text-primary); }
+  h1 { font-size: 28px; line-height: 1.25; }
+  h2 { font-size: 22px; margin-bottom: var(--spacing-lg); display: flex; align-items: center; gap: 10px; }
+  h2::before { content: ''; width: 4px; height: 22px; border-radius: 2px; background: var(--accent); display: inline-block; }
+  .lead { color: var(--text-secondary); max-width: 70ch; margin-bottom: var(--spacing-lg); }
+  .eyebrow { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+
+  .grid { display: grid; gap: var(--spacing-md); }
+  .cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 860px) { .cols-3,.cols-4 { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 560px) { .cols-2,.cols-3,.cols-4 { grid-template-columns: 1fr; } }
+
+  /* 色板 */
+  .swatch { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius-md); overflow: hidden; }
+  .swatch .chip-color { height: 64px; }
+  .swatch .meta { padding: 12px; }
+  .swatch .name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .swatch .hex { font-size: 11px; color: var(--text-medium); font-family: ui-monospace, monospace; }
+  .swatch .var { font-size: 11px; color: var(--text-dim); font-family: ui-monospace, monospace; }
+
+  /* 字体样本 */
+  .type-row { display: flex; align-items: baseline; gap: var(--spacing-lg); padding: 14px 0; border-bottom: 1px solid var(--border-light); }
+  .type-row .label { width: 120px; flex-shrink: 0; font-size: 11px; color: var(--text-medium); font-family: ui-monospace, monospace; }
+  .type-row .sample { flex: 1; }
+  .t-hero { font-family: var(--font-heading-zh); font-size: 28px; font-weight: 600; line-height: 1.25; }
+  .t-h1 { font-family: var(--font-heading-zh); font-size: 22px; font-weight: 600; line-height: 1.3; }
+  .t-h2 { font-family: var(--font-heading-zh); font-size: 18px; font-weight: 600; line-height: 1.4; }
+  .t-h3 { font-family: var(--font-heading-zh); font-size: 16px; font-weight: 600; }
+  .t-body { font-family: var(--font-body-zh); font-size: 14px; font-weight: 400; line-height: 1.6; }
+  .t-small { font-family: var(--font-body-zh); font-size: 13px; color: var(--text-secondary); }
+  .t-caption { font-family: var(--font-body-zh); font-size: 11px; color: var(--text-medium); letter-spacing: .5px; }
+  .t-nano { font-family: var(--font-body-zh); font-size: 10px; color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase; }
+
+  /* 按钮 */
+  .hf-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 40px; padding: 10px 20px; border: 1px solid transparent;
+    border-radius: var(--radius-md); font-family: var(--font-body-zh); font-size: 14px; font-weight: 600;
+    line-height: 1.2; cursor: pointer; user-select: none; transition: var(--transition);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .hf-btn--primary { background: var(--accent); color: #1a1208; }
+  .hf-btn--primary:hover { filter: brightness(1.08); box-shadow: var(--shadow-glow); }
+  .hf-btn--primary:active { transform: translateY(1px); }
+  .hf-btn--secondary { background: transparent; color: var(--accent); border-color: var(--border); }
+  .hf-btn--secondary:hover { background: var(--bg-surface); }
+  .hf-btn--ghost { background: transparent; color: var(--text-medium); }
+  .hf-btn--ghost:hover { background: var(--bg-surface); color: var(--text-primary); }
+  .hf-btn--danger { background: var(--danger); color: #1a0a0a; }
+  .hf-btn--danger:hover { filter: brightness(1.06); }
+  .hf-btn:disabled { background: var(--text-muted-alt); color: #1a1208; cursor: not-allowed; box-shadow: none; filter: none; }
+  .hf-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .35); }
+  .hf-btn--block { width: 100%; }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+  /* 卡片 */
+  .hf-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius-lg); box-shadow: var(--shadow); overflow: hidden; }
+  .hf-card--elevated { background: var(--bg-elevated); }
+  .hf-card__header { padding: 16px 20px 0; font-family: var(--font-heading-zh); font-weight: 600; color: var(--text-primary); }
+  .hf-card__body { padding: 20px; color: var(--text-secondary); }
+  .hf-card__footer { padding: 0 20px 16px; color: var(--text-dim); font-size: 13px; }
+
+  /* 输入 */
+  .hf-field { display: flex; flex-direction: column; gap: 6px; }
+  .hf-field__label { font-size: 13px; color: var(--text-medium); }
+  .hf-input { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; font-family: var(--font-body-zh); font-size: 14px; transition: var(--transition); }
+  .hf-input::placeholder { color: var(--text-dim); }
+  .hf-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .2); }
+  .hf-input:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* 导航项 */
+  .nav-demo { background: var(--bg-deep); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 8px; max-width: 320px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; font-size: 13px; color: var(--text-secondary); transition: var(--transition); position: relative; overflow: hidden; }
+  .nav-item::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 0; border-radius: 0 2px 2px 0; background: var(--accent); transition: height var(--transition); opacity: 0; }
+  .nav-item:hover { background: var(--bg-surface); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-glow); color: var(--accent); }
+  .nav-item.active::before { height: 60%; opacity: 1; }
+  .nav-icon { width: 20px; text-align: center; opacity: .7; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  /* 标记 */
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; border: 1px solid rgba(212,165,116,.4); color: var(--accent); }
+  .chip { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 11px; border: 1px solid var(--border); color: var(--text-secondary); }
+  .badge-official { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; background: var(--accent-dim); color: var(--accent); }
+  .badge-runtime-active { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; background: rgba(52,211,153,.14); color: var(--success); }
+  .badge-runtime-declarative { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; background: rgba(240,192,64,.14); color: var(--warning); }
+
+  /* 阴影阶梯 */
+  .shadow-demo { background: var(--bg-elevated); border: 1px solid var(--border-light); border-radius: var(--radius-lg); height: 96px; display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-secondary); }
+  .s-xs { box-shadow: var(--shadow-xs); }
+  .s-base { box-shadow: var(--shadow); }
+  .s-glow { box-shadow: var(--shadow-glow); }
+  .s-lg { box-shadow: var(--shadow-lg); }
+  .s-2xl { box-shadow: var(--shadow-2xl); }
+
+  /* 玻璃 */
+  .glass-stage { position: relative; border-radius: var(--radius-lg); padding: var(--spacing-xl); overflow: hidden; border: 1px solid var(--border-light); }
+  .glass-stage .bg-orbs { position: absolute; inset: 0; z-index: 0;
+    background: radial-gradient(40% 60% at 20% 30%, rgba(212,165,116,.35), transparent 60%),
+                radial-gradient(40% 60% at 80% 70%, rgba(90,184,160,.30), transparent 60%); }
+  .glass { position: relative; z-index: 1; background: var(--bg-elevated); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border-light); border-radius: var(--radius-lg); padding: var(--spacing-lg); max-width: 420px; }
+
+  /* Do / Don't */
+  .dodont { border-radius: var(--radius-lg); border: 1px solid var(--border-light); padding: var(--spacing-lg); }
+  .dodont.do { background: rgba(52,211,153,.05); }
+  .dodont.dont { background: rgba(255,107,107,.05); }
+  .dodont h3 { margin-bottom: 12px; }
+  .dodont ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .dodont li { font-size: 13px; color: var(--text-secondary); padding-left: 22px; position: relative; }
+  .dodont.do li::before { content: '✓'; position: absolute; left: 0; color: var(--success); }
+  .dodont.dont li::before { content: '✕'; position: absolute; left: 0; color: var(--danger); }
+
+  /* 模态 */
+  .modal-mask { position: fixed; inset: 0; background: rgba(10,8,6,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: none; place-items: center; z-index: 1000; padding: var(--spacing-md); }
+  .modal-mask.open { display: grid; }
+  .hf-modal { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); width: 100%; max-width: 440px; }
+  .hf-modal__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .hf-modal__title { font-family: var(--font-heading-zh); font-size: 21px; font-weight: 600; color: var(--text-primary); margin: 0; }
+  .hf-modal__close { background: transparent; border: none; color: var(--text-medium); font-size: 22px; line-height: 1; cursor: pointer; padding: 4px 8px; border-radius: var(--radius-md); }
+  .hf-modal__close:hover { background: var(--bg-surface); color: var(--text-primary); }
+  .hf-modal__body { color: var(--text-medium); }
+  .hf-modal__foot { margin-top: 20px; display: flex; gap: 12px; justify-content: flex-end; }
+
+  .note { font-size: 12px; color: var(--text-dim); margin-top: 12px; }
+  code { font-family: ui-monospace, monospace; background: var(--bg-surface); padding: 1px 6px; border-radius: 4px; color: var(--accent); font-size: 12px; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <span class="brand">心流工坊 · DESIGN.md</span>
+      <a href="#colors">调色板</a>
+      <a href="#type">字体</a>
+      <a href="#components">组件</a>
+      <a href="#depth">深度</a>
+      <a href="#glass">玻璃</a>
+      <a href="#rules">规范</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <header style="margin-bottom: var(--spacing-2xl);">
+      <div class="eyebrow">Living Styleguide · 离线安全</div>
+      <h1>深夜食堂 · 暖琥珀设计系统</h1>
+      <p class="lead">本页是 <code>DESIGN.md</code> 的可视化预览，所有色值、字体、圆角、阴影、组件样式均实时取自设计令牌，
+        与 <code>src/assets/design-tokens.css</code> 及 <code>src/components/ui/*</code> 完全一致。
+        不引用任何外部字体或 CDN，可离线打开。</p>
+    </header>
+
+    <!-- 调色板 -->
+    <section id="colors">
+      <div class="eyebrow">Chapter 2</div>
+      <h2>调色板与角色</h2>
+      <p class="lead">主色仅琥珀 <code>--accent</code>；青/蓝/紫仅作语义点缀；文字层级由"暖白 + 透明度"表达，不用冷灰。</p>
+
+      <h3 style="margin:20px 0 12px; font-size:16px;">主色 / 强调 / 语义</h3>
+      <div class="grid cols-4">
+        <div class="swatch"><div class="chip-color" style="background:var(--accent)"></div><div class="meta"><div class="name">Accent 琥珀</div><div class="hex">#d4a574</div><div class="var">--accent</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--accent-cyan)"></div><div class="meta"><div class="name">Cyan 青</div><div class="hex">#5ab8a0</div><div class="var">--accent-cyan</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--accent-blue)"></div><div class="meta"><div class="name">Blue 蓝</div><div class="hex">#6b9fc4</div><div class="var">--accent-blue</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--accent-purple)"></div><div class="meta"><div class="name">Purple 紫</div><div class="hex">#a07c8c</div><div class="var">--accent-purple</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--success)"></div><div class="meta"><div class="name">Success</div><div class="hex">#34d399</div><div class="var">--success</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--danger)"></div><div class="meta"><div class="name">Danger</div><div class="hex">#ff6b6b</div><div class="var">--danger</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--warning)"></div><div class="meta"><div class="name">Warning</div><div class="hex">#f0c040</div><div class="var">--warning</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--error)"></div><div class="meta"><div class="name">Error</div><div class="hex">#ef4444</div><div class="var">--error</div></div></div>
+      </div>
+
+      <h3 style="margin:28px 0 12px; font-size:16px;">背景 / 表面</h3>
+      <div class="grid cols-4">
+        <div class="swatch"><div class="chip-color" style="background:var(--bg-primary)"></div><div class="meta"><div class="name">Bg Primary</div><div class="hex">#0d0b09</div><div class="var">--bg-primary</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--bg-deep)"></div><div class="meta"><div class="name">Bg Deep</div><div class="hex">#14100b</div><div class="var">--bg-deep</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--bg-panel)"></div><div class="meta"><div class="name">Bg Panel</div><div class="hex">#1a1612</div><div class="var">--bg-panel</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--bg-elevated)"></div><div class="meta"><div class="name">Bg Elevated</div><div class="hex">rgba(35,30,24,.8)</div><div class="var">--bg-elevated</div></div></div>
+      </div>
+
+      <h3 style="margin:28px 0 12px; font-size:16px;">文字（暖白 + 透明度阶梯）</h3>
+      <div class="grid cols-4">
+        <div class="swatch"><div class="chip-color" style="background:var(--text-primary)"></div><div class="meta"><div class="name">Text Primary</div><div class="hex">#e8e0d8</div><div class="var">--text-primary</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--text-secondary)"></div><div class="meta"><div class="name">Text Secondary</div><div class="hex">rgba(...,.55)</div><div class="var">--text-secondary</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--text-medium)"></div><div class="meta"><div class="name">Text Medium</div><div class="hex">rgba(...,.5)</div><div class="var">--text-medium</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--text-dim)"></div><div class="meta"><div class="name">Text Dim</div><div class="hex">rgba(...,.4)</div><div class="var">--text-dim</div></div></div>
+      </div>
+
+      <h3 style="margin:28px 0 12px; font-size:16px;">琥珀色阶（3500K 暖光）</h3>
+      <div class="grid" style="grid-template-columns: repeat(10,1fr);">
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-50)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">50</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-100)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">100</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-200)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">200</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-300)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">300</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-400)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">400</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-500)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">500</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-600)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">600</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-700)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">700</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-800)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">800</div></div></div>
+        <div class="swatch"><div class="chip-color" style="background:var(--amber-900)"></div><div class="meta" style="padding:8px;"><div class="hex" style="font-size:10px;">900</div></div></div>
+      </div>
+    </section>
+
+    <!-- 字体 -->
+    <section id="type">
+      <div class="eyebrow">Chapter 3</div>
+      <h2>字体排印</h2>
+      <p class="lead">标题衬线（Noto Serif SC），正文无衬线（Noto Sans SC）；字重仅 400/500/600；系统回退，离线可用。</p>
+      <div class="hf-card" style="padding: var(--spacing-md) var(--spacing-lg);">
+        <div class="type-row"><div class="label">Display Hero</div><div class="sample t-hero">让今天先安静落下来</div></div>
+        <div class="type-row"><div class="label">H1 · 22/600</div><div class="sample t-h1">引力场与逐日心锚</div></div>
+        <div class="type-row"><div class="label">H2 · 18/600</div><div class="sample t-h2">情绪花房 · 安全岛</div></div>
+        <div class="type-row"><div class="label">H3 · 16/600</div><div class="sample t-h3">镜我 · 语丝 · 房间</div></div>
+        <div class="type-row"><div class="label">Body · 14/400</div><div class="sample t-body">时间是温柔的容器，盛放你愿意记住的每一刻。文字层级由暖白与透明度表达。</div></div>
+        <div class="type-row"><div class="label">Small · 13</div><div class="sample t-small">数字安息日 · 今日不扰</div></div>
+        <div class="type-row"><div class="label">Caption · 11</div><div class="sample t-caption">SEED · INHERIT · SILENCE</div></div>
+        <div class="type-row"><div class="label">Nano · 10</div><div class="sample t-nano">Constitution Clause 49</div></div>
+      </div>
+    </section>
+
+    <!-- 组件 -->
+    <section id="components">
+      <div class="eyebrow">Chapter 4</div>
+      <h2>组件样式</h2>
+
+      <h3 style="margin:0 0 12px; font-size:16px;">Buttons</h3>
+      <div class="btn-row" style="margin-bottom: var(--spacing-xl);">
+        <button class="hf-btn hf-btn--primary">主操作</button>
+        <button class="hf-btn hf-btn--secondary">次操作</button>
+        <button class="hf-btn hf-btn--ghost">幽灵</button>
+        <button class="hf-btn hf-btn--danger">危险</button>
+        <button class="hf-btn hf-btn--primary" disabled>禁用</button>
+      </div>
+
+      <div class="grid cols-3">
+        <div class="hf-card">
+          <div class="hf-card__header">卡片 · Card</div>
+          <div class="hf-card__body">半透明底、极淡琥珀边、圆角 16px、基础投影。房间内容默认容器。</div>
+          <div class="hf-card__footer">footer · 静音说明</div>
+        </div>
+        <div class="hf-card hf-card--elevated">
+          <div class="hf-card__header">浮起 · Elevated</div>
+          <div class="hf-card__body">更实的表面，用于浮起面板 / 模态。仍可透出背后氛围辉光。</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div class="hf-field">
+            <label class="hf-field__label">输入框 · Input</label>
+            <input class="hf-input" placeholder="写点什么…" />
+          </div>
+          <div class="hf-field">
+            <label class="hf-field__label">聚焦态（点击查看）</label>
+            <input class="hf-input" value="琥珀焦点环" />
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin:28px 0 12px; font-size:16px;">Navigation（侧栏项）</h3>
+      <div class="nav-demo">
+        <div class="nav-item"><span class="nav-icon">🌙</span> 夜静调暗</div>
+        <div class="nav-item active"><span class="nav-icon">🔮</span> 镜我</div>
+        <div class="nav-item"><span class="nav-icon">📜</span> 宪法</div>
+      </div>
+      <p class="note">active：底 <code>--accent-glow</code> + 字 <code>--accent</code> + 左侧 3px 琥珀指示条；hover：底 <code>--bg-surface</code>。</p>
+
+      <h3 style="margin:28px 0 12px; font-size:16px;">Badges / Tags / Chips</h3>
+      <div class="btn-row">
+        <span class="tag"># 琥珀标签</span>
+        <span class="chip">⬡ 条件分支</span>
+        <span class="badge-official">官方</span>
+        <span class="badge-runtime-active">生效中</span>
+        <span class="badge-runtime-declarative">声明式</span>
+      </div>
+      <p class="note">标记一律弱描边小字，不用实心高饱和底；颜色优先取上下文色。</p>
+
+      <h3 style="margin:28px 0 12px; font-size:16px;">Modal（点击打开）</h3>
+      <button class="hf-btn hf-btn--primary" onclick="document.getElementById('demoModal').classList.add('open')">打开对话框</button>
+    </section>
+
+    <!-- 深度 -->
+    <section id="depth">
+      <div class="eyebrow">Chapter 6</div>
+      <h2>深度与层级</h2>
+      <p class="lead">深度靠"半透明 + 模糊 + 极淡投影"表达，不用重黑硬边。</p>
+      <div class="grid cols-3">
+        <div class="shadow-demo s-xs">shadow-xs</div>
+        <div class="shadow-demo s-base">shadow (base)</div>
+        <div class="shadow-demo s-glow">shadow-glow</div>
+        <div class="shadow-demo s-lg">shadow-lg</div>
+        <div class="shadow-demo s-2xl">shadow-2xl</div>
+      </div>
+    </section>
+
+    <!-- 玻璃 -->
+    <section id="glass">
+      <div class="eyebrow">Atmosphere</div>
+      <h2>玻璃质感</h2>
+      <div class="glass-stage">
+        <div class="bg-orbs"></div>
+        <div class="glass">
+          <h3 style="margin-bottom:8px;">深夜食堂</h3>
+          <p style="color:var(--text-secondary); font-size:13px;">玻璃面板 = <code>--bg-elevated</code> + <code>backdrop-filter: blur(12px)</code> + 极淡琥珀边。浮层（侧栏/幕僚坞/星盘/模态）均复用此范式。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 规范 -->
+    <section id="rules">
+      <div class="eyebrow">Chapter 7</div>
+      <h2>该做 / 不该做</h2>
+      <div class="grid cols-2">
+        <div class="dodont do">
+          <h3>✓ Do</h3>
+          <ul>
+            <li>颜色一律走 CSS 变量</li>
+            <li>复用 Base* 基元，对齐其密度/圆角</li>
+            <li>氛围靠 ::before/::after 辉光 + backdrop-filter</li>
+            <li>动效统一 --transition 缓动</li>
+            <li>文字层级用暖白透明度，不用冷灰</li>
+            <li>标记用弱描边小字</li>
+          </ul>
+        </div>
+        <div class="dodont dont">
+          <h3>✕ Don't</h3>
+          <ul>
+            <li>硬编码 HEX / 引入青紫渐变霓虹（AI-slop）</li>
+            <li>给房间根铺不透明渐变背景</li>
+            <li>用 height:100vh 硬撑视图根</li>
+            <li>另起 border-radius / padding 数值体系</li>
+            <li>组件内硬编码宪法软效果</li>
+            <li>强依赖外部字体 CDN</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <footer style="color:var(--text-dim); font-size:12px; border-top:1px solid var(--border-light); padding-top:24px;">
+      心流工坊 · DESIGN.md Living Styleguide · 与 design-tokens.css 及 Base* 基元一致 · 离线安全
+    </footer>
+  </div>
+
+  <!-- 模态 -->
+  <div class="modal-mask" id="demoModal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="hf-modal" role="dialog" aria-modal="true" aria-label="示例对话框">
+      <div class="hf-modal__head">
+        <h3 class="hf-modal__title">示例对话框</h3>
+        <button class="hf-modal__close" aria-label="关闭" onclick="document.getElementById('demoModal').classList.remove('open')">×</button>
+      </div>
+      <div class="hf-modal__body">遮罩 <code>rgba(10,8,6,.6)</code> + <code>blur(8px)</code>，z-index 1000；入场 <code>summon-fade-in .32s</code>。按 Esc 或点击遮罩关闭。</div>
+      <div class="hf-modal__foot">
+        <button class="hf-btn hf-btn--ghost" onclick="document.getElementById('demoModal').classList.remove('open')">取消</button>
+        <button class="hf-btn hf-btn--primary" onclick="document.getElementById('demoModal').classList.remove('open')">确认</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') document.getElementById('demoModal').classList.remove('open'); });
+  </script>
+</body>
+</html>

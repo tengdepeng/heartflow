@@ -1,0 +1,40 @@
+# ============================================================
+# 心流工坊 · 反漂移 CI（P2.4）
+# 守护「宪法之实」：任何让 A2 账本与引擎/定义三路分歧的改动，
+# 都会在流水线中失败，阻止 drift 悄悄合入。
+# 本地等价：在 heartflow/project/frontend 下执行 `npm run guard`
+# ============================================================
+name: Guard · 反漂移 CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    name: 四道闸门 + A2 账本反漂移断言
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: heartflow/project/frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: heartflow/project/frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run guard (vue-tsc → eslint → madge → vitest 反漂移 → vite build)
+        run: npm run guard

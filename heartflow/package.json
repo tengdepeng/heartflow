@@ -1,0 +1,31 @@
+{
+  "name": "heartflow",
+  "private": true,
+  "version": "0.1.0",
+  "description": "仓库根目录已不再包含前端工程（原 src/ 已归档至 _archive/legacy_root_src）。前端唯一真源位于 project/frontend，所有 npm 命令请在其目录下运行。",
+  "scripts": {
+    "dev": "node -e \"console.log('[heartflow] 前端工程已迁移：请在 project/frontend/ 下运行 npm run dev');process.exit(1)\"",
+    "build": "node -e \"console.log('[heartflow] 前端工程已迁移：请在 project/frontend/ 下运行 npm run build');process.exit(1)\"",
+    "preview": "node -e \"console.log('[heartflow] 前端工程已迁移：请在 project/frontend/ 下运行 npm run preview');process.exit(1)\"",
+    "test": "node -e \"console.log('[heartflow] 前端工程已迁移：请在 project/frontend/ 下运行 npm run test');process.exit(1)\"",
+    "test:watch": "node -e \"console.log('[heartflow] 前端工程已迁移：请在 project/frontend/ 下运行 npm run test:watch');process.exit(1)\"",
+    "tauri": "node -e \"console.log('[heartflow] Tauri 工程已迁移：请在 project/frontend/ 下运行 npm run tauri');process.exit(1)\"",
+    "tauri:dev": "node -e \"console.log('[heartflow] Tauri 工程已迁移：请在 project/frontend/ 下运行 npm run tauri:dev');process.exit(1)\""
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-opener": "^2",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.13",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^26.1.1",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.3",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^2.1.10"
+  }
+}
