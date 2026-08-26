@@ -8,7 +8,7 @@ import { ref, computed } from 'vue'
 import { useLauncher } from './useLauncher'
 import type { ExternalAppEntry, EntryInput } from './types'
 
-const { grouped, addEntry, updateEntry, removeEntry, launchEntry } = useLauncher()
+const { grouped, addEntry, updateEntry, removeEntry, moveEntry, renameCategory, launchEntry } = useLauncher()
 
 const search = ref('')
 const showForm = ref(false)
@@ -81,6 +81,47 @@ async function launch(entry: ExternalAppEntry): Promise<void> {
   }
 }
 
+// ——— 拖拽排序（规格 §3.4）———
+const dragId = ref<string | null>(null)
+const overId = ref<string | null>(null)
+const dragCat = ref<string | null>(null)
+
+function onDragStart(e: DragEvent, entry: ExternalAppEntry, cat: string): void {
+  dragId.value = entry.id
+  dragCat.value = cat
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/plain', entry.id)
+  }
+}
+function onDragOver(entry: ExternalAppEntry): void {
+  if (dragCat.value && entry.category === dragCat.value) overId.value = entry.id
+}
+function onDrop(e: DragEvent, entry: ExternalAppEntry): void {
+  e.preventDefault()
+  if (dragId.value && entry.id !== dragId.value && dragCat.value === entry.category) {
+    moveEntry(dragId.value, entry.id)
+  }
+  onDragEnd()
+}
+function onDragEnd(): void {
+  dragId.value = null
+  overId.value = null
+  dragCat.value = null
+}
+
+// ——— 分类管理：内联重命名（规格 §3.4）———
+const catEditing = ref<string | null>(null)
+const catDraft = ref('')
+function startRenameCat(cat: string): void {
+  catEditing.value = cat
+  catDraft.value = cat
+}
+function commitRenameCat(oldCat: string): void {
+  renameCategory(oldCat, catDraft.value)
+  catEditing.value = null
+}
+
 let feedbackTimer: ReturnType<typeof setTimeout> | undefined
 function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
   feedback.value = { kind, text }
@@ -134,11 +175,29 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
     <!-- 分组列表 -->
     <div v-for="[cat, list] in filteredGrouped" :key="cat" data-enter class="cat-block">
       <div class="cat-head">
-        <span class="cat-name">{{ cat }}</span>
+        <span v-if="catEditing !== cat" class="cat-name">{{ cat }}</span>
+        <input
+          v-else
+          class="cat-rename"
+          v-model="catDraft"
+          @keydown.enter="commitRenameCat(cat)"
+          @blur="commitRenameCat(cat)"
+        />
         <span class="cat-count">{{ list.length }}</span>
+        <button v-if="catEditing !== cat" class="cat-edit" title="重命名分类" @click="startRenameCat(cat)">✎</button>
       </div>
       <div class="app-grid">
-        <div v-for="e in list" :key="e.id" class="app-card">
+        <div
+          v-for="e in list"
+          :key="e.id"
+          class="app-card"
+          :class="{ 'is-dragging': dragId === e.id, 'is-over': overId === e.id }"
+          draggable="true"
+          @dragstart="onDragStart($event, e, cat)"
+          @dragover.prevent="onDragOver(e)"
+          @drop.prevent="onDrop($event, e)"
+          @dragend="onDragEnd"
+        >
           <div class="app-icon">{{ e.icon }}</div>
           <div class="app-body">
             <div class="app-name">{{ e.name }}</div>
@@ -265,6 +324,19 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .cat-head { display: flex; align-items: center; gap: 8px; margin: 6px 0 12px; opacity: 0.7; }
 .cat-name { font-size: 13px; letter-spacing: 2px; }
 .cat-count { font-size: 11px; opacity: 0.5; background: rgba(255, 255, 255, 0.06); border-radius: 8px; padding: 1px 8px; }
+.cat-edit { background: none; border: none; color: var(--accent, #d4a574); opacity: 0.45; cursor: pointer; font-size: 13px; padding: 0 4px; transition: opacity 0.2s ease; }
+.cat-edit:hover { opacity: 1; }
+.cat-rename {
+  background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(212, 165, 116, 0.4);
+  border-radius: 6px; color: var(--text-primary, #e9e0d0); font-size: 13px;
+  padding: 1px 8px; letter-spacing: 2px; width: 130px;
+}
+.cat-rename:focus { outline: none; border-color: var(--accent, #d4a574); }
+
+.app-card { cursor: grab; }
+.app-card:active { cursor: grabbing; }
+.app-card.is-dragging { opacity: 0.4; }
+.app-card.is-over { border-color: rgba(212, 165, 116, 0.65); box-shadow: 0 0 0 1px rgba(212, 165, 116, 0.45) inset; }
 
 .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
 .app-card {

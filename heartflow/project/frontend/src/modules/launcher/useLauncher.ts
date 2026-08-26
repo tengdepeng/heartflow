@@ -46,7 +46,7 @@ function addEntry(input: EntryInput): void {
   const entry: ExternalAppEntry = {
     id: genId(),
     name: input.name.trim(),
-    icon: input.icon.trim() || '📦',
+    icon: input.icon?.trim() || '📦',
     category: input.category.trim() || '未分类',
     launch: input.launch.trim(),
     deepLink: input.deepLink?.trim() || undefined,
@@ -67,6 +67,34 @@ function updateEntry(id: string, patch: Partial<EntryInput>): void {
 
 function removeEntry(id: string): void {
   entries.value = entries.value.filter((e) => e.id !== id)
+  persist()
+}
+
+/** 组内拖拽排序（规格 §3.4）：把 id 移到 beforeId 之前（beforeId 为 null 则移到末尾）。
+ *  跨分类拖拽不支持——分类是分组维度，排序只在组内有效。 */
+function moveEntry(id: string, beforeId: string | null): void {
+  const entry = entries.value.find((e) => e.id === id)
+  if (!entry || id === beforeId) return
+  const cat = entry.category
+  const group = sortedEntries().filter((e) => e.category === cat && e.id !== id)
+  let idx = beforeId ? group.findIndex((e) => e.id === beforeId) : group.length
+  if (idx < 0) idx = group.length
+  group.splice(idx, 0, entry)
+  const newSort = new Map<string, number>()
+  group.forEach((e, i) => newSort.set(e.id, i))
+  entries.value = entries.value.map((e) =>
+    e.category === cat ? { ...e, sort: newSort.get(e.id) ?? e.sort } : e,
+  )
+  persist()
+}
+
+/** 分类管理（规格 §3.4）：重命名分类，同名词目自动合并到新名称下。 */
+function renameCategory(oldCat: string, newCat: string): void {
+  const next = newCat.trim()
+  if (!next || next === oldCat) return
+  entries.value = entries.value.map((e) =>
+    e.category === oldCat ? { ...e, category: next } : e,
+  )
   persist()
 }
 
@@ -93,6 +121,8 @@ export function useLauncher() {
     addEntry,
     updateEntry,
     removeEntry,
+    moveEntry,
+    renameCategory,
     recordLaunch,
     launchEntry,
   }
