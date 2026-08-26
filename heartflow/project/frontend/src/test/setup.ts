@@ -59,8 +59,65 @@ const ctxStub = {
   createPattern: () => null,
 } as unknown as CanvasRenderingContext2D
 
+// 最小 WebGL2 上下文 stub（Proxy 兜底）：happy-dom 不实现 WebGL，含 three.js 3D 场景的
+// 视图在测试环境挂载时，WebGLRenderer 初始化会调 getExtension / getParameter / … 等大量 API。
+// 这里对任何未知属性返回 no-op，关键查询返回合理默认值，让渲染器成功初始化而不抛
+// "gl.getExtension is not a function"（仅补齐环境缺失，不掩盖真实逻辑错误）。
+function createWebGLStub(canvas: HTMLCanvasElement): WebGL2RenderingContext {
+  const noop = () => undefined
+  const handler: ProxyHandler<WebGL2RenderingContext> = {
+    get(_t: unknown, prop: string | symbol): any {
+      if (typeof prop === 'symbol') return undefined
+      switch (prop) {
+        case 'canvas': return canvas
+        case 'drawingBufferWidth': return canvas.width || 1
+        case 'drawingBufferHeight': return canvas.height || 1
+        case 'VERSION': return 0x1f02
+        case 'SHADING_LANGUAGE_VERSION': return 0x8b8c
+        case 'getContextAttributes': return () => ({ alpha: true, depth: true, stencil: false, antialias: false, premultipliedAlpha: true, preserveDrawingBuffer: false, powerPreference: 'default', failIfMajorPerformanceCaveat: false })
+        case 'getParameter': return (p: number) => (p === 0x1f02 ? 'WebGL 2.0' : p === 0x8b8c ? 'WebGL GLSL ES 3.00' : 4096)
+        case 'getExtension': return () => null
+        case 'getSupportedExtensions': return () => []
+        case 'getShaderPrecisionFormat': return () => ({ precision: 23, rangeMin: 127, rangeMax: 127 })
+        case 'getShaderParameter': return () => true
+        case 'getProgramParameter': return () => true
+        case 'getProgramInfoLog': return () => ''
+        case 'getShaderInfoLog': return () => ''
+        case 'getError': return () => 0
+        case 'checkFramebufferStatus': return () => 0x8cd5 // FRAMEBUFFER_COMPLETE
+        case 'FRAMEBUFFER_COMPLETE': return 0x8cd5
+        case 'NO_ERROR': return 0
+        case 'NONE': return 0
+        case 'getActiveUniform':
+        case 'getActiveAttrib': return () => ({ name: 'attr', size: 1, type: 0 })
+        case 'getUniformLocation': return () => ({})
+        case 'getAttribLocation': return () => 0
+        case 'getUniformBlockIndex': return () => 0
+        case 'createBuffer':
+        case 'createFramebuffer':
+        case 'createRenderbuffer':
+        case 'createTexture':
+        case 'createProgram':
+        case 'createShader':
+        case 'createVertexArray':
+        case 'fenceSync': return () => ({})
+        default: return noop
+      }
+    },
+    getPrototypeOf() {
+      return typeof WebGL2RenderingContext !== 'undefined' ? WebGL2RenderingContext.prototype : Object.prototype
+    },
+  }
+  return new Proxy({} as WebGL2RenderingContext, handler) as unknown as WebGL2RenderingContext
+}
+
 if (typeof HTMLCanvasElement !== 'undefined') {
-  HTMLCanvasElement.prototype.getContext = vi.fn(() => ctxStub) as unknown as typeof HTMLCanvasElement.prototype.getContext
+  HTMLCanvasElement.prototype.getContext = vi.fn((type: string) => {
+    if (type === 'webgl' || type === 'webgl2' || type === 'experimental-webgl') {
+      return createWebGLStub(document.createElement('canvas'))
+    }
+    return ctxStub
+  }) as unknown as typeof HTMLCanvasElement.prototype.getContext
 }
 
 // happy-dom 未实现 ResizeObserver / IntersectionObserver / matchMedia，补齐以免相关组件在测试期崩溃。
