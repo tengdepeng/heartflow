@@ -50,7 +50,7 @@ function addEntry(input: EntryInput): void {
     category: input.category.trim() || '未分类',
     launch: input.launch.trim(),
     deepLink: input.deepLink?.trim() || undefined,
-    useDeepLink: input.useDeepLink,
+    useDeepLink: input.useDeepLink ?? false,
     sort: maxSort + 1,
     launchCount: 0,
   }

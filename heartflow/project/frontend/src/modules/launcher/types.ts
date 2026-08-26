@@ -29,9 +29,9 @@ export interface ExternalAppEntry {
 /** 新增 / 编辑表单的可变字段（id 与计数由引擎托管） */
 export interface EntryInput {
   name: string
-  icon: string
+  icon?: string
   category: string
   launch: string
   deepLink?: string
-  useDeepLink: boolean
+  useDeepLink?: boolean
 }
