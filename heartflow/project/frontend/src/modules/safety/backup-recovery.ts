@@ -32,8 +32,8 @@ export interface BackupMetadata {
 
 export interface BackupSnapshot {
   metadata: BackupMetadata
-  /** 键值对数据 */
-  data: Record<string, string>
+  /** 键值对数据（保留原始对象形态；落库经 storage 后端、随整库 JSON 持久化） */
+  data: Record<string, unknown>
 }
 
 export interface RestoreResult {
@@ -181,23 +181,22 @@ export function useBackupRecovery() {
       const data: Record<string, string> = {}
       const hfPrefix = 'hf:'
 
-      // 收集所有 HeartFlow 存储数据
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (!key) continue
+      // 收集所有 HeartFlow 存储数据（经 storage 后端遍历整库 kvStore，与主存储同落盘路径）
+      const kvStore = storage.exportAllData().kvStore ?? {}
+      for (const [key, value] of Object.entries(kvStore)) {
+        if (value === undefined) continue
+        // 备份数据体自身不纳入快照，避免递归膨胀
+        if (key.startsWith('hf:backup_')) continue
 
         if (type === 'full' && key.startsWith(hfPrefix)) {
-          const value = localStorage.getItem(key)
-          if (value) data[key] = value
+          data[key] = value
         } else if (type === 'config-only' && (key.startsWith('hf:config') || key.startsWith('hf:safety'))) {
-          const value = localStorage.getItem(key)
-          if (value) data[key] = value
+          data[key] = value
         } else if (type === 'incremental') {
           // 增量备份：只备份最近更新的键
           const lastBackup = backups.value[0]
           if (lastBackup && key.startsWith(hfPrefix)) {
-            const value = localStorage.getItem(key)
-            if (value) data[key] = value
+            data[key] = value
           }
         }
       }
@@ -207,7 +206,7 @@ export function useBackupRecovery() {
       const checksum = computeChecksum(data)
 
       const metadata: BackupMetadata = {
-        id: `backup_${Date.now()}`,
+        id: `backup_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
         type,
         name: name || `${type === 'full' ? '全量' : type === 'config-only' ? '配置' : '增量'}备份 - ${new Date().toLocaleString('zh-CN')}`,
         createdAt: new Date().toISOString(),
@@ -218,16 +217,16 @@ export function useBackupRecovery() {
         checksum,
       }
 
-      // 保存备份数据
+      // 保存备份数据（经 storage.setKV 落库，随整库 JSON 持久化；Tauri 桌面端不再游离于主存储之外）
       const backupKey = `hf:backup_${metadata.id}`
       try {
-        localStorage.setItem(backupKey, JSON.stringify({ metadata, data }))
+        storage.setKV(backupKey, { metadata, data })
       } catch (e) {
         // 存储空间不足，清理旧备份
         if (backups.value.length > 0) {
           const oldest = backups.value[backups.value.length - 1]
-          localStorage.removeItem(`hf:backup_${oldest.id}`)
-          localStorage.setItem(backupKey, JSON.stringify({ metadata, data }))
+          storage.removeKV(`hf:backup_${oldest.id}`)
+          storage.setKV(backupKey, { metadata, data })
         } else {
           throw e
         }
@@ -262,13 +261,12 @@ export function useBackupRecovery() {
 
     try {
       const backupKey = `hf:backup_${backupId}`
-      const raw = localStorage.getItem(backupKey)
-      if (!raw) {
+      const snapshot = storage.getKV<BackupSnapshot | null>(backupKey, null)
+      if (!snapshot) {
         result.errors.push('备份数据不存在')
         return result
       }
 
-      const snapshot: BackupSnapshot = JSON.parse(raw)
       const { data } = snapshot
 
       for (const [key, value] of Object.entries(data)) {
@@ -279,7 +277,7 @@ export function useBackupRecovery() {
         }
 
         try {
-          localStorage.setItem(key, value)
+          storage.setKV(key, value)
           result.restored++
         } catch (err) {
           result.failed++
@@ -304,20 +302,14 @@ export function useBackupRecovery() {
 
     backups.value.splice(idx, 1)
     saveBackups()
-    localStorage.removeItem(`hf:backup_${backupId}`)
+    storage.removeKV(`hf:backup_${backupId}`)
 
     return true
   }
 
   /** 获取备份详情 */
   function getBackupSnapshot(backupId: string): BackupSnapshot | null {
-    const raw = localStorage.getItem(`hf:backup_${backupId}`)
-    if (!raw) return null
-    try {
-      return JSON.parse(raw)
-    } catch {
-      return null
-    }
+    return storage.getKV<BackupSnapshot | null>(`hf:backup_${backupId}`, null)
   }
 
   /** 清理旧备份（保留最近 N 个） */
@@ -326,7 +318,7 @@ export function useBackupRecovery() {
 
     const toDelete = backups.value.slice(keepCount)
     for (const backup of toDelete) {
-      localStorage.removeItem(`hf:backup_${backup.id}`)
+      storage.removeKV(`hf:backup_${backup.id}`)
     }
     backups.value = backups.value.slice(0, keepCount)
     saveBackups()
