@@ -2,7 +2,7 @@
 // 心流 Home 视图测试
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 import { ref } from 'vue'
 
 // ---- 模拟 pinia ----
@@ -189,9 +189,12 @@ vi.mock('../../components/HomeBackgroundMedia.vue', () => ({
 
 async function createWrapper() {
   const { default: Home } = await import('../Home.vue')
-  return mount(Home, {
+  const wrapper = mount(Home, {
     global: {},
   })
+  await flushPromises()
+  await wrapper.vm.$nextTick()
+  return wrapper
 }
 
 describe('Home 心流视图', () => {
@@ -205,30 +208,11 @@ describe('Home 心流视图', () => {
     expect(wrapper.text()).toContain('让今天先安静落下来')
   })
 
-  it('渲染核心房间卡片', async () => {
+  // 极简契约：Home 首屏不再渲染房间卡片网格（房间导航唯一入口已下沉到侧栏，
+  // home-rail 于 2026-08-22 删除）。此断言锁定该设计，防止把房间网格重新加回首屏。
+  it('首屏保持极简：不渲染房间卡片网格', async () => {
     const wrapper = await createWrapper()
-    const cards = wrapper.findAll('.room-card')
-    expect(cards.length).toBeGreaterThanOrEqual(4)
-  })
-
-  it('房间卡片包含时间长廊', async () => {
-    const wrapper = await createWrapper()
-    expect(wrapper.text()).toContain('时间长廊')
-  })
-
-  it('房间卡片包含逐日心锚', async () => {
-    const wrapper = await createWrapper()
-    expect(wrapper.text()).toContain('逐日心锚')
-  })
-
-  it('房间卡片包含情绪花房', async () => {
-    const wrapper = await createWrapper()
-    expect(wrapper.text()).toContain('情绪花房')
-  })
-
-  it('房间卡片包含安全岛', async () => {
-    const wrapper = await createWrapper()
-    expect(wrapper.text()).toContain('安全岛')
+    expect(wrapper.find('.room-card').exists()).toBe(false)
   })
 
   it('渲染统计卡片区域', async () => {
@@ -252,11 +236,6 @@ describe('Home 心流视图', () => {
     expect(wrapper.text()).toContain('花房记录')
   })
 
-  it('渲染自然语言创建入口', async () => {
-    const wrapper = await createWrapper()
-    // 聚焦计时器模式下，首屏保留"一句话开始"的创建入口（导航已下沉到房间卡片）
-    expect(wrapper.find('.nl-create__btn').exists()).toBe(true)
-  })
 
   it('渲染宪法箴言', async () => {
     const wrapper = await createWrapper()
