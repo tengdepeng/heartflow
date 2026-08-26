@@ -1,6 +1,6 @@
 <template>
   <UnlockGate v-if="showUnlock" />
-  <div v-else class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed, 'chrome-hidden': chromeHidden, 'is-mobile': isMobile, 'docked-mode': navMode === 'docked', 'surface-3d': is3dShell }" :style="shellStyle">
+  <div v-else-if="!isAuraWindow" class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed, 'chrome-hidden': chromeHidden, 'is-mobile': isMobile, 'docked-mode': navMode === 'docked', 'surface-3d': is3dShell }" :style="shellStyle">
     <!-- 全局自定义背景层：垫在画布之下，跨路由持久化 -->
     <!-- effectiveBackground 已注入单房间覆盖的背景场景（否则跟随全局） -->
     <div class="app-base-bg" aria-hidden="true">
@@ -188,6 +188,10 @@
       :tap-progress="sanctuaryTrigger.triggerProgress.value"
     />
   </div>
+
+  <!-- 桌面美化层 AuraLayer：透明常驻浮层 + 多元氛围主题。
+       aura 窗（Tauri 透明窗）下主壳经 v-else-if 隐藏，仅渲染此层。 -->
+  <AuraLayer />
 </template>
 
 <script setup lang="ts">
@@ -217,6 +221,8 @@ import NoteLayer from './components/NoteLayer.vue'
 import MirrorSelf from './components/MirrorSelf.vue'
 import FloatingNavBar from './components/FloatingNavBar.vue'
 import BreathingLayer from './modules/breathing/BreathingLayer.vue'
+import AuraLayer from './modules/aura/AuraLayer.vue'
+import { useAura } from './modules/aura/auraLayer'
 import ToastContainer from './components/ToastContainer.vue'
 import PendingActionsTray from './components/PendingActionsTray.vue'
 import SkeletonLoader from './components/SkeletonLoader.vue'
@@ -252,6 +258,7 @@ import { usePerceptionStore } from './stores/perception'
 useConstitutionStore()
 const { isNight } = useNightDim()
 const { isSabbath } = useDigitalSabbath()
+const { isAuraWindow } = useAura()
 useLongDormancy()
 const styleStore = useStyleStore()
 const advisor = useAdvisorStore()
@@ -1667,6 +1674,22 @@ watch(() => nav.currentRoomId.value, () => {
   pointer-events: none;
   transform: translateY(8px);
   transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* ---- 桌面美化层 AuraLayer 控制簇：随沉浸模式同步淡出（与底栏一块自动隐藏） ----
+   aura-control 是 .aura-layer 的直接子节点、.app-shell 的兄弟节点，
+   故用 .app-shell.chrome-hidden ~ 通用兄弟选择器命中。 */
+.app-shell.chrome-hidden ~ .aura-layer .aura-control {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* ---- aura 透明窗：去除 html/body 实底背景，使透明窗真正透出桌面 ----
+   仅对已加 .aura-window 类的文档生效（web 主窗不受影响）。 */
+:global(html.aura-window),
+:global(html.aura-window body) {
+  background: transparent !important;
 }
 
 /* ---- 3D 正厅态：侧栏悬浮窗自动降级（2026-08-26 补） ----

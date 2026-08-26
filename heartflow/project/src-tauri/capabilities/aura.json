@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "aura",
+  "description": "AuraLayer 透明美化窗：置顶 / 显隐 / 全局热键注册",
+  "windows": ["aura"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:global-shortcut:allow-register",
+    "core:global-shortcut:allow-unregister"
+  ]
+}

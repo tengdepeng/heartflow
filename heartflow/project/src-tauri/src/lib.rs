@@ -8,6 +8,7 @@
 use std::fs;
 use std::path::PathBuf;
 use tauri::Manager;
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Modifiers, Shortcut, Code};
 
 mod touchpoints;
 
@@ -67,18 +68,57 @@ fn generate_device_secret() -> String {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
-        .setup(|_app| {
+        // 全局热键插件：用于切换 AuraLayer 透明窗显隐
+        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+        .setup(|app| {
             touchpoints::init();
+
+            // 启动即隐藏 aura 透明窗（避免一开机就盖一层）；由全局热键 / 退出保活唤起。
+            if let Some(aura) = app.get_webview_window("aura") {
+                let _ = aura.hide();
+            }
+
+            // 退出保活：关闭主窗时隐藏而非销毁，保留 aura 透明窗常驻（「缩小为美化层」）。
+            // 仅当配置 exitToAura 时唤起 aura；此处保守默认唤起，前端可关闭 aura 窗。
+            let app_handle = app.handle().clone();
+            app.on_window_event(move |window, event| {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    if window.label() == "main" {
+                        api.prevent_close();
+                        let _ = window.hide();
+                        if let Some(aura) = app_handle.get_webview_window("aura") {
+                            let _ = aura.show();
+                            let _ = aura.set_focus();
+                        }
+                    }
+                }
+            });
+
+            // 全局热键 Ctrl/Cmd+Shift+A 切换 aura 透明窗显隐
+            let handle = app.handle().clone();
+            let shortcut = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyA);
+            let _ = handle.global_shortcut().register(shortcut, move |_s: Shortcut| {
+                if let Some(aura) = handle.get_webview_window("aura") {
+                    let visible = aura.is_visible().unwrap_or(false);
+                    if visible {
+                        let _ = aura.hide();
+                    } else {
+                        let _ = aura.show();
+                        let _ = aura.set_focus();
+                    }
+                }
+            });
+
             Ok(())
         })
-    .invoke_handler(tauri::generate_handler![
-        start_pairing_server,
-        stop_pairing_server,
-        set_share_payload,
-        get_share_payload,
-        is_pairing_server_running,
-        cmd_get_device_secret
-    ])
+        .invoke_handler(tauri::generate_handler![
+            start_pairing_server,
+            stop_pairing_server,
+            set_share_payload,
+            get_share_payload,
+            is_pairing_server_running,
+            cmd_get_device_secret
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

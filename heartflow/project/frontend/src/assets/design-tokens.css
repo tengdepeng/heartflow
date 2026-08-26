@@ -112,6 +112,9 @@
   --z-floating: 90;
   --z-popover: 95;
   --z-modal: 9999;
+  /* 桌面美化层 AuraLayer：装饰性常驻浮层（pointer-events:none 穿透），
+     位于交互浮层之上、沉浸态安全岛(1999)/模态(9999)之下 */
+  --z-aura: 1500;
 
   /* 琥珀色阶 — 暖光 3500K 系列 */
   --amber-50: #fde8c8;

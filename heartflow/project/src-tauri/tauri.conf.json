@@ -17,6 +17,17 @@
         "height": 720,
         "resizable": true,
         "fullscreen": false
+      },
+      {
+        "label": "aura",
+        "title": "Heartflow Aura",
+        "width": 1280,
+        "height": 800,
+        "resizable": false,
+        "fullscreen": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "decorations": false
       }
     ],
     "security": {
