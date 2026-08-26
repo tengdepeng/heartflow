@@ -6,6 +6,7 @@
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
 import type { SafetyScore } from './types'
+import { encryptWithPassphrase, decryptWithPassphrase, VaultDecryptError, type VaultCipherPayload } from './vault-cipher'
 
 // ---- 备份类型 ----
 
@@ -156,7 +157,7 @@ export function useBackupRecovery() {
   }
 
   /** 计算简单校验和 */
-  function computeChecksum(data: Record<string, string>): string {
+  function computeChecksum(data: Record<string, unknown>): string {
     const str = JSON.stringify(data)
     let hash = 0
     for (let i = 0; i < str.length; i++) {
@@ -174,11 +175,16 @@ export function useBackupRecovery() {
   async function createBackup(
     type: BackupType = 'full',
     name?: string,
+    passphrase?: string,
   ): Promise<BackupMetadata | null> {
     isBackingUp.value = true
 
     try {
-      const data: Record<string, string> = {}
+      if (!passphrase) {
+        console.error('[Safety] 创建备份需提供加密口令')
+        return null
+      }
+      const data: Record<string, unknown> = {}
       const hfPrefix = 'hf:'
 
       // 收集所有 HeartFlow 存储数据（经 storage 后端遍历整库 kvStore，与主存储同落盘路径）
@@ -217,16 +223,19 @@ export function useBackupRecovery() {
         checksum,
       }
 
-      // 保存备份数据（经 storage.setKV 落库，随整库 JSON 持久化；Tauri 桌面端不再游离于主存储之外）
+      // 备份数据体经 vault-cipher 用口令加密为密文载荷，再由 storage.setKV 落库（随整库 JSON
+      // 持久化；密文形态，即使整库文件泄露也无口令不可还原；Tauri 桌面端不再游离于主存储之外）
       const backupKey = `hf:backup_${metadata.id}`
+      const plaintext = JSON.stringify({ metadata, data })
+      const payload: VaultCipherPayload = await encryptWithPassphrase(plaintext, passphrase)
       try {
-        storage.setKV(backupKey, { metadata, data })
+        storage.setKV(backupKey, payload)
       } catch (e) {
         // 存储空间不足，清理旧备份
         if (backups.value.length > 0) {
           const oldest = backups.value[backups.value.length - 1]
           storage.removeKV(`hf:backup_${oldest.id}`)
-          storage.setKV(backupKey, { metadata, data })
+          storage.setKV(backupKey, payload)
         } else {
           throw e
         }
@@ -247,7 +256,7 @@ export function useBackupRecovery() {
   /**
    * 恢复备份
    */
-  async function restoreBackup(backupId: string): Promise<RestoreResult> {
+  async function restoreBackup(backupId: string, passphrase: string): Promise<RestoreResult> {
     isRestoring.value = true
 
     const result: RestoreResult = {
@@ -261,9 +270,23 @@ export function useBackupRecovery() {
 
     try {
       const backupKey = `hf:backup_${backupId}`
-      const snapshot = storage.getKV<BackupSnapshot | null>(backupKey, null)
-      if (!snapshot) {
+      const payload = storage.getKV<VaultCipherPayload | null>(backupKey, null)
+      if (!payload) {
         result.errors.push('备份数据不存在')
+        return result
+      }
+
+      // 用口令解密备份体（密文载荷）
+      let snapshot: BackupSnapshot
+      try {
+        const plaintext = await decryptWithPassphrase(payload, passphrase)
+        snapshot = JSON.parse(plaintext)
+      } catch (e) {
+        if (e instanceof VaultDecryptError) {
+          result.errors.push('备份口令错误，无法解密')
+        } else {
+          result.errors.push(`备份数据损坏: ${e}`)
+        }
         return result
       }
 
@@ -307,9 +330,16 @@ export function useBackupRecovery() {
     return true
   }
 
-  /** 获取备份详情 */
-  function getBackupSnapshot(backupId: string): BackupSnapshot | null {
-    return storage.getKV<BackupSnapshot | null>(`hf:backup_${backupId}`, null)
+  /** 获取备份详情（需用同一口令解密；口令错误或数据损坏返回 null） */
+  async function getBackupSnapshot(backupId: string, passphrase: string): Promise<BackupSnapshot | null> {
+    const payload = storage.getKV<VaultCipherPayload | null>(`hf:backup_${backupId}`, null)
+    if (!payload) return null
+    try {
+      const plaintext = await decryptWithPassphrase(payload, passphrase)
+      return JSON.parse(plaintext)
+    } catch {
+      return null
+    }
   }
 
   /** 清理旧备份（保留最近 N 个） */

@@ -1,60 +1,72 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { storage } from '../../../engine/storage'
 import { useBackupRecovery } from '../backup-recovery'
-import type { BackupSnapshot } from '../backup-recovery'
 
-describe('useBackupRecovery 落库与恢复', () => {
+describe('useBackupRecovery 加密落库与恢复', () => {
   beforeEach(() => {
     storage.clear()
     vi.restoreAllMocks()
   })
 
-  it('createBackup 经 storage.setKV 落库备份体（不再裸 localStorage 游离）', async () => {
+  it('createBackup 经 storage.setKV 落库 vault-cipher 密文载荷（非明文）', async () => {
     storage.setKV('hf:config', { theme: 'dark' })
     storage.setKV('hf:note', { text: 'hello' })
 
     const setSpy = vi.spyOn(storage, 'setKV')
-    const { createBackup } = useBackupRecovery()
-    const meta = await createBackup('full', '测试备份')
+    const { createBackup, getBackupSnapshot } = useBackupRecovery()
+    const meta = await createBackup('full', '测试备份', 'test-pass')
     expect(meta).not.toBeNull()
 
-    // 断言备份数据体严格经 storage.setKV 写入（key 形如 hf:backup_）
     expect(setSpy).toHaveBeenCalledWith(
       expect.stringMatching(/^hf:backup_/),
       expect.anything(),
     )
 
     const backupKey = `hf:backup_${meta!.id}`
-    const snapshot = storage.getKV<BackupSnapshot | null>(backupKey, null)
+    const payload = storage.getKV<any>(backupKey, null)
+    // 落库的是密文载荷（vault-cipher 形态），不是 {metadata,data} 明文
+    expect(payload).not.toBeNull()
+    expect(payload.v).toBe(1)
+    expect(payload.data).toEqual(expect.any(String)) // base64 密文
+    expect(payload.metadata).toBeUndefined() // 明文 metadata 不应直接暴露
+
+    // 正确口令可解密还原
+    const snapshot = await getBackupSnapshot(meta!.id, 'test-pass')
     expect(snapshot).not.toBeNull()
     expect(snapshot!.data['hf:config']).toEqual({ theme: 'dark' })
     expect(snapshot!.data['hf:note']).toEqual({ text: 'hello' })
-    // 备份元数据同样经 setKV 落库
-    expect(storage.getKV('hf:safety_backups', null)).not.toBeNull()
   })
 
-  it('restoreBackup 经 storage.setKV 将备份数据还原回存储（对象形态对称）', async () => {
+  it('restoreBackup 正确口令还原数据', async () => {
     storage.setKV('hf:config', { theme: 'dark' })
-
     const { createBackup, restoreBackup } = useBackupRecovery()
-    const meta = await createBackup('full')
+    const meta = await createBackup('full', undefined, 'test-pass')
     const backupKey = `hf:backup_${meta!.id}`
-    const backupBody = storage.getKV<BackupSnapshot | null>(backupKey, null)
+    const backupBody = storage.getKV(backupKey, null)
 
-    // 模拟用户数据丢失，仅保留备份体
     storage.clear()
     storage.setKV(backupKey, backupBody!)
 
-    const result = await restoreBackup(meta!.id)
+    const result = await restoreBackup(meta!.id, 'test-pass')
     expect(result.success).toBe(true)
     expect(result.restored).toBeGreaterThan(0)
     expect(storage.getKV('hf:config', null)).toEqual({ theme: 'dark' })
   })
 
-  it('deleteBackup 经 storage.removeKV 移除落库备份数据体', async () => {
+  it('restoreBackup 错误口令无法解密', async () => {
+    storage.setKV('hf:config', { theme: 'dark' })
+    const { createBackup, restoreBackup } = useBackupRecovery()
+    const meta = await createBackup('full', undefined, 'test-pass')
+
+    const result = await restoreBackup(meta!.id, 'wrong-pass')
+    expect(result.success).toBe(false)
+    expect(result.errors.join('')).toContain('备份口令错误')
+  })
+
+  it('deleteBackup 经 storage.removeKV 移除密文载荷', async () => {
     storage.setKV('hf:config', { n: 1 })
     const { createBackup, deleteBackup } = useBackupRecovery()
-    const meta = await createBackup('full')
+    const meta = await createBackup('full', undefined, 'test-pass')
     const backupKey = `hf:backup_${meta!.id}`
     expect(storage.getKV(backupKey, null)).not.toBeNull()
 
@@ -67,7 +79,7 @@ describe('useBackupRecovery 落库与恢复', () => {
     storage.setKV('hf:config', { n: 1 })
     const { createBackup, cleanupOldBackups, backups } = useBackupRecovery()
     for (let i = 0; i < 7; i++) {
-      await createBackup('full', `b${i}`)
+      await createBackup('full', `b${i}`, 'test-pass')
     }
     expect(backups.value.length).toBe(7)
 
@@ -80,13 +92,16 @@ describe('useBackupRecovery 落库与恢复', () => {
     expect(remaining).toBe(3)
   })
 
-  it('getBackupSnapshot 经 storage.getKV 取回备份快照对象', async () => {
+  it('getBackupSnapshot 错误口令返回 null', async () => {
     storage.setKV('hf:config', { x: 1 })
     const { createBackup, getBackupSnapshot } = useBackupRecovery()
-    const meta = await createBackup('full')
-    const snap = getBackupSnapshot(meta!.id)
+    const meta = await createBackup('full', undefined, 'test-pass')
+    const snap = await getBackupSnapshot(meta!.id, 'test-pass')
     expect(snap).not.toBeNull()
     expect(snap!.metadata.id).toBe(meta!.id)
     expect(snap!.data['hf:config']).toEqual({ x: 1 })
+
+    const wrong = await getBackupSnapshot(meta!.id, 'wrong-pass')
+    expect(wrong).toBeNull()
   })
 })
