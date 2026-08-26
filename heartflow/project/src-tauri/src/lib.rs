@@ -7,11 +7,22 @@
 
 use std::fs;
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::Manager;
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Modifiers, Shortcut, Code};
 use tauri_plugin_shell;
 
 mod touchpoints;
+
+/// 退出主窗时是否缩小为 aura 美化层（保活）。由前端 aura:exit-to-aura
+/// 经 set_exit_to_aura 命令同步；默认 true（与前端 KV 默认值一致）。
+static EXIT_TO_AURA: AtomicBool = AtomicBool::new(true);
+
+#[tauri::command]
+fn set_exit_to_aura(value: bool) -> Result<(), String> {
+    EXIT_TO_AURA.store(value, Ordering::SeqCst);
+    Ok(())
+}
 
 #[tauri::command]
 async fn start_pairing_server(app: tauri::AppHandle, port: u16) -> Result<(), String> {
@@ -86,14 +97,18 @@ pub fn run() {
             let app_handle = app.handle().clone();
             app.on_window_event(move |window, event| {
                 if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                    if window.label() == "main" {
-                        api.prevent_close();
-                        let _ = window.hide();
+                if window.label() == "main" {
+                    api.prevent_close();
+                    let _ = window.hide();
+                    // 仅在用户开启了「退出缩小为美化层」时唤起 aura 透明窗；
+                    // 否则主窗隐藏后仅后台驻留（托盘/热键可再次唤起主窗）。
+                    if EXIT_TO_AURA.load(Ordering::SeqCst) {
                         if let Some(aura) = app_handle.get_webview_window("aura") {
                             let _ = aura.show();
                             let _ = aura.set_focus();
                         }
                     }
+                }
                 }
             });
 
@@ -120,7 +135,8 @@ pub fn run() {
             set_share_payload,
             get_share_payload,
             is_pairing_server_running,
-            cmd_get_device_secret
+            cmd_get_device_secret,
+            set_exit_to_aura
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

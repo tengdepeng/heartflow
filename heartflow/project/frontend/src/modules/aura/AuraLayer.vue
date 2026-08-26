@@ -51,7 +51,7 @@ import { useAura } from './auraLayer'
 import { THEME_META, THEME_ORDER, THEME_COMPONENTS } from './themes'
 import type { AuraThemeId } from './types'
 
-const { enabled, themeId, resolvedTheme, setEnabled, setTheme, detectAuraWindow } = useAura()
+const { enabled, themeId, resolvedTheme, setEnabled, setTheme, detectAuraWindow, syncExitToAura } = useAura()
 
 const resolved = resolvedTheme
 const themeComponent = computed(() => THEME_COMPONENTS[themeId.value])
@@ -74,6 +74,7 @@ function onDisable(): void {
 
 onMounted(() => {
   detectAuraWindow()
+  syncExitToAura()
 })
 </script>
 

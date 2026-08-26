@@ -11,6 +11,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { invoke } from '@tauri-apps/api/core'
 import { storage } from '../../engine/storage'
 import type { AuraThemeId, AuraThemeOverride } from './types'
 import { THEME_META } from './themes'
@@ -80,6 +81,20 @@ async function detectAuraWindow(): Promise<void> {
   }
 }
 
+/** 仅 Tauri：把前端持久化的「退出缩小为美化层」开关同步给 Rust 保活逻辑。 */
+function isTauriRuntime(): boolean {
+  return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+}
+
+async function syncExitToAura(): Promise<void> {
+  if (!isTauriRuntime()) return
+  try {
+    await invoke('set_exit_to_aura', { value: exitToAura.value })
+  } catch {
+    /* 命令未注册 / aura 窗未起，静默忽略 */
+  }
+}
+
 export function useAura() {
   return {
     enabled,
@@ -95,5 +110,6 @@ export function useAura() {
     setExitToAura,
     setOverride,
     detectAuraWindow,
+    syncExitToAura,
   }
 }
