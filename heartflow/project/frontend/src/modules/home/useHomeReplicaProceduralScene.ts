@@ -12,8 +12,12 @@ import {
   addRoomFurniture,
   getRoomWorldPosition,
   getAllRoomIds,
+  buildCorridor,
+  ROOM_CONNECTIONS,
   ROOM_W,
   ROOM_D,
+  ROOM_H,
+  ROOM_GAP,
   FLOOR_Y,
 } from './useHomeReplicaProcedural'
 
@@ -24,6 +28,14 @@ export interface ProceduralScene {
   focusRoom(roomId: string): void
   /** 获取当前聚焦的房间 ID */
   getCurrentRoomId(): string | null
+  /** 进入第一人称漫游（锁定指针 + 房间内自由移动） */
+  enterWalkMode(): void
+  /** 退出漫游回到聚焦模式 */
+  exitWalkMode(): void
+  /** 设置漫游时当前房间变化回调 */
+  setOnRoomChange(cb: (roomId: string) => void): void
+  /** 是否处于漫游模式 */
+  isWalkMode(): boolean
 }
 
 type THREE_NS = typeof import('three')
@@ -260,6 +272,56 @@ export async function createProceduralHomeScene(
     await addRoomMedia(THREE, group, asset, worldPos, roomId, homeRoom?.atmosphereColor ?? '#8a7d6b', disposables)
   }
 
+  // ---- 连廊与漫游可行走盒 ----
+  const roomBoxes: THREE.Box3[] = []
+  const walkBoxes: THREE.Box3[] = []
+
+  const seen = new Set<string>()
+  for (const a of getAllRoomIds()) {
+    for (const b of ROOM_CONNECTIONS[a] ?? []) {
+      const key = [a, b].sort().join('|')
+      if (seen.has(key)) continue
+      seen.add(key)
+
+      const pa = getRoomWorldPosition(a)
+      const pb = getRoomWorldPosition(b)
+      const corridor = buildCorridor(THREE, a, b)
+      scene.add(corridor)
+      corridor.traverse(o => collectDisposable(o, disposables))
+
+      const mid: [number, number, number] = [
+        (pa[0] + pb[0]) / 2,
+        (pa[1] + pb[1]) / 2,
+        (pa[2] + pb[2]) / 2,
+      ]
+      const horizontal = Math.abs(pb[0] - pa[0]) > Math.abs(pb[2] - pa[2])
+      const halfLen = ROOM_GAP / 2 + 0.6
+      const halfWid = 1.0
+      if (horizontal) {
+        walkBoxes.push(new THREE.Box3(
+          new THREE.Vector3(mid[0] - halfLen, FLOOR_Y, mid[2] - halfWid),
+          new THREE.Vector3(mid[0] + halfLen, FLOOR_Y + ROOM_H, mid[2] + halfWid),
+        ))
+      } else {
+        walkBoxes.push(new THREE.Box3(
+          new THREE.Vector3(mid[0] - halfWid, FLOOR_Y, mid[2] - halfLen),
+          new THREE.Vector3(mid[0] + halfWid, FLOOR_Y + ROOM_H, mid[2] + halfLen),
+        ))
+      }
+    }
+  }
+
+  // 房间内部可行走盒（供碰撞 + 房间检测）
+  for (const id of getAllRoomIds()) {
+    const p = getRoomWorldPosition(id)
+    const box = new THREE.Box3(
+      new THREE.Vector3(p[0] - ROOM_W / 2 + 0.3, FLOOR_Y, p[2] - ROOM_D / 2 + 0.3),
+      new THREE.Vector3(p[0] + ROOM_W / 2 - 0.3, FLOOR_Y + ROOM_H, p[2] + ROOM_D / 2 - 0.3),
+    )
+    roomBoxes.push(box)
+    walkBoxes.push(box)
+  }
+
   // 相机动画状态
   let animTarget: THREE.Vector3 | null = null
   let animStart: THREE.Vector3 | null = null
@@ -325,6 +387,105 @@ export async function createProceduralHomeScene(
   currentRoomId = initialRoom
   resize()
 
+  // ---- 第一人称漫游 ----
+  let walkMode = false
+  let plControls: any = null
+  let plReady = false
+  const walkKeys = { f: false, b: false, l: false, r: false }
+  let onRoomChangeCb: ((id: string) => void) | null = null
+  const WALK_HEIGHT = FLOOR_Y + 1.6
+  const WALK_SPEED = 3.2
+
+  function insideWalkBoxes(p: THREE.Vector3): boolean {
+    for (const b of walkBoxes) if (b.containsPoint(p)) return true
+    return false
+  }
+
+  function ensureWalkControls(): void {
+    if (plReady) return
+    plReady = true
+    import('three/examples/jsm/controls/PointerLockControls.js').then((mod: any) => {
+      const { PointerLockControls } = mod
+      plControls = new PointerLockControls(camera, canvas)
+      plControls.addEventListener('lock', () => { walkMode = true })
+      plControls.addEventListener('unlock', () => { walkMode = false })
+    }).catch((e: unknown) => {
+      console.warn('[home-replica] PointerLockControls 加载失败：', e)
+    })
+  }
+
+  function onWalkKey(e: KeyboardEvent, down: boolean): void {
+    switch (e.code) {
+      case 'KeyW': case 'ArrowUp': walkKeys.f = down; break
+      case 'KeyS': case 'ArrowDown': walkKeys.b = down; break
+      case 'KeyA': case 'ArrowLeft': walkKeys.l = down; break
+      case 'KeyD': case 'ArrowRight': walkKeys.r = down; break
+    }
+  }
+
+  const onWalkKeyDown = (e: KeyboardEvent) => onWalkKey(e, true)
+  const onWalkKeyUp = (e: KeyboardEvent) => onWalkKey(e, false)
+  window.addEventListener('keydown', onWalkKeyDown)
+  window.addEventListener('keyup', onWalkKeyUp)
+
+  function updateWalk(dt: number): void {
+    const dtSec = Math.min(dt, 50) / 1000
+    const dir = new THREE.Vector3()
+    camera.getWorldDirection(dir)
+    dir.y = 0
+    if (dir.lengthSq() < 1e-6) return
+    dir.normalize()
+    const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize()
+    const move = new THREE.Vector3()
+    if (walkKeys.f) move.add(dir)
+    if (walkKeys.b) move.sub(dir)
+    if (walkKeys.r) move.add(right)
+    if (walkKeys.l) move.sub(right)
+    if (move.lengthSq() > 0) {
+      move.normalize().multiplyScalar(WALK_SPEED * dtSec)
+      const nx = camera.position.clone(); nx.x += move.x
+      if (insideWalkBoxes(nx)) camera.position.x = nx.x
+      const nz = camera.position.clone(); nz.z += move.z
+      if (insideWalkBoxes(nz)) camera.position.z = nz.z
+    }
+    const ids = getAllRoomIds()
+    for (let i = 0; i < roomBoxes.length; i++) {
+      if (roomBoxes[i].containsPoint(camera.position)) {
+        const id = ids[i]
+        if (id !== currentRoomId) {
+          currentRoomId = id
+          onRoomChangeCb?.(id)
+        }
+        break
+      }
+    }
+  }
+
+  function enterWalkMode(): void {
+    ensureWalkControls()
+    const id = currentRoomId ?? getAllRoomIds()[0]
+    const p = getRoomWorldPosition(id)
+    camera.position.set(p[0], WALK_HEIGHT, p[2])
+    camera.lookAt(p[0], WALK_HEIGHT, p[2] - 1)
+    walkMode = true
+    try { plControls?.lock() } catch { /* headless / 非用户手势下忽略 */ }
+  }
+
+  function exitWalkMode(): void {
+    walkMode = false
+    plControls?.unlock()
+    const id = currentRoomId ?? getAllRoomIds()[0]
+    focusRoom(id)
+  }
+
+  function setOnRoomChange(cb: (id: string) => void): void {
+    onRoomChangeCb = cb
+  }
+
+  function isWalkMode(): boolean {
+    return walkMode
+  }
+
   // 渲染循环
   let lastTime = performance.now()
   let animFrameId = 0
@@ -357,6 +518,8 @@ export async function createProceduralHomeScene(
       }
     }
 
+    if (walkMode) updateWalk(dt)
+
     renderer.render(scene, camera)
   }
 
@@ -369,10 +532,16 @@ export async function createProceduralHomeScene(
       disposed = true
       cancelAnimationFrame(animFrameId)
       window.removeEventListener('resize', resize)
+      window.removeEventListener('keydown', onWalkKeyDown)
+      window.removeEventListener('keyup', onWalkKeyUp)
       disposables.forEach(d => d.dispose())
       renderer.dispose()
     },
     focusRoom,
     getCurrentRoomId: () => currentRoomId,
+    enterWalkMode,
+    exitWalkMode,
+    setOnRoomChange,
+    isWalkMode,
   }
 }

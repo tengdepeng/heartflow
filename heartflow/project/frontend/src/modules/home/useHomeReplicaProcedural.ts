@@ -11,9 +11,9 @@ import type { HomeRoom } from './rooms'
 // ---- 房间布局常驻 ----
 
 export const ROOM_W = 8   // 宽 (x)
-const ROOM_H = 5   // 高 (y)
+export const ROOM_H = 5   // 高 (y)
 export const ROOM_D = 8   // 深 (z)
-const ROOM_GAP = 2 // 房间间距
+export const ROOM_GAP = 2 // 房间间距
 
 /** 房间在 3D 世界中的位置（网格布局） */
 const ROOM_LAYOUT: Record<string, [number, number, number]> = {
@@ -37,6 +37,41 @@ export function getRoomWorldPosition(roomId: string): [number, number, number] {
 
 export function getAllRoomIds(): string[] {
   return Object.keys(ROOM_LAYOUT)
+}
+
+// ---- 房间邻接图（用于第一人称漫游连通）----
+// 基于网格相邻关系定义合理动线；每条无向边对应一个 2m 连廊（ROOM_GAP）。
+export const ROOM_CONNECTIONS: Record<string, string[]> = {
+  entrance: ['living-room'],
+  'living-room': ['entrance', 'dining-room', 'bedroom'],
+  'dining-room': ['living-room', 'kitchen', 'bathroom'],
+  kitchen: ['dining-room', 'wardrobe'],
+  study: ['entrance', 'bedroom', 'courtyard'],
+  bedroom: ['living-room', 'study', 'bathroom', 'balcony'],
+  bathroom: ['dining-room', 'bedroom', 'wardrobe', 'storage'],
+  wardrobe: ['kitchen', 'bathroom'],
+  courtyard: ['study'],
+  balcony: ['bedroom'],
+  storage: ['bathroom'],
+}
+
+/** 门朝向（相对房间本地坐标：N=-z 背墙, S=+z 前侧, W=-x 左, E=+x 右） */
+export type DoorDir = 'N' | 'S' | 'E' | 'W'
+
+/** 依据邻居相对网格位置，计算房间需要开门的朝向 */
+export function getRoomDoors(roomId: string): Set<DoorDir> {
+  const self = getRoomWorldPosition(roomId)
+  const dirs = new Set<DoorDir>()
+  for (const nb of ROOM_CONNECTIONS[roomId] ?? []) {
+    const p = getRoomWorldPosition(nb)
+    const dx = Math.round((p[0] - self[0]) / (ROOM_W + ROOM_GAP))
+    const dz = Math.round((p[2] - self[2]) / (ROOM_D + ROOM_GAP))
+    if (dx > 0) dirs.add('E')
+    else if (dx < 0) dirs.add('W')
+    if (dz > 0) dirs.add('S')
+    else if (dz < 0) dirs.add('N')
+  }
+  return dirs
 }
 
 // ---- 颜色与材质工具 ----
@@ -237,44 +272,83 @@ export function buildRoomShell(
   floor.receiveShadow = true
   group.add(floor)
 
+  // 墙材质：双面渲染，使从连廊侧看房间墙体也可见（漫游穿门时）
   const wallMat = () => new T.MeshStandardMaterial({
     color: baseColor,
     roughness: 0.85,
     metalness: 0.02,
     emissive: glowColor,
     emissiveIntensity: 0.06,
+    side: T.DoubleSide,
   })
 
-  // 背墙（中间留门洞 + 上方门楣）
   const doorW = 1.6
   const doorH = 3
-  const sideW = (ROOM_W - doorW) / 2
-  const leftWall = new T.Mesh(new T.PlaneGeometry(sideW, ROOM_H), wallMat())
-  leftWall.position.set(-(doorW / 2 + sideW / 2), 0, -ROOM_D / 2)
-  leftWall.rotation.y = 0
-  leftWall.receiveShadow = true
-  group.add(leftWall)
+  const doors = getRoomDoors(room.id)
 
-  const rightWall = new T.Mesh(new T.PlaneGeometry(sideW, ROOM_H), wallMat())
-  rightWall.position.set(doorW / 2 + sideW / 2, 0, -ROOM_D / 2)
-  rightWall.receiveShadow = true
-  group.add(rightWall)
+  // 四面墙规格：N=-z 背墙, S=+z 前侧, W=-x 左, E=+x 右
+  const walls: Array<{ key: DoorDir; width: number; pos: [number, number, number]; rotY: number; axis: 'x' | 'z' }> = [
+    { key: 'N', width: ROOM_W, pos: [0, 0, -ROOM_D / 2], rotY: 0, axis: 'x' },
+    { key: 'S', width: ROOM_W, pos: [0, 0, ROOM_D / 2], rotY: Math.PI, axis: 'x' },
+    { key: 'W', width: ROOM_D, pos: [-ROOM_W / 2, 0, 0], rotY: Math.PI / 2, axis: 'z' },
+    { key: 'E', width: ROOM_D, pos: [ROOM_W / 2, 0, 0], rotY: -Math.PI / 2, axis: 'z' },
+  ]
 
-  const lintel = new T.Mesh(new T.PlaneGeometry(doorW, ROOM_H - doorH), wallMat())
-  lintel.position.set(0, (doorH + ROOM_H) / 2 - ROOM_H / 2, -ROOM_D / 2)
-  lintel.receiveShadow = true
-  group.add(lintel)
+  for (const w of walls) {
+    const mat = wallMat()
+    if (!doors.has(w.key)) {
+      // 完整墙
+      const wall = new T.Mesh(new T.PlaneGeometry(w.width, ROOM_H), mat)
+      wall.position.set(...w.pos)
+      wall.rotation.y = w.rotY
+      wall.receiveShadow = true
+      group.add(wall)
+      continue
+    }
 
-  // 左墙 / 右墙
-  for (const def of [
-    { pos: [-ROOM_W / 2, 0, 0] as [number, number, number], rotY: Math.PI / 2, w: ROOM_D, h: ROOM_H },
-    { pos: [ROOM_W / 2, 0, 0] as [number, number, number], rotY: -Math.PI / 2, w: ROOM_D, h: ROOM_H },
-  ]) {
-    const wall = new T.Mesh(new T.PlaneGeometry(def.w, def.h), wallMat())
-    wall.position.set(...def.pos)
-    wall.rotation.y = def.rotY
-    wall.receiveShadow = true
-    group.add(wall)
+    // 带门洞墙：左右墙段 + 门楣 + 门框柱 + 门槛（门洞通畅，漫游可穿过）
+    const sideW = (w.width - doorW) / 2
+    const off = doorW / 2 + sideW / 2
+    const offX = w.axis === 'x' ? off : 0
+    const offZ = w.axis === 'z' ? off : 0
+
+    const left = new T.Mesh(new T.PlaneGeometry(sideW, ROOM_H), mat)
+    left.position.set(w.pos[0] - offX, w.pos[1], w.pos[2] - offZ)
+    left.rotation.y = w.rotY
+    left.receiveShadow = true
+    group.add(left)
+
+    const right = new T.Mesh(new T.PlaneGeometry(sideW, ROOM_H), mat)
+    right.position.set(w.pos[0] + offX, w.pos[1], w.pos[2] + offZ)
+    right.rotation.y = w.rotY
+    right.receiveShadow = true
+    group.add(right)
+
+    const lintel = new T.Mesh(new T.PlaneGeometry(doorW, ROOM_H - doorH), mat)
+    lintel.position.set(w.pos[0], w.pos[1] + (doorH + ROOM_H) / 2 - ROOM_H / 2, w.pos[2])
+    lintel.rotation.y = w.rotY
+    lintel.receiveShadow = true
+    group.add(lintel)
+
+    // 门框柱（门洞两侧，薄 box）
+    const frameMat = new T.MeshStandardMaterial({ color: endColor.clone().multiplyScalar(0.6), roughness: 0.55, metalness: 0.12 })
+    const pillarGeo = new T.BoxGeometry(0.12, doorH, 0.12)
+    const px = w.axis === 'x' ? doorW / 2 : 0
+    const pz = w.axis === 'z' ? doorW / 2 : 0
+    const pillarL = new T.Mesh(pillarGeo, frameMat)
+    pillarL.position.set(w.pos[0] - px, FLOOR_Y + doorH / 2, w.pos[2] - pz)
+    group.add(pillarL)
+    const pillarR = new T.Mesh(pillarGeo, frameMat)
+    pillarR.position.set(w.pos[0] + px, FLOOR_Y + doorH / 2, w.pos[2] + pz)
+    group.add(pillarR)
+
+    // 门槛
+    const thGeo = w.axis === 'x'
+      ? new T.BoxGeometry(doorW, 0.08, 0.3)
+      : new T.BoxGeometry(0.3, 0.08, doorW)
+    const threshold = new T.Mesh(thGeo, new T.MeshStandardMaterial({ color: endColor.clone().multiplyScalar(0.5), roughness: 0.6 }))
+    threshold.position.set(w.pos[0], FLOOR_Y + 0.04, w.pos[2])
+    group.add(threshold)
   }
 
   // 天花板
@@ -287,29 +361,58 @@ export function buildRoomShell(
   ceil.receiveShadow = true
   group.add(ceil)
 
-  // 前侧双开暗示门框（房间入口，朝向相机）
-  const doorMat = new T.MeshStandardMaterial({
-    color: endColor.clone().multiplyScalar(0.7),
-    roughness: 0.55,
-    metalness: 0.12,
-  })
-  const leafL = new T.Mesh(new T.BoxGeometry(0.78, doorH, 0.12), doorMat)
-  leafL.position.set(-0.4, FLOOR_Y + doorH / 2, ROOM_D / 2)
-  leafL.castShadow = true
-  group.add(leafL)
-  const leafR = new T.Mesh(new T.BoxGeometry(0.78, doorH, 0.12), doorMat)
-  leafR.position.set(0.4, FLOOR_Y + doorH / 2, ROOM_D / 2)
-  leafR.castShadow = true
-  group.add(leafR)
-  // 门槛
-  const threshold = new T.Mesh(
-    new T.BoxGeometry(doorW, 0.08, 0.3),
-    new T.MeshStandardMaterial({ color: endColor.clone().multiplyScalar(0.5), roughness: 0.6 }),
-  )
-  threshold.position.set(0, FLOOR_Y + 0.04, ROOM_D / 2)
-  group.add(threshold)
-
   return { group, worldPos }
+}
+
+/** 两相邻房间之间的连廊几何（ROOM_GAP 间隙，门洞连通） */
+export function buildCorridor(
+  T: typeof THREE,
+  a: string,
+  b: string,
+): THREE.Group {
+  const pa = getRoomWorldPosition(a)
+  const pb = getRoomWorldPosition(b)
+  const mid: [number, number, number] = [
+    (pa[0] + pb[0]) / 2,
+    (pa[1] + pb[1]) / 2,
+    (pa[2] + pb[2]) / 2,
+  ]
+  const horizontal = Math.abs(pb[0] - pa[0]) > Math.abs(pb[2] - pa[2])
+  const len = ROOM_GAP
+  const wid = 1.6
+  const g = new T.Group()
+
+  const floorMat = new T.MeshStandardMaterial({ color: 0x3a322a, roughness: 0.95, metalness: 0 })
+  const floorGeo = new T.PlaneGeometry(horizontal ? len : wid, horizontal ? wid : len)
+  const floor = new T.Mesh(floorGeo, floorMat)
+  floor.rotation.x = -Math.PI / 2
+  floor.position.set(mid[0], FLOOR_Y + 0.01, mid[2])
+  floor.receiveShadow = true
+  g.add(floor)
+
+  const ceilMat = new T.MeshStandardMaterial({ color: 0x2a241e, roughness: 0.95, metalness: 0, side: T.DoubleSide })
+  const ceilGeo = new T.PlaneGeometry(horizontal ? len : wid, horizontal ? wid : len)
+  const ceil = new T.Mesh(ceilGeo, ceilMat)
+  ceil.rotation.x = Math.PI / 2
+  ceil.position.set(mid[0], ROOM_H / 2, mid[2])
+  ceil.receiveShadow = true
+  g.add(ceil)
+
+  const wallMat = new T.MeshStandardMaterial({ color: 0x332c24, roughness: 0.9, metalness: 0, side: T.DoubleSide })
+  for (const side of [-1, 1]) {
+    const w = new T.Mesh(new T.PlaneGeometry(len, ROOM_H), wallMat)
+    if (horizontal) {
+      w.position.set(mid[0], 0, mid[2] + side * wid / 2)
+      w.rotation.y = 0
+    } else {
+      w.position.set(mid[0] + side * wid / 2, 0, mid[2])
+      w.rotation.y = Math.PI / 2
+    }
+    w.receiveShadow = true
+    g.add(w)
+  }
+
+  return g
 }
 
 // ---- 房间家具生成器 ----

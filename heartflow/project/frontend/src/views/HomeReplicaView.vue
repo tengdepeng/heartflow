@@ -42,7 +42,15 @@
 
         <button class="hr-clear" type="button" @click="onClear">清除清单</button>
         <button class="hr-export" type="button" @click="onExport">导出 manifest</button>
+        <button class="hr-enter-walk" type="button" @click="enterWalk" v-if="!walkMode">进入漫游</button>
       </aside>
+      <!-- 第一人称漫游叠加层 -->
+      <div v-if="walkMode" class="hr-walk">
+        <div class="hr-crosshair"></div>
+        <div class="hr-walk__room">{{ walkRoomName }}</div>
+        <div class="hr-walk__hint">WASD / 方向键移动 · 鼠标转视角 · ESC 退出 · 走到门洞穿过房间</div>
+        <button class="hr-walk__exit" type="button" @click="exitWalk">退出漫游</button>
+      </div>
     </div>
 
     <!-- WebGL 不可用：降级说明 -->
@@ -105,6 +113,7 @@ import {
 } from '../modules/home/useHomeReplica'
 import {
   useHomeReplicaNavigation,
+  ROOM_DISPLAY_NAMES,
 } from '../modules/home/useHomeReplicaNavigation'
 import {
   createProceduralHomeScene,
@@ -219,6 +228,28 @@ function onKeydown(e: KeyboardEvent): void {
     e.preventDefault()
     navPrev()
   }
+}
+
+// ---- 第一人称漫游 ----
+const walkMode = ref(false)
+const walkRoomId = ref(currentRoomId.value)
+const walkRoomName = computed(() => ROOM_DISPLAY_NAMES[walkRoomId.value] ?? walkRoomId.value)
+function onRoomChange(id: string): void {
+  walkRoomId.value = id
+}
+function enterWalk(): void {
+  if (!scene) return
+  scene.setOnRoomChange(onRoomChange)
+  scene.enterWalkMode()
+  walkMode.value = true
+  window.removeEventListener('keydown', onKeydown)
+}
+function exitWalk(): void {
+  if (!scene) return
+  scene.exitWalkMode()
+  walkMode.value = false
+  window.addEventListener('keydown', onKeydown)
+  focusRoom(walkRoomId.value)
 }
 
 function onClear(): void {
@@ -621,6 +652,79 @@ onUnmounted(() => {
   font-size: 12px;
   color: #ff8a8a;
   margin: 8px 0 0;
+}
+
+/* ---- 第一人称漫游 ---- */
+.hr-walk {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+.hr-crosshair {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.4);
+}
+.hr-walk__room {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  color: var(--text-primary);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 6px 14px;
+  border-radius: 999px;
+  letter-spacing: 1px;
+}
+.hr-walk__hint {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  color: var(--text-secondary);
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 16px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.hr-walk__exit {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  pointer-events: auto;
+  background: rgba(var(--accent-rgb), 0.2);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.hr-walk__exit:hover {
+  background: rgba(var(--accent-rgb), 0.32);
+}
+.hr-enter-walk {
+  background: rgba(var(--accent-rgb), 0.18);
+  border: 1px solid rgba(var(--accent-rgb), 0.32);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-top: 6px;
+  width: 100%;
+}
+.hr-enter-walk:hover {
+  background: rgba(var(--accent-rgb), 0.28);
 }
 
 /* 480px 及以下 */
