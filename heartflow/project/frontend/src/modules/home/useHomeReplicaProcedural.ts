@@ -10,9 +10,9 @@ import type { HomeRoom } from './rooms'
 
 // ---- 房间布局常驻 ----
 
-const ROOM_W = 8   // 宽 (x)
+export const ROOM_W = 8   // 宽 (x)
 const ROOM_H = 5   // 高 (y)
-const ROOM_D = 8   // 深 (z)
+export const ROOM_D = 8   // 深 (z)
 const ROOM_GAP = 2 // 房间间距
 
 /** 房间在 3D 世界中的位置（网格布局） */
@@ -97,7 +97,7 @@ function makeCyl(
   return mesh
 }
 
-const FLOOR_Y = -ROOM_H / 2
+export const FLOOR_Y = -ROOM_H / 2
 
 // ---- 通用家具件 ----
 
