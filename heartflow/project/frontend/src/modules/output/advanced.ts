@@ -221,6 +221,7 @@ export function useBatchOperations(
   /** 批量归档 */
   function batchArchive(ids: string[]): BatchOperation {
     const op = createOperation('archive', ids)
+    operations.value.push(op)
     const targets = ids.length > 0 ? ids : [...selectedIds.value]
 
     const records = getRecords()
@@ -251,6 +252,7 @@ export function useBatchOperations(
   /** 批量删除 */
   function batchDelete(ids: string[]): BatchOperation {
     const op = createOperation('delete', ids)
+    operations.value.push(op)
     const targets = ids.length > 0 ? ids : [...selectedIds.value]
 
     let success = 0
@@ -274,6 +276,7 @@ export function useBatchOperations(
   /** 批量修改状态 */
   function batchChangeStatus(ids: string[], newStatus: OutputRecordStatus): BatchOperation {
     const op = createOperation('status-change', ids, { status: newStatus })
+    operations.value.push(op)
     const targets = ids.length > 0 ? ids : [...selectedIds.value]
 
     let success = 0
