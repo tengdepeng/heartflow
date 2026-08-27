@@ -1665,6 +1665,12 @@ watch(() => nav.currentRoomId.value, () => {
   transform: translateY(12px);
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
+/* 侧栏同样随沉浸模式淡出（铁律清单要求；此前仅淡出浮栏/镜我，遗漏侧栏，
+   导致 chrome-hidden 态侧栏仍杵着挡内容）。!important 确保沉浸态优先于 surface-3d 降级。 */
+.app-shell.chrome-hidden .nav-bar {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 /* 桌面端悬浮侧栏随沉浸模式同步淡出（与底栏一块自动隐藏）。
    滑动位移由各 float-edge-* 类的 chrome-hidden 规则负责，此处补 opacity 淡出，
    使「滑出 + 淡出」同步，视觉与底栏一致；不影响移动/平板端（其 chrome-hidden 已自带滑出）。 */
@@ -1698,15 +1704,18 @@ watch(() => nav.currentRoomId.value, () => {
    与 chrome-hidden 互补：chrome-hidden 是全局沉浸（任意态都淡出），surface-3d 是仅 3D 态降级。
    z 不动（仍为 --z-navbar），靠 opacity/pointer-events 降级——不破坏契约层级、不动优先级，
    3D 模式下顾问球(z-jade:20)与侧栏(z-navbar:40)仍按令牌正确叠放，但侧栏几乎不可见。 */
+/* 3D 世界壳接管屏幕时，左侧栏降级为半透明、不抢镜；但保留导航树交互
+   （pointer-events:auto），否则 3D 态下房间树无法滚动/点击（回归：原整栏
+   pe:none 导致「侧边悬浮栏上下滑动不了」）。hover/focus-within 唤回近全不透明。
+   z 不动（--z-navbar），靠 opacity 降级不破坏层叠契约。 */
 .app-shell.surface-3d .nav-bar {
   opacity: 0.32;
-  pointer-events: none;
+  pointer-events: auto;
   transition: opacity 0.5s ease, transform 0.4s ease, background 0.4s ease;
 }
 .app-shell.surface-3d .nav-bar:hover,
 .app-shell.surface-3d .nav-bar:focus-within {
   opacity: 0.96;
-  pointer-events: auto;
 }
 
 /* 3D 正厅态：心流页顾问球纵向偏移量沿用 2D 基准 220px。
