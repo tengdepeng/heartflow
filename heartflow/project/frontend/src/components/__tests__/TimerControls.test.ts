@@ -142,9 +142,39 @@ describe('TimerControls', () => {
     expect(ring.find('circle').exists()).toBe(true)
   })
 
-  it('渲染三个 mode tab', () => {
+  it('渲染六个 mode tab（含番茄/倒计时/正计时）', () => {
     const wrapper = mount(TimerControls, { props: baseProps })
     const tabs = wrapper.findAll('.mode-tab')
-    expect(tabs).toHaveLength(3)
+    expect(tabs).toHaveLength(6)
+    const labels = tabs.map(t => t.text())
+    expect(labels.some(l => l.includes('番茄'))).toBe(true)
+    expect(labels.some(l => l.includes('倒计时'))).toBe(true)
+    expect(labels.some(l => l.includes('正计时'))).toBe(true)
+  })
+
+  it('倒计时模式显示分钟输入框，点击 tab 带分钟 emit', async () => {
+    const wrapper = mount(TimerControls, { props: { ...baseProps, currentMode: 'countdown' } })
+    expect(wrapper.find('.countdown-input').exists()).toBe(true)
+    const tabs = wrapper.findAll('.mode-tab')
+    const countdownTab = tabs.find(t => t.text().includes('倒计时'))!
+    await countdownTab.trigger('click')
+    expect(wrapper.emitted('switchMode')).toHaveLength(1)
+    expect(wrapper.emitted('switchMode')![0]).toEqual(['countdown', 25])
+  })
+
+  it('番茄模式显示当前阶段（专注）', () => {
+    const wrapper = mount(TimerControls, {
+      props: { ...baseProps, currentMode: 'pomodoro', pomodoroPhase: 'work' },
+    })
+    expect(wrapper.text()).toContain('番茄 · 专注')
+  })
+
+  it('正计时模式显示已计时（向上计数，不显示剩余）', () => {
+    const wrapper = mount(TimerControls, {
+      props: { ...baseProps, currentMode: 'countup', displayTime: '00:42', remainingSeconds: 99999 },
+    })
+    expect(wrapper.text()).toContain('00:42')
+    expect(wrapper.text()).toContain('已计时')
+    expect(wrapper.text()).not.toContain('剩余 99999 秒')
   })
 })

@@ -13,17 +13,31 @@
         :key="m.key"
         :class="['mode-tab', { active: currentMode === m.key }]"
         type="button"
-        @click="$emit('switchMode', m.key)"
+        @click="onSwitch(m)"
       >
         {{ m.label }}
       </button>
     </div>
 
+    <!-- 自定义倒计时：分钟输入（仅倒计时模式可见） -->
+    <div v-if="currentMode === 'countdown'" class="countdown-input">
+      <input
+        v-model.number="customMinutes"
+        class="countdown-input__field"
+        type="number"
+        min="1"
+        max="180"
+        inputmode="numeric"
+        aria-label="倒计时分钟"
+      />
+      <span class="countdown-input__unit">分钟</span>
+    </div>
+
     <!-- Timer Display -->
     <div class="timer-display">
       <span class="time-caption">{{ modeLabel }}</span>
-      <span class="time">{{ displayTime }}</span>
-      <span class="time-progress">已流动 {{ progressPercent }}%</span>
+      <span class="time">{{ shownTime }}</span>
+      <span v-if="progressText" class="time-progress">{{ progressText }}</span>
     </div>
 
     <!-- Progress Ring -->
@@ -60,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps<{
   displayTime: string
@@ -69,19 +83,39 @@ const props = defineProps<{
   currentMode: string
   remainingSeconds: number
   totalSeconds: number
+  pomodoroPhase?: 'work' | 'break'
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   toggle: []
   reset: []
-  switchMode: [mode: string]
+  switchMode: [mode: string, minutes?: number]
 }>()
 
 const modes = [
   { key: 'focus', label: '🍅 专注' },
   { key: 'nap',   label: '☕ 小憩' },
   { key: 'free',  label: '✨ 自由' },
+  { key: 'pomodoro', label: '🔁 番茄' },
+  { key: 'countdown', label: '⏱ 倒计时' },
+  { key: 'countup', label: '⏳ 正计时' },
 ]
+
+const customMinutes = ref(25)
+
+function onSwitch(m: { key: string; label: string }) {
+  if (m.key === 'countdown') emit('switchMode', 'countdown', customMinutes.value)
+  else emit('switchMode', m.key)
+}
+
+function formatMMSS(totalSec: number): string {
+  const s = Math.max(0, Math.floor(totalSec))
+  const h = Math.floor(s / 3600)
+  const m = Math.floor((s % 3600) / 60)
+  const sec = s % 60
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+  return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+}
 
 const circumference = 2 * Math.PI * 52
 
@@ -96,8 +130,16 @@ const ringColor = computed(() => {
     case 'focus': return 'var(--accent)'
     case 'nap':   return 'var(--accent-cyan)'
     case 'free':  return 'var(--accent-purple)'
+    case 'pomodoro': return 'var(--accent)'
+    case 'countdown': return 'var(--accent-cyan)'
+    case 'countup': return 'var(--accent-purple)'
     default:      return 'var(--accent)'
   }
+})
+
+const shownTime = computed(() => {
+  if (props.currentMode === 'countup') return props.displayTime
+  return formatMMSS(props.remainingSeconds)
 })
 
 const modeLabel = computed(() => {
@@ -105,6 +147,9 @@ const modeLabel = computed(() => {
     case 'focus': return '专注模式'
     case 'nap': return '小憩模式'
     case 'free': return '自由模式'
+    case 'pomodoro': return props.pomodoroPhase === 'work' ? '番茄 · 专注' : '番茄 · 休息'
+    case 'countdown': return '自定义倒计时'
+    case 'countup': return '正计时'
     default: return '计时模式'
   }
 })
@@ -121,13 +166,21 @@ const statusTone = computed(() => {
   return 'idle'
 })
 
-const modeMeta = computed(() => `剩余 ${Math.max(0, props.remainingSeconds)} 秒`)
+const modeMeta = computed(() =>
+  props.currentMode === 'countup'
+    ? `已计时 ${props.displayTime}`
+    : `剩余 ${Math.max(0, props.remainingSeconds)} 秒`,
+)
 
 const progressPercent = computed(() => {
   const total = props.totalSeconds || 1500
   const ratio = Math.max(0, Math.min(1, 1 - props.remainingSeconds / total))
   return Math.round(ratio * 100)
 })
+
+const progressText = computed(() =>
+  props.currentMode === 'countup' ? '' : `已流动 ${progressPercent.value}%`,
+)
 
 const canReset = computed(() => props.isRunning || props.isPaused || props.remainingSeconds !== props.totalSeconds)
 </script>
@@ -275,10 +328,41 @@ const canReset = computed(() => props.isRunning || props.isPaused || props.remai
   opacity: 0.75;
 }
 
+/* ── 倒计时输入 ── */
+.countdown-input {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.countdown-input__field {
+  width: 56px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  outline: none;
+}
+
+.countdown-input__unit {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 /* ── Action Row ── */
 .action-row {
   display: flex;
-  gap: 10px;
+  justify-content: center;
+  gap: 12px;
   width: 100%;
 }
 

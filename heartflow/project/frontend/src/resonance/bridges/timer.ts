@@ -17,7 +17,7 @@ export function useTimer() {
   const {
     session, elapsed, isRunning, progress, display,
     isFocusing, isPaused, isCompleted, isIdle,
-    longBreakDue,
+    longBreakDue, pomodoroPhase,
   } = storeToRefs(store)
 
   const remainingSeconds = computed(() =>
@@ -28,6 +28,7 @@ export function useTimer() {
     session,
     elapsed,
     isRunning,
+    pomodoroPhase,
     progress,
     display,
     isFocusing,

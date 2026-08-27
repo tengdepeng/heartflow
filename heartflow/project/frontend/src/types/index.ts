@@ -15,7 +15,7 @@ export type FocusStatus = 'idle' | 'focusing' | 'paused' | 'completed' | 'interr
 export type OperationMode = 'silent' | 'confirm' | 'suggest'
 
 /** 专注模式 */
-export type FocusMode = 'focus' | 'nap' | 'free'
+export type FocusMode = 'focus' | 'nap' | 'free' | 'pomodoro' | 'countdown' | 'countup'
 
 /** 载体类型 */
 export type CarrierType = 'jade-bead' | 'crystal' | 'custom'

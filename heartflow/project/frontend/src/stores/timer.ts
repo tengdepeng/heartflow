@@ -25,6 +25,7 @@ export const useTimerStore = defineStore('timer', () => {
   const elapsed = ref(0)          // 当前已耗时（ms）
   const isRunning = ref(false)    // 是否正在走时
   const intervalId = ref<number | null>(null)
+  const pomodoroPhase = ref<'work' | 'break'>('work') // 番茄钟当前阶段
 
   // ---- 计算属性 ----
   const progress = computed(() => calcProgress(elapsed.value, session.value.plannedDuration))
@@ -64,9 +65,17 @@ export const useTimerStore = defineStore('timer', () => {
       const now = Date.now()
       elapsed.value = tickStartElapsed + (now - tickBase)
 
-      // 自动完成检查
+      // 自动完成检查（按模式分流）
       if (elapsed.value >= session.value.plannedDuration) {
-        finish()
+        if (session.value.mode === 'pomodoro') {
+          // 番茄钟：到时自动切换阶段（工作↔休息），继续走时
+          cyclePomodoro()
+        } else if (session.value.mode === 'countup') {
+          // 正计时：无上限，仅持续累加 elapsed，不自动完成
+          // no-op
+        } else {
+          finish()
+        }
       }
     }, tickMs)
   }
@@ -81,14 +90,26 @@ export const useTimerStore = defineStore('timer', () => {
   }
 
   // ---- 动作 ----
-  const VALID_MODES: FocusMode[] = ['focus', 'nap', 'free']
+  const VALID_MODES: FocusMode[] = ['focus', 'nap', 'free', 'pomodoro', 'countdown', 'countup']
 
   function setMode(mode: FocusMode, minutes: number) {
     // 边界保护：非法 mode / 非法时长回落到安全默认值，避免脏状态进入会话
     const safeMode: FocusMode = VALID_MODES.includes(mode) ? mode : 'focus'
-    const safeMinutes = Number.isFinite(minutes) && minutes > 0
-      ? minutes
-      : storage.getConfig().timer.defaultDuration
+    const cfg = storage.getConfig().timer
+    let safeMinutes = Number.isFinite(minutes) && minutes > 0 ? minutes : cfg.defaultDuration
+
+    // 各模式时长策略
+    if (safeMode === 'pomodoro') {
+      // 番茄钟：工作段用传入分钟（缺省默认专注时长），休息段用配置 breakDuration
+      pomodoroPhase.value = 'work'
+      safeMinutes = safeMinutes || cfg.defaultDuration
+    } else if (safeMode === 'countdown') {
+      // 自定义倒计时：用传入分钟（缺省默认专注时长）
+      safeMinutes = safeMinutes || cfg.defaultDuration
+    } else if (safeMode === 'countup') {
+      // 正计时：无上限，plannedDuration 设为极大值，tick 不自动完成
+      safeMinutes = 99 * 60
+    }
 
     // 如果正在计时或暂停中，先中断当前会话（保存到历史）
     if (isRunning.value || isPaused.value) {
@@ -101,9 +122,21 @@ export const useTimerStore = defineStore('timer', () => {
     // 默认约束生效（isTargetActive=true）→ 专注需用户手动开始；
     // 用户关闭该约束（isTargetActive=false）→ 选择专注模式即自动开始计时。
     // 初始化前回落 defaultActiveTargets 仍含此目标，故不会在引擎就绪前误触发。
+    // 番茄/倒计时/正计时不自动开始，交由用户手动启动。
     if (safeMode === 'focus' && !isTargetActive('focus:auto-start')) {
       start()
     }
+  }
+
+  /** 番茄钟阶段切换：工作↔休息自动循环，不落历史、不停 tick */
+  function cyclePomodoro() {
+    const cfg = storage.getConfig().timer
+    const nextPhase: 'work' | 'break' = pomodoroPhase.value === 'work' ? 'break' : 'work'
+    pomodoroPhase.value = nextPhase
+    const durMin = nextPhase === 'work' ? cfg.defaultDuration : cfg.breakDuration
+    session.value = startSession(createSession('pomodoro', durMin * 60 * 1000))
+    elapsed.value = 0
+    triggerHaptic('light', hapticEnabled())
   }
 
   function start() {
@@ -168,6 +201,7 @@ export const useTimerStore = defineStore('timer', () => {
   function reset() {
     stopTick()
     isRunning.value = false
+    pomodoroPhase.value = 'work'
     session.value = createSession(session.value.mode, session.value.plannedDuration)
     elapsed.value = 0
   }
@@ -200,6 +234,7 @@ export const useTimerStore = defineStore('timer', () => {
     session,
     elapsed,
     isRunning,
+    pomodoroPhase,
     // computed
     progress,
     display,

@@ -80,3 +80,51 @@ describe('useTimerStore · A2 focus:auto-start 宪法门控', () => {
     expect(timer.isRunning).toBe(false)
   })
 })
+
+describe('useTimerStore · 计时多样性（番茄/倒计时/正计时）', () => {
+  beforeEach(async () => {
+    setActivePinia(createPinia())
+    ;(globalThis as any).localStorage = createMockStorage()
+    const { invalidateCache } = await import('../../engine/storage/core')
+    invalidateCache()
+    vi.mocked(isTargetActive).mockReset()
+    vi.mocked(isTargetActive).mockReturnValue(true)
+  })
+
+  it('setMode 番茄：阶段归 work，时长取默认专注时长，不自动开始', async () => {
+    const { useTimerStore } = await import('../timer')
+    const timer = useTimerStore()
+    timer.setMode('pomodoro', 0)
+    expect(timer.session.mode).toBe('pomodoro')
+    expect(timer.pomodoroPhase).toBe('work')
+    expect(timer.isRunning).toBe(false)
+    expect(timer.session.plannedDuration).toBe(25 * 60 * 1000)
+  })
+
+  it('setMode 自定义倒计时：用传入分钟定时长', async () => {
+    const { useTimerStore } = await import('../timer')
+    const timer = useTimerStore()
+    timer.setMode('countdown', 40)
+    expect(timer.session.mode).toBe('countdown')
+    expect(timer.session.plannedDuration).toBe(40 * 60 * 1000)
+    expect(timer.isRunning).toBe(false)
+  })
+
+  it('setMode 正计时：无上限（极大 plannedDuration），不自动完成', async () => {
+    const { useTimerStore } = await import('../timer')
+    const timer = useTimerStore()
+    timer.setMode('countup', 0)
+    expect(timer.session.mode).toBe('countup')
+    expect(timer.session.plannedDuration).toBe(99 * 60 * 60 * 1000)
+    expect(timer.isRunning).toBe(false)
+  })
+
+  it('reset 重置番茄阶段为 work', async () => {
+    const { useTimerStore } = await import('../timer')
+    const timer = useTimerStore()
+    timer.setMode('pomodoro', 0)
+    timer.pomodoroPhase = 'break'
+    timer.reset()
+    expect(timer.pomodoroPhase).toBe('work')
+  })
+})

@@ -51,7 +51,7 @@
         <div class="orb-stage">
           <div ref="gestureSurface" class="gesture-surface">
             <JadeBead
-              :displayTime="display"
+              :displayTime="beadTime"
               :isRunning="isRunning"
               :isPaused="isPaused"
               :isFocusing="isFocusing"
@@ -70,6 +70,7 @@
               :currentMode="session.mode"
               :remainingSeconds="remainingSeconds"
               :totalSeconds="Math.floor(session.plannedDuration / 1000)"
+              :pomodoro-phase="pomodoroPhase"
               @toggle="toggle"
               @reset="reset"
               @switchMode="switchMode"
@@ -107,6 +108,7 @@ import { useConstitution } from '../resonance/bridges/constitution'
 import { useConfig } from '../resonance/bridges/config'
 import { useRuntimeState } from '../resonance/bridges/runtime'
 import { storage } from '../engine/storage'
+import { formatTimerClock } from '../engine/timer'
 import { useEmotion } from '../resonance/bridges/emotion'
 import { useAnchorBridge } from '../resonance/bridges/anchor'
 import { useGesture, type GestureEvent } from '../composables/useGesture'
@@ -153,7 +155,7 @@ const { enterSanctuary, exitSanctuary } = useRuntimeState()
 const timer = useTimer()
 const {
   session, isRunning, progress, display, isFocusing, isPaused,
-  remainingSeconds,
+  remainingSeconds, pomodoroPhase,
 } = toRefs(timer)
 
 function toggle() {
@@ -162,17 +164,21 @@ function toggle() {
   else timer.start()
 }
 
-function switchMode(mode: string) {
+function switchMode(mode: string, minutes?: number) {
   if (session.value.mode === mode) {
     toggle()
     return
   }
-  const cfg = configRef.timer
-  const mins = mode === 'focus' ? cfg.defaultDuration : mode === 'nap' ? cfg.breakDuration : cfg.longBreakDuration
-  timer.setMode(mode as any, mins)
+  // 时长交给 store 按模式取默认值；倒计时传自定义分钟
+  timer.setMode(mode as any, minutes ?? 0)
 }
 
 function reset() { timer.reset() }
+
+// 玉珠上的时间：倒计时/番茄显示剩余，正计时显示已计（向上）
+const beadTime = computed(() =>
+  session.value.mode === 'countup' ? display.value : formatTimerClock(remainingSeconds.value * 1000),
+)
 
 function finishFocusSession() {
   timer.finish()
@@ -497,32 +503,23 @@ watch(() => timer.isCompleted, (done) => {
   gap: 16px;
 }
 
-/* TimerControls 显隐由 Home 自有包裹层 .orb-controls 接管，
-   不依赖覆盖子组件 scoped 样式（子组件自带 opacity:0.92 会压过 :deep 覆盖）。
-   默认 max-height:0 + visibility:hidden + opacity:0 收起不占位、不可点；
-   悬停/聚焦时展开淡入，且仍位于 .orb-stage 悬停区内。 */
+/* TimerControls 由 Home 自有包裹层 .orb-controls 接管，常驻可见且居中
+   （用户要求计时器控件区居中显示、不依赖 hover 才出现）。 */
 .orb-controls {
   width: 100%;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition: opacity 0.4s ease, max-height 0.4s ease, visibility 0.4s ease;
-}
-
-.orb-stage:hover .orb-controls,
-.orb-stage:focus-within .orb-controls {
-  max-height: 220px;
-  opacity: 0.72;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 1;
   visibility: visible;
   pointer-events: auto;
+  transition: opacity 0.4s ease;
 }
 
-/* 隐藏冗余的进度环、时间大字、状态药丸 */
+/* 隐藏冗余的进度环与时间大字（时间已由玉珠承载，避免双重显示）；
+   状态药丸保留可见，作为计时状态反馈 */
 .focus-orb :deep(.progress-ring),
-.focus-orb :deep(.timer-display),
-.focus-orb :deep(.timer-status) {
+.focus-orb :deep(.timer-display) {
   display: none;
 }
 
