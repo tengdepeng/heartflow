@@ -85,6 +85,17 @@
       <p v-if="externalClimate.rooms.length" class="climate-summary">{{ summarizeClimate(externalClimate) }}</p>
     </section>
 
+    <!-- 感官守护：护眼 / 日出日落自动启停 / 白噪音 -->
+    <EyeCarePanel />
+    <SunSchedulePanel />
+    <WhiteNoisePanel />
+
+    <!-- 设备传感器感知（safety·useSensorIntegration） -->
+    <SensorIntegrationPanel />
+
+    <!-- 人身安全（safety·usePersonalSafety：SOS / 跌倒检测 / 紧急联系人） -->
+    <PersonalSafetyPanel />
+
     <!-- 护眼盾 -->
     <EyeShieldPanel />
   </div>
@@ -102,6 +113,11 @@ import HealthPanel from '../components/guard-room/HealthPanel.vue'
 import PsySafePanel from '../components/guard-room/PsySafePanel.vue'
 import SoundScenePanel from '../components/SoundScenePanel.vue'
 import EyeShieldPanel from '../components/EyeShieldPanel.vue'
+import EyeCarePanel from '../components/EyeCarePanel.vue'
+import SunSchedulePanel from '../components/SunSchedulePanel.vue'
+import WhiteNoisePanel from '../components/WhiteNoisePanel.vue'
+import SensorIntegrationPanel from '../components/SensorIntegrationPanel.vue'
+import PersonalSafetyPanel from '../components/PersonalSafetyPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

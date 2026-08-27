@@ -133,6 +133,9 @@
     <section data-enter>
       <MovementAchievementsPanel />
     </section>
+
+    <!-- 运动分析（movement·useMovementAnalytics） -->
+    <MovementAnalyticsPanel :moves="moves" />
   </div>
 </template>
 
@@ -141,6 +144,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useMovement } from '../modules/movement/movement-log'
 import MovementAchievementsPanel from '../components/movement/MovementAchievementsPanel.vue'
+import MovementAnalyticsPanel from '../components/MovementAnalyticsPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const movement = useMovement()

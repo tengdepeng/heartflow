@@ -486,6 +486,9 @@
         </div>
       </section>
     </div>
+
+    <!-- 快乐盒子（emotion/happy-box 模块） -->
+    <HappyBoxPanel />
   </div>
 </template>
 
@@ -498,6 +501,7 @@ import type { EmotionType, EmotionWeather } from '../modules/emotion/types'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import GardenFlower from '../components/GardenFlower.vue'
 import GardenHealthPanel from '../components/GardenHealthPanel.vue'
+import HappyBoxPanel from '../components/HappyBoxPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'

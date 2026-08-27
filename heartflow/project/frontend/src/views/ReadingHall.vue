@@ -146,6 +146,9 @@
     <!-- 古籍竖排 -->
     <ClassicalVerticalPanel />
 
+    <!-- 阅读习惯分析（reading·useReadingHabits） -->
+    <ReadingHabitsPanel />
+
     <!-- ========== 摘录对话框 ========== -->
     <div data-enter v-if="showDialog" class="rh-dialog-overlay" @click.self="closeDialog">
       <div class="rh-dialog-card">
@@ -173,6 +176,7 @@ import { useReadingInsights, useReadingSpeed, useReading } from '../modules/read
 import type { Excerpt } from '../modules/reading'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
 import ClassicalVerticalPanel from '../components/ClassicalVerticalPanel.vue'
+import ReadingHabitsPanel from '../components/ReadingHabitsPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()

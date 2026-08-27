@@ -283,6 +283,27 @@
         </div>
       </div>
     </section>
+
+    <!-- 高级定制 -->
+    <section data-enter class="sc-section">
+      <h3 class="sc-section-title">高级定制</h3>
+      <p class="sc-section-desc">主题、材质、动画与空间快照</p>
+      <CustomizationAdvancedPanel />
+    </section>
+
+    <!-- 布局与快照 -->
+    <section data-enter class="sc-section">
+      <h3 class="sc-section-title">布局与快照</h3>
+      <p class="sc-section-desc">布局模板、深度主题与快照对比</p>
+      <WorkspaceAdvancedPanel />
+    </section>
+
+    <!-- 预览引擎 -->
+    <section data-enter class="sc-section">
+      <h3 class="sc-section-title">预览引擎</h3>
+      <p class="sc-section-desc">撤销重做、装修历史与批量操作</p>
+      <PreviewEnginePanel />
+    </section>
   </div>
 </template>
 
@@ -296,6 +317,9 @@ import {
   createSpaceConfig, deleteSpaceConfig, duplicateSpaceConfig, updateSpaceConfig,
 } from '../modules/customization/index'
 import { useAppSpaceManager } from '../modules/space/app-space-manager'
+import CustomizationAdvancedPanel from '../components/CustomizationAdvancedPanel.vue'
+import WorkspaceAdvancedPanel from '../components/WorkspaceAdvancedPanel.vue'
+import PreviewEnginePanel from '../components/PreviewEnginePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { recordActivity } = useAppSpaceManager()

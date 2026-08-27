@@ -407,6 +407,9 @@
       </div>
     </section>
 
+    <!-- 财务目标 / 投资 / 健康 / 时间线（reward·finance-goals） -->
+    <FinanceGoalsPanel :records="adaptedRecords" />
+
     <!-- 空状态 -->
     <div v-if="!records.length" class="rw-empty">
       <p>天平静置，尚无记录。</p>
@@ -424,6 +427,7 @@ import { useBudgetOptimizer } from '../modules/reward/budget-optimizer'
 import { useFinancialForecast } from '../modules/reward/financial-forecast'
 import type { RewardRecord as RewardRecordBridge, Budget, RewardStats, IncomeCategory, ExpenseCategory } from '../modules/reward/types'
 import { useReward, type RewardRecord } from '../modules/reward/reward-list'
+import FinanceGoalsPanel from '../components/FinanceGoalsPanel.vue'
 const { entranceRef, entranceClass } = useViewEntrance()
 const rewardBridge = useRewardBridge()
 const budgetOptimizer = useBudgetOptimizer()

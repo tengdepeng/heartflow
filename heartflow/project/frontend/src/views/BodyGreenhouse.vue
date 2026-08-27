@@ -286,6 +286,9 @@
     <!-- 营养计算（body 模块，原已实现但未挂载） -->
     <NutritionPanel />
 
+    <!-- 营养分析（body/meal-nutrition 模块，饮食记录 → 营养评分） -->
+    <MealNutritionPanel :logs="logs" />
+
     <!-- 近期记录 -->
     <section class="recent-logs" v-if="recentLogs.length">
       <h3 class="section-title">📜 近期记录</h3>
@@ -304,6 +307,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useHealthDashboard } from '../modules/body'
 import BodyRingsPanel from '../components/BodyRingsPanel.vue'
 import NutritionPanel from '../components/NutritionPanel.vue'
+import MealNutritionPanel from '../components/MealNutritionPanel.vue'
 import { usePerceptionStore } from '../stores/perception'
 
 const { entranceRef, entranceClass } = useViewEntrance()

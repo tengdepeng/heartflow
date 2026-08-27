@@ -197,6 +197,9 @@
 
     <p v-if="viewMode === 'list' && !filteredBookmarks.length" class="empty">还没有书签，添加一个吧</p>
     <div data-enter class="stats">共 {{ bookmarks.length }} 个书签（{{ activeBookmarks.length }} 活跃 · {{ archivedBookmarks.length }} 归档）</div>
+
+    <!-- 网页剪藏（bookmarks·clip） -->
+    <ClipPanel />
   </div>
 </template>
 
@@ -204,6 +207,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useBookmarks } from '../modules/bookmarks'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import ClipPanel from '../components/ClipPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

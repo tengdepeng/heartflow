@@ -148,6 +148,15 @@
 
     <!-- 观星指数 -->
     <ObservingPanel />
+
+    <!-- 足迹分析 -->
+    <TravelAnalyticsPanel :places="places" />
+
+    <!-- 空间格局 -->
+    <SpatialPatternPanel :places="places" />
+
+    <!-- 环球投影 -->
+    <GeoProjectionPanel :places="places" />
   </div>
 </template>
 
@@ -158,6 +167,9 @@ import { useMap } from '../modules/map'
 import type { Place } from '../modules/map'
 import FootprintPanel from '../components/FootprintPanel.vue'
 import ObservingPanel from '../components/ObservingPanel.vue'
+import TravelAnalyticsPanel from '../components/TravelAnalyticsPanel.vue'
+import SpatialPatternPanel from '../components/SpatialPatternPanel.vue'
+import GeoProjectionPanel from '../components/GeoProjectionPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { places, lifeNodes, load, save, loadNodes, saveNodes } = useMap()
