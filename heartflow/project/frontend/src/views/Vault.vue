@@ -58,6 +58,9 @@
     <!-- 自动锁定（vault auto-lock 模块） -->
     <VaultAutoLockPanel :settings="autoLockSettings" @update="handleAutoLockUpdate" />
 
+    <!-- 备份恢复与安全报告（safety·useBackupRecovery / useSecurityReports） -->
+    <BackupRecoveryPanel :passphrase="activePass" />
+
     <!-- 资产分布 -->
     <section data-enter class="vt-section">
       <h3 class="vt-section-title">📊 资产分布</h3>
@@ -159,6 +162,7 @@ import {
 import { useVault, type Asset, type Archive, type VaultData } from '../modules/vault'
 import { useVaultAutoLock, type AutoLockSettings } from '../modules/vault/auto-lock'
 import VaultAutoLockPanel from '../components/VaultAutoLockPanel.vue'
+import BackupRecoveryPanel from '../components/BackupRecoveryPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
