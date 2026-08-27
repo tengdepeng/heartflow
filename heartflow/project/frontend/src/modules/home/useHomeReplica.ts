@@ -17,9 +17,9 @@ export interface HomeReplicaRoomAsset {
   name: string
   /**
    * 资产路径（本地 public/ 路径或绝对路径，仅本机引用，绝不外传）。
-   * 具体格式由 `kind` 决定。
+   * 具体格式由 `kind` 决定。纯程序化房间可省略（无资产，走程序化家具兜底）。
    */
-  model: string
+  model?: string
   /** 资产类型；缺省按 `'model'` 处理（向后兼容旧清单） */
   kind?: HomeReplicaAssetKind
   /** 场景坐标 [x, y, z]（米，1:1 真实比例） */
@@ -56,7 +56,8 @@ const ASSET_KINDS: HomeReplicaAssetKind[] = ['model', 'image', 'plan']
 function isRoomAsset(v: unknown): v is HomeReplicaRoomAsset {
   if (!v || typeof v !== 'object') return false
   const r = v as Record<string, unknown>
-  if (typeof r.id !== 'string' || typeof r.name !== 'string' || typeof r.model !== 'string') return false
+  if (typeof r.id !== 'string' || typeof r.name !== 'string') return false
+  if (r.model !== undefined && typeof r.model !== 'string') return false
   if (r.kind !== undefined && !ASSET_KINDS.includes(r.kind as HomeReplicaAssetKind)) return false
   return true
 }

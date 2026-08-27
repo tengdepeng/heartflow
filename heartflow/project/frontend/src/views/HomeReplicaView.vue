@@ -90,9 +90,9 @@
 
       <div class="hr-sample">
         <button class="hr-sample__btn" type="button" @click="onLoadSample">
-          载入示例家（蓝图9房间）
+          载入示例家（完整 11 房间 · 含真实 3D 模型）
         </button>
-        <p class="hr-sample__hint">一键加载内置示例：户型俯视图（plan）+ 墙面示意画（image），展示多格式能力。可清除后导入你自己的户型图 / 3D 模型（支持 model / image / plan）。</p>
+        <p class="hr-sample__hint">一键加载完整内置家：11 个房间骨架 + 5 个真实 3D 模型覆盖，与默认家一致、不再退化空场景。可清除后导入你自己的户型图 / 3D 模型（支持 model / image / plan）。</p>
 
         <button class="hr-sample__btn hr-sample__btn--alt" type="button" @click="onLoadRealPlan">
           载入真实户型图（网上 CC0）

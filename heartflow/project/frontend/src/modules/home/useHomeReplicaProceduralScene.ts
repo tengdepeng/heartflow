@@ -224,9 +224,15 @@ export async function createProceduralHomeScene(
   let currentRoomId: string | null = null
 
   // 构建所有房间
-  const roomIds = manifest?.rooms?.length
-    ? manifest.rooms.map(r => r.id)
-    : getAllRoomIds()
+  // 若 manifest 列出的房间 id 全部属于内置家（HOME_ROOMS），视为「完整家」：
+  // 渲染全部 11 个内置房间，manifest 资产(model/plan/image)作为覆盖层叠加其上，
+  // 避免「只列几个房间」导致其余内置房间被清空而退化空场景（示例家/默认家统一）。
+  // 否则（含自定义导入 id）保留原行为：仅渲染 manifest 中列出的房间（真实户型图导入示例）。
+  const manifestIds = manifest?.rooms?.map(r => r.id) ?? []
+  const allBuiltin = manifestIds.length > 0 && manifestIds.every(id => getAllRoomIds().includes(id))
+  const roomIds = allBuiltin
+    ? getAllRoomIds()
+    : (manifestIds.length ? manifestIds : getAllRoomIds())
 
   const roomGroups = new Map<string, THREE.Group>()
 

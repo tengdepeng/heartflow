@@ -67,6 +67,7 @@ export async function createHomeReplicaScene(
 
   // 3D 模型：动态加载 GLTFLoader（仅在确有 model 资产时，避免纯图片清单也拉 GLTF 分块）
   async function loadModel(room: HomeReplicaRoomAsset): Promise<void> {
+    if (!room.model) return
     const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js')
     const loader = new GLTFLoader()
     const gltf = await loader.loadAsync(room.model)
@@ -89,6 +90,7 @@ export async function createHomeReplicaScene(
     room: HomeReplicaRoomAsset,
     kind: 'image' | 'plan',
   ): Promise<void> {
+    if (!room.model) return
     const tex = await new THREE.TextureLoader().loadAsync(room.model)
     tex.colorSpace = THREE.SRGBColorSpace
     const isPlan = kind === 'plan'
