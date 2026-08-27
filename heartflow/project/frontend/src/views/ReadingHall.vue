@@ -143,6 +143,9 @@
     <!-- 间隔重复面板（P2 收口） -->
     <ReadingSrsPanel />
 
+    <!-- 古籍竖排 -->
+    <ClassicalVerticalPanel />
+
     <!-- ========== 摘录对话框 ========== -->
     <div data-enter v-if="showDialog" class="rh-dialog-overlay" @click.self="closeDialog">
       <div class="rh-dialog-card">
@@ -169,6 +172,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useReadingInsights, useReadingSpeed, useReading } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
+import ClassicalVerticalPanel from '../components/ClassicalVerticalPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()

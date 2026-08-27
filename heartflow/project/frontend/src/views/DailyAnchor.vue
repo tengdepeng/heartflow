@@ -461,6 +461,15 @@
 
     <!-- 心愿锚 -->
     <WishAnchorPanel />
+
+    <!-- 照片日记 -->
+    <PhotoDiaryPanel />
+
+    <!-- 智能提醒 -->
+    <SmartReminderPanel :anchors="anchor.allAnchors.value" />
+
+    <!-- 日历导出 -->
+    <CalendarExportPanel :anchors="anchor.allAnchors.value" />
   </div>
 </template>
 
@@ -478,6 +487,9 @@ import type { RoomKey } from '../modules/room-resonance'
 import { useCelebration } from '../modules/anchor/celebration'
 import { useAnchorClustering } from '../modules/anchor/anchor-cluster'
 import WishAnchorPanel from '../components/WishAnchorPanel.vue'
+import PhotoDiaryPanel from '../components/PhotoDiaryPanel.vue'
+import SmartReminderPanel from '../components/SmartReminderPanel.vue'
+import CalendarExportPanel from '../components/CalendarExportPanel.vue'
 
 const { entranceClass } = useViewEntrance()
 

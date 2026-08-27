@@ -151,6 +151,12 @@
         <button @click="addCompass" class="gw-btn">+</button>
       </div>
     </section>
+
+    <!-- 目标可视化 -->
+    <GoalVisualizationPanel :goals="goal.goals.value" />
+
+    <!-- 进度统计 -->
+    <GoalProgressPanel :goals="goal.goals.value" />
   </div>
 </template>
 
@@ -163,6 +169,8 @@ import { DRIVING_FORCE_LABELS, type DrivingForce } from '../modules/seasonal/coc
 import { placeInUnfinishedGarden } from '../modules/unfinished'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import type { GoalStatus } from '../modules/goal'
+import GoalVisualizationPanel from '../components/GoalVisualizationPanel.vue'
+import GoalProgressPanel from '../components/GoalProgressPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

@@ -281,6 +281,9 @@
       <p>溯源树还在等待生长</p>
       <span class="empty-hint">在时间长廊里偶遇一段旧记忆时，来这里种下一个根系节点</span>
     </div>
+
+    <!-- 根脉可视化 -->
+    <VisualTreePanel :roots="roots" />
   </div>
 </template>
 
@@ -291,6 +294,7 @@ import { useDecayEngine } from '../modules/roots/decay-engine'
 import { computeGardenHealth } from '../modules/roots/root-narrative'
 import { useRootGarden } from '../modules/roots/roots-garden'
 import type { Root } from '../modules/roots/roots-garden'
+import VisualTreePanel from '../components/VisualTreePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const rootGarden = useRootGarden()

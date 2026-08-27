@@ -201,6 +201,9 @@
     </section>
 
     <div data-enter v-if="!analysis.words.length && !history.length && !words.length" class="empty"><span>🪞</span><p>在这里映照你的文字，或添加词汇开始学习</p></div>
+
+    <!-- 间隔复习会话 -->
+    <ReviewSessionPanel :words="wordEntries" />
     </template>
 
     <!-- ============== Tab 3: 联想网络 ============== -->
@@ -361,7 +364,13 @@
       </section>
 
       <div data-enter v-if="!selectedTemplate && !writingResult" class="empty"><span>✍️</span><p>选择一个模板开始写作，或粘贴文字进行分析</p></div>
+
+      <!-- 写作辅助 -->
+      <WritingAssistantPanel :words="wordEntries" />
     </template>
+
+    <!-- 文字分析（词频 + 风格） -->
+    <TextAnalysisPanel :words="wordEntries" />
   </div>
 </template>
 
@@ -375,6 +384,10 @@ import { usePersonalVocabulary } from '../modules/word-mirror/personal-vocabular
 import { useWordMirror, type WordItem } from '../modules/word-mirror/word-mirror-store'
 import { isStale } from '../modules/word-mirror/stale'
 import { dueWords, nextReviewState } from '../modules/word-mirror/spaced-repetition'
+import TextAnalysisPanel from '../components/TextAnalysisPanel.vue'
+import WritingAssistantPanel from '../components/WritingAssistantPanel.vue'
+import ReviewSessionPanel from '../components/ReviewSessionPanel.vue'
+import type { WordEntry } from '../modules/word-mirror/types'
 
 /* ============== 类型定义 ============== */
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -470,6 +483,21 @@ const newWord = ref('')
 const newDef = ref('')
 const searchQuery = ref('')
 const filterProficiency = ref('')
+
+// 文字分析面板所需：WordItem → WordEntry
+const wordEntries = computed<WordEntry[]>(() =>
+  words.value.map(w => ({
+    id: w.id,
+    word: w.word,
+    definition: w.definition,
+    proficiency: w.proficiency as WordEntry['proficiency'],
+    favorite: w.favorite,
+    tags: [],
+    createdAt: w.createdAt,
+    lastReviewedAt: w.lastReviewedAt,
+    reviewCount: 0,
+  })),
+)
 
 // 分组展开状态
 const groupExpanded: Record<string, boolean> = { learning: true, memorized: false, favorites: false }

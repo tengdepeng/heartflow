@@ -177,6 +177,15 @@
         {{ maintainMessage.text }}
       </div>
     </section>
+
+    <!-- 聚合视图 -->
+    <AggregationPanel :entries="allEntries" />
+
+    <!-- 全文搜索 -->
+    <FullTextSearchPanel :entries="allEntries" />
+
+    <!-- 事件关联 -->
+    <EventLinkagePanel :entries="allEntries" />
   </div>
 </template>
 
@@ -186,6 +195,10 @@ import { useRouter } from 'vue-router'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useTimelineIndex } from '../modules/timeline-index'
 import type { IndexQueryResult } from '../modules/timeline-index'
+import type { IndexEntry } from '../modules/timeline-index'
+import AggregationPanel from '../components/AggregationPanel.vue'
+import FullTextSearchPanel from '../components/FullTextSearchPanel.vue'
+import EventLinkagePanel from '../components/EventLinkagePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -196,10 +209,13 @@ const cacheStats = ref<ReturnType<typeof index.getCacheStats> | null>(null)
 const queryResult = ref<IndexQueryResult | null>(null)
 const rebuilding = ref(false)
 const maintainMessage = ref<{ type: string; text: string } | null>(null)
+const allEntries = ref<IndexEntry[]>([])
 
 onMounted(() => {
   indexStats.value = index.getStats()
   cacheStats.value = index.getCacheStats()
+  const result = index.queryByTime({ limit: 10000 })
+  allEntries.value = result.entries
 })
 
 function navTo(path: string) {

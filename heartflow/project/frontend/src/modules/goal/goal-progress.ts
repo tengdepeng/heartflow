@@ -424,7 +424,7 @@ export function useMilestoneTimeline() {
 // ---- 综合进度统计 ----
 
 export function useProgressStats() {
-  const { snapshots, loadSnapshots, getLatestSnapshot, computeProgressTrend } = useProgressSnapshots()
+  const { snapshots, loadSnapshots, getGoalSnapshots, takeSnapshot, getLatestSnapshot, computeProgressTrend } = useProgressSnapshots()
   const { logs, loadLogs, getRecentLogs } = useGrowthLogs()
 
   function computeStats(goals: Goal[]): ProgressStats {
@@ -467,6 +467,8 @@ export function useProgressStats() {
     logs,
     loadSnapshots,
     loadLogs,
+    getGoalSnapshots,
+    takeSnapshot,
     getLatestSnapshot,
     computeProgressTrend,
     getRecentLogs,

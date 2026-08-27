@@ -229,6 +229,12 @@
     <div class="mindmap-mount">
       <MindMapPanel />
     </div>
+
+    <!-- 信笺（study letters 模块） -->
+    <LettersPanel />
+
+    <!-- 通话磁带（study tapes 模块） -->
+    <TapesPanel />
   </div>
 </template>
 
@@ -240,6 +246,8 @@ import { storage } from '../engine/storage'
 import NoteEditor from '../components/NoteEditor.vue'
 import QuickCapture from '../components/QuickCapture.vue'
 import MindMapPanel from '../components/MindMapPanel.vue'
+import LettersPanel from '../components/LettersPanel.vue'
+import TapesPanel from '../components/TapesPanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'

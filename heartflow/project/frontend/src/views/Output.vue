@@ -188,8 +188,19 @@
       >下一页 ›</button>
     </div>
 
+    <!-- 输出统计 -->
+    <OutputStatsPanel :records="allRecords" />
+
     <!-- 版本快照 -->
     <OutputSnapshotsPanel :records="allRecords" @restored="onSnapshotsRestored" />
+
+    <!-- 高级检索 · 批量 · 导出 -->
+    <OutputAdvancedPanel
+      :records="allRecords"
+      :update-record="updateRecord"
+      :delete-record="deleteRecord"
+      @changed="onAdvancedChanged"
+    />
   </div>
 </template>
 
@@ -199,6 +210,8 @@ import { useOutputManager } from '../modules/output'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import type { OutputRecord, OutputRecordType } from '../modules/output'
 import OutputSnapshotsPanel from '../components/OutputSnapshotsPanel.vue'
+import OutputStatsPanel from '../components/OutputStatsPanel.vue'
+import OutputAdvancedPanel from '../components/OutputAdvancedPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -337,6 +350,23 @@ function deleteOne(id: string) {
 }
 
 function onSnapshotsRestored() {
+  allRecords.value = manager.getAll()
+  currentPage.value = 1
+}
+
+function updateRecord(id: string, updates: Partial<OutputRecord>): boolean {
+  const ok = manager.update(id, updates)
+  if (ok) allRecords.value = manager.getAll()
+  return ok
+}
+
+function deleteRecord(id: string): boolean {
+  const ok = manager.delete(id)
+  if (ok) allRecords.value = manager.getAll()
+  return ok
+}
+
+function onAdvancedChanged() {
   allRecords.value = manager.getAll()
   currentPage.value = 1
 }

@@ -9,6 +9,7 @@ import { ref } from 'vue'
 import type {
   OutputRecord,
   OutputRecordType,
+  OutputRecordStatus,
   OutputState,
   OutputEvent,
   OutputEventListener,
@@ -19,7 +20,7 @@ import type {
 import { DEFAULT_OUTPUT_CONFIG } from './types'
 import { governanceCheckRecord } from './governance-gate'
 
-export type { OutputRecord, OutputRecordType, OutputState, OutputEvent, CreateRecordParams, IOutputManager, OutputConfig }
+export type { OutputRecord, OutputRecordType, OutputRecordStatus, OutputState, OutputEvent, CreateRecordParams, IOutputManager, OutputConfig }
 export { DEFAULT_OUTPUT_CONFIG }
 
 // ---- 发布流水线（P15-8） ----
