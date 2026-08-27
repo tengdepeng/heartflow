@@ -57,8 +57,8 @@ export async function createProceduralHomeScene(
   const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 500)
 
   // 灯光
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5))
-  const sun = new THREE.DirectionalLight(0xffffff, 1.2)
+  scene.add(new THREE.AmbientLight(0xffffff, 0.32))
+  const sun = new THREE.DirectionalLight(0xffffff, 0.9)
   sun.position.set(20, 30, 20)
   sun.castShadow = true
   scene.add(sun)
@@ -93,6 +93,12 @@ export async function createProceduralHomeScene(
     const worldPos = getRoomWorldPosition(roomId)
     const { group } = buildRoomShell(THREE, homeRoom, worldPos)
     addRoomFurniture(THREE, group, roomId, homeRoom.atmosphereColor)
+
+    // 房间氛围点光源：用房间主色着色，仅照亮本房间，增强家的温暖感与辨识度
+    const ambColor = new THREE.Color(homeRoom.atmosphereColor)
+    const roomLight = new THREE.PointLight(ambColor, 0.85, 18, 2)
+    roomLight.position.set(worldPos[0], worldPos[1] + 2.4, worldPos[2])
+    scene.add(roomLight)
 
     group.traverse((o) => {
       const mesh = o as THREE.Mesh

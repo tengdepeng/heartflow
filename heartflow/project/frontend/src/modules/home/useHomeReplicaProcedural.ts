@@ -1,7 +1,8 @@
 // ============================================================
 // 家 · 程序化 3D 房间生成器
-// 为 11 个蓝图房间生成墙面、地面、家具等 3D 几何体，
+// 为 11 个蓝图房间生成墙面、地面、天花板、家具等 3D 几何体，
 // 无需外部 .glb 文件，纯 Three.js 基元拼装。
+// 视觉精致化：家具带细节（靠背/扶手/桌腿/床头板）、房间封闭感（天花板+门窗）。
 // ============================================================
 
 import type * as THREE from 'three'
@@ -38,13 +39,172 @@ export function getAllRoomIds(): string[] {
   return Object.keys(ROOM_LAYOUT)
 }
 
-// ---- 颜色工具 ----
+// ---- 颜色与材质工具 ----
 
 function hexToColor(THREE_MODULE: typeof THREE, hex: string): THREE.Color {
   return new THREE_MODULE.Color(hex)
 }
 
-// ---- 基础房间结构（墙面 + 地面）----
+interface PlacedOpts {
+  x?: number
+  y?: number
+  z?: number
+}
+
+/** 便捷建盒（带投影/接收阴影） */
+function makeBox(
+  T: typeof THREE,
+  w: number, h: number, d: number,
+  color: THREE.Color,
+  opts: PlacedOpts & { roughness?: number; metalness?: number; emissive?: THREE.Color; emissiveIntensity?: number } = {},
+): THREE.Mesh {
+  const mat = new T.MeshStandardMaterial({
+    color,
+    roughness: opts.roughness ?? 0.82,
+    metalness: opts.metalness ?? 0.04,
+  })
+  if (opts.emissive) {
+    mat.emissive = opts.emissive
+    mat.emissiveIntensity = opts.emissiveIntensity ?? 0.4
+  }
+  const mesh = new T.Mesh(new T.BoxGeometry(w, h, d), mat)
+  mesh.position.set(opts.x ?? 0, opts.y ?? 0, opts.z ?? 0)
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+  return mesh
+}
+
+/** 便捷建圆柱 */
+function makeCyl(
+  T: typeof THREE,
+  rTop: number, rBottom: number, h: number,
+  color: THREE.Color,
+  opts: PlacedOpts & { roughness?: number; metalness?: number; emissive?: THREE.Color; emissiveIntensity?: number; seg?: number } = {},
+): THREE.Mesh {
+  const mat = new T.MeshStandardMaterial({
+    color,
+    roughness: opts.roughness ?? 0.7,
+    metalness: opts.metalness ?? 0.1,
+  })
+  if (opts.emissive) {
+    mat.emissive = opts.emissive
+    mat.emissiveIntensity = opts.emissiveIntensity ?? 0.4
+  }
+  const mesh = new T.Mesh(new T.CylinderGeometry(rTop, rBottom, h, opts.seg ?? 12), mat)
+  mesh.position.set(opts.x ?? 0, opts.y ?? 0, opts.z ?? 0)
+  mesh.castShadow = true
+  mesh.receiveShadow = true
+  return mesh
+}
+
+const FLOOR_Y = -ROOM_H / 2
+
+// ---- 通用家具件 ----
+
+function makeChair(T: typeof THREE, g: THREE.Group, color: THREE.Color, dark: THREE.Color, x: number, z: number, rotY = 0): void {
+  const seatY = FLOOR_Y + 0.45
+  const seat = makeBox(T, 0.5, 0.1, 0.5, color, { x, z, y: seatY })
+  seat.rotation.y = rotY
+  g.add(seat)
+  const back = makeBox(T, 0.5, 0.55, 0.08, color, { x, z: z - 0.21, y: seatY + 0.32 })
+  back.rotation.y = rotY
+  g.add(back)
+  for (const [lx, lz] of [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]]) {
+    const leg = makeCyl(T, 0.04, 0.04, 0.45, dark, { x: x + lx, z: z + lz, y: FLOOR_Y + 0.225 })
+    g.add(leg)
+  }
+}
+
+function makeTable(T: typeof THREE, g: THREE.Group, color: THREE.Color, dark: THREE.Color, x: number, z: number, w = 1.4, d = 0.9, h = 0.75): void {
+  const topY = FLOOR_Y + h
+  g.add(makeBox(T, w, 0.08, d, color, { x, z, y: topY }))
+  const hx = w / 2 - 0.15
+  const hz = d / 2 - 0.15
+  for (const [lx, lz] of [[-hx, -hz], [hx, -hz], [-hx, hz], [hx, hz]]) {
+    g.add(makeCyl(T, 0.06, 0.06, h, dark, { x: x + lx, z: z + lz, y: FLOOR_Y + h / 2 }))
+  }
+}
+
+function makeSofa(T: typeof THREE, g: THREE.Group, color: THREE.Color, x: number, z: number, w = 3): void {
+  const baseY = FLOOR_Y + 0.28
+  g.add(makeBox(T, w, 0.5, 1.1, color, { x, z: z - 0.3, y: baseY }))
+  g.add(makeBox(T, w, 0.75, 0.22, color, { x, z: z - 0.78, y: baseY + 0.5 }))
+  g.add(makeBox(T, 0.26, 0.6, 1.1, color, { x: x - w / 2 + 0.13, z: z - 0.3, y: baseY + 0.18 }))
+  g.add(makeBox(T, 0.26, 0.6, 1.1, color, { x: x + w / 2 - 0.13, z: z - 0.3, y: baseY + 0.18 }))
+  // 抱枕
+  g.add(makeBox(T, 0.5, 0.4, 0.18, color.clone().multiplyScalar(0.85), { x: x - w / 4, z: z - 0.55, y: baseY + 0.55, roughness: 0.95 }))
+  g.add(makeBox(T, 0.5, 0.4, 0.18, color.clone().multiplyScalar(0.85), { x: x + w / 4, z: z - 0.55, y: baseY + 0.55, roughness: 0.95 }))
+}
+
+function makeBed(T: typeof THREE, g: THREE.Group, color: THREE.Color, dark: THREE.Color, x: number, z: number): void {
+  g.add(makeBox(T, 2.4, 0.3, 2.8, dark, { x, z, y: FLOOR_Y + 0.15 }))
+  g.add(makeBox(T, 2.2, 0.24, 2.6, color, { x, z, y: FLOOR_Y + 0.42 }))
+  g.add(makeBox(T, 2.4, 1.0, 0.2, dark, { x, z: z - 1.35, y: FLOOR_Y + 0.5 }))
+  // 枕头
+  g.add(makeBox(T, 0.8, 0.16, 0.5, color.clone().multiplyScalar(1.15), { x: x - 0.55, z: z - 1.0, y: FLOOR_Y + 0.62, roughness: 0.95 }))
+  g.add(makeBox(T, 0.8, 0.16, 0.5, color.clone().multiplyScalar(1.15), { x: x + 0.55, z: z - 1.0, y: FLOOR_Y + 0.62, roughness: 0.95 }))
+  // 被角折边
+  g.add(makeBox(T, 2.2, 0.06, 0.7, color.clone().multiplyScalar(0.9), { x, z: z + 0.7, y: FLOOR_Y + 0.56, roughness: 0.95 }))
+}
+
+function makeRug(T: typeof THREE, g: THREE.Group, color: THREE.Color, x: number, z: number, w = 2.5, d = 2): void {
+  const rug = new T.Mesh(
+    new T.PlaneGeometry(w, d),
+    new T.MeshStandardMaterial({ color: color.clone().multiplyScalar(0.7), roughness: 1, metalness: 0 }),
+  )
+  rug.rotation.x = -Math.PI / 2
+  rug.position.set(x, FLOOR_Y + 0.02, z)
+  rug.receiveShadow = true
+  g.add(rug)
+}
+
+function makeShelfUnit(T: typeof THREE, g: THREE.Group, color: THREE.Color, x: number, z: number, w = 2, h = 3.5, depth = 0.6, levels = 3): void {
+  const frame = makeBox(T, w, h, depth, color, { x, z, y: FLOOR_Y + h / 2, roughness: 0.6 })
+  g.add(frame)
+  for (let i = 1; i < levels; i++) {
+    const sy = FLOOR_Y + (h / levels) * i
+    g.add(makeBox(T, w - 0.1, 0.06, depth - 0.05, color.clone().multiplyScalar(0.8), { x, z, y: sy }))
+  }
+}
+
+function makeWardrobeBody(T: typeof THREE, g: THREE.Group, color: THREE.Color, x: number, z: number): void {
+  const h = ROOM_H - 0.5
+  g.add(makeBox(T, 3, h, 0.8, color, { x, z, y: FLOOR_Y + h / 2, roughness: 0.5 }))
+  // 双开门缝 + 把手
+  g.add(makeBox(T, 0.04, h - 0.4, 0.04, color.clone().multiplyScalar(0.5), { x: x - 0.06, z: z + 0.42, y: FLOOR_Y + h / 2 }))
+  g.add(makeBox(T, 0.04, h - 0.4, 0.04, color.clone().multiplyScalar(0.5), { x: x + 0.06, z: z + 0.42, y: FLOOR_Y + h / 2 }))
+}
+
+function makePendant(T: typeof THREE, g: THREE.Group, color: THREE.Color, x: number, z: number): void {
+  g.add(makeCyl(T, 0.02, 0.02, ROOM_H - 1.2, color.clone().multiplyScalar(0.4), { x, z, y: FLOOR_Y + (ROOM_H - 1.2) / 2, roughness: 0.5 }, ))
+  const shade = new T.Mesh(
+    new T.ConeGeometry(0.35, 0.4, 16, 1, true),
+    new T.MeshStandardMaterial({ color, roughness: 0.4, metalness: 0.2, side: T.DoubleSide }),
+  )
+  shade.position.set(x, ROOM_H / 2 - 0.6, z)
+  shade.castShadow = true
+  g.add(shade)
+  g.add(makeCyl(T, 0.12, 0.12, 0.16, color, { x, z, y: ROOM_H / 2 - 0.42, emissive: color, emissiveIntensity: 0.7, roughness: 0.2 }))
+}
+
+function makeMirror(T: typeof THREE, g: THREE.Group, x: number, y: number, z: number, w = 1, h = 1.2): void {
+  g.add(makeBox(T, w, h, 0.05, new T.Color(0xcccccc), { x, y, z, roughness: 0.08, metalness: 0.92 }))
+}
+
+function makePlant(T: typeof THREE, g: THREE.Group, x: number, z: number): void {
+  g.add(makeCyl(T, 0.22, 0.28, 0.5, new T.Color(0x8a5a3c), { x, z, y: FLOOR_Y + 0.25, roughness: 0.8 }))
+  const foliage = new T.MeshStandardMaterial({ color: new T.Color(0x4a8c3f), roughness: 0.9, metalness: 0 })
+  const f1 = new T.Mesh(new T.SphereGeometry(0.55, 10, 8), foliage)
+  f1.position.set(x, FLOOR_Y + 1.1, z)
+  f1.castShadow = true
+  g.add(f1)
+  const f2 = new T.Mesh(new T.SphereGeometry(0.4, 10, 8), foliage)
+  f2.position.set(x + 0.35, FLOOR_Y + 0.85, z + 0.2)
+  f2.castShadow = true
+  g.add(f2)
+}
+
+// ---- 基础房间结构（地面 + 墙 + 天花板）----
 
 export interface ProceduralRoomResult {
   group: THREE.Group
@@ -68,48 +228,86 @@ export function buildRoomShell(
   const floorGeo = new T.PlaneGeometry(ROOM_W, ROOM_D)
   const floorMat = new T.MeshStandardMaterial({
     color: endColor,
-    roughness: 0.85,
+    roughness: 0.9,
     metalness: 0.02,
   })
   const floor = new T.Mesh(floorGeo, floorMat)
   floor.rotation.x = -Math.PI / 2
-  floor.position.y = -ROOM_H / 2
+  floor.position.y = FLOOR_Y
   floor.receiveShadow = true
   group.add(floor)
 
-  // 三面墙（背墙 + 左墙 + 右墙，前面开放）
-  const wallDefs: Array<{ pos: [number, number, number]; rotY: number; w: number; h: number }> = [
-    { pos: [0, 0, -ROOM_D / 2], rotY: 0, w: ROOM_W, h: ROOM_H },
-    { pos: [-ROOM_W / 2, 0, 0], rotY: Math.PI / 2, w: ROOM_D, h: ROOM_H },
-    { pos: [ROOM_W / 2, 0, 0], rotY: -Math.PI / 2, w: ROOM_D, h: ROOM_H },
-  ]
+  const wallMat = () => new T.MeshStandardMaterial({
+    color: baseColor,
+    roughness: 0.85,
+    metalness: 0.02,
+    emissive: glowColor,
+    emissiveIntensity: 0.06,
+  })
 
-  for (const def of wallDefs) {
-    const wallGeo = new T.PlaneGeometry(def.w, def.h)
-    const wallMat = new T.MeshStandardMaterial({
-      color: baseColor,
-      roughness: 0.7,
-      metalness: 0.02,
-      emissive: glowColor,
-      emissiveIntensity: 0.08,
-    })
-    const wall = new T.Mesh(wallGeo, wallMat)
+  // 背墙（中间留门洞 + 上方门楣）
+  const doorW = 1.6
+  const doorH = 3
+  const sideW = (ROOM_W - doorW) / 2
+  const leftWall = new T.Mesh(new T.PlaneGeometry(sideW, ROOM_H), wallMat())
+  leftWall.position.set(-(doorW / 2 + sideW / 2), 0, -ROOM_D / 2)
+  leftWall.rotation.y = 0
+  leftWall.receiveShadow = true
+  group.add(leftWall)
+
+  const rightWall = new T.Mesh(new T.PlaneGeometry(sideW, ROOM_H), wallMat())
+  rightWall.position.set(doorW / 2 + sideW / 2, 0, -ROOM_D / 2)
+  rightWall.receiveShadow = true
+  group.add(rightWall)
+
+  const lintel = new T.Mesh(new T.PlaneGeometry(doorW, ROOM_H - doorH), wallMat())
+  lintel.position.set(0, (doorH + ROOM_H) / 2 - ROOM_H / 2, -ROOM_D / 2)
+  lintel.receiveShadow = true
+  group.add(lintel)
+
+  // 左墙 / 右墙
+  for (const def of [
+    { pos: [-ROOM_W / 2, 0, 0] as [number, number, number], rotY: Math.PI / 2, w: ROOM_D, h: ROOM_H },
+    { pos: [ROOM_W / 2, 0, 0] as [number, number, number], rotY: -Math.PI / 2, w: ROOM_D, h: ROOM_H },
+  ]) {
+    const wall = new T.Mesh(new T.PlaneGeometry(def.w, def.h), wallMat())
     wall.position.set(...def.pos)
     wall.rotation.y = def.rotY
     wall.receiveShadow = true
     group.add(wall)
   }
 
-  // 门框（前面中央开口处的暗示）
-  const doorGeo = new T.BoxGeometry(1.2, 3, 0.2)
+  // 天花板
+  const ceil = new T.Mesh(
+    new T.PlaneGeometry(ROOM_W, ROOM_D),
+    new T.MeshStandardMaterial({ color: baseColor.clone().multiplyScalar(0.55), roughness: 0.95, metalness: 0 }),
+  )
+  ceil.rotation.x = Math.PI / 2
+  ceil.position.y = ROOM_H / 2
+  ceil.receiveShadow = true
+  group.add(ceil)
+
+  // 前侧双开暗示门框（房间入口，朝向相机）
   const doorMat = new T.MeshStandardMaterial({
     color: endColor.clone().multiplyScalar(0.7),
-    roughness: 0.6,
-    metalness: 0.1,
+    roughness: 0.55,
+    metalness: 0.12,
   })
-  const door = new T.Mesh(doorGeo, doorMat)
-  door.position.set(0, -ROOM_H / 2 + 1.5, ROOM_D / 2)
-  group.add(door)
+  const leafL = new T.Mesh(new T.BoxGeometry(0.78, doorH, 0.12), doorMat)
+  leafL.position.set(-0.4, FLOOR_Y + doorH / 2, ROOM_D / 2)
+  leafL.castShadow = true
+  group.add(leafL)
+  const leafR = new T.Mesh(new T.BoxGeometry(0.78, doorH, 0.12), doorMat)
+  leafR.position.set(0.4, FLOOR_Y + doorH / 2, ROOM_D / 2)
+  leafR.castShadow = true
+  group.add(leafR)
+  // 门槛
+  const threshold = new T.Mesh(
+    new T.BoxGeometry(doorW, 0.08, 0.3),
+    new T.MeshStandardMaterial({ color: endColor.clone().multiplyScalar(0.5), roughness: 0.6 }),
+  )
+  threshold.position.set(0, FLOOR_Y + 0.04, ROOM_D / 2)
+  group.add(threshold)
 
   return { group, worldPos }
 }
@@ -124,359 +322,93 @@ export function addRoomFurniture(
 ): void {
   const c = hexToColor(T, color)
   const dark = c.clone().multiplyScalar(0.6)
-  const accent = c.clone().multiplyScalar(0.8)
+  const accent = c.clone().multiplyScalar(0.85)
+  const light = c.clone().lerp(new T.Color(0xffffff), 0.4)
 
   switch (roomId) {
     case 'bedroom':
-      addBed(T, group, c, dark)
+      makeBed(T, group, c, dark, 0, -1.2)
+      makeChair(T, group, c, dark, -1.8, -1.2)
+      group.add(makeBox(T, 0.6, 0.5, 0.6, dark, { x: -1.8, z: -1.2, y: FLOOR_Y + 0.45, roughness: 0.5 }))
+      group.add(makeCyl(T, 0.1, 0.15, 0.5, light, { x: -1.8, z: -1.2, y: FLOOR_Y + 0.95, emissive: c, emissiveIntensity: 0.4, roughness: 0.3 }))
       break
     case 'study':
-      addStudy(T, group, c, dark)
+      makeTable(T, group, dark, dark, 0, -1, 2.5, 1.2, 1.1)
+      for (const [lx, lz] of [[-1.1, -0.5], [1.1, -0.5], [-1.1, 0.5], [1.1, 0.5]]) {
+        group.add(makeCyl(T, 0.06, 0.06, 1, dark, { x: lx, z: lz, y: FLOOR_Y + 0.5 }))
+      }
+      makeShelfUnit(T, group, dark, -2.6, -2, 2, 3.5, 0.6, 4)
+      makeChair(T, group, c, dark, 0, 0.3)
+      makePlant(T, group, 2.6, -2)
       break
     case 'living':
     case 'living-room':
-      addLivingRoom(T, group, c, dark)
+      makeSofa(T, group, c, 0, -1.4, 3)
+      makeTable(T, group, dark, dark, 0, -0.2, 1.5, 0.9, 0.45)
+      makeRug(T, group, c, 0, -0.5, 2.5, 2)
+      makePlant(T, group, 2.8, -2.5)
       break
     case 'kitchen':
-      addKitchen(T, group, c, dark)
+      group.add(makeBox(T, 3.5, 0.9, 0.8, dark, { x: 0, z: -2.5, y: FLOOR_Y + 0.6, roughness: 0.35, metalness: 0.15 }))
+      group.add(makeBox(T, 1.2, 0.06, 0.6, new T.Color(0x333333), { x: 0, z: -2.5, y: FLOOR_Y + 1.08, roughness: 0.2, metalness: 0.5 }))
+      group.add(makeCyl(T, 0.05, 0.05, 0.3, new T.Color(0x999999), { x: 0, z: -2.5, y: FLOOR_Y + 1.25, metalness: 0.8, roughness: 0.2 }))
+      makeTable(T, group, dark, dark, 0, 0.6, 1.8, 1.2, 0.9)
+      makeChair(T, group, c, dark, -1.3, 0.6)
+      makeChair(T, group, c, dark, 1.3, 0.6)
       break
     case 'dining':
     case 'dining-room':
-      addDining(T, group, c, dark)
+      makeTable(T, group, dark, dark, 0, 0, 2.4, 1.4, 0.9)
+      makeChair(T, group, c, dark, 0, -1.2)
+      makeChair(T, group, c, dark, 0, 1.2)
+      makeChair(T, group, c, dark, -1.5, 0)
+      makeChair(T, group, c, dark, 1.5, 0)
+      makePendant(T, group, c, 0, 0)
       break
     case 'bath':
     case 'bathroom':
-      addBathroom(T, group, c, accent)
+      group.add(makeBox(T, 2, 0.7, 1.2, accent, { x: 0, z: -1.5, y: FLOOR_Y + 0.5, roughness: 0.2, metalness: 0.2 }))
+      group.add(makeBox(T, 1.7, 0.5, 0.9, accent.clone().multiplyScalar(0.85), { x: 0, z: -1.5, y: FLOOR_Y + 0.95, roughness: 0.2, metalness: 0.2 }))
+      group.add(makeBox(T, 1.2, 0.15, 0.7, accent, { x: 2, z: -2, y: FLOOR_Y + 1, roughness: 0.2, metalness: 0.2 }))
+      makeMirror(T, group, 2, FLOOR_Y + 1.8, -2.35, 1, 1.2)
       break
     case 'entrance':
-      addEntrance(T, group, c, dark)
+      group.add(makeBox(T, 2, 1.2, 0.5, dark, { x: 2, z: -2.5, y: FLOOR_Y + 0.7, roughness: 0.5 }))
+      group.add(makeCyl(T, 0.05, 0.05, 0.3, new T.Color(0x888888), { x: 2.5, y: ROOM_H / 2 - 0.5, z: -2.5, metalness: 0.7, roughness: 0.3 }))
+      makeRug(T, group, c, 0, 1, 1.5, 2)
       break
     case 'wardrobe':
-      addWardrobe(T, group, c, dark)
+      makeWardrobeBody(T, group, dark, 0, -2.5)
+      makeMirror(T, group, 2.5, 0, -2.5, 0.8, 2.5)
       break
     case 'courtyard':
-      addCourtyard(T, group, c, dark)
+      // 庭院开放，无天花板视觉效果（天花板已统一加，但庭院用低矮围栏感）
+      group.add(makeBox(T, 1.5, 0.04, 4, dark, { x: 0, z: 1, y: FLOOR_Y + 0.03, roughness: 0.7 }))
+      group.add(makeCyl(T, 0.15, 0.2, 2, new T.Color(0x8b6914), { x: 2, z: 2, y: FLOOR_Y + 1, roughness: 0.8 }))
+      group.add(makeCyl(T, 0.02, 0.02, 0.3, new T.Color(0x555555), { x: 2, z: 2, y: FLOOR_Y + 2.15, roughness: 0.4 }))
+      const foliage = new T.Mesh(
+        new T.SphereGeometry(1, 10, 8),
+        new T.MeshStandardMaterial({ color: new T.Color(0x4a8c3f), roughness: 0.9, metalness: 0 }),
+      )
+      foliage.position.set(2, FLOOR_Y + 2.7, 2)
+      foliage.castShadow = true
+      group.add(foliage)
+      group.add(makeBox(T, 2, 0.2, 0.6, dark, { x: -2, z: 0, y: FLOOR_Y + 0.7, roughness: 0.5 }))
       break
     case 'balcony':
-      addBalcony(T, group, c, accent)
+      for (let x = -ROOM_W / 2 + 0.5; x <= ROOM_W / 2 - 0.5; x += 0.8) {
+        group.add(makeCyl(T, 0.04, 0.04, 1.5, new T.Color(0x999999), { x, z: ROOM_D / 2 - 0.1, y: FLOOR_Y + 0.75, metalness: 0.6, roughness: 0.3 }))
+      }
+      makeChair(T, group, accent, accent, 2, 1)
+      group.add(makeCyl(T, 0.3, 0.3, 0.06, accent, { x: 2, z: 1.5, y: FLOOR_Y + 0.9, roughness: 0.3, metalness: 0.1 }))
       break
     case 'storage':
-      addStorage(T, group, c, dark)
+      for (let i = 0; i < 3; i++) {
+        group.add(makeBox(T, 2.5, 0.1, 0.8, dark, { x: 0, z: -2, y: FLOOR_Y + 0.5 + i * 1.2, roughness: 0.5 }))
+      }
+      for (let i = 0; i < 4; i++) {
+        group.add(makeBox(T, 0.6, 0.5, 0.5, c, { x: -1.5 + (i % 2) * 1.5, z: 0.5 + Math.floor(i / 2) * 0.8, y: FLOOR_Y + 0.3, roughness: 0.7 }))
+      }
       break
-  }
-}
-
-// ---- 各房间家具实现 ----
-
-function addBed(T: typeof THREE, g: THREE.Group, c: THREE.Color, dark: THREE.Color): void {
-  // 床架
-  const bedFrame = new T.Mesh(
-    new T.BoxGeometry(2.4, 0.3, 2.8),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.5, metalness: 0.05 }),
-  )
-  bedFrame.position.set(0, -ROOM_H / 2 + 0.35, -1.5)
-  g.add(bedFrame)
-
-  // 床垫
-  const mattress = new T.Mesh(
-    new T.BoxGeometry(2.2, 0.25, 2.6),
-    new T.MeshStandardMaterial({ color: c, roughness: 0.9, metalness: 0 }),
-  )
-  mattress.position.set(0, -ROOM_H / 2 + 0.65, -1.5)
-  g.add(mattress)
-
-  // 床头柜
-  const nightstand = new T.Mesh(
-    new T.BoxGeometry(0.6, 0.5, 0.6),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.5, metalness: 0.05 }),
-  )
-  nightstand.position.set(-1.8, -ROOM_H / 2 + 0.5, -1.5)
-  g.add(nightstand)
-
-  // 台灯
-  const lamp = new T.Mesh(
-    new T.CylinderGeometry(0.1, 0.15, 0.5, 8),
-    new T.MeshStandardMaterial({ color: c, roughness: 0.3, emissive: c, emissiveIntensity: 0.4 }),
-  )
-  lamp.position.set(-1.8, -ROOM_H / 2 + 0.95, -1.5)
-  g.add(lamp)
-}
-
-function addStudy(T: typeof THREE, g: THREE.Group, c: THREE.Color, dark: THREE.Color): void {
-  // 书桌
-  const desk = new T.Mesh(
-    new T.BoxGeometry(2.5, 0.15, 1.2),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.4, metalness: 0.05 }),
-  )
-  desk.position.set(0, -ROOM_H / 2 + 1.1, -1)
-  g.add(desk)
-
-  // 桌腿
-  for (const [lx, lz] of [[-1.1, -0.5], [1.1, -0.5], [-1.1, 0.5], [1.1, 0.5]]) {
-    const leg = new T.Mesh(
-      new T.CylinderGeometry(0.06, 0.06, 1, 8),
-      new T.MeshStandardMaterial({ color: dark, roughness: 0.4, metalness: 0.05 }),
-    )
-    leg.position.set(lx, -ROOM_H / 2 + 0.5, lz)
-    g.add(leg)
-  }
-
-  // 书架
-  const shelf = new T.Mesh(
-    new T.BoxGeometry(2, 3.5, 0.6),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.5, metalness: 0.05 }),
-  )
-  shelf.position.set(-2.5, -ROOM_H / 2 + 1.75, -2)
-  g.add(shelf)
-
-  // 椅子
-  const chairSeat = new T.Mesh(
-    new T.BoxGeometry(0.6, 0.1, 0.6),
-    new T.MeshStandardMaterial({ color: c, roughness: 0.8, metalness: 0 }),
-  )
-  chairSeat.position.set(0, -ROOM_H / 2 + 0.55, 0.2)
-  g.add(chairSeat)
-}
-
-function addLivingRoom(T: typeof THREE, g: THREE.Group, c: THREE.Color, dark: THREE.Color): void {
-  // 沙发
-  const sofa = new T.Mesh(
-    new T.BoxGeometry(3, 0.8, 1.2),
-    new T.MeshStandardMaterial({ color: c, roughness: 0.85, metalness: 0 }),
-  )
-  sofa.position.set(0, -ROOM_H / 2 + 0.6, -1.5)
-  g.add(sofa)
-
-  // 茶几
-  const coffeeTable = new T.Mesh(
-    new T.BoxGeometry(1.5, 0.1, 0.9),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.4, metalness: 0.1 }),
-  )
-  coffeeTable.position.set(0, -ROOM_H / 2 + 0.45, -0.2)
-  g.add(coffeeTable)
-
-  // 地毯
-  const rug = new T.Mesh(
-    new T.PlaneGeometry(2.5, 2),
-    new T.MeshStandardMaterial({ color: c.clone().multiplyScalar(0.7), roughness: 1, metalness: 0 }),
-  )
-  rug.rotation.x = -Math.PI / 2
-  rug.position.set(0, -ROOM_H / 2 + 0.01, -0.5)
-  g.add(rug)
-}
-
-function addKitchen(T: typeof THREE, g: THREE.Group, _c: THREE.Color, dark: THREE.Color): void {
-  // 灶台/操作台
-  const counter = new T.Mesh(
-    new T.BoxGeometry(3.5, 0.9, 0.8),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.3, metalness: 0.15 }),
-  )
-  counter.position.set(0, -ROOM_H / 2 + 0.6, -2.5)
-  g.add(counter)
-
-  // 灶具
-  const stove = new T.Mesh(
-    new T.BoxGeometry(1.2, 0.05, 0.6),
-    new T.MeshStandardMaterial({ color: 0x333333, roughness: 0.2, metalness: 0.5 }),
-  )
-  stove.position.set(0, -ROOM_H / 2 + 1.08, -2.5)
-  g.add(stove)
-
-  // 餐桌
-  const table = new T.Mesh(
-    new T.BoxGeometry(1.8, 0.1, 1.2),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.4, metalness: 0.05 }),
-  )
-  table.position.set(0, -ROOM_H / 2 + 0.9, 0.5)
-  g.add(table)
-}
-
-function addDining(T: typeof THREE, g: THREE.Group, c: THREE.Color, dark: THREE.Color): void {
-  // 餐桌
-  const table = new T.Mesh(
-    new T.BoxGeometry(2.4, 0.12, 1.4),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.35, metalness: 0.05 }),
-  )
-  table.position.set(0, -ROOM_H / 2 + 0.9, 0)
-  g.add(table)
-
-  // 四把椅子
-  const chairPositions: [number, number, number][] = [
-    [0, -ROOM_H / 2 + 0.5, -1.2],
-    [0, -ROOM_H / 2 + 0.5, 1.2],
-    [-1.5, -ROOM_H / 2 + 0.5, 0],
-    [1.5, -ROOM_H / 2 + 0.5, 0],
-  ]
-  for (const pos of chairPositions) {
-    const chair = new T.Mesh(
-      new T.BoxGeometry(0.5, 0.5, 0.5),
-      new T.MeshStandardMaterial({ color: c, roughness: 0.8, metalness: 0 }),
-    )
-    chair.position.set(...pos)
-    g.add(chair)
-  }
-
-  // 吊灯
-  const pendant = new T.Mesh(
-    new T.SphereGeometry(0.3, 8, 8),
-    new T.MeshStandardMaterial({ color: c, roughness: 0.2, emissive: c, emissiveIntensity: 0.5 }),
-  )
-  pendant.position.set(0, ROOM_H / 2 - 0.6, 0)
-  g.add(pendant)
-}
-
-function addBathroom(T: typeof THREE, g: THREE.Group, _c: THREE.Color, accent: THREE.Color): void {
-  // 浴缸
-  const tub = new T.Mesh(
-    new T.BoxGeometry(2, 0.7, 1.2),
-    new T.MeshStandardMaterial({ color: accent, roughness: 0.2, metalness: 0.2 }),
-  )
-  tub.position.set(0, -ROOM_H / 2 + 0.5, -1.5)
-  g.add(tub)
-
-  // 洗手台
-  const sink = new T.Mesh(
-    new T.BoxGeometry(1.2, 0.15, 0.7),
-    new T.MeshStandardMaterial({ color: accent, roughness: 0.2, metalness: 0.2 }),
-  )
-  sink.position.set(2, -ROOM_H / 2 + 1, -2)
-  g.add(sink)
-
-  // 镜子
-  const mirror = new T.Mesh(
-    new T.PlaneGeometry(1, 1.2),
-    new T.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.1, metalness: 0.9 }),
-  )
-  mirror.position.set(2, -ROOM_H / 2 + 1.8, -2.35)
-  g.add(mirror)
-}
-
-function addEntrance(T: typeof THREE, g: THREE.Group, c: THREE.Color, dark: THREE.Color): void {
-  // 鞋柜
-  const shoeRack = new T.Mesh(
-    new T.BoxGeometry(2, 1.2, 0.5),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.5, metalness: 0.05 }),
-  )
-  shoeRack.position.set(2, -ROOM_H / 2 + 0.7, -2.5)
-  g.add(shoeRack)
-
-  // 挂衣钩暗示
-  const hook = new T.Mesh(
-    new T.CylinderGeometry(0.05, 0.05, 0.3, 8),
-    new T.MeshStandardMaterial({ color: 0x888888, roughness: 0.3, metalness: 0.7 }),
-  )
-  hook.position.set(2.5, ROOM_H / 2 - 0.5, -2.5)
-  g.add(hook)
-
-  // 地毯
-  const rug = new T.Mesh(
-    new T.PlaneGeometry(1.5, 2),
-    new T.MeshStandardMaterial({ color: c, roughness: 1, metalness: 0 }),
-  )
-  rug.rotation.x = -Math.PI / 2
-  rug.position.set(0, -ROOM_H / 2 + 0.01, 1)
-  g.add(rug)
-}
-
-function addWardrobe(T: typeof THREE, g: THREE.Group, _c: THREE.Color, dark: THREE.Color): void {
-  // 衣柜
-  const wardrobe = new T.Mesh(
-    new T.BoxGeometry(3, ROOM_H - 0.5, 0.8),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.4, metalness: 0.05 }),
-  )
-  wardrobe.position.set(0, 0, -2.5)
-  g.add(wardrobe)
-
-  // 穿衣镜
-  const fullMirror = new T.Mesh(
-    new T.PlaneGeometry(0.8, 2.5),
-    new T.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.05, metalness: 0.95 }),
-  )
-  fullMirror.position.set(2.5, 0, -2.5)
-  g.add(fullMirror)
-}
-
-function addCourtyard(T: typeof THREE, g: THREE.Group, _c: THREE.Color, dark: THREE.Color): void {
-  // 去掉天花板效果——庭院是开放的
-  // 石板路
-  const path = new T.Mesh(
-    new T.PlaneGeometry(1.5, 4),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.7, metalness: 0.05 }),
-  )
-  path.rotation.x = -Math.PI / 2
-  path.position.set(0, -ROOM_H / 2 + 0.02, 1)
-  g.add(path)
-
-  // 树（简化）
-  const trunk = new T.Mesh(
-    new T.CylinderGeometry(0.15, 0.2, 2, 8),
-    new T.MeshStandardMaterial({ color: 0x8B6914, roughness: 0.8, metalness: 0 }),
-  )
-  trunk.position.set(2, -ROOM_H / 2 + 1, 2)
-  g.add(trunk)
-
-  const leaves = new T.Mesh(
-    new T.SphereGeometry(1, 8, 6),
-    new T.MeshStandardMaterial({ color: 0x4a8c3f, roughness: 0.9, metalness: 0 }),
-  )
-  leaves.position.set(2, -ROOM_H / 2 + 2.5, 2)
-  g.add(leaves)
-
-  // 长椅
-  const bench = new T.Mesh(
-    new T.BoxGeometry(2, 0.2, 0.6),
-    new T.MeshStandardMaterial({ color: dark, roughness: 0.5, metalness: 0.05 }),
-  )
-  bench.position.set(-2, -ROOM_H / 2 + 0.7, 0)
-  g.add(bench)
-}
-
-function addBalcony(T: typeof THREE, g: THREE.Group, _c: THREE.Color, accent: THREE.Color): void {
-  // 栏杆
-  for (let x = -ROOM_W / 2 + 0.5; x <= ROOM_W / 2 - 0.5; x += 0.8) {
-    const rail = new T.Mesh(
-      new T.CylinderGeometry(0.04, 0.04, 1.5, 8),
-      new T.MeshStandardMaterial({ color: 0x999999, roughness: 0.3, metalness: 0.6 }),
-    )
-    rail.position.set(x, -ROOM_H / 2 + 0.7, ROOM_D / 2 - 0.1)
-    g.add(rail)
-  }
-
-  // 休闲椅
-  const chair = new T.Mesh(
-    new T.BoxGeometry(0.8, 0.6, 0.8),
-    new T.MeshStandardMaterial({ color: accent, roughness: 0.8, metalness: 0 }),
-  )
-  chair.position.set(2, -ROOM_H / 2 + 0.5, 1)
-  g.add(chair)
-
-  // 小圆桌
-  const table = new T.Mesh(
-    new T.CylinderGeometry(0.3, 0.3, 0.05, 12),
-    new T.MeshStandardMaterial({ color: accent, roughness: 0.3, metalness: 0.1 }),
-  )
-  table.position.set(2, -ROOM_H / 2 + 0.9, 1.5)
-  g.add(table)
-}
-
-function addStorage(T: typeof THREE, g: THREE.Group, c: THREE.Color, dark: THREE.Color): void {
-  // 货架
-  for (let i = 0; i < 3; i++) {
-    const shelf = new T.Mesh(
-      new T.BoxGeometry(2.5, 0.1, 0.8),
-      new T.MeshStandardMaterial({ color: dark, roughness: 0.5, metalness: 0.05 }),
-    )
-    shelf.position.set(0, -ROOM_H / 2 + 0.5 + i * 1.2, -2)
-    g.add(shelf)
-  }
-
-  // 箱子
-  for (let i = 0; i < 4; i++) {
-    const box = new T.Mesh(
-      new T.BoxGeometry(0.6, 0.5, 0.5),
-      new T.MeshStandardMaterial({ color: c, roughness: 0.7, metalness: 0 }),
-    )
-    box.position.set(-1.5 + (i % 2) * 1.5, -ROOM_H / 2 + 0.3, 0.5 + Math.floor(i / 2) * 0.8)
-    g.add(box)
   }
 }
