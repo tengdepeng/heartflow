@@ -113,6 +113,25 @@
         </div>
       </div>
 
+      <!-- 幕僚任务：侧栏常驻显示调令任务（与幕僚阁调令系统联动） -->
+      <div class="nav-tasks" v-if="taskRecent.length" @click="goAdvisors" title="查看幕僚任务">
+        <div class="nav-tasks-head">
+          <span class="nav-tasks-title">幕僚任务</span>
+          <span v-if="taskRunning" class="nav-tasks-badge">{{ taskRunning }} 进行中</span>
+        </div>
+        <ul class="nav-tasks-list">
+          <li
+            v-for="t in taskRecent"
+            :key="t.id"
+            class="nav-task-item"
+            :class="{ done: t.status === 'done' }"
+          >
+            <span class="nav-task-dot" :class="t.status"></span>
+            <span class="nav-task-label">{{ t.intentLabel }}</span>
+          </li>
+        </ul>
+      </div>
+
       <!-- 底部氛围 -->
       <div class="nav-footer">
         <div class="nav-footer-light"></div>
@@ -204,9 +223,10 @@ import { useConfigStore } from './stores/config'
 import { useUnlockStore } from './stores/unlock'
 import UnlockGate from './components/safety/UnlockGate.vue'
 import { useRoomNavigation } from './composables/useRoomNavigation'
-import { getAllRooms, type RoomNode, type RoomSlot, type RoomDomain } from './engine/room-graph'
+import { getAllRooms, type RoomNode, type RoomGroup, type RoomSlot, type RoomDomain } from './engine/room-graph'
 import NavTreeNode from './components/NavTreeNode.vue'
 import { useRoomManager } from './modules/room-manager'
+import { useRoomTaxonomy, DOMAIN_LABELS, GROUP_LABELS, SLOT_LABELS } from './modules/room-taxonomy'
 import type { BackgroundMediaConfig } from './types'
 // composable 静态导入（触发逻辑小），重组件懒加载，首屏不打包
 import { useAstrolabe } from './modules/astrolabe'
@@ -241,6 +261,7 @@ import SwitchPanel from './components/SwitchPanel.vue'
 import FloatingLayerHost from './components/FloatingLayerHost.vue'
 import { useLayerSwitchTrigger } from './composables/useLayerSwitchTrigger'
 import { useBreakpoint } from './composables/useBreakpoint'
+import { navReorder } from './modules/nav/navReorderState'
 
 // 非首屏重组件：按需加载
 const Astrolabe = defineAsyncComponent(() =>
@@ -262,6 +283,16 @@ const { isAuraWindow } = useAura()
 useLongDormancy()
 const styleStore = useStyleStore()
 const advisor = useAdvisorStore()
+const commandTasks = computed(() =>
+  Array.isArray(advisor.commandTasks) ? advisor.commandTasks : []
+)
+const taskRunning = computed(
+  () => commandTasks.value.filter((t) => t.status === 'running').length
+)
+const taskRecent = computed(() => [...commandTasks.value].reverse().slice(0, 3))
+function goAdvisors() {
+  window.location.hash = '/advisors'
+}
 const perceptionStore = usePerceptionStore()
 const nav = useRoomNavigation()
 // 三层空间 · 切换触发器（键盘 + 长按空白，三端通用、可自定义）
@@ -299,9 +330,6 @@ const { sidebarFloatEdge, setSidebarFloatEdge, sidebarFloatPos, setSidebarFloatP
 watch(autoHideChrome, (on) => { if (on) poke() })
 // 空闲时长变更时，若界面当前可见则重启计时，使新时长即时生效（隐藏态不强行唤醒）
 watch(autoHideDelay, () => { if (!chromeHidden.value) poke() })
-// 笔记板可见性（NoteLayer 注入，联动其 FAB 开关）
-const noteBoardVisible = ref(false)
-provide('noteBoardVisible', noteBoardVisible)
 
 // ---- 侧边栏自定义：派生 CSS 变量注入壳层（超级自定义 · 侧边栏子组） ----
 // 宽度 / 毛玻璃通透度 / 背景模式 / 项目组密度 统一映射为 :root 级自定义属性，
@@ -403,28 +431,69 @@ const navBarFloatStyle = computed((): Record<string, string> => {
   return normal
 })
 
+let pendingDragTimer: number | null = null
+let pendingDragStart: { x: number; y: number } | null = null
+
 function onNavBarPointerDown(e: PointerEvent): void {
-  if (!isDesktop.value) return // 仅桌面端可拖
   if (sidebarCollapsed.value) return // 用户主动收起态不拖
+  const t = e.target as HTMLElement
+  // 房间列表（.nav-scroll）整体可抓来拖动侧栏；仅链接/按钮/输入/抽屉关闭钮不触发拖动
+  // （房间项自身的「长按重排」由 NavTreeNode 接管，重排进行中 onDragMove 会放弃侧栏拖动）
+  if (t.closest('a, button, input, textarea, .nav-drawer-close')) return
+  // 桌面鼠标：按下即拖（与桌面一致）；触摸：长按 350ms 才进拖动，
+  // 先滑动=滚动房间列表，按住再拖=移动侧栏，避免手势冲突抢占列表触摸滑动。
+  if (e.pointerType === 'touch') {
+    pendingDragStart = { x: e.clientX, y: e.clientY }
+    const onEarlyMove = (me: PointerEvent) => {
+      if (pendingDragStart && Math.hypot(me.clientX - pendingDragStart.x, me.clientY - pendingDragStart.y) > 10) {
+        cleanupPendingDrag()
+      }
+    }
+    const onEarlyUp = () => cleanupPendingDrag()
+    pendingDragTimer = window.setTimeout(() => {
+      window.removeEventListener('pointermove', onEarlyMove)
+      window.removeEventListener('pointerup', onEarlyUp)
+      pendingDragTimer = null
+      pendingDragStart = null
+      beginSidebarDrag(e)
+    }, 350)
+    window.addEventListener('pointermove', onEarlyMove)
+    window.addEventListener('pointerup', onEarlyUp, { once: true })
+    return
+  }
+  beginSidebarDrag(e)
+}
+
+function cleanupPendingDrag(): void {
+  if (pendingDragTimer !== null) {
+    clearTimeout(pendingDragTimer)
+    pendingDragTimer = null
+  }
+  pendingDragStart = null
+}
+
+function beginSidebarDrag(e: PointerEvent): void {
   // 对侧栏操作（点按/拖拽）→ pokeSidebar 唤醒无操作隐藏，侧栏立即在
   // 「原位置」（sidebarFloatPos 拖动位置）出现、不回边框隐藏，随后可拖。
   pokeSidebar()
-  // 整条侧栏可抓：仅当按下落在交互元素（链接/按钮/输入框/滚动列表/关闭钮）上时不启动拖动，
-  // 其余区域（品牌栏、分组标题、空白）均可起拖，避免只能抓顶部一小条的「抓不到」问题。
-  const t = e.target as HTMLElement
-  if (t.closest('a, button, input, textarea, .nav-scroll, .nav-drawer-close')) return
   const el = navBarEl.value
   if (!el) return
   const rect = el.getBoundingClientRect()
   dragStart = { sx: e.clientX, sy: e.clientY, ox: rect.left, oy: rect.top }
   dragPos.value = { x: rect.left, y: rect.top }
   sidebarDragging.value = true
+  try { el.setPointerCapture(e.pointerId) } catch { /* noop */ }
   window.addEventListener('pointermove', onDragMove)
   window.addEventListener('pointerup', onDragEnd)
   e.preventDefault()
 }
 
 function onDragMove(e: PointerEvent): void {
+  // 房间重排进行中：放弃侧栏拖动，避免「既移侧栏又重排」的手势冲突
+  if (navReorder.active) {
+    cancelSidebarDrag()
+    return
+  }
   if (!dragStart || !navBarEl.value) return
   const rect = navBarEl.value.getBoundingClientRect()
   let nx = dragStart.ox + (e.clientX - dragStart.sx)
@@ -437,6 +506,14 @@ function onDragMove(e: PointerEvent): void {
   nx = Math.max(-(rect.width - keep), Math.min(nx, window.innerWidth - keep))
   ny = Math.max(-(rect.height - keep), Math.min(ny, window.innerHeight - keep))
   dragPos.value = { x: nx, y: ny }
+}
+
+function cancelSidebarDrag(): void {
+  window.removeEventListener('pointermove', onDragMove)
+  window.removeEventListener('pointerup', onDragEnd)
+  sidebarDragging.value = false
+  dragStart = null
+  dragPos.value = null
 }
 
 function onDragEnd(): void {
@@ -463,6 +540,13 @@ function onDragEnd(): void {
   const distRight = vw - right
   const distTop = top
   const distBottom = vh - bottom
+  // 窄屏（手机/平板）：保持覆盖抽屉模型。松手吸附到最近水平边（左/右）并清除自由浮动坐标，
+  // 使抽屉收起（translateX(-110%)）仍可正常隐藏，避免拖动后变浮动面板卡死无法收起。
+  if (isMobileOrTablet.value) {
+    setSidebarFloatEdge(distLeft <= distRight ? 'left' : 'right')
+    setSidebarFloatPos(null)
+    return
+  }
   // 吸附阈值：窗体任意边距视口该边 ≤ 24px 即判定为「贴该边」。
   // 但当侧栏在该方向尺寸 ≥ 视口尺寸时，该方向无法自由放置（必然溢出），
   // 此时不吸附该方向，避免「侧栏太高 → 底部永远进阈值 → 拖到中部也强制贴边」的退化。
@@ -768,6 +852,7 @@ const hallAnchor = computed<{ x: number; y: number } | null>(() => {
 
 // ---- 超级自定义 · 收藏式导航（侧栏与底栏统一驱动） ----
 const rm = useRoomManager()
+const taxonomy = useRoomTaxonomy()
 
 // 未自定义排序时的「自然序」：主链路优先（与现状首屏顺序一致），其余按房间图定义序
 // ---- 侧栏全量树 · 按蓝图18空间排布（家为原点 → 主链路 → 世界空间七领域 → 系统边界）----
@@ -781,16 +866,6 @@ interface NavNode {
   slot?: string
   domain?: string
   children: NavNode[]
-}
-
-const DOMAIN_LABELS: Record<RoomDomain, string> = {
-  inward: '向内 · 自我',
-  outward: '向外 · 关系',
-  body: '身体 · 践行',
-  knowledge: '知识 · 创造',
-  work: '工作 · 收入',
-  time: '时间 · 记忆',
-  system: '系统 · 安全',
 }
 
 // 哪些房间需要从"父房间"下作为子节点呈现（更漏、家延伸等）
@@ -808,15 +883,21 @@ function effDomain(r: RoomNode): RoomDomain {
   return (cfg?.pinnedDomain as RoomDomain) ?? r.domain
 }
 
+// 导航可见性：用户在「房间设置 / 房间管理器」隐藏的房间从侧栏移除（home / home-space 为原点，永不隐藏）
+function isNavVisible(r: RoomNode): boolean {
+  if (r.id === 'home' || r.id === 'home-space') return true
+  return rm.getRoomConfig(r.id)?.visible !== false
+}
+
 const navTree = computed<NavNode[]>(() => {
   const all = getAllRooms()
   const tree: NavNode[] = []
 
-  // 1) 家 · 原点（home-space 为根，列出未 pin 走的其他家延伸房间）
+  // 1) 家 · 原点（home-space 为根，列出未 pin 走其他区的家延伸房间）
   const home = all.find((r) => r.id === 'home-space')
   if (home) {
     const homeKids = childRoomsOf('home-space')
-      .filter((r) => effSlot(r) === 'screen') // 用户没钉到其他区的家延伸才留在家下
+      .filter((r) => effSlot(r) === 'screen' && isNavVisible(r)) // 用户没钉到其他区的家延伸才留在家下
       .map(roomToNode)
     tree.push({ ...roomToNode(home), children: homeKids })
   }
@@ -824,78 +905,72 @@ const navTree = computed<NavNode[]>(() => {
   const heart = all.find((r) => r.id === 'home')
   if (heart) tree.push(roomToNode(heart))
 
-  // 2) 主链路 · 每日（高频日常，isMainPath 固定）
-  const mainPathRooms = all.filter((r) => r.isMainPath)
-  if (mainPathRooms.length > 0) {
-    tree.push({
-      id: 'slot-main-path',
-      name: '主链路 · 每日',
-      icon: '🌿',
-      color: '#d4a574',
-      path: '',
-      group: 'main-path',
-      slot: 'main-path',
-      domain: 'time',
-      children: mainPathRooms.map(roomToNode),
-    })
-  }
-
-  // 3) 世界空间 · 七领域（按用户 pin 或默认的 domain 分组，排除家延伸/主链路/系统）
-  const homeExtIds = new Set(childRoomsOf('home-space').map((r) => r.id))
-  const worldRooms = all.filter(
-    (r) =>
-      r.id !== 'home-space' &&
-      r.id !== 'home' &&
-      !r.isMainPath &&
-      effDomain(r) !== 'system' &&
-      !(homeExtIds.has(r.id) && effSlot(r) === 'screen'),
-  )
-  const byDomain = new Map<RoomDomain, RoomNode[]>()
-  for (const r of worldRooms) {
-    const arr = byDomain.get(effDomain(r)) ?? []
+  // 2) 其余房间按所选分类体系（taxonomy）聚合重排
+  const rest = all.filter((r) => r.id !== 'home-space' && r.id !== 'home' && isNavVisible(r))
+  const buckets = new Map<string, RoomNode[]>()
+  for (const r of rest) {
+    const key = dimKey(r)
+    const arr = buckets.get(key) ?? []
     arr.push(r)
-    byDomain.set(effDomain(r), arr)
+    buckets.set(key, arr)
   }
-  for (const [domain, rooms] of byDomain) {
-    const kids = rooms.map((r) => {
-      // 更漏：把其 branchFrom==='worklog' 的子空间挂上
-      if (r.id === 'worklog') {
-        const sub = childRoomsOf('worklog').map(roomToNode)
-        return { ...roomToNode(r), children: sub }
-      }
-      return roomToNode(r)
-    })
-    tree.push({
-      id: `domain-${domain}`,
-      name: DOMAIN_LABELS[domain],
-      icon: '·',
-      color: '#b89a6a',
-      path: '',
-      group: domain,
-      slot: 'world',
-      domain,
-      children: kids,
-    })
-  }
-
-  // 4) 系统边界 · 最边缘
-  const sysRooms = all.filter((r) => effDomain(r) === 'system' && r.id !== 'home-space' && r.id !== 'home')
-  if (sysRooms.length > 0) {
-    tree.push({
-      id: 'slot-system',
-      name: '系统边界 · 安全',
-      icon: '🔒',
-      color: '#b89a6a',
-      path: '',
-      group: 'system',
-      slot: 'corner',
-      domain: 'system',
-      children: sysRooms.map(roomToNode),
-    })
+  for (const [key, rooms] of buckets) {
+    const kids = rooms
+      .sort((a, b) => roomOrder(a.id) - roomOrder(b.id))
+      .map((r) => {
+        // 更漏：把其 branchFrom==='worklog' 的子空间挂上
+        if (r.id === 'worklog') {
+          return { ...roomToNode(r), children: childRoomsOf('worklog').filter(isNavVisible).map(roomToNode) }
+        }
+        return roomToNode(r)
+      })
+    tree.push(buildGroupHead(key, kids))
   }
 
   return tree
 })
+
+/** 按当前分类体系计算房间的聚合维度 key */
+function dimKey(r: RoomNode): string {
+  switch (taxonomy.selectedTaxonomy.value) {
+    case 'domain':
+      // 主链路房间未显式设 domain，归到「时间 · 记忆」
+      return effDomain(r) ?? (r.isMainPath ? 'time' : 'system')
+    case 'group':
+      return r.group
+    case 'slot':
+      return effSlot(r) ?? r.slot ?? 'screen'
+    case 'custom': {
+      const gid = taxonomy.groupIdOf(r.id)
+      return gid ?? 'ungrouped'
+    }
+  }
+}
+
+/** 按维度 key 构造导航树分组头节点（id 前缀 tax-* 供 onMoveNode 落点判定） */
+function buildGroupHead(key: string, children: NavNode[]): NavNode {
+  const t = taxonomy.selectedTaxonomy.value
+  if (t === 'domain') {
+    return { id: `tax-domain-${key}`, name: DOMAIN_LABELS[key as RoomDomain] ?? key, icon: '·', color: '#b89a6a', path: '', group: key, slot: undefined, domain: key, children }
+  }
+  if (t === 'group') {
+    return { id: `tax-group-${key}`, name: GROUP_LABELS[key as RoomGroup] ?? key, icon: '·', color: '#b89a6a', path: '', group: key, slot: undefined, domain: undefined, children }
+  }
+  if (t === 'slot') {
+    return { id: `tax-slot-${key}`, name: SLOT_LABELS[key as RoomSlot] ?? key, icon: '·', color: '#b89a6a', path: '', group: 'world', slot: key, domain: undefined, children }
+  }
+  // custom
+  if (key === 'ungrouped') {
+    return { id: 'tax-custom-ungrouped', name: '未分组', icon: '·', color: '#b89a6a', path: '', group: 'world', slot: undefined, domain: undefined, children }
+  }
+  const g = taxonomy.customGroups.value.find((g) => g.id === key)
+  return { id: `tax-custom-${key}`, name: g?.name ?? '未命名分组', icon: '·', color: '#b89a6a', path: '', group: 'world', slot: undefined, domain: undefined, children }
+}
+
+/** 房间排序权重（order===0 视为自然序，保持 room-graph 定义序） */
+function roomOrder(id: string): number {
+  return rm.getRoomConfig(id)?.order ?? 0
+}
 
 function roomToNode(r: RoomNode): NavNode {
   const cfg = rm.getRoomConfig(r.id)
@@ -912,9 +987,12 @@ function roomToNode(r: RoomNode): NavNode {
   }
 }
 
-// 侧栏全量树展开状态（默认仅展开「家」和「主链路」，其余折叠，避免点累了）
+// 侧栏全量树展开状态。
+// 默认展开所有「分类分组头」(tax-*)，让房间立即可见、可拖到别的分组
+// （修复：原先仅展开 home-space → 分组全折叠 → 侧栏只渲染分组头、无房间可拖，
+//   用户感知为「根本不能移动房间到别的分组」）。用户手动折叠仍生效（watch 仅追加不收回）。
 const expandedIds = ref<Set<string>>(
-  new Set(['home-space', 'slot-main-path']),
+  new Set(['home-space']),
 )
 function toggleExpand(id: string) {
   const s = new Set(expandedIds.value)
@@ -922,6 +1000,22 @@ function toggleExpand(id: string) {
   else s.add(id)
   expandedIds.value = s
 }
+// 默认展开分类分组头：挂载即把当前 navTree 中所有 tax-* 头加入展开集（仅追加，尊重手动折叠）
+watch(
+  navTree,
+  (tree) => {
+    const s = new Set(expandedIds.value)
+    let changed = false
+    for (const n of tree) {
+      if (n.id.startsWith('tax-') && !s.has(n.id)) {
+        s.add(n.id)
+        changed = true
+      }
+    }
+    if (changed) expandedIds.value = s
+  },
+  { immediate: true },
+)
 
 // ---- 超级自定义 · 拖拽落点处理 ----
 function findNavNode(nodes: NavNode[], id: string): NavNode | undefined {
@@ -936,27 +1030,34 @@ function findNavNode(nodes: NavNode[], id: string): NavNode | undefined {
 function onMoveNode(draggedId: string, targetId: string) {
   const target = findNavNode(navTree.value, targetId)
   if (!target || draggedId === target.id) return
-  // 拖到分组头（无 path）：改变归属大区/领域
+  // 拖到分组头（无 path）：改变归属维度
   if (!target.path) {
-    let slot = target.slot ?? null
-    let domain = target.domain ?? null
-    // 主链路是固定高频组，不允许钉入；落到此处归到前院+时间领域近似
-    if (target.id === 'slot-main-path') {
-      slot = 'front-yard'
-      domain = 'time'
+    if (target.id.startsWith('tax-domain-')) {
+      const domain = target.id.slice('tax-domain-'.length) as RoomDomain
+      rm.setRoomPin(draggedId, null, domain)
+    } else if (target.id.startsWith('tax-slot-')) {
+      const slot = target.id.slice('tax-slot-'.length) as RoomSlot
+      rm.updateRoomConfig(draggedId, { pinnedSlot: slot }) // 保留 domain 钉
+    } else if (target.id.startsWith('tax-custom-')) {
+      const gid = target.id.slice('tax-custom-'.length)
+      if (gid === 'ungrouped') taxonomy.removeRoomFromGroups(draggedId)
+      else taxonomy.addRoomToGroup(gid, draggedId)
     }
-    rm.setRoomPin(draggedId, slot as RoomSlot | null, domain as RoomDomain | null)
+    // tax-group-* 为只读聚合视图（group 是 room-graph 常量不可写），不触发归属变更
     // 展开目标组，让用户看到结果
-    if (target.id) {
-      const s = new Set(expandedIds.value)
-      s.add(target.id)
-      expandedIds.value = s
-    }
+    const s = new Set(expandedIds.value)
+    s.add(target.id)
+    expandedIds.value = s
     return
   }
-  // 拖到房间项（有 path）：同组内排序 + 归属对齐到目标房间的大区/领域
+  // 拖到房间项（有 path）：同组内排序 + 归属对齐到目标房间的大区/分组
   rm.reorderWithinGroup(draggedId, target.id)
-  rm.setRoomPin(draggedId, target.slot as RoomSlot | null, target.domain as RoomDomain | null)
+  if (target.domain) rm.updateRoomConfig(draggedId, { pinnedDomain: target.domain as RoomDomain })
+  if (target.slot) rm.updateRoomConfig(draggedId, { pinnedSlot: target.slot as RoomSlot })
+  if (taxonomy.selectedTaxonomy.value === 'custom' && target.id) {
+    const gid = taxonomy.groupIdOf(target.id)
+    if (gid) taxonomy.addRoomToGroup(gid, draggedId)
+  }
 }
 
 // ---- 页面过渡动画（光门过渡） ----
@@ -1574,6 +1675,88 @@ watch(() => nav.currentRoomId.value, () => {
   white-space: nowrap;
 }
 
+/* ---- 侧栏幕僚任务（与幕僚阁调令系统联动）---- */
+.nav-tasks {
+  margin: 4px 12px 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb), 0.06);
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+.nav-tasks:hover {
+  background: rgba(var(--accent-rgb), 0.1);
+}
+.nav-tasks-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.nav-tasks-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.72);
+}
+.nav-tasks-badge {
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.18);
+  color: rgba(var(--accent-rgb), 1);
+  white-space: nowrap;
+}
+.nav-tasks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.nav-task-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.82);
+}
+.nav-task-item.done {
+  color: rgba(255, 255, 255, 0.5);
+}
+.nav-task-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(var(--accent-rgb), 0.55);
+}
+.nav-task-dot.running {
+  background: rgba(var(--accent-rgb), 0.9);
+  animation: nav-task-pulse 1.4s ease-out infinite;
+}
+.nav-task-item.done .nav-task-dot {
+  animation: nav-task-light 2.6s ease-in-out infinite;
+  background: rgba(var(--accent-rgb), 0.6);
+}
+.nav-task-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@keyframes nav-task-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.5); }
+  70% { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+}
+@keyframes nav-task-light {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
 /* ---- 底部氛围 ---- */
 .nav-footer {
   height: 2px;
@@ -1681,7 +1864,6 @@ watch(() => nav.currentRoomId.value, () => {
   transform: translateY(8px);
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
-
 /* ---- 桌面美化层 AuraLayer 控制簇：随沉浸模式同步淡出（与底栏一块自动隐藏） ----
    aura-control 是 .aura-layer 的直接子节点、.app-shell 的兄弟节点，
    故用 .app-shell.chrome-hidden ~ 通用兄弟选择器命中。 */

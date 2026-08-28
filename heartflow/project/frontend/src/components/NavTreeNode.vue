@@ -10,23 +10,30 @@
         'is-drop-target': isDropTarget,
         'is-dragging': isDragging,
       }"
-      :style="indentStyle"
-      :data-node-id="node.id"
-      @pointerdown="onPointerDown"
+    :style="indentStyle"
+    :data-node-id="node.id"
+  >
+    <button
+      v-if="canDrag"
+      type="button"
+      class="nav-grip"
+      aria-label="拖动以移动到其他分组"
+      title="拖动以移动"
+      @pointerdown.stop.prevent="onGripDown"
       @pointermove="onPointerMove"
       @pointerup="onPointerUp"
       @pointercancel="onPointerCancel"
-    >
-      <button
-        v-if="hasChildren"
-        type="button"
-        class="nav-caret"
-        :class="{ open: isOpen }"
-        :aria-label="isOpen ? '收起' : '展开'"
-        :title="isOpen ? '收起' : '展开'"
-        @click.stop="toggle"
-      >▾</button>
-      <span v-else class="nav-caret-spacer" aria-hidden="true" />
+    >⠿</button>
+    <button
+      v-if="hasChildren"
+      type="button"
+      class="nav-caret"
+      :class="{ open: isOpen }"
+      :aria-label="isOpen ? '收起' : '展开'"
+      :title="isOpen ? '收起' : '展开'"
+      @click.stop="toggle"
+    >▾</button>
+    <span v-else class="nav-caret-spacer" aria-hidden="true" />
 
       <router-link v-if="node.path" :to="node.path" class="nav-link-row" @click="onNavClick">
         <span class="nav-icon">{{ node.icon }}</span>
@@ -62,6 +69,7 @@
 
 <script setup lang="ts">
 import { computed, reactive } from 'vue'
+import { navReorder } from '../modules/nav/navReorderState'
 
 export interface NavTreeNodeData {
   id: string
@@ -111,51 +119,48 @@ const navDrag = reactive<{ active: boolean; draggedId: string; targetId: string;
 const isDropTarget = computed(() => navDrag.active && navDrag.targetId === props.node.id && navDrag.draggedId !== props.node.id)
 const isDragging = computed(() => navDrag.active && navDrag.draggedId === props.node.id)
 
-let pressTimer: number | null = null
-let pressX = 0
-let pressY = 0
 let dragging = false
 
-function clearPress() {
-  if (pressTimer !== null) {
-    clearTimeout(pressTimer)
-    pressTimer = null
-  }
-}
-
-function onPointerDown(e: PointerEvent) {
+// 拖拽手柄（⠿）按下即进入拖拽：拖拽与「点击进房」彻底解耦，
+// 不再依赖 400ms 长按（长按不可发现、且易与列表触摸滑动冲突）。
+function onGripDown(e: PointerEvent): void {
   if (!canDrag.value) return
-  pressX = e.clientX ?? 0
-  pressY = e.clientY ?? 0
-  clearPress()
-  // 长按 400ms 进入拖拽；期间若移动超阈值则视为滑动/点击，取消
-  pressTimer = window.setTimeout(() => startDrag(e), 400)
+  startDrag(e)
 }
 
 function startDrag(e: PointerEvent) {
   if (!canDrag.value) return
   navDrag.active = true
+  navReorder.active = true // 通知 App.vue：房间重排进行中，放弃侧栏拖动
   navDrag.draggedId = props.node.id
   navDrag.targetId = ''
   dragging = true
   try { (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId) } catch { /* noop */ }
 }
 
+// 侧栏滚动容器（拖拽自动滚动用）
+function navScroller(): HTMLElement | null {
+  return document.querySelector('.nav-scroll')
+}
+
 function onPointerMove(e: PointerEvent) {
-  if (!dragging && pressTimer !== null) {
-    const dx = (e.clientX ?? 0) - pressX
-    const dy = (e.clientY ?? 0) - pressY
-    if (Math.hypot(dx, dy) > 10) clearPress()
-    return
-  }
   if (!dragging) return
+  // 拖拽靠近侧栏上/下边缘时自动滚动，让屏幕外的目标分组头滚入视野
+  // （修复：手机长列表下源房间与目标分组无法同时可见、够不到目标）
+  const sc = navScroller()
+  if (sc) {
+    const r = sc.getBoundingClientRect()
+    const y = e.clientY ?? 0
+    const margin = 48
+    if (y < r.top + margin) sc.scrollTop -= (r.top + margin - y) * 0.35
+    else if (y > r.bottom - margin) sc.scrollTop += (y - (r.bottom - margin)) * 0.35
+  }
   const el = document.elementFromPoint(e.clientX ?? 0, e.clientY ?? 0) as HTMLElement | null
   const item = el?.closest('.nav-item-core') as HTMLElement | null
   navDrag.targetId = item?.getAttribute('data-node-id') ?? ''
 }
 
 function onPointerUp(e: PointerEvent) {
-  clearPress()
   if (!dragging) return
   dragging = false
   try { (e.currentTarget as HTMLElement).releasePointerCapture?.(e.pointerId) } catch { /* noop */ }
@@ -165,15 +170,16 @@ function onPointerUp(e: PointerEvent) {
       navDrag.consumed = true
     }
     navDrag.active = false
+    navReorder.active = false
     navDrag.draggedId = ''
     navDrag.targetId = ''
   }
 }
 
 function onPointerCancel() {
-  clearPress()
   dragging = false
   navDrag.active = false
+  navReorder.active = false
   navDrag.draggedId = ''
   navDrag.targetId = ''
 }
@@ -250,8 +256,37 @@ function toggle() {
   background: var(--accent-glow);
 }
 .nav-item.can-drag {
+  cursor: default;
+}
+/* 拖拽手柄：独立抓取点，按下即拖（与点击进房解耦）；touch-action:none 仅限手柄，
+   房间本体仍可正常接收触摸滚动，避免长列表侧栏在手机上滑不动。 */
+.nav-grip {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 2px 0 -2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 6px;
   cursor: grab;
   touch-action: none;
+  transition: opacity var(--transition), color var(--transition), background var(--transition);
+}
+.nav-grip:hover {
+  opacity: 0.95;
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+.nav-grip:active {
+  cursor: grabbing;
 }
 .nav-item.can-drag:active {
   cursor: grabbing;
