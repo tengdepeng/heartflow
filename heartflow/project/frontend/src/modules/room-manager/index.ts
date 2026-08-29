@@ -55,9 +55,16 @@ function saveAllRoomConfigs(configs: RoomConfig[]): void {
   storage.setKV(ROOM_CONFIG_STORAGE_KEY, map)
 }
 
-export function useRoomManager() {
-  const configs = ref<RoomConfig[]>(loadAllRoomConfigs())
+// ---- 模块级单例：所有调用方（App.vue 导航树 / 殿堂设置 / 房间管理器 / 聚合面板）共享同一份配置 ----
+// 切换可见性 / 钉入归属后跨组件实时联动，无需重载。与 useRoomTaxonomy / useAstrolabeTheme 等单例一致。
+const configs = ref<RoomConfig[]>(loadAllRoomConfigs())
 
+/** 测试用：从存储重新载入配置，避免模块级单例在用例之间串味。真实应用无需调用。 */
+export function resetRoomManager() {
+  configs.value = loadAllRoomConfigs()
+}
+
+export function useRoomManager() {
   /** 获取所有房间配置 */
   function getAllRoomConfigs(): RoomConfig[] {
     return configs.value
@@ -134,8 +141,13 @@ export function useRoomManager() {
       return cfg?.pinnedDomain ?? room?.domain ?? ''
     }
     const g = groupOf(draggedId)
+    // 注意：可见性判定必须与 App.vue isNavVisible 一致（visible !== false）。
+    // 原先写成 c.visible（真值判断）会把「从未显式设过 visible」的房间
+    // （configs 里大量房间 visible 为 undefined）直接排除掉，
+    // 导致 fromIdx/toIdx = -1 提前 return —— 拖拽移动静默失效、无任何报错，
+    // 表现为「房间拖过去没反应 / 拖不回原来的组」。
     const group = configs.value
-      .filter((c) => c.visible && groupOf(c.roomId) === g)
+      .filter((c) => c.visible !== false && groupOf(c.roomId) === g)
       .sort((a, b) => a.order - b.order)
     const fromIdx = group.findIndex((c) => c.roomId === draggedId)
     const toIdx = group.findIndex((c) => c.roomId === targetId)

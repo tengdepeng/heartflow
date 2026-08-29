@@ -9,6 +9,8 @@
         'can-drag': canDrag,
         'is-drop-target': isDropTarget,
         'is-dragging': isDragging,
+        'is-empty-group': isEmptyGroup,
+        'is-group-head': isGroupHead,
       }"
     :style="indentStyle"
     :data-node-id="node.id"
@@ -46,6 +48,9 @@
         <span class="nav-icon">{{ node.icon }}</span>
         <span class="nav-label">{{ node.name }}</span>
         <span v-if="hasChildren && !isOpen" class="nav-child-count">{{ node.children.length }}</span>
+        <!-- 空分组占位：分组头必须保留可命中的高度，否则房间被全部移走后
+             落点消失、再也拖不回去。用弱化虚线态提示「这里可以拖回来」。 -->
+        <span v-if="isEmptyGroup" class="nav-empty-hint">空 · 拖到此处</span>
       </div>
     </div>
 
@@ -68,8 +73,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
-import { navReorder } from '../modules/nav/navReorderState'
+import { computed } from 'vue'
+import { navReorder, navDrag } from '../modules/nav/navReorderState'
 
 export interface NavTreeNodeData {
   id: string
@@ -107,15 +112,14 @@ const indentStyle = computed(() => ({ paddingLeft: `${10 + props.depth * 14}px` 
 
 const canDrag = computed(() => (props.draggable ?? true) && !!props.node.path && props.node.id !== 'home-space')
 
-// ---- 长按拖拽重排（触屏/桌面统一：去 HTML5 draggable，T5.1）----
-// 跨整棵导航树共享同一拖拽态（同一时刻仅一处拖拽）
-const navDrag = reactive<{ active: boolean; draggedId: string; targetId: string; consumed: boolean }>({
-  active: false,
-  draggedId: '',
-  targetId: '',
-  consumed: false,
-})
+/** 分类分组头（tax-* 体系头 / 家原点容器等无 path 的聚合节点） */
+const isGroupHead = computed(() => !props.node.path)
+/** 空分组：有分组头但没有成员房间。必须照常渲染（见模板注释），仅弱化视觉。 */
+const isEmptyGroup = computed(() => isGroupHead.value && props.node.children.length === 0)
 
+// ---- 拖拽重排 ----
+// 拖拽态为模块级共享（见 modules/nav/navReorderState.ts）：
+// 递归组件每实例各持一份会导致目标节点收不到 targetId、落点高亮永不出现。
 const isDropTarget = computed(() => navDrag.active && navDrag.targetId === props.node.id && navDrag.draggedId !== props.node.id)
 const isDragging = computed(() => navDrag.active && navDrag.draggedId === props.node.id)
 
@@ -295,6 +299,41 @@ function toggle() {
   opacity: 0.55;
   outline: 1px solid var(--accent);
   outline-offset: -2px;
+}
+
+/* ---- 空分组头：保留可命中的高度 + 弱化虚线态，提示「可拖回」----
+   背景：分组头集合改为「维度全集 ∪ 实际有房间的桶」后，空组也会渲染。
+   若不给最小高度/虚线提示，用户会以为是渲染故障；若不给高度，则落点不可命中。 */
+.nav-item.is-empty-group {
+  min-height: 34px;
+  margin: 2px 0;
+  border: 1px dashed rgba(var(--accent-rgb), 0.18);
+  background: transparent;
+  opacity: 0.6;
+}
+.nav-item.is-empty-group:hover {
+  opacity: 0.9;
+  border-color: rgba(var(--accent-rgb), 0.4);
+  background: rgba(var(--accent-rgb), 0.04);
+}
+.nav-empty-hint {
+  margin-left: auto;
+  flex: 0 0 auto;
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: var(--text-secondary);
+  opacity: 0.65;
+  white-space: nowrap;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px dashed rgba(var(--accent-rgb), 0.25);
+}
+/* 空分组被拖拽悬停时，明确给出「可放下」的落点反馈 */
+.nav-item.is-empty-group.is-drop-target {
+  opacity: 1;
+  border-style: solid;
+  border-color: var(--accent);
+  background: var(--accent-glow);
 }
 
 .nav-item.is-adjacent {

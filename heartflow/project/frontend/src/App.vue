@@ -226,7 +226,7 @@ import { useRoomNavigation } from './composables/useRoomNavigation'
 import { getAllRooms, type RoomNode, type RoomGroup, type RoomSlot, type RoomDomain } from './engine/room-graph'
 import NavTreeNode from './components/NavTreeNode.vue'
 import { useRoomManager } from './modules/room-manager'
-import { useRoomTaxonomy, DOMAIN_LABELS, GROUP_LABELS, SLOT_LABELS } from './modules/room-taxonomy'
+import { useRoomTaxonomy, DOMAIN_LABELS, GROUP_LABELS, SLOT_LABELS, UNGROUPED_KEY, collectTaxonomyKeys } from './modules/room-taxonomy'
 import type { BackgroundMediaConfig } from './types'
 // composable 静态导入（触发逻辑小），重组件懒加载，首屏不打包
 import { useAstrolabe } from './modules/astrolabe'
@@ -914,7 +914,17 @@ const navTree = computed<NavNode[]>(() => {
     arr.push(r)
     buckets.set(key, arr)
   }
-  for (const [key, rooms] of buckets) {
+  // 分组头集合 = 维度全集 ∪ 实际有房间的桶。
+  // 关键修复：空桶同样生成分组头（带「空 · 拖到此处」占位），保证：
+  //   · 把某组房间全移走后，源组头仍在 → 还能把房间拖回去（此前源组头消失即永久移不回）；
+  //   · 新建的自定义分组（roomIds: []）立刻可见、且是有效拖拽落点。
+  const groupKeys = collectTaxonomyKeys(
+    taxonomy.selectedTaxonomy.value,
+    buckets.keys(),
+    taxonomy.customGroups.value.map((g) => g.id),
+  )
+  for (const key of groupKeys) {
+    const rooms = buckets.get(key) ?? []
     const kids = rooms
       .sort((a, b) => roomOrder(a.id) - roomOrder(b.id))
       .map((r) => {
@@ -942,7 +952,7 @@ function dimKey(r: RoomNode): string {
       return effSlot(r) ?? r.slot ?? 'screen'
     case 'custom': {
       const gid = taxonomy.groupIdOf(r.id)
-      return gid ?? 'ungrouped'
+      return gid ?? UNGROUPED_KEY
     }
   }
 }
@@ -959,8 +969,8 @@ function buildGroupHead(key: string, children: NavNode[]): NavNode {
   if (t === 'slot') {
     return { id: `tax-slot-${key}`, name: SLOT_LABELS[key as RoomSlot] ?? key, icon: '·', color: '#b89a6a', path: '', group: 'world', slot: key, domain: undefined, children }
   }
-  // custom
-  if (key === 'ungrouped') {
+  // custom（含 roomIds 为空的新建分组：仍生成分组头，作为有效拖拽落点）
+  if (key === UNGROUPED_KEY) {
     return { id: 'tax-custom-ungrouped', name: '未分组', icon: '·', color: '#b89a6a', path: '', group: 'world', slot: undefined, domain: undefined, children }
   }
   const g = taxonomy.customGroups.value.find((g) => g.id === key)
@@ -1034,7 +1044,11 @@ function onMoveNode(draggedId: string, targetId: string) {
   if (!target.path) {
     if (target.id.startsWith('tax-domain-')) {
       const domain = target.id.slice('tax-domain-'.length) as RoomDomain
-      rm.setRoomPin(draggedId, null, domain)
+      // 仅改领域归属，不动 slot 钉：
+      // 原先 rm.setRoomPin(draggedId, null, domain) 会把 pinnedSlot 一并写成 null，
+      // 属于「改 A 顺手清掉 B」的破坏性副作用（用户明确要求不改变现有状态），
+      // 且房间被拖走后丢失原 slot，再拖回来时行为已变、主观感受「拖不回去」。
+      rm.updateRoomConfig(draggedId, { pinnedDomain: domain })
     } else if (target.id.startsWith('tax-slot-')) {
       const slot = target.id.slice('tax-slot-'.length) as RoomSlot
       rm.updateRoomConfig(draggedId, { pinnedSlot: slot }) // 保留 domain 钉
