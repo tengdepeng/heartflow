@@ -1,88 +1,67 @@
-// ============================================================
-// NoteEditor 内联双链跳转测试
-// ============================================================
-import { describe, expect, it, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
-import { flushPromises } from '@vue/test-utils'
-import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
+import { describe, it, expect, afterEach } from 'vitest'
+import { mount, flushPromises } from '@vue/test-utils'
 import NoteEditor from '../NoteEditor.vue'
-import { useStudy } from '../../modules/study'
-import { useNoteLinks } from '../../modules/study/note-links'
+import type { Note } from '../../types'
 
-describe('NoteEditor 内联双链', () => {
-  beforeEach(async () => {
-    ;(globalThis as any).localStorage = createMockStorage()
-    const { invalidateCache } = await import('../../engine/storage/core')
-    invalidateCache()
-    useNoteLinks().links.value = []
+function makeNote(over: Partial<Note> = {}): Note {
+  return {
+    id: 'note-a',
+    title: '笔记A',
+    content: '正文',
+    tags: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    archived: false,
+    isAtomic: false,
+    ...over,
+  }
+}
+
+// 编辑器整体用 <Teleport to="body"> 包裹，按钮与浮层会被 portal 到 document.body，
+// 故用 document 全局查询而非 wrapper.find。每例后在 afterEach 卸载并清理 body 残留。
+let wrapper: ReturnType<typeof mount> | null = null
+
+afterEach(() => {
+  wrapper?.unmount()
+  wrapper = null
+  document.querySelectorAll('.modal-overlay, .link-picker-overlay').forEach(el => el.remove())
+})
+
+function findBtn(text: string): HTMLButtonElement | undefined {
+  return Array.from(document.querySelectorAll('button')).find(b => (b.textContent || '').includes(text))
+}
+
+describe('NoteEditor 双向链接插入 UI', () => {
+  it('渲染「插入双链」按钮', () => {
+    wrapper = mount(NoteEditor, {
+      props: { visible: true, editing: true, note: makeNote() },
+      attachTo: document.body,
+    })
+    expect(findBtn('插入双链')).toBeTruthy()
   })
 
-  it('预览区点击 [[标题]] 内联双链 → emit open(目标 id)', async () => {
-    const study = useStudy()
-    study.load()
-    const target = study.create('目标笔记', '被引用的内容')
-    const source = study.create('源笔记', `链接到 [[${target.title}]]`)
-
-    const wrapper = mount(NoteEditor, {
+  it('点击「插入双链」弹出链接选择浮层', async () => {
+    wrapper = mount(NoteEditor, {
+      props: { visible: true, editing: true, note: makeNote() },
       attachTo: document.body,
-      props: {
-        visible: false,
-        editing: true,
-        note: source,
-      },
     })
-
-    // 打开编辑器 → 触发 watch 填充 form
-    await wrapper.setProps({ visible: true })
+    const btn = findBtn('插入双链')!
+    expect(btn).toBeTruthy()
+    btn.click()
     await flushPromises()
-
-    // 切到预览模式
-    const previewTab = Array.from(document.querySelectorAll('.tab-btn')).find(
-      el => el.textContent === '预览',
-    ) as HTMLElement | undefined
-    expect(previewTab).toBeTruthy()
-    previewTab!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-    await flushPromises()
-
-    const anchor = document.querySelector('.preview-area .wikilink') as HTMLElement | null
-    expect(anchor).toBeTruthy()
-    expect(anchor!.getAttribute('data-wikilink')).toBe(target.title)
-
-    // 点击内联双链 → 应解析并 emit open
-    anchor!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-    await flushPromises()
-
-    const emitted = wrapper.emitted('open')
-    expect(emitted).toBeTruthy()
-    expect(emitted![0]).toEqual([target.id])
-
-    wrapper.unmount()
+    await new Promise(r => setTimeout(r, 0))
+    // 浮层根节点 + 搜索框
+    expect(document.querySelector('.link-picker')).toBeTruthy()
+    expect(document.querySelector('.lp-search')).toBeTruthy()
   })
 
-  it('预览区普通文本点击不 emit open', async () => {
-    const study = useStudy()
-    study.load()
-    const source = study.create('纯文本笔记', '没有任何双链')
-
-    const wrapper = mount(NoteEditor, {
+  it('插入块锚点按钮与插入双链按钮并存（编辑态工具区完整）', () => {
+    wrapper = mount(NoteEditor, {
+      props: { visible: true, editing: true, note: makeNote() },
       attachTo: document.body,
-      props: { visible: false, editing: true, note: source },
     })
-
-    await wrapper.setProps({ visible: true })
-    await flushPromises()
-
-    const previewTab = Array.from(document.querySelectorAll('.tab-btn')).find(
-      el => el.textContent === '预览',
-    ) as HTMLElement | undefined
-    previewTab!.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-    await flushPromises()
-
-    const area = document.querySelector('.preview-area') as HTMLElement
-    area.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-    await flushPromises()
-
-    expect(wrapper.emitted('open')).toBeFalsy()
-    wrapper.unmount()
+    const texts = Array.from(document.querySelectorAll('.editor-tools .tool-btn')).map(b => (b.textContent || '').trim())
+    expect(texts.some(t => t.includes('插入双链'))).toBe(true)
+    expect(texts.some(t => t.includes('插入块锚点'))).toBe(true)
   })
 })

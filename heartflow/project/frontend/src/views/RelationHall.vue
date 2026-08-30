@@ -41,6 +41,9 @@
       </div>
     </header>
 
+    <!-- 羁绊档案（INCR-13）档案概览/健康/类型/节律/洞察 -->
+    <BondArchivePanel :persons="rel.persons.value" />
+
     <!-- 选项卡导航 -->
     <nav class="rh-tabs">
       <button
@@ -322,6 +325,7 @@ import { useRelation } from '../modules/relation'
 import { useMemorialSeats } from '../modules/relation/memorial-seats'
 import { RELATION_LABELS } from '../modules/relation/types'
 import type { Person } from '../modules/relation/types'
+import BondArchivePanel from '../components/BondArchivePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 // ============================================================
@@ -985,6 +989,8 @@ function savePerson() {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  max-height: 86vh;
+  overflow-y: auto;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4), 0 0 40px rgba(var(--accent-rgb), 0.03);
 }
 

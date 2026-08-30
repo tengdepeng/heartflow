@@ -48,6 +48,11 @@ export const useConfigStore = defineStore('config', () => {
     config.value.operationMode = VALID.includes(mode) ? mode : 'silent'
   }
 
+  /** 设置应用品牌图标（app 自身 logo）；null 回退默认 ✦ */
+  function updateAppBrandIcon(icon: string | null) {
+    config.value.appBrandIcon = icon || null
+  }
+
   function updateBackgroundMedia(background: AppConfig['background']) {
     config.value.background = { ...background }
   }
@@ -174,6 +179,7 @@ export const useConfigStore = defineStore('config', () => {
     updateTimer,
     updateAdvisorEnabled,
     updateOperationMode,
+    updateAppBrandIcon,
     updateBackgroundMedia,
     resetBackgroundMedia,
     setPresetScene,

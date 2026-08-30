@@ -20,8 +20,12 @@ describe('CRYSTAL_COLORS_BY_MODE', () => {
 })
 
 describe('CRYSTAL_COLORS', () => {
-  it('合并所有模式颜色，共 12 个', () => {
-    expect(CRYSTAL_COLORS).toHaveLength(12)
+  it('合并所有模式颜色，每模式 4 色', () => {
+    const modes = Object.keys(CRYSTAL_COLORS_BY_MODE)
+    for (const m of modes) {
+      expect(CRYSTAL_COLORS_BY_MODE[m as keyof typeof CRYSTAL_COLORS_BY_MODE]).toHaveLength(4)
+    }
+    expect(CRYSTAL_COLORS).toHaveLength(modes.length * 4)
   })
 
   it('所有颜色以 # 开头', () => {

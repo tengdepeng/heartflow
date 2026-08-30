@@ -78,10 +78,10 @@ describe('TimerControls', () => {
     const tabs = wrapper.findAll('.mode-tab')
     await tabs[1].trigger('click')
     expect(wrapper.emitted('switchMode')).toHaveLength(1)
-    expect(wrapper.emitted('switchMode')![0]).toEqual(['nap'])
+    expect(wrapper.emitted('switchMode')![0]).toEqual(['pomodoro'])
   })
 
-  it('第二个 mode tab 触发 nap 模式', async () => {
+  it('第三个 mode tab 触发 自由模式', async () => {
     const wrapper = mount(TimerControls, { props: baseProps })
     const tabs = wrapper.findAll('.mode-tab')
     await tabs[2].trigger('click')
@@ -142,10 +142,17 @@ describe('TimerControls', () => {
     expect(ring.find('circle').exists()).toBe(true)
   })
 
-  it('渲染六个 mode tab（含番茄/倒计时/正计时）', () => {
+  it('常显三主模式 + 更多；展开后次要模式可见', async () => {
     const wrapper = mount(TimerControls, { props: baseProps })
-    const tabs = wrapper.findAll('.mode-tab')
-    expect(tabs).toHaveLength(6)
+    // 折叠态：3 主模式（专注/番茄/自由）+ 1 个「更多」按钮 = 4
+    let tabs = wrapper.findAll('.mode-tab')
+    expect(tabs).toHaveLength(4)
+    expect(tabs.map(t => t.text())).toContain('更多')
+    // 点击「更多」展开次要模式（小憩/倒计时/正计时）；含「更多」按钮共 7 个
+    const moreBtn = tabs.find(t => t.text() === '更多')!
+    await moreBtn.trigger('click')
+    tabs = wrapper.findAll('.mode-tab')
+    expect(tabs).toHaveLength(7)
     const labels = tabs.map(t => t.text())
     expect(labels.some(l => l.includes('番茄'))).toBe(true)
     expect(labels.some(l => l.includes('倒计时'))).toBe(true)

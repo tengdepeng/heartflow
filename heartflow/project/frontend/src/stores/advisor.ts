@@ -13,6 +13,8 @@ import { aiEngine, isAIEngineEnabled } from '../engine/ai'
 import { checkAdvisorNeutrality, checkAdvisorDataDriven } from '../modules/constitution/neutrality-checker'
 import { useComplianceBaseline } from '../modules/constitution/compliance-baseline'
 import { DEFAULT_ADVISOR_PRESETS } from '../modules/advisor/presets'
+import { parseCommandIntent } from '../modules/advisor/commandIntent'
+import type { CommandTaskType } from '../modules/advisor/commandIntent'
 import { isLongDormant } from '../modules/advisor/longDormancy'
 import { decideForProactive, emitOperationGate } from '../modules/operation-mode/gate'
 
@@ -75,12 +77,38 @@ export interface TaskProgress {
   anchors: TaskProgressItem
 }
 
+/** 调令系统 - 单条调令任务（幕僚管家闭环） */
+export interface CommandTask {
+  id: string
+  /** 用户原始调令文本 */
+  command: string
+  /** 意图中文标签 */
+  intentLabel: string
+  /** 任务类型 */
+  taskType: CommandTaskType
+  /** 派单到的幕僚 */
+  advisorId?: string
+  advisorName?: string
+  /** running（任务中）/ done（已完成，浮现完成光点） */
+  status: 'running' | 'done'
+  /** 「任务中」进度描述（蓝图648：带房间名的过程叙述） */
+  progressDesc: string
+  /** 完成一句话结论（review 类为真实数据汇总） */
+  resultSummary?: string
+  createdAt: string
+  finishedAt?: string
+  /** 极淡「完成」光点标记（蓝图650：完成后浮现） */
+  doneLight: boolean
+  /** navigate 类：目标路由，UI 层下达后立即跳转（调令要真办事，不能只汇报） */
+  targetRoute?: string
+}
+
 /** 角色-任务匹配权重矩阵 */
 const ROLE_TASK_AFFINITY: Record<string, Record<string, number>> = {
-  guardian:  { focus: 0.6, note: 0.7, emotion: 0.9, anchor: 0.5, general: 0.8 },
-  scholar:   { focus: 0.8, note: 0.9, emotion: 0.5, anchor: 0.7, general: 0.6 },
-  craftsman: { focus: 0.9, note: 0.6, emotion: 0.4, anchor: 0.8, general: 0.7 },
-  hermit:    { focus: 0.5, note: 0.7, emotion: 0.9, anchor: 0.6, general: 0.8 },
+  guardian:  { focus: 0.6, note: 0.7, emotion: 0.9, anchor: 0.5, review: 0.6, finance: 0.7, navigate: 0.85, general: 0.8 },
+  scholar:   { focus: 0.8, note: 0.9, emotion: 0.5, anchor: 0.7, review: 0.95, finance: 0.8, navigate: 0.7, general: 0.6 },
+  craftsman: { focus: 0.9, note: 0.6, emotion: 0.4, anchor: 0.8, review: 0.7, finance: 0.8, navigate: 0.7, general: 0.7 },
+  hermit:    { focus: 0.5, note: 0.7, emotion: 0.9, anchor: 0.6, review: 0.5, finance: 0.5, navigate: 0.6, general: 0.8 },
 }
 
 export const useAdvisorStore = defineStore('advisor', () => {
@@ -695,6 +723,129 @@ export const useAdvisorStore = defineStore('advisor', () => {
       emotions: { current: todayEmotions.length, total: 5, label: '情绪' },
       anchors: { current: todayCompletedAnchors.length, total: Math.max(todayAnchors.length, 1), label: '锚点' },
     }
+  }
+
+  // ---- 调令系统（幕僚管家闭环） ----
+  const COMMAND_TASKS_KEY = 'hf:command-tasks'
+  const commandTasks = ref<CommandTask[]>([])
+
+  /** 载入历史调令任务；会话恢复时把上一轮未收尾的 running 标记为已完成 */
+  function loadCommandTasks(): CommandTask[] {
+    const raw = storage.getKV<CommandTask[]>(COMMAND_TASKS_KEY, [])
+    // 防御：存储里该键可能被写脏成非数组，直接 for...of 会让整个 store 初始化崩掉
+    const list = Array.isArray(raw) ? raw : []
+    for (const t of list) {
+      if (t.status === 'running') {
+        t.status = 'done'
+        t.doneLight = true
+        t.finishedAt = t.finishedAt ?? new Date().toISOString()
+        t.resultSummary = t.resultSummary ?? '（会话恢复时已收尾）'
+        t.progressDesc = '已收尾'
+      }
+    }
+    return list
+  }
+  commandTasks.value = loadCommandTasks()
+
+  function persistCommandTasks() {
+    storage.setKV(COMMAND_TASKS_KEY, commandTasks.value)
+  }
+
+  /** review 类调令：真实统计近 30 天数据，给出一句话结论（蓝图646：跨域汇总） */
+  function buildReviewSummary(): string {
+    const since = new Date(Date.now() - 30 * 86400000).toISOString()
+    const sessions = storage.getSessions().filter((s) => (s.completedAt ?? '') >= since)
+    const notes = storage.getNotes().filter((n) => (n.createdAt ?? '') >= since)
+    const emotions = storage.getEmotions().filter((e) => (e.createdAt ?? '') >= since)
+    return `近 30 天：专注 ${sessions.length} 次 · 笔记 ${notes.length} 篇 · 情绪 ${emotions.length} 条`
+  }
+
+  /**
+   * general 类调令的收尾话术。
+   * 没命中任何已知意图时，先在功能词典里模糊搜过一遍：
+   *   · 有候选 → 报出最相近的几个名字，让用户一句话确认；
+   *   · 没候选 → 给出可用功能清单，而不是干巴巴的「没有这个功能」。
+   */
+  function buildGeneralSummary(
+    advisorName: string,
+    suggestions?: { route: string; name: string }[],
+    featureHint?: string,
+  ): string {
+    if (suggestions && suggestions.length > 0) {
+      const names = suggestions.map((s) => s.name).join(' / ')
+      return `没太确定你要哪个，是不是想去：${names}？说一声我就带你去。`
+    }
+    if (featureHint) {
+      return `没找到你说的那个，不过殿堂里有这些：${featureHint}。换个说法我再试试。`
+    }
+    return `已交由 ${advisorName} 协调，随时回看。`
+  }
+
+  /**
+   * 下达调令：镜我解析意图 → 派单 → 进入「任务中」→ 短暂运行后收尾浮现完成光点。
+   * 本地无云端 AI 执行后端，故以进度描述 + 完成光点呈现闭环（蓝图644–650）。
+   */
+  function issueCommand(text: string): CommandTask | null {
+    const cmd = (text || '').trim()
+    if (!cmd) return null
+
+    const intent = parseCommandIntent(cmd)
+    const advisor = dispatchAvatar(intent.dispatchKey)
+    const advisorName = advisor?.name ?? '镜我'
+    const advisorId = advisor?.id
+    const now = new Date().toISOString()
+
+    const task: CommandTask = {
+      id: `cmd_${Date.now()}`,
+      command: cmd,
+      intentLabel: intent.intentLabel,
+      taskType: intent.taskType,
+      advisorId,
+      advisorName,
+      status: 'running',
+      progressDesc: `${advisorName} 正在 ${intent.room} ${intent.action}…`,
+      createdAt: now,
+      doneLight: false,
+      ...(intent.targetRoute ? { targetRoute: intent.targetRoute } : {}),
+    }
+    commandTasks.value.push(task)
+    persistCommandTasks()
+
+    // 任务生命周期：运行 → 收尾（仅本地计时，真实执行由蓝图未来本地 AI 接管）
+    setTimeout(() => {
+      const t = commandTasks.value.find((x) => x.id === task.id)
+      if (!t || t.status === 'done') return
+      let summary: string
+      switch (intent.taskType) {
+        case 'review': summary = buildReviewSummary(); break
+        case 'navigate': summary = `已为你打开${intent.targetName ?? '目标空间'}。`; break
+        case 'finance':
+          // 财务/记账：项目里真实存在的是 /reward「劳酬」（记账 v2），
+          // 此前词表没接上，用户问「我要记账」会被当成没有这个功能。
+          summary = `已为你打开${intent.targetName ?? '劳酬'}：记账、预算、支出流水都在里面。`
+          break
+        case 'focus': summary = `已为你开启专注（${storage.getConfig().timer.defaultDuration} 分钟），愿心流自来。`; break
+        case 'note': summary = '已打开笔记编辑器，写下即沉淀。'; break
+        case 'emotion': summary = '已为你打开情绪花房，慢慢说。'; break
+        case 'anchor': summary = '已为你打开锚点庭院，立个今日目标。'; break
+        default:
+          // 功能搜索兜底：宁可给候选/清单，也不回一句「没有这个功能」
+          summary = buildGeneralSummary(advisorName, intent.suggestions, intent.featureHint)
+          break
+      }
+      t.status = 'done'
+      t.doneLight = true
+      t.finishedAt = new Date().toISOString()
+      t.resultSummary = summary
+      t.progressDesc = `${advisorName} 已完成。`
+      persistCommandTasks()
+    }, 1600)
+
+    return task
+  }
+
+  function getCommandTasks(): CommandTask[] {
+    return commandTasks.value
   }
 
   // ---- 见证系统 ----
@@ -1511,6 +1662,10 @@ export const useAdvisorStore = defineStore('advisor', () => {
     getTaskAwareness,
     dispatchAvatar,
     getTaskProgress,
+    // 调令系统（幕僚管家闭环）
+    commandTasks,
+    issueCommand,
+    getCommandTasks,
     getAnnualDialogue,
     triggerAnnualDialogue,
     getQuarterlyDialogue,

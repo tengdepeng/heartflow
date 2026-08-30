@@ -154,6 +154,9 @@
       </div>
     </div>
 
+    <!-- 知识档案（INCR-18）档案概览/图谱形状/导入来源/温和洞察 -->
+    <KnowledgeArchivePanel :nodes="nodes" :sources="importSources" />
+
     <!-- 展示模式切换 -->
     <div data-enter class="kt-tabs">
       <button v-for="m in modes" :key="m.key" :class="['kt-tab',{active:mode===m.key}]" @click="mode=m.key">{{m.icon}} {{m.label}}</button>
@@ -252,6 +255,7 @@ import NodeEditModal from '../components/knowledge-tower/NodeEditModal.vue'
 import DecisionAnalysisPanel from '../components/DecisionAnalysisPanel.vue'
 import FlashcardsPanel from '../components/FlashcardsPanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
+import KnowledgeArchivePanel from '../components/KnowledgeArchivePanel.vue'
 
 // 视图级 UI 实例（每挂载实例全新状态），经 provide 下发，子面板 inject 共享同一实例。
 const ui = useKnowledgeTowerUi()

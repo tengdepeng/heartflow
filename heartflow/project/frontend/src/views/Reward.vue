@@ -233,6 +233,106 @@
       </div>
     </section>
 
+    <!-- 周期性收支分析（INCR：日/周/月/季/年收支节奏 + 收支对比） -->
+    <PeriodicRewardPanel :records="adaptedRecords" />
+
+    <!-- 多账户与转账（记账 v2） -->
+    <AccountManagerPanel :records="records" @change="accounts.load()" />
+
+    <!-- 周期/重复记账（INCR-22）房租/工资/订阅自动出账 -->
+    <RecurringPanel
+      :rules="recurringRules"
+      :accounts="accountList"
+      @create:rule="onCreateRule"
+      @update:rule="onUpdateRule"
+      @remove:rule="onRemoveRule"
+      @apply:rule="onApplyRule"
+      @skip:rule="onSkipRule"
+    />
+
+    <!-- 预算预警（记账 v2） -->
+    <BudgetAlertPanel :records="records" :transfers="transfers" />
+
+    <!-- 预算进阶（INCR-28：总/年度预算 + 日均动态 + 滚动结余） -->
+    <BudgetPanel :records="records" :transfers="transfers" />
+
+    <!-- 记账明细（记账 v2）标签/归档/筛选/排序/分页 -->
+    <RecordManagerPanel :records="records" @update:records="saveRecords" />
+
+    <!-- 月结单（记账 v2）月度汇总 + Markdown/CSV 导出 -->
+    <MonthlyStatementPanel :records="records" />
+
+    <!-- 数据导入（记账 v2）支付宝/微信 CSV -->
+    <ImportPanel @import:records="onImportRecords" />
+
+    <!-- 自定义分类（INCR-23）增删改 / 命名 / 配色 / 图标 / 多级层级 -->
+    <CustomCategoryPanel
+      :categories="customCategories"
+      @create="onCreateCategory"
+      @update="onUpdateCategory"
+      @remove="onRemoveCategory"
+    />
+
+    <!-- 自然语言快速记账（INCR-24）一段话智能解析 → 一键入账 -->
+    <QuickEntryPanel
+      :categories="customCategories"
+      :accounts="accountList"
+      @commit="onQuickCommit"
+    />
+
+    <!-- 借贷/往来（INCR-25）借出借入记录 + 还款/收债状态 + 应收应付净额 -->
+    <LoanPanel
+      :records="loanRecords"
+      :accounts="accountList"
+      @create="onLoanCreate"
+      @settle="onLoanSettle"
+      @remove="onLoanRemove"
+    />
+
+    <!-- 信用卡/负债（INCR-26）额度 + 已用/可用 + 还款计划 + 到期提醒 -->
+    <CreditCardPanel
+      :records="creditCards"
+      @create="onCardCreate"
+      @repay="onCardRepay"
+      @plan="onCardPlan"
+      @remove="onCardRemove"
+    />
+
+    <!-- 资产负债净资产（INCR-27）资产 − 负债 = 净资产 · 仪表盘 + 趋势 -->
+    <NetAssetPanel
+      :accounts="accountList"
+      :records="records"
+      :transfers="transfers"
+      :cards="creditCards"
+    />
+
+    <!-- 报表可视化（INCR-29）同比环比 + 分类占比/趋势/排行榜 + 年度热力图 -->
+    <ReportVisualPanel :records="records" />
+
+    <!-- 存钱计划（INCR-30）攒钱 / 52周挑战 / 心愿 + 每笔存款记录 -->
+    <SavingPlanPanel />
+
+    <!-- 每日记账提醒（INCR-30）今日状态 + 连续打卡 + 本月活跃 + 提醒开关 -->
+    <HabitReminderPanel :records="records" @focus-form="focusRecordForm" />
+
+    <!-- 日历跨天补账（INCR-30）逐日回填 / 跨天补记 -->
+    <BackfillCalendarPanel :records="records" @update:records="saveRecords" />
+
+    <!-- 数据导出（INCR-30）Excel(.xls) / CSV -->
+    <ExportPanel :records="records" :accounts="accountList" />
+
+    <!-- 隐私锁（INCR-31 数据安全：主密码守护 + 会话锁定） -->
+    <PrivacyLockPanel />
+
+    <!-- 数据加密（INCR-31 数据安全：账本加密备份/恢复） -->
+    <EncryptionPanel :records="records" @update:records="saveRecords" />
+
+    <!-- 多币种/汇率（INCR-31 数据扩展：基准币 + 汇率换算） -->
+    <CurrencyPanel />
+
+    <!-- 投资持仓收益（INCR-31 数据扩展：市值盈亏/收益率） -->
+    <InvestmentPanel />
+
     <!-- 添加记录 -->
     <section class="rw-form-section">
       <h3 class="rw-section-label">{{ editingRecord ? '✏ 编辑记录' : '➕ 新记录' }}</h3>
@@ -258,6 +358,10 @@
         </div>
         <div class="rw-form-row">
           <input v-model="formDesc" placeholder="备注（如：月度项目奖金）" class="rw-input" :maxlength="displayCfg.noteMaxLength" />
+        </div>
+        <div class="rw-form-row">
+          <input v-model="formDate" type="date" class="rw-input rw-input--date" :title="'记账日期（留空记今天：' + todayForHint + '）'" />
+          <span class="rw-date-hint">留空记为今天</span>
         </div>
         <div class="rw-form-row rw-form-actions">
           <button v-if="editingRecord" class="rw-btn rw-btn--cancel" @click="cancelEdit">取消</button>
@@ -285,10 +389,10 @@
       <select v-model="filterCategory" class="rw-filter-select">
         <option value="">全部类别</option>
         <optgroup label="收入">
-          <option v-for="c in incomeCategories" :key="c.value" :value="c.value">{{ c.icon }} {{ c.label }}</option>
+          <option v-for="c in filterIncomeOptions" :key="c.value" :value="c.value">{{ c.icon }} {{ c.label }}</option>
         </optgroup>
         <optgroup label="支出">
-          <option v-for="c in expenseCategories" :key="c.value" :value="c.value">{{ c.icon }} {{ c.label }}</option>
+          <option v-for="c in filterExpenseOptions" :key="c.value" :value="c.value">{{ c.icon }} {{ c.label }}</option>
         </optgroup>
       </select>
     </div>
@@ -427,34 +531,49 @@ import { useBudgetOptimizer } from '../modules/reward/budget-optimizer'
 import { useFinancialForecast } from '../modules/reward/financial-forecast'
 import type { RewardRecord as RewardRecordBridge, Budget, RewardStats, IncomeCategory, ExpenseCategory } from '../modules/reward/types'
 import { useReward, type RewardRecord } from '../modules/reward/reward-list'
+import { useAccounts } from '../modules/reward/accounts'
 import FinanceGoalsPanel from '../components/FinanceGoalsPanel.vue'
+import PeriodicRewardPanel from '../components/PeriodicRewardPanel.vue'
+import AccountManagerPanel from '../components/AccountManagerPanel.vue'
+import BudgetAlertPanel from '../components/BudgetAlertPanel.vue'
+import BudgetPanel from '../components/BudgetPanel.vue'
+import RecordManagerPanel from '../components/RecordManagerPanel.vue'
+import MonthlyStatementPanel from '../components/MonthlyStatementPanel.vue'
+import ImportPanel from '../components/ImportPanel.vue'
+import RecurringPanel from '../components/RecurringPanel.vue'
+import CustomCategoryPanel from '../components/CustomCategoryPanel.vue'
+import QuickEntryPanel from '../components/QuickEntryPanel.vue'
+import LoanPanel from '../components/LoanPanel.vue'
+import CreditCardPanel from '../components/CreditCardPanel.vue'
+import NetAssetPanel from '../components/NetAssetPanel.vue'
+import ReportVisualPanel from '../components/ReportVisualPanel.vue'
+import SavingPlanPanel from '../components/SavingPlanPanel.vue'
+import HabitReminderPanel from '../components/HabitReminderPanel.vue'
+import BackfillCalendarPanel from '../components/BackfillCalendarPanel.vue'
+import ExportPanel from '../components/ExportPanel.vue'
+import PrivacyLockPanel from '../components/PrivacyLockPanel.vue'
+import EncryptionPanel from '../components/EncryptionPanel.vue'
+import CurrencyPanel from '../components/CurrencyPanel.vue'
+import InvestmentPanel from '../components/InvestmentPanel.vue'
+import { dedupe, type ImportRow, type ImportSource } from '../modules/reward/importer'
+import { useRecurring, nextOccurrenceAfter, toRecurringDraft, type RecurringRule } from '../modules/reward/recurring'
+import { useCustomCategories, categoryOptionsFor, categoryLabelAny, categoryIconAny, categoryColor, type CategoryKind, type CustomCategory } from '../modules/reward/custom-category'
+import { quickEntryToRecord, type QuickEntryDraft } from '../modules/reward/nlp-entry'
+import { useLoans, type LoanRecord } from '../modules/reward/loan'
+import { useCreditCards, type CreditCardRecord } from '../modules/reward/credit-card'
 const { entranceRef, entranceClass } = useViewEntrance()
 const rewardBridge = useRewardBridge()
 const budgetOptimizer = useBudgetOptimizer()
 const forecast = useFinancialForecast()
 const displayCfg = storage.getConfig().display
 
-const incomeCategories = [
-  { value: 'salary', icon: '💰', label: '薪资' },
-  { value: 'freelance', icon: '💻', label: '自由职业' },
-  { value: 'investment', icon: '📈', label: '投资收益' },
-  { value: 'gift', icon: '🎁', label: '赠予' },
-  { value: 'other-income', icon: '📦', label: '其他收入' },
-]
-
-const expenseCategories = [
-  { value: 'tool', icon: '🔧', label: '工具' },
-  { value: 'course', icon: '📚', label: '学习' },
-  { value: 'health', icon: '🏥', label: '健康' },
-  { value: 'social', icon: '🤝', label: '社交' },
-  { value: 'other-expense', icon: '📦', label: '其他支出' },
-]
-
 const formType = ref<'income' | 'expense'>('income')
 const formCategory = ref('')
 const formAmount = ref(0)
 const formDesc = ref('')
+const formDate = ref('')
 const editingRecord = ref<RewardRecord | null>(null)
+const todayForHint = new Date().toISOString().slice(0, 10)
 
 // 搜索与筛选
 const searchQuery = ref('')
@@ -462,9 +581,22 @@ const filterType = ref('')
 const filterCategory = ref('')
 const trendType = ref<'income' | 'expense' | 'net'>('income')
 
-const formCategories = computed(() =>
-  formType.value === 'income' ? incomeCategories : expenseCategories
-)
+// ---- 自定义分类（INCR-23）：动态分类选项，随用户增删改实时刷新 ----
+const customCats = useCustomCategories()
+const customCategories = customCats.categories
+const formCategories = computed(() => categoryOptionsFor(formType.value))
+const filterIncomeOptions = computed(() => categoryOptionsFor('income'))
+const filterExpenseOptions = computed(() => categoryOptionsFor('expense'))
+
+function onCreateCategory(data: { name: string; kind: CategoryKind; icon: string; color: string; parentId?: string | null }): void {
+  customCats.create(data)
+}
+function onUpdateCategory(payload: { id: string; patch: Partial<CustomCategory> }): void {
+  customCats.update(payload.id, payload.patch)
+}
+function onRemoveCategory(id: string): void {
+  customCats.remove(id)
+}
 
 const formValid = computed(() =>
   formCategory.value && formAmount.value > 0
@@ -472,9 +604,99 @@ const formValid = computed(() =>
 
 const reward = useReward()
 const records = reward.records
+const accounts = useAccounts()
+const transfers = accounts.transfers
+const recurring = useRecurring()
+const recurringRules = recurring.rules
+const loans = useLoans()
+const loanRecords = loans.records
+const accountList = accounts.accounts
+
+// ---- 周期记账（INCR-22）：建/改/删规则、到期入账或跳过 ----
+function onCreateRule(data: Omit<RecurringRule, 'id' | 'nextRunAt'>): void {
+  recurring.create(data)
+}
+function onUpdateRule(payload: { id: string; patch: Partial<RecurringRule> }): void {
+  recurring.update(payload.id, payload.patch)
+}
+function onRemoveRule(id: string): void {
+  recurring.remove(id)
+}
+function onApplyRule(rule: RecurringRule): void {
+  const draft = toRecurringDraft(rule, rule.nextRunAt)
+  const newRecord: RewardRecord = {
+    id: `rec-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`,
+    type: draft.type,
+    category: draft.category,
+    amount: draft.amount,
+    description: draft.description,
+    at: new Date(`${draft.at}T12:00:00`).toISOString(),
+    account: draft.account,
+    bizId: `rec-${rule.id}-${draft.at}`,
+  }
+  saveRecords([...records.value, newRecord])
+  recurring.update(rule.id, { nextRunAt: nextOccurrenceAfter(rule, rule.nextRunAt) })
+}
+function onSkipRule(rule: RecurringRule): void {
+  recurring.update(rule.id, { nextRunAt: nextOccurrenceAfter(rule, rule.nextRunAt) })
+}
 
 function saveRecords(list: RewardRecord[]) {
   reward.save(list)
+}
+
+// ---- 自然语言快速记账（INCR-24）：草稿 → 一键落库 ----
+function onQuickCommit(draft: QuickEntryDraft): void {
+  saveRecords([...records.value, quickEntryToRecord(draft)])
+}
+
+// ---- 借贷/往来（INCR-25）：借出借入记录 + 还款/收债 ----
+function onLoanCreate(data: Omit<LoanRecord, 'id' | 'settlements'>): void {
+  loans.create(data)
+}
+function onLoanSettle(payload: { id: string; amount: number; at: string; note?: string }): void {
+  loans.settle(payload.id, payload.amount, payload.at, payload.note)
+}
+function onLoanRemove(id: string): void {
+  loans.remove(id)
+}
+
+// ---- 信用卡/负债（INCR-26）：额度 + 还款/还款计划 ----
+const creditCardsStore = useCreditCards()
+const creditCards = creditCardsStore.records
+
+function onCardCreate(data: Omit<CreditCardRecord, 'id' | 'repayments'>): void {
+  creditCardsStore.create(data)
+}
+function onCardRepay(payload: { id: string; amount: number; at: string; note?: string }): void {
+  creditCardsStore.repay(payload.id, payload.amount, payload.at, payload.note)
+}
+function onCardPlan(payload: { id: string; planMonthly?: number }): void {
+  creditCardsStore.updatePlan(payload.id, payload.planMonthly)
+}
+function onCardRemove(id: string): void {
+  creditCardsStore.remove(id)
+}
+
+// 导入：去重 → 自动建账户 → 映射为 RewardRecord 持久化
+function onImportRecords(rows: ImportRow[], source: ImportSource): void {
+  const accName = source === 'alipay' ? '支付宝' : source === 'wechat' ? '微信' : '银联'
+  const accType = source === 'alipay' ? 'alipay' : source === 'wechat' ? 'wechat' : 'bank'
+  accounts.ensure(accName, accType)
+  const fresh = dedupe(records.value, rows)
+  if (!fresh.length) return
+  const now = Date.now()
+  const newRecs: RewardRecord[] = fresh.map((r, i) => ({
+    id: `imp-${now}-${i}`,
+    type: r.type,
+    category: r.category as RewardRecord['category'],
+    amount: r.amount,
+    description: r.note,
+    at: r.at,
+    account: accType,
+    bizId: r.bizId,
+  }))
+  reward.save([...records.value, ...newRecs])
 }
 
 const totalIncome = computed(() => {
@@ -542,10 +764,9 @@ const thisMonthExpense = computed(() => {
 })
 
 const categoryStats = computed(() => {
-  const catInfo = new Map([...incomeCategories, ...expenseCategories].map(c => [c.value, c]))
-  const map = new Map<string, { total: number; count: number }>()
+  const map = new Map<string, { total: number; count: number; kind: 'income' | 'expense' }>()
   records.value.forEach(r => {
-    const entry = map.get(r.category) || { total: 0, count: 0 }
+    const entry = map.get(r.category) || { total: 0, count: 0, kind: r.type }
     entry.total += r.amount
     entry.count += 1
     map.set(r.category, entry)
@@ -553,20 +774,12 @@ const categoryStats = computed(() => {
   const maxTotal = Math.max(...Array.from(map.values()).map(v => v.total), 1)
   return Array.from(map.entries())
     .map(([key, val]) => ({
-      label: catInfo.get(key)?.label || key,
-      icon: catInfo.get(key)?.icon || '📦',
+      label: categoryLabelAny(key),
+      icon: categoryIconAny(key),
       total: val.total.toFixed(1),
       count: val.count,
       percent: Math.round((val.total / maxTotal) * 100),
-      color: catInfo.get(key)?.value.startsWith('salary') ? '#e8c060'
-        : catInfo.get(key)?.value.startsWith('freelance') ? '#c0a060'
-        : catInfo.get(key)?.value.startsWith('investment') ? '#a0d080'
-        : catInfo.get(key)?.value.startsWith('gift') ? '#d080a0'
-        : catInfo.get(key)?.value.startsWith('tool') ? '#80a0c0'
-        : catInfo.get(key)?.value.startsWith('course') ? '#a0c080'
-        : catInfo.get(key)?.value.startsWith('health') ? '#d0a080'
-        : catInfo.get(key)?.value.startsWith('social') ? '#c080a0'
-        : '#888',
+      color: categoryColor(val.kind, key),
     }))
     .sort((a, b) => parseFloat(b.total) - parseFloat(a.total))
 })
@@ -722,12 +935,12 @@ function healthGradeLabel(grade: string) {
 }
 
 function categoryLabel(cat: string) {
-  const all = [...incomeCategories, ...expenseCategories]
-  return all.find(c => c.value === cat)?.label || cat
+  return categoryLabelAny(cat)
 }
 
 function saveRecord() {
-  const now = new Date().toISOString()
+  const base = formDate.value ? new Date(`${formDate.value}T12:00:00`) : new Date()
+  const now = base.toISOString()
   if (editingRecord.value) {
     const list = records.value.map(r =>
       r.id === editingRecord.value!.id
@@ -749,6 +962,7 @@ function saveRecord() {
     formCategory.value = ''
     formAmount.value = 0
     formDesc.value = ''
+    formDate.value = ''
   }
 }
 
@@ -758,6 +972,12 @@ function editRecord(r: RewardRecord) {
   formCategory.value = r.category
   formAmount.value = r.amount
   formDesc.value = r.description
+  formDate.value = r.at.slice(0, 10)
+}
+
+// 记账提醒面板「现在记一笔」滚动到新增记录表单
+function focusRecordForm() {
+  entranceRef.value?.querySelector('.rw-form-section')?.scrollIntoView({ behavior: 'smooth' })
 }
 
 function cancelEdit() {
@@ -766,6 +986,7 @@ function cancelEdit() {
   formCategory.value = ''
   formAmount.value = 0
   formDesc.value = ''
+  formDate.value = ''
 }
 
 function deleteRecord(id: string) {
@@ -936,6 +1157,8 @@ function fmt(iso: string) {
 .rw-input:focus { border-color: rgba(232,192,96,0.3); }
 .rw-input::placeholder { color: rgba(232,192,96,0.2); }
 .rw-input--num { width: 80px; flex: none; text-align: center; }
+.rw-input--date { flex: none; width: 150px; color-scheme: dark; }
+.rw-date-hint { font-size: 11px; color: rgba(232,192,96,0.3); white-space: nowrap; }
 .rw-select { appearance: none; cursor: pointer; }
 .rw-select option { background: #0a0906; color: rgba(var(--text-primary-rgb), 0.85); }
 

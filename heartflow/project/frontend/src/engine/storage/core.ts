@@ -475,6 +475,8 @@ export const DEFAULT_CONFIG: AppConfig = {
   },
   /** 用户显式操作过的合规覆盖字段（持久化，优先级高于引擎推导） */
   overrideUserTouched: [],
+  /** 应用品牌图标（app 自身 logo）；null = 默认 ✦ */
+  appBrandIcon: null,
   /** 世界壳（三层空间）配置单一真源 */
   worldShell: structuredClone(DEFAULT_WORLDSHELL_CONFIG),
 }

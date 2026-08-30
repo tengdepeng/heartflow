@@ -15,9 +15,7 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
   server: {
-    port: 1001,
-    // Tauri 要求固定端口：占用即失败而非漂移，否则 tauri.conf.json 的 devUrl
-    // 仍指向 1001 而 dev server 静默漂到 1002 → 真机 dev 模式白屏。
+    port: Number(process.env.VITE_DEV_PORT) || 1001,
     strictPort: true,
     host: host || false,
     hmr: host

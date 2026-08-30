@@ -61,6 +61,9 @@
     <!-- 备份恢复与安全报告（safety·useBackupRecovery / useSecurityReports） -->
     <BackupRecoveryPanel :passphrase="activePass" />
 
+    <!-- 安全审计（INCR-12）资产集中度/完整度/陈旧/洞察 -->
+    <VaultAuditPanel :assets="assets" :archives="archives" />
+
     <!-- 资产分布 -->
     <section data-enter class="vt-section">
       <h3 class="vt-section-title">📊 资产分布</h3>
@@ -163,6 +166,7 @@ import { useVault, type Asset, type Archive, type VaultData } from '../modules/v
 import { useVaultAutoLock, type AutoLockSettings } from '../modules/vault/auto-lock'
 import VaultAutoLockPanel from '../components/VaultAutoLockPanel.vue'
 import BackupRecoveryPanel from '../components/BackupRecoveryPanel.vue'
+import VaultAuditPanel from '../components/VaultAuditPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

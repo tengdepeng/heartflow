@@ -38,14 +38,16 @@
     <span v-else class="nav-caret-spacer" aria-hidden="true" />
 
       <router-link v-if="node.path" :to="node.path" class="nav-link-row" @click="onNavClick">
-        <span class="nav-icon">{{ node.icon }}</span>
+        <span v-if="isImageIcon(node.icon)" class="nav-icon nav-icon-img"><img :src="node.icon" :alt="node.name" /></span>
+        <span v-else class="nav-icon">{{ node.icon }}</span>
         <span class="nav-label">{{ node.name }}</span>
         <span v-if="node.id === 'sanctuary'" class="nav-pill pill-silent">静默</span>
         <span v-else-if="node.id === 'constitution'" class="constitution-foundation-seal">基石</span>
         <span v-else-if="hasChildren && !isOpen" class="nav-child-count">{{ node.children.length }}</span>
       </router-link>
       <div v-else class="nav-link-row nav-group-head" @click="hasChildren && toggle()">
-        <span class="nav-icon">{{ node.icon }}</span>
+        <span v-if="isImageIcon(node.icon)" class="nav-icon nav-icon-img"><img :src="node.icon" :alt="node.name" /></span>
+        <span v-else class="nav-icon">{{ node.icon }}</span>
         <span class="nav-label">{{ node.name }}</span>
         <span v-if="hasChildren && !isOpen" class="nav-child-count">{{ node.children.length }}</span>
         <!-- 空分组占位：分组头必须保留可命中的高度，否则房间被全部移走后
@@ -75,6 +77,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { navReorder, navDrag } from '../modules/nav/navReorderState'
+import { isImageIcon } from '../utils/icon'
 
 export interface NavTreeNodeData {
   id: string
@@ -110,7 +113,13 @@ const isAdjacent = computed(() => props.adjacentIds.includes(props.node.id))
 // 每层缩进 14px，呈现「包含」层级；根层（depth 0）保持与原侧栏一致的左内边距
 const indentStyle = computed(() => ({ paddingLeft: `${10 + props.depth * 14}px` }))
 
-const canDrag = computed(() => (props.draggable ?? true) && !!props.node.path && props.node.id !== 'home-space')
+// 分组头（无 path）与房间（有 path）都可拖：分组头之间拖动 = 重排分组顺序；
+// 房间拖到分组头 = 改变归属。home-space 与「未分组」兜底头不可作拖拽源。
+const canDrag = computed(
+  () => (props.draggable ?? true)
+    && props.node.id !== 'home-space'
+    && props.node.id !== 'tax-custom-ungrouped',
+)
 
 /** 分类分组头（tax-* 体系头 / 家原点容器等无 path 的聚合节点） */
 const isGroupHead = computed(() => !props.node.path)
@@ -161,6 +170,13 @@ function onPointerMove(e: PointerEvent) {
   }
   const el = document.elementFromPoint(e.clientX ?? 0, e.clientY ?? 0) as HTMLElement | null
   const item = el?.closest('.nav-item-core') as HTMLElement | null
+  // 分组头之间才重排：拖动分组头时，落点到房间/家原点不算有效目标（避免误重排）
+  const draggedIsGroup = navDrag.draggedId.startsWith('tax-')
+  const itemIsGroup = !!item && item.classList.contains('is-group-head')
+  if (draggedIsGroup && !itemIsGroup) {
+    navDrag.targetId = ''
+    return
+  }
   navDrag.targetId = item?.getAttribute('data-node-id') ?? ''
 }
 
@@ -299,6 +315,15 @@ function toggle() {
   opacity: 0.55;
   outline: 1px solid var(--accent);
   outline-offset: -2px;
+  /* 拖拽源节点自身不拦截 elementFromPoint：否则光标若压在源 item 上，
+     命中检测只会拿到自身 → targetId 恒等于 draggedId → 永远拖不动。
+     让命中检测穿透到源下方的真实落点（如被源压住的空分组头）。 */
+  pointer-events: none;
+}
+/* 但拖拽手柄仍须接收事件：setPointerCapture 在手柄上，须保持可命中，
+   否则 move/up 收不到、整条拖拽链路断。 */
+.nav-item.is-dragging .nav-grip {
+  pointer-events: auto;
 }
 
 /* ---- 空分组头：保留可命中的高度 + 弱化虚线态，提示「可拖回」----
@@ -350,6 +375,20 @@ function toggle() {
   text-align: center;
   flex-shrink: 0;
   opacity: 0.7;
+}
+
+.nav-icon-img {
+  width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  overflow: hidden;
+}
+.nav-icon-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
 }
 
 .nav-item.active .nav-icon {

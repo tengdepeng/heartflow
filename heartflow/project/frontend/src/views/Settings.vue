@@ -6,6 +6,34 @@
       <div class="ambient-glow"></div>
     </div>
 
+    <div class="settings-layout">
+      <nav class="settings-nav" aria-label="设置分组导航">
+        <p class="settings-nav__title">分组</p>
+        <ul class="settings-nav__list">
+          <li
+            v-for="item in navItems"
+            :key="item.key"
+            class="settings-nav__item"
+            :class="{ 'is-active': activeKey === item.key }"
+            role="button"
+            tabindex="0"
+            @click="onNavClick(item.key)"
+            @keydown.enter="onNavClick(item.key)"
+            @keydown.space.prevent="onNavClick(item.key)"
+          >{{ item.label }}</li>
+        </ul>
+      </nav>
+      <div class="settings-content">
+        <div class="settings-filter">
+          <input
+            class="settings-filter__input"
+            type="search"
+            placeholder="搜索设置项…"
+            :value="sectionFilter"
+            @input="sectionFilter = ($event.target as HTMLInputElement).value"
+          />
+        </div>
+
     <header data-enter class="settings-header">
       <div class="settings-ornament">
         <span class="ornament-line"></span>
@@ -21,7 +49,7 @@
       <h2 class="section-title">超级自定义</h2>
       <p class="section-desc">统一调校你的心流工坊环境、动效与界面显隐，打造只属于你的沉浸空间。</p>
 
-      <div class="sub-group" :class="{ 'is-collapsed': !openSections.bg }">
+      <div class="sub-group" :class="sectionClass('bg')" :data-section="'bg'">
         <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('bg')" @keydown.enter="toggleSection('bg')" @keydown.space.prevent="toggleSection('bg')">
           <span class="sub-group__chevron">{{ openSections.bg ? '▾' : '▸' }}</span>
           <div class="sub-group__heading">
@@ -162,6 +190,81 @@
         @change="onBackgroundFileChange($event, 'video')"
       />
     </div>
+
+      <!-- 氛围主题（原右下角常驻浮层：迁至此处与幕僚阁两入口） -->
+      <div class="sub-group" :class="{ 'is-collapsed': !openSections.aura }">
+        <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('aura')" @keydown.enter="toggleSection('aura')" @keydown.space.prevent="toggleSection('aura')">
+          <span class="sub-group__chevron">{{ openSections.aura ? '▾' : '▸' }}</span>
+          <div class="sub-group__heading">
+            <h3 class="sub-title">氛围主题</h3>
+            <p class="sub-desc">星图 / 呼吸球 / 流体壁纸等多元氛围，本地保存。</p>
+          </div>
+        </div>
+
+        <AuraThemePicker />
+      </div>
+
+      <div class="sub-group" :class="{ 'is-collapsed': !openSections.taxonomy }">
+        <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('taxonomy')" @keydown.enter="toggleSection('taxonomy')" @keydown.space.prevent="toggleSection('taxonomy')">
+          <span class="sub-group__chevron">{{ openSections.taxonomy ? '▾' : '▸' }}</span>
+          <div class="sub-group__heading">
+            <h3 class="sub-title">侧栏分类</h3>
+            <p class="sub-desc">切换导航树聚合维度，或自建分组拖拽归并。</p>
+          </div>
+        </div>
+
+        <div class="tax-body">
+          <div class="tax-schemes">
+            <button
+              v-for="t in TAXONOMY_ORDER"
+              :key="t"
+              type="button"
+              class="seg-btn"
+              :class="{ active: selectedTaxonomy === t }"
+              @click="setTaxonomy(t)"
+            >{{ TAXONOMY_LABELS[t] }}</button>
+          </div>
+
+          <div v-if="selectedTaxonomy === 'custom'" class="tax-groups">
+            <div
+              v-for="(g, i) in customGroups"
+              :key="g.id"
+              class="tax-group-row"
+              :class="{ 'is-drop-target': groupDragOver === i && groupDragFrom !== i }"
+              draggable="true"
+              @dragstart="onGroupDragStart(i, $event)"
+              @dragover="onGroupDragOver(i, $event)"
+              @drop="onGroupDrop(i, $event)"
+              @dragend="onGroupDragEnd"
+            >
+              <span class="tax-grip" title="拖动排序" aria-label="拖动排序">⠿</span>
+              <input
+                class="tax-group-input"
+                :value="g.name"
+                @change="renameCustomGroup(g.id, ($event.target as HTMLInputElement).value)"
+              />
+              <span class="tax-group-count">{{ g.roomIds.length }}</span>
+              <button type="button" class="tax-group-del" title="删除分组" @click="deleteGroup(g.id)">×</button>
+            </div>
+            <p v-if="customGroups.length === 0" class="sub-desc">尚无自定义分组，点击下方新建。按住左侧 ⠿ 上下拖动可调整分组顺序。</p>
+            <button type="button" class="tax-group-add" @click="createCustomGroup()">＋ 新建分组</button>
+          </div>
+          <p v-else class="sub-desc">当前为预设体系；选「自定义」后可新建/改名/删除分组，并在侧栏长按拖动房间归入。</p>
+        </div>
+      </div>
+
+      <!-- 房间设置（聚合面板：所有房间的显隐 / 自定义 / 钉入归属集中至此一处，与「房间管理器」路由同源） -->
+      <div class="sub-group" :class="{ 'is-collapsed': !openSections.rooms }">
+        <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('rooms')" @keydown.enter="toggleSection('rooms')" @keydown.space.prevent="toggleSection('rooms')">
+          <span class="sub-group__chevron">{{ openSections.rooms ? '▾' : '▸' }}</span>
+          <div class="sub-group__heading">
+            <h3 class="sub-title">房间设置</h3>
+            <p class="sub-desc">集中管理每个房间在导航中的显隐、名称/图标/颜色与归入院中领域，归纳于一处。</p>
+          </div>
+        </div>
+
+        <RoomSettingsPanel />
+      </div>
 
       <div class="sub-group" :class="{ 'is-collapsed': !openSections.operation }">
         <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('operation')" @keydown.enter="toggleSection('operation')" @keydown.space.prevent="toggleSection('operation')">
@@ -574,8 +677,31 @@
         </div>
       </div>
 
+      <!-- 应用图标（自定义房间图标 + 电脑端 exe 图标向导） -->
+      <div class="sub-group" :class="{ 'is-collapsed': !openSections.appicon }" :data-section="'appicon'">
+        <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('appicon')" @keydown.enter="toggleSection('appicon')" @keydown.space.prevent="toggleSection('appicon')">
+          <span class="sub-group__chevron">{{ openSections.appicon ? '▾' : '▸' }}</span>
+          <div class="sub-group__heading">
+            <h3 class="sub-title">应用图标</h3>
+            <p class="sub-desc">自定义 app 品牌图标（侧栏徽标 / favicon）与房间图标；电脑端窗口图标为构建期资源，见向导。</p>
+          </div>
+        </div>
+
+        <div class="rm-detail-field">
+          <label class="rm-detail-label">应用品牌图标（app 自身 logo）</label>
+          <IconPicker :model-value="appBrandIcon" label="心流工坊" @change="onAppBrandIconChange" />
+        </div>
+
+        <div class="rm-detail-field">
+          <label class="rm-detail-label">电脑端图标（窗口 / 任务栏 / 桌面快捷方式）</label>
+          <DesktopIconWizard />
+        </div>
+      </div>
+
       <!-- 数据整理（data:cleanup · 仅宪法显式启用后出现入口） -->
       <DataCleanupPanel />
+    </div>
+    </div>
     </div>
   </div>
 </template>
@@ -589,12 +715,25 @@ import { useBackgroundPreviewAudio, useBackgroundVideoSync, useVideoRateGuard } 
 import { useAstrolabeTheme, ASTROLABE_SCHEMES, ASTROLABE_SEARCH_STYLES } from '../modules/astrolabe/useAstrolabeTheme'
 import GestureConfigEditor from '../components/GestureConfigEditor.vue'
 import DataCleanupPanel from '../components/DataCleanupPanel.vue'
+import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
+import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
+import IconPicker from '../components/IconPicker.vue'
+import DesktopIconWizard from '../components/DesktopIconWizard.vue'
+import { useConfigStore } from '../stores/config'
+import { useRoomTaxonomy } from '../modules/room-taxonomy'
 import type { GestureAction } from '../modules/gesture/contracts'
 import type { GestureType } from '../modules/gesture/types'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const configBridge = useConfig()
 const { config: configRef } = configBridge
+
+// 应用图标：品牌图标经 pinia config store 持久化，与侧栏品牌徽标/ favicon 同源实时联动
+const configStore = useConfigStore()
+const appBrandIcon = computed(() => configStore.config.appBrandIcon ?? null)
+function onAppBrandIconChange(v: string | null) {
+  configStore.updateAppBrandIcon(v)
+}
 
 // ---- 背景音频互斥路由：进入殿堂设置时，全局背景让出声音，改由预览出声 ----
 const { previewOwnsAudio, setPreviewOwnsAudio } = useBackgroundPreviewAudio()
@@ -608,11 +747,28 @@ onMounted(() => {
   setPreviewActive(true)
   // 入口即应用已持久化的播放速度到预览（全局视频由 HomeBackgroundMedia 同步）
   applyPreviewRate()
+  // 设置分组导航锚点滚动高亮：进入视口的分组同步点亮左栏
+  if (typeof IntersectionObserver !== 'undefined') {
+    io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            const k = (e.target as HTMLElement).dataset.section
+            if (k) activeKey.value = k
+          }
+        }
+      },
+      { rootMargin: '-15% 0px -75% 0px', threshold: 0 },
+    )
+    document.querySelectorAll('[data-section]').forEach((n) => io!.observe(n))
+  }
 })
 onUnmounted(() => {
   setPreviewOwnsAudio(false)
   setPreviewActive(false)
   unbindPreview()
+  io?.disconnect()
+  io = null
 })
 
 // ---- 子分组折叠（可收缩展开，减少滚动查找） ----
@@ -620,6 +776,7 @@ onUnmounted(() => {
 // 其余折叠，进入设置即可一眼扫到标题再按需展开。
 const openSections = reactive<Record<string, boolean>>({
   bg: true,
+  aura: true,
   operation: true,
   gesture: true,
   anim: false,
@@ -628,9 +785,116 @@ const openSections = reactive<Record<string, boolean>>({
   sidebar: true,
   edgebar: true,
   astrolabe: false,
+  taxonomy: true,
+  rooms: false,
+  appicon: false,
 })
 function toggleSection(key: string) {
   openSections[key] = !openSections[key]
+}
+
+// ---- 设置分组导航锚点 + 搜索过滤（② 自适应：两栏导航 + 顶部过滤）----
+// navItems 顺序须与模板中 sub-group 出现顺序一致，保证滚动高亮与点击跳转索引对齐。
+const NAV_ITEMS = [
+  { key: 'bg', label: '背景介质' },
+  { key: 'aura', label: '氛围主题' },
+  { key: 'taxonomy', label: '侧栏分类' },
+  { key: 'rooms', label: '房间设置' },
+  { key: 'operation', label: '三级操作模式' },
+  { key: 'gesture', label: '手势映射' },
+  { key: 'anim', label: '界面动画' },
+  { key: 'visual', label: '视觉强度' },
+  { key: 'chrome', label: '界面显隐' },
+  { key: 'sidebar', label: '侧边栏' },
+  { key: 'edgebar', label: '上下边栏' },
+  { key: 'astrolabe', label: '星图主题' },
+  { key: 'appicon', label: '应用图标' },
+] as const
+const navItems = NAV_ITEMS
+
+const sectionFilter = ref('')
+const filterActive = computed(() => sectionFilter.value.trim().length > 0)
+function matchSection(key: string): boolean {
+  const kw = sectionFilter.value.trim()
+  if (!kw) return true
+  const item = NAV_ITEMS.find((n) => n.key === key)
+  return item ? item.label.includes(kw) : false
+}
+// 折叠态 + 搜索过滤态合并：搜索时只显示匹配分组且自动展开，非匹配隐藏
+function sectionClass(key: string) {
+  const hidden = filterActive.value && !matchSection(key)
+  const collapsed = filterActive.value ? hidden : !openSections[key]
+  return { 'is-collapsed': collapsed, 'is-hidden': hidden }
+}
+
+const activeKey = ref<string>('bg')
+function onNavClick(key: string) {
+  openSections[key] = true
+  activeKey.value = key
+  const el = document.querySelector(`[data-section="${key}"]`)
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+let io: IntersectionObserver | null = null
+
+// ---- 侧栏分类体系（room-taxonomy）：切换聚合维度 + 自定义分组 CRUD ----
+const taxonomy = useRoomTaxonomy()
+const {
+  selectedTaxonomy,
+  customGroups,
+  TAXONOMY_ORDER,
+  TAXONOMY_LABELS,
+  setTaxonomy,
+  renameCustomGroup,
+  createCustomGroup,
+  deleteCustomGroup,
+  reorderCustomGroups,
+} = taxonomy
+
+// 删除自定义分组（仅解除归属，房间保留）
+function deleteGroup(id: string) {
+  if (window.confirm('删除该分组？组内房间将回到「未分组」（不会删除房间）。')) {
+    deleteCustomGroup(id)
+  }
+}
+
+// ---- 自定义分组拖拽排序（设置→侧栏分类→自定义）----
+// 用户诉求：设置里的自定义分组之前只能改名/删/建，不能调顺序 → 加上下拖动排序。
+// customGroups 是 room-taxonomy 的模块级 ref 数组，splice 后 deep watch 自动持久化，
+// 侧栏自定义视图按此数组顺序渲染分组，故调序即同步侧栏分组先后。
+const groupDragFrom = ref(-1)
+const groupDragOver = ref(-1)
+function onGroupDragStart(i: number, e: DragEvent) {
+  const t = e.target as HTMLElement | null
+  // 从输入框/删除按钮起拖时取消（避免误拖文本、误触删除按钮）
+  if (t && t.closest('input, button')) { e.preventDefault(); return }
+  groupDragFrom.value = i
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'move'
+    try { e.dataTransfer.setData('text/plain', String(i)) } catch { /* noop */ }
+  }
+  ;(e.currentTarget as HTMLElement).classList.add('is-dragging')
+}
+function onGroupDragOver(i: number, e: DragEvent) {
+  if (groupDragFrom.value < 0) return
+  e.preventDefault() // 允许 drop
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'move'
+  if (groupDragOver.value !== i) groupDragOver.value = i
+}
+function onGroupDragEnd(e: DragEvent) {
+  ;(e.currentTarget as HTMLElement)?.classList?.remove('is-dragging')
+  groupDragFrom.value = -1
+  groupDragOver.value = -1
+}
+function onGroupDrop(i: number, e: DragEvent) {
+  e.preventDefault()
+  const from = groupDragFrom.value
+  // 顺序调整交给 room-taxonomy.reorderCustomGroups（splice + deep watch 持久化），
+  // 不在组件里裸改数组，便于单测断言且保证侧栏「自定义」视图同步顺序。
+  if (from >= 0 && from !== i) reorderCustomGroups(from, i)
+  ;(e.currentTarget as HTMLElement)?.classList?.remove('is-dragging')
+  groupDragFrom.value = -1
+  groupDragOver.value = -1
 }
 
 // ---- 三级操作模式 ----
@@ -924,12 +1188,12 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   --st-bg: #0a0a0a;
 
   position: relative;
-  max-width: 560px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 40px 24px 80px;
   background: transparent;
   min-height: 100vh;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* =============================================
@@ -1062,7 +1326,202 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   line-height: 1.6;
 }
 
+/* ---- 两栏布局：左栏分组导航 + 右栏内容（② 自适应）---- */
+.settings-layout {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+.settings-nav {
+  flex: 0 0 220px;
+  position: sticky;
+  top: 24px;
+  align-self: flex-start;
+  padding: 14px 12px;
+  border: 1px solid rgba(138, 138, 138, 0.12);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.settings-nav__title {
+  font-size: 12px;
+  color: var(--text-muted, #8a8a8a);
+  margin: 0 0 10px;
+  letter-spacing: 0.08em;
+}
+.settings-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.settings-nav__item {
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  color: var(--text-secondary, #b8b0a8);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s;
+}
+.settings-nav__item:hover {
+  background: rgba(138, 138, 138, 0.08);
+}
+.settings-nav__item.is-active {
+  background: rgba(138, 138, 138, 0.16);
+  color: var(--text-primary, #e8e0d8);
+  border-color: rgba(138, 138, 138, 0.22);
+}
+.settings-content {
+  flex: 1;
+  min-width: 0;
+}
+.settings-filter {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-bottom: 18px;
+}
+.settings-filter__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  font-size: 13px;
+  border-radius: 12px;
+  border: 1px solid rgba(138, 138, 138, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #e8e0d8);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.settings-filter__input:focus {
+  border-color: rgba(138, 138, 138, 0.32);
+}
+.settings-filter__input::placeholder {
+  color: var(--text-muted, #8a8a8a);
+}
+.sub-group.is-hidden {
+  display: none;
+}
+
 /* ---- 超级自定义子分组 ---- */
+
+/* ---- 侧栏分类体系（room-taxonomy） ---- */
+.tax-body {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.tax-schemes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tax-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tax-group-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px;
+  border-radius: 10px;
+  cursor: default;
+  transition: background var(--transition), box-shadow var(--transition), opacity var(--transition);
+}
+/* 拖拽手柄：独立抓取点，按住 ⠿ 上下拖动改分组顺序；与输入框/删除按钮解耦 */
+.tax-grip {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 1px 0 -2px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 6px;
+  cursor: grab;
+  transition: opacity var(--transition), color var(--transition);
+}
+.tax-grip:hover {
+  opacity: 0.95;
+  color: var(--accent);
+}
+.tax-group-row.is-dragging {
+  opacity: 0.55;
+  outline: 1px solid var(--accent);
+  outline-offset: -2px;
+}
+/* 拖拽落点：插入位置提示（虚线描边 + 轻微高亮） */
+.tax-group-row.is-drop-target {
+  outline: 1px dashed var(--accent);
+  outline-offset: -2px;
+  background: var(--accent-glow);
+}
+.tax-group-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  padding: 7px 10px;
+  outline: none;
+}
+.tax-group-input:focus {
+  border-color: var(--accent);
+}
+.tax-group-count {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  min-width: 18px;
+  text-align: center;
+}
+.tax-group-del {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  transition: all var(--transition);
+}
+.tax-group-del:hover {
+  border-color: rgba(220, 80, 80, 0.5);
+  color: #e07070;
+}
+.tax-group-add {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 8px 14px;
+  border: 1px dashed rgba(var(--accent-rgb), 0.35);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all var(--transition);
+}
+.tax-group-add:hover {
+  background: var(--accent-glow);
+}
 .sub-group {
   padding: 16px 0;
   border-top: 1px solid rgba(138, 138, 138, 0.08);
@@ -1621,6 +2080,41 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 /* =============================================
    Responsive
    ============================================= */
+@media (max-width: 900px) {
+  .settings-layout {
+    flex-direction: column;
+  }
+  .settings-nav {
+    position: static;
+    flex: none;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    overflow-x: auto;
+  }
+  .settings-nav__title {
+    display: none;
+  }
+  .settings-nav__list {
+    flex-direction: row;
+    gap: 6px;
+  }
+  .settings-nav__item {
+    white-space: nowrap;
+  }
+  .settings-filter {
+    position: static;
+  }
+}
+
+@media (max-width: 600px) {
+  .settings-nav {
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 480px) {
   .settings {
     padding: 24px 16px 64px;

@@ -25,6 +25,8 @@
         <span class="achat-empty-icon">💬</span>
         <p class="achat-empty-text">开始与 {{ advisorProfile?.name ?? '幕僚' }} 对话</p>
       </div>
+      <!-- 对话分身档案（INCR-08：DeepSeek/Kimi 式分身画像） -->
+      <AdvisorChatArchivePanel :advisor-id="advisorId" />
       <div
         v-for="(msg, idx) in chatMessages"
         :key="msg.id"
@@ -71,6 +73,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { ADVISOR_PERSONALITIES, AFFINITY_TIERS } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import AdvisorChatArchivePanel from '../components/AdvisorChatArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()

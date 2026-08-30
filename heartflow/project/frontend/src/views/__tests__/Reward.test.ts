@@ -124,9 +124,10 @@ describe('Reward 视图', () => {
     const wrapper = await getWrapper()
     const input = wrapper.find('.rw-search-input')
     await input.setValue('薪资')
-    // 应该只显示匹配的记录
-    expect(wrapper.text()).toContain('月度薪资')
-    expect(wrapper.text()).not.toContain('购买开发工具')
+    const timeline = wrapper.find('.rw-timeline-section').text()
+    // 时间线应该只显示匹配的记录
+    expect(timeline).toContain('月度薪资')
+    expect(timeline).not.toContain('购买开发工具')
   })
 
   // ---- 类型筛选 ----
@@ -141,8 +142,9 @@ describe('Reward 视图', () => {
     const selects = wrapper.findAll('.rw-filter-select')
     const typeSelect = selects[0]
     await typeSelect.setValue('income')
-    expect(wrapper.text()).toContain('月度薪资')
-    expect(wrapper.text()).not.toContain('购买开发工具')
+    const timeline = wrapper.find('.rw-timeline-section').text()
+    expect(timeline).toContain('月度薪资')
+    expect(timeline).not.toContain('购买开发工具')
   })
 
   it('类型筛选"支出"只显示支出记录', async () => {
@@ -150,8 +152,9 @@ describe('Reward 视图', () => {
     const selects = wrapper.findAll('.rw-filter-select')
     const typeSelect = selects[0]
     await typeSelect.setValue('expense')
-    expect(wrapper.text()).toContain('购买开发工具')
-    expect(wrapper.text()).not.toContain('月度薪资')
+    const timeline = wrapper.find('.rw-timeline-section').text()
+    expect(timeline).toContain('购买开发工具')
+    expect(timeline).not.toContain('月度薪资')
   })
 
   // ---- 月度趋势 ----

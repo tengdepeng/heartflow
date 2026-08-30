@@ -6,9 +6,9 @@ import MirrorSceneCards from '../MirrorSceneCards.vue'
 describe('MirrorSceneCards 组件', () => {
   setActivePinia(createPinia())
 
-  it('渲染全部 10 个意图（不含 unknown）', () => {
+  it('渲染全部 11 个意图（不含 unknown，含 finance 记账）', () => {
     const wrapper = mount(MirrorSceneCards)
-    expect(wrapper.findAll('.mssc-card').length).toBe(10)
+    expect(wrapper.findAll('.mssc-card').length).toBe(11)
   })
 
   it('点击卡片 emit launch 并携带正确意图', async () => {

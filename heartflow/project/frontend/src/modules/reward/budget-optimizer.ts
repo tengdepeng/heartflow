@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import type { RewardRecord, ExpenseCategory, Budget, RewardStats } from './types'
 import { EXPENSE_CATEGORY_META } from './types'
+import { categoryLabelAny } from './custom-category'
 
 // ============================================================
 // 类型定义
@@ -35,8 +36,8 @@ export interface BudgetAllocation {
 export interface OverspendAlert {
   /** 预警 ID */
   id: string
-  /** 类别 */
-  category: ExpenseCategory
+  /** 类别（INCR-23：可为内置键或用户自定义分类键） */
+  category: string
   /** 标签 */
   label: string
   /** 预算 */
@@ -306,10 +307,10 @@ export function useBudgetOptimizer() {
 
       if (usageRate > monthProgress * 1.5) {
         severity = 'critical'
-        suggestion = `严重超支！建议立即停止 ${EXPENSE_CATEGORY_META[budget.category].label} 类支出`
+        suggestion = `严重超支！建议立即停止 ${categoryLabelAny(budget.category)} 类支出`
       } else if (usageRate > monthProgress * 1.2) {
         severity = 'warning'
-        suggestion = `支出进度超前，建议控制 ${EXPENSE_CATEGORY_META[budget.category].label} 类支出`
+        suggestion = `支出进度超前，建议控制 ${categoryLabelAny(budget.category)} 类支出`
       } else if (usageRate > monthProgress) {
         severity = 'info'
         suggestion = '支出进度略快，保持关注'
@@ -320,7 +321,7 @@ export function useBudgetOptimizer() {
       newAlerts.push({
         id: `alert_${budget.category}_${Date.now()}`,
         category: budget.category,
-        label: EXPENSE_CATEGORY_META[budget.category].label,
+        label: categoryLabelAny(budget.category),
         budget: budget.monthlyLimit,
         spent,
         usageRate: Math.round(usageRate * 100) / 100,

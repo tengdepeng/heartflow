@@ -289,6 +289,9 @@
     <!-- 营养分析（body/meal-nutrition 模块，饮食记录 → 营养评分） -->
     <MealNutritionPanel :logs="logs" />
 
+    <!-- 身体数据接入（INCR-06：运动手记 · 手动录入聚合） -->
+    <ExerciseTrackerPanel />
+
     <!-- 近期记录 -->
     <section class="recent-logs" v-if="recentLogs.length">
       <h3 class="section-title">📜 近期记录</h3>
@@ -308,6 +311,7 @@ import { useHealthDashboard } from '../modules/body'
 import BodyRingsPanel from '../components/BodyRingsPanel.vue'
 import NutritionPanel from '../components/NutritionPanel.vue'
 import MealNutritionPanel from '../components/MealNutritionPanel.vue'
+import ExerciseTrackerPanel from '../components/ExerciseTrackerPanel.vue'
 import { usePerceptionStore } from '../stores/perception'
 
 const { entranceRef, entranceClass } = useViewEntrance()

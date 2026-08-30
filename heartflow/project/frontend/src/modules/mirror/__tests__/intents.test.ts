@@ -16,8 +16,8 @@ describe('镜我意图分类 (intents)', () => {
 
   // ---- 注册表完整性 ----
 
-  it('INTENT_REGISTRY 包含 10 个意图', () => {
-    expect(INTENT_REGISTRY).toHaveLength(10)
+  it('INTENT_REGISTRY 包含 11 个意图（含 finance 记账）', () => {
+    expect(INTENT_REGISTRY).toHaveLength(11)
   })
 
   it('每个意图都有 category / label / icon / description / keywords / patterns / paramExtractors', () => {
@@ -48,8 +48,8 @@ describe('镜我意图分类 (intents)', () => {
 
   // ---- INTENT_INFO 速查表 ----
 
-  it('INTENT_INFO 包含 11 个条目（10 意图 + unknown）', () => {
-    expect(Object.keys(INTENT_INFO)).toHaveLength(11)
+  it('INTENT_INFO 包含 12 个条目（11 意图 + unknown）', () => {
+    expect(Object.keys(INTENT_INFO)).toHaveLength(12)
   })
 
   it('INTENT_INFO.unknown 存在', () => {
@@ -103,16 +103,16 @@ describe('镜我意图分类 (intents)', () => {
 
   // ---- getAllIntentCategories ----
 
-  it('getAllIntentCategories 返回 10 个分类', () => {
+  it('getAllIntentCategories 返回 11 个分类（含 finance 记账）', () => {
     const categories = getAllIntentCategories()
-    expect(categories).toHaveLength(10)
+    expect(categories).toHaveLength(11)
   })
 
   it('getAllIntentCategories 包含所有预期分类', () => {
     const categories = getAllIntentCategories()
     const expected: IntentCategory[] = [
       'focus', 'note', 'emotion', 'anchor', 'plan',
-      'reflect', 'learn', 'create', 'rest', 'explore',
+      'reflect', 'learn', 'create', 'rest', 'explore', 'finance',
     ]
     for (const cat of expected) {
       expect(categories).toContain(cat)

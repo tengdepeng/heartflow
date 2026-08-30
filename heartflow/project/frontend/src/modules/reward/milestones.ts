@@ -10,8 +10,8 @@ import type {
 } from './types'
 import {
   REWARD_STORAGE_KEYS, DEFAULT_MILESTONES,
-  EXPENSE_CATEGORY_META,
 } from './types'
+import { categoryLabelAny } from './custom-category'
 
 /**
  * 劳酬里程碑引擎
@@ -106,9 +106,9 @@ export function useRewardMilestones() {
   /**
    * 获取预算预警
    */
-  function getBudgetAlerts(): { category: ExpenseCategory; label: string; spent: number; limit: number; percentage: number; level: 'safe' | 'warning' | 'danger' }[] {
+  function getBudgetAlerts(): { category: string; label: string; spent: number; limit: number; percentage: number; level: 'safe' | 'warning' | 'danger' }[] {
     const month = new Date().toISOString().slice(0, 7)
-    const alerts: { category: ExpenseCategory; label: string; spent: number; limit: number; percentage: number; level: 'safe' | 'warning' | 'danger' }[] = []
+    const alerts: { category: string; label: string; spent: number; limit: number; percentage: number; level: 'safe' | 'warning' | 'danger' }[] = []
 
     for (const budget of budgets.value) {
       if (budget.month !== month) continue
@@ -120,7 +120,7 @@ export function useRewardMilestones() {
 
       alerts.push({
         category: budget.category,
-        label: EXPENSE_CATEGORY_META[budget.category].label,
+        label: categoryLabelAny(budget.category),
         spent: budget.currentSpent,
         limit: budget.monthlyLimit,
         percentage,

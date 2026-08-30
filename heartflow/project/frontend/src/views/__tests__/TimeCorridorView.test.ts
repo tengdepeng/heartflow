@@ -93,4 +93,10 @@ describe('TimeCorridorView 时间长廊', () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('总专注')
   })
+
+  it('渲染天文日历面板（INCR-05 观星时节）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('天文日历')
+    expect(wrapper.find('.astro-panel').exists()).toBe(true)
+  })
 })

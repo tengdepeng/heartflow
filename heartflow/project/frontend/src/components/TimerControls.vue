@@ -1,15 +1,41 @@
 <template>
-  <div class="timer-controls">
+  <div
+    class="timer-controls"
+    :class="{ reveal: revealed }"
+    @mouseenter="revealed = true"
+    @mouseleave="revealed = false"
+    @focusin="revealed = true"
+    @focusout="revealed = false"
+  >
     <div class="timer-status" :class="`timer-status--${statusTone}`">
       <span class="timer-status__dot" />
       <span class="timer-status__label">{{ statusLabel }}</span>
       <span class="timer-status__meta">{{ modeMeta }}</span>
     </div>
 
-    <!-- Mode Tabs -->
+    <div class="timer-panel">
+    <!-- Mode Tabs：常显主打三模式，其余收进「更多」 -->
     <div class="mode-tabs">
       <button
-        v-for="m in modes"
+        v-for="m in mainModes"
+        :key="m.key"
+        :class="['mode-tab', { active: currentMode === m.key }]"
+        type="button"
+        @click="onSwitch(m)"
+      >
+        {{ m.label }}
+      </button>
+      <button
+        class="mode-tab mode-tab--more"
+        type="button"
+        :class="{ open: moreOpen }"
+        @click="showMore = !showMore"
+        :title="moreOpen ? '收起更多模式' : '展开更多模式'"
+      >{{ moreOpen ? '收起' : '更多' }}</button>
+    </div>
+    <div v-if="moreOpen" class="mode-tabs mode-tabs--more">
+      <button
+        v-for="m in moreModes"
         :key="m.key"
         :class="['mode-tab', { active: currentMode === m.key }]"
         type="button"
@@ -33,6 +59,17 @@
       <span class="countdown-input__unit">分钟</span>
     </div>
 
+      <!-- Controls -->
+      <div class="action-row">
+        <button class="btn btn-primary" type="button" @click="$emit('toggle')">
+          {{ isRunning ? '停一停' : isPaused ? '接续' : '开始流动' }}
+        </button>
+        <button class="btn btn-secondary" type="button" :disabled="!canReset" @click="$emit('reset')">
+          归零
+        </button>
+      </div>
+    </div><!-- /.timer-panel -->
+
     <!-- Timer Display -->
     <div class="timer-display">
       <span class="time-caption">{{ modeLabel }}</span>
@@ -41,7 +78,7 @@
     </div>
 
     <!-- Progress Ring -->
-    <svg class="progress-ring" :viewBox="`0 0 120 120`" width="200" height="200">
+    <svg class="progress-ring" :viewBox="`0 0 120 120`" width="280" height="280">
       <circle
         cx="60" cy="60" r="52"
         fill="none"
@@ -61,15 +98,6 @@
       />
     </svg>
 
-    <!-- Controls -->
-    <div class="action-row">
-      <button class="btn btn-primary" type="button" @click="$emit('toggle')">
-        {{ isRunning ? '停一停' : isPaused ? '接续' : '开始流动' }}
-      </button>
-      <button class="btn btn-secondary" type="button" :disabled="!canReset" @click="$emit('reset')">
-        归零
-      </button>
-    </div>
   </div>
 </template>
 
@@ -92,16 +120,25 @@ const emit = defineEmits<{
   switchMode: [mode: string, minutes?: number]
 }>()
 
-const modes = [
+const mainModes = [
   { key: 'focus', label: '🍅 专注' },
-  { key: 'nap',   label: '☕ 小憩' },
-  { key: 'free',  label: '✨ 自由' },
   { key: 'pomodoro', label: '🔁 番茄' },
+  { key: 'free', label: '✨ 自由' },
+]
+const moreModes = [
+  { key: 'nap', label: '☕ 小憩' },
   { key: 'countdown', label: '⏱ 倒计时' },
   { key: 'countup', label: '⏳ 正计时' },
 ]
 
 const customMinutes = ref(25)
+const showMore = ref(false)
+
+/** 鼠标移到计时器上 → 控制面板浮现；移开 → 收起（按键默认隐藏、放大态常显） */
+const revealed = ref(false)
+
+/** 当前选中的若是次要模式，自动展开「更多」行，避免选中态看不见 */
+const moreOpen = computed(() => showMore.value || moreModes.some(m => m.key === props.currentMode))
 
 function onSwitch(m: { key: string; label: string }) {
   if (m.key === 'countdown') emit('switchMode', 'countdown', customMinutes.value)
@@ -190,10 +227,33 @@ const canReset = computed(() => props.isRunning || props.isPaused || props.remai
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 0;
   position: relative;
   z-index: 10;
   opacity: 0.92;
+}
+
+/* ── 控制面板：默认隐藏，鼠标移到计时器上浮现 ── */
+.timer-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  margin: 0;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.45s ease, transform 0.45s ease, max-height 0.45s ease;
+}
+.timer-controls.reveal .timer-panel {
+  opacity: 1;
+  max-height: 360px;
+  transform: translateY(0);
+  pointer-events: auto;
+  margin: 12px 0;
 }
 
 .timer-status {
@@ -201,6 +261,7 @@ const canReset = computed(() => props.isRunning || props.isPaused || props.remai
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
+  margin-bottom: 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -282,6 +343,30 @@ const canReset = computed(() => props.isRunning || props.isPaused || props.remai
   box-shadow: 0 8px 18px rgba(124, 108, 240, 0.22);
 }
 
+/* 次要模式展开行（收起的「更多」内容） */
+.mode-tabs--more {
+  margin-top: -12px;
+  padding-top: 0;
+}
+
+.mode-tab--more {
+  flex: 0 0 auto;
+  min-width: 60px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mode-tab--more:hover {
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mode-tab--more.open {
+  background: rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.82);
+  box-shadow: none;
+}
+
 /* ── Timer Display ── */
 .timer-display {
   position: absolute;
@@ -304,7 +389,7 @@ const canReset = computed(() => props.isRunning || props.isPaused || props.remai
 }
 
 .time {
-  font-size: 60px;
+  font-size: 88px;
   font-weight: 300;
   letter-spacing: 3px;
   font-variant-numeric: tabular-nums;

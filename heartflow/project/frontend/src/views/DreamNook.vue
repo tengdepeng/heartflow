@@ -24,6 +24,11 @@
       </div>
     </section>
 
+    <!-- 梦境档案（INCR-11：概览/情绪分布/高频主题/温和洞察） -->
+    <section data-enter>
+      <DreamArchivePanel :dreams="store.dreams" />
+    </section>
+
     <!-- 标签云 -->
     <section data-enter v-if="allTags.length" class="tag-cloud-section">
       <h3>🏷️ 标签云</h3>
@@ -131,6 +136,7 @@
 import { ref, computed, reactive } from 'vue'
 import { useDreamNookStore, DREAM_REALM_ID } from '../stores/dreamNook'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import DreamArchivePanel from '../components/DreamArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useDreamNookStore()

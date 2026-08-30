@@ -120,6 +120,9 @@
       </div>
     </section>
 
+    <!-- 岁时档案（INCR-15）档案概览/季节分布/岁时健康/温和洞察 -->
+    <SeasonalArchivePanel :rituals="srCtx.rituals.value" />
+
     <!-- 岁时环 -->
     <div data-enter class="sr-ring-container">
       <div class="sr-season-ring">
@@ -364,6 +367,7 @@ import { SOLAR_TERMS, SEASON_META, getTermCustoms, getFestivalInfo } from '../mo
 import type { SolarTerm, Festival } from '../modules/seasonal/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import JournalPanel from '../components/JournalPanel.vue'
+import SeasonalArchivePanel from '../components/SeasonalArchivePanel.vue'
 
 // ---- 模块化 composables ----
 const { entranceRef, entranceClass } = useViewEntrance()

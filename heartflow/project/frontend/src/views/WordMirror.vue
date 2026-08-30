@@ -95,6 +95,9 @@
       </div>
     </section>
 
+    <!-- 每日词汇推荐（INCR-01：逐日心锚·时间流 · 每日固定一词） -->
+    <DailyRecommendationPanel />
+
     <!-- 统计概览行 - 3 卡片 -->
     <section data-enter class="wm-stats-section">
       <div class="wm-stat-item">
@@ -387,6 +390,7 @@ import { dueWords, nextReviewState } from '../modules/word-mirror/spaced-repetit
 import TextAnalysisPanel from '../components/TextAnalysisPanel.vue'
 import WritingAssistantPanel from '../components/WritingAssistantPanel.vue'
 import ReviewSessionPanel from '../components/ReviewSessionPanel.vue'
+import DailyRecommendationPanel from '../components/DailyRecommendationPanel.vue'
 import type { WordEntry } from '../modules/word-mirror/types'
 
 /* ============== 类型定义 ============== */

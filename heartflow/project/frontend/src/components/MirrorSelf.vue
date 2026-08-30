@@ -167,14 +167,17 @@
         <span class="dingyin-entry-label">四幕</span>
       </button>
 
-      <!-- 幕僚对话面板 -->
-      <MirrorDialogue :visible="showDialogue" :active-room-id="activeRoomId" @close="showDialogue = false" />
+      <!-- 幕僚对话面板：用 Teleport 送到 body 之外，避免被 .mirror-self-wrapper 的
+           transform 创建包含块，导致 position:fixed 锚定到珠子而非视口（面板跑到屏幕顶部） -->
+      <Teleport to="body">
+        <MirrorDialogue :visible="showDialogue" :active-room-id="activeRoomId" @close="showDialogue = false" />
+      </Teleport>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { useTimer } from '../resonance/bridges/timer'
@@ -250,6 +253,17 @@ function loadWidget(): WidgetState {
 }
 const widget = ref<WidgetState>(loadWidget())
 const dragPos = ref<FloatPos | null>(null)
+
+// 响应式视口尺寸：窗口缩放时驱动 wrapperStyle 重算，否则拖动过的珠子在缩窗后僵死不跟随
+const viewport = ref({
+  w: typeof window !== 'undefined' ? window.innerWidth : 1280,
+  h: typeof window !== 'undefined' ? window.innerHeight : 800,
+})
+function onViewportResize() {
+  viewport.value = { w: window.innerWidth, h: window.innerHeight }
+}
+onMounted(() => window.addEventListener('resize', onViewportResize))
+onUnmounted(() => window.removeEventListener('resize', onViewportResize))
 // 旧绝对坐标数据：还原 dragPos（拖拽接管后才写回相对坐标）
 {
   const raw = storage.getKV<{ x?: number; y?: number }>(WIDGET_KEY, {})
@@ -362,7 +376,7 @@ const wrapperStyle = computed(() => {
   }
   // 拖动过：自由浮动接管（D5/D6，置于 homeCentered/centered 之上）
   if (dragPos.value) {
-    const px = floatPosToPx(dragPos.value, { w: 54, h: 54 }, ZERO_SAFE, window.innerWidth, window.innerHeight)
+    const px = floatPosToPx(dragPos.value, { w: 54, h: 54 }, ZERO_SAFE, viewport.value.w, viewport.value.h)
     base.left = `${px.x}px`
     base.top = `${px.y}px`
     base.right = 'auto'

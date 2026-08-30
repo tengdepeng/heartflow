@@ -9,7 +9,7 @@ import { storeToRefs } from 'pinia'
 
 export function useAdvisor() {
   const store = useAdvisorStore()
-  const { messages, currentBubble, affinityMap, interactionCountMap, advisors } = storeToRefs(store)
+  const { messages, currentBubble, affinityMap, interactionCountMap, advisors, commandTasks } = storeToRefs(store)
 
   return reactive({
     // 响应式状态
@@ -43,6 +43,10 @@ export function useAdvisor() {
     getTaskAwareness: store.getTaskAwareness?.bind(store),
     dispatchAvatar: store.dispatchAvatar?.bind(store),
     getTaskProgress: store.getTaskProgress?.bind(store),
+    // 调令系统（幕僚管家闭环）
+    commandTasks,
+    issueCommand: store.issueCommand?.bind(store),
+    getCommandTasks: store.getCommandTasks?.bind(store),
 
     // 年度/季度对话
     getAnnualDialogue: store.getAnnualDialogue?.bind(store),

@@ -63,7 +63,9 @@ describe('room-graph 房间图引擎', () => {
 
   it('getRoomsByGroup 返回系统房间', () => {
     const systemRooms = getRoomsByGroup('system')
-    expect(systemRooms.length).toBe(5)
+    // 6 = 原有 5 个 + 外链房 /external（Item 8 新增）
+    expect(systemRooms.length).toBe(6)
+    expect(systemRooms.some((r) => r.id === 'external')).toBe(true)
   })
 
   // ------- 主链路 -------

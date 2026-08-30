@@ -35,6 +35,31 @@ export type {
 } from './types'
 export { CRAFT_CATEGORY_LABELS, RITUAL_TYPE_LABELS } from './types'
 
+// ---- 文明档案分析（INCR-16）----
+export {
+  CRAFT_META,
+  RITUAL_META,
+  SOURCE_META,
+  traditionsOverview,
+  traditionsCraftRows,
+  traditionsRitualRows,
+  traditionsSourceRows,
+  traditionsRegionRows,
+  practiceBuckets,
+  traditionsRhythm,
+  traditionsHealth,
+  traditionsInsights,
+  traditionsTopTags,
+} from './traditions-analytics'
+export type {
+  TraditionsOverview,
+  TraditionsRow,
+  PracticeBuckets,
+  TraditionsRhythm,
+  TraditionsArchiveHealth,
+  TraditionsTag,
+} from './traditions-analytics'
+
 // ---- 存储键 ----
 
 const ENTRIES_KEY = 'hf:folklore_entries'

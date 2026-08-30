@@ -276,6 +276,35 @@ describe('镜我任务解析器 (parser)', () => {
       expect(result.best!.params.roomTarget).toBe('锚点')
     })
 
+    // ---- 记账意图（修复：镜我对"我要记账/打开记账"此前无对应意图，只回文字不跳转） ----
+
+    it('识别"我要记账"为 finance', () => {
+      const result = parseTask('我要记账')
+      expect(result.best).not.toBeNull()
+      expect(result.best!.intent).toBe('finance')
+    })
+
+    it('识别"记账"为 finance（裸词也能命中）', () => {
+      const result = parseTask('记账')
+      expect(result.best).not.toBeNull()
+      expect(result.best!.intent).toBe('finance')
+    })
+
+    it('识别"打开记账"为 finance 或 explore 且能解析到记账目标', () => {
+      const result = parseTask('打开记账')
+      expect(result.best).not.toBeNull()
+      const intents = result.tasks.map(t => t.intent)
+      // 两种意图任一命中都能最终跳到 /reward（finance 直跳 / explore 经 roomResolver 记账别名）
+      expect(intents).toContain('finance')
+      expect(result.best!.params.roomTarget === '劳酬' || result.best!.params.roomTarget === '记账' || result.best!.intent === 'finance').toBe(true)
+    })
+
+    it('识别"记一笔账"为 finance', () => {
+      const result = parseTask('记一笔账')
+      expect(result.best).not.toBeNull()
+      expect(result.best!.intent).toBe('finance')
+    })
+
     // ---- 歧义与边界 ----
 
     it('无意义输入不匹配任何意图', () => {

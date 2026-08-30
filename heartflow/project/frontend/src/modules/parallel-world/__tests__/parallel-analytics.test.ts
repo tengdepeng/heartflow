@@ -33,7 +33,7 @@ function makeAlt(partial: Partial<AltSelf> = {}): AltSelf {
 }
 
 function makeCapsule(partial: Partial<Capsule> = {}): Capsule {
-  return { id: 'c1', message: 'hi', openDate: '2027-01-01', opened: false, at: iso(10), scope: 'free', ...partial }
+  return { id: 'c1', title: 'hi', message: 'hi', items: [], createdAt: iso(10), openDate: '2027-01-01', openedAt: null, opened: false, at: iso(10), scope: 'free', ...partial }
 }
 
 function makeBranch(partial: Partial<WorldBranch> = {}): WorldBranch {

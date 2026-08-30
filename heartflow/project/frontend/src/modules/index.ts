@@ -309,6 +309,16 @@ export type {
   WordStats,
 } from './word-mirror'
 
+// ---- hanzi（殿堂辞典·汉字本体/查字/档案/手写）----
+export * from './hanzi'
+
+// ---- garden（成长庭院·种子/习惯/罗盘 + 成长气象 + 打卡日历）----
+export { useGardenFlourish } from './garden'
+export { growthOverview, domainDistribution, stageDistribution, habitReview, growthMomentum, growthInsights, STAGE_LABELS } from './garden/growth-meteor'
+export type { SeedLike, HabitLike, GrowthOverview, DomainRow, StageRow, HabitReview, GrowthMomentum } from './garden/growth-meteor'
+export { habitCalendarAggregate, habitDimensionStats, toLocalDate } from './garden/habit-calendar'
+export type { DayCell, HabitCalendar, HabitDimension } from './garden/habit-calendar'
+
 // ---- body-wisdom ----
 export { useMeridianTracker, getCurrentMeridian, useConstitutionAnalyzer, useFiveMovements, useSutraAnnotations, useWellnessPlan, useMeridianCheck } from './body-wisdom'
 export { BODY_WISDOM_STORAGE_KEYS, ORGAN_ELEMENT_MAP, CONSTITUTION_META, MERIDIAN_HOURS, ANNOTATION_TYPE_META } from './body-wisdom'
@@ -368,6 +378,22 @@ export type {
 export { useRewardMilestones, useFinanceGoals, useInvestmentTracker, useFinanceHealth, useFinanceTimeline } from './reward'
 export { useReward } from './reward'
 export { REWARD_STORAGE_KEYS, INCOME_CATEGORY_META, EXPENSE_CATEGORY_META, DEFAULT_MILESTONES, GOAL_TYPE_META, GOAL_TERM_META, INVESTMENT_TYPE_META, HEALTH_GRADE_META } from './reward'
+export {
+  useCustomCategories,
+  resetCategoryRegistry,
+  buildMerged,
+  customOnly,
+  descendantIds,
+  resolveMeta,
+  resolveMetaAny,
+  categoryOptions,
+  categoryLabel,
+  categoryIcon,
+  categoryColor,
+  categoryLabelAny,
+  categoryIconAny,
+  categoryOptionsFor,
+} from './reward'
 export type {
   RewardType,
   IncomeCategory,
@@ -384,6 +410,9 @@ export type {
   HealthDimension,
   FinanceHealthScore,
   FinanceTimelineEvent,
+  CustomCategory,
+  CategoryOption,
+  CategoryKind,
 } from './reward'
 
 // ---- rest ----

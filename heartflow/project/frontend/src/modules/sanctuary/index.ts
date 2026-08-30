@@ -9,6 +9,19 @@ export { useSanctuaryTrigger } from './composables/useSanctuaryTrigger'
 export type { SanctuaryTriggerConfig } from './composables/useSanctuaryTrigger'
 export { useSanctuary } from './useSanctuary'
 export type { SanctuaryNote, SanctuaryLog } from './useSanctuary'
+
+// ---- 安全岛档案分析（INCR-19）----
+export {
+  sanctuaryOverview,
+  retreatRhythm,
+  sanctuaryGrowth,
+  sanctuaryInsights,
+} from './sanctuary-analytics'
+export type {
+  SanctuaryOverview,
+  RetreatRhythm,
+  SanctuaryGrowth,
+} from './sanctuary-analytics'
 export {
   useDesktopSilentOverlay,
   DESKTOP_SILENT_OVERLAY_KEY,

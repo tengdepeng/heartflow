@@ -301,9 +301,42 @@ const exploreIntent: IntentMeta = {
   ],
 }
 
+// ---- 记账 (finance) ----
+// 项目里真实存在的财务空间是 /reward「劳酬」（记账 v2：多账户 / 预算预警 /
+// 支出流水 / 月结单 / CSV 导入）。此前镜我对系统完全没接这个意图，导致用户
+// 对玉珠说「我要记账」「打开记账」只回文字、不跳转（与 AdvisorHub 调令系统
+// 的 commandIntent 词表脱节）。此处补齐，finance 意图直接发 navigate 步到
+// 劳酬（roomResolver 已把「劳酬」映射到 /reward；另在 roomResolver 补记账同义词，
+// 让「打开记账」经 explore 也能解析）。
+const financeIntent: IntentMeta = {
+  category: 'finance',
+  label: '记账理财',
+  icon: '💰',
+  description: '打开劳酬空间，记账与预算都在这里',
+  keywords: [
+    '记账', '账本', '财务', '劳酬', '算账', '收支', '流水账', '账单', '报销',
+    '结余', '资产负债', '开销', '花销', '支出', '收入', '预算', '月结',
+    '入账', '出账', '记一笔',
+  ],
+  patterns: [
+    /(?:我要|我想|帮我|给我)\s*(?:记|做|搞|记一笔)\s*(?:一笔)?\s*账/i,
+    /(?:打开|开启|去|进入|前往|跳到)\s*(?:记账|账本|财务|劳酬)/i,
+    /(?:查|看|记|记一下)\s*(?:一下|这个月|今天|本月)?\s*(?:的)?\s*(?:开销|花销|支出|流水|账单)/i,
+    /(?:记一笔|记个账|记个账本)/i,
+    /(?:记账|账本|财务|劳酬|算账|记一笔账)/,
+  ],
+  paramExtractors: [
+    {
+      name: 'roomTarget',
+      pattern: /(?:记账|账本|财务|劳酬|开销|花销|支出|流水|账单)/i,
+      transform: () => '劳酬',
+    },
+  ],
+}
+
 // ---- 所有意图注册表 ----
 
-/** 10 意图分类完整定义 */
+/** 11 意图分类完整定义 */
 export const INTENT_REGISTRY: IntentMeta[] = [
   focusIntent,
   noteIntent,
@@ -315,6 +348,7 @@ export const INTENT_REGISTRY: IntentMeta[] = [
   createIntent,
   restIntent,
   exploreIntent,
+  financeIntent,
 ]
 
 /** 意图信息速查表 */
@@ -329,6 +363,7 @@ export const INTENT_INFO: Record<IntentCategory, Omit<IntentMeta, 'keywords' | '
   create:   { category: 'create',   label: '创造', icon: '🎨', description: '输出内容、创作' },
   rest:     { category: 'rest',     label: '休息', icon: '☕', description: '放松、呼吸、暂停' },
   explore:  { category: 'explore',  label: '探索', icon: '🔍', description: '信息查询、统计分析、系统浏览' },
+  finance:  { category: 'finance',  label: '记账理财', icon: '💰', description: '打开劳酬空间，记账与预算都在这里' },
   unknown:  { category: 'unknown',  label: '未知', icon: '❓', description: '无法匹配任何意图' },
 }
 

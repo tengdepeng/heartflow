@@ -23,10 +23,10 @@ beforeEach(() => {
 })
 
 describe('useMirrorToolCards', () => {
-  it('无存储记录时回退到约 10 个默认种子卡', async () => {
+  it('无存储记录时回退到 11 个默认种子卡（含 finance 记账）', async () => {
     const { useMirrorToolCards, MIRROR_TOOL_CARDS_KEY } = await loadComposable()
     const { cards } = useMirrorToolCards()
-    expect(cards.value.length).toBe(10)
+    expect(cards.value.length).toBe(11)
     // 种子卡以 seed- 前缀命名，且均引用真实意图
     expect(cards.value.every((c) => c.id.startsWith('seed-'))).toBe(true)
     // 默认状态下存储未被写入（沉默默认）

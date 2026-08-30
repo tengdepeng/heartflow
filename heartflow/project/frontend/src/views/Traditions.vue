@@ -116,6 +116,9 @@
       </p>
     </section>
 
+    <!-- 文明档案（INCR-16）档案概览/技艺/仪式/来源/地域/实践/文明健康/标签/洞察 -->
+    <TraditionsArchivePanel :entries="entries" />
+
     <!-- 个人文明收藏 -->
     <section class="trad-block">
       <header class="trad-head">
@@ -184,6 +187,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useTraditionsBridge } from '../modules/traditions/traditions-bridge'
 import { CRAFT_CATEGORY_LABELS, RITUAL_TYPE_LABELS } from '../modules/traditions'
 import type { CraftCategory, RitualType, FolkloreEntry } from '../modules/traditions'
+import TraditionsArchivePanel from '../components/TraditionsArchivePanel.vue'
 
 const {
   entries,

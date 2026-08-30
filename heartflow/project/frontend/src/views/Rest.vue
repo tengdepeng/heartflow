@@ -1485,6 +1485,8 @@ const restTips: RestTip[] = [
   border: 1px solid rgba(122, 184, 122, 0.15);
   border-radius: 12px;
   padding: 28px 24px;
+  max-height: 86vh;
+  overflow-y: auto;
   animation: modal-scale-in 0.25s ease;
 }
 

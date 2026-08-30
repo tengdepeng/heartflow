@@ -6,7 +6,7 @@ import { mount } from '@vue/test-utils'
 import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
 import BacklinksPanel from '../BacklinksPanel.vue'
 import { useStudy } from '../../modules/study'
-import { useNoteLinks, connect } from '../../modules/study/note-links'
+import { useNoteLinks, syncLinksForNote } from '../../modules/study/note-links'
 
 describe('BacklinksPanel', () => {
   beforeEach(async () => {
@@ -21,7 +21,7 @@ describe('BacklinksPanel', () => {
     study.load()
     const a = study.create('笔记A', '内容A')
     const b = study.create('笔记B', '内容B')
-    connect(b.id, a.id) // b 引用 a → a 的反向链接来自 b
+    syncLinksForNote(b.id, `[[${a.id}]]`, [a, b]) // b 引用 a → a 的反向链接来自 b
     const wrapper = mount(BacklinksPanel, { props: { noteId: a.id } })
     expect(wrapper.text()).toContain('笔记B')
     expect(wrapper.text()).toContain('反向链接')
@@ -40,7 +40,7 @@ describe('BacklinksPanel', () => {
     study.load()
     const a = study.create('笔记A', '内容A')
     const b = study.create('笔记B', '内容B')
-    connect(b.id, a.id)
+    syncLinksForNote(b.id, `[[${a.id}]]`, [a, b])
     const wrapper = mount(BacklinksPanel, { props: { noteId: a.id } })
     await wrapper.find('.bl-item').trigger('click')
     expect(wrapper.emitted('open')?.[0]).toEqual([b.id])

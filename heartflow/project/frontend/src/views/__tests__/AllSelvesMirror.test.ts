@@ -189,6 +189,9 @@ describe('AllSelvesMirror 万镜之厅视图', () => {
     const wrapper = await createWrapper()
     expect(wrapper.text()).toContain('拥抱变化')
     expect(wrapper.text()).toContain('保持专注')
+    // 自我对话档案（INCR-08）随对话数据联动
+    expect(wrapper.find('.stalk-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('自我对话档案')
   })
 
   // ------- 点击镜面触发涟漪 -------

@@ -184,8 +184,9 @@ describe('BodyGreenhouse 视图', () => {
     const wrapper = await getWrapper()
     const input = wrapper.find('.gh-search-input')
     await input.setValue('沙拉')
-    expect(wrapper.text()).toContain('沙拉鸡胸肉')
-    expect(wrapper.text()).not.toContain('跑步')
+    const recentLogs = wrapper.find('.recent-logs')
+    expect(recentLogs.text()).toContain('沙拉鸡胸肉')
+    expect(recentLogs.text()).not.toContain('跑步')
   })
 
   // ---- 类型筛选 ----

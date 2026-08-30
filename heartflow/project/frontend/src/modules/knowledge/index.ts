@@ -136,3 +136,19 @@ export {
   KNOWLEDGE_STAR_POSITIONS_KEY,
 } from './knowledge-tower'
 export type { KNode, StarPositions } from './knowledge-tower'
+
+// ---- 知识档案分析（INCR-18）----
+export {
+  KNOWLEDGE_CAT_LABELS,
+  knowledgeOverview,
+  knowledgeGraphShape,
+  importOverview,
+  knowledgeInsights,
+  starLayoutProgress,
+} from './knowledge-analytics'
+export type {
+  KnowledgeOverview,
+  KnowledgeGraphShape,
+  ImportOverview,
+  KnowledgeInsight,
+} from './knowledge-analytics'

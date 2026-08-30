@@ -73,35 +73,6 @@ export function resolveTargetId(token: string, notes: Note[]): string | null {
   return byTitle ? byTitle.id : null
 }
 
-/** 建立一条链接（去重；不允许自引用；可带块锚点） */
-export function connect(sourceId: string, targetId: string, blockId?: string): NoteLink | null {
-  if (sourceId === targetId) return null
-  if (links.value.some(l =>
-    l.sourceId === sourceId && l.targetId === targetId && (l.blockId ?? '') === (blockId ?? ''),
-  )) return null
-  const link: NoteLink = {
-    id: generateId(),
-    sourceId,
-    targetId,
-    createdAt: new Date().toISOString(),
-    blockId,
-  }
-  links.value = [...links.value, link]
-  saveLinks(links.value)
-  return link
-}
-
-/** 断开一条链接 */
-export function disconnect(sourceId: string, targetId: string): boolean {
-  const before = links.value.length
-  links.value = links.value.filter(l => !(l.sourceId === sourceId && l.targetId === targetId))
-  if (links.value.length !== before) {
-    saveLinks(links.value)
-    return true
-  }
-  return false
-}
-
 /** 本笔记引用了哪些笔记（出链） */
 export function getOutgoingLinks(noteId: string): NoteLink[] {
   return links.value.filter(l => l.sourceId === noteId)
@@ -204,8 +175,6 @@ export function useNoteLinks() {
     parseLinkRefs,
     splitBlockRef,
     resolveTargetId,
-    connect,
-    disconnect,
     getOutgoingLinks,
     getBacklinks,
     getBlockContent,

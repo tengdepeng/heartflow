@@ -8,6 +8,8 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { parseTask } from './parser'
 import { executePlan } from './executor'
+import { resolveRoomRoute } from './roomResolver'
+import { decideForProactive, emitOperationGate } from '../../modules/operation-mode/gate'
 import type {
   ParsedTask,
   ParsedTaskResult,
@@ -21,6 +23,9 @@ import { useTimer } from '../../resonance/bridges/timer'
 import { useStudy } from '../study'
 import { storage } from '../../engine/storage'
 import { getLocalDateKey } from '../../utils/time'
+import { getAllRooms } from '../../engine/room-graph'
+import { GROUP_LABELS } from '../../modules/room-taxonomy'
+import { INTENT_INFO } from './intents'
 
 // ---- 默认 Action Handler 工厂 ----
 
@@ -353,6 +358,49 @@ function generateDialogueId(): string {
   return `dlg_${Date.now()}_${++dialogueIdCounter}`
 }
 
+// ---- 资产感知（Item 4）：让幕僚"知晓自身院落" ----
+// 用户问"有哪些房间 / 能做什么"时，列举真实房间与能力，而非通用兜底
+const ROOM_AWARE_CUES = [
+  '房间', '空间', '都有啥', '有哪些', '你有哪些', '你能打开', '打开什么',
+  '去哪', '在哪里', '目录', '都有什么', '院落', '地方',
+]
+const CAPABILITY_AWARE_CUES = [
+  '能做什么', '会什么', '能干嘛', '功能', '你会', '能帮我', '可以做什么',
+  '擅长', '能干什么', '能做什么事', '本领',
+]
+
+function buildAssetOverview(text: string): string | null {
+  const t = text.toLowerCase()
+  const asksRooms = ROOM_AWARE_CUES.some((c) => t.includes(c.toLowerCase()))
+  const asksCaps = CAPABILITY_AWARE_CUES.some((c) => t.includes(c.toLowerCase()))
+  if (!asksRooms && !asksCaps) return null
+
+  const parts: string[] = []
+
+  if (asksRooms) {
+    const byGroup = new Map<string, string[]>()
+    for (const room of getAllRooms()) {
+      if (room.defaultNavVisible === false) continue
+      const label = GROUP_LABELS[room.group] ?? room.group
+      if (!byGroup.has(label)) byGroup.set(label, [])
+      byGroup.get(label)!.push(room.name)
+    }
+    const lines = [...byGroup.entries()].map(([g, names]) => `· ${g}：${names.join('、')}`)
+    parts.push(
+      `我这里是一整座院落，目前有这些房间：\n${lines.join('\n')}\n\n想进哪个，直接说「打开 XX」就行——比如「打开记账」会带你去劳酬空间。`,
+    )
+  }
+
+  if (asksCaps) {
+    const caps = Object.values(INTENT_INFO)
+      .filter((i) => i.category !== 'unknown')
+      .map((i) => `${i.label}（${i.description}）`)
+    parts.push(`我能帮你做这些事：\n${caps.join('；')}。`)
+  }
+
+  return parts.join('\n\n')
+}
+
 /**
  * 镜我对话 composable
  *
@@ -377,40 +425,6 @@ export function useMirrorDialogue() {
   const handlers = createDefaultHandlers()
   const router = useRouter()
 
-  /** 房间名称到路由的映射 */
-  const roomRouteMap: Record<string, string> = {
-    '锚点': '/anchor',
-    'anchor': '/anchor',
-    '笔记': '/notes',
-    'notes': '/notes',
-    '情绪': '/emotion',
-    'emotion': '/emotion',
-    '身体': '/body',
-    'body': '/body',
-    '账本': '/reward',
-    'reward': '/reward',
-    '安全岛': '/sanctuary',
-    'sanctuary': '/sanctuary',
-    '花房': '/garden',
-    'garden': '/garden',
-    '工艺': '/craft',
-    'craft': '/craft',
-    '职业': '/career',
-    'career': '/career',
-    '休息': '/rest',
-    'rest': '/rest',
-    '背包': '/bag',
-    'bag': '/bag',
-    '伤疤': '/scar',
-    'scar': '/scar',
-    '知识': '/knowledge',
-    'knowledge': '/knowledge',
-    '时间线': '/timeline',
-    'timeline': '/timeline',
-    '首页': '/',
-    'home': '/',
-  }
-
   /**
    * 发送用户输入，触发完整的解析-执行-回应流程
    * @param text 用户输入文本
@@ -420,7 +434,7 @@ export function useMirrorDialogue() {
    */
   async function send(
     text: string,
-    opts?: { overrideIntent?: IntentCategory; roomId?: string },
+    opts?: { overrideIntent?: IntentCategory; roomId?: string; bypassGate?: boolean },
   ): Promise<{
     response: string
     result: ExecutionResult
@@ -460,6 +474,32 @@ export function useMirrorDialogue() {
 
       // 3. 如果没有最佳匹配，返回通用回应
       if (!best) {
+        // Item 4：资产感知优先于通用兜底——用户问"有哪些房间/能做什么"时真正列举院落资产
+        const overview = buildAssetOverview(text)
+        if (overview) {
+          const mirrorEntry: DialogueEntry = {
+            id: generateDialogueId(),
+            role: 'mirror',
+            text: overview,
+            timestamp: Date.now(),
+          }
+          dialogue.value.push(mirrorEntry)
+          lastResponse.value = overview
+          const result: ExecutionResult = {
+            success: true,
+            stepsExecuted: 0,
+            stepsTotal: 0,
+            message: overview,
+            stepResults: [],
+          }
+          lastExecutionResult.value = result
+          return {
+            response: overview,
+            result,
+            parsedTask: null,
+            ambiguous: false,
+          }
+        }
         const fallbackResponse = '收到你的消息，但我不太确定你想做什么。试试说「开始专注」或「记录笔记」？'
         const mirrorEntry: DialogueEntry = {
           id: generateDialogueId(),
@@ -517,13 +557,52 @@ export function useMirrorDialogue() {
         }
       }
 
+      // 4.2 三级操作模式门控
+      // silent（默认）→ 直接执行；confirm/suggest → 不自动执行，改发待确认/建议事件。
+      // bypassGate=true 表示已用户点头（来自待确认托盘回投），跳过门控直接执行。
+      const decision = opts?.bypassGate ? 'execute' : decideForProactive()
+      if (decision !== 'execute') {
+        emitOperationGate({
+          kind: 'advisor',
+          decision: decision as 'confirm' | 'suggest',
+          message: response,
+          text: response,
+          advisorId: 'mirror',
+          originalText: text,
+          intent: best.intent,
+        })
+        const gateLine =
+          decision === 'confirm'
+            ? `已为你备好：${response}（请在右下角「待确认」中点执行）`
+            : `建议：${response}`
+        const gateEntry: DialogueEntry = {
+          id: generateDialogueId(),
+          role: 'mirror',
+          text: gateLine,
+          timestamp: Date.now(),
+        }
+        dialogue.value.push(gateEntry)
+        lastResponse.value = gateLine
+        return {
+          response: gateLine,
+          result: { success: true, stepsExecuted: 0, stepsTotal: plan.steps.length, message: gateLine, stepResults: [] },
+          parsedTask: best,
+          ambiguous: lastParseResult.value.ambiguous,
+        }
+      }
+
       // 5. 处理 navigate 操作（需要在执行前处理路由跳转）
+      // 用房间图动态解析 + 别名表，替换写死的 roomRouteMap；解析失败则回退提示而非静默无动作
+      let navigateFailedTarget: string | null = null
       const navigateStep = plan.steps.find(s => s.action === 'navigate')
       if (navigateStep) {
         const target = (navigateStep.params.target as string) || ''
-        const route = roomRouteMap[target] || roomRouteMap[target.toLowerCase()]
-        if (route) {
-          router.push(route)
+        const resolved = resolveRoomRoute(target)
+        if (resolved.path) {
+          router.push(resolved.path)
+        } else {
+          // 解析失败：记录目标，步骤 7 用回退文案覆盖「正在跳转」回执
+          navigateFailedTarget = target
         }
       }
 
@@ -532,15 +611,19 @@ export function useMirrorDialogue() {
       lastExecutionResult.value = result
 
       // 7. 添加镜我回应到对话记录
+      // 若 navigate 解析失败，用回退文案覆盖「正在跳转」回执，避免「只说不做」
+      const mirrorText = navigateFailedTarget
+        ? `没找到「${navigateFailedTarget}」对应的房间，试试更准确的说法，例如「打开殿堂设置」或「去情绪花房」。`
+        : (result.message || response)
       const mirrorEntry: DialogueEntry = {
         id: generateDialogueId(),
         role: 'mirror',
-        text: result.message || response,
+        text: mirrorText,
         timestamp: Date.now(),
         executionResult: result,
       }
       dialogue.value.push(mirrorEntry)
-      lastResponse.value = result.message || response
+      lastResponse.value = mirrorText
 
       return {
         response: result.message || response,

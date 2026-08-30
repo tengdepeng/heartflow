@@ -81,15 +81,6 @@ describe('块级引用', () => {
     expect(bl.map(l => l.blockId).sort()).toEqual(['blk1', 'blk2'])
   })
 
-  it('connect 带 blockId 去重（同目标不同块视为不同链接）', () => {
-    const { connect, getOutgoingLinks } = useNoteLinks()
-    expect(connect('a', 'b', 'x')).not.toBeNull()
-    expect(connect('a', 'b', 'x')).toBeNull()
-    expect(connect('a', 'b', 'y')).not.toBeNull()
-    const out = getOutgoingLinks('a')
-    expect(out).toHaveLength(2)
-  })
-
   it('getBlockContent 从段落提取块文本（去锚点）', () => {
     const content = '第一段\n\n这是要点段落 ^blk1\n\n第三段'
     expect(getBlockContent(content, 'blk1')).toBe('这是要点段落')

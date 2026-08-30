@@ -63,6 +63,18 @@
       </div>
     </section>
 
+    <!-- 守护档案（guard-analytics 分析引擎） -->
+    <GuardArchivePanel
+      :visits="visitLogs"
+      :sessions="sessionActivity"
+      :perms="permissionLights"
+      :anonymous-mode="anonymousMode"
+      :data-reflux="dataReflux"
+      :external-link-control="externalLinkControl"
+      :contacts="contacts"
+      :crashes="crashLogs"
+    />
+
     <!-- 四大台面板（按当前标签渲染其一） -->
     <GovernPanel v-if="activeTab === 'govern'" />
     <SecurityPanel v-if="activeTab === 'security'" />
@@ -118,6 +130,7 @@ import SunSchedulePanel from '../components/SunSchedulePanel.vue'
 import WhiteNoisePanel from '../components/WhiteNoisePanel.vue'
 import SensorIntegrationPanel from '../components/SensorIntegrationPanel.vue'
 import PersonalSafetyPanel from '../components/PersonalSafetyPanel.vue'
+import GuardArchivePanel from '../components/GuardArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -155,7 +168,7 @@ function emitGuardSignal() {
 
 // 守护室数据层组合式函数（模块级单例，状态跨视图与面板共享）
 const guard = useGuard()
-const { contacts, visitLogs, sessionActivity, dataReflux, anonymousMode, externalLinkControl } = guard
+const { contacts, visitLogs, sessionActivity, permissionLights, crashLogs, dataReflux, anonymousMode, externalLinkControl } = guard
 const configBridge = useConfig()
 const advisorEnabled = computed({
   get: () => configBridge.config.advisorEnabled,

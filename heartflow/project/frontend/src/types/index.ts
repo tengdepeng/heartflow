@@ -512,6 +512,11 @@ export interface AppConfig {
    * reload/重启后据此恢复「用户 touched 优先」语义，避免宪法引擎推导覆盖用户手动设置。
    */
   overrideUserTouched: string[]
+  /**
+   * 应用品牌图标（侧栏品牌徽标 / favicon 等 app 自身 logo）。
+   * 图片型为 data-uri 或 url；字形型为单个 emoji/字符。null = 沿用默认 ✦。
+   */
+  appBrandIcon: string | null
 }
 
 /** 标签分类节点（树形结构） */

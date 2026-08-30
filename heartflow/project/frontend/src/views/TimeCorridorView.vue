@@ -55,6 +55,11 @@
       </div>
     </div>
 
+    <!-- 天文日历 · 观星时节（INCR-05：让时间/星空看得见，纯本地计算） -->
+    <div data-enter class="tcv-astro">
+      <AstronomyPanel />
+    </div>
+
     <!-- 时光胶囊 · 接入已存在的 modules/capsule（本地私有/沉默默认/允许未定义） -->
     <section data-enter class="tcv-capsule">
       <header class="tcv-capsule-head">
@@ -104,6 +109,7 @@ import { useRouter } from 'vue-router'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { storage, storageVersion } from '../engine/storage'
 import TimeCorridor from '../components/TimeCorridor.vue'
+import AstronomyPanel from '../components/AstronomyPanel.vue'
 import type { FocusSession } from '../types'
 import { useTimeCapsule } from '../modules/capsule'
 
@@ -337,6 +343,13 @@ function navTo(path: string) {
   border: 1px solid rgba(var(--accent-rgb), 0.08);
   overflow: hidden;
   padding: 12px;
+}
+
+/* ---- 天文日历（INCR-05） ---- */
+.tcv-astro {
+  position: relative;
+  z-index: 1;
+  margin: 16px 24px 0;
 }
 
 /* ---- 时光胶囊面板 ---- */

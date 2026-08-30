@@ -956,6 +956,19 @@ const ROOM_GRAPH: Record<string, RoomNode> = {
     mainPathOrder: -1,
     domain: 'system',
   },
+  'external': {
+    id: 'external',
+    path: '/external',
+    name: '外链房',
+    icon: '⇄',
+    color: '#7fb3d5',
+    group: 'system',
+    description: '外部链接房 · AI 模型与接口 / 技能 / 云同步 / 写作提示词 / 榜单通道',
+    adjacentTo: ['home-space', 'launcher'],
+    isMainPath: false,
+    mainPathOrder: -1,
+    domain: 'system',
+  },
 }
 
 // ---- 主链路顺序列表 ----

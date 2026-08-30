@@ -298,3 +298,25 @@ export function useWisdom() {
 // ---- 对话历史（视图数据层下沉，独立于 useWisdom）----
 export { useWisdomHistory, WISDOM_HISTORY_KEY } from './history'
 export type { HistoryItem } from './history'
+
+// ---- 知微档案分析（INCR-17）----
+export {
+  classifyDomain,
+  DOMAIN_META,
+  wisdomOverview,
+  wisdomDomainRows,
+  wisdomTagRows,
+  wisdomMonthlyRows,
+  wisdomRhythm,
+  wisdomHealth,
+  wisdomInsights,
+  wisdomTopTags,
+} from './wisdom-analytics'
+export type { WisdomDomain } from './wisdom-analytics'
+export type {
+  WisdomOverview,
+  WisdomRow,
+  WisdomRhythm,
+  WisdomArchiveHealth,
+  WisdomTag,
+} from './wisdom-analytics'

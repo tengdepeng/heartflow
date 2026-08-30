@@ -144,6 +144,9 @@
       </div>
     </section>
 
+    <!-- 安全岛档案（INCR-19）档案概览/驻足节奏/深研修习/温和洞察 -->
+    <SanctuaryArchivePanel :logs="logs" :notes="notes" />
+
     <!-- ============ 2. 呼吸引导（原有） ============ -->
     <div class="breath-guide" data-enter>
       <div
@@ -276,6 +279,7 @@ import { useRouter } from 'vue-router'
 import { useRuntimeState } from '../resonance/bridges/runtime'
 import { useSanctuary } from '../modules/sanctuary'
 import { useDesktopSilentOverlay } from '../modules/sanctuary'
+import SanctuaryArchivePanel from '../components/SanctuaryArchivePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceClass } = useViewEntrance()
@@ -1505,6 +1509,8 @@ onUnmounted(() => {
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   padding: 28px 32px;
+  max-height: 86vh;
+  overflow-y: auto;
   width: 280px;
   text-align: center;
   backdrop-filter: blur(12px);

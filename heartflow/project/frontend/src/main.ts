@@ -13,6 +13,7 @@ import { getPerception } from './modules/perception/usePerception'
 import { getRuntimeStateBridge } from './resonance/bridges/runtime'
 import { useRuntimeStore } from './stores/runtime'
 import { useResonance } from './resonance'
+import { setRouteSource } from './modules/advisor/featureDictionary'
 
 async function bootstrap() {
   // 容错工具：单个初始化步骤失败只记日志，绝不阻断挂载
@@ -42,6 +43,10 @@ async function bootstrap() {
   const pinia = createPinia()
   app.use(pinia)
   app.use(router)
+
+  // 把真实路由表注入幕僚功能词典（featureDictionary 不静态 import router，
+  // 否则会把 createRouter 副作用带进所有引用它的模块图，测试中会整片崩）
+  setRouteSource(() => router.getRoutes())
 
   // 根组件渲染错误兜底：避免子组件异常导致整体白屏（仅记日志，Vue 仍会渲染其余部分）
   app.config.errorHandler = (err, _instance, info) => {

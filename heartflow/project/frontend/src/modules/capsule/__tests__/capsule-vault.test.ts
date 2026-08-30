@@ -3,13 +3,16 @@ import { capsuleStatus, countdownText, capsuleVault, CAPSULE_STATUS_META } from 
 import type { TimeCapsule } from '../index'
 
 function mk(overrides: Partial<TimeCapsule> = {}): TimeCapsule {
+  const createdAt = new Date('2026-01-01').toISOString()
   return {
     id: 'c1',
     title: '测试胶囊',
     items: [],
-    createdAt: new Date('2026-01-01').toISOString(),
+    createdAt,
+    at: createdAt,
     openDate: '2026-01-01',
     openedAt: null,
+    opened: false,
     ...overrides,
   }
 }

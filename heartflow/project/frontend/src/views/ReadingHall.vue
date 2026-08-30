@@ -796,6 +796,8 @@ onMounted(reading.load)
   width: 400px;
   max-width: 90vw;
   padding: 24px;
+  max-height: 86vh;
+  overflow-y: auto;
   border-radius: 14px;
   background: var(--bg-deep);
   border: 1px solid rgba(var(--accent-rgb), 0.15);

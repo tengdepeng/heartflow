@@ -165,3 +165,16 @@ export type {
   BatchExportTask,
   ExportEngineConfig,
 } from './export-enhance'
+
+// ---- 视图桥接聚合（INCR-14 时光档案） ----
+export { useTimelineBridge } from './timeline-bridge'
+
+export type {
+  TimelineOverview,
+  PatternInsights,
+  TimelineRecommendation,
+  EmotionAnalysisSummary,
+  NarrativeSummaryBag,
+  BridgeFilterOptions,
+  BridgeExportOptions,
+} from './timeline-bridge'

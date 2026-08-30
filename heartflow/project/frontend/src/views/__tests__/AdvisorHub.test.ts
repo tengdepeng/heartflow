@@ -84,6 +84,8 @@ vi.mock('../../stores/advisor', () => ({
       anchors: { label: '锚点', current: 3, total: 5 },
     }),
     dispatchAvatar: () => null,
+    commandTasks: [],
+    issueCommand: vi.fn(),
   }),
 }))
 

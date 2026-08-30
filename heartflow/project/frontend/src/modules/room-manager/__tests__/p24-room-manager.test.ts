@@ -75,6 +75,7 @@ vi.mock('../../../engine/storage', () => ({
 
 async function importRoomManager() {
   const mod = await import('../index')
+  mod.resetRoomManager?.()
   return mod.useRoomManager()
 }
 

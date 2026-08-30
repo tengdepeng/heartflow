@@ -8,8 +8,10 @@ export interface ExternalAppEntry {
   id: string
   /** 显示名，如「网易云音乐」 */
   name: string
-  /** emoji 或本地图标路径 */
+  /** emoji 或字形符号（图片图标为空时的兜底） */
   icon: string
+  /** 图片型图标：data URI 或本地文件路径，优先于 icon（Item 3 图标自定义产物） */
+  iconImage?: string
   /** 用户自建分类，如「音乐」「支付」「办公」 */
   category: string
   /** 启动方式：可执行路径（.exe/.app）或 URI scheme（weixin://…） */
@@ -30,6 +32,7 @@ export interface ExternalAppEntry {
 export interface EntryInput {
   name: string
   icon?: string
+  iconImage?: string
   category: string
   launch: string
   deepLink?: string

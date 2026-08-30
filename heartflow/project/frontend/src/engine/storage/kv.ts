@@ -1,5 +1,20 @@
 import { loadSchema, saveSchema } from './core'
-export function getKV<T>(key: string, defaultValue: T): T { const s = loadSchema(); const val = s.kvStore?.[key]; return val !== undefined ? val : defaultValue }
+/**
+ * 读取 KV。
+ * 单向类型守卫：仅当「调用方明确期望数组（默认值为 []）而存储被写脏成非数组」
+ * 时才回退默认值，避免调用方的 for...of / 解构把对象当数组迭代而当场抛出
+ * （崩点离真正写脏处很远、极难排查）。
+ * 注意：默认值为 null 属中性占位（表示"可能没有"），不触发回退；
+ * 反向（期望非数组、实际是数组）也保持原行为。因此 getKV(key, null)
+ * 在真实存了数组时能正确返回数组，不会被误伤。
+ */
+export function getKV<T>(key: string, defaultValue: T): T {
+  const s = loadSchema()
+  const val = s.kvStore?.[key]
+  if (val === undefined) return defaultValue
+  if (Array.isArray(defaultValue) && !Array.isArray(val)) return defaultValue
+  return val as T
+}
 export function setKV(key: string, value: any): void { const s = loadSchema(); if (!s.kvStore) s.kvStore = {}; s.kvStore[key] = value; saveSchema(s) }
 export function removeKV(key: string): void {
   const s = loadSchema()

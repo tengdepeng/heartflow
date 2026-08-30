@@ -732,6 +732,8 @@ function remove(id: string) {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-height: 86vh;
+  overflow-y: auto;
 }
 .tg-modal-card h3 {
   font-size: 16px;

@@ -5,6 +5,8 @@
 
 import { ref, computed } from 'vue'
 import type { AIMessage } from '@/engine/ai/types'
+import { getAllRooms } from '../../engine/room-graph'
+import { GROUP_LABELS } from '../room-taxonomy'
 
 // ============================================================
 // 类型定义
@@ -273,7 +275,23 @@ export function useLLMBridge(config?: Partial<LLMBridgeConfig>) {
     }
     prompt += `\n当前时间：${ctx.timeOfDay}`
 
+    // Item 4：让镜我（LLM 路径）知晓自身院落资产，避免"不知道自己有啥房间"
+    const roomInv = buildRoomInventory()
+    if (roomInv) prompt += `\n\n你拥有的房间（院落资产）：\n${roomInv}`
+
     return prompt
+  }
+
+  /** 构建房间资产清单（院落真实房间，按分组聚合；收编子房间不列入） */
+  function buildRoomInventory(): string {
+    const byGroup = new Map<string, string[]>()
+    for (const room of getAllRooms()) {
+      if (room.defaultNavVisible === false) continue
+      const label = GROUP_LABELS[room.group] ?? room.group
+      if (!byGroup.has(label)) byGroup.set(label, [])
+      byGroup.get(label)!.push(room.name)
+    }
+    return [...byGroup.entries()].map(([g, names]) => `${g}：${names.join('、')}`).join('\n')
   }
 
   /** 构建消息列表 */

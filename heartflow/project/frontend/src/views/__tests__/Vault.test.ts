@@ -85,6 +85,9 @@ describe('Vault 口令锁', () => {
 
     expect(wrapper.find('.vt-lock-btn--ghost').exists()).toBe(true)
 
+    // 安全审计面板（INCR-12）随解锁态渲染
+    expect(wrapper.text()).toContain('安全审计')
+
     const nameInput = wrapper.find('input[placeholder="资产名称"]')
     await nameInput.setValue('房产证')
     const addBtn = wrapper.findAll('button.vt-btn').find((b) => b.text() === '+')

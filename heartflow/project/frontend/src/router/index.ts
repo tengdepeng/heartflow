@@ -449,6 +449,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '启动器' },
   }),
   withRoomMeta({
+    path: '/external',
+    name: 'external',
+    component: () => import('../views/ExternalRoom.vue'),
+    meta: { title: '外链房' },
+  }),
+  withRoomMeta({
     path: '/interaction-config',
     name: 'interaction-config',
     component: () => import('../views/InteractionConfig.vue'),

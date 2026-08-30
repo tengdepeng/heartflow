@@ -314,8 +314,16 @@ export function useTimelineBridge() {
 
   // ---- 5. narrativeSummary ----
 
-  const narrativeSummary = computed<NarrativeSummaryBag>(() => {
-    narrativeGenerator.loadReports()
+  /** 叙事摘要缓存（命令式重建，避免在计算属性内调用含副作用的生成函数导致递归） */
+  const narrativeSummaryRef = ref<NarrativeSummaryBag>({ daily: null, weekly: null, recent: [] })
+
+  /** 命令式重建叙事摘要（在 refreshSource 中调用） */
+  function rebuildNarrativeSummary(): void {
+    try {
+      narrativeGenerator.loadReports()
+    } catch {
+      // 忽略加载失败，保持缓存
+    }
 
     const today = new Date().toISOString().slice(0, 10)
     let dailyReport: NarrativeReport | null = null
@@ -342,14 +350,17 @@ export function useTimelineBridge() {
       weeklyReport = null
     }
 
-    const recent = narrativeGenerator.getReportsByType('daily').slice(0, 7)
-
-    return {
-      daily: dailyReport,
-      weekly: weeklyReport,
-      recent,
+    let recent: NarrativeReport[] = []
+    try {
+      recent = narrativeGenerator.getReportsByType('daily').slice(0, 7)
+    } catch {
+      recent = []
     }
-  })
+
+    narrativeSummaryRef.value = { daily: dailyReport, weekly: weeklyReport, recent }
+  }
+
+  const narrativeSummary = computed<NarrativeSummaryBag>(() => narrativeSummaryRef.value)
 
   // ---- 6. milestones ----
 
@@ -504,6 +515,7 @@ export function useTimelineBridge() {
     loading.value = true
     try {
       source.value = getRiverSource()
+      rebuildNarrativeSummary()
     } finally {
       loading.value = false
     }

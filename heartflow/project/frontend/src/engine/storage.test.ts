@@ -265,6 +265,7 @@ describe('storage 模块 · Config 读写', () => {
         allowExternalAI: false,
       },
       operationMode: DEFAULT_CONFIG.operationMode,
+      appBrandIcon: null,
       worldShell: structuredClone(DEFAULT_CONFIG.worldShell),
       overrideUserTouched: [],
     }
@@ -317,6 +318,7 @@ describe('storage 模块 · Config 读写', () => {
         allowExternalAI: false,
       },
       operationMode: DEFAULT_CONFIG.operationMode,
+      appBrandIcon: null,
       worldShell: structuredClone(DEFAULT_CONFIG.worldShell),
       overrideUserTouched: [],
     }

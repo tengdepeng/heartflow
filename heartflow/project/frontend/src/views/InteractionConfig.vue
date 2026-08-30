@@ -677,6 +677,8 @@ function saveRule() {
   border: 1px solid rgba(var(--accent-rgb), 0.12);
   border-radius: 12px; padding: 24px;
   width: 440px; max-width: 90vw;
+  max-height: 86vh;
+  overflow-y: auto;
 }
 
 .modal-wide { width: 560px; }

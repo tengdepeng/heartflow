@@ -730,6 +730,8 @@ function openConfig(id: string) {
   border: 1px solid rgba(var(--accent-rgb), 0.15);
   border-radius: 16px;
   padding: 28px;
+  max-height: 86vh;
+  overflow-y: auto;
   box-shadow: 0 24px 48px rgba(0,0,0,0.4);
 }
 .cm-modal-title {

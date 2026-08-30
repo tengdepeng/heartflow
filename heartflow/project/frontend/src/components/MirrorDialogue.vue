@@ -148,13 +148,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useMirrorDialogue } from '../modules/mirror/useMirrorDialogue'
 import { INTENT_INFO } from '../modules/mirror/intents'
 import type { IntentCategory, ExecutionAction } from '../modules/mirror/types'
 import { useVoiceInput } from '../modules/mirror/voice-input'
 import { extractStructured } from '../modules/mirror/nl-create'
 import { formatClockTime as formatTime } from '../utils/time'
+import { ADVISOR_CONFIRM_EXECUTE_EVENT } from '../modules/operation-mode/gate'
 
 const props = defineProps<{
   visible: boolean
@@ -248,6 +249,26 @@ watch(() => props.visible, (v) => {
   }
 })
 
+// ---- 三级操作模式 · 待确认回投 ----
+// 用户在右下角「待确认」托盘点"执行"后，本面板以 bypassGate 重新执行原始指令，
+// 保证对话状态与面板同一实例、不分裂（导航/动作真正发生）。
+function onAdvisorConfirmExecute(e: Event) {
+  const detail = (e as CustomEvent<{ text: string; intent?: string }>).detail
+  if (detail?.text) {
+    const intent = detail.intent as IntentCategory | undefined
+    void send(detail.text, { overrideIntent: intent, bypassGate: true, roomId: props.activeRoomId })
+    scrollToBottom()
+  }
+}
+
+onMounted(() => {
+  window.addEventListener(ADVISOR_CONFIRM_EXECUTE_EVENT, onAdvisorConfirmExecute as EventListener)
+})
+
+onUnmounted(() => {
+  window.removeEventListener(ADVISOR_CONFIRM_EXECUTE_EVENT, onAdvisorConfirmExecute as EventListener)
+})
+
 // ---- 发送消息 ----
 async function handleSend() {
   const text = inputText.value.trim()
@@ -308,7 +329,8 @@ function getActionLabel(action: ExecutionAction): string {
   bottom: 140px;
   right: 32px;
   width: 360px;
-  max-height: 520px;
+  /* 视口自适应：底部锚定 bottom:140px，故可用高 ≈ 100dvh-140；取 min 保上限 520px 且矮窗不顶溢 */
+  max-height: min(520px, calc(100dvh - 200px));
   border-radius: 18px;
   background: rgba(14, 16, 24, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -317,7 +339,9 @@ function getActionLabel(action: ExecutionAction): string {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  z-index: 25;
+  /* 消费布局契约令牌：对话面板是 bead 弹出的浮层，须高于珠(--z-jade=20)、悬浮栏(--z-floating=90)，
+     且 Teleport 到 body 后仍需以此令牌与全局层级对齐（禁裸 z-index） */
+  z-index: var(--z-popover, 95);
 }
 
 /* ========== 顶部栏 ========== */

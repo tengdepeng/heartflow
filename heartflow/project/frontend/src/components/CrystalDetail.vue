@@ -183,6 +183,8 @@ function glowOpacity(i: number): number {
   border: 1px solid var(--border, rgba(255,255,255,0.12));
   border-radius: 24px;
   padding: 32px;
+  max-height: 86vh;
+  overflow-y: auto;
   backdrop-filter: blur(24px);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
 }

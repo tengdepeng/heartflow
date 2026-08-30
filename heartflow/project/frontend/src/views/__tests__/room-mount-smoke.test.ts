@@ -67,6 +67,12 @@ beforeAll(() => {
 
 // ---- 路由桩 ----
 vi.mock('vue-router', () => ({
+  createRouter: () => ({
+    push: vi.fn(), back: vi.fn(), replace: vi.fn(),
+    beforeEach: vi.fn(), afterEach: vi.fn(), resolve: vi.fn(),
+    currentRoute: { value: { path: '/', params: {}, query: {}, meta: {}, name: 'home' } },
+  }),
+  createWebHashHistory: () => ({}),
   useRouter: () => ({ push: vi.fn(), back: vi.fn(), replace: vi.fn(), beforeEach: vi.fn(), afterEach: vi.fn() }),
   useRoute: () => ({ path: '/', params: {}, query: {}, meta: {}, name: 'home' }),
   RouterLink: { name: 'RouterLink', template: '<a><slot/></a>' },

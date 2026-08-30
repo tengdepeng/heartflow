@@ -8,6 +8,7 @@ import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
 import type { ExternalAppEntry, EntryInput } from './types'
 import { launchApp, type LaunchResult } from './open'
+import { useLauncherSpace } from './spaceTheme'
 
 const STORAGE_KEY = 'launcher:entries'
 
@@ -47,6 +48,7 @@ function addEntry(input: EntryInput): void {
     id: genId(),
     name: input.name.trim(),
     icon: input.icon?.trim() || '📦',
+    iconImage: input.iconImage?.trim() || undefined,
     category: input.category.trim() || '未分类',
     launch: input.launch.trim(),
     deepLink: input.deepLink?.trim() || undefined,
@@ -59,9 +61,22 @@ function addEntry(input: EntryInput): void {
 }
 
 function updateEntry(id: string, patch: Partial<EntryInput>): void {
-  entries.value = entries.value.map((e) =>
-    e.id === id ? { ...e, ...patch, name: patch.name?.trim() ?? e.name, category: patch.category?.trim() ?? e.category, launch: patch.launch?.trim() ?? e.launch, deepLink: patch.deepLink?.trim() || undefined } : e,
-  )
+  entries.value = entries.value.map((e) => {
+    if (e.id !== id) return e
+    const next: ExternalAppEntry = {
+      ...e,
+      ...patch,
+      name: patch.name?.trim() ?? e.name,
+      category: patch.category?.trim() ?? e.category,
+      launch: patch.launch?.trim() ?? e.launch,
+      deepLink: patch.deepLink?.trim() || undefined,
+    }
+    // 图片图标：显式区分「清空」(空串→undefined) 与「未改动」(undefined→保留原值)
+    if (patch.iconImage !== undefined) {
+      next.iconImage = patch.iconImage.trim() || undefined
+    }
+    return next
+  })
   persist()
 }
 
@@ -125,5 +140,7 @@ export function useLauncher() {
     renameCategory,
     recordLaunch,
     launchEntry,
+    /** 3D 空间风格配置（模块级单例，跨视图共享） */
+    space: useLauncherSpace(),
   }
 }

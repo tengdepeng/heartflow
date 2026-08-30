@@ -4,11 +4,34 @@
 // 呈现用户 App 库，按 category 分组；支持增 / 改 / 删 / 启动 / 深链。
 // 不嵌入外部 App 窗口（设计规格 §3.2：原生桌面程序无法嵌 webview）。
 // ============================================================
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useLauncher } from './useLauncher'
 import type { ExternalAppEntry, EntryInput } from './types'
+import { storage } from '../../engine/storage'
+import { isImageIcon } from '../../utils/icon'
+import LauncherSpace from './LauncherSpace.vue'
+import LauncherSpaceSettings from './LauncherSpaceSettings.vue'
+import IconPicker from '../../components/IconPicker.vue'
 
-const { grouped, addEntry, updateEntry, removeEntry, moveEntry, renameCategory, launchEntry } = useLauncher()
+const { entries, grouped, addEntry, updateEntry, removeEntry, moveEntry, renameCategory, launchEntry } =
+  useLauncher()
+
+// ——— 视图模式：3D 空间 / 平面列表（选择持久化，宪法「超级自定义」）———
+type ViewMode = 'space' | 'list'
+const VIEW_KEY = 'launcher:view'
+const viewMode = ref<ViewMode>(storage.getKV<ViewMode>(VIEW_KEY, 'space') === 'list' ? 'list' : 'space')
+watch(viewMode, (v) => storage.setKV(VIEW_KEY, v))
+const showSpaceSettings = ref(false)
+
+/** 3D 空间按 sort 平铺消费（不按分类分组，空间里分类无意义） */
+const flatEntries = computed(() => [...entries.value].sort((a, b) => a.sort - b.sort))
+const filteredFlat = computed(() => {
+  const q = search.value.trim().toLowerCase()
+  if (!q) return flatEntries.value
+  return flatEntries.value.filter((e) =>
+    (e.name + e.category + e.launch + (e.deepLink ?? '')).toLowerCase().includes(q),
+  )
+})
 
 const search = ref('')
 const showForm = ref(false)
@@ -41,12 +64,28 @@ function openEdit(entry: ExternalAppEntry): void {
   form.value = {
     name: entry.name,
     icon: entry.icon,
+    iconImage: entry.iconImage,
     category: entry.category,
     launch: entry.launch,
     deepLink: entry.deepLink ?? '',
     useDeepLink: entry.useDeepLink,
   }
   showForm.value = true
+}
+
+/** IconPicker 单值模型 → 分流到 icon（字形）/ iconImage（图片）两字段 */
+const formIcon = computed(() => form.value.iconImage || form.value.icon || null)
+function onIconPick(v: string | null): void {
+  if (!v) {
+    form.value.iconImage = undefined
+    return
+  }
+  if (isImageIcon(v)) {
+    form.value.iconImage = v
+  } else {
+    form.value.icon = v
+    form.value.iconImage = undefined
+  }
 }
 
 function save(): void {
@@ -161,8 +200,26 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
     <!-- 工具栏 -->
     <div data-enter class="toolbar">
       <input class="search-input" v-model="search" placeholder="搜索应用 / 分类 / 路径…" />
+      <div class="view-switch" role="group" aria-label="视图切换">
+        <button class="vs-btn" :class="{ 'is-on': viewMode === 'space' }" @click="viewMode = 'space'">
+          空间
+        </button>
+        <button class="vs-btn" :class="{ 'is-on': viewMode === 'list' }" @click="viewMode = 'list'">
+          列表
+        </button>
+      </div>
+      <button v-if="viewMode === 'space'" class="ln-btn ln-ghost" @click="showSpaceSettings = !showSpaceSettings">
+        {{ showSpaceSettings ? '收起设置' : '空间设置' }}
+      </button>
       <button class="ln-btn ln-primary" @click="openAdd">+ 添加应用</button>
     </div>
+
+    <!-- 空间风格设置（仅空间视图下展开） -->
+    <Transition name="ln-fade">
+      <div v-if="viewMode === 'space' && showSpaceSettings" data-enter class="space-settings-wrap">
+        <LauncherSpaceSettings />
+      </div>
+    </Transition>
 
     <!-- 空态 -->
     <div v-if="totalCount === 0" data-enter class="empty-state">
@@ -172,7 +229,11 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
       <button class="ln-btn ln-primary" @click="openAdd">添加第一个应用</button>
     </div>
 
+    <!-- 3D 空间视图（默认）：按 sort 平铺，分类在空间中不作为分组维度 -->
+    <LauncherSpace v-else-if="viewMode === 'space'" :entries="filteredFlat" @launch="launch" />
+
     <!-- 分组列表 -->
+    <template v-else>
     <div v-for="[cat, list] in filteredGrouped" :key="cat" data-enter class="cat-block">
       <div class="cat-head">
         <span v-if="catEditing !== cat" class="cat-name">{{ cat }}</span>
@@ -219,6 +280,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
         </div>
       </div>
     </div>
+    </template>
 
     <!-- 添加 / 编辑表单 -->
     <Transition name="ln-fade">
@@ -233,10 +295,14 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
               <span class="ln-label">显示名 *</span>
               <input v-model="form.name" class="ln-input" placeholder="如 网易云音乐" @keydown.enter="save" />
             </label>
-            <label class="ln-row">
-              <span class="ln-label">图标 emoji</span>
-              <input v-model="form.icon" class="ln-input ln-input--icon" maxlength="4" placeholder="📦" />
-            </label>
+            <div class="ln-row">
+              <span class="ln-label">图标</span>
+              <IconPicker
+                :model-value="formIcon"
+                label="应用图标"
+                @update:model-value="onIconPick"
+              />
+            </div>
             <label class="ln-row">
               <span class="ln-label">分类</span>
               <input v-model="form.category" class="ln-input" placeholder="音乐 / 支付 / 办公…" list="ln-cats" />
@@ -296,7 +362,36 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .overview-num { display: block; font-size: 24px; font-weight: 700; color: var(--accent, #d4a574); }
 .overview-label { font-size: 11px; letter-spacing: 1px; opacity: 0.55; }
 
-.toolbar { display: flex; gap: 12px; margin: 26px 0 18px; }
+.toolbar { display: flex; gap: 12px; margin: 26px 0 18px; flex-wrap: wrap; }
+
+.view-switch {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.vs-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary, #e9e0d0);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.vs-btn:hover { background: rgba(212, 165, 116, 0.08); }
+.vs-btn.is-on {
+  background: rgba(212, 165, 116, 0.18);
+  color: var(--accent, #d4a574);
+}
+
+.space-settings-wrap {
+  padding: 18px 20px;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
 .search-input {
   flex: 1; padding: 10px 14px; border-radius: 12px;
   background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);

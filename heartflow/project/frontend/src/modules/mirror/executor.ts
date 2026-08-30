@@ -169,6 +169,19 @@ function intentToPlan(task: ParsedTask): ExecutionPlan {
       break
     }
 
+    case 'finance': {
+      // 记账意图 → 真办事：跳到真实存在的 /reward「劳酬」（记账 v2）。
+      // target 用 roomResolver 已映射的「劳酬」别名，确保 resolveRoomRoute 命中 /reward。
+      steps.push({
+        order: 1,
+        action: 'navigate',
+        params: { target: '劳酬' },
+        description: '打开劳酬（记账）',
+      })
+      response = '已为你打开劳酬：记账、预算、支出流水都在里面。'
+      break
+    }
+
     case 'explore': {
       const roomTarget = task.params.roomTarget as string
       const query = task.params.query as string

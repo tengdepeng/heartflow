@@ -48,6 +48,7 @@
         { collapsed: sidebarCollapsed },
         `float-edge-${sidebarFloatEdge}`,
         { dragging: sidebarDragging },
+        { 'room-drag-active': navReorder.active },
       ]"
       :style="navBarFloatStyle"
       @pointerdown="onNavBarPointerDown"
@@ -62,7 +63,10 @@
       >✕</button>
 
       <div class="nav-brand drag-handle" title="拖动可移动侧栏 · 松手自动吸附最近边">
-        <div class="brand-emblem">✦</div>
+        <div class="brand-emblem">
+          <img v-if="isImageIcon(appBrandIcon)" :src="appBrandIcon ?? ''" alt="品牌图标" class="brand-emblem-img" />
+          <template v-else>{{ appBrandIcon || '✦' }}</template>
+        </div>
         <div class="brand-text">
           <strong>心流工坊</strong>
           <span class="brand-note">深夜食堂 · 灯一直亮着</span>
@@ -106,7 +110,7 @@
             :adjacent-ids="adjacentIds"
             :expanded-ids="expandedIds"
             :toggle-expand="toggleExpand"
-            :draggable="node.path ? true : false"
+            :draggable="true"
             @move-node="onMoveNode"
             @close="closeMobileDrawer"
           />
@@ -220,6 +224,7 @@ import { useConstitutionStore } from './stores/constitution'
 import { useAdvisorStore } from './stores/advisor'
 import { useStyleStore } from './stores/style'
 import { useConfigStore } from './stores/config'
+import { isImageIcon } from './utils/icon'
 import { useUnlockStore } from './stores/unlock'
 import UnlockGate from './components/safety/UnlockGate.vue'
 import { useRoomNavigation } from './composables/useRoomNavigation'
@@ -667,6 +672,13 @@ const is3dShell = computed(() => configStore.config.worldShell.surfaceState === 
 // 模板 :class 已消费 is3dShell；显式 void 让 vue-tsc 视为「已使用」（避免 TS6133 误报）
 void is3dShell.value
 
+// 应用品牌图标（app 自身 logo）：侧栏品牌徽标 + 运行时 favicon 同步
+const appBrandIcon = computed(() => configStore.config.appBrandIcon ?? null)
+watch(appBrandIcon, (v) => {
+  const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+  if (link && v && isImageIcon(v)) link.href = v
+}, { immediate: true })
+
 // B0 加密存储：启动期若磁盘已加密且内存未解锁，挂起主界面、显示解锁遮罩
 const unlockStore = useUnlockStore()
 const showUnlock = computed(() => unlockStore.needsUnlock())
@@ -923,7 +935,9 @@ const navTree = computed<NavNode[]>(() => {
     buckets.keys(),
     taxonomy.customGroups.value.map((g) => g.id),
   )
-  for (const key of groupKeys) {
+  // 应用用户分组头排序覆盖（Item 1：预设/自定义分组可拖动重排）
+  const orderedKeys = taxonomy.applyGroupOrderOverride(taxonomy.selectedTaxonomy.value, groupKeys)
+  for (const key of orderedKeys) {
     const rooms = buckets.get(key) ?? []
     const kids = rooms
       .sort((a, b) => roomOrder(a.id) - roomOrder(b.id))
@@ -938,6 +952,23 @@ const navTree = computed<NavNode[]>(() => {
   }
 
   return tree
+})
+
+/** 未应用用户覆盖的分组头默认顺序（供 onReorderGroup 以当前全序为基准重排） */
+const defaultGroupKeys = computed<string[]>(() => {
+  const rest = getAllRooms().filter((r) => r.id !== 'home-space' && r.id !== 'home' && isNavVisible(r))
+  const b = new Map<string, RoomNode[]>()
+  for (const r of rest) {
+    const k = dimKey(r)
+    const a = b.get(k) ?? []
+    a.push(r)
+    b.set(k, a)
+  }
+  return collectTaxonomyKeys(
+    taxonomy.selectedTaxonomy.value,
+    b.keys(),
+    taxonomy.customGroups.value.map((g) => g.id),
+  )
 })
 
 /** 按当前分类体系计算房间的聚合维度 key */
@@ -1038,6 +1069,11 @@ function findNavNode(nodes: NavNode[], id: string): NavNode | undefined {
 }
 
 function onMoveNode(draggedId: string, targetId: string) {
+  // 分组头之间拖动 → 重排分组头顺序（预设分组/自定义分组通用，Item 1）
+  if (draggedId.startsWith('tax-') && targetId.startsWith('tax-')) {
+    onReorderGroup(draggedId, targetId)
+    return
+  }
   const target = findNavNode(navTree.value, targetId)
   if (!target || draggedId === target.id) return
   // 拖到分组头（无 path）：改变归属维度
@@ -1072,6 +1108,31 @@ function onMoveNode(draggedId: string, targetId: string) {
     const gid = taxonomy.groupIdOf(target.id)
     if (gid) taxonomy.addRoomToGroup(gid, draggedId)
   }
+}
+
+/** 从分组头 id 剥出维度 key（去掉 tax-<体系>- 前缀） */
+function stripGroupKey(id: string): string {
+  if (id.startsWith('tax-domain-')) return id.slice('tax-domain-'.length)
+  if (id.startsWith('tax-group-')) return id.slice('tax-group-'.length)
+  if (id.startsWith('tax-slot-')) return id.slice('tax-slot-'.length)
+  if (id.startsWith('tax-custom-')) return id.slice('tax-custom-'.length)
+  return ''
+}
+
+/** 重排某分类体系下两个分组头的相对顺序：取当前全序 → 移动 fromKey 到 toKey 位 → 持久化 */
+function onReorderGroup(fromId: string, toId: string): void {
+  const tax = taxonomy.selectedTaxonomy.value
+  const fromKey = stripGroupKey(fromId)
+  const toKey = stripGroupKey(toId)
+  if (!fromKey || !toKey || fromKey === toKey) return
+  const current = taxonomy.applyGroupOrderOverride(tax, defaultGroupKeys.value)
+  const f = current.indexOf(fromKey)
+  const t = current.indexOf(toKey)
+  if (f < 0 || t < 0 || f === t) return
+  const copy = current.slice()
+  const [moved] = copy.splice(f, 1)
+  copy.splice(t, 0, moved)
+  taxonomy.setGroupOrder(tax, copy)
 }
 
 // ---- 页面过渡动画（光门过渡） ----
@@ -1268,6 +1329,24 @@ watch(() => nav.currentRoomId.value, () => {
   cursor: grabbing;
 }
 
+/* 房间重排拖拽进行中：强制侧栏可命中且停屏上。
+   根因：沉浸自动隐藏（.app-shell.chrome-hidden）会给 .nav-bar 设
+   pointer-events:none !important 并把侧栏 translate 出屏；拖拽时
+   elementFromPoint 因此「看不见」任何分组头 → targetId 永为空 →
+   房间永远拖不动（用户实测「侧边栏移动不了」）。拖拽激活期间
+   必须压住这两个状态，保证落点检测能命中分组头。
+   特异性：须高于 .app-shell.chrome-hidden .nav-bar(0,3,0,!important)，
+   故首条用 .app-shell.chrome-hidden .nav-bar.room-drag-active(0,4,0) 必赢；
+   次条 .app-shell .nav-bar.room-drag-active(0,3,0) 兜非 chrome-hidden 的
+   侧栏位移（如 float-edge 收边/sidebar-collapsed）。二者均带 !important。 */
+.app-shell.chrome-hidden .nav-bar.room-drag-active,
+.app-shell .nav-bar.room-drag-active {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  translate: 0 !important;
+  transform: none !important;
+}
+
 /* 整条侧栏可抓取拖动（仅桌面端，JS 门控排除交互元素）。
    非交互区显示 grab 手型，交互元素（链接/按钮/滚动列表）恢复默认手型。
    该手型仅在桌面段启用，移动/平板覆盖抽屉保持 default（见响应式段）。 */
@@ -1343,6 +1422,15 @@ watch(() => nav.currentRoomId.value, () => {
   opacity: 0.6;
   margin-top: 2px;
   animation: float 6s ease-in-out infinite;
+  display: grid;
+  place-items: center;
+}
+.brand-emblem-img {
+  width: 22px;
+  height: 22px;
+  object-fit: cover;
+  border-radius: 6px;
+  opacity: 1;
 }
 
 .brand-text {

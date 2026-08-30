@@ -47,9 +47,23 @@ export interface OperationGateEvent {
   /** advisor：待确认/建议的文案与幕僚 id */
   text?: string
   advisorId?: string
+  /**
+   * advisor：原始用户指令文本（confirm 时由托盘"执行"按钮经
+   * ADVISOR_CONFIRM_EXECUTE_EVENT 回投给镜我，真正执行动作，而非仅发声）。
+   */
+  originalText?: string
+  /** advisor：解析出的意图类别，供回投执行时强制单一意图 */
+  intent?: string
 }
 
 const GATE_EVENT_NAME = 'hf:operation-gate'
+
+/**
+ * 顾问确认执行事件：PendingActionsTray 在用户点击"执行"后派发，
+ * 由 MirrorDialogue 监听并以 bypassGate 重新执行原始指令。
+ * 走事件而非直接调用，避免跨组件实例的 dialogue 状态分裂。
+ */
+export const ADVISOR_CONFIRM_EXECUTE_EVENT = 'hf:advisor-confirm-execute'
 
 /** 发出门控事件（待确认/建议），供全局托盘消费 */
 export function emitOperationGate(event: OperationGateEvent): void {

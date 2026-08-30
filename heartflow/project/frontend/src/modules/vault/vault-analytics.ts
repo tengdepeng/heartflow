@@ -5,6 +5,7 @@
 // ============================================================
 
 import type { Credential, VaultCategory } from './vault-entries'
+import type { Asset, Archive } from './vault'
 import { evaluatePasswordStrength } from './password-generator'
 
 export interface VaultAuditOverview {
@@ -148,6 +149,160 @@ export function vaultInsights(
 
   if (archives.length === 0) {
     insights.push('还没有重要档案，证件号、存放位置等关键信息可加密留存。')
+  }
+
+  return insights.slice(0, limit)
+}
+
+// ============================================================
+// 资产 / 档案安全审计（真实解密数据 hf:vault_cipher 中的 VaultData）
+// 集中度 / 完整度 / 陈旧记录 / 温和洞察。
+// ============================================================
+
+/** 资产分类元信息（与 Vault.vue 猫色板一致） */
+export const ASSET_CATEGORY_META: Record<string, { icon: string; label: string; color: string }> = {
+  financial: { icon: '💰', label: '金融', color: '#8a9a7a' },
+  realestate: { icon: '🏠', label: '房产', color: '#e0a96d' },
+  digital: { icon: '💻', label: '数字', color: '#6b9fc4' },
+  physical: { icon: '📦', label: '实物', color: '#d98c7a' },
+  intangible: { icon: '✨', label: '无形', color: '#a07c8c' },
+  other: { icon: '📋', label: '其他', color: '#6b7280' },
+}
+
+export interface LargestAsset {
+  name: string
+  value: number
+  pct: number
+}
+
+export interface VaultAssetAuditOverview {
+  totalAssets: number
+  totalValue: number
+  archiveCount: number
+  categoryCount: number
+  missingValueCount: number
+  missingNoteCount: number
+  staleCount: number
+  archiveMissingDetailCount: number
+  largest: LargestAsset | null
+  top3Pct: number
+}
+
+function daysSince(iso: string | undefined, now: Date): number {
+  if (!iso) return 0
+  const t = new Date(iso).getTime()
+  if (Number.isNaN(t)) return 0
+  return (now.getTime() - t) / 86400000
+}
+
+/** 资产/档案安全审计概览 */
+export function assetAuditOverview(
+  assets: Asset[],
+  archives: Archive[],
+  now: Date = new Date(),
+  staleDays = 180,
+): VaultAssetAuditOverview {
+  const totalValue = assets.reduce((s, a) => s + (a.value || 0), 0)
+  const missingValue = assets.filter(a => !a.value || a.value <= 0)
+  const missingNote = assets.filter(a => !a.note || !a.note.trim())
+  const stale = assets.filter(a => daysSince(a.at, now) > staleDays)
+  const archiveMissingDetail = archives.filter(a => !a.detail || !a.detail.trim())
+
+  const sorted = assets.map(a => a.value || 0).sort((a, b) => b - a)
+  let top3 = 0
+  sorted.slice(0, 3).forEach(v => { top3 += v })
+  let largest: LargestAsset | null = null
+  if (assets.length > 0) {
+    const top = [...assets].sort((a, b) => (b.value || 0) - (a.value || 0))[0]
+    largest = {
+      name: top.name,
+      value: top.value || 0,
+      pct: totalValue > 0 ? Math.round(((top.value || 0) / totalValue) * 100) : 0,
+    }
+  }
+
+  return {
+    totalAssets: assets.length,
+    totalValue,
+    archiveCount: archives.length,
+    categoryCount: new Set(assets.map(a => a.category)).size,
+    missingValueCount: missingValue.length,
+    missingNoteCount: missingNote.length,
+    staleCount: stale.length,
+    archiveMissingDetailCount: archiveMissingDetail.length,
+    largest,
+    top3Pct: totalValue > 0 ? Math.round((top3 / totalValue) * 100) : 0,
+  }
+}
+
+export interface AssetCategoryAuditRow {
+  cat: string
+  icon: string
+  label: string
+  color: string
+  count: number
+  total: number
+  pct: number
+}
+
+/** 资产按分类分布（仅有资产的分类，按价值降序） */
+export function assetCategoryDistribution(assets: Asset[]): AssetCategoryAuditRow[] {
+  const total = Math.max(1, assets.reduce((s, a) => s + (a.value || 0), 0))
+  const seen = new Map<string, number>()
+  assets.forEach(a => {
+    seen.set(a.category, (seen.get(a.category) || 0) + (a.value || 0))
+  })
+  return [...seen.entries()]
+    .map(([cat, value]) => {
+      const meta = ASSET_CATEGORY_META[cat] || ASSET_CATEGORY_META.other
+      return {
+        cat,
+        icon: meta.icon,
+        label: meta.label,
+        color: meta.color,
+        count: assets.filter(a => a.category === cat).length,
+        total: Math.round(value * 100) / 100,
+        pct: Math.round((value / total) * 100),
+      }
+    })
+    .sort((a, b) => b.total - a.total)
+}
+
+/** 温和审计洞察：集中度 / 完整度 / 陈旧 / 空库提示 */
+export function vaultAssetInsights(
+  assets: Asset[],
+  archives: Archive[],
+  now: Date = new Date(),
+  limit = 4,
+): string[] {
+  const insights: string[] = []
+  const ov = assetAuditOverview(assets, archives, now)
+
+  if (ov.totalAssets === 0 && ov.archiveCount === 0) {
+    return ['保险库还空着，先记录一笔资产或重要档案，让它替你守住重要之物。']
+  }
+
+  if (ov.totalAssets === 0) {
+    insights.push('还没有资产记录，把贵重物品与账户价值记下来，趋势会随时间浮现。')
+  } else {
+    if (ov.largest && ov.largest.pct >= 50) {
+      insights.push(`「${ov.largest.name}」占资产 ${ov.largest.pct}%，价值集中度偏高，建议分散持有。`)
+    }
+    if (ov.missingValueCount > 0) {
+      insights.push(`${ov.missingValueCount} 条资产价值为 0，可补记或删除闲置条目。`)
+    }
+    if (ov.missingNoteCount > 0) {
+      insights.push(`${ov.missingNoteCount} 条资产未填备注，建议补充存放位置或凭证信息。`)
+    }
+    if (ov.staleCount > 0) {
+      insights.push(`${ov.staleCount} 条资产超过半年未更新，可抽空复核现值。`)
+    }
+  }
+
+  if (ov.archiveCount === 0) {
+    insights.push('还没有重要档案，证件号、存放位置等关键信息可加密留存。')
+  } else if (ov.archiveMissingDetailCount > 0) {
+    insights.push(`${ov.archiveMissingDetailCount} 个档案未填备注，补充后可减少遗忘。`)
   }
 
   return insights.slice(0, limit)

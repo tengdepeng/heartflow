@@ -152,6 +152,9 @@
       </div>
     </section>
 
+    <!-- 习惯打卡复合（INCR-07：Streaks 式打卡热图 + 习惯档案） -->
+    <HabitReviewPanel />
+
     <!-- 目标可视化 -->
     <GoalVisualizationPanel :goals="goal.goals.value" />
 
@@ -171,6 +174,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import type { GoalStatus } from '../modules/goal'
 import GoalVisualizationPanel from '../components/GoalVisualizationPanel.vue'
 import GoalProgressPanel from '../components/GoalProgressPanel.vue'
+import HabitReviewPanel from '../components/HabitReviewPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

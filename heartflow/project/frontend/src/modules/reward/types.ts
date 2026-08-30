@@ -46,7 +46,8 @@ export interface RewardMilestone {
 /** 预算 */
 export interface Budget {
   id: string
-  category: ExpenseCategory
+  /** 支出类别 id（INCR-23：可为内置键或用户自定义分类键） */
+  category: string
   /** 月度预算金额 */
   monthlyLimit: number
   /** 当前月已用 */
@@ -91,6 +92,31 @@ export const REWARD_STORAGE_KEYS = {
   RECORDS: 'rewards',
   MILESTONES: 'hf:reward_milestones',
   BUDGETS: 'hf:reward_budgets',
+  /* 记账 v2：多账户与转账 ledger */
+  ACCOUNTS: 'hf:reward_accounts',
+  TRANSFERS: 'hf:reward_transfers',
+  /* INCR-22：周期/重复记账规则 */
+  RECURRING: 'hf:reward_recurring',
+  /* INCR-23：自定义分类（仅存用户新增/覆盖，内置种子隐式） */
+  CUSTOM_CATEGORIES: 'hf:reward_custom_categories',
+  /* INCR-25：借贷/往来记录（借出借入 + 还款/收债） */
+  LOANS: 'hf:reward_loans',
+  /* INCR-26：信用卡/负债账户（额度 + 已用/可用 + 还款计划 + 到期提醒） */
+  CREDIT_CARDS: 'hf:reward_credit_cards',
+  /* INCR-28：预算进阶（总/年度预算 + 日均动态 + 滚动结余 rollover 结转） */
+  BUDGET_ADVANCE: 'hf:reward_budget_advance',
+  /* INCR-30：存钱计划（攒钱 / 52周 / 心愿）+ 每笔存款明细 */
+  SAVING_PLANS: 'hf:reward_saving_plans',
+  /* INCR-30：每日记账提醒（开关 + 时间）*/
+  DAILY_REMINDER: 'hf:reward_daily_reminder',
+  /* INCR-31：隐私锁（主密码指纹，仅存哈希+盐） */
+  PRIVACY_LOCK: 'hf:reward_privacy_lock',
+  /* INCR-31：数据加密（加密账本备份快照） */
+  ENCRYPTED_BACKUP: 'hf:reward_encrypted_backup',
+  /* INCR-31：多币种/汇率配置（基准币种 + 汇率表） */
+  CURRENCY_CONFIG: 'hf:reward_currency_config',
+  /* INCR-31：投资持仓（股票/基金/加密/其他） */
+  HOLDINGS: 'hf:reward_holdings',
 } as const
 
 /** 收入类别元数据 */

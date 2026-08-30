@@ -85,6 +85,8 @@
       <SolarTermPanel />
       <!-- 药膳食谱（medicinal-diet 模块） -->
       <MedicinalDietPanel />
+      <!-- 健康档案（health-analysis 引擎） -->
+      <HealthArchivePanel :meridian-logs="meridianLogs" :wisdom-logs="wisdomLogs" />
     </div>
 
     <!-- ===== 感知层 ===== -->
@@ -186,6 +188,7 @@ import { derivePassiveHealthImagery } from '../modules/body-wisdom/passive-healt
 import ConstitutionTrendPanel from '../components/ConstitutionTrendPanel.vue'
 import SolarTermPanel from '../components/body-wisdom/SolarTermPanel.vue'
 import MedicinalDietPanel from '../components/body-wisdom/MedicinalDietPanel.vue'
+import HealthArchivePanel from '../components/HealthArchivePanel.vue'
 
 const health = useHealth()
 const { meridianLogs, wisdomLogs, readingLogs, bodyNotes, senseNotes, sutraNotes } = health

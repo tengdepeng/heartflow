@@ -8,6 +8,9 @@
     <h1 class="capsule-title">时光胶囊</h1>
     <div data-enter class="header-kicker">把此刻的心流封存，留给未来的自己开启</div>
 
+    <!-- 档案陈列 -->
+    <CapsuleArchivePanel :capsules="capsule.capsules.value" />
+
     <!-- 新建胶囊 -->
     <section data-enter class="capsule-create">
       <button class="cap-btn-new" @click="showForm = !showForm">
@@ -93,7 +96,7 @@
         </div>
         <p v-if="c.note" class="cap-card-note">{{ c.note }}</p>
         <div class="cap-items">
-          <span class="cap-items-label">封存内容（{{ c.items.length }}）</span>
+          <span class="cap-items-label">封存内容（{{ c.items?.length ?? 0 }}）</span>
           <ul class="cap-item-list">
             <li v-for="it in c.items" :key="it.type + it.id" class="cap-item">
               <span class="cap-item-type">{{ it.type === 'note' ? '📝' : '💎' }}</span>
@@ -104,7 +107,7 @@
                 title="移除"
               >×</button>
             </li>
-            <li v-if="c.items.length === 0" class="cap-item-empty">空胶囊</li>
+            <li v-if="(c.items?.length ?? 0) === 0" class="cap-item-empty">空胶囊</li>
           </ul>
         </div>
         <div class="cap-card-meta">
@@ -120,6 +123,7 @@ import { ref, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useTimeCapsule, type CapsuleItemRef } from '../modules/capsule'
 import { getNoteStore } from '../modules/note'
+import CapsuleArchivePanel from '../components/CapsuleArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const capsule = useTimeCapsule()

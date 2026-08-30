@@ -1,9 +1,9 @@
 // ============================================================
 // 镜面对话系统 · 核心类型定义
-// 蓝图要求：task parser + 10 intent categories + execution flow
+// 蓝图要求：task parser + 11 intent categories + execution flow
 // ============================================================
 
-// ---- 10 意图分类 ----
+// ---- 11 意图分类 ----
 
 /** 镜面对话 · 10 意图分类 */
 export type IntentCategory =
@@ -17,6 +17,7 @@ export type IntentCategory =
   | 'create'      // 创造 — 输出内容、创作
   | 'rest'        // 休息 — 放松、呼吸、暂停
   | 'explore'     // 探索 — 信息查询、统计分析、系统浏览
+  | 'finance'     // 记账 — 打开劳酬空间（记账 v2：多账户/预算/流水/月结/导入）
   | 'unknown'     // 未识别 — 无法匹配任何意图
 
 /** 意图元数据 */

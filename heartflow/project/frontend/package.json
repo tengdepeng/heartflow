@@ -15,7 +15,7 @@
     "check:circular": "madge --circular --extensions ts --ts-config tsconfig.json src",
     "guard": "vue-tsc --noEmit && eslint . --quiet && madge --circular --extensions ts --ts-config tsconfig.json src && vitest run --no-file-parallelism && vite build --outDir node_modules/.hf-guard-dist",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev --project-dir ../src-tauri",
+    "tauri:dev": "node ../scripts/tauri-dev.mjs",
     "tauri:build": "tauri build --project-dir ../src-tauri"
   },
   "dependencies": {

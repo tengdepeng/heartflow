@@ -274,6 +274,19 @@ export {
 
 export type { Season, SeasonalRitual, Ritual, LifeRitual, SeasonalStats, SolarTerm, Festival, SeasonMeta } from './types'
 
+// ---- 岁时档案分析（INCR-15）----
+export {
+  seasonalOverview,
+  seasonRows,
+  seasonHealth,
+  seasonalInsights,
+} from './seasonal-analytics'
+export type {
+  SeasonalOverview,
+  SeasonRow,
+  SeasonalHealth,
+} from './seasonal-analytics'
+
 // ---- 季节日志 ----
 export {
   getCurrentSeason,

@@ -470,6 +470,9 @@
 
     <!-- 日历导出 -->
     <CalendarExportPanel :anchors="anchor.allAnchors.value" />
+
+    <!-- 时间流 · 尺度视图（INCR-01 逐日心锚时间流） -->
+    <AnchorTimeScalePanel :anchors="anchor.allAnchors.value" />
   </div>
 </template>
 
@@ -490,6 +493,7 @@ import WishAnchorPanel from '../components/WishAnchorPanel.vue'
 import PhotoDiaryPanel from '../components/PhotoDiaryPanel.vue'
 import SmartReminderPanel from '../components/SmartReminderPanel.vue'
 import CalendarExportPanel from '../components/CalendarExportPanel.vue'
+import AnchorTimeScalePanel from '../components/AnchorTimeScalePanel.vue'
 
 const { entranceClass } = useViewEntrance()
 

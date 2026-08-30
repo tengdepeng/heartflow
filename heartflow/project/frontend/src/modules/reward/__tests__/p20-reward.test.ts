@@ -31,6 +31,16 @@ function daysAgo(n: number): string {
   return d.toISOString()
 }
 
+/** 固定到 m 个月前、同月第 day 日（避免 daysAgo 跨月碰撞，保证落在不同月份分桶） */
+function monthsAgo(m: number, day: number): string {
+  const d = new Date()
+  d.setDate(1)
+  d.setMonth(d.getMonth() - m)
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate()
+  d.setDate(Math.min(day, last))
+  return d.toISOString()
+}
+
 function makeBasicStats(overrides: Partial<RewardStats> = {}): RewardStats {
   return {
     totalIncome: 10000,
@@ -203,13 +213,13 @@ describe('useFinancialForecast', () => {
   beforeEach(() => {
     forecast = useFinancialForecast()
     records = [
-      // 过去3个月的数据
-      makeRecord({ type: 'income', category: 'freelance' as IncomeCategory, amount: 4000, recordedAt: daysAgo(60) }),
-      makeRecord({ type: 'income', category: 'salary' as IncomeCategory, amount: 5000, recordedAt: daysAgo(60) }),
-      makeRecord({ type: 'expense', category: 'tools' as ExpenseCategory, amount: 500, recordedAt: daysAgo(60) }),
-      makeRecord({ type: 'income', category: 'freelance' as IncomeCategory, amount: 4500, recordedAt: daysAgo(30) }),
-      makeRecord({ type: 'income', category: 'salary' as IncomeCategory, amount: 5000, recordedAt: daysAgo(30) }),
-      makeRecord({ type: 'expense', category: 'learning' as ExpenseCategory, amount: 300, recordedAt: daysAgo(30) }),
+      // 过去3个月的数据（固定月位，保证 3 个独立月份分桶）
+      makeRecord({ type: 'income', category: 'freelance' as IncomeCategory, amount: 4000, recordedAt: monthsAgo(2, 15) }),
+      makeRecord({ type: 'income', category: 'salary' as IncomeCategory, amount: 5000, recordedAt: monthsAgo(2, 15) }),
+      makeRecord({ type: 'expense', category: 'tools' as ExpenseCategory, amount: 500, recordedAt: monthsAgo(2, 15) }),
+      makeRecord({ type: 'income', category: 'freelance' as IncomeCategory, amount: 4500, recordedAt: monthsAgo(1, 15) }),
+      makeRecord({ type: 'income', category: 'salary' as IncomeCategory, amount: 5000, recordedAt: monthsAgo(1, 15) }),
+      makeRecord({ type: 'expense', category: 'learning' as ExpenseCategory, amount: 300, recordedAt: monthsAgo(1, 15) }),
       makeRecord({ type: 'income', category: 'freelance' as IncomeCategory, amount: 5000, recordedAt: daysAgo(0) }),
       makeRecord({ type: 'expense', category: 'tools' as ExpenseCategory, amount: 400, recordedAt: daysAgo(0) }),
       makeRecord({ type: 'expense', category: 'health' as ExpenseCategory, amount: 200, recordedAt: daysAgo(0) }),

@@ -120,6 +120,9 @@
       </div>
     </section>
 
+    <!-- 知微档案（INCR-17：语录/摘抄 → 档案概览/领域/标签/月度/节律/知微健康/洞察） -->
+    <WisdomArchivePanel :entries="wisdomItems" :history="history" />
+
     <!-- 渐进背诵 -->
     <RecitePanel />
 
@@ -128,6 +131,9 @@
 
     <!-- 词书背单词 -->
     <VocabPanel />
+
+    <!-- 记忆档案（INCR-03：背书匠/Khan 记忆沉淀） -->
+    <MemoryArchivePanel />
   </div>
 </template>
 
@@ -145,6 +151,8 @@ import { useBodyGreenhouse } from '../modules/body'
 import RecitePanel from '../components/RecitePanel.vue'
 import MasteryPanel from '../components/MasteryPanel.vue'
 import VocabPanel from '../components/VocabPanel.vue'
+import MemoryArchivePanel from '../components/MemoryArchivePanel.vue'
+import WisdomArchivePanel from '../components/WisdomArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const statsStore = useStatsStore()

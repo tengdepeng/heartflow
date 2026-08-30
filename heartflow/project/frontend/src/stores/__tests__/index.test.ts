@@ -5,6 +5,7 @@
 
 import { describe, expect, it, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
+import { flushPromises } from '@vue/test-utils'
 import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
 
 describe('stores 入口', () => {
@@ -40,6 +41,22 @@ describe('stores 入口', () => {
     const config = stores.useConfigStore()
     expect(config.config).toBeDefined()
     expect(config.config.theme).toBe('dark')
+  })
+
+  it('useConfigStore · appBrandIcon 默认 null，updateAppBrandIcon 写入并持久化', async () => {
+    const stores = await import('../index')
+    const config = stores.useConfigStore()
+    expect(config.config.appBrandIcon).toBeNull()
+    config.updateAppBrandIcon('data:image/png;base64,AAA')
+    expect(config.config.appBrandIcon).toBe('data:image/png;base64,AAA')
+    await flushPromises()
+    const raw = (globalThis as any).localStorage.getItem('heartflow:storage')
+    expect(raw).toContain('"appBrandIcon":"data:image/png;base64,AAA"')
+    config.updateAppBrandIcon(null)
+    expect(config.config.appBrandIcon).toBeNull()
+    await flushPromises()
+    const raw2 = (globalThis as any).localStorage.getItem('heartflow:storage')
+    expect(raw2).toContain('"appBrandIcon":null')
   })
 
   it('useRuntimeStore 创建后返回预期状态', async () => {

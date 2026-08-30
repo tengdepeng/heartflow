@@ -117,6 +117,9 @@
     <!-- 统计 -->
     <div data-enter class="stats">共 {{ store.entries.length }} 条词条 · {{ store.categories.length }} 个分类</div>
 
+    <!-- 字源随时查（INCR-04：拼音/部首/笔画查字） -->
+    <HanziLookupPanel />
+
     <!-- 编辑模态框 -->
     <div data-enter v-if="showEditor" class="modal-overlay" @click.self="closeEditor">
       <div class="modal">
@@ -148,6 +151,7 @@
 import { ref, computed } from 'vue'
 import { useDictionaryStore, type DictEntry } from '../stores/dictionary'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import HanziLookupPanel from '../components/HanziLookupPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useDictionaryStore()
@@ -615,6 +619,8 @@ function importDict(e: Event) {
   width: 380px;
   max-width: 90vw;
   padding: 24px;
+  max-height: 86vh;
+  overflow-y: auto;
   border-radius: 14px;
   background: rgba(26, 22, 18, 0.95);
   border: 1px solid rgba(var(--accent-rgb), 0.12);

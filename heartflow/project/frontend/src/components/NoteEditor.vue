@@ -48,6 +48,11 @@
               @click="insertBlockAnchor"
               title="在光标所在行尾插入块锚点，便于被 [[笔记#锚点]] 引用"
             >🔗 插入块锚点</button>
+            <button
+              class="tool-btn"
+              @click="openLinkPicker"
+              title="插入 [[笔记]] 双链：选择目标笔记后于光标处插入引用"
+            >📎 插入双链</button>
           </div>
 
           <!-- 编辑/预览模式切换 -->
@@ -85,6 +90,37 @@
             :note-id="props.note.id"
             @open="emit('open', $event)"
           />
+
+          <!-- 插入双链 · 笔记选择浮层 -->
+          <Transition name="modal">
+            <div v-if="showLinkPicker" class="link-picker-overlay" @click.self="closeLinkPicker">
+              <div class="link-picker">
+                <div class="lp-head">
+                  <span>插入双链 · 选择目标笔记</span>
+                  <button class="lp-close" @click="closeLinkPicker">✕</button>
+                </div>
+                <input
+                  v-model="linkQuery"
+                  class="lp-search"
+                  placeholder="搜索笔记标题…"
+                  autofocus
+                  @keyup.enter.prevent="linkCandidates[0] && insertLink(linkCandidates[0].id)"
+                />
+                <ul class="lp-list">
+                  <li
+                    v-for="n in linkCandidates"
+                    :key="n.id"
+                    class="lp-item"
+                    @click="insertLink(n.id)"
+                  >
+                    <span class="lp-title">{{ n.title || '未命名笔记' }}</span>
+                    <span class="lp-id">{{ n.id }}</span>
+                  </li>
+                  <li v-if="!linkCandidates.length" class="lp-empty">没有匹配的笔记</li>
+                </ul>
+              </div>
+            </div>
+          </Transition>
 
           <!-- 底部信息栏 -->
           <div class="editor-footer">
@@ -178,6 +214,38 @@ function insertBlockAnchor() {
   nextTick(() => {
     if (!ta) return
     const pos = end + anchor.length
+    ta.focus()
+    ta.setSelectionRange(pos, pos)
+  })
+}
+
+/** 插入双链浮层：列出除自身外的笔记，选中后于光标处插入 [[id]] */
+const showLinkPicker = ref(false)
+const linkQuery = ref('')
+const linkCandidates = computed(() => {
+  const q = linkQuery.value.trim().toLowerCase()
+  const selfId = props.note?.id ?? null
+  return study.notes.value
+    .filter(n => n.id !== selfId)
+    .filter(n => !q || (n.title || '').toLowerCase().includes(q))
+    .slice(0, 30)
+})
+function openLinkPicker() {
+  showLinkPicker.value = true
+  linkQuery.value = ''
+}
+function closeLinkPicker() {
+  showLinkPicker.value = false
+}
+function insertLink(noteId: string) {
+  const ta = contentRef.value
+  const token = `[[${noteId}]]`
+  const caret = ta ? (ta.selectionStart ?? form.content.length) : form.content.length
+  form.content = form.content.slice(0, caret) + token + form.content.slice(caret)
+  closeLinkPicker()
+  nextTick(() => {
+    if (!ta) return
+    const pos = caret + token.length
     ta.focus()
     ta.setSelectionRange(pos, pos)
   })
@@ -429,6 +497,119 @@ function chipStyle(tag: string) {
   background: rgba(212, 165, 116, 0.16);
   border-color: rgba(212, 165, 116, 0.5);
   color: var(--accent, #d4a574);
+}
+
+/* 插入双链 · 笔记选择浮层 */
+.link-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+}
+
+.link-picker {
+  width: 420px;
+  max-width: 88vw;
+  max-height: 70vh;
+  background: #1e1e26;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.lp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.lp-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.lp-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.lp-search {
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.lp-search:focus {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.lp-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow-y: auto;
+}
+
+.lp-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lp-item:hover {
+  background: rgba(124, 92, 252, 0.12);
+}
+
+.lp-title {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lp-id {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.lp-empty {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 10px;
+  text-align: center;
 }
 
 /* 模式切换标签 */

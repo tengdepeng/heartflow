@@ -234,6 +234,15 @@ describe('镜我执行流 (executor)', () => {
       expect(plan!.steps[0].action).toBe('navigate')
     })
 
+    it('"我要记账"生成包含 navigate 到劳酬的计划（修复：此前无 finance 意图，只回文字不跳转）', () => {
+      const { plan, parsedTask, response } = planMirrorInput('我要记账')
+      expect(plan).not.toBeNull()
+      expect(parsedTask!.intent).toBe('finance')
+      expect(plan!.steps[0].action).toBe('navigate')
+      expect(plan!.steps[0].params.target).toBe('劳酬')
+      expect(response).toContain('劳酬')
+    })
+
     it('"统计"生成包含 show-stats 的计划', () => {
       const { plan, parsedTask } = planMirrorInput('统计一下')
       expect(plan).not.toBeNull()

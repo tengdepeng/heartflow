@@ -1,8 +1,9 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 
 // 镜我对话依赖 vue-router（仅 navigate 步骤用到），单元测试中桩掉
+const { mockPush } = vi.hoisted(() => ({ mockPush: vi.fn() }))
 vi.mock('vue-router', () => ({
-  useRouter: () => ({ push: vi.fn() }),
+  useRouter: () => ({ push: mockPush }),
 }))
 
 import { createMockStorage } from '../../../engine/storage/__tests__/test-utils'
@@ -55,5 +56,17 @@ describe('镜我对话 · send（MVP-A：M3 房间感知 + M4 歧义消解）', 
     // 用户消息上的解析结果应为被强制选定的意图
     const userEntry = m.dialogue.value.find(d => d.role === 'user')
     expect(userEntry?.parsedTask?.intent).toBe('note')
+  })
+
+  it('send「我要记账」真办事：解析为 finance 并 router.push 到 /reward（修复：此前镜我说打开记账不做）', async () => {
+    const { useMirrorDialogue } = await import('../useMirrorDialogue')
+    const m = useMirrorDialogue()
+
+    const res = await m.send('我要记账')
+    expect(res.parsedTask?.intent).toBe('finance')
+    // useMirrorDialogue 在 executePlan 前对 navigate 步执行 router.push
+    expect(mockPush).toHaveBeenCalledWith('/reward')
+    // 回应文案确认打开了劳酬
+    expect(res.response).toContain('劳酬')
   })
 })

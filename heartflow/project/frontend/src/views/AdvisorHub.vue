@@ -27,6 +27,41 @@
       </div>
     </div>
 
+    <!-- 调令（幕僚管家闭环：下达 → 派单 → 任务中 → 完成光点） -->
+    <section data-enter class="ah-command-section">
+      <h3 class="ah-scheduler-heading">⚡ 调令</h3>
+      <p class="ah-aura-desc">对镜我下达一句话调令，她会解析意图、派给合适的幕僚，并真正帮你办事——开启专注、写下笔记、跳到锚点庭院或情绪花房，完成后浮现极淡的完成光点。</p>
+      <div class="ah-command-bar">
+        <input
+          v-model="commandText"
+          class="ah-command-input"
+          placeholder="例如：帮我查一下最近三个月的工作记录，看看加班最密集的是哪段"
+          @keyup.enter="sendCommand"
+        />
+        <button class="ah-command-send" :disabled="!commandText.trim()" @click="sendCommand">下达</button>
+      </div>
+      <div class="ah-command-list" v-if="commandTasksReversed.length">
+        <div
+          v-for="t in commandTasksReversed"
+          :key="t.id"
+          class="ah-command-item"
+          :class="{ done: t.status === 'done' }"
+        >
+          <span class="ah-cmd-dot" :class="{ light: t.doneLight }"></span>
+          <div class="ah-cmd-body">
+            <div class="ah-cmd-head">
+              <span class="ah-cmd-intent">{{ t.intentLabel }}</span>
+              <span class="ah-cmd-advisor" v-if="t.advisorName">· {{ t.advisorName }}</span>
+              <span class="ah-cmd-status" v-if="t.status === 'running'">任务中…</span>
+            </div>
+            <p class="ah-cmd-progress">{{ t.progressDesc }}</p>
+            <p class="ah-cmd-summary" v-if="t.status === 'done' && t.resultSummary">{{ t.resultSummary }}</p>
+          </div>
+        </div>
+      </div>
+      <p v-else class="ah-command-empty">还没有调令。试着下达第一条，让管家动起来。</p>
+    </section>
+
     <!-- 幕僚卡片 -->
     <div data-enter class="ah-advisor-grid" v-if="advisors.length">
       <div v-for="a in advisors" :key="a.id" class="ah-advisor-card" :class="{ dormant: a.state === 'slumber' }" @click="editAdvisor(a)">
@@ -67,6 +102,46 @@
     <section data-enter class="ah-scheduler-section">
       <h3 class="ah-scheduler-heading">⚙ 幕僚调度</h3>
       <AdvisorScheduler />
+    </section>
+
+    <!-- 氛围主题（原右下角常驻浮层：迁至此处与设置页两入口） -->
+    <section data-enter class="ah-aura-section">
+      <h3 class="ah-scheduler-heading">🌌 氛围主题</h3>
+      <p class="ah-aura-desc">星图 / 呼吸球 / 流体壁纸等多元氛围，本地保存，随你的陪伴幕僚一同呼吸。</p>
+      <AuraThemePicker />
+    </section>
+
+    <!-- 笔记（原独立浮动 FAB / 笔记板已并入此处，消除接线孤儿） -->
+    <section data-enter class="ah-notes-section">
+      <h3 class="ah-scheduler-heading">📝 笔记</h3>
+      <p class="ah-aura-desc">思绪沉淀都在这里。新建即可记录，或贴为浮窗便签。</p>
+      <div class="ah-notes-bar">
+        <input v-model="noteQuery" class="ah-notes-search" placeholder="搜索笔记标题或内容…" />
+        <button class="ah-btn-affinity ah-notes-new" @click="noteEditor.openCreate()">+ 新建笔记</button>
+      </div>
+      <div class="ah-notes-list" v-if="noteList.length">
+        <div
+          v-for="n in noteList"
+          :key="n.id"
+          class="ah-note-item"
+          :class="{ sticky: isNoteSticky(n.id) }"
+        >
+          <div class="ah-note-head">
+            <span class="ah-note-dot" :style="{ background: '#' + noteColor(n.id) }"></span>
+            <span class="ah-note-title">{{ n.title || '无标题' }}</span>
+          </div>
+          <p class="ah-note-preview">{{ n.content || '（空）' }}</p>
+          <div class="ah-note-meta">
+            <span class="ah-note-time">{{ noteFmt(n.updatedAt) }}</span>
+          </div>
+          <div class="ah-note-actions">
+            <button @click="noteEditor.openEdit(asSticky(n))" title="编辑">✏️</button>
+            <button @click="noteToggleSticky(n.id)" :title="isNoteSticky(n.id) ? '收入面板' : '贴为便签'">📌</button>
+            <button class="ah-note-del" @click="noteDelete(n.id)" title="删除">🗑️</button>
+          </div>
+        </div>
+      </div>
+      <p v-else class="ah-notes-empty">还没有笔记，点「+ 新建笔记」记录第一条。</p>
     </section>
 
     <div data-enter v-if="!advisors.length" class="ah-empty-hint"><span>🏛</span><p>幕僚大厅等待第一位居民</p></div>
@@ -114,10 +189,35 @@ import { advisorCarrierStageOf, carrierGlyph, carrierIsImage } from '../types'
 import AdvisorScheduler from '../components/AdvisorScheduler.vue'
 import DialogueSessionList from '../components/DialogueSessionList.vue'
 import AdvisorCarrierEditor from '../components/AdvisorCarrierEditor.vue'
+import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
+import { useCommandExecutor } from '../modules/advisor/commandExecutor'
+import { getNoteStore } from '../modules/note'
+import { useNoteEditor } from '../modules/note/useNoteEditor'
+import type { StickyNote } from '../modules/note/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const $router = useRouter()
+
+// ---- 调令系统（幕僚管家闭环）：下达 → 派单 → 任务中 → 完成光点 → 真办事 ----
+const commandText = ref('')
+const commandTasksReversed = computed(() => [...(advisor.commandTasks ?? [])].reverse())
+const executor = useCommandExecutor()
+function sendCommand() {
+  const text = commandText.value.trim()
+  if (!text) return
+  const task = advisor.issueCommand(text)
+  commandText.value = ''
+  if (!task) return
+  // 调令要真办事，不能只汇报：
+  // navigate 类（如「打开殿堂设置」）下达即跳转，不等完成光点
+  if (task.targetRoute) {
+    $router.push(task.targetRoute)
+    return
+  }
+  // action 类：真正触发对应能力（开启专注 / 写笔记 / 跳锚点庭院 / 跳情绪花房）
+  executor.runAction(task)
+}
 
 // ---- 统一到真实 advisor 档案层（含 6 固定预设）；与幕僚坞共享同一批幕僚 ----
 const advisor = useAdvisor()
@@ -335,6 +435,48 @@ function removeAdvisor(id: string) {
   // 固定预设不可删，仅用户自建可删（避免误删 6 类固定幕僚）
   if (isPreset(id)) return
   advisor.removeAdvisorProfile(id)
+}
+
+// ---- 笔记（并入幕僚阁：内联列表 + 复用全局编辑器，原独立 FAB 已删） ----
+const noteStore = getNoteStore()
+const noteEditor = useNoteEditor()
+const noteQuery = ref('')
+
+const noteList = computed(() => {
+  const all = noteStore.allNotes.value
+  if (!noteQuery.value.trim()) return all.slice(0, 20)
+  const q = noteQuery.value.toLowerCase()
+  return all
+    .filter(n => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q))
+    .slice(0, 20)
+})
+
+/** 每篇笔记都有对应的便签扩展状态（create 时同步写入），取之喂给编辑器 */
+function asSticky(n: { id: string }): StickyNote {
+  return noteStore.getStickyById(n.id) as StickyNote
+}
+
+function isNoteSticky(id: string): boolean {
+  const s = noteStore.getStickyById(id)
+  return !!s && (s.displayMode === 'sticky' || s.displayMode === 'minimized')
+}
+
+function noteColor(id: string): string {
+  return noteStore.getStickyById(id)?.color ?? 'cccccc'
+}
+
+function noteToggleSticky(id: string) {
+  if (isNoteSticky(id)) noteStore.moveToBoard(id)
+  else noteStore.moveToSticky(id)
+}
+
+function noteDelete(id: string) {
+  noteStore.hardRemove(id)
+}
+
+function noteFmt(iso: string): string {
+  const d = new Date(iso)
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 </script>
 
@@ -687,6 +829,8 @@ function removeAdvisor(id: string) {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  max-height: 86vh;
+  overflow-y: auto;
   position: relative;
   box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(var(--accent-rgb), 0.05);
 }
@@ -824,6 +968,280 @@ function removeAdvisor(id: string) {
   color: rgba(var(--accent-rgb), 0.55);
   margin-bottom: 12px;
   letter-spacing: 1px;
+}
+
+/* ---- 氛围主题段 ---- */
+.ah-aura-section {
+  margin-top: 28px;
+  position: relative;
+  z-index: 1;
+}
+.ah-aura-desc {
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(var(--accent-rgb), 0.38);
+  margin: -4px 0 12px;
+}
+
+/* ---- 笔记区（并入幕僚阁） ---- */
+.ah-notes-section {
+  margin-top: 28px;
+  position: relative;
+  z-index: 1;
+}
+.ah-notes-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ah-notes-search {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid rgba(var(--accent-rgb), 0.1);
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.03);
+  color: rgba(255, 240, 224, 0.8);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ah-notes-search:focus {
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+.ah-notes-new {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 8px 16px;
+}
+.ah-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ah-note-item {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb), 0.03);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+  transition: background 0.2s, border-color 0.2s;
+}
+.ah-note-item:hover {
+  background: rgba(var(--accent-rgb), 0.06);
+  border-color: rgba(var(--accent-rgb), 0.14);
+}
+.ah-note-item.sticky {
+  border-left: 3px solid var(--accent);
+}
+.ah-note-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.ah-note-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.ah-note-title {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 240, 224, 0.85);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ah-note-preview {
+  font-size: 11px;
+  color: rgba(255, 240, 224, 0.4);
+  margin: 4px 0;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ah-note-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+.ah-note-time {
+  font-size: 10px;
+  color: rgba(var(--accent-rgb), 0.3);
+  margin-left: auto;
+}
+.ah-note-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.ah-note-item:hover .ah-note-actions {
+  opacity: 1;
+}
+.ah-note-actions button {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: rgba(var(--accent-rgb), 0.06);
+  cursor: pointer;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.ah-note-actions button:hover {
+  background: rgba(var(--accent-rgb), 0.14);
+}
+.ah-note-del:hover {
+  background: rgba(224, 49, 49, 0.18);
+}
+.ah-notes-empty {
+  color: rgba(var(--accent-rgb), 0.3);
+  font-size: 12px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ---- 调令 section（幕僚管家闭环） ---- */
+.ah-command-section {
+  margin-top: 28px;
+  position: relative;
+  z-index: 1;
+}
+.ah-command-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.ah-command-input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb), 0.03);
+  color: rgba(255, 240, 224, 0.85);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ah-command-input::placeholder {
+  color: rgba(var(--accent-rgb), 0.28);
+}
+.ah-command-input:focus {
+  border-color: rgba(var(--accent-rgb), 0.32);
+}
+.ah-command-send {
+  flex: 0 0 auto;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--bg-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.ah-command-send:hover {
+  background: #debc8c;
+}
+.ah-command-send:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.ah-command-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ah-command-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb), 0.03);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+  transition: background 0.3s, border-color 0.3s;
+}
+.ah-command-item.done {
+  background: rgba(var(--accent-rgb), 0.05);
+  border-color: rgba(var(--accent-rgb), 0.14);
+}
+.ah-cmd-dot {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: rgba(var(--accent-rgb), 0.22);
+  transition: all 0.5s ease;
+}
+.ah-cmd-dot.light {
+  background: var(--accent);
+  box-shadow: 0 0 10px 2px rgba(var(--accent-rgb), 0.5);
+  animation: cmd-light-breathe 2.4s ease-in-out infinite;
+}
+@keyframes cmd-light-breathe {
+  0%, 100% { opacity: 0.55; box-shadow: 0 0 6px 1px rgba(var(--accent-rgb), 0.35); }
+  50% { opacity: 1; box-shadow: 0 0 12px 3px rgba(var(--accent-rgb), 0.6); }
+}
+.ah-cmd-body {
+  flex: 1;
+  min-width: 0;
+}
+.ah-cmd-head {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.ah-cmd-intent {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 240, 224, 0.9);
+}
+.ah-cmd-advisor {
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.5);
+}
+.ah-cmd-status {
+  font-size: 10px;
+  color: rgba(var(--accent-rgb), 0.55);
+  margin-left: auto;
+  animation: cmd-pulse 1.4s ease-in-out infinite;
+}
+@keyframes cmd-pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.9; }
+}
+.ah-cmd-progress {
+  font-size: 11px;
+  color: rgba(255, 240, 224, 0.4);
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+.ah-cmd-summary {
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.72);
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+.ah-command-empty {
+  color: rgba(var(--accent-rgb), 0.3);
+  font-size: 12px;
+  text-align: center;
+  padding: 16px 0;
 }
 
 @media (max-width: 860px) {

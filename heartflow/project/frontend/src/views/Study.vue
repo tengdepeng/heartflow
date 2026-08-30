@@ -50,6 +50,9 @@
       </div>
     </header>
 
+    <!-- 全库检索（INCR-02：找东西） -->
+    <NoteSearchPanel :notes="study.notes.value" @open="openNoteById" />
+
     <!-- 标签云（可隐藏） -->
     <section class="tag-cloud-section" v-if="tagCloudVisible">
       <div class="tag-cloud-head">
@@ -246,6 +249,7 @@ import { storage } from '../engine/storage'
 import NoteEditor from '../components/NoteEditor.vue'
 import QuickCapture from '../components/QuickCapture.vue'
 import MindMapPanel from '../components/MindMapPanel.vue'
+import NoteSearchPanel from '../components/NoteSearchPanel.vue'
 import LettersPanel from '../components/LettersPanel.vue'
 import TapesPanel from '../components/TapesPanel.vue'
 import type { Note } from '../types'
@@ -856,6 +860,8 @@ function toggleArchive(note: Note) {
   border: 1px solid rgba(var(--accent-rgb), 0.12);
   border-radius: 12px;
   padding: 24px;
+  max-height: 86vh;
+  overflow-y: auto;
   width: 300px;
   text-align: center;
 }
@@ -1030,6 +1036,8 @@ function toggleArchive(note: Note) {
   border-radius: 12px;
   padding: 24px;
   padding-left: 28px;
+  max-height: 86vh;
+  overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 

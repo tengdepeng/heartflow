@@ -10,7 +10,11 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import { automationEngine } from '../engine/automation'
 import { useAdvisorStore } from '../stores/advisor'
-import { GATE_EVENT_NAME, type OperationGateEvent } from '../modules/operation-mode/gate'
+import {
+  GATE_EVENT_NAME,
+  ADVISOR_CONFIRM_EXECUTE_EVENT,
+  type OperationGateEvent,
+} from '../modules/operation-mode/gate'
 
 interface TrayItem extends OperationGateEvent {
   id: number
@@ -43,8 +47,18 @@ function confirmExecute(item: TrayItem) {
       // 用户点头 → 以手动触发重新执行该流程
       void automationEngine.execute(item.flow, 'manual')
     } else if (item.kind === 'advisor') {
-      // 用户允许 → 以 click 触发真正发声（绕过主动动作门控）
-      useAdvisorStore().say(item.text ?? '', 'click', item.advisorId)
+      if (item.originalText) {
+        // 用户允许 → 把原始指令回投给镜我，真正执行动作（而非仅发声）
+        // MirrorDialogue 监听该事件并以 bypassGate 重新 send，dialogue 状态不分裂
+        window.dispatchEvent(
+          new CustomEvent(ADVISOR_CONFIRM_EXECUTE_EVENT, {
+            detail: { text: item.originalText, intent: item.intent },
+          }),
+        )
+      } else {
+        // 兜底：无原始指令时仅发声（保持旧行为，便于其他顾问来源接入）
+        useAdvisorStore().say(item.text ?? '', 'click', item.advisorId)
+      }
     }
   } catch {
     /* 执行失败不影响托盘移除 */

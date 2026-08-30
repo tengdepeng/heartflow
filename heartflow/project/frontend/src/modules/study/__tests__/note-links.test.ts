@@ -45,21 +45,6 @@ describe('笔记双向链接', () => {
     expect(resolveTargetId('不存在', [makeNote('abc', '标题A')])).toBeNull()
   })
 
-  it('connect 建立链接，去重且不自引用', () => {
-    const { connect, getOutgoingLinks } = useNoteLinks()
-    expect(connect('a', 'b')).not.toBeNull()
-    expect(connect('a', 'b')).toBeNull()
-    expect(connect('a', 'a')).toBeNull()
-    expect(getOutgoingLinks('a').length).toBe(1)
-  })
-
-  it('disconnect 断开链接', () => {
-    const { connect, disconnect, getOutgoingLinks } = useNoteLinks()
-    connect('a', 'b')
-    expect(disconnect('a', 'b')).toBe(true)
-    expect(getOutgoingLinks('a').length).toBe(0)
-  })
-
   it('syncLinksForNote 由正文 [[id]] 建立出链', () => {
     const { syncLinksForNote, getOutgoingLinks } = useNoteLinks()
     const notes = [makeNote('a', 'A'), makeNote('b', 'B')]

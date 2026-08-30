@@ -1270,6 +1270,8 @@ function toggleExpandPlan(planId: string) {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  max-height: 86vh;
+  overflow-y: auto;
   box-shadow: 0 8px 40px rgba(0,0,0,0.5);
 }
 .modal-card h3 {

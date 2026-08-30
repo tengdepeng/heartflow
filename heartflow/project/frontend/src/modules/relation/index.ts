@@ -28,6 +28,26 @@ export type {
   RelationshipRadar,
 } from './relation-visualization'
 
+// ---- 互动日志 / 纪念日（INCR-13 羁绊档案数据背书）----
+export { useInteractionJournal, useAnniversaries, INTERACTION_KIND_META } from './interaction-journal'
+export type { InteractionEntry, InteractionKind, InteractionStats } from './interaction-journal'
+
+// ---- 羁绊档案分析（INCR-13）----
+export {
+  relationOverview,
+  relationTypeRows,
+  relationRhythm,
+  relationHealth,
+  relationInsights,
+  daysSinceLast,
+} from './relation-analytics'
+export type {
+  RelationOverview,
+  RelationTypeRow,
+  RelationRhythm,
+  RelationHealth,
+} from './relation-analytics'
+
 // ---- 状态管理（已抽取至叶子，公共 API 不变）----
 export { useRelation } from './relation-store'
 
