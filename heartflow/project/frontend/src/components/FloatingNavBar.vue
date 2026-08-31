@@ -3,6 +3,7 @@
   <div class="floating-nav">
     <!-- 拖拽容器：docked 时透传、不定位；floating 时固定到自由坐标、两岛并排居中 -->
     <div
+      ref="dragEl"
       class="floating-nav__drag"
       :class="{ 'is-floating': navFloating, 'bar-idle': barIdle }"
       :style="dragStyle"
@@ -161,6 +162,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useRoomNavigation } from '../composables/useRoomNavigation'
 import { useCanvasRoom } from '../modules/canvas'
 import { useAppearance } from '../modules/customization/useAppearance'
+import { clampNavFloat } from '../modules/customization/floatReanchor'
 import { useConfigStore } from '../stores/config'
 
 defineEmits<{ (e: 'toggle-sidebar'): void }>()
@@ -222,6 +224,25 @@ function onDragEnd() {
   if ((navFloatPos.value?.y ?? 0) > vh * 0.72) setNavFloatPos(null)
 }
 
+// ① 窗口缩放重锚：液态底栏自由悬浮时钳进视口，避免缩小窗口后停在原位 / 跑出屏幕。
+const dragEl = ref<HTMLElement | null>(null)
+let navReanchorRaf = 0
+function reanchorNav() {
+  if (!navFloating.value || !navFloatPos.value || !dragEl.value) return
+  const rect = dragEl.value.getBoundingClientRect()
+  const next = clampNavFloat(
+    navFloatPos.value,
+    { width: rect.width, height: rect.height },
+    window.innerWidth,
+    window.innerHeight,
+  )
+  if (next.x !== navFloatPos.value.x || next.y !== navFloatPos.value.y) setNavFloatPos(next)
+}
+function onNavResize() {
+  if (navReanchorRaf) cancelAnimationFrame(navReanchorRaf)
+  navReanchorRaf = requestAnimationFrame(reanchorNav)
+}
+
 // ---- 自动收缩：空闲 N 秒后收成小条，任意活动即展开 ----
 const BAR_IDLE_MS = 4500
 const barIdle = ref(false)
@@ -235,12 +256,16 @@ const barActivityEvs = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touch
 onMounted(() => {
   barActivityEvs.forEach((ev) => window.addEventListener(ev, pokeBar, { passive: true }))
   pokeBar()
+  window.addEventListener('resize', onNavResize)
+  onNavResize() // 初始按当前视口重锚一次（上次会话可能在不同尺寸下存过 pos）
 })
 onUnmounted(() => {
   barActivityEvs.forEach((ev) => window.removeEventListener(ev, pokeBar))
   if (barIdleTimer) clearTimeout(barIdleTimer)
   window.removeEventListener('pointermove', onDragMove)
   window.removeEventListener('pointerup', onDragEnd)
+  window.removeEventListener('resize', onNavResize)
+  if (navReanchorRaf) cancelAnimationFrame(navReanchorRaf)
 })
 
 // ---- 世界壳三态循环键（hall-3d → map-2d → screen，常驻右浮岛任意 shell，D3） ----

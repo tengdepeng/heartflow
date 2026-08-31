@@ -239,12 +239,15 @@ import { useSanctuaryTrigger } from './modules/sanctuary'
 import { useAppearance } from './modules/customization/useAppearance'
 import { useChromeAutoHide } from './modules/customization/useChromeAutoHide'
 import { useRoomStyle } from './modules/customization/useRoomStyle'
+import { applyBrandIconToWindow } from './modules/customization/applyWindowIcon'
 import { useRuntimeState } from './resonance/bridges/runtime'
 import CanvasRoom from './modules/canvas/CanvasRoom.vue'
 import SurfaceStage from './modules/canvas/SurfaceStage.vue'
 import NoteLayer from './components/NoteLayer.vue'
 import MirrorSelf from './components/MirrorSelf.vue'
 import FloatingNavBar from './components/FloatingNavBar.vue'
+// ① 窗口缩放重锚：侧栏自由浮动位置钳回视口（接回 floatReanchor 规划好的重锚逻辑）
+import { clampSidebarFloat } from './modules/customization/floatReanchor'
 import BreathingLayer from './modules/breathing/BreathingLayer.vue'
 import AuraLayer from './modules/aura/AuraLayer.vue'
 import { useAura } from './modules/aura/auraLayer'
@@ -674,9 +677,11 @@ void is3dShell.value
 
 // 应用品牌图标（app 自身 logo）：侧栏品牌徽标 + 运行时 favicon 同步
 const appBrandIcon = computed(() => configStore.config.appBrandIcon ?? null)
-watch(appBrandIcon, (v) => {
+watch(appBrandIcon, async (v) => {
   const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
   if (link && v && isImageIcon(v)) link.href = v
+  // 桌面端：品牌图（图片）热替换窗口标题栏 / 任务栏图标（item3 运行时补全）
+  await applyBrandIconToWindow(v)
 }, { immediate: true })
 
 // B0 加密存储：启动期若磁盘已加密且内存未解锁，挂起主界面、显示解锁遮罩
@@ -760,6 +765,26 @@ const isDesktop = bp.isDesktop
 // 上一次视口断点（isDesktop 态），用于检测 1024px 边界跃迁
 let lastIsDesktop: boolean | null = null
 
+// ① 窗口缩放重锚：侧栏若为自由浮动位置（sidebarFloatPos 有值），钳进视口，
+//    避免「缩小窗口后侧栏停在旧像素位置 / 跑出屏幕」。
+//    吸附态（pos 为 null，四角/单边吸附）由 CSS float-edge-* 接管，本就不受缩放影响。
+let reanchorRaf = 0
+function reanchorSidebar() {
+  if (!sidebarFloatPos.value) return
+  const el = navBarEl.value
+  if (!el) return
+  const next = clampSidebarFloat(
+    sidebarFloatPos.value,
+    sidebarFloatEdge.value || 'free',
+    { width: el.offsetWidth, height: el.offsetHeight },
+    window.innerWidth,
+    window.innerHeight,
+  )
+  if (next.x !== sidebarFloatPos.value.x || next.y !== sidebarFloatPos.value.y) {
+    setSidebarFloatPos(next)
+  }
+}
+
 function onResize() {
   const nowDesktop = window.innerWidth >= 1024
   // 仅在跨过 1024px 断点（桌面 <-> 移动/平板）时重置折叠态：
@@ -771,6 +796,9 @@ function onResize() {
     setSidebarCollapsed(true)
   }
   lastIsDesktop = nowDesktop
+  // 缩放重锚（rAF 合帧，规避拖拽缩放时高频写存储）
+  if (reanchorRaf) cancelAnimationFrame(reanchorRaf)
+  reanchorRaf = requestAnimationFrame(reanchorSidebar)
 }
 
 // 汉堡 ≡ 切换侧栏显隐（调出 / 隐藏）：
