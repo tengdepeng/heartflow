@@ -39,7 +39,7 @@
         <span class="pm-empty-icon">📦</span>
         <p>暂无已安装的插件</p>
       </div>
-      <div v-else class="pm-plugin-grid">
+      <div v-else class="pm-plugin-grid hf-room-grid--wide">
         <div
           v-for="p in plugins"
           :key="p.manifest.meta.id"
@@ -82,7 +82,7 @@
     <!-- 可安装插件 -->
     <section class="pm-section pm-community-section">
       <h2 class="pm-section-title">可安装插件</h2>
-      <div class="pm-plugin-grid">
+      <div class="pm-plugin-grid hf-room-grid--wide">
         <div
           v-for="plugin in availablePlugins"
           :key="plugin.meta.id"
@@ -474,9 +474,11 @@ function tierLabel(t: PluginTier): string {
 }
 
 /* ---- Plugin Grid ---- */
+/* ② 自适应整改：由单列 flex 改为 auto-fit 多列网格，
+   窗口够宽自动多列、窄屏自动降为单列，减少纵向滚屏。 */
 .pm-plugin-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
   gap: 8px;
 }
 

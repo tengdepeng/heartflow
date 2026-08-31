@@ -50,6 +50,8 @@
           该分类下没有匹配的房间
         </div>
 
+        <!-- 自适应网格：容器够宽自动多列（减少滚屏），窄容器自动降为单列避免拥挤 -->
+        <div v-if="filteredByGroup(group).length > 0" class="hf-room-grid--wide">
         <div
           v-for="entry in filteredByGroup(group)"
           :key="entry.room.id"
@@ -159,6 +161,7 @@
               重置为默认
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>

@@ -109,6 +109,9 @@
       </div>
     </section>
 
+    <!-- 逸趣档案（play-analytics：概览/品类/种子/节律/健康/洞察） -->
+    <PlayArchivePanel />
+
     <!-- 平台分布 -->
     <section data-enter v-if="pg.platformDistribution.length" class="dist-section">
       <div class="section-label">平台分布</div>
@@ -197,8 +200,8 @@
         <input v-model="pg.searchQuery" placeholder="搜索游戏…" class="search-input pg-input" />
       </div>
 
-      <!-- 游戏列表 -->
-      <div v-if="pg.games.length" class="game-list">
+      <!-- 游戏列表（自适应网格：宽屏多列减滚屏，窄屏自动单列） -->
+      <div v-if="pg.games.length" class="game-list hf-room-grid--wide">
         <div v-for="g in (pg.searchQuery ? pg.filteredGames : pg.sortedGames)" :key="g.id" class="game-card">
           <span class="game-icon">🎮</span>
           <div class="game-info">
@@ -249,7 +252,7 @@
       </div>
 
       <!-- 玩具列表 -->
-      <div class="item-grid" v-if="pg.filteredToys.length">
+      <div class="item-grid hf-room-grid" v-if="pg.filteredToys.length">
         <div v-for="t in pg.filteredToys" :key="t.id" class="item-card">
           <span class="item-icon">🧸</span>
           <div class="item-info">
@@ -284,7 +287,8 @@
           <div class="series-title">{{ group.series || '未分类' }}
             <span class="series-count">{{ group.items.length }}</span>
           </div>
-          <div class="item-grid">
+          <!-- 自适应网格：类名虽为 item-grid，原本实为单列 flex，此处接入基类改为真网格 -->
+          <div class="item-grid hf-room-grid">
             <div v-for="m in group.items" :key="m.id" class="item-card">
               <span class="item-icon">🗿</span>
               <div class="item-info">
@@ -315,7 +319,7 @@
       </div>
 
       <!-- 其他列表 -->
-      <div class="item-grid" v-if="pg.filteredOthers.length">
+      <div class="item-grid hf-room-grid" v-if="pg.filteredOthers.length">
         <div v-for="o in pg.filteredOthers" :key="o.id" class="item-card">
           <span class="item-icon">📦</span>
           <div class="item-info">
@@ -509,6 +513,7 @@ import {
 } from '../modules/play'
 import SeedInheritancePanel from '../components/SeedInheritancePanel.vue'
 import ReceivedSeedsInbox from '../components/ReceivedSeedsInbox.vue'
+import PlayArchivePanel from '../components/PlayArchivePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 // ===== 时间种子（生长阶段系统） =====

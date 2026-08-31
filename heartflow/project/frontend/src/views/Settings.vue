@@ -772,20 +772,20 @@ onUnmounted(() => {
 })
 
 // ---- 子分组折叠（可收缩展开，减少滚动查找） ----
-// 默认展开与本次改动相关的分组（背景介质 / 侧边栏 / 上下边栏），
-// 其余折叠，进入设置即可一眼扫到标题再按需展开。
+// 默认仅展开首个分组：原默认展开 7 个分区，功能增多后初始即超长单页、需大量滚屏。
+// 改为「一眼扫到全部分组标题 → 按需展开」，其余分组由左栏 TOC 点击（onNavClick）展开并平滑定位。
 const openSections = reactive<Record<string, boolean>>({
   bg: true,
-  aura: true,
-  operation: true,
-  gesture: true,
+  aura: false,
+  operation: false,
+  gesture: false,
   anim: false,
   visual: false,
   chrome: false,
-  sidebar: true,
-  edgebar: true,
+  sidebar: false,
+  edgebar: false,
   astrolabe: false,
-  taxonomy: true,
+  taxonomy: false,
   rooms: false,
   appicon: false,
 })

@@ -1,0 +1,160 @@
+/* ============================================================
+   心流工坊 · 房间自适应排版基底（内容区）
+   ------------------------------------------------------------
+   与 layout-contract.css 分工明确：
+     · layout-contract.css → 浮层 z 栈 / 响应式避让（fixed 元素）
+     · room-adaptive.css   → 房间「内容区」自适应排版（本文档流元素）
+
+   目标：功能增多的房间（设置 / 工坊 / 殿堂等）在窗口缩放时
+   自动增减列数、分区标题吸顶、分区可折叠，从而减少纵向滚屏。
+
+   设计原则（纯加法，零破坏）：
+     · 仅提供「可复用工具类」，不强制作用于任何现有选择器；
+     · 房间按需在模板上加 class 即接入，不改结构、不改逻辑；
+     · 已自适应的房间（如 Settings）保持原样，可逐步迁移。
+   ============================================================ */
+
+/* ---- 1. 自适应卡片网格：随窗口宽度自动增减列数 ----
+   用 minmax(min(Npx, 100%), 1fr) 而非 minmax(Npx, 1fr)，
+   避免容器窄于最小列宽时横向溢出（侧栏内嵌场景常见）。      */
+.hf-room-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+}
+.hf-room-grid--dense {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+}
+.hf-room-grid--wide {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+}
+/* 固定两列 / 三列（需确定性列数时使用） */
+.hf-room-grid--2 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.hf-room-grid--3 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ---- 2. 分区标题吸顶：长内容滚动时分组标题常驻可见 ---- */
+.hf-room-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+}
+
+/* ---- 3. 折叠分区（与 Settings .sub-group 同构，供他房复用）----
+   用法：
+     <div class="hf-room-fold" :class="{ 'is-collapsed': !open }">
+       <div class="hf-room-fold__head" @click="open = !open">标题</div>
+       <div class="hf-room-fold__body">内容</div>
+     </div>                                                        */
+.hf-room-fold__body {
+  display: block;
+}
+.hf-room-fold.is-collapsed > .hf-room-fold__body {
+  display: none;
+}
+
+/* ---- 4. 内容区安全容器：响应式留白，防贴边 ---- */
+.hf-room-shell {
+  box-sizing: border-box;
+  max-width: 100%;
+  padding-inline: clamp(12px, 3vw, 32px);
+}
+
+/* ---- 5. 横向溢出兜底（需显式接入，避免误伤刻意横向滚动的房间）---- */
+.hf-room-clip {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+/* ---- 卡片各自高度，避免同行被最高（或展开态）卡片拉伸 ---- */
+.hf-room-grid,
+.hf-room-grid--dense,
+.hf-room-grid--wide,
+.hf-room-grid--2,
+.hf-room-grid--3 {
+  align-items: start;
+}
+
+/* ---- 6. 三档断点塌缩 ----
+   ≥1024：多列（由 auto-fit 自动决定）
+   640–1023：中等容器下降为双列上限
+   <640：一律单列，避免列被挤成不可用宽度                        */
+@media (max-width: 1023px) {
+  .hf-room-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .hf-room-grid,
+  .hf-room-grid--dense,
+  .hf-room-grid--wide,
+  .hf-room-grid--2,
+  .hf-room-grid--3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- 7. 特异性加固（关键，勿删）--------------------------------
+   问题：把基类加到「已有元素」上时，组件 scoped 样式与基类同为
+   单类选择器（0-0-1-0），而 Vite 下 scoped 后注入 → 会覆盖基类。
+   实测：PlayGallery 的 .game-list / .item-grid 均写死
+   `display:flex; flex-direction:column`（后者类名叫 grid 实为单列）。
+
+   对策：用「双类」选择器把特异性提到 0-0-2-0，压过组件单类规则，
+   确保基类在任何接入方式下都生效（新增包裹容器本就无冲突）。    */
+.hf-room-grid.hf-room-grid,
+.hf-room-grid--dense.hf-room-grid--dense,
+.hf-room-grid--wide.hf-room-grid--wide,
+.hf-room-grid--2.hf-room-grid--2,
+.hf-room-grid--3.hf-room-grid--3 {
+  display: grid;
+}
+.hf-room-grid.hf-room-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+}
+.hf-room-grid--dense.hf-room-grid--dense {
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+}
+.hf-room-grid--wide.hf-room-grid--wide {
+  grid-template-columns: repeat(auto-fit, minmax(min(360px, 100%), 1fr));
+}
+.hf-room-grid--2.hf-room-grid--2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.hf-room-grid--3.hf-room-grid--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+/* 网格已用 gap 控制间距，清掉卡片自带 margin-bottom 避免双重留白
+   （如 RoomSettingsPanel 的 .rm-room-card 带 margin-bottom:8px）  */
+.hf-room-grid.hf-room-grid > *,
+.hf-room-grid--dense.hf-room-grid--dense > *,
+.hf-room-grid--wide.hf-room-grid--wide > *,
+.hf-room-grid--2.hf-room-grid--2 > *,
+.hf-room-grid--3.hf-room-grid--3 > * {
+  margin-bottom: 0;
+}
+@media (max-width: 1023px) {
+  .hf-room-grid--3.hf-room-grid--3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .hf-room-grid.hf-room-grid,
+  .hf-room-grid--dense.hf-room-grid--dense,
+  .hf-room-grid--wide.hf-room-grid--wide,
+  .hf-room-grid--2.hf-room-grid--2,
+  .hf-room-grid--3.hf-room-grid--3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -86,6 +86,33 @@ describe('PlayGallery 逸趣阁视图', () => {
     expect(wrapper.text()).toContain('4')
   })
 
+  // ---- 集成：逸趣档案（INCR-47）----
+
+  it('集成渲染逸趣档案空态引导', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.pap-archive').exists()).toBe(true)
+    expect(wrapper.text()).toContain('逸趣档案')
+    expect(wrapper.find('.pap-badge-neutral').text()).toBe('逸趣未启')
+    expect(wrapper.text()).toContain('还没有可供陈列的逸趣记录')
+  })
+
+  it('集成渲染逸趣档案填充态', async () => {
+    mockStore['hf:play_v2'] = {
+      games: [
+        makeGame({ id: 'g1', name: '游戏A', hours: 30, platform: 'PS5' }),
+        makeGame({ id: 'g2', name: '游戏B', hours: 10, platform: 'PC' }),
+      ],
+      toys: [makeToy({ id: 't1', name: '手办A' })],
+      models: [],
+      others: [],
+    }
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.pap-archive').exists()).toBe(true)
+    expect(wrapper.text()).toContain('逸趣档案')
+    expect(wrapper.text()).toContain('品类分布')
+    expect(wrapper.text()).toContain('收藏节律')
+  })
+
   // ---- 游戏排序 ----
 
   it('游戏排序默认按时长降序', async () => {

@@ -217,4 +217,13 @@ describe('CognitionHall 释光阁 · 素镜视图', () => {
     expect(wrapper.text()).toContain('冥想记录')
     expect(wrapper.text()).toContain('释怀记录')
   })
+
+  // ------- 集成：澄明统计面板（INCR-46）-------
+  it('集成渲染澄明统计面板（空态引导）', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('.cstp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('澄明统计')
+    expect(wrapper.find('.cstp-badge-neutral').text()).toBe('数据未显影')
+    expect(wrapper.text()).toContain('还没有可供统计的澄明记录')
+  })
 })

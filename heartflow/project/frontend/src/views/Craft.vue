@@ -63,6 +63,8 @@
     </header>
 
     <CraftStatsOverview />
+    <!-- 匠庐档案（craft-analytics：概览/状态/类型/进化/节律/健康/洞察/标签） -->
+    <CraftArchivePanel />
     <CraftWorkbench />
     <CraftWipBench />
     <CraftExhibitionShelf />
@@ -86,6 +88,7 @@
 import { provide } from 'vue'
 import { useCraftUi, CRAFT_UI_KEY } from '../modules/craft/useCraftUi'
 import CraftStatsOverview from '../components/craft/CraftStatsOverview.vue'
+import CraftArchivePanel from '../components/CraftArchivePanel.vue'
 import CraftWorkbench from '../components/craft/CraftWorkbench.vue'
 import CraftWipBench from '../components/craft/CraftWipBench.vue'
 import CraftExhibitionShelf from '../components/craft/CraftExhibitionShelf.vue'

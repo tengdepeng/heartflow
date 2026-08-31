@@ -338,6 +338,9 @@
       <h3>🏮 留光阁记录</h3>
       <LightRecordsPanel />
     </section>
+
+    <!-- 澄明统计（light·useClarityDashboard：冥想/释怀/趋势/最佳时段） -->
+    <ClarionStatsPanel />
   </div>
 </template>
 
@@ -347,6 +350,7 @@ import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useMeditationAnalytics, evaluateFourLights, LIGHT_META, LIGHT_ORDER, type FourLightsInput, useCognitionReflections } from '../modules/cognition'
 import LightRecordsPanel from '../components/LightRecordsPanel.vue'
+import ClarionStatsPanel from '../components/ClarionStatsPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
