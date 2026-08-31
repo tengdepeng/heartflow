@@ -510,3 +510,33 @@ describe('半成品工作台', () => {
     expect(wrapper.find('.wip-empty-text').text()).toContain('没有正在打磨的半成品')
   })
 })
+
+// =============================================================
+// 13. 匠庐档案面板（INCR-48）
+// =============================================================
+
+describe('匠庐档案面板', () => {
+  it('空态显示「匠庐未启」引导', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+
+    const archive = wrapper.find('.cap-archive')
+    expect(archive.exists()).toBe(true)
+    expect(archive.find('.cap-badge-neutral').text()).toBe('匠庐未启')
+    expect(archive.text()).toContain('炉火尚温')
+  })
+
+  it('填充态渲染档案块（概览/健康/洞察）', async () => {
+    mockWorks.value = sampleWorks
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+
+    const archive = wrapper.find('.cap-archive')
+    expect(archive.exists()).toBe(true)
+    expect(archive.text()).toContain('匠心概览')
+    expect(archive.text()).toContain('匠庐健康')
+    // 作品三无标签，作品一 tags=['vue','前端']，作品二 tags=['写作']
+    expect(archive.text()).toContain('高频标签')
+    expect(archive.find('.cap-insight').exists()).toBe(true)
+  })
+})
