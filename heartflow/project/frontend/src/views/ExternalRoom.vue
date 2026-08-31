@@ -3,8 +3,10 @@
 // 外链房（/external）· 外部链接与能力接入
 //
 // 五个分区：AI 模型与接口 / 技能 / 云同步 / 写作提示词 / 榜单通道。
-// 本轮按用户拍板先把「AI 模型与接口」做实（引擎就绪但零设置 UI，缺口最大），
-// 其余四项以 PendingSection 明确标「待建」——不做空壳假装功能存在。
+// 「AI 模型与接口」「技能」「写作提示词」「云同步」「榜单通道」均已做实；
+// 写作提示词为用户模板 CRUD + 实时预览，云同步为口令加密快照 + 本地目录直写（零后端），
+// 榜单通道为外部数据源接入位（宪法禁排行 UI：仅接入、不呈现名次，默认关闭、启用需出口闸同意），
+// 技能为能力登记面板（种子自镜我意图 intents.ts + 顾问调令 commandIntent.ts，外部技能出网经出口闸）。
 //
 // 宪法第 1 条（本地私有）：所有外部调用经 engine/ai/external-gate 出口闸，
 // 未显式同意一律拦截。房间顶部常驻显示闸门状态，让用户随时知情。
@@ -13,7 +15,10 @@ import { ref, computed } from 'vue'
 import { storage } from '../engine/storage'
 import { isExternalAIConsented } from '../engine/ai/external-gate'
 import AIModelSettings from '../components/external-room/AIModelSettings.vue'
-import PendingSection from '../components/external-room/PendingSection.vue'
+import PromptTemplates from '../components/external-room/PromptTemplates.vue'
+import CloudSync from '../components/external-room/CloudSync.vue'
+import RankChannel from '../components/external-room/RankChannel.vue'
+import SkillChannel from '../components/external-room/SkillChannel.vue'
 
 type SectionId = 'ai' | 'skill' | 'sync' | 'prompt' | 'rank'
 
@@ -29,63 +34,13 @@ function select(id: SectionId): void {
 
 const SECTIONS: ReadonlyArray<{ id: SectionId; label: string; ready: boolean }> = [
   { id: 'ai', label: 'AI 模型与接口', ready: true },
-  { id: 'skill', label: '技能 Skill', ready: false },
-  { id: 'sync', label: '云同步', ready: false },
-  { id: 'prompt', label: '写作提示词', ready: false },
-  { id: 'rank', label: '榜单通道', ready: false },
+  { id: 'skill', label: '技能 Skill', ready: true },
+  { id: 'sync', label: '云同步', ready: true },
+  { id: 'prompt', label: '写作提示词', ready: true },
+  { id: 'rank', label: '榜单通道', ready: true },
 ]
 
 const externalConsented = computed(() => isExternalAIConsented())
-
-const PENDING: Record<
-  Exclude<SectionId, 'ai'>,
-  { title: string; summary: string; plan: string[] }
-> = {
-  skill: {
-    title: '技能 Skill',
-    summary:
-      '全仓尚无「技能 / 能力插件」系统（代码里出现的 skill 均为背包技能点，非此处所指）。这块要从零建模，且与镜我、顾问能力体系耦合较深，故单独一轮推进。',
-    plan: [
-      '技能元数据模型：名称 / 能力声明 / 触发词 / 所需权限',
-      '启停与排序持久化，复用侧栏分组重排的既有拖拽',
-      '与镜我意图（modules/mirror/intents）及顾问能力对接',
-      '外部技能需经出口闸同意，默认只允许本地技能',
-    ],
-  },
-  sync: {
-    title: '云同步',
-    summary:
-      '备份 / 恢复 / 加密 / 导出已有（BackupRecoveryPanel 347 行、DataSecurityPanel 560 行、EncryptionPanel 131 行），缺的是「跨设备」这一层。已定方案：本地同步文件夹 + 加密快照。',
-    plan: [
-      '用户自选一个本地目录（可放在自己的 OneDrive / 坚果云同步盘里）',
-      '写入前加密，读回时校验；数据不出用户自己的盘，零后端',
-      '冲突策略：按时间戳较新者胜出，冲突副本保留可回滚',
-      '同步状态与最近同步时间在房内可见',
-    ],
-  },
-  prompt: {
-    title: '写作提示词',
-    summary:
-      'engine/ai/prompt.ts 已有 BUILTIN_TEMPLATES 与 renderTemplate 变量渲染，但只有内置模板，用户无法增删改自己的模板。',
-    plan: [
-      '用户模板持久化 CRUD（名称 / 系统模板 / 用户模板 / 变量默认值）',
-      '变量填充实时预览，复用 renderTemplate',
-      '内置模板只读，用户模板可复制内置为起点',
-      '与写作助手（WritingAssistantPanel）打通，可直接选用',
-    ],
-  },
-  rank: {
-    title: '榜单通道',
-    summary:
-      '宪法禁止竞速 / 排行类 UI，故本分区默认关闭，仅保留外部接入通道（用户已拍板：默认关闭、只提供通道）。',
-    plan: [
-      '不提供任何内置排行榜界面',
-      '仅暴露一个外部数据源接入位，用户自填才启用',
-      '启用前需经出口闸同意，且明确告知数据外发',
-      '默认关闭，关闭时不占任何渲染与网络开销',
-    ],
-  },
-}
 </script>
 
 <template>
@@ -127,13 +82,10 @@ const PENDING: Record<
 
     <div data-enter class="panel">
       <AIModelSettings v-if="active === 'ai'" />
-      <PendingSection
-        v-else-if="active === 'skill'"
-        v-bind="PENDING.skill"
-      />
-      <PendingSection v-else-if="active === 'sync'" v-bind="PENDING.sync" />
-      <PendingSection v-else-if="active === 'prompt'" v-bind="PENDING.prompt" />
-      <PendingSection v-else v-bind="PENDING.rank" />
+      <SkillChannel v-else-if="active === 'skill'" />
+      <CloudSync v-else-if="active === 'sync'" />
+      <PromptTemplates v-else-if="active === 'prompt'" />
+      <RankChannel v-else-if="active === 'rank'" />
     </div>
   </div>
 </template>

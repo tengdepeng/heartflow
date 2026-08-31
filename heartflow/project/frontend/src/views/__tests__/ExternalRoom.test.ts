@@ -36,23 +36,22 @@ describe('外链房 /external', () => {
     expect(wrapper.find('.pending').exists()).toBe(false)
   })
 
-  it('切到待建分区时显示「待建」占位，而不是空壳面板', async () => {
+  it('切到技能分区渲染 SkillChannel 面板（已做实，无待建占位）', async () => {
     const wrapper = mount(ExternalRoom)
     const tabs = wrapper.findAll('.tab')
     await tabs[1].trigger('click') // 技能
-    expect(wrapper.find('.pending').exists()).toBe(true)
-    expect(wrapper.find('.pending-badge').text()).toBe('待建')
-    expect(wrapper.find('.pending-title').text()).toBe('技能 Skill')
-    // 待建分区不应再渲染 AI 面板
+    expect(wrapper.find('.pending').exists()).toBe(false)
+    expect(wrapper.find('.sc').exists()).toBe(true) // SkillChannel 根节点
+    // 不应再渲染 AI 面板
     expect(wrapper.find('.ai-settings').exists()).toBe(false)
   })
 
-  it('四个待建分区标签都带待建圆点，已建分区不带', () => {
+  it('所有分区均已做实，标签均不带待建圆点', () => {
     const wrapper = mount(ExternalRoom)
     const tabs = wrapper.findAll('.tab')
-    expect(tabs[0].find('.tab-dot').exists()).toBe(false)
-    for (let i = 1; i < 5; i++) {
-      expect(tabs[i].find('.tab-dot').exists()).toBe(true)
+    expect(tabs).toHaveLength(5)
+    for (let i = 0; i < 5; i++) {
+      expect(tabs[i].find('.tab-dot').exists()).toBe(false)
     }
   })
 
