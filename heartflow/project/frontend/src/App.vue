@@ -154,7 +154,7 @@
     <div v-if="isMobileOrTablet && !sidebarCollapsed" class="sidebar-overlay" @click="setSidebarCollapsed(true)"></div>
 
     <!-- 主内容区（就地绑定单房间覆盖的 CSS 变量，不污染侧栏/壳层） -->
-    <main class="main-content" :style="roomStyleVars">
+    <main class="main-content" :style="mainStyleVars">
       <router-view v-slot="{ Component, route }">
         <transition :name="pageTransition" mode="out-in" @after-enter="onAfterRouteEnter">
           <component :is="Component" v-if="Component" :key="route.fullPath" />
@@ -865,6 +865,13 @@ onUnmounted(() => {
 // 覆盖仅作用于内容容器 .main-content（不污染侧栏/壳层），随路由切换自动应用。
 const roomStyle = useRoomStyle()
 const roomStyleVars = computed(() => roomStyle.roomStyleVars(currentRoomId.value))
+// 殿堂「切换动画时长」设置：经 CSS 变量注入页面过渡，使滑块真正生效
+// （animations.css 的 .page-fade-* / .light-gate-* 读取该变量）。
+const pageTransitionDuration = computed(() => `${configStore.config.transitionDuration}ms`)
+const mainStyleVars = computed<Record<string, string>>(() => ({
+  ...roomStyleVars.value,
+  '--hf-page-td': pageTransitionDuration.value,
+}))
 const effectiveBackground = computed<BackgroundMediaConfig>(() => {
   const scene = roomStyle.roomBackgroundScene(currentRoomId.value)
   const base = appBackground.value

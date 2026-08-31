@@ -6,6 +6,7 @@ import { defineStore } from 'pinia'
 import { ref, watch } from 'vue'
 import type { AppConfig, ScenePreset, SurfaceState, WorldShellType, FloatingLayerState } from '../types'
 import { storage } from '../engine/storage'
+import { unlocked } from '../engine/storage/unlock-state'
 import type { GestureAction } from '../modules/gesture/contracts'
 import type { GestureType } from '../modules/gesture/types'
 
@@ -25,6 +26,30 @@ export const useConfigStore = defineStore('config', () => {
   watch(config, (val) => {
     storage.setConfig(val)
   }, { deep: true })
+
+  /**
+   * 解锁后重新同步真实配置。
+   * 根因：加密启动时 store 在创建时仅取一次 storage.getConfig()，
+   * 此时处于锁屏态 → loadSchema() 返回 createDefaultSchema()（operationMode:'silent'）。
+   * 解锁后 _schemaCache 已水合为真实配置，但 store 不会自动重新读取，
+   * 导致设置面板显示默认值、改一次才「恢复」——即「幕僚设置卡死/重置」。
+   * 此处监听解锁态，解锁即把 config 重新同步为 storage.getConfig() 的真实值。
+   */
+  function syncConfigFromStorage() {
+    const real = storage.getConfig()
+    // 重建用户触碰标记集合，使已持久化的合规覆盖优先级在解锁后依然生效
+    userTouchedOverrideKeys.clear()
+    if (Array.isArray(real.overrideUserTouched)) {
+      for (const k of real.overrideUserTouched) userTouchedOverrideKeys.add(k)
+    } else {
+      real.overrideUserTouched = []
+    }
+    config.value = real
+  }
+
+  watch(unlocked, (val) => {
+    if (val) syncConfigFromStorage()
+  }, { immediate: true })
 
   const VALID_THEMES: AppConfig['theme'][] = ['light', 'dark', 'system']
 

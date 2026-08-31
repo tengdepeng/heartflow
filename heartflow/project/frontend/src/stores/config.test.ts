@@ -4,8 +4,11 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { nextTick } from 'vue'
 import { useConfigStore } from './config'
 import { storage } from '../engine/storage'
+import { unlocked } from '../engine/storage/unlock-state'
+import type { AppConfig } from '../types'
 
 describe('config store', () => {
   beforeEach(() => {
@@ -27,6 +30,35 @@ describe('config store', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    unlocked.value = false
+  })
+
+  describe('加密解锁后配置重新同步（item8 卡死修复）', () => {
+    it('解锁态翻转时 config 从 storage 重新读取真实配置', async () => {
+      const configA = { operationMode: 'silent', transitionDuration: 350 } as unknown as AppConfig
+      const configB = { operationMode: 'suggest', transitionDuration: 900 } as unknown as AppConfig
+
+      // 锁屏态：store 创建时仅读到默认快照（A）
+      const getConfigSpy = vi.spyOn(storage, 'getConfig')
+      getConfigSpy.mockReturnValue(configA)
+      vi.spyOn(storage, 'setConfig').mockImplementation(() => {})
+      unlocked.value = false
+
+      const store = useConfigStore()
+      // 锁屏态：store 初始化读到的应是默认快照 A（ref 会把对象包成 reactive proxy，按属性比较）
+      expect(store.config.operationMode).toBe('silent')
+      expect(store.config.transitionDuration).toBe(350)
+
+      // 用户解锁 → storage 已水合真实配置（B），store 应重新同步而非停留在 A
+      getConfigSpy.mockReturnValue(configB)
+      unlocked.value = true
+      // watch 回调在微任务异步 flush，需等待一拍再断言
+      await nextTick()
+
+      expect(store.config.operationMode).toBe('suggest')
+      expect(store.config.transitionDuration).toBe(900)
+    })
   })
 
   it('初始化时加载默认配置', () => {
