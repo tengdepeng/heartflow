@@ -103,3 +103,15 @@ verify-bead.cjs
 
 # 临时诊断测试
 *_smoke_diag_tmp.test.ts
+
+# Test results output
+test-results/
+
+# Increment screenshots and verify/shot scripts (generated during dev)
+**/scripts/incr*.png
+**/scripts/incr*-verify.py
+**/scripts/incr*-shot.py
+**/scripts/incr*-probe.py
+
+# Vitest schedule (moved to docs/)
+.vitest-schedule.md

@@ -45,3 +45,10 @@ npm run tauri:dev
 ## 当前阶段说明
 
 当前仓库重点不是把整份超大蓝图一次性做完，而是先打通第一条高保真可交互主链路，让核心房间先形成完整体验闭环，再逐步扩展其余房间。
+
+## 开发与质量
+
+- 测试：`npm run test`（Vitest）
+- 类型闸门：`npx vue-tsc --noEmit`（CI 中强制执行，合并前须通过）
+- 提交约定：按特性逐文件 `git add`，不使用 `git add -A`；遵循「本地私有 / 超级自定义」的项目宪法。
+- 前端代码真源位于 `project/frontend/`，Tauri 桌面端 `frontendDist` 指向其 `dist`。
