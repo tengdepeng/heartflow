@@ -421,6 +421,31 @@ export {
   computePreferenceProfile,
   MILESTONE_DEFS,
 } from './play-advanced'
+
+// ---- 逸趣档案（逸趣阁·档案陈列，与 play-advanced 的趋势/偏好互补）----
+export {
+  seedEffectiveAge,
+  moodSeedStage,
+  playArchiveOverview,
+  collectionTypeRows,
+  moodSeedOverview,
+  collectionRhythm,
+  collectionHealth,
+  playInsights,
+  MOOD_SEED_STAGE_LABELS,
+  MOOD_SEED_STAGE_COLORS,
+} from './play-analytics'
+export type {
+  MoodSeedStage,
+  PlayArchiveOverview,
+  CollectionTypeRow,
+  MoodSeedRow,
+  MoodDistribution,
+  MoodSeedOverview,
+  CollectionRhythm,
+  CollectionHealth,
+  PlayInsight,
+} from './play-analytics'
 export type {
   PlayMilestone,
   MilestoneCategory,

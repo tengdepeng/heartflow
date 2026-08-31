@@ -35,3 +35,26 @@ export type {
   SynthesisEfficiency,
   WorkRecommendation,
 } from './craft-bridge'
+
+// ---- 匠庐档案（craft-analytics：概览/状态/类型/进化/节律/健康/洞察/标签）----
+export {
+  WORK_STATUS_META,
+  WORK_TYPE_META,
+  EVOLUTION_STAGES,
+  craftOverview,
+  craftStatusRows,
+  craftTypeRows,
+  craftEvolutionRows,
+  craftRhythm,
+  craftHealth,
+  craftInsights,
+  craftTopTags,
+} from './craft-analytics'
+export type {
+  EvolutionStageMeta,
+  CraftWorkOverview,
+  CraftRow,
+  CraftRhythm,
+  CraftArchiveHealth,
+  TagCount,
+} from './craft-analytics'
