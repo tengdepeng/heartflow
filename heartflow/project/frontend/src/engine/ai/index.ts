@@ -190,6 +190,7 @@ class AIEngine {
     affinity: number,
     userText: string,
     turnCount: number,
+    context?: string,
   ): Promise<string> {
     const conversationId = makeConversationId(advisorId)
 
@@ -201,6 +202,7 @@ class AIEngine {
       affinity,
       turnCount,
       lastUserMessage: userText,
+      context,
     })
 
     // 设置系统提示词

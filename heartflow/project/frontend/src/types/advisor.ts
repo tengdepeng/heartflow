@@ -2,6 +2,8 @@
 // 幕僚 · 完整类型体系
 // ============================================================
 
+import type { KnowledgeScope } from './knowledge-scope'
+
 // ---- 核心枚举 ----
 
 /** 幕僚角色 */
@@ -369,6 +371,9 @@ export interface AdvisorProfile {
     /** 消息轮次序号 */
     turnCount: number
   }
+  /** 专属知识库范围（蓝图第四部分·三）：默认全殿堂，可在幕僚设置中收窄。
+   *  经 knowledge-scope.collectHallKnowledge 消费，注入幕僚回答链路。 */
+  knowledgeScope?: KnowledgeScope
 }
 
 // ---- 幕僚消息 ----

@@ -156,6 +156,8 @@ export function buildAdvisorSystemPrompt(params: {
   turnCount: number
   lastUserMessage: string
   additionalRules?: string
+  /** 情境与知识上下文（天色时段 / 幕僚当前活动 / 授权殿堂痕迹），由调用方预先组装。缺省则省略该段。 */
+  context?: string
 }): string {
   const { name, role, personality, affinity, turnCount, lastUserMessage } = params
   const template = getTemplate('advisor-chat')
@@ -165,7 +167,7 @@ export function buildAdvisorSystemPrompt(params: {
   const affinityInfo = getAffinityLevelDescription(affinity)
   const additionalRules = params.additionalRules ?? getAdditionalRules(personality)
 
-  return renderTemplate(template.systemTemplate, {
+  const base = renderTemplate(template.systemTemplate, {
     advisorName: name,
     roleDesc: getRoleDescription(role),
     roleLabel: getRoleLabel(role),
@@ -178,6 +180,11 @@ export function buildAdvisorSystemPrompt(params: {
     maxLength: '80',
     additionalRules,
   })
+
+  const ctx = params.context?.trim()
+  if (!ctx) return base
+
+  return `${base}\n\n## 情境与知识\n${ctx}`
 }
 
 /**

@@ -17,6 +17,9 @@ import { parseCommandIntent } from '../modules/advisor/commandIntent'
 import type { CommandTaskType } from '../modules/advisor/commandIntent'
 import { isLongDormant } from '../modules/advisor/longDormancy'
 import { decideForProactive, emitOperationGate } from '../modules/operation-mode/gate'
+import { collectHallKnowledge } from '../modules/advisor/knowledge-scope'
+import { useAdvisorDailyLife } from '../modules/advisor/daily-life'
+import { buildAdvisorSituationContext } from '../modules/advisor/situation'
 
 interface AdvisorMessage {
   id: string
@@ -953,6 +956,13 @@ export const useAdvisorStore = defineStore('advisor', () => {
     // 尝试 AI 引擎生成回应，失败时回退到规则匹配
     let response = ''
     if (isAIEngineEnabled()) {
+      // 情境感知 + 接通专属知识库：组装天色时段 / 幕僚当前活动 / 授权殿堂痕迹
+      const life = useAdvisorDailyLife()
+      const situation = buildAdvisorSituationContext({
+        timeSlot: life.currentTimeSlot.value,
+        activities: life.getCurrentActivities(advisorId),
+        knowledge: collectHallKnowledge(advisor.knowledgeScope),
+      })
       response = await aiEngine.getAdvisorReply(
         advisorId,
         advisor.name,
@@ -961,6 +971,7 @@ export const useAdvisorStore = defineStore('advisor', () => {
         advisor.affinity,
         text,
         advisor.conversationContext.turnCount,
+        situation,
       )
     }
     // 若 AI 未启用或返回空，使用规则匹配

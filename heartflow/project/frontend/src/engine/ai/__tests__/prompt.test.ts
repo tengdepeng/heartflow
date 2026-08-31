@@ -131,6 +131,33 @@ describe('buildAdvisorSystemPrompt', () => {
     expect(steady).toContain('少用修饰词')
     expect(lively).toContain('语气活泼')
   })
+
+  it('有 context 时追加「情境与知识」段落', () => {
+    const prompt = buildAdvisorSystemPrompt({
+      name: '小镜',
+      role: 'hermit' as AdvisorRole,
+      personality: 'intuitive' as AdvisorPersonality,
+      affinity: 40,
+      turnCount: 8,
+      lastUserMessage: '在吗',
+      context: '天色时段：深夜（沉思）。\n你正在：冥想。',
+    })
+    expect(prompt).toContain('情境与知识')
+    expect(prompt).toContain('深夜')
+    expect(prompt).toContain('冥想')
+  })
+
+  it('无 context 时不出现「情境与知识」段落', () => {
+    const prompt = buildAdvisorSystemPrompt({
+      name: '小镜',
+      role: 'hermit' as AdvisorRole,
+      personality: 'intuitive' as AdvisorPersonality,
+      affinity: 40,
+      turnCount: 8,
+      lastUserMessage: '在吗',
+    })
+    expect(prompt).not.toContain('情境与知识')
+  })
 })
 
 describe('buildDingyinSystemPrompt', () => {
