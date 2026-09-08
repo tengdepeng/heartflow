@@ -71,6 +71,18 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '时间长廊' },
   }),
   withRoomMeta({
+    path: '/crystal',
+    name: 'crystal',
+    component: () => import('../views/Crystal.vue'),
+    meta: { title: '结晶阁' },
+  }),
+  withRoomMeta({
+    path: '/will',
+    name: 'will',
+    component: () => import('../views/Will.vue'),
+    meta: { title: '遗志堂' },
+  }),
+  withRoomMeta({
     path: '/anchor',
     name: 'anchor',
     component: () => import('../views/DailyAnchor.vue'),
@@ -371,12 +383,6 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '心流宪法' },
   }),
   withRoomMeta({
-    path: '/constitution-editor',
-    name: 'constitution-editor',
-    component: () => import('../views/ConstitutionEditor.vue'),
-    meta: { title: '宪法编辑器' },
-  }),
-  withRoomMeta({
     path: '/plugins',
     name: 'plugins',
     component: () => import('../views/Plugins.vue'),
@@ -561,5 +567,24 @@ router.afterEach(() => {
   const enabled = !!cfg?.interaction?.hapticFeedback || !!cfg?.complianceOverride?.hapticFeedbackOverwrite
   triggerHaptic('light', enabled)
 })
+
+// 安全导航：导航被拒时静默忽略良性的「重复跳转」(NavigationDuplicated)，
+// 避免 unhandled promise rejection 噪声；真实导航错误（守卫拦截/路径非法等）
+// 仍向上抛出，不掩盖真实故障。一次性包装，覆盖全仓所有 router.push/replace 调用点。
+const NAV_DUP = 'NavigationDuplicated'
+function silenceDuplicate(to: Promise<unknown>): Promise<unknown> {
+  return to.catch((err: unknown) => {
+    if (err && (err as { name?: string }).name === NAV_DUP) return
+    throw err
+  })
+}
+const _origPush = router.push.bind(router)
+const _origReplace = router.replace.bind(router)
+const _mutable = router as unknown as {
+  push: (to: Parameters<typeof _origPush>[0]) => Promise<unknown>
+  replace: (to: Parameters<typeof _origReplace>[0]) => Promise<unknown>
+}
+_mutable.push = (to) => silenceDuplicate(_origPush(to))
+_mutable.replace = (to) => silenceDuplicate(_origReplace(to))
 
 export default router

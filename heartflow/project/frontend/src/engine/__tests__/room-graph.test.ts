@@ -358,6 +358,7 @@ describe('room-graph 房间图引擎', () => {
       'space-customizer',
       'time-corridor',
       'timeline-index',
+      'will',
     ]
     for (const id of newRooms) {
       it(`房间 ${id} 已注册且路径可被星盘解析`, () => {
@@ -377,6 +378,34 @@ describe('room-graph 房间图引擎', () => {
           expect(getRoom(room.branchFrom)).toBeDefined()
         }
       }
+    })
+
+    it('结晶阁 crystal 从时间长廊分支且邻接正确', () => {
+      const crystal = getRoom('crystal')
+      expect(crystal).toBeDefined()
+      expect(crystal?.path).toBe('/crystal')
+      expect(crystal?.name).toBe('结晶阁')
+      expect(crystal?.icon).toBe('💎')
+      expect(crystal?.group).toBe('world')
+      expect(crystal?.isMainPath).toBe(false)
+      expect(crystal?.branchFrom).toBe('timeline')
+      expect(crystal?.adjacentTo).toContain('timeline')
+      expect(crystal?.adjacentTo).toContain('time-corridor')
+      expect(crystal?.adjacentTo).toContain('home-space')
+    })
+
+    it('遗志堂 will 从载体编辑器分支且邻接正确', () => {
+      const will = getRoom('will')
+      expect(will).toBeDefined()
+      expect(will?.path).toBe('/will')
+      expect(will?.name).toBe('遗志堂')
+      expect(will?.icon).toBe('🕯️')
+      expect(will?.group).toBe('world')
+      expect(will?.isMainPath).toBe(false)
+      expect(will?.branchFrom).toBe('carrier-editor')
+      expect(will?.adjacentTo).toContain('carrier-editor')
+      expect(will?.adjacentTo).toContain('relations')
+      expect(will?.adjacentTo).toContain('home-space')
     })
   })
 })
