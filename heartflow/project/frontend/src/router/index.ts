@@ -83,6 +83,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '遗志堂' },
   }),
   withRoomMeta({
+    path: '/world-life',
+    name: 'world-life',
+    component: () => import('../views/WorldLife.vue'),
+    meta: { title: '世界生命' },
+  }),
+  withRoomMeta({
     path: '/anchor',
     name: 'anchor',
     component: () => import('../views/DailyAnchor.vue'),

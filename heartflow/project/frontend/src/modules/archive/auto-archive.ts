@@ -199,3 +199,31 @@ export function describeAutoArchive(result: AutoArchiveResult): string {
   if (result.skipped) return '未开启自动归档，未触碰任何数据。'
   return `归档 ${result.total} 条（冥想 ${result.archivedMeditations} · 释怀 ${result.archivedReleases} · 笔记 ${result.archivedNotes}）`
 }
+
+/**
+ * 启动自动归档调度器。
+ * 宪法条款 data:auto-archive 启用后，首屏后 30s 首检 + 每 24h 周期执行；
+ * 默认关闭 → 零动作，绝不静默动数据。
+ * 返回一个 dispose 函数用于清理定时器。
+ */
+export function initAutoArchiveScheduler(): () => void {
+  const INTERVAL_MS = 24 * 60 * 60 * 1000 // 24h
+  let timerId: ReturnType<typeof setInterval> | null = null
+
+  const execute = async () => {
+    if (!isTargetActive('data:auto-archive')) return
+    await runAutoArchive()
+  }
+
+  // 首屏后 30s 首检
+  const initialTimeout = setTimeout(() => {
+    void execute()
+    // 首检后转为 24h 周期
+    timerId = setInterval(() => { void execute() }, INTERVAL_MS)
+  }, 30_000)
+
+  return () => {
+    clearTimeout(initialTimeout)
+    if (timerId !== null) clearInterval(timerId)
+  }
+}
