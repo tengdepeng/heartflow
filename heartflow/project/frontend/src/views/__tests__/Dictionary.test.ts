@@ -94,6 +94,22 @@ vi.mock('../../stores/dictionary', () => ({
   useDictionaryStore: () => mockStore,
 }))
 
+vi.mock('../../engine/storage', () => ({
+  storage: {
+    getKV: vi.fn((key: string, fallback?: any) => {
+      const store: Record<string, any> = { 'hf:poetry_favorites': [] }
+      return store[key] ?? fallback
+    }),
+    setKV: vi.fn(),
+    getConfig: () => ({
+      display: { trendNoteCount: 20, titleTruncateLength: 8, excerptTruncateLength: 80, tagDisplayCount: 2, statsWindowDays: 30, searchResultLimit: 10, dreamStorageLimit: 100, cleanupThresholdDays: 30, moveTrajectoryCount: 20, healthRecentSleepCount: 14, healthRecentExerciseCount: 30, healthRecentMealCount: 5, noteMaxLength: 100, uploadImageMaxBytes: 5242880, uploadVideoMaxBytes: 104857600 },
+      health: { exerciseTarget: 150, sleepTarget: 7, sleepMinThreshold: 6, sleepCriticalThreshold: 5, sleepExcellentThreshold: 7.5 },
+      worklog: { overtimeRate: 1.5, nightRate: 1.3, defaultStart: '09:00', defaultEnd: '18:00', trendDays: 30, trendMonths: 6, recentShiftLimit: 15 },
+    }),
+    setConfig: vi.fn(),
+  },
+}))
+
 async function getWrapper() {
   const { default: Dictionary } = await import('../Dictionary.vue')
   return mount(Dictionary, {
@@ -237,5 +253,36 @@ describe('Dictionary 视图', () => {
     await wrapper.find('input[placeholder="释义"]').setValue('大水之意')
     await wrapper.find('.chp-add-btn').trigger('click')
     expect(wrapper.text()).toContain('㵘')
+  })
+
+  // ============================================================
+  // 集成：诗词卡片面板（INCR-205：补挂载孤儿面板 PoetryPanel）
+  // ============================================================
+
+  it('渲染诗词卡片面板含今日一诗与检索', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.poetry')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('诗词卡片')
+    expect(wrapper.text()).toContain('今日一诗')
+    // 今日诗词 + 操作按钮
+    expect(wrapper.find('.poetry-card').exists()).toBe(true)
+    expect(wrapper.find('.poetry-card-title').exists()).toBe(true)
+    expect(wrapper.find('.poetry-fav').exists()).toBe(true)
+    expect(wrapper.findAll('.poetry-btn').length).toBe(2)
+  })
+
+  it('搜索诗词列表', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.poetry-input').setValue('春')
+    const items = wrapper.findAll('.poetry-item')
+    expect(items.length).toBeGreaterThan(0)
+    expect(wrapper.text()).toContain('春晓')
+  })
+
+  it('切换随机诗词', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.findAll('.poetry-btn')[1].trigger('click')
+    expect(wrapper.find('.poetry-card').exists()).toBe(true)
   })
 })

@@ -123,6 +123,9 @@
     <!-- 手写查字（INCR-178） -->
     <HandwritingPanel />
 
+    <!-- 诗词卡片（wisdom/poetry 引擎：今日一诗/搜索/收藏/洞察，INCR-205） -->
+    <PoetryPanel />
+
     <!-- 自定义字库（hanzi 引擎，把查过的字收进字库，INCR-186） -->
     <CustomHanziPanel />
 
@@ -160,6 +163,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import HanziLookupPanel from '../components/HanziLookupPanel.vue'
 import HandwritingPanel from '../components/HandwritingPanel.vue'
 import CustomHanziPanel from '../components/CustomHanziPanel.vue'
+import PoetryPanel from '../components/PoetryPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useDictionaryStore()
