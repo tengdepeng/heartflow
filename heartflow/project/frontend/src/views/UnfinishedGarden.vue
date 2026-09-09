@@ -130,6 +130,9 @@
       <button class="uf-btn cleanup-btn" @click="confirmCleanup">清理搁置超过 30 天的种子</button>
     </div>
 
+    <!-- 复垦气象（unfinished/garden-analytics 引擎：花园气象/今日拾起/拾起时机/复垦洞察，INCR-197） -->
+    <ReclamationWeatherPanel :items="items" />
+
     <!-- 手动放入未完成花园（蓝图附录E：任意房间入口） -->
     <div class="place-row">
       <span class="place-label">放入未完成花园</span>
@@ -148,6 +151,7 @@
 import { ref, computed, nextTick, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useGoal } from '../modules/goal'
+import ReclamationWeatherPanel from '../components/ReclamationWeatherPanel.vue'
 import {
   collectLightDots,
   placeInUnfinishedGarden,

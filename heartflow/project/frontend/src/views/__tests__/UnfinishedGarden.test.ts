@@ -235,4 +235,38 @@ describe('UnfinishedGarden 未完成花园视图', () => {
     const wrapper = await createWrapper()
     expect(wrapper.text()).toContain('清理搁置超过 30 天的种子')
   })
+
+  // ------- 复垦气象面板（INCR-197） -------
+  it('渲染复垦气象面板（空态引导）', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('.ufw-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('复垦气象')
+    // 无未完成项 → 空态
+    expect(wrapper.find('.ufw-empty').exists()).toBe(true)
+    // 空库洞察引导
+    expect(wrapper.text()).toContain('花园还空着')
+  })
+
+  it('复垦气象注入事项后展示花园气象与拾起时机', async () => {
+    mockStore['hf:unfinished_v2'] = [
+      makeItem({ id: 's1', type: 'seed', text: '写作计划', at: new Date().toISOString() }),
+      makeItem({ id: 'd1', type: 'draft', text: '半截论文', completed: true }),
+    ]
+    const wrapper = await createWrapper()
+    // 花园气象事实格：共/已完成/完成率/活跃
+    expect(wrapper.find('.ufw-facts').exists()).toBe(true)
+    expect(wrapper.text()).toContain('共 2 件')
+    expect(wrapper.text()).toContain('完成率 50%')
+    // 类型分布 + 沉淀分档
+    expect(wrapper.text()).toContain('类型分布')
+    expect(wrapper.text()).toContain('沉淀分档')
+    // 今日该拾起命中未完成种子
+    expect(wrapper.find('.ufw-today').exists()).toBe(true)
+    expect(wrapper.text()).toContain('今日该拾起')
+    expect(wrapper.text()).toContain('写作计划')
+    // 拾起时机榜（TOP5）
+    expect(wrapper.find('.ufw-pick-row').exists()).toBe(true)
+    // 复垦洞察
+    expect(wrapper.find('.ufw-insights').exists()).toBe(true)
+  })
 })

@@ -130,5 +130,18 @@ export function adoptLightDot(dot: LightDot): UItem {
   return placeInUnfinishedGarden(dot.label, 'seed')
 }
 
+// ---- 复垦分析引擎（garden-analytics） ----
+export {
+  gardenStats,
+  rankForPickup,
+  pickUpSuggestion,
+  gardenInsights,
+  type GardenType,
+  type BucketKey,
+  type GardenBucket,
+  type GardenStats,
+  type PickCandidate,
+} from './garden-analytics'
+
 // ---- 数据层（事项 + 种子） ----
 export { useUnfinished } from './unfinished-store'
