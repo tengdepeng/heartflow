@@ -108,6 +108,9 @@
     <!-- 人身安全（safety·usePersonalSafety：SOS / 跌倒检测 / 紧急联系人） -->
     <PersonalSafetyPanel />
 
+    <!-- 实时异常检测（safety·useAnomalyDetector：行为基线 / 自适应阈值 / 规则，INCR-161） -->
+    <AnomalyDetectorPanel />
+
     <!-- 护眼盾 -->
     <EyeShieldPanel />
   </div>
@@ -130,6 +133,7 @@ import SunSchedulePanel from '../components/SunSchedulePanel.vue'
 import WhiteNoisePanel from '../components/WhiteNoisePanel.vue'
 import SensorIntegrationPanel from '../components/SensorIntegrationPanel.vue'
 import PersonalSafetyPanel from '../components/PersonalSafetyPanel.vue'
+import AnomalyDetectorPanel from '../components/AnomalyDetectorPanel.vue'
 import GuardArchivePanel from '../components/GuardArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()

@@ -278,7 +278,9 @@ export function useAnomalyDetector() {
   }
 
   function loadRules(): DetectionRule[] {
-    return storage.getKV<DetectionRule[]>(RULES_KEY, DEFAULT_RULES)
+    // 拷贝以避免别名修改污染模块级 DEFAULT_RULES（lastTriggered 等会随检测被改写，
+    // 无持久化数据时重挂载会读到被污染的默认规则，导致冷却期跨实例生效）
+    return storage.getKV<DetectionRule[]>(RULES_KEY, DEFAULT_RULES).map(r => ({ ...r }))
   }
 
   function saveRules() {

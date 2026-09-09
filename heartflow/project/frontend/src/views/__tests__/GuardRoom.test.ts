@@ -518,4 +518,23 @@ describe('GuardRoom 视图', () => {
     await clickTab(wrapper, 2)
     expect(wrapper.text()).toContain('数据来自身体温室')
   })
+
+  // ============================================================
+  // 集成：实时异常检测面板（INCR-161：补挂载 claim-but-orphan 面板）
+  // ============================================================
+
+  it('集成渲染实时异常检测面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.adp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('实时异常检测')
+    expect(wrapper.text()).toContain('检测次数')
+    expect(wrapper.text()).toContain('暂无严重未解决异常')
+  })
+
+  it('实时异常检测徽标展示空态计数', async () => {
+    const wrapper = await getWrapper()
+    const badge = wrapper.find('.adp-badge')
+    expect(badge.exists()).toBe(true)
+    expect(badge.text()).toContain('0 异常')
+  })
 })
