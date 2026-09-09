@@ -7,6 +7,15 @@
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
 
+export {
+  useWishList,
+  wishProgress,
+  habitCompletionCounts,
+  wishlistOverview,
+  wishlistInsights,
+} from './wish-list'
+export type { Wish, WishInput, WishProgress, WishlistOverview } from './wish-list'
+
 export interface Seed {
   id: string
   text: string

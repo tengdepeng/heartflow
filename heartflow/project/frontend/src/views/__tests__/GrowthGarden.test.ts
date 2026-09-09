@@ -105,4 +105,20 @@ describe('GrowthGarden 成长庭院', () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('记录蜕变光茧')
   })
+
+  it('渲染心愿清单面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.wlp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('心愿清单')
+    expect(wrapper.text()).toContain('习惯联动解锁')
+  })
+
+  it('心愿清单可添加心愿并显示统计', async () => {
+    const wrapper = await getWrapper()
+    const input = wrapper.find('.wlp-add-form input')
+    await input.setValue('去一次远方旅行')
+    await wrapper.find('.wlp-add-form').trigger('submit')
+    expect(wrapper.text()).toContain('去一次远方旅行')
+    expect(wrapper.find('.wlp-stat-num').text()).toBe('1')
+  })
 })

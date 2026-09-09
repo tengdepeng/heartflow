@@ -160,6 +160,9 @@
 
     <!-- 进度统计 -->
     <GoalProgressPanel :goals="goal.goals.value" />
+
+    <!-- 心愿清单（garden/wish-list 引擎，习惯联动解锁，INCR-182） -->
+    <WishListPanel />
   </div>
 </template>
 
@@ -175,6 +178,7 @@ import type { GoalStatus } from '../modules/goal'
 import GoalVisualizationPanel from '../components/GoalVisualizationPanel.vue'
 import GoalProgressPanel from '../components/GoalProgressPanel.vue'
 import HabitReviewPanel from '../components/HabitReviewPanel.vue'
+import WishListPanel from '../components/WishListPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
