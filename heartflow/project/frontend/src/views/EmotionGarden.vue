@@ -329,6 +329,9 @@
         </div>
       </section>
 
+      <!-- 情绪趋势深度分析（emotion/emotion-trends 引擎：概览6指标/趋势折线/分布/模式识别/未来预测，INCR-201） -->
+      <EmotionTrendsPanel :records="allEmotionRecords" />
+
       <!-- 情绪日历 -->
       <section class="calendar-section" v-if="emotionViz.active.value">
         <h3 class="section-title">月度情绪日历</h3>
@@ -518,6 +521,7 @@ import GardenFlower from '../components/GardenFlower.vue'
 import GardenHealthPanel from '../components/GardenHealthPanel.vue'
 import HappyBoxPanel from '../components/HappyBoxPanel.vue'
 import SoundscapePanel from '../components/SoundscapePanel.vue'
+import EmotionTrendsPanel from '../components/EmotionTrendsPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'
@@ -538,6 +542,9 @@ const { emitRoomSignal } = useRoomResonance()
 const selectedType = ref<EmotionType>('calm')
 const selectedWeather = ref<EmotionWeather | null>(null)
 const noteText = ref('')
+
+// 情绪趋势深度分析入参：garden.records 为模块级 ref，模板需解包后传入
+const allEmotionRecords = computed(() => garden.records.value)
 
 // ---- 温和情感反馈：连续负面情绪检测 + 关怀提示 ----
 const showCare = ref(false)

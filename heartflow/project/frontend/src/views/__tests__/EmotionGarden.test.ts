@@ -474,3 +474,42 @@ describe('EmotionGarden 安全岛光路（蓝图心理安全机制）', () => {
     expect(wrapper.text()).toContain('音量')
   })
 })
+
+// ============================================================
+// 集成：情绪趋势深度分析面板（INCR-201：补挂载孤儿面板 EmotionTrendsPanel）
+// ============================================================
+describe('集成：情绪趋势深度分析面板', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRecords.value = []
+  })
+
+  it('有记录时渲染概览指标/趋势折线/情绪分布', async () => {
+    mockRecords.value = createRecords(30)
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.etp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('情绪趋势')
+    // 概览 6 指标
+    expect(wrapper.findAll('.etp-metric').length).toBe(6)
+    expect(wrapper.text()).toContain('近30天记录')
+    expect(wrapper.text()).toContain('主导情绪')
+    expect(wrapper.text()).toContain('稳定度')
+    expect(wrapper.text()).toContain('积极占比')
+    expect(wrapper.text()).toContain('消极占比')
+    expect(wrapper.text()).toContain('情绪多样')
+    // 趋势折线 + 分布
+    expect(wrapper.find('.etp-svg').exists()).toBe(true)
+    expect(wrapper.findAll('.etp-dist-row').length).toBeGreaterThan(0)
+    // 不渲染空态
+    expect(wrapper.find('.etp-empty').exists()).toBe(false)
+  })
+
+  it('无记录时渲染空态引导', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.etp').exists()).toBe(true)
+    expect(wrapper.find('.etp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('记录第一朵情绪之花')
+  })
+})
