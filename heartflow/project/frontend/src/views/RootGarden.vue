@@ -282,6 +282,9 @@
       <span class="empty-hint">在时间长廊里偶遇一段旧记忆时，来这里种下一个根系节点</span>
     </div>
 
+    <!-- 根系可视化（roots·useRootVisualization：生命力地图 / 根脉图谱 / 标签聚类，INCR-163） -->
+    <RootVisualizationPanel v-if="roots.length" />
+
     <!-- 根脉可视化 -->
     <VisualTreePanel :roots="roots" />
   </div>
@@ -295,6 +298,7 @@ import { computeGardenHealth } from '../modules/roots/root-narrative'
 import { useRootGarden } from '../modules/roots/roots-garden'
 import type { Root } from '../modules/roots/roots-garden'
 import VisualTreePanel from '../components/VisualTreePanel.vue'
+import RootVisualizationPanel from '../components/RootVisualizationPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const rootGarden = useRootGarden()

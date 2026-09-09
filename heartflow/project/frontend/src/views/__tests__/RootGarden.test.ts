@@ -22,7 +22,7 @@ async function createWrapper() {
   return mount(RootGarden, { attachTo: document.body })
 }
 
-// 构造一个根系数据
+// 构造一个根系数据（补齐 roots 模块全字段，供根系可视化面板安全消费）
 function makeRoot(overrides: Record<string, any> = {}) {
   return {
     id: `rt${Date.now()}${Math.random().toString(36).slice(2, 4)}`,
@@ -32,6 +32,12 @@ function makeRoot(overrides: Record<string, any> = {}) {
     era: '',
     icon: '🪨',
     _expanded: false,
+    strength: 0.5,
+    connections: [] as string[],
+    tags: [] as string[],
+    color: '#8a9a7a',
+    willId: null,
+    lastUpdatedAt: new Date().toISOString(),
     ...overrides,
   }
 }
@@ -275,5 +281,42 @@ describe('RootGarden 根花园视图', () => {
     await wrapper.vm.$nextTick()
     const circles = wrapper.findAll('.tree-node')
     expect(circles.length).toBe(0)
+  })
+
+  // ============================================================
+  // 集成：根系可视化面板（INCR-163：补挂载 claim-but-orphan 面板）
+  // ============================================================
+
+  it('有根系时集成渲染根系可视化面板', async () => {
+    mockStore['hf:roots_v2'] = [
+      makeRoot({ id: 'r1', layer: 'soil', text: '原生家庭', tags: ['家庭'] }),
+      makeRoot({ id: 'r2', layer: 'soil', text: '故乡记忆', tags: ['家庭'] }),
+      makeRoot({ id: 'r3', layer: 'era', text: '大学时代', era: '大学' }),
+      makeRoot({ id: 'r4', layer: 'branch', text: '信念形成' }),
+    ]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.rvp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('根系可视化')
+    expect(wrapper.text()).toContain('生命力')
+    expect(wrapper.text()).toContain('根脉图谱')
+  })
+
+  it('根系可视化面板渲染生命力与图谱元素', async () => {
+    mockStore['hf:roots_v2'] = [
+      makeRoot({ id: 'r1', layer: 'soil', text: '原生家庭' }),
+      makeRoot({ id: 'r2', layer: 'era', text: '大学时代' }),
+      makeRoot({ id: 'r3', layer: 'branch', text: '信念形成' }),
+    ]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.rvp-vitality-ring').exists()).toBe(true)
+    expect(wrapper.find('.rvp-tree-svg').exists()).toBe(true)
+  })
+
+  it('无根系时根系可视化面板不渲染', async () => {
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.rvp').exists()).toBe(false)
   })
 })
