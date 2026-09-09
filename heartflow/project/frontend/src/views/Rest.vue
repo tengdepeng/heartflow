@@ -408,6 +408,8 @@ import type { RestPractice, BreakRecord } from '../modules/rest'
 import RestSleepPanel from './RestSleepPanel.vue'
 import RestRitualPanel from './RestRitualPanel.vue'
 import RestReminderPanel from '../components/RestReminderPanel.vue'
+import RestFocusLinkPanel from '../components/RestFocusLinkPanel.vue'
+import RestQualityPanel from '../components/RestQualityPanel.vue'
 
 // ---- 标签导航 ----
 const activeTab = ref<'rest' | 'sleep' | 'ritual'>('rest')
