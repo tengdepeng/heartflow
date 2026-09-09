@@ -56,6 +56,9 @@ vi.mock('../../components/CalendarView.vue', () => ({
 vi.mock('../../components/StatsPanel.vue', () => ({
   default: { name: 'StatsPanel', template: '<div class="stats-stub">Stats</div>' },
 }))
+vi.mock('../../components/TimeLensPanel.vue', () => ({
+  default: { name: 'TimeLensPanel', template: '<div class="time-lens-stub" data-test="time-lens">时间透视</div>' },
+}))
 vi.mock('../../components/RecordList.vue', () => ({
   default: { name: 'RecordList', template: '<div class="record-list-stub">Records</div>' },
 }))
@@ -98,6 +101,26 @@ describe('Timeline 时间长廊', () => {
   it('渲染标签导航 - 统计', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('统计')
+  })
+
+  it('渲染标签导航 - 透视（INCR-170 时间透视面板）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('透视')
+  })
+
+  it('切换至透视子标签时挂载时间透视面板', async () => {
+    const wrapper = await getWrapper()
+    // 初始处于时间之河子标签，透视面板不应渲染
+    expect(wrapper.find('[data-test="time-lens"]').exists()).toBe(false)
+    // 点击透视子标签
+    const lensBtn = wrapper.findAll('.sub-tab').find(b => b.text().includes('透视'))
+    expect(lensBtn).toBeTruthy()
+    await lensBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 透视面板已挂载
+    const lensPanel = wrapper.find('[data-test="time-lens"]')
+    expect(lensPanel.exists()).toBe(true)
+    expect(lensPanel.text()).toContain('时间透视')
   })
 
   it('渲染标签导航 - 记录', async () => {
