@@ -417,6 +417,11 @@
       <CausalChainPanel :marks="adaptedMarks" />
     </section>
 
+    <!-- 伤痕叙事工坊（scar/scar-story 引擎：故事/匿名社区/伤痕地图/锻造仪式，INCR-203；弃用 ScarNarrativePanel） -->
+    <section data-enter class="sc-snw-section">
+      <ScarNarrativeWorkshopPanel :marks="adaptedMarks" />
+    </section>
+
     <!-- 空状态 -->
     <div data-enter v-if="!marks.length" class="sc-empty">
       <p>锻炉安静，尚无印记。</p>
@@ -436,6 +441,7 @@ import type { BodyMark as ModuleBodyMark, ScarStats, HealingStage, SeverityLevel
 import ScarVisualizationPanel from '../components/ScarVisualizationPanel.vue'
 import CausalChainPanel from '../components/CausalChainPanel.vue'
 import ScarArchivePanel from '../components/ScarArchivePanel.vue'
+import ScarNarrativeWorkshopPanel from '../components/ScarNarrativeWorkshopPanel.vue'
 const { entranceRef, entranceClass } = useViewEntrance()
 const healingJourney = useHealingJourney()
 const narrative = useNarrativeEnhancer()

@@ -386,4 +386,49 @@ describe('Scar 视图', () => {
     expect(wrapper.text()).toContain('工痕尚未开炉')
     expect(wrapper.text()).toContain('印记待启')
   })
+
+  // ============================================================
+  // 集成：伤痕叙事工坊面板（INCR-203：补挂载孤儿面板 ScarNarrativeWorkshopPanel，弃用 ScarNarrativePanel）
+  // ============================================================
+
+  it('集成渲染伤痕叙事工坊四个分区', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.snw-panel')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('伤痕叙事工坊')
+    // 四个 tab
+    const tabs = wrapper.findAll('.snw-tab')
+    expect(tabs.length).toBe(4)
+    expect(wrapper.text()).toContain('故事')
+    expect(wrapper.text()).toContain('社区')
+    expect(wrapper.text()).toContain('地图')
+    expect(wrapper.text()).toContain('仪式')
+  })
+
+  it('故事分区展示统计与空态引导', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('已完成')
+    expect(wrapper.text()).toContain('章节')
+    expect(wrapper.text()).toContain('还没有故事，写下第一段吧')
+  })
+
+  it('有印记时地图分区可生成伤痕地图', async () => {
+    const wrapper = await getWrapper()
+    // 切到地图 tab
+    const tabs = wrapper.findAll('.snw-tab')
+    await tabs[2].trigger('click')
+    expect(wrapper.text()).toContain('生成伤痕地图')
+    const generateBtn = wrapper.find('.snw-btn--primary')
+    await generateBtn.trigger('click')
+    expect(wrapper.text()).toContain('伤痕总数')
+  })
+
+  it('仪式分区展示锻造仪式管理', async () => {
+    const wrapper = await getWrapper()
+    const tabs = wrapper.findAll('.snw-tab')
+    await tabs[3].trigger('click')
+    expect(wrapper.text()).toContain('锻造仪式')
+    expect(wrapper.text()).toContain('月度回顾')
+    expect(wrapper.text()).toContain('还没有锻造仪式')
+  })
 })
