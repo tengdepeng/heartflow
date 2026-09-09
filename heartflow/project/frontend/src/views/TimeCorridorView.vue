@@ -58,6 +58,8 @@
     <!-- 天文日历 · 观星时节（INCR-05：让时间/星空看得见，纯本地计算） -->
     <div data-enter class="tcv-astro">
       <AstronomyPanel />
+      <!-- 月相历 · 逐月观星（timeline/astronomy 引擎：逐日月相+流星雨峰值，INCR-193） -->
+      <AstronomyCalendarPanel />
     </div>
 
     <!-- 时间星图 · 赤道→地平投影 / 四季回溯（sky 引擎，INCR-185） -->
@@ -115,6 +117,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { storage, storageVersion } from '../engine/storage'
 import TimeCorridor from '../components/TimeCorridor.vue'
 import AstronomyPanel from '../components/AstronomyPanel.vue'
+import AstronomyCalendarPanel from '../components/AstronomyCalendarPanel.vue'
 import SkyGazePanel from '../components/SkyGazePanel.vue'
 import type { FocusSession } from '../types'
 import { useTimeCapsule } from '../modules/capsule'

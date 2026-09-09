@@ -112,4 +112,19 @@ describe('TimeCorridorView 时间长廊', () => {
     expect(wrapper.text()).toContain('星可见')
     expect(wrapper.find('.sg-toolbar').exists()).toBe(true)
   })
+
+  it('渲染月相历面板（INCR-193 逐月观星）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.acld-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('月相历')
+    expect(wrapper.text()).toContain('逐月观星')
+  })
+
+  it('月相历渲染月历格与月份导航', async () => {
+    const wrapper = await getWrapper()
+    const grid = wrapper.find('.acld-grid')
+    expect(grid.exists()).toBe(true)
+    expect(wrapper.findAll('.acld-day').length).toBeGreaterThan(0)
+    expect(wrapper.find('.acld-nav').exists()).toBe(true)
+  })
 })
