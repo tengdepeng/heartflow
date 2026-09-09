@@ -67,7 +67,15 @@ function makeMove(overrides: Record<string, any> = {}) {
 
 async function createWrapper() {
   const { default: MovementRoom } = await import('../MovementRoom.vue')
-  return mount(MovementRoom)
+  return mount(MovementRoom, {
+    global: {
+      stubs: {
+        RecoveryOptimizerPanel: true,
+        RhythmAnalysisPanel: true,
+        WorkoutPlansPanel: true,
+      },
+    },
+  })
 }
 
 // ---- 测试 ----
@@ -210,5 +218,21 @@ describe('MovementRoom 动律之间视图', () => {
     expect(wrapper.find('.mv-search-input').exists()).toBe(false)
     expect(wrapper.find('.mv-type-filter').exists()).toBe(false)
     expect(wrapper.find('.mv-weekly-section').exists()).toBe(false)
+  })
+
+  // ---- 批量收口：恢复优化/运动节奏/运动计划面板（INCR-175）----
+  it('挂载恢复优化面板', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.findComponent({ name: 'RecoveryOptimizerPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载运动节奏分析面板', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.findComponent({ name: 'RhythmAnalysisPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载运动计划管理面板', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.findComponent({ name: 'WorkoutPlansPanel' }).exists()).toBe(true)
   })
 })

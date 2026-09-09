@@ -136,6 +136,15 @@
 
     <!-- 运动分析（movement·useMovementAnalytics） -->
     <MovementAnalyticsPanel :moves="moves" />
+
+    <!-- 恢复优化（movement·recovery，INCR-175） -->
+    <RecoveryOptimizerPanel />
+
+    <!-- 运动节奏分析（movement·rhythm，INCR-175） -->
+    <RhythmAnalysisPanel />
+
+    <!-- 运动计划管理（movement，INCR-175） -->
+    <WorkoutPlansPanel />
   </div>
 </template>
 

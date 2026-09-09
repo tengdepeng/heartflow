@@ -108,7 +108,15 @@ vi.mock('pinia', () => ({
 
 async function getWrapper() {
   const { default: BodyGreenhouse } = await import('../BodyGreenhouse.vue')
-  return mount(BodyGreenhouse)
+  return mount(BodyGreenhouse, {
+    global: {
+      stubs: {
+        ChronotypeAnalysisPanel: true,
+        HealthGoalsPanel: true,
+        HealthRemindersPanel: true,
+      },
+    },
+  })
 }
 
 // ---- 可控的健康仪表盘（仅覆写 useHealthDashboard，保留 rings 等真实导出供 BodyRingsPanel） ----
@@ -241,5 +249,21 @@ describe('BodyGreenhouse 视图', () => {
     const wrapper = await getWrapper()
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.body-emotion-link').exists()).toBe(false)
+  })
+
+  // ---- 批量收口：作息时段/健康目标/健康提醒面板（INCR-175）----
+  it('挂载作息时段分析面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'ChronotypeAnalysisPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载健康目标管理面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'HealthGoalsPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载健康提醒管理面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'HealthRemindersPanel' }).exists()).toBe(true)
   })
 })

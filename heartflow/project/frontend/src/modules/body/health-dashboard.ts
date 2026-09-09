@@ -499,6 +499,14 @@ export function useHealthGoals() {
     return goal
   }
 
+  /** 删除目标 */
+  function removeGoal(goalId: string): boolean {
+    const idx = goals.value.findIndex((g) => g.id === goalId)
+    if (idx === -1) return false
+    goals.value.splice(idx, 1)
+    return true
+  }
+
   return {
     goals,
     createGoal,
@@ -507,6 +515,7 @@ export function useHealthGoals() {
     getAchievedGoals,
     pauseGoal,
     resumeGoal,
+    removeGoal,
   }
 }
 

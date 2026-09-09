@@ -1,5 +1,4 @@
-// ============================================================
-// 动律之间 · barrel export
+// ---- 动律之间 · barrel export ----
 // ============================================================
 
 export { useMovementRhythm, getMovementRecords } from './rhythm'
@@ -7,6 +6,9 @@ export { useWorkoutPlans, useMovementAchievements, useRhythmAnalysis, PLAN_TYPE_
 export { MOVEMENT_TYPE_META, MOVEMENT_INTENSITY_META, MOVEMENT_STORAGE_KEYS } from './types'
 export type { MovementType, MovementIntensity, MovementRecord, MovementRhythm } from './types'
 export type { WorkoutPlan, PlanType, DailyWorkout, PlannedActivity, MovementAchievement, AchievementCondition, RhythmAnalysis } from './achievements'
+
+// ---- 运动转换工具 ----
+export { movesToRecords, deriveRhythm } from './move-converter'
 
 // ---- 运动分析引擎 ----
 export { useMovementAnalytics } from './movement-analytics'

@@ -292,6 +292,15 @@
     <!-- 身体数据接入（INCR-06：运动手记 · 手动录入聚合） -->
     <ExerciseTrackerPanel />
 
+    <!-- 作息时段分析（body·chronotype，INCR-175） -->
+    <ChronotypeAnalysisPanel />
+
+    <!-- 健康目标管理（body，INCR-175） -->
+    <HealthGoalsPanel />
+
+    <!-- 健康提醒管理（body，INCR-175） -->
+    <HealthRemindersPanel />
+
     <!-- 近期记录 -->
     <section class="recent-logs" v-if="recentLogs.length">
       <h3 class="section-title">📜 近期记录</h3>
