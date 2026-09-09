@@ -365,9 +365,11 @@ describe('Rest 息壤视图', () => {
     // 点击保存
     await wrapper.find('.rfa-btn--primary').trigger('click')
 
-    // 验证 setKV 被调用（持久化数据）
+    // 验证 setKV 被调用（持久化数据）——按 key 精确取保存调用（挂载面板的成就写入会先于本调用）
     expect(mockSetKV).toHaveBeenCalledWith('rest:break_records', expect.any(Array))
-    const savedRecords = mockSetKV.mock.calls[0][1] as BreakRecord[]
+    const saveCall = mockSetKV.mock.calls.find(([k]) => k === 'rest:break_records')
+    expect(saveCall).toBeDefined()
+    const savedRecords = saveCall![1] as BreakRecord[]
     expect(savedRecords.length).toBe(3) // 原有 2 条 + 新增 1 条
     expect(savedRecords[savedRecords.length - 1].activity).toBe('meditation')
     expect(savedRecords[savedRecords.length - 1].duration).toBe(20)
@@ -607,6 +609,11 @@ describe('集成：休息提醒面板', () => {
 // 集成：休憩档案面板（INCR-199：补挂载孤儿面板 RestArchivePanel）
 // ============================================================
 describe('集成：休憩档案面板', () => {
+  beforeEach(() => {
+    mockKV.set('rest:practices', DEFAULT_PRACTICES.map(p => ({ ...p })))
+    mockKV.set('rest:break_records', mockRecords.map(r => ({ ...r })))
+  })
+
   it('有记录时渲染休憩档案（概览/活动分布/节律/恢复健康/洞察）', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.find('.rap-panel').exists()).toBe(true)
@@ -632,5 +639,44 @@ describe('集成：休憩档案面板', () => {
     expect(wrapper.text()).toContain('休憩档案')
     expect(wrapper.text()).toContain('息壤未耕')
     expect(wrapper.find('.rap-empty').exists()).toBe(true)
+  })
+})
+
+// ============================================================
+// 集成：休憩成就与趋势面板（INCR-200：补挂载孤儿面板 RestAchievementTrendPanel，弃用精简版 RestTrendPanel）
+// ============================================================
+describe('集成：休憩成就与趋势面板', () => {
+  beforeEach(() => {
+    mockKV.set('rest:practices', DEFAULT_PRACTICES.map(p => ({ ...p })))
+    mockKV.set('rest:break_records', mockRecords.map(r => ({ ...r })))
+    mockKV.set('hf:rest_achievements', [])
+  })
+
+  it('有记录时渲染趋势概览/30日柱状图/成就勋章/重置', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.ratp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('休憩成就与趋势')
+    // 趋势概览 6 格
+    expect(wrapper.text()).toContain('趋势概览')
+    expect(wrapper.findAll('.ratp-cell').length).toBe(6)
+    // 30 日柱状图
+    expect(wrapper.text()).toContain('近 30 日休憩次数')
+    // 成就勋章 + 解锁徽标
+    expect(wrapper.text()).toContain('成就勋章')
+    expect(wrapper.find('.ratp-ach-card').exists()).toBe(true)
+    // 重置按钮
+    expect(wrapper.find('.ratp-reset').exists()).toBe(true)
+  })
+
+  it('无记录时渲染空态引导（尚未启程）', async () => {
+    // 直挂面板传空 props：规避 Pinia 单例 store 的 onMounted 时序（父视图 load 晚于子面板 checkAchievements）
+    const { default: RestAchievementTrendPanel } = await import('../../components/RestAchievementTrendPanel.vue')
+    const wrapper = mount(RestAchievementTrendPanel, {
+      props: { records: [], practices: DEFAULT_PRACTICES.map(p => ({ ...p })) },
+    })
+    expect(wrapper.find('.ratp-panel').exists()).toBe(true)
+    expect(wrapper.find('.ratp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('尚无休憩记录')
+    expect(wrapper.text()).toContain('尚未启程')
   })
 })

@@ -306,6 +306,9 @@
     <!-- ===== 休憩档案（rest/rest-analytics 引擎：总览/活动分布/节律/恢复健康/洞察，INCR-199） ===== -->
     <RestArchivePanel :records="breakRecords" :practices="practicesData" />
 
+    <!-- ===== 休憩成就与趋势（rest/rest-advanced 引擎：趋势概览/30日柱状图/成就勋章/重置，INCR-200） ===== -->
+    <RestAchievementTrendPanel :records="breakRecords" :practices="practicesData" />
+
     <!-- ===== 底部导航 ===== -->
     <section class="rest-section">
       <div class="rest-footer-nav">
@@ -414,6 +417,7 @@ import RestReminderPanel from '../components/RestReminderPanel.vue'
 import RestFocusLinkPanel from '../components/RestFocusLinkPanel.vue'
 import RestQualityPanel from '../components/RestQualityPanel.vue'
 import RestArchivePanel from '../components/RestArchivePanel.vue'
+import RestAchievementTrendPanel from '../components/RestAchievementTrendPanel.vue'
 
 // ---- 标签导航 ----
 const activeTab = ref<'rest' | 'sleep' | 'ritual'>('rest')
