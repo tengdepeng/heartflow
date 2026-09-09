@@ -56,6 +56,9 @@
     <!-- 笔记分析仪表盘（INCR-172：补挂载孤儿面板，引擎 note-analytics.ts 完备） -->
     <NoteAnalyticsPanel v-if="study.notes.value.length" :notes="study.notes.value" />
 
+    <!-- 书房气象档案（study/study-analytics 引擎：藏书概览/落字节奏/温故建议/书房健康/洞察，INCR-198） -->
+    <StudyWeatherPanel />
+
     <!-- 标签云（可隐藏） -->
     <section class="tag-cloud-section" v-if="tagCloudVisible">
       <div class="tag-cloud-head">
@@ -254,6 +257,7 @@ import QuickCapture from '../components/QuickCapture.vue'
 import MindMapPanel from '../components/MindMapPanel.vue'
 import NoteSearchPanel from '../components/NoteSearchPanel.vue'
 import NoteAnalyticsPanel from '../components/NoteAnalyticsPanel.vue'
+import StudyWeatherPanel from '../components/StudyWeatherPanel.vue'
 import LettersPanel from '../components/LettersPanel.vue'
 import TapesPanel from '../components/TapesPanel.vue'
 import type { Note } from '../types'

@@ -254,4 +254,35 @@ describe('Study 视图', () => {
     await getWrapper()
     expect(mockLoad).toHaveBeenCalledOnce()
   })
+
+  // ---- 书房气象档案（INCR-198） ----
+
+  it('渲染书房气象档案（空态引导）', async () => {
+    mockNotes.value = []
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.swp-archive').exists()).toBe(true)
+    expect(wrapper.text()).toContain('书房气象档案')
+    // 空态徽标 + 引导语
+    expect(wrapper.text()).toContain('书房未启')
+    expect(wrapper.find('.swp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('书房还空着')
+  })
+
+  it('书房气象注入笔记后展示概览/节奏/温故建议/健康/洞察', async () => {
+    const fiveDaysAgo = new Date(Date.now() - 5 * 86400000).toISOString()
+    mockNotes.value = [
+      sampleNote({ id: 'old', title: '搁置的笔记', updatedAt: fiveDaysAgo, createdAt: fiveDaysAgo }),
+      sampleNote({ id: 'fresh', title: '今日新笔', tags: ['vue', 'test'] }),
+    ]
+    const wrapper = await getWrapper()
+    // 概览 / 节奏 / 健康区块
+    expect(wrapper.text()).toContain('藏书概览')
+    expect(wrapper.text()).toContain('落字节奏')
+    expect(wrapper.text()).toContain('书房健康')
+    // 温故建议命中搁置 5 天的笔记
+    expect(wrapper.find('.swp-suggest').exists()).toBe(true)
+    expect(wrapper.text()).toContain('搁置的笔记')
+    // 温和洞察
+    expect(wrapper.find('.swp-insights').exists()).toBe(true)
+  })
 })
