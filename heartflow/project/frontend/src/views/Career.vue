@@ -43,27 +43,36 @@
     </div>
 
     <!-- Header -->
-    <header data-enter class="career-header">
-      <div class="breadcrumb-row">
-        <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
-          <span class="breadcrumb-home-icon">🏠</span>
-          <span>家</span>
-        </button>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-link current">
-          <span class="breadcrumb-icon">{{ roomData?.icon }}</span>
-          <span>{{ roomData?.name }}</span>
-        </span>
-      </div>
-      <div class="career-header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <h1 class="career-title">{{ roomData?.name }}</h1>
-      <p class="career-subtitle">{{ roomData?.description }}</p>
-      <p class="career-kicker">从更漏 · 工作日志中生长出的关系网络</p>
-    </header>
+    <RoomHeader
+      class="career-room-header"
+      data-enter
+      :title="roomData?.name"
+      :subtitle="roomData?.description"
+    >
+      <template #breadcrumb>
+        <div class="breadcrumb-row">
+          <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
+            <span class="breadcrumb-home-icon">🏠</span>
+            <span>家</span>
+          </button>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-link current">
+            <span class="breadcrumb-icon">{{ roomData?.icon }}</span>
+            <span>{{ roomData?.name }}</span>
+          </span>
+        </div>
+      </template>
+      <template #ornament>
+        <div class="career-header-ornament">
+          <span class="orn-line"></span>
+          <span class="orn-diamond">✦</span>
+          <span class="orn-line"></span>
+        </div>
+      </template>
+      <template #meta>
+        <p class="career-kicker">从更漏 · 工作日志中生长出的关系网络</p>
+      </template>
+    </RoomHeader>
 
     <!-- 概览统计 -->
     <section data-enter class="career-section">
@@ -284,6 +293,11 @@
       </div>
     </section>
 
+    <!-- 业脉档案（career·career-analytics：业脉健康/圈层/亲密度/角色/项目状态/洞察，INCR-168） -->
+    <section data-enter class="career-section cap-section">
+      <CareerArchivePanel :contacts="contacts" :projects="projects" :connections="connections" />
+    </section>
+
     <!-- 底部铭文 -->
     <footer class="career-colophon">
       <div class="colophon-ornament">
@@ -427,6 +441,8 @@ import { useRoomNavigation } from '../composables/useRoomNavigation'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useCareer, type CareerContact as Contact, type CareerProject, type NodeTypeId, type ProjectStatus } from '../modules/career/career'
 import { useCareerMilestones, useSkillMap, MILESTONE_TYPE_META } from '../modules/career/skill-map'
+import RoomHeader from '../components/RoomHeader.vue'
+import CareerArchivePanel from '../components/CareerArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const nav = useRoomNavigation()
@@ -1116,10 +1132,19 @@ const skillSummary = computed(() => {
 }
 
 /* ---- Header ---- */
-.career-header {
+.career-room-header {
   text-align: center;
   position: relative;
   z-index: 1;
+}
+.career-room-header :deep(.rh-main) {
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.career-room-header :deep(.rh-titles) {
+  align-items: center;
+  gap: 0;
 }
 
 /* Breadcrumb */
@@ -1196,7 +1221,7 @@ const skillSummary = computed(() => {
   opacity: 0.4;
 }
 
-.career-title {
+.career-room-header :deep(.rh-title) {
   font-size: 28px;
   font-weight: 600;
   font-family: var(--font-heading-zh);
@@ -1205,7 +1230,7 @@ const skillSummary = computed(() => {
   margin: 0;
 }
 
-.career-subtitle {
+.career-room-header :deep(.rh-subtitle) {
   font-size: 14px;
   color: var(--text-secondary, var(--text-secondary));
   margin: 8px 0 4px;
@@ -2171,7 +2196,7 @@ const skillSummary = computed(() => {
     padding: 16px;
   }
 
-  .career-title {
+  .career-room-header :deep(.rh-title) {
     font-size: 24px;
   }
 
@@ -2197,16 +2222,16 @@ const skillSummary = computed(() => {
     gap: 24px;
   }
 
-  .career-header {
+  .career-room-header {
     padding-top: 40px;
   }
 
-  .career-title {
+  .career-room-header :deep(.rh-title) {
     font-size: 20px;
     letter-spacing: 2px;
   }
 
-  .career-subtitle {
+  .career-room-header :deep(.rh-subtitle) {
     font-size: 12px;
   }
 

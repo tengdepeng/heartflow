@@ -468,3 +468,38 @@ describe('脉络图', () => {
     expect(w.text()).toContain('师徒')
   })
 })
+
+// ============================================================
+// 集成：业脉档案面板（INCR-168：补挂载 claim-but-orphan 面板）
+// ============================================================
+describe('集成：业脉档案面板', () => {
+  it('挂载业脉档案面板并渲染标题与健康圆环', async () => {
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    expect(w.find('.cap').exists()).toBe(true)
+    expect(w.text()).toContain('业脉档案')
+    expect(w.find('.cap-ring-num').text()).toContain('/100')
+  })
+
+  it('有数据时渲染概览指标、圈层分布与洞察', async () => {
+    mockStore['career:contacts'] = [
+      { id: 'c1', name: '张老师', role: '导师', tier: 'core', nodeType: 'mentor', affinity: 9, tags: ['教学'] },
+      { id: 'c2', name: '李工', role: '合作', tier: 'active', nodeType: 'colleague', affinity: 6, tags: ['工程'] },
+      { id: 'c3', name: '王组长', role: '上级', tier: 'core', nodeType: 'superior', affinity: 8, tags: ['团队'] },
+    ]
+    mockStore['career:projects'] = [
+      { id: 'p1', name: '灰度重构', icon: '🛠', description: '系统重构', color: '#8a9a7a', status: 'active', statusLabel: '进行中', partners: 'resolve', date: '2026-09-01' },
+    ]
+    mockStore['career:connections'] = [
+      { id: 'cn1', fromId: 'c1', toId: 'c2', type: 'collaboration' },
+    ]
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    const metrics = w.findAll('.cap-metric')
+    expect(metrics.length).toBe(5)
+    expect(w.text()).toContain('联系人')
+    expect(w.text()).toContain('核心圈')
+    expect(w.find('.cap-block').exists()).toBe(true)
+    expect(w.text()).toContain('圈层分布')
+  })
+})
