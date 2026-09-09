@@ -78,6 +78,15 @@ vi.mock('../../components/NoteEditor.vue', () => ({
   },
 }))
 
+// 笔记分析仪表盘（INCR-172）：视图测试中以 stub 模拟（依赖 modules/note 真实存储，引擎已有 modules/note 单元测试背书）
+vi.mock('../../components/NoteAnalyticsPanel.vue', () => ({
+  default: {
+    name: 'NoteAnalyticsPanel',
+    template: '<div class="note-analytics-stub" data-test="note-analytics">笔记分析</div>',
+    props: ['notes'],
+  },
+}))
+
 async function getWrapper() {
   const { default: Study } = await import('../Study.vue')
   return mount(Study)
@@ -126,6 +135,22 @@ describe('Study 视图', () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('Vue 学习')
     expect(wrapper.text()).toContain('Vue 3 的 Composition API')
+  })
+
+  // ---- 笔记分析仪表盘（INCR-172：补挂载孤儿面板）----
+
+  it('有笔记时集成渲染笔记分析仪表盘', async () => {
+    mockNotes.value = [sampleNote({ title: '第一则', tags: ['a'] }), sampleNote({ id: 'n2', title: '第二则', tags: ['b'] })]
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.note-analytics-stub')
+    expect(panel.exists()).toBe(true)
+    expect(panel.text()).toContain('笔记分析')
+  })
+
+  it('无笔记时不渲染笔记分析仪表盘', async () => {
+    mockNotes.value = []
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.note-analytics-stub').exists()).toBe(false)
   })
 
   // ---- 标签过滤 ----

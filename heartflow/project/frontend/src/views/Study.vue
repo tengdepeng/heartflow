@@ -53,6 +53,9 @@
     <!-- 全库检索（INCR-02：找东西） -->
     <NoteSearchPanel :notes="study.notes.value" @open="openNoteById" />
 
+    <!-- 笔记分析仪表盘（INCR-172：补挂载孤儿面板，引擎 note-analytics.ts 完备） -->
+    <NoteAnalyticsPanel v-if="study.notes.value.length" :notes="study.notes.value" />
+
     <!-- 标签云（可隐藏） -->
     <section class="tag-cloud-section" v-if="tagCloudVisible">
       <div class="tag-cloud-head">
@@ -250,6 +253,7 @@ import NoteEditor from '../components/NoteEditor.vue'
 import QuickCapture from '../components/QuickCapture.vue'
 import MindMapPanel from '../components/MindMapPanel.vue'
 import NoteSearchPanel from '../components/NoteSearchPanel.vue'
+import NoteAnalyticsPanel from '../components/NoteAnalyticsPanel.vue'
 import LettersPanel from '../components/LettersPanel.vue'
 import TapesPanel from '../components/TapesPanel.vue'
 import type { Note } from '../types'
