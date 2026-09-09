@@ -207,4 +207,28 @@ describe('DreamNook 视图', () => {
     await sendBtn.trigger('click')
     expect(mockStore.linkParallelWorld).toHaveBeenCalledWith('d1', 'dream-realm')
   })
+
+  // ==========================================================
+  // 意象之镜（INCR-169 接线）
+  // ==========================================================
+  it('空态渲染意象之镜「梦镜未启」引导', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('意象之镜')
+    expect(wrapper.text()).toContain('梦镜未启')
+    expect(wrapper.text()).toContain('梦乡还空着')
+  })
+
+  it('有梦境时渲染高频意象与意象回响', async () => {
+    mockDreams.value = [
+      { id: 'd1', title: '海', content: '梦见大海', mood: 'neutral', tags: [], at: '2026-01-01T00:00:00Z' },
+      { id: 'd2', title: '雨', content: '梦见下雨', mood: 'neutral', tags: [], at: '2026-01-02T00:00:00Z' },
+      { id: 'd3', title: '飞', content: '在云端飞翔', mood: 'happy', tags: [], at: '2026-01-03T00:00:00Z' },
+    ]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('高频意象')
+    expect(wrapper.findAll('.dmo-omen-chip').length).toBeGreaterThan(0)
+    expect(wrapper.findAll('.dmo-echo').length).toBeGreaterThan(0)
+  })
 })

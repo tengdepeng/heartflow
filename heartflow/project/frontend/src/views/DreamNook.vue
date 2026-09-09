@@ -29,6 +29,11 @@
       <DreamArchivePanel :dreams="store.dreams" />
     </section>
 
+    <!-- 意象之镜（INCR-169 接线：高频意象/意象回响/温和观照） -->
+    <section data-enter class="dmo-section">
+      <DreamOmenPanel />
+    </section>
+
     <!-- 标签云 -->
     <section data-enter v-if="allTags.length" class="tag-cloud-section">
       <h3>🏷️ 标签云</h3>
@@ -137,6 +142,7 @@ import { ref, computed, reactive } from 'vue'
 import { useDreamNookStore, DREAM_REALM_ID } from '../stores/dreamNook'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import DreamArchivePanel from '../components/DreamArchivePanel.vue'
+import DreamOmenPanel from '../components/DreamOmenPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useDreamNookStore()
