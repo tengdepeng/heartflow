@@ -297,6 +297,12 @@
     <!-- ===== 休息提醒（rest·useRestReminders：番茄钟/定时/疲劳/姿势规则 + 模拟触发，INCR-164） ===== -->
     <RestReminderPanel />
 
+    <!-- ===== 专注休憩联动（rest·useFocusRestLink，INCR-174） ===== -->
+    <RestFocusLinkPanel />
+
+    <!-- ===== 休息质量面板（rest，INCR-174） ===== -->
+    <RestQualityPanel />
+
     <!-- ===== 底部导航 ===== -->
     <section class="rest-section">
       <div class="rest-footer-nav">

@@ -215,6 +215,8 @@ async function getWrapper() {
         'router-link': {
           template: '<a class="router-link-stub"><slot /></a>',
         },
+        RestFocusLinkPanel: true,
+        RestQualityPanel: true,
       },
     },
   })
@@ -587,5 +589,16 @@ describe('集成：休息提醒面板', () => {
     await wrapper.find('.rrp-btn').trigger('click')
     // 面板 onMounted 已跑一次模拟；点击后应产出同一批默认提醒的预览
     expect(wrapper.find('.rrp-sim-result, .rrp-sim-none').exists()).toBe(true)
+  })
+
+  // ---- 批量收口：专注休憩联动 + 休息质量面板（INCR-174）----
+  it('挂载专注休憩联动面板 RestFocusLinkPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'RestFocusLinkPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载休息质量面板 RestQualityPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'RestQualityPanel' }).exists()).toBe(true)
   })
 })

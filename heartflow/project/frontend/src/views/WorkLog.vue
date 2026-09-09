@@ -329,6 +329,12 @@
     <!-- 劳酬联动（reward·worklog-bridge：工时日志一键变现为收入记录，INCR-167） -->
     <WorklogRewardPanel />
 
+    <!-- 生产效率预测（worklog·productivity-prediction，INCR-174） -->
+    <ProductivityPanel />
+
+    <!-- 工时节奏分析（worklog·worklog-habits，INCR-174） -->
+    <WorkRhythmPanel />
+
     <!-- 记录列表 -->
     <section class="wl-shift-section" v-if="paginatedShifts.length > 0">
       <div class="wl-shift-list">

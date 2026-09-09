@@ -17,7 +17,14 @@ vi.mock('../../engine/storage', () => ({
 
 async function getWrapper() {
   const { default: WorkLog } = await import('../WorkLog.vue')
-  return mount(WorkLog)
+  return mount(WorkLog, {
+    global: {
+      stubs: {
+        ProductivityPanel: true,
+        WorkRhythmPanel: true,
+      },
+    },
+  })
 }
 
 function makeShift(overrides: Record<string, any> = {}) {
@@ -657,5 +664,16 @@ describe('集成：劳酬联动面板', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('预估 1 条')
     expect(wrapper.find('.wrp-btn').attributes('disabled')).toBeUndefined()
+  })
+
+  // ---- 批量收口：生产效率预测 + 工时节奏面板（INCR-174）----
+  it('挂载生产效率预测面板 ProductivityPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'ProductivityPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载工时节奏分析面板 WorkRhythmPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'WorkRhythmPanel' }).exists()).toBe(true)
   })
 })
