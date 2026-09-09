@@ -402,6 +402,11 @@
       </div>
     </section>
 
+    <!-- 伤痕可视化面板（INCR-161：补挂载 claim-but-orphan 面板） -->
+    <section data-enter class="sc-viz-section" v-if="marks.length">
+      <ScarVisualizationPanel />
+    </section>
+
     <!-- 空状态 -->
     <div data-enter v-if="!marks.length" class="sc-empty">
       <p>锻炉安静，尚无印记。</p>
@@ -418,6 +423,7 @@ import { useHealingJourney } from '../modules/scar/healing-journey'
 import { useNarrativeEnhancer } from '../modules/scar/narrative-enhancer'
 import { useScarMarks } from '../modules/scar/marks'
 import type { BodyMark as ModuleBodyMark, ScarStats, HealingStage, SeverityLevel, BodyPart } from '../modules/scar/types'
+import ScarVisualizationPanel from '../components/ScarVisualizationPanel.vue'
 const { entranceRef, entranceClass } = useViewEntrance()
 const healingJourney = useHealingJourney()
 const narrative = useNarrativeEnhancer()
@@ -1298,6 +1304,11 @@ function strikeAnvil() {
 
 /* ---- Narrative Enhancement ---- */
 .sc-narrative-section {
+  margin-bottom: 28px; position: relative; z-index: 1;
+}
+
+/* ---- Scar Visualization (INCR-161) ---- */
+.sc-viz-section {
   margin-bottom: 28px; position: relative; z-index: 1;
 }
 .sc-narrative-card {

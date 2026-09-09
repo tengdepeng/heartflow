@@ -301,4 +301,24 @@ describe('Scar 视图', () => {
       expect(style).toContain('width: 100%')
     })
   })
+
+  // ============================================================
+  // 集成：伤痕可视化面板（INCR-161：补挂载 claim-but-orphan 面板）
+  // ============================================================
+
+  it('有印记时集成渲染伤痕可视化面板', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.svp')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('伤痕可视化')
+    expect(wrapper.text()).toContain('身体伤痕分布')
+    expect(wrapper.text()).toContain('严重度与韧性雷达')
+  })
+
+  it('伤痕可视化面板渲染类型分布与愈合时间线', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('伤痕类型分布')
+    expect(wrapper.text()).toContain('愈合时间线')
+    expect(wrapper.text()).toContain('逆境成长曲线')
+  })
 })
