@@ -152,6 +152,12 @@
     <!-- 阅读习惯分析（reading·useReadingHabits） -->
     <ReadingHabitsPanel />
 
+    <!-- 荐书面板（INCR-173：补挂载孤儿面板，reading 引擎完备） -->
+    <BookRecommendationsPanel />
+
+    <!-- 阅读挑战面板（INCR-173：补挂载孤儿面板，reading·useReadingChallenges 完备） -->
+    <ReadingChallengesPanel />
+
     <!-- ========== 摘录对话框 ========== -->
     <div data-enter v-if="showDialog" class="rh-dialog-overlay" @click.self="closeDialog">
       <div class="rh-dialog-card">
@@ -181,6 +187,8 @@ import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
 import ClassicalVerticalPanel from '../components/ClassicalVerticalPanel.vue'
 import ReadingHabitsPanel from '../components/ReadingHabitsPanel.vue'
 import ReadingDashboardPanel from '../components/ReadingDashboardPanel.vue'
+import BookRecommendationsPanel from '../components/BookRecommendationsPanel.vue'
+import ReadingChallengesPanel from '../components/ReadingChallengesPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()

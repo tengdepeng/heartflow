@@ -69,6 +69,17 @@ describe('ReadingHall 阅览殿', () => {
     expect(tabs[2].text()).toContain('回顾')
   })
 
+  // ---- 批量收口：补挂载孤儿面板（INCR-173）----
+  it('挂载荐书面板 BookRecommendationsPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'BookRecommendationsPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载阅读挑战面板 ReadingChallengesPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'ReadingChallengesPanel' }).exists()).toBe(true)
+  })
+
   it('默认显示书卷标签', async () => {
     const wrapper = await getWrapper()
     const activeTab = wrapper.find('.rh-tab.active')
