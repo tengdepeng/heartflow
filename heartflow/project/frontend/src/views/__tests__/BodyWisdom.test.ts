@@ -171,7 +171,28 @@ describe('BodyWisdom 藏象阁', () => {
     const wrapper = await getWrapper()
     expect(wrapper.find('.mvp').exists()).toBe(true)
     expect(wrapper.text()).toContain('经络可视化')
-    expect(wrapper.text()).toContain('子午流注 · 热力 · 五行 · 趋势')
+  })
+
+  it('身体层渲染健康分析体检单面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.health-analysis').exists()).toBe(true)
+    expect(wrapper.text()).toContain('健康分析 · 藏象体检单')
+  })
+
+  it('健康分析面板展示已采集数据统计', async () => {
+    const today = new Date().toISOString().slice(0, 10)
+    mockMeridianLogs.value = [
+      { hour: 1, feeling: 'bad', at: '2026-09-01T06:00:00.000Z', date: today },
+      { hour: 3, feeling: 'good', at: '2026-09-01T08:00:00.000Z', date: today },
+    ]
+    mockWisdomLogs.value = [
+      { id: 'w1', content: '今日心绪', at: '2026-09-01T09:00:00.000Z', mood: 'calm', insight: '平稳' },
+      { id: 'w2', content: '有点焦虑', at: '2026-09-02T09:00:00.000Z', mood: 'anxious' },
+    ]
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('已采集')
+    expect(wrapper.text()).toContain('经络 2')
+    expect(wrapper.text()).toContain('情绪 2')
   })
 
   it('经络可视化面板展示概览统计', async () => {

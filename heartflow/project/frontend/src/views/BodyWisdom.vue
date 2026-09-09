@@ -91,6 +91,8 @@
       <MeridianCheckPanel :records="meridianRecords" />
       <!-- 经络可视化（meridian-visualization 引擎，INCR-180） -->
       <MeridianVisualizationPanel :records="meridianRecords" />
+      <!-- 健康分析 · 藏象体检单（health-analysis 引擎，INCR-188） -->
+      <HealthAnalysisPanel :meridians="meridianRecords" :moods="moodRecords" />
     </div>
 
     <!-- ===== 感知层 ===== -->
@@ -195,6 +197,7 @@ import MedicinalDietPanel from '../components/body-wisdom/MedicinalDietPanel.vue
 import HealthArchivePanel from '../components/HealthArchivePanel.vue'
 import MeridianCheckPanel from '../components/MeridianCheckPanel.vue'
 import MeridianVisualizationPanel from '../components/MeridianVisualizationPanel.vue'
+import HealthAnalysisPanel from '../components/HealthAnalysisPanel.vue'
 import { MERIDIAN_HOURS } from '../modules/body-wisdom'
 import type { MeridianRecord } from '../modules/body-wisdom'
 
@@ -255,6 +258,19 @@ const meridianRecords = computed<MeridianRecord[]>(() =>
       hour: l.hour,
     }
   }),
+)
+
+// 情绪记录数据源：问境日志（hf:wisdom_logs）→ 模块 MoodRecord 契约（白名单收窄）
+const MOOD_WHITELIST = ['calm', 'anxious', 'sad', 'happy', 'angry', 'fearful'] as const
+const moodRecords = computed<MoodRecord[]>(() =>
+  wisdomLogs.value
+    .filter(l => l.mood && (MOOD_WHITELIST as readonly string[]).includes(l.mood))
+    .map(l => ({
+      id: `ml_${l.at}`,
+      mood: l.mood as MoodRecord['mood'],
+      insight: l.insight ?? '',
+      recordedAt: l.at ?? '',
+    })),
 )
 
 // ========================
