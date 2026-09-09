@@ -140,6 +140,9 @@
       </div>
     </div>
 
+    <!-- 阅读总览仪表盘（INCR-160：已构建但从未接线的 reading-bridge + useReadingDashboard） -->
+    <ReadingDashboardPanel />
+
     <!-- 间隔重复面板（P2 收口） -->
     <ReadingSrsPanel />
 
@@ -177,6 +180,7 @@ import type { Excerpt } from '../modules/reading'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
 import ClassicalVerticalPanel from '../components/ClassicalVerticalPanel.vue'
 import ReadingHabitsPanel from '../components/ReadingHabitsPanel.vue'
+import ReadingDashboardPanel from '../components/ReadingDashboardPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()

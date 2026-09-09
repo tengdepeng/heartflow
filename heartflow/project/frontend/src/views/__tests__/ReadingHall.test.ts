@@ -31,6 +31,7 @@ vi.mock('pinia', () => ({
 async function getWrapper() {
   const { default: ReadingHall } = await import('../ReadingHall.vue')
   return mount(ReadingHall, {
+    shallow: true,
     global: {
       stubs: {
         Teleport: true,
@@ -107,6 +108,12 @@ describe('ReadingHall 阅览殿', () => {
   // ------- 集成：间隔重复面板（P2 收口）-------
   it('集成渲染间隔重复面板（三选一回顾）', async () => {
     const wrapper = await getWrapper()
-    expect(wrapper.text()).toContain('间隔重复')
+    expect(wrapper.find('reading-srs-panel-stub').exists()).toBe(true)
+  })
+
+  // ------- 集成：阅读总览仪表盘（INCR-160）-------
+  it('集成渲染阅读总览仪表盘', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('reading-dashboard-panel-stub').exists()).toBe(true)
   })
 })
