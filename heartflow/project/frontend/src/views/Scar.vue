@@ -124,6 +124,11 @@
       </div>
     </section>
 
+    <!-- 铸造档案（scar/scar-analytics 引擎：档案概览/锻造节律/铸造健康/温和洞察，INCR-202） -->
+    <section data-enter class="sc-archive-section">
+      <ScarArchivePanel :marks="marks" />
+    </section>
+
     <!-- 身体部位分布 -->
     <section data-enter class="sc-body-section" v-if="marks.length">
       <h3 class="sc-section-label">🏷 部位分布</h3>
@@ -430,6 +435,7 @@ import { useScarMarks } from '../modules/scar/marks'
 import type { BodyMark as ModuleBodyMark, ScarStats, HealingStage, SeverityLevel, BodyPart } from '../modules/scar/types'
 import ScarVisualizationPanel from '../components/ScarVisualizationPanel.vue'
 import CausalChainPanel from '../components/CausalChainPanel.vue'
+import ScarArchivePanel from '../components/ScarArchivePanel.vue'
 const { entranceRef, entranceClass } = useViewEntrance()
 const healingJourney = useHealingJourney()
 const narrative = useNarrativeEnhancer()

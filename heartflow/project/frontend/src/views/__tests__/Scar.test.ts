@@ -351,4 +351,39 @@ describe('Scar 视图', () => {
     await pickers[0].trigger('click')
     expect(wrapper.text()).toContain('链路深度')
   })
+
+  // ============================================================
+  // 集成：铸造档案面板（INCR-202：补挂载孤儿面板 ScarArchivePanel）
+  // ============================================================
+
+  it('有印记时集成渲染铸造档案面板', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.scap-panel')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('铸造档案')
+    // 档案概览 8 格
+    expect(wrapper.findAll('.scap-cell').length).toBe(13)
+    expect(wrapper.text()).toContain('总印记')
+    expect(wrapper.text()).toContain('重度(≥4)')
+    expect(wrapper.text()).toContain('平均严重度')
+    // 锻造节律 + 铸造健康
+    expect(wrapper.text()).toContain('锻造节律')
+    expect(wrapper.text()).toContain('铸造健康')
+    expect(wrapper.text()).toContain('觉察广度')
+    expect(wrapper.text()).toContain('沉淀深度')
+    // 温和洞察
+    expect(wrapper.findAll('.scap-insight').length).toBeGreaterThan(0)
+    // 不渲染空态
+    expect(wrapper.find('.scap-empty').exists()).toBe(false)
+  })
+
+  it('无印记时渲染空态引导（印记待启）', async () => {
+    mockKV.set('scars', [])
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.scap-panel')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.find('.scap-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('工痕尚未开炉')
+    expect(wrapper.text()).toContain('印记待启')
+  })
 })
