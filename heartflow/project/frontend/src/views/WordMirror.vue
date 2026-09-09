@@ -207,6 +207,9 @@
 
     <!-- 间隔复习会话 -->
     <ReviewSessionPanel :words="wordEntries" />
+
+    <!-- 词根词缀拆解（wisdom/word-roots 引擎，INCR-187） -->
+    <WordRootPanel />
     </template>
 
     <!-- ============== Tab 3: 联想网络 ============== -->
@@ -392,6 +395,7 @@ import { isStale } from '../modules/word-mirror/stale'
 import { dueWords, nextReviewState } from '../modules/word-mirror/spaced-repetition'
 import TextAnalysisPanel from '../components/TextAnalysisPanel.vue'
 import WordNetworkPanel from '../components/WordNetworkPanel.vue'
+import WordRootPanel from '../components/WordRootPanel.vue'
 import WritingAssistantPanel from '../components/WritingAssistantPanel.vue'
 import ReviewSessionPanel from '../components/ReviewSessionPanel.vue'
 import DailyRecommendationPanel from '../components/DailyRecommendationPanel.vue'

@@ -112,4 +112,25 @@ describe('WordMirror 字镜阁', () => {
     expect(wrapper.find('.wnp-stats').exists()).toBe(true)
     expect(wrapper.text()).toContain('词典规模')
   })
+
+  it('词汇自习室渲染词根词缀拆解面板', async () => {
+    const wrapper = await getWrapper()
+    const vocabTab = wrapper.findAll('.wm-tab').find(btn => btn.text() === '词汇自习室')
+    if (vocabTab) await vocabTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.wroot').exists()).toBe(true)
+    expect(wrapper.text()).toContain('词根词缀拆解')
+  })
+
+  it('词根拆解输入单词显示部件', async () => {
+    const wrapper = await getWrapper()
+    const vocabTab = wrapper.findAll('.wm-tab').find(btn => btn.text() === '词汇自习室')
+    if (vocabTab) await vocabTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    const input = wrapper.find('.wroot-input')
+    await input.setValue('transport')
+    await input.trigger('keyup.enter')
+    expect(wrapper.text()).toContain('trans')
+    expect(wrapper.find('.wroot-legend').exists()).toBe(true)
+  })
 })
