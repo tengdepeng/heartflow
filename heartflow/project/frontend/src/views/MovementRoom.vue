@@ -137,6 +137,9 @@
     <!-- 运动分析（movement·useMovementAnalytics） -->
     <MovementAnalyticsPanel :moves="moves" />
 
+    <!-- 动律档案（movement/movement-archive-analytics 引擎：档案概览/运动节律/运动健康/类型分布/同游者/温和洞察，INCR-204） -->
+    <MovementArchivePanel :moves="moves" />
+
     <!-- 恢复优化（movement·recovery，INCR-175） -->
     <RecoveryOptimizerPanel />
 
@@ -154,6 +157,10 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useMovement } from '../modules/movement/movement-log'
 import MovementAchievementsPanel from '../components/movement/MovementAchievementsPanel.vue'
 import MovementAnalyticsPanel from '../components/MovementAnalyticsPanel.vue'
+import RecoveryOptimizerPanel from '../components/RecoveryOptimizerPanel.vue'
+import RhythmAnalysisPanel from '../components/RhythmAnalysisPanel.vue'
+import WorkoutPlansPanel from '../components/WorkoutPlansPanel.vue'
+import MovementArchivePanel from '../components/MovementArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const movement = useMovement()

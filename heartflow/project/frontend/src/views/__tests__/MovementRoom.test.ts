@@ -235,4 +235,48 @@ describe('MovementRoom 动律之间视图', () => {
     const wrapper = await createWrapper()
     expect(wrapper.findComponent({ name: 'WorkoutPlansPanel' }).exists()).toBe(true)
   })
+
+  // ============================================================
+  // 集成：动律档案面板（INCR-204：补挂载孤儿面板 MovementArchivePanel）
+  // ============================================================
+
+  it('有记录时渲染动律档案面板', async () => {
+    mockStore['hf:moves_v2'] = [
+      makeMove({ id: 'm1', type: 'run', duration: 30, note: '晨跑' }),
+      makeMove({ id: 'm2', type: 'swim', duration: 45, note: '游泳' }),
+    ]
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.mvap-panel')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('动律档案')
+    // 档案概览 + 节律共 14 格
+    expect(wrapper.findAll('.mvap-cell').length).toBe(14)
+    expect(wrapper.text()).toContain('总次数')
+    expect(wrapper.text()).toContain('总分钟')
+    expect(wrapper.text()).toContain('平均时长(分)')
+    expect(wrapper.text()).toContain('类型数')
+    expect(wrapper.text()).toContain('最长单次(分)')
+    // 运动节律
+    expect(wrapper.text()).toContain('活跃天数')
+    expect(wrapper.text()).toContain('当前连续')
+    expect(wrapper.text()).toContain('平均间隔(天)')
+    // 运动健康三轴
+    expect(wrapper.text()).toContain('运动健康')
+    expect(wrapper.text()).toContain('多样性')
+    expect(wrapper.text()).toContain('仪式')
+    // 类型分布 + 温和洞察
+    expect(wrapper.findAll('.mvap-type-row').length).toBe(2)
+    expect(wrapper.findAll('.mvap-insight').length).toBeGreaterThan(0)
+    // 不渲染空态
+    expect(wrapper.find('.mvap-empty').exists()).toBe(false)
+  })
+
+  it('无记录时渲染空态引导（静待启程）', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.mvap-panel')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.find('.mvap-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('身体还空着')
+    expect(wrapper.text()).toContain('静待启程')
+  })
 })
