@@ -360,6 +360,7 @@ describe('room-graph 房间图引擎', () => {
       'timeline-index',
       'will',
       'data-asset',
+      'visitor',
     ]
     for (const id of newRooms) {
       it(`房间 ${id} 已注册且路径可被星盘解析`, () => {
@@ -435,6 +436,20 @@ describe('room-graph 房间图引擎', () => {
       expect(da?.adjacentTo).toContain('archive')
       expect(da?.adjacentTo).toContain('home-space')
       expect(da?.adjacentTo).toContain('timeline')
+    })
+
+    it('访客中心 visitor 从家分支且邻接正确', () => {
+      const vs = getRoom('visitor')
+      expect(vs).toBeDefined()
+      expect(vs?.path).toBe('/visitor')
+      expect(vs?.name).toBe('访客中心')
+      expect(vs?.icon).toBe('🚪')
+      expect(vs?.group).toBe('world')
+      expect(vs?.isMainPath).toBe(false)
+      expect(vs?.branchFrom).toBe('home-space')
+      expect(vs?.adjacentTo).toContain('home-space')
+      expect(vs?.adjacentTo).toContain('relations')
+      expect(vs?.adjacentTo).toContain('garden')
     })
   })
 })

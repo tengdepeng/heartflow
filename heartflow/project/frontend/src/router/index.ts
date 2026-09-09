@@ -89,6 +89,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '世界生命' },
   }),
   withRoomMeta({
+    path: '/visitor',
+    name: 'visitor',
+    component: () => import('../views/Visitor.vue'),
+    meta: { title: '访客中心' },
+  }),
+  withRoomMeta({
     path: '/anchor',
     name: 'anchor',
     component: () => import('../views/DailyAnchor.vue'),
