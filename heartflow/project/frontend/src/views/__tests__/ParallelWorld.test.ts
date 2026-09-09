@@ -78,4 +78,40 @@ describe('ParallelWorld 平行世界', () => {
     expect(capsuleBtn.exists()).toBe(true)
     expect(capsuleBtn.attributes('disabled')).toBeDefined()
   })
+
+  // ============================================================
+  // 批量收口：分支管理面板（INCR-176）
+  // ============================================================
+
+  it('集成渲染分支管理面板 BranchManagementPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'BranchManagementPanel' }).exists()).toBe(true)
+  })
+
+  // ============================================================
+  // 批量收口：分支回放面板（INCR-176）
+  // ============================================================
+
+  it('集成渲染分支回放面板 BranchReplayPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'BranchReplayPanel' }).exists()).toBe(true)
+  })
+
+  // ============================================================
+  // 批量收口：分支时间线面板（INCR-176）
+  // ============================================================
+
+  it('集成渲染分支时间线面板 BranchTimelinePanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'BranchTimelinePanel' }).exists()).toBe(true)
+  })
+
+  // ============================================================
+  // 批量收口：分支可视化面板（INCR-176）
+  // ============================================================
+
+  it('集成渲染分支可视化面板 BranchVisualizationPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'BranchVisualizationPanel' }).exists()).toBe(true)
+  })
 })

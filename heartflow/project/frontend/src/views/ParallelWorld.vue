@@ -228,6 +228,34 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 分支管理（parallel-world·useParallelWorld，INCR-176） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <BranchManagementPanel />
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 分支回放（parallel-world·useBranchReplay，INCR-176） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <BranchReplayPanel />
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 分支时间线（parallel-world·useBranchTimeline，INCR-176） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <BranchTimelinePanel />
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 分支可视化（parallel-world·useBranchVisualization，INCR-176） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <BranchVisualizationPanel />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 梦境碎片 -->
     <!-- ============================================================ -->
     <section data-enter class="pw-dream-section">
@@ -257,6 +285,10 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useParallelWorld, useTimeCapsule, useParallelSelves } from '../modules/parallel-world'
 import type { Fork } from '../modules/parallel-world'
 import { DREAM_REALM_ID } from '../stores/dreamNook'
+import BranchManagementPanel from '../components/BranchManagementPanel.vue'
+import BranchReplayPanel from '../components/BranchReplayPanel.vue'
+import BranchTimelinePanel from '../components/BranchTimelinePanel.vue'
+import BranchVisualizationPanel from '../components/BranchVisualizationPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const parallelWorld = useParallelWorld()
@@ -1252,6 +1284,11 @@ section {
 /* ---- 梦境碎片 ---- */
 .pw-dream-section {
   /* section */
+}
+
+.pw-branch-panels {
+  margin-bottom: 24px;
+  padding: 0;
 }
 
 .pw-dream-grid {

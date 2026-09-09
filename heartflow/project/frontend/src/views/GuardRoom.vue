@@ -111,6 +111,12 @@
     <!-- 实时异常检测（safety·useAnomalyDetector：行为基线 / 自适应阈值 / 规则，INCR-161） -->
     <AnomalyDetectorPanel />
 
+    <!-- 审计时间线（guard·audit-timeline，INCR-176） -->
+    <AuditTimelinePanel />
+
+    <!-- 合规审查（guard·compliance-review，INCR-176） -->
+    <ComplianceReviewPanel />
+
     <!-- 护眼盾 -->
     <EyeShieldPanel />
   </div>
@@ -135,6 +141,8 @@ import SensorIntegrationPanel from '../components/SensorIntegrationPanel.vue'
 import PersonalSafetyPanel from '../components/PersonalSafetyPanel.vue'
 import AnomalyDetectorPanel from '../components/AnomalyDetectorPanel.vue'
 import GuardArchivePanel from '../components/GuardArchivePanel.vue'
+import AuditTimelinePanel from '../components/AuditTimelinePanel.vue'
+import ComplianceReviewPanel from '../components/ComplianceReviewPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

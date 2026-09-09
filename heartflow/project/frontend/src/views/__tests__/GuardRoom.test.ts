@@ -537,4 +537,22 @@ describe('GuardRoom 视图', () => {
     expect(badge.exists()).toBe(true)
     expect(badge.text()).toContain('0 异常')
   })
+
+  // ============================================================
+  // 批量收口：审计时间线面板（INCR-176）
+  // ============================================================
+
+  it('集成渲染审计时间线面板 AuditTimelinePanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'AuditTimelinePanel' }).exists()).toBe(true)
+  })
+
+  // ============================================================
+  // 批量收口：合规审查面板（INCR-176）
+  // ============================================================
+
+  it('集成渲染合规审查面板 ComplianceReviewPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'ComplianceReviewPanel' }).exists()).toBe(true)
+  })
 })
