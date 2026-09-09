@@ -602,3 +602,35 @@ describe('集成：休息提醒面板', () => {
     expect(wrapper.findComponent({ name: 'RestQualityPanel' }).exists()).toBe(true)
   })
 })
+
+// ============================================================
+// 集成：休憩档案面板（INCR-199：补挂载孤儿面板 RestArchivePanel）
+// ============================================================
+describe('集成：休憩档案面板', () => {
+  it('有记录时渲染休憩档案（概览/活动分布/节律/恢复健康/洞察）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.rap-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('休憩档案')
+    // 档案概览
+    expect(wrapper.text()).toContain('档案概览')
+    expect(wrapper.text()).toContain('总次数')
+    expect(wrapper.text()).toContain('总时长')
+    // 活动分布：2 条记录 → 2 行（meditation→冥想 / walk→散步）
+    expect(wrapper.text()).toContain('活动分布')
+    expect(wrapper.findAll('.rap-activity-row').length).toBe(2)
+    // 休憩节律 + 恢复健康
+    expect(wrapper.text()).toContain('休憩节律')
+    expect(wrapper.text()).toContain('恢复健康')
+    // 温和洞察
+    expect(wrapper.find('.rap-insights').exists()).toBe(true)
+  })
+
+  it('无记录时渲染空态引导（息壤未耕）', async () => {
+    mockKV.set('rest:break_records', [])
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.rap-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('休憩档案')
+    expect(wrapper.text()).toContain('息壤未耕')
+    expect(wrapper.find('.rap-empty').exists()).toBe(true)
+  })
+})
