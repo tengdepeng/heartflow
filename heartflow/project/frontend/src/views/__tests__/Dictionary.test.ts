@@ -96,7 +96,13 @@ vi.mock('../../stores/dictionary', () => ({
 
 async function getWrapper() {
   const { default: Dictionary } = await import('../Dictionary.vue')
-  return mount(Dictionary)
+  return mount(Dictionary, {
+    global: {
+      stubs: {
+        HandwritingPanel: { template: '<div class="hwp-stub" />' },
+      },
+    },
+  })
 }
 
 describe('Dictionary 视图', () => {
@@ -211,5 +217,10 @@ describe('Dictionary 视图', () => {
     await input.setValue('Flow')
     const cards = wrapper.findAll('.entry-card')
     expect(cards).toHaveLength(1)
+  })
+
+  it('渲染 HandwritingPanel 手写查字面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.hwp-stub').exists()).toBe(true)
   })
 })

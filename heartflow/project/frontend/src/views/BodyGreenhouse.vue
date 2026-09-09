@@ -301,6 +301,9 @@
     <!-- 健康提醒管理（body，INCR-175） -->
     <HealthRemindersPanel />
 
+    <!-- 健康报告档案（body，需要 logs prop，INCR-178） -->
+    <HealthReportPanel :logs="logs" />
+
     <!-- 近期记录 -->
     <section class="recent-logs" v-if="recentLogs.length">
       <h3 class="section-title">📜 近期记录</h3>
@@ -321,6 +324,10 @@ import BodyRingsPanel from '../components/BodyRingsPanel.vue'
 import NutritionPanel from '../components/NutritionPanel.vue'
 import MealNutritionPanel from '../components/MealNutritionPanel.vue'
 import ExerciseTrackerPanel from '../components/ExerciseTrackerPanel.vue'
+import ChronotypeAnalysisPanel from '../components/ChronotypeAnalysisPanel.vue'
+import HealthGoalsPanel from '../components/HealthGoalsPanel.vue'
+import HealthRemindersPanel from '../components/HealthRemindersPanel.vue'
+import HealthReportPanel from '../components/HealthReportPanel.vue'
 import { usePerceptionStore } from '../stores/perception'
 
 const { entranceRef, entranceClass } = useViewEntrance()

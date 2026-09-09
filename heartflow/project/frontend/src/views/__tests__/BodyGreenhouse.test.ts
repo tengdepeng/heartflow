@@ -114,6 +114,7 @@ async function getWrapper() {
         ChronotypeAnalysisPanel: true,
         HealthGoalsPanel: true,
         HealthRemindersPanel: true,
+        HealthReportPanel: { template: '<div class="hrp-stub" />' },
       },
     },
   })
@@ -265,5 +266,10 @@ describe('BodyGreenhouse 视图', () => {
   it('挂载健康提醒管理面板', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.findComponent({ name: 'HealthRemindersPanel' }).exists()).toBe(true)
+  })
+
+  it('挂载健康报告档案面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.hrp-stub').exists()).toBe(true)
   })
 })

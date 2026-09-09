@@ -1529,3 +1529,29 @@ export function useHealthReport() {
     DEFAULT_TEMPLATES,
   }
 }
+
+/**
+ * 从健康报告中提取温和洞察
+ */
+export function healthReportInsights(report: HealthReport | null): string[] {
+  if (!report) return ['暂无健康报告，点击「生成报告」创建一份']
+
+  const insights: string[] = []
+  const { summary } = report
+
+  if (summary.highlights.length > 0) {
+    insights.push(`亮点：${summary.highlights.slice(0, 2).join('、')}`)
+  }
+  if (summary.concerns.length > 0) {
+    insights.push(`需关注：${summary.concerns.slice(0, 2).join('、')}`)
+  }
+  if (summary.trackingDays > 0) {
+    insights.push(`已追踪 ${summary.trackingDays} 天，数据完整度 ${Math.round(summary.dataCompleteness * 100)}%`)
+  }
+  if (summary.scoreChange !== 0) {
+    const dir = summary.scoreChange > 0 ? '上升' : '下降'
+    insights.push(`综合评分较上期 ${dir} ${Math.abs(summary.scoreChange)} 分`)
+  }
+
+  return insights
+}

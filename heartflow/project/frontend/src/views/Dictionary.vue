@@ -120,6 +120,9 @@
     <!-- 字源随时查（INCR-04：拼音/部首/笔画查字） -->
     <HanziLookupPanel />
 
+    <!-- 手写查字（INCR-178） -->
+    <HandwritingPanel />
+
     <!-- 编辑模态框 -->
     <div data-enter v-if="showEditor" class="modal-overlay" @click.self="closeEditor">
       <div class="modal">
@@ -152,6 +155,7 @@ import { ref, computed } from 'vue'
 import { useDictionaryStore, type DictEntry } from '../stores/dictionary'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import HanziLookupPanel from '../components/HanziLookupPanel.vue'
+import HandwritingPanel from '../components/HandwritingPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useDictionaryStore()
