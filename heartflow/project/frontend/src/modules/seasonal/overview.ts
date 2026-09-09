@@ -216,3 +216,36 @@ export function buildYearComparison(
     activeMonths: overviews.map(o => o.stats.activeMonths),
   }
 }
+
+/** 温和洞察（≤limit 条）：空库引导 / 完成次数+最活跃月 / 渐成习惯 / 生命仪礼 / 年度对比生长 */
+export function yearOverviewInsights(
+  overview: YearOverview,
+  comparison?: YearComparison,
+  limit = 3,
+): string[] {
+  const { year, stats } = overview
+  const total = stats.totalRituals
+  if (total === 0 && stats.lifeRitualCount === 0 && stats.privateRitualCount === 0) {
+    return ['岁时阁还没有仪式记录。记下第一件想反复做的小仪式，它会落进年度俯瞰的某一格。']
+  }
+
+  const out: string[] = []
+  const peakLabel = overview.months[stats.peakMonth - 1]?.label ?? `${stats.peakMonth}月`
+  out.push(`${year} 年共完成 ${total} 次四季仪式，最活跃月是${peakLabel}。`)
+
+  if (stats.activeMonths >= 6) {
+    out.push(`仪式覆盖 ${stats.activeMonths} 个月，岁时渐成习惯。`)
+  }
+  if (stats.lifeRitualCount > 0) {
+    out.push(`这一年有 ${stats.lifeRitualCount} 场生命仪礼被记下。`)
+  }
+  if (comparison && comparison.years.length >= 2) {
+    const cur = comparison.rituals[comparison.rituals.length - 1]
+    const prev = comparison.rituals[comparison.rituals.length - 2]
+    const diff = cur - prev
+    if (diff > 0) out.push(`四季仪式较上年多 ${diff} 次，生长的痕迹清晰可见。`)
+    else if (diff < 0) out.push(`四季仪式较上年少 ${-diff} 次，时节还在，慢慢来。`)
+  }
+
+  return out.slice(0, limit)
+}

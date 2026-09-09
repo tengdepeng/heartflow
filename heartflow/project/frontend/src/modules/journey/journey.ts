@@ -120,6 +120,23 @@ export function journeySpanScore(journey: Journey): number {
   return Math.min(100, Math.round(journey.regions.length * 20 + Math.min(journey.spanDays, 40) * 1.5))
 }
 
+/** 温和洞察（≤4条）：空足迹守候引导 / 旅程数+覆盖天数 / 最长旅程 / 最近旅程 / 地理跨度最广 */
+export function journeyInsights(journeys: Journey[]): string[] {
+  if (journeys.length === 0) {
+    return ['足迹还空着。记下第一段行程，它会在这里串成一段旅程。']
+  }
+  const out: string[] = []
+  const totalDays = journeys.reduce((s, j) => s + j.spanDays, 0)
+  out.push(`已走过 ${journeys.length} 段旅程，足迹覆盖 ${totalDays} 天。`)
+  const longest = journeys.reduce((a, b) => (b.spanDays > a.spanDays ? b : a), journeys[0])
+  out.push(`最长的一段是「${longest.regions.join('、')}」，共 ${longest.spanDays} 天。`)
+  const recent = journeys[journeys.length - 1]
+  out.push(`最近旅程：${recent.startDate} → ${recent.endDate}，途经 ${recent.regions.join('、')}。`)
+  const widest = journeys.reduce((a, b) => (journeySpanScore(b) > journeySpanScore(a) ? b : a), journeys[0])
+  out.push(`地理跨度最广：${widest.regions.join('、')}，跨度分 ${journeySpanScore(widest)}。`)
+  return out.slice(0, 4)
+}
+
 // ============================================================
 // 组合 API（持久化）
 // ============================================================

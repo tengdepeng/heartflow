@@ -8,6 +8,7 @@ export {
   buildJourneys,
   computeJourneyStats,
   journeySpanScore,
+  journeyInsights,
   DEFAULT_JOURNEY_CONFIG,
 } from './journey'
 export type {

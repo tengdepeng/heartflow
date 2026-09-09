@@ -97,4 +97,33 @@ describe('MapRoom 本地坐标星图', () => {
     await flushPromises()
     expect(wrapper.findAll('.node-card').length).toBe(0)
   })
+
+  // ============================================================
+  // 旅程档案（INCR-58 设计，INCR-195 恢复挂载）
+  // ============================================================
+  it('渲染旅程档案面板（空态引导）', async () => {
+    const wrapper = await getWrapper()
+    await flushPromises()
+    expect(wrapper.find('.jap').exists()).toBe(true)
+    expect(wrapper.text()).toContain('旅程档案')
+    expect(wrapper.text()).toContain('旅程未启')
+  })
+
+  it('注入足迹记录后渲染旅程统计与清单', async () => {
+    const schema = readSchema()
+    schema.kvStore = schema.kvStore || {}
+    schema.kvStore['hf:footprint_records'] = [
+      { id: 'fp1', name: '故宫', region: '北京', date: '2026-01-05', type: 'sight' },
+      { id: 'fp2', name: '外滩', region: '上海', date: '2026-01-06', type: 'sight' },
+      { id: 'fp3', name: '西湖', region: '杭州', date: '2026-01-07', type: 'sight' },
+    ]
+    localStorage.setItem('heartflow:storage', JSON.stringify(schema))
+    invalidateCache()
+
+    const wrapper = await getWrapper()
+    await flushPromises()
+    expect(wrapper.text()).toContain('段旅程')
+    expect(wrapper.findAll('.jap-stat').length).toBe(4)
+    expect(wrapper.findAll('.jap-row').length).toBeGreaterThan(0)
+  })
 })

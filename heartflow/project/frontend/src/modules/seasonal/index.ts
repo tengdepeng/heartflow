@@ -27,6 +27,7 @@ export {
   buildYearOverview,
   getAvailableYears,
   buildYearComparison,
+  yearOverviewInsights,
 } from './overview'
 export type { YearOverview, MonthSummary, YearStats, YearComparison } from './overview'
 

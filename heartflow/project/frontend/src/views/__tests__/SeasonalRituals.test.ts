@@ -41,6 +41,8 @@ describe('SeasonalRituals 岁时阁视图', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockStore['hf:seasonal_rituals'] = []
+    mockStore['hf:rituals'] = []
+    mockStore['hf:life_rituals'] = []
   })
 
   // ------- 渲染标题和统计卡片 -------
@@ -162,6 +164,39 @@ describe('SeasonalRituals 岁时阁视图', () => {
     expect(sortBtns[0].classes()).toContain('active')
     expect(sortBtns[0].find('.sr-sort-arrow').exists()).toBe(true)
     expect(sortBtns[1].classes()).not.toContain('active')
+  })
+
+  // ------- 年度俯瞰面板（INCR-196） -------
+  it('渲染年度俯瞰面板（空态引导）', async () => {
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.syo-archive').exists()).toBe(true)
+    expect(wrapper.text()).toContain('年度俯瞰')
+    // 空态：无仪式时给出守候引导
+    expect(wrapper.find('.syo-empty').exists()).toBe(true)
+  })
+
+  it('年度俯瞰注入仪式后展示月度分布与洞察', async () => {
+    const year = new Date().getFullYear()
+    mockStore['hf:seasonal_rituals'] = [
+      makeRitual({ id: 'r1', name: '踏青', count: 3, lastCompletedAt: `${year}-03-15T00:00:00Z` }),
+    ]
+    mockStore['hf:rituals'] = [{ id: 'p1', name: '晨读', date: `${year}-04-10`, note: '', icon: '🕯' }]
+    mockStore['hf:life_rituals'] = [{ id: 'l1', name: '婚礼', date: `${year}-05-20`, note: '', icon: '💒', type: '婚礼' }]
+
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.syo-archive').exists()).toBe(true)
+    // 月度分布热力格
+    expect(wrapper.find('.syo-heat-cell').exists()).toBe(true)
+    // 统计格：四季仪式 / 最活跃月 / 生命仪礼 / 私人仪式
+    expect(wrapper.text()).toContain('四季仪式')
+    expect(wrapper.text()).toContain('生命仪礼')
+    expect(wrapper.text()).toContain('私人仪式')
+    // 温和洞察
+    expect(wrapper.find('.syo-insight').exists()).toBe(true)
   })
 })
 

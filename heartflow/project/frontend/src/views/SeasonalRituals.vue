@@ -357,6 +357,13 @@
 
     <!-- 季节日志 -->
     <JournalPanel />
+
+    <!-- 年度俯瞰（seasonal/overview 引擎：月度分布热力/年度对比/温和洞察，INCR-196） -->
+    <SeasonalYearOverviewPanel
+      :rituals="srCtx.rituals.value"
+      :lifeRituals="prCtx.lifeRituals.value"
+      :privateRituals="prCtx.rituals.value"
+    />
   </div>
 </template>
 
@@ -368,6 +375,7 @@ import type { SolarTerm, Festival } from '../modules/seasonal/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import JournalPanel from '../components/JournalPanel.vue'
 import SeasonalArchivePanel from '../components/SeasonalArchivePanel.vue'
+import SeasonalYearOverviewPanel from '../components/SeasonalYearOverviewPanel.vue'
 
 // ---- 模块化 composables ----
 const { entranceRef, entranceClass } = useViewEntrance()

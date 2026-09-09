@@ -146,6 +146,9 @@
     <!-- 足迹志 -->
     <FootprintPanel />
 
+    <!-- 旅程档案（journey 引擎：足迹聚类/统计/跨度，INCR-58 设计，INCR-195 恢复挂载） -->
+    <JourneyArchivePanel :records="records" />
+
     <!-- 观星指数 -->
     <ObservingPanel />
 
@@ -165,7 +168,9 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useMap } from '../modules/map'
 import type { Place } from '../modules/map'
+import { useFootprint } from '../modules/footprint'
 import FootprintPanel from '../components/FootprintPanel.vue'
+import JourneyArchivePanel from '../components/JourneyArchivePanel.vue'
 import ObservingPanel from '../components/ObservingPanel.vue'
 import TravelAnalyticsPanel from '../components/TravelAnalyticsPanel.vue'
 import SpatialPatternPanel from '../components/SpatialPatternPanel.vue'
@@ -173,6 +178,7 @@ import GeoProjectionPanel from '../components/GeoProjectionPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { places, lifeNodes, load, save, loadNodes, saveNodes } = useMap()
+const { records } = useFootprint()
 
 // 内置城市经纬度（完全本地，无任何外部请求 / 瓦片 / SDK）
 const CITY_COORDS: Record<string, { lng: number; lat: number }> = {
