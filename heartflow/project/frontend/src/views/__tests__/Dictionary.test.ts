@@ -223,4 +223,19 @@ describe('Dictionary 视图', () => {
     const wrapper = await getWrapper()
     expect(wrapper.find('.hwp-stub').exists()).toBe(true)
   })
+
+  it('渲染自定义字库面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.chp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('自定义字库')
+    expect(wrapper.text()).toContain('字库还是空的')
+  })
+
+  it('自定义字库可添加汉字', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.chp-char').setValue('㵘')
+    await wrapper.find('input[placeholder="释义"]').setValue('大水之意')
+    await wrapper.find('.chp-add-btn').trigger('click')
+    expect(wrapper.text()).toContain('㵘')
+  })
 })
