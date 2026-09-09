@@ -180,6 +180,11 @@
       <BagOrganizePanel />
     </section>
 
+    <!-- ===== 物品进化（bag/evolution 引擎：进化统计/添加路径/可进化物品/进化路径，INCR-207） ===== -->
+    <section class="bag-section">
+      <BagEvolutionPanel />
+    </section>
+
     <!-- ===== 成长轨迹 ===== -->
     <section class="bag-section">
       <div class="bag-section-header">
@@ -327,6 +332,7 @@ import { useBagStore } from '../modules/bag'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import BagAnalyticsPanel from '../components/BagAnalyticsPanel.vue'
 import BagOrganizePanel from '../components/bag/BagOrganizePanel.vue'
+import BagEvolutionPanel from '../components/BagEvolutionPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

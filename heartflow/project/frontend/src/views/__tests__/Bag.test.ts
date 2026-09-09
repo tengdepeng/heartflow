@@ -135,6 +135,23 @@ vi.mock('../../modules/bag', () => ({
   CATEGORY_TYPES: CATEGORY_TYPES_MOCK,
 }))
 
+// BagEvolutionPanel 依赖 storage（bag:evolution-paths），补 mock 隔离（INCR-207）
+vi.mock('../../engine/storage', () => ({
+  storage: {
+    getKV: vi.fn((key: string, fallback?: any) => {
+      const store: Record<string, any> = { 'bag:evolution-paths': [] }
+      return store[key] ?? fallback
+    }),
+    setKV: vi.fn(),
+    getConfig: () => ({
+      display: { trendNoteCount: 20, titleTruncateLength: 8, excerptTruncateLength: 80, tagDisplayCount: 2, statsWindowDays: 30, searchResultLimit: 10, dreamStorageLimit: 100, cleanupThresholdDays: 30, moveTrajectoryCount: 20, healthRecentSleepCount: 14, healthRecentExerciseCount: 30, healthRecentMealCount: 5, noteMaxLength: 100, uploadImageMaxBytes: 5242880, uploadVideoMaxBytes: 104857600 },
+      health: { exerciseTarget: 150, sleepTarget: 7, sleepMinThreshold: 6, sleepCriticalThreshold: 5, sleepExcellentThreshold: 7.5 },
+      worklog: { overtimeRate: 1.5, nightRate: 1.3, defaultStart: '09:00', defaultEnd: '18:00', trendDays: 30, trendMonths: 6, recentShiftLimit: 15 },
+    }),
+    setConfig: vi.fn(),
+  },
+}))
+
 // =============================================================
 // 挂载辅助函数
 // =============================================================
@@ -394,5 +411,52 @@ describe('生长状态演化', () => {
       expect(card.find('.bcm-growth-icon').exists()).toBe(true)
       expect(card.find('.bcm-growth-name').exists()).toBe(true)
     }
+  })
+})
+
+// ============================================================
+// 集成：物品进化面板（INCR-207：补挂载孤儿面板 BagEvolutionPanel）
+// ============================================================
+
+describe('集成：物品进化面板', () => {
+  it('渲染物品进化面板含统计与空态', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.bep')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('物品进化')
+    expect(wrapper.text()).toContain('进化统计')
+    expect(wrapper.findAll('.bep-stat').length).toBe(3)
+    expect(wrapper.text()).toContain('总路径')
+    expect(wrapper.text()).toContain('进行中')
+    expect(wrapper.text()).toContain('已丰收')
+    // 空态引导
+    expect(wrapper.find('.bep-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('暂无进化路径')
+    // 添加输入
+    expect(wrapper.find('.bep-input').exists()).toBe(true)
+    expect(wrapper.find('.bep-btn--primary').exists()).toBe(true)
+  })
+
+  it('添加进化路径后出现在列表并统计更新', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.bep-input').setValue('吉他')
+    await wrapper.find('.bep-btn--primary').trigger('click')
+    expect(wrapper.text()).toContain('吉他')
+    expect(wrapper.find('.bep-path').exists()).toBe(true)
+    expect(wrapper.find('.bep-stage-track').exists()).toBe(true)
+    // 种子阶段节点
+    expect(wrapper.text()).toContain('种子')
+    // 统计更新：总路径 1
+    expect(wrapper.text()).toContain('1')
+  })
+
+  it('删除进化路径', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.bep-input').setValue('吉他')
+    await wrapper.find('.bep-btn--primary').trigger('click')
+    expect(wrapper.findAll('.bep-path').length).toBe(1)
+    await wrapper.find('.bep-btn--danger').trigger('click')
+    expect(wrapper.findAll('.bep-path').length).toBe(0)
+    expect(wrapper.find('.bep-empty').exists()).toBe(true)
   })
 })
