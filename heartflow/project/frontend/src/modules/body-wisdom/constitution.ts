@@ -296,6 +296,14 @@ export function useConstitutionAnalyzer() {
   }
 
   /**
+   * 清除体质分析结果（重新测评）
+   */
+  async function clearAnalysis(): Promise<void> {
+    analysis.value = null
+    storage.removeKV(BODY_WISDOM_STORAGE_KEYS.CONSTITUTION)
+  }
+
+  /**
    * 计算当前五运六气
    */
   function calculateFiveMovementsSixQi(date?: Date): FiveMovementsSixQi {
@@ -385,6 +393,7 @@ export function useConstitutionAnalyzer() {
     analysis,
     analyzeFromAnswers,
     saveAnalysis,
+    clearAnalysis,
     calculateFiveMovementsSixQi,
     generateWellnessAdvice,
     load,

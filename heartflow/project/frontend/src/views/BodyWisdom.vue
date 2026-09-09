@@ -79,6 +79,8 @@
         <div v-for="(n,i) in bodyNotes.slice(0,5)" :key="i" class="bw-note-item">{{n}}</div>
       </section>
       <button class="bw-note-btn" @click="openNote('body')">✎ 记一笔</button>
+      <!-- 体质问卷 · 中医体质画像（body-wisdom/constitution 引擎：问卷→分析→雷达/画像，INCR-208） -->
+      <ConstitutionPanel />
       <!-- 体质趋势（constitution-trend 模块，原已实现但未挂载） -->
       <ConstitutionTrendPanel />
       <!-- 节气养生（solar-term 模块） -->
@@ -192,6 +194,7 @@ import { useHealth } from '../resonance/bridges/health'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { derivePassiveHealthImagery } from '../modules/body-wisdom/passive-health-imagery'
 import ConstitutionTrendPanel from '../components/ConstitutionTrendPanel.vue'
+import ConstitutionPanel from '../components/ConstitutionPanel.vue'
 import SolarTermPanel from '../components/body-wisdom/SolarTermPanel.vue'
 import MedicinalDietPanel from '../components/body-wisdom/MedicinalDietPanel.vue'
 import HealthArchivePanel from '../components/HealthArchivePanel.vue'
@@ -199,7 +202,7 @@ import MeridianCheckPanel from '../components/MeridianCheckPanel.vue'
 import MeridianVisualizationPanel from '../components/MeridianVisualizationPanel.vue'
 import HealthAnalysisPanel from '../components/HealthAnalysisPanel.vue'
 import { MERIDIAN_HOURS } from '../modules/body-wisdom'
-import type { MeridianRecord } from '../modules/body-wisdom'
+import type { MeridianRecord, MoodRecord } from '../modules/body-wisdom'
 
 const health = useHealth()
 const { meridianLogs, wisdomLogs, readingLogs, bodyNotes, senseNotes, sutraNotes } = health

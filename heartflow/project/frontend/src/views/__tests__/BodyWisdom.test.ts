@@ -61,6 +61,27 @@ vi.mock('pinia', () => {
   }
 })
 
+// ConstitutionPanel 依赖 storage（hf:body_wisdom_constitution），补 mock 隔离（INCR-208）
+vi.mock('../../engine/storage', () => ({
+  storage: {
+    getKV: vi.fn((key: string, fallback?: any) => {
+      const store: Record<string, any> = {
+        'hf:body_wisdom_constitution': null,
+        'hf:body_wisdom_meridians': [],
+        'hf:body_wisdom_moods': [],
+      }
+      return store[key] ?? fallback
+    }),
+    setKV: vi.fn(),
+    getConfig: () => ({
+      display: { trendNoteCount: 20, titleTruncateLength: 8, excerptTruncateLength: 80, tagDisplayCount: 2, statsWindowDays: 30, searchResultLimit: 10, dreamStorageLimit: 100, cleanupThresholdDays: 30, moveTrajectoryCount: 20, healthRecentSleepCount: 14, healthRecentExerciseCount: 30, healthRecentMealCount: 5, noteMaxLength: 100, uploadImageMaxBytes: 5242880, uploadVideoMaxBytes: 104857600 },
+      health: { exerciseTarget: 150, sleepTarget: 7, sleepMinThreshold: 6, sleepCriticalThreshold: 5, sleepExcellentThreshold: 7.5 },
+      worklog: { overtimeRate: 1.5, nightRate: 1.3, defaultStart: '09:00', defaultEnd: '18:00', trendDays: 30, trendMonths: 6, recentShiftLimit: 15 },
+    }),
+    setConfig: vi.fn(),
+  },
+}))
+
 async function getWrapper() {
   const { default: BodyWisdom } = await import('../BodyWisdom.vue')
   return mount(BodyWisdom, {
@@ -205,5 +226,44 @@ describe('BodyWisdom 藏象阁', () => {
     expect(wrapper.text()).toContain('经络健康概览')
     expect(wrapper.text()).toContain('2')
     expect(wrapper.text()).toContain('良好率')
+  })
+})
+
+// ============================================================
+// 集成：体质画像问卷面板（INCR-208：补挂载孤儿面板 ConstitutionPanel）
+// ============================================================
+
+describe('集成：体质画像问卷面板', () => {
+  it('渲染问卷模式含九组体质问题与进度', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.cp')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('体质画像')
+    // 9 组体质问题
+    expect(wrapper.findAll('.cp-group').length).toBe(9)
+    expect(wrapper.text()).toContain('平和质')
+    // 进度 + 提交按钮
+    expect(wrapper.text()).toContain('已完成')
+    const submitBtn = wrapper.find('.cp-submit')
+    expect(submitBtn.exists()).toBe(true)
+    expect(submitBtn.attributes('disabled')).toBeDefined()
+  })
+
+  it('全部作答后提交生成体质画像结果', async () => {
+    const wrapper = await getWrapper()
+    // 每题选第一个选项
+    const opts = wrapper.findAll('.cp-opt')
+    expect(opts.length).toBeGreaterThan(0)
+    for (const opt of opts) {
+      await opt.trigger('click')
+    }
+    // 进度满 + 提交按钮可用
+    const submitBtn = wrapper.find('.cp-submit')
+    expect(submitBtn.attributes('disabled')).toBeUndefined()
+    await submitBtn.trigger('click')
+    // 结果模式：雷达图 + 主体质
+    expect(wrapper.find('.cp-radar').exists()).toBe(true)
+    expect(wrapper.find('.cp-primary').exists()).toBe(true)
+    expect(wrapper.text()).toContain('主体质')
   })
 })
