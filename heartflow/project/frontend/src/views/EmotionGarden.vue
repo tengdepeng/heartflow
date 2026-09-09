@@ -86,17 +86,28 @@
       </div>
     </div>
 
-    <header data-enter class="garden-header">
-      <div class="header-ornament">
-        <span class="orn-line" />
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line" />
-      </div>
-      <p class="garden-kicker">只记录，不裁判</p>
-      <h1 class="garden-title">情绪花房</h1>
-      <p class="garden-desc">每一种情绪都先有位置，再谈理解。你不需要解释自己为什么这样，只需要把这一朵花放下。</p>
+    <RoomHeader
+      class="garden-room-header"
+      data-enter
+      :ornament="false"
+      subtitle="每一种情绪都先有位置，再谈理解。你不需要解释自己为什么这样，只需要把这一朵花放下。"
+    >
+      <template #ornament>
+        <div class="header-ornament">
+          <span class="orn-line" />
+          <span class="orn-diamond">✦</span>
+          <span class="orn-line" />
+        </div>
+      </template>
+      <template #kicker>
+        <span class="garden-kicker">只记录，不裁判</span>
+      </template>
+      <template #title>
+        <span class="garden-title">情绪花房</span>
+      </template>
 
       <!-- 概览卡片 -->
+      <template #meta>
       <div class="garden-overview">
         <article v-for="item in overviewCards" :key="item.label" class="overview-card">
           <span class="ov-label">{{ item.label }}</span>
@@ -276,7 +287,8 @@
         </div>
         <span class="env-status-text">{{ envScore >= 70 ? '环境适宜，花朵绽放' : envScore >= 30 ? '环境一般，状态正常' : '环境恶劣，花朵枯萎' }}</span>
       </div>
-    </header>
+      </template>
+    </RoomHeader>
 
     <!-- 灵犀标记 -->
     <div class="lingxi-mark" v-if="lingxiVisited" title="灵犀来过">
@@ -489,6 +501,9 @@
 
     <!-- 快乐盒子（emotion/happy-box 模块） -->
     <HappyBoxPanel />
+
+    <!-- 环境音景（emotion/flower-season 模块，INCR-181） -->
+    <SoundscapePanel />
   </div>
 </template>
 
@@ -502,9 +517,11 @@ import { useAdvisor } from '../resonance/bridges/advisor'
 import GardenFlower from '../components/GardenFlower.vue'
 import GardenHealthPanel from '../components/GardenHealthPanel.vue'
 import HappyBoxPanel from '../components/HappyBoxPanel.vue'
+import SoundscapePanel from '../components/SoundscapePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'
+import RoomHeader from '../components/RoomHeader.vue'
 
 // A2.3 批3：情绪可视化是否展示受宪法「情绪可视化」条款门控
 // （emotion:visualization，enable 型默认开启＝默认显示；关闭条款即隐藏趋势图与日历）。
@@ -1209,7 +1226,7 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
 /* ============================================================
    头部 - 自然花房氛围
    ============================================================ */
-.garden-header {
+.garden-room-header {
   padding: 36px 32px 20px;
   flex-shrink: 0;
   position: relative;
@@ -1217,6 +1234,27 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0;
+}
+.garden-room-header :deep(.rh-main) {
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.garden-room-header :deep(.rh-titles) {
+  align-items: center;
+  gap: 0;
+}
+.garden-room-header :deep(.rh-title) {
+  margin: 0;
+}
+.garden-room-header :deep(.rh-subtitle) {
+  max-width: 600px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.8;
+  color: rgba(var(--text-primary-rgb), 0.45);
+  margin-bottom: 20px;
 }
 
 /* 装饰横条 - 仿藤蔓枝叶 */
@@ -2562,7 +2600,7 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
    响应式
    ============================================================ */
 @media (max-width: 860px) {
-  .garden-header { padding: 24px 16px 16px; }
+  .garden-room-header { padding: 24px 16px 16px; }
   .garden-overview { grid-template-columns: 1fr; }
   .garden-title { font-size: 26px; }
   .selected-preview { align-items: flex-start; }
@@ -2573,7 +2611,7 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
 }
 
 @media (max-width: 480px) {
-  .garden-header { padding: 48px 12px 12px; }
+  .garden-room-header { padding: 48px 12px 12px; }
   .garden-title { font-size: 22px; letter-spacing: 3px; }
   .garden-kicker { font-size: 10px; letter-spacing: 2px; }
 

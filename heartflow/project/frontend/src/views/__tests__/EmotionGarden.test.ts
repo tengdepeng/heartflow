@@ -460,4 +460,17 @@ describe('EmotionGarden 安全岛光路（蓝图心理安全机制）', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.safety-path').exists()).toBe(false)
   })
+
+  it('渲染环境音景面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.scp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('环境音景')
+  })
+
+  it('音景面板展示默认音景列表与音量控制', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.scp-list').exists()).toBe(true)
+    expect(wrapper.find('.scp-volume').exists()).toBe(true)
+    expect(wrapper.text()).toContain('音量')
+  })
 })
