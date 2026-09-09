@@ -390,6 +390,8 @@ import { useWorklogAnalytics, useWorkLog } from '../modules/worklog'
 import type { WorkShift } from '../modules/worklog'
 import WorklogExportPanel from '../components/WorklogExportPanel.vue'
 import WorklogRewardPanel from '../components/WorklogRewardPanel.vue'
+import ProductivityPanel from '../components/ProductivityPanel.vue'
+import WorkRhythmPanel from '../components/WorkRhythmPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
