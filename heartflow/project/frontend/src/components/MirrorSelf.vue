@@ -285,7 +285,7 @@ function persistWidget() {
 function hideBead() { hidden.value = true; persistWidget() }
 function restoreBead() { hidden.value = false; persistWidget() }
 
-// 左滑切房间：向上转发新房间 id（Home 经 AdvisorDock v-model 接住并切换当前房间）
+// 左滑切房间：向父组件抛出新房间 id（update:activeRoomId 事件，供父组件监听以切换当前房间）
 const emit = defineEmits<{ (e: 'update:activeRoomId', id: string): void }>()
 
 const showDialogue = ref(false)

@@ -27,10 +27,13 @@
       </div>
 
       <!-- 预设列表 -->
-      <div v-if="scenePresets.length === 0" class="deco-empty">
-        <span class="deco-empty-icon">🏗</span>
-        <span class="deco-empty-text">尚未保存任何场景预设</span>
-      </div>
+      <EmptyState
+        v-if="scenePresets.length === 0"
+        :glow="false"
+        icon="🏗"
+        title="尚未保存任何场景预设"
+        cta-label=""
+      />
 
       <div v-else class="deco-preset-grid">
         <div
@@ -98,6 +101,7 @@
 
 <script setup lang="ts">
 import { useCraftUi } from '../../modules/craft/useCraftUi'
+import EmptyState from '../EmptyState.vue'
 const ui = useCraftUi()
 const { scenePresets, presetNameInput, handleSavePreset, renamingId, renameInput, renameInputRef, handleRenameConfirm, handleApplyPreset, handleDeletePreset, startRenaming, isActivePreset, sceneIndicatorClass, sceneIndicatorIcon, presetSceneLabel, decoMessage, decoMessageType } = ui
 </script>

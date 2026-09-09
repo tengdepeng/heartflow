@@ -26,15 +26,20 @@
           </div>
         </div>
       </div>
-      <div v-else class="wip-empty">
-        <span class="wip-empty-text">没有正在打磨的半成品</span>
-      </div>
+      <EmptyState
+        v-else
+        :glow="false"
+        icon="🔧"
+        title="没有正在打磨的半成品"
+        cta-label=""
+      />
     </section>
 </template>
 
 <script setup lang="ts">
 import { useCraftUi } from '../../modules/craft/useCraftUi'
 import { STATUS_LABEL } from '../../modules/craft/types'
+import EmptyState from '../EmptyState.vue'
 const ui = useCraftUi()
 const { wipWorks } = ui
 </script>

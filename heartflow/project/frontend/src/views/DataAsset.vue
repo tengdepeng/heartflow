@@ -174,7 +174,13 @@
           </div>
         </div>
       </div>
-      <p v-else class="da-none">数据资产状态良好，暂无建议。</p>
+      <EmptyState
+        v-else
+        icon="💡"
+        title="数据资产状态良好"
+        hint="暂无优化建议，继续保持"
+        cta-label=""
+      />
     </section>
   </div>
 </template>
@@ -185,6 +191,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomNavigation } from '../composables/useRoomNavigation'
 import { useDataAssetBridge } from '../modules/data-asset'
 import { getRoom } from '../engine/room-graph'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceClass, entranceRef } = useViewEntrance()
 const nav = useRoomNavigation()
@@ -314,8 +321,6 @@ onMounted(() => {
 .da-rec-body { display: flex; flex-direction: column; gap: 2px; }
 .da-rec-title { font-size: 12px; font-weight: 600; color: var(--text-high, #d8c3a5); }
 .da-rec-desc { font-size: 11px; color: rgba(232, 221, 208, 0.5); margin: 0; line-height: 1.5; }
-
-.da-none { font-size: 12px; color: rgba(232, 221, 208, 0.45); text-align: center; padding: 16px 0; margin: 0; }
 
 @media (max-width: 640px) {
   .da { padding: 20px 14px 48px; }

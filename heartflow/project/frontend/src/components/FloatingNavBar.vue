@@ -48,7 +48,7 @@
         v-if="!isFocus"
         class="bar-btn bar-astro"
         @click="astrolabe.open('bar')"
-        title="打开星盘 (Ctrl+K)"
+        title="打开星盘（命令面板搜「星盘」）"
         aria-label="打开星盘"
       >
         <span class="bar-astro-icon">✦</span>

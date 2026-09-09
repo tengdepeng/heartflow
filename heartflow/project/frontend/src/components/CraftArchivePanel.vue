@@ -6,9 +6,12 @@
         <span class="cap-title">✨ 匠庐档案</span>
         <span class="cap-badge cap-badge-neutral">匠庐未启</span>
       </div>
-      <p class="cap-empty">
-        炉火尚温。还没有任何作品陈列于此。落一件「样作」、打磨到「细琢」，匠心的成色便会在这面墙上显影。
-      </p>
+      <EmptyState
+        icon="✨"
+        title="炉火尚温"
+        hint="还没有任何作品陈列于此。落一件「样作」、打磨到「细琢」，匠心的成色便会在这面墙上显影。"
+        cta-label=""
+      />
     </template>
 
     <!-- 填充态 -->
@@ -136,6 +139,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useCraftStore } from '../modules/craft'
+import EmptyState from './EmptyState.vue'
 import {
   craftOverview,
   craftStatusRows,
@@ -201,11 +205,6 @@ function pct(v: number): string {
   color: var(--text-secondary, #b5aa98);
   border-color: var(--border-light, #3a332a);
   background: transparent;
-}
-.cap-empty {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
 }
 .cap-block {
   margin-top: 18px;

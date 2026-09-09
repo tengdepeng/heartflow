@@ -340,17 +340,13 @@ export function useAstrolabe(opts?: {
     }
   }
 
-  /** 全局键盘快捷键 */
+  /**
+   * 全局键盘快捷键（仅星盘已打开时生效：Esc 关闭、/ 聚焦搜索）。
+   * 注意：Ctrl/Cmd+K 不再用于召唤星盘——该键位已归属命令面板
+   * （App.vue 的 onCommandKeydown），避免一次按键同时弹出两层遮罩互相遮挡。
+   * 星盘的键盘入口改为：命令面板「星盘导航」动作（act:astrolabe）。
+   */
   function onGlobalKeydown(e: KeyboardEvent) {
-    if (!cfg.enableKeyboardShortcuts) return
-
-    // Ctrl+K 或 Command+K 呼出星盘
-    if ((e.ctrlKey || e.metaKey) && e.key === cfg.summonKey) {
-      e.preventDefault()
-      toggle('keyboard')
-      return
-    }
-
     // 星盘打开时的快捷键
     if (!visibility.value.visible) return
 

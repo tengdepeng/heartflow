@@ -41,15 +41,19 @@
           </div>
         </div>
       </div>
-      <div v-else class="et-empty">
-        <span class="et-empty-icon">📜</span>
-        <span class="et-empty-text">暂无进化记录</span>
-      </div>
+      <EmptyState
+        v-else
+        :glow="false"
+        icon="📜"
+        title="暂无进化记录"
+        cta-label=""
+      />
     </section>
 </template>
 
 <script setup lang="ts">
 import { useCraftUi } from '../../modules/craft/useCraftUi'
+import EmptyState from '../EmptyState.vue'
 const ui = useCraftUi()
 const { timelineEntries } = ui
 </script>

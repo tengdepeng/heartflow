@@ -14,7 +14,14 @@
         <div class="will-stat"><span class="will-stat-num">{{ inherited.length }}</span><span class="will-stat-label">已传承</span></div>
         <div class="will-stat"><span class="will-stat-num">{{ heritageCount }}</span><span class="will-stat-label">传承级</span></div>
       </div>
-      <p v-if="allWills.length === 0" class="will-empty">尚无遗志。载体退休时，其积累将凝结为遗志，等待新载体继承。</p>
+      <EmptyState
+        v-if="allWills.length === 0"
+        :glow="false"
+        icon="📜"
+        title="尚无遗志"
+        hint="载体退休时，其积累将凝结为遗志，等待新载体继承。"
+        cta-label=""
+      />
     </div>
 
     <!-- 遗志列表 -->
@@ -35,7 +42,14 @@
           <button class="will-btn danger" @click="removeWill(w.id)">删除</button>
         </li>
       </ul>
-      <p v-else class="will-empty">暂无遗志记录。</p>
+      <EmptyState
+        v-else
+        :glow="false"
+        icon="📜"
+        title="暂无遗志记录"
+        hint="载体退休时，其积累将凝结为遗志。"
+        cta-label=""
+      />
     </div>
 
     <!-- 传承链 -->
@@ -61,6 +75,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useWill } from '../../modules/will'
 import { WILL_GRADES } from '../../modules/will'
 import type { WillGrade } from '../../modules/will'
+import EmptyState from '../EmptyState.vue'
 
 const willApi = useWill()
 const expandedId = ref<string | null>(null)

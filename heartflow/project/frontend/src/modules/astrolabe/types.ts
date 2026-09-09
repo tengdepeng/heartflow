@@ -11,9 +11,9 @@ export interface AstrolabeConfig {
   maxRecentRooms: number
   /** 搜索延迟（ms） */
   searchDebounce: number
-  /** 是否启用键盘快捷键 */
+  /** @deprecated 星盘不再占用 Ctrl/Cmd+K（该键位已归属命令面板）。保留字段仅为兼容既有持久化配置，请勿用于召唤星盘。 */
   enableKeyboardShortcuts: boolean
-  /** 快捷键：呼出星盘 */
+  /** @deprecated 同上，已废弃。星盘的键盘入口改为命令面板「星盘导航」动作（act:astrolabe）。 */
   summonKey: 'k' | 'space' | 'slash'
   /** 是否启用长按手势 */
   enableLongPress: boolean

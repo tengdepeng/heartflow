@@ -81,14 +81,6 @@
   color: var(--text-low);
 }
 
-.will-empty {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.6;
-  color: var(--text-low);
-  text-align: center;
-}
-
 .will-list {
   list-style: none;
   margin: 0;

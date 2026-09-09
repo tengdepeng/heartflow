@@ -120,18 +120,20 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-if="store.filteredWorks.length === 0" class="craft-empty">
-        <span class="craft-empty-icon">🔨</span>
-        <span class="craft-empty-text">
-          {{ store.works.length === 0 ? '还没有作品，点击「新作品」开始创作吧' : '没有匹配的作品' }}
-        </span>
-      </div>
+      <EmptyState
+        v-if="store.filteredWorks.length === 0"
+        :glow="false"
+        icon="🔨"
+        :title="store.works.length === 0 ? '还没有作品，点击「新作品」开始创作吧' : '没有匹配的作品'"
+        cta-label=""
+      />
     </section>
 </template>
 
 <script setup lang="ts">
 import { useCraftUi } from '../../modules/craft/useCraftUi'
 import { STATUS_LABEL, TYPE_LABEL } from '../../modules/craft/types'
+import EmptyState from '../EmptyState.vue'
 const ui = useCraftUi()
 const { searchInput, store, openCreateModal, statusFilterChips, configRef, getLightForm, evolutionStages, polishingId, handlePolishWork, openEditModal, handleDeleteWork } = ui
 </script>

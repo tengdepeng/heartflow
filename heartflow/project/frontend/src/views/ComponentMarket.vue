@@ -42,6 +42,13 @@
 
     <!-- 组件网格 -->
     <div data-enter class="cm-grid">
+      <EmptyState
+        v-if="filteredComponents.length === 0"
+        icon="🔌"
+        title="该分类暂无组件"
+        hint="换个分类看看，或稍后再来"
+      />
+      <template v-else>
       <article
         v-for="comp in filteredComponents"
         :key="comp.id"
@@ -186,6 +193,7 @@
           </button>
         </div>
       </article>
+      </template>
     </div>
 
     <!-- 配置弹窗 -->
@@ -264,6 +272,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import EmptyState from '../components/EmptyState.vue'
 
 // ---- 组件类型定义 ----
 const { entranceRef, entranceClass } = useViewEntrance()

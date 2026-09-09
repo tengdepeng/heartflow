@@ -55,7 +55,14 @@
           <button class="will-btn" @click="toggleExpand(t.id)">{{ expandedId === t.id ? '收起' : '详情' }}</button>
         </li>
       </ul>
-      <p v-else class="will-empty">尚无遗嘱。立下第一份遗嘱，为珍视之物安排归宿。</p>
+      <EmptyState
+        v-else
+        :glow="false"
+        icon="🏛️"
+        title="尚无遗嘱"
+        hint="立下第一份遗嘱，为珍视之物安排归宿。"
+        cta-label=""
+      />
     </div>
 
     <!-- 遗嘱详情 -->
@@ -85,7 +92,14 @@
           <button class="will-btn danger" @click="removeClause(expanded.id, c.id)">×</button>
         </li>
       </ul>
-      <p v-else class="will-empty">暂无条款，封印前至少需要一条条款。</p>
+      <EmptyState
+        v-else
+        :glow="false"
+        icon="📝"
+        title="暂无条款"
+        hint="封印前至少需要一条条款。"
+        cta-label=""
+      />
 
       <!-- 受益人 -->
       <div class="will-row">
@@ -103,7 +117,14 @@
           <button class="will-btn danger" @click="removeBeneficiary(expanded.id, b.id)">×</button>
         </li>
       </ul>
-      <p v-else class="will-empty">暂无受益人。</p>
+      <EmptyState
+        v-else
+        :glow="false"
+        icon="🤝"
+        title="暂无受益人"
+        hint="为珍视之物指定归属。"
+        cta-label=""
+      />
     </div>
   </section>
 </template>
@@ -118,6 +139,7 @@ import {
   TRIGGER_LABELS,
 } from '../../modules/will'
 import type { TestamentType, TestamentTrigger } from '../../modules/will'
+import EmptyState from '../EmptyState.vue'
 
 const testament = useTestament()
 const expandedId = ref<string | null>(null)

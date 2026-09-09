@@ -265,9 +265,10 @@ describe('Craft 匠庐视图', () => {
     const wrapper = await getWrapper()
     await wrapper.vm.$nextTick()
 
-    const empty = wrapper.find('.craft-empty')
-    expect(empty.exists()).toBe(true)
-    expect(empty.text()).toContain('还没有作品')
+    const empties = wrapper.findAll('.hf-empty')
+    const empty = empties.find((e) => e.text().includes('还没有作品'))
+    expect(empty).toBeTruthy()
+    expect(empty!.text()).toContain('还没有作品')
   })
 
   it('空状态：搜索无结果时显示不同提示', async () => {
@@ -280,9 +281,10 @@ describe('Craft 匠庐视图', () => {
     await input.setValue('不存在的作品')
     await wrapper.vm.$nextTick()
 
-    const empty = wrapper.find('.craft-empty')
-    expect(empty.exists()).toBe(true)
-    expect(empty.text()).toContain('没有匹配的作品')
+    const empties = wrapper.findAll('.hf-empty')
+    const empty = empties.find((e) => e.text().includes('没有匹配的作品'))
+    expect(empty).toBeTruthy()
+    expect(empty!.text()).toContain('没有匹配的作品')
   })
 
   // ============================
@@ -506,8 +508,10 @@ describe('半成品工作台', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.find('.wip-bench').exists()).toBe(false)
-    expect(wrapper.find('.wip-empty').exists()).toBe(true)
-    expect(wrapper.find('.wip-empty-text').text()).toContain('没有正在打磨的半成品')
+    const empties = wrapper.findAll('.hf-empty')
+    const empty = empties.find((e) => e.text().includes('没有正在打磨的半成品'))
+    expect(empty).toBeTruthy()
+    expect(empty!.text()).toContain('没有正在打磨的半成品')
   })
 })
 
@@ -516,6 +520,13 @@ describe('半成品工作台', () => {
 // =============================================================
 
 describe('匠庐档案面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockWorks.value = []
+    mockSearchQuery.value = ''
+    mockFilterStatus.value = ''
+  })
+
   it('空态显示「匠庐未启」引导', async () => {
     const wrapper = await getWrapper()
     await wrapper.vm.$nextTick()
