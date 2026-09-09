@@ -133,4 +133,22 @@ describe('WordMirror 字镜阁', () => {
     expect(wrapper.text()).toContain('trans')
     expect(wrapper.find('.wroot-legend').exists()).toBe(true)
   })
+
+  it('词汇自习室渲染词汇游戏面板', async () => {
+    const wrapper = await getWrapper()
+    const vocabTab = wrapper.findAll('.wm-tab').find(btn => btn.text() === '词汇自习室')
+    if (vocabTab) await vocabTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.wgp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('词汇游戏')
+  })
+
+  it('词汇游戏面板提供游戏类型选择', async () => {
+    const wrapper = await getWrapper()
+    const vocabTab = wrapper.findAll('.wm-tab').find(btn => btn.text() === '词汇自习室')
+    if (vocabTab) await vocabTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    const types = wrapper.findAll('.wgp-chip')
+    expect(types.length).toBeGreaterThan(0)
+  })
 })

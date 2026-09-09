@@ -210,6 +210,9 @@
 
     <!-- 词根词缀拆解（wisdom/word-roots 引擎，INCR-187） -->
     <WordRootPanel />
+
+    <!-- 词汇游戏（word-mirror/word-games 引擎：闪卡·配对·填空·词源，INCR-192） -->
+    <WordGamesPanel :words="wordEntries" />
     </template>
 
     <!-- ============== Tab 3: 联想网络 ============== -->
@@ -396,6 +399,7 @@ import { dueWords, nextReviewState } from '../modules/word-mirror/spaced-repetit
 import TextAnalysisPanel from '../components/TextAnalysisPanel.vue'
 import WordNetworkPanel from '../components/WordNetworkPanel.vue'
 import WordRootPanel from '../components/WordRootPanel.vue'
+import WordGamesPanel from '../components/WordGamesPanel.vue'
 import WritingAssistantPanel from '../components/WritingAssistantPanel.vue'
 import ReviewSessionPanel from '../components/ReviewSessionPanel.vue'
 import DailyRecommendationPanel from '../components/DailyRecommendationPanel.vue'
