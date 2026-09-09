@@ -134,6 +134,9 @@
 
     <!-- 记忆档案（INCR-03：背书匠/Khan 记忆沉淀） -->
     <MemoryArchivePanel />
+
+    <!-- 诗词卡片（wisdom/poetry 引擎，INCR-183） -->
+    <PoetryCardPanel />
   </div>
 </template>
 
@@ -152,6 +155,7 @@ import RecitePanel from '../components/RecitePanel.vue'
 import MasteryPanel from '../components/MasteryPanel.vue'
 import VocabPanel from '../components/VocabPanel.vue'
 import MemoryArchivePanel from '../components/MemoryArchivePanel.vue'
+import PoetryCardPanel from '../components/PoetryCardPanel.vue'
 import WisdomArchivePanel from '../components/WisdomArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()

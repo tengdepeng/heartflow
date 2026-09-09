@@ -114,4 +114,16 @@ describe('WisdomPavilion 知微阁', () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('暂无记录，在上面添加一条吧')
   })
+
+  it('渲染诗词卡片面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.pcp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('诗词卡片')
+  })
+
+  it('诗词卡片展示今日一诗', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('今日一诗')
+    expect(wrapper.text()).toContain('收藏')
+  })
 })
