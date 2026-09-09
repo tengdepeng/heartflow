@@ -14,12 +14,15 @@ import { useTimerStore } from '../../stores/timer'
 import { useNoteEditor } from '../note/useNoteEditor'
 import { storage } from '../../engine/storage'
 import type { CommandTask } from '../../stores/advisor'
+import { advisorActionAllowed } from './restraint'
 
 export interface CommandActionResult {
   /** 是否真正执行了动作（区别于纯汇报 / 跳转型） */
   acted: boolean
   /** 若执行过程中发生了路由跳转，记录目标路由 */
   navigated?: string
+  /** 是否被宪法第44条「幕僚的克制」拦截（代执行动作被禁止） */
+  blockedByRestraint?: boolean
 }
 
 export function useCommandExecutor() {
@@ -30,6 +33,10 @@ export function useCommandExecutor() {
    * 返回是否真正执行了副作用，以及是否发生了路由跳转（供调用方决策）。
    */
   function runAction(task: CommandTask): CommandActionResult {
+    // 宪法第44条「幕僚的克制」：受限动作在克制生效时拦截，幕僚不得代用户决策/发送/交易/外部交互
+    if (!advisorActionAllowed(task.taskType)) {
+      return { acted: false, blockedByRestraint: true }
+    }
     switch (task.taskType) {
       case 'focus': {
         // 真办事：开启一段专注计时（全局 timerStore 单例，跨路由照常走时）

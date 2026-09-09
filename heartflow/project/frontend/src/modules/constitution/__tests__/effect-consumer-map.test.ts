@@ -1,6 +1,6 @@
 // ============================================================
 // effect-consumer-map 宪法效果消费账本 · 测试（A2.1）
-// 验证：42 个目标全覆盖、与 CONSUMED_TARGETS 真实消费语义一致、关键修正项正确。
+// 验证：45 个目标全覆盖、与 CONSUMED_TARGETS 真实消费语义一致、关键修正项正确。
 // 本表为「宪法之实」的单一事实源，任何接线/误标都必须在此暴露。
 // ============================================================
 
@@ -14,10 +14,10 @@ import {
 import { CONSUMED_TARGETS, DEFAULT_EFFECT_MAP } from '../../../engine/constitution-effects'
 
 describe('消费账本完整性', () => {
-  it('枚举全部 42 个 EffectTarget 且无重复', () => {
-    expect(EFFECT_CONSUMER_MAP.length).toBe(42)
+  it('枚举全部 45 个 EffectTarget 且无重复', () => {
+    expect(EFFECT_CONSUMER_MAP.length).toBe(45)
     const uniq = new Set(EFFECT_CONSUMER_MAP.map(c => c.target))
-    expect(uniq.size).toBe(42)
+    expect(uniq.size).toBe(45)
   })
 
   it('每条记录 label 由引擎 getTargetLabel 提供（非空、非 target 本身）', () => {
@@ -39,14 +39,14 @@ describe('与 CONSUMED_TARGETS 的真实消费语义一致', () => {
     }
   })
 
-  it('已解析 42 个、待接线 0 个（29 运行时真实消费 + 13 诚实声明式 declared）', () => {
+  it('已解析 45 个、待接线 0 个（32 运行时真实消费 + 13 诚实声明式 declared）', () => {
     const resolved = EFFECT_CONSUMER_MAP.filter(c => c.consumed)
-    expect(resolved.length).toBe(42)
+    expect(resolved.length).toBe(45)
     expect(getPendingTargets().length).toBe(0)
     const declared = EFFECT_CONSUMER_MAP.filter(c => c.mechanism === 'declared')
     expect(declared.length).toBe(13)
     const runtime = EFFECT_CONSUMER_MAP.filter(c => c.consumed && c.mechanism !== 'declared')
-    expect(runtime.length).toBe(29)
+    expect(runtime.length).toBe(32)
   })
 
   it('已消费条目 mechanism 不得为 pending', () => {
@@ -100,7 +100,7 @@ describe('关键修正项（A2.4 诚实度）', () => {
 })
 
 // A2-EXT P1b · 反漂移 CI：账本与引擎定义同源
-// 账本是 EffectTarget 类型（42）的完整审计镜像；DEFAULT_EFFECT_MAP 是其中"有默认
+// 账本是 EffectTarget 类型（45）的完整审计镜像；DEFAULT_EFFECT_MAP 是其中"有默认
 // effect 的规则映射"（去重 35，为类型的子集）。本组断言守「引擎定义的 effect 不漏审计」：
 // 任何在 DEFAULT_EFFECT_MAP 新增/改写的 target，若账本未登记，此处必红。
 // （账本不捏造非法 target 由 vue-tsc 编译期保证，无需运行时重复。）

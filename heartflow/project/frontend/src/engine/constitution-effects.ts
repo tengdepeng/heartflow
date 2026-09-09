@@ -52,6 +52,9 @@ export type EffectTarget =
   | 'scene:night-dim'           // 夜静调暗
   | 'scene:sabbath'             // 数字安息日
   | 'advisor:long-dormancy'     // 长眠守护
+  | 'perception:enabled'        // 感知逐项授权（第43条·感知的边界）
+  | 'advisor:restraint'         // 幕僚克制：不代用户决策/发送/交易（第44条）
+  | 'data:forget'               // 遗忘四态：老化/封存/释放/冬眠（第45条）
 
 /** 效果类型 */
 export type EffectType = 'enable' | 'disable' | 'reduce' | 'increase' | 'set'
@@ -605,7 +608,7 @@ export const DEFAULT_EFFECT_MAP: ConstitutionEffect[] = [
     scope: 'OS 级与应用内主动通知默认关闭，仅保留用户预约/守护室逐项开启的例外',
   },
 
-  // === 第43条 分享的本地边界 ===
+  // === 第49条 分享的本地边界 ===
   {
     ruleId: 'elastic-share-local',
     target: 'share:local-only',
@@ -614,7 +617,7 @@ export const DEFAULT_EFFECT_MAP: ConstitutionEffect[] = [
     scope: '社区内容交换不触云，不强制云端账号；下载内容不含个人数据',
   },
 
-  // === 第44条 禁打扰红线 ===
+  // === 第50条 禁打扰红线 ===
   {
     ruleId: 'elastic-no-disturb',
     target: 'ui:notification',
@@ -623,7 +626,7 @@ export const DEFAULT_EFFECT_MAP: ConstitutionEffect[] = [
     scope: '任何插件/模板/社区内容不得包含主动打扰设计（与第5/52条叠加）',
   },
 
-  // === 第45条 禁攀比红线 ===
+  // === 第51条 禁攀比红线 ===
   {
     ruleId: 'elastic-no-comparison',
     target: 'stats:comparison',
@@ -659,7 +662,7 @@ export const DEFAULT_EFFECT_MAP: ConstitutionEffect[] = [
     scope: '收回后切片变暗为半透明不可展开标记（注明来源已收回）',
   },
 
-  // === 第49条 夜静调暗 ===
+  // === 第53条 夜静调暗 ===
   {
     ruleId: 'elastic-night-dim',
     target: 'scene:night-dim',
@@ -676,7 +679,7 @@ export const DEFAULT_EFFECT_MAP: ConstitutionEffect[] = [
     scope: '夜静模式下场景过渡时长降低至 70%，营造安静节律',
   },
 
-  // === 第50条 数字安息日 ===
+  // === 第54条 数字安息日 ===
   {
     ruleId: 'elastic-digital-sabbath',
     target: 'scene:sabbath',
@@ -685,13 +688,40 @@ export const DEFAULT_EFFECT_MAP: ConstitutionEffect[] = [
     scope: '周期性数字断联',
   },
 
-  // === 第51条 长眠守护 ===
+  // === 第55条 长眠守护 ===
   {
     ruleId: 'elastic-long-dormancy',
     target: 'advisor:long-dormancy',
     type: 'enable',
     description: '连续三月未打开殿堂，所有幕僚进入沉睡',
     scope: '长期不活跃后的安静收束',
+  },
+
+  // === 第43条 感知的边界（v21.3 依蓝图回补）===
+  {
+    ruleId: 'elastic-perception-boundary',
+    target: 'perception:enabled',
+    type: 'enable',
+    description: '感知逐项授权：每一项环境感知都需用户单独开启',
+    scope: '位置/光线/电量/网络/运动/时段逐项开关；感知数据不出本地，仅输出脱敏摘要',
+  },
+
+  // === 第44条 幕僚的克制（v21.3 依蓝图回补）===
+  {
+    ruleId: 'elastic-advisor-restraint',
+    target: 'advisor:restraint',
+    type: 'enable',
+    description: '幕僚不得代用户决策、发送消息、执行交易或代表用户与外部交互',
+    scope: '建议只能是「你可以考虑」而非「你应该」；表达看法须标注为主观',
+  },
+
+  // === 第45条 遗忘的权利（v21.3 依蓝图回补）===
+  {
+    ruleId: 'elastic-forget-right',
+    target: 'data:forget',
+    type: 'enable',
+    description: '遗忘四态可用：老化 / 封存 / 释放 / 冬眠',
+    scope: '数据可自然老化变淡、手动封存、永久释放、整体冬眠；六种退出方式均被尊重',
   },
 ]
 
@@ -755,6 +785,9 @@ export const CONSUMED_TARGETS: ReadonlySet<EffectTarget> = new Set<EffectTarget>
   'scene:transition',
   'ui:empty-space',
   'ui:silence',
+  // perception:enabled：第43条 感知的边界——stores/perception 经 maskUnauthorizedPerception
+  // 按 authorizedDimensions 逐项授权遮蔽未授权维度（isTargetActive 运行时门控）。
+  'perception:enabled',
   // 注意：sanctuary:enable 不在 CONSUMED_TARGETS 中。桌面静默覆盖（useDesktopSilentOverlay）
   // 直接读取 elastic-sanctuary 规则（useRuleEnabled('elastic-sanctuary')），而非经由
   // isTargetActive('sanctuary:enable') 效果目标系统；本集合仅登记「经 isTargetActive 消费的
@@ -763,6 +796,9 @@ export const CONSUMED_TARGETS: ReadonlySet<EffectTarget> = new Set<EffectTarget>
   'scene:night-dim',
   'scene:sabbath',
   'advisor:long-dormancy',
+  // advisor:restraint：第44条 幕僚的克制——commandExecutor.runAction 经 advisorActionAllowed
+  // 拦截代执行动作（send/trade/external-interact），isTargetActive 运行时门控。
+  'advisor:restraint',
   'seed:inherit',
   'seed:scope',
   'seed:revoke',
@@ -780,6 +816,9 @@ export const CONSUMED_TARGETS: ReadonlySet<EffectTarget> = new Set<EffectTarget>
   // 经 isTargetActive 运行时门控；默认由 elastic-safety disable 规则关闭，入口不渲染。
   // 归入真实消费集，与 effect-consumer-map 的 module-gate 分类保持一致（反漂移同源）。
   'data:cleanup',
+  // data:forget：第45条 遗忘的权利——sovereignty-engine.executeForgetting 经 isTargetActive
+  // 在遗忘权关闭时拦截全部遗忘操作（老化/封存/释放/冬眠/仪式）。
+  'data:forget',
   // emotion:neutral：任务②落地——情绪中性呈现（views/EmotionGarden.vue 根 ambient 类
   // 经 isTargetActive 运行时门控）；默认关闭→保持氛围辉光。归入真实消费集，与
   // effect-consumer-map 的 composable 分类保持一致（反漂移同源）。

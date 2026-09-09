@@ -1,6 +1,6 @@
 // ============================================================
 // 心流工坊 · 宪法效果消费映射（A2.1 · 单一事实源）
-// 枚举全部 42 个 EffectTarget，逐条标注「是否被运行时真实消费」及消费位置。
+// 枚举全部 45 个 EffectTarget，逐条标注「是否被运行时真实消费」及消费位置。
 // 与 engine/constitution-effects.ts 的 CONSUMED_TARGETS 保持一致的「真实消费」语义，
 // 本表为可审计、可 grep 的权威清单：宪法编辑器据此给每条条款标
 // 「生效中 / 声明式·不影响运行时」，避免用户误以为所有开关都会改变产品。
@@ -71,8 +71,8 @@ export const EFFECT_CONSUMER_MAP: EffectConsumer[] = [
   { target: 'ui:silence', label: getTargetLabel('ui:silence'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'components/CanvasParticles.vue', note: 'A2.3 批1 已接线' },
   { target: 'ui:empty-space', label: getTargetLabel('ui:empty-space'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'views/HomeSpace.vue', note: 'A2.3 批1 已接线' },
   { target: 'scene:transition', label: getTargetLabel('scene:transition'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'views/HomeSpace.vue', note: 'A2.3 批1 已接线' },
-  { target: 'scene:night-dim', label: getTargetLabel('scene:night-dim'), form: 'visual', consumed: true, mechanism: 'composable', consumer: 'composables/useNightDim.ts + views/App.vue', note: 'A2.3 批1 已接线' },
-  { target: 'scene:sabbath', label: getTargetLabel('scene:sabbath'), form: 'visual', consumed: true, mechanism: 'composable', consumer: 'composables/useDigitalSabbath.ts + views/App.vue', note: 'A2.3 批1 已接线' },
+  { target: 'scene:night-dim', label: getTargetLabel('scene:night-dim'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'engine/constitution-effect.ts(applyConstitutionVisualEffects→:root) + views/App.vue(.night-dim-overlay.active opacity)', note: '死接线已修复：宪法引擎注入强度倍率，App.vue 叠层 opacity 消费之' },
+  { target: 'scene:sabbath', label: getTargetLabel('scene:sabbath'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'engine/constitution-effect.ts(applyConstitutionVisualEffects→:root) + views/App.vue(.sabbath-overlay.active opacity)', note: '死接线已修复：宪法引擎注入强度倍率，App.vue 叠层 opacity 消费之' },
   { target: 'scene:preset', label: getTargetLabel('scene:preset'), form: 'visual', consumed: true, mechanism: 'declared', consumer: '（诚实声明式·无运行时门控·已封口）', note: 'A2 账本封口：场景预设切换无对应可门控运行时特征——经实测场景预设特性已存在（装修工坊背景预设 CRUD：engine/storage/scene-preset.ts + CraftScenePresets.vue，scene-preset.test 全绿），本质为用户主动操作（保存/应用预设）、非宪法效果目标，无 isTargetActive 门控点；故永久诚实声明式·不影响宪法运行时·不伪造宪法之实【已存在特性·用户操作·非宪法效果目标·永久诚实声明】' },
 
   // ===== 幕僚身份 / 表达（compliance-override / module-gate）=====
@@ -105,7 +105,7 @@ export const EFFECT_CONSUMER_MAP: EffectConsumer[] = [
   { target: 'relation:unbounded', label: getTargetLabel('relation:unbounded'), form: 'data', consumed: true, mechanism: 'declared', consumer: '（诚实声明式·无运行时门控·已封口）', note: 'A2 账本封口：关系留白无对应可门控运行时特征（关系数据未做自动分析即天然留白，relation:auto-analyze 已消费），诚实声明式·不影响运行时·不伪造宪法之实【决策已定·永久诚实声明·永不建】' },
   { target: 'note:auto-categorize', label: getTargetLabel('note:auto-categorize'), form: 'data', consumed: true, mechanism: 'declared', consumer: '（诚实声明式·无运行时门控·已封口）', note: 'A2 账本封口：笔记自动分类无对应可门控运行时逻辑（无 auto-categorize 实现），诚实声明式·不影响运行时·不伪造宪法之实' },
   { target: 'note:fragment', label: getTargetLabel('note:fragment'), form: 'data', consumed: true, mechanism: 'declared', consumer: '（诚实声明式·无运行时门控·已封口）', note: 'A2 账本封口：片段记录无对应可门控运行时特征（笔记已支持片段形式，无宪法门控点），诚实声明式·不影响运行时·不伪造宪法之实' },
-  { target: 'stats:comparison', label: getTargetLabel('stats:comparison'), form: 'data', consumed: true, mechanism: 'declared', consumer: '（诚实声明式·无运行时门控·已封口）', note: 'A2 账本封口：统计比较性展示无对应可门控组件（无排行/比较 UI），第45条禁攀比由 elastic-no-comparison 约束，诚实声明式·不影响运行时·不伪造宪法之实【决策已定·永久诚实声明·永不建】' },
+  { target: 'stats:comparison', label: getTargetLabel('stats:comparison'), form: 'data', consumed: true, mechanism: 'declared', consumer: '（诚实声明式·无运行时门控·已封口）', note: 'A2 账本封口：统计比较性展示无对应可门控组件（无排行/比较 UI），第51条禁攀比由 elastic-no-comparison 约束，诚实声明式·不影响运行时·不伪造宪法之实【决策已定·永久诚实声明·永不建】' },
   { target: 'stats:show-panel', label: getTargetLabel('stats:show-panel'), form: 'data', consumed: true, mechanism: 'composable', consumer: 'components/StatsPanel.vue (root v-if 门控 isTargetActive)', note: 'A2.3 批3 已接线（统计面板显隐受宪法条款门控，默认启用零行为变化）' },
 
   // ===== 安全岛（pending）=====
@@ -117,6 +117,11 @@ export const EFFECT_CONSUMER_MAP: EffectConsumer[] = [
   { target: 'seed:inherit', label: getTargetLabel('seed:inherit'), form: 'sharing', consumed: true, mechanism: 'module-gate', consumer: 'modules/play/seed-transfer.ts', note: 'A2.3 已接线' },
   { target: 'seed:scope', label: getTargetLabel('seed:scope'), form: 'sharing', consumed: true, mechanism: 'module-gate', consumer: 'modules/play/seed-transfer.ts', note: 'A2.3 已接线' },
   { target: 'seed:revoke', label: getTargetLabel('seed:revoke'), form: 'sharing', consumed: true, mechanism: 'module-gate', consumer: 'modules/play/seed-transfer.ts', note: 'A2.3 已接线' },
+
+  // ===== v21.3 依蓝图回补的 3 个新目标（待接线·诚实 pending）=====
+  { target: 'perception:enabled', label: getTargetLabel('perception:enabled'), form: 'behavior', consumed: true, mechanism: 'module-gate', consumer: 'stores/perception.ts（setEnvironment/patchEnvironment 经 maskUnauthorizedPerception 按 authorizedDimensions 逐项遮蔽未授权维度）', note: 'v21.3 第43条「感知的边界」已接线：感知 store 唯一写入点按时逐项授权遮蔽。设置 UI 经 setDimensionAuthorized 控制授权集' },
+  { target: 'advisor:restraint', label: getTargetLabel('advisor:restraint'), form: 'identity', consumed: true, mechanism: 'module-gate', consumer: 'modules/advisor/restraint.ts（advisorActionAllowed）→ commandExecutor.runAction 顶部拦截代执行动作', note: 'v21.3 第44条「幕僚的克制」已接线：commandExecutor 在落地前经 advisorActionAllowed 校验，受限动作(send/trade/external-interact)在克制生效时被拦截' },
+  { target: 'data:forget', label: getTargetLabel('data:forget'), form: 'data', consumed: true, mechanism: 'module-gate', consumer: 'modules/data-sovereignty/sovereignty-engine.ts（executeForgetting 顶部 isTargetActive 拦截）', note: 'v21.3 第45条「遗忘的权利」已接线：遗忘引擎 executeForgetting 在遗忘权(data:forget)关闭时早返回 success:false，老化/封存/释放/冬眠/仪式全受控' },
 ]
 
 /**

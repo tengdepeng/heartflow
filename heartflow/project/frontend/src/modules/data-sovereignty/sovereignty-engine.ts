@@ -11,6 +11,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
+import { isTargetActive } from '../../engine/constitution-effect'
 import type {
   ForgetMethod,
   ForgetMethodInfo,
@@ -489,6 +490,28 @@ export function executeForgetting(
   prefix: string,
   method: ForgetMethod
 ): ForgetResult {
+  // 宪法第45条「遗忘的权利」：权利关闭时禁止任何遗忘操作（老化/封存/释放/冬眠/仪式）
+  if (!isTargetActive('data:forget')) {
+    const blocked: ForgettingRecord = {
+      id: `forget-blocked-${Date.now()}`,
+      moduleKey,
+      moduleName,
+      method,
+      timestamp: Date.now(),
+      affectedCount: 0,
+      freedBytes: 0,
+      recoverable: false,
+    }
+    return {
+      success: false,
+      moduleKey,
+      moduleName,
+      method,
+      affectedCount: 0,
+      freedBytes: 0,
+      record: blocked,
+    }
+  }
   try {
     let affectedCount = 0
     let freedBytes = 0
