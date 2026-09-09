@@ -326,6 +326,9 @@
       </div>
     </section>
 
+    <!-- 劳酬联动（reward·worklog-bridge：工时日志一键变现为收入记录，INCR-167） -->
+    <WorklogRewardPanel />
+
     <!-- 记录列表 -->
     <section class="wl-shift-section" v-if="paginatedShifts.length > 0">
       <div class="wl-shift-list">
@@ -380,6 +383,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useWorklogAnalytics, useWorkLog } from '../modules/worklog'
 import type { WorkShift } from '../modules/worklog'
 import WorklogExportPanel from '../components/WorklogExportPanel.vue'
+import WorklogRewardPanel from '../components/WorklogRewardPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

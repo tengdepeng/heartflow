@@ -624,3 +624,38 @@ describe('跨房间联动 (Cross-Room Linkage)', () => {
     })
   })
 })
+
+// ============================================================
+// 集成：劳酬联动面板（INCR-167：补挂载 claim-but-orphan 面板）
+// ============================================================
+describe('集成：劳酬联动面板', () => {
+  beforeEach(() => {
+    delete mockStore['worklog:entries']
+  })
+
+  it('挂载劳酬联动面板并渲染标题、开关徽标与统计', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.wrp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('劳酬联动')
+    expect(wrapper.find('.wrp-tag').text()).toContain('已开启')
+    expect(wrapper.find('.wrp-stats').exists()).toBe(true)
+    expect(wrapper.text()).toContain('累计映射')
+    expect(wrapper.text()).toContain('累计收入')
+  })
+
+  it('空日志时无可桥接项且一键桥接按钮禁用', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('没有可桥接的日志')
+    expect(wrapper.find('.wrp-btn').attributes('disabled')).toBeDefined()
+  })
+
+  it('有长工时时预估待桥接条数并启用一键桥接', async () => {
+    mockStore['worklog:entries'] = [
+      { id: 'e1', type: 'journal', title: '灰度系统重构', content: '今天完成了灰度系统重构与蓝图归档，推进多房间联动收口，共八个不同功能区块逐项核验。', tags: ['重构', '归档'], sessionIds: [], createdAt: '2026-09-09T10:00:00.000Z', updatedAt: '2026-09-09T10:00:00.000Z' },
+    ]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('预估 1 条')
+    expect(wrapper.find('.wrp-btn').attributes('disabled')).toBeUndefined()
+  })
+})
