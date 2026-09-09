@@ -102,6 +102,20 @@ export function sanitizeCarrier(input: unknown): AdvisorCarrier | undefined {
     carrier.formLabel = obj.formLabel.trim().slice(0, 32)
   }
 
+  // 全维度视觉设置：色彩 / 辉光 / 大小（缺省不落盘，消费端用 CARRIER_VISUAL_DEFAULTS 兜底）
+  if (typeof obj.tint === 'string' && /^#?[0-9a-fA-F]{3,8}$/.test(obj.tint)) {
+    carrier.tint = obj.tint.startsWith('#') ? obj.tint : `#${obj.tint}`
+  }
+  if (typeof obj.glow === 'number' && isFinite(obj.glow)) {
+    carrier.glow = Math.min(1, Math.max(0, obj.glow))
+  }
+  if (typeof obj.size === 'number' && isFinite(obj.size)) {
+    carrier.size = Math.min(1.4, Math.max(0.8, obj.size))
+  }
+  if (typeof obj.glass === 'number' && isFinite(obj.glass)) {
+    carrier.glass = Math.min(1, Math.max(0, obj.glass))
+  }
+
   if (obj.stages && typeof obj.stages === 'object') {
     const stages = obj.stages as Record<string, unknown>
     const outStages: Partial<Record<AdvisorCarrierStage, AdvisorCarrier>> = {}
@@ -150,7 +164,7 @@ export function parseCarrierFile(text: string): CarrierFilePayload {
 
 /** 触发浏览器下载一个 .carrier 文件（纯本地，不触云） */
 export function downloadCarrierFile(carrier: AdvisorCarrier, name: string): void {
-  // 第43条本地边界：载体分享仅限本地 .carrier 文件，拦截任何云端目标
+  // 第49条本地边界：载体分享仅限本地 .carrier 文件，拦截任何云端目标
   assertShareLocalOnly('local')
   const text = exportCarrierFile(carrier, name)
   const safeName = (name || 'carrier').replace(/[^\w一-龥-]+/g, '_').slice(0, 32)

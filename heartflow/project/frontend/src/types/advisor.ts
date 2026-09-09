@@ -212,6 +212,14 @@ export interface AdvisorCarrier {
   imageData?: string
   /** 形态标签（如「玉珠」「萤火虫光点」，供展示与导出） */
   formLabel?: string
+  /** 视觉自定义：主色（hex，可选；缺省由 CARRIER_VISUAL_DEFAULTS 兜底） */
+  tint?: string
+  /** 视觉自定义：辉光强度 0–1（可选） */
+  glow?: number
+  /** 视觉自定义：缩放 0.8–1.4（可选） */
+  size?: number
+  /** 视觉自定义：玻璃/通透度 0–1（可选） */
+  glass?: number
   /** 各生命阶段形态覆盖（可选；缺省阶段沿用顶层形态） */
   stages?: Partial<Record<AdvisorCarrierStage, AdvisorCarrier>>
 }

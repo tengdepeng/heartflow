@@ -34,7 +34,7 @@
       <p v-if="importError" class="ce-error">{{ importError }}</p>
       <p class="ce-hint">社区分享以本地文件形式进行，绝不上传云端（符合本地私有）。</p>
       <p v-if="shareLocalOnly" class="ce-notice">
-        宪法第43条「分享的本地边界」已生效：载体分享仅限本地 .carrier 文件或 P2P，不经任何官方服务器。
+        宪法第49条「分享的本地边界」已生效：载体分享仅限本地 .carrier 文件或 P2P，不经任何官方服务器。
       </p>
     </section>
   </div>
@@ -55,7 +55,7 @@ import CarrierFormPiece from './CarrierFormPiece.vue'
 const props = defineProps<{ modelValue?: AdvisorCarrier }>()
 const emit = defineEmits<{ (e: 'update:modelValue', v: AdvisorCarrier): void }>()
 
-// 第43条 分享的本地边界（默认启用，UI 据以提示用户）
+// 第49条 分享的本地边界（默认启用，UI 据以提示用户）
 const shareLocalOnly = isShareLocalOnly()
 
 function emptyCarrier(): AdvisorCarrier {

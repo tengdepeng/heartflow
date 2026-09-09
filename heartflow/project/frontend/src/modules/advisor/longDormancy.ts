@@ -1,5 +1,5 @@
 // ============================================================
-// 长眠守护（宪法第51条 · elastic-long-dormancy → advisor:long-dormancy）
+// 长眠守护（宪法第55条 · elastic-long-dormancy → advisor:long-dormancy）
 // 纯函数层：判定某幕僚是否进入「长眠」（条款启用 且 长时间未被打开）。
 // 与夜静调暗/数字安息日同属「时间节律家族」，但作用对象是幕僚的沉睡状态，
 // 由 advisor store 的 applyLongDormancy 在运行时落实为 state 切换。

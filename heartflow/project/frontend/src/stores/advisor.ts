@@ -174,7 +174,7 @@ export const useAdvisorStore = defineStore('advisor', () => {
   }
 
   /**
-   * 长眠守护（宪法第51条 elastic-long-dormancy → advisor:long-dormancy）。
+   * 长眠守护（宪法第55条 elastic-long-dormancy → advisor:long-dormancy）。
    * 周期性落实「长眠→slumber / 重新互动→awake」状态切换：
    * - 超过阈值且当前不在 slumber → 置 slumber（自然沉睡）
    * - 当前为 slumber 但已重新互动（lastActiveAt 近期）→ 唤醒回 awake
