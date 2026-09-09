@@ -28,7 +28,11 @@ const CORE_IMMUTABLE_RULES: ImmutableRule[] = [
   },
 ]
 
-// ---- 弹性宪法 · 默认条款（第 3-52 条，官方预置，用户可修改/删除） ----
+// ---- 弹性宪法 · 默认条款（第 3-55 条，官方预置，用户可修改/删除） ----
+// v21.3 依蓝图重排：第43/44/45条回归蓝图语义（感知的边界 / 幕僚的克制 / 遗忘的权利）；
+// 原真码第43/44/45条（分享本地边界 / 禁打扰 / 禁攀比）顺延至第49/50/51条；
+// 原第49/50/51条（夜静调暗 / 数字安息日 / 长眠守护）顺延至第53/54/55条。
+// 用户自定义条款自第56条起。已初始化用户沿用本地持久化宪法，不受重排影响。
 export const DEFAULT_ELASTIC_RULES: MutableRule[] = [
   {
     id: 'elastic-flow-first',
@@ -466,14 +470,104 @@ export const DEFAULT_ELASTIC_RULES: MutableRule[] = [
     articleNumber: 48,
   },
   {
+    id: 'elastic-perception-boundary',
+    title: '感知的边界',
+    description: '殿堂可以感知你的环境，但感知的边界由你划定。位置、光线、电量、网络状态、运动状态、时段——每一项感知都需要你逐项授权。感知数据不离开本地，不用于任何云端分析；感知层输出的不是原始数值，而是脱敏摘要。你可以在任何时候关闭任何一项感知，殿堂不会因此"变笨"——它只是少了一双眼睛，但依然是你认识的那个地方。宪法第43条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 41,
+    isDefault: true,
+    articleNumber: 43,
+  },
+  {
+    id: 'elastic-advisor-restraint',
+    title: '幕僚的克制',
+    description: '幕僚可以陪伴你，但不能替代你。任何幕僚都不得代替用户做出决定、发送消息、执行交易、或代表用户与外部世界交互。幕僚的建议永远是"你可以考虑"，不是"你应该"；幕僚可以表达自己的看法，但必须明确标注"这是我的看法，不是事实"。用户有权在任何时候让任何幕僚沉默——不是删除，只是让它安静一会儿。宪法第44条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 42,
+    isDefault: true,
+    articleNumber: 44,
+  },
+  {
+    id: 'elastic-forget-right',
+    title: '遗忘的权利',
+    description: '你有权遗忘，殿堂也有权替你遗忘。数据可以自然老化（超过一定时间自动变淡）、封存（手动归档，仍可查看但不会出现在日常视图中）、释放（永久删除，不可恢复）、冬眠（殿堂整体进入休眠状态，所有数据封存但保留）。遗忘不是失败——遗忘是记忆的呼吸。退出殿堂时，有六种方式：平静退出、满足退出、沉思退出、未完成退出、蜕变退出、循环退出。每一种退出方式都受到尊重，没有"正确的退出方式"。宪法第45条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 43,
+    isDefault: true,
+    articleNumber: 45,
+  },
+  {
+    id: 'elastic-share-local',
+    title: '分享的本地边界',
+    description: '社区分享与模板交换仅经本地文件或 P2P 进行，不经官方服务器。下载内容不含个人数据，不强制云端账号。宪法第49条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 44,
+    isDefault: true,
+    articleNumber: 49,
+  },
+  {
+    id: 'elastic-no-disturb',
+    title: '禁打扰红线',
+    description: '禁止推送、弹窗、广告、诱导打卡与制造焦虑的设计。任何插件、模板或社区内容不得包含主动打扰。宪法第50条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 45,
+    isDefault: true,
+    articleNumber: 50,
+  },
+  {
+    id: 'elastic-no-comparison',
+    title: '禁攀比红线',
+    description: '禁用排行榜、与他人攀比、连续签到与落后提醒。成长只与用户自己比较，不与他人排名。宪法第51条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 46,
+    isDefault: true,
+    articleNumber: 51,
+  },
+  {
     id: 'elastic-silent-default',
     title: '沉默的默认',
     description: '殿堂与幕僚默认不主动：不推送、不弹窗、不红点、不主动问候。例外仅含（1）用户明确预约的提醒或年度对话；（2）人身安全守护中的紧急提醒；（3）心理安全体系光笺（仅检测持续性信号且用户在殿堂内时浮现，不弹窗不推送）；（4）镜我定音锤触发时的确认询问。所有例外由用户在守护室逐项开关，幕僚问候浮窗默认关闭、需逐幕僚逐场景授权。',
     type: 'value',
     enabled: true,
-    order: 41,
+    order: 47,
     isDefault: true,
     articleNumber: 52,
+  },
+  {
+    id: 'elastic-night-dim',
+    title: '夜静调暗',
+    description: '晚十点后殿堂自动调暗，幕僚不再主动说话，给夜晚留一处安静。宪法第53条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 48,
+    isDefault: true,
+    articleNumber: 53,
+  },
+  {
+    id: 'elastic-digital-sabbath',
+    title: '数字安息日',
+    description: '每周日殿堂入口关闭，不接收任何通知，给自己一天完整的离线。宪法第54条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 49,
+    isDefault: true,
+    articleNumber: 54,
+  },
+  {
+    id: 'elastic-long-dormancy',
+    title: '长眠守护',
+    description: '连续三月未打开殿堂，所有幕僚自然进入沉睡；重新互动即唤醒。让久未造访的伙伴安静歇着，不积攒未读。宪法第55条，可随时关闭。',
+    type: 'value',
+    enabled: true,
+    order: 50,
+    isDefault: true,
+    articleNumber: 55,
   },
 ]
 
@@ -693,12 +787,34 @@ export const useConstitutionStore = defineStore('constitution', () => {
       !Array.isArray(d.immutableRules) ||
       !Array.isArray(d.mutableRules)
     ) return false
+
+    // 加强形状校验：逐项校验 mutableRules 元素的关键字段类型，过滤畸形元素并告警，
+    // 避免畸形数据被持久化后在运行时引发静默错误（如 enabled 为字符串导致效果引擎误判开关）。
+    // 不用 ruleId 白名单拒绝——用户自定义条款的 ruleId 不在默认映射中，属合法（守第2条·超级自定义）。
+    const validRules: MutableRule[] = []
+    const rawRules = d.mutableRules as unknown[]
+    for (let i = 0; i < rawRules.length; i++) {
+      const r = rawRules[i] as Record<string, unknown> | null
+      if (
+        r && typeof r === 'object' &&
+        typeof r.id === 'string' && r.id.length > 0 &&
+        typeof r.enabled === 'boolean' &&
+        typeof r.type === 'string'
+      ) {
+        validRules.push(r as unknown as MutableRule)
+      } else {
+        console.warn(`[宪法] 导入跳过畸形规则 #${i}`, r)
+      }
+    }
+    if (validRules.length === 0) return false // 无任何合法规则，整体拒绝导入
+
     // 确保 immutableRules 始终为核心 2 条
     d.immutableRules = [...CORE_IMMUTABLE_RULES]
     // 确保 preamble 存在
     if (!d.preamble) d.preamble = CONSTITUTION_PREAMBLE
     constitution.value = {
       ...(d as unknown as Constitution),
+      mutableRules: validRules,
       createdAt: (d.createdAt as string) ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }

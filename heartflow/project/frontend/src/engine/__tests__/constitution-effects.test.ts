@@ -165,12 +165,12 @@ describe('groupEffectsByTarget', () => {
 })
 
 describe('宪法效果覆盖完整性（无零条目死开关）', () => {
-  // 蓝图定义 2 强制 + 50 弹性 = 52 条；弹性规则 id 均以 elastic- 开头，
-  // 且 DEFAULT_EFFECT_MAP 全部为 elastic-*（见上文测试）。故覆盖全部 50 条弹性规则
-  // 等价于「没有规则在 DEFAULT_EFFECT_MAP 中零条目」。
-  const EXPECTED_ELASTIC_COUNT = 50
+  // v21.3：蓝图定义 2 强制 + 53 弹性 = 55 条（新增第43/44/45条：感知的边界 / 幕僚的克制 / 遗忘的权利）。
+  // 弹性规则 id 均以 elastic- 开头，且 DEFAULT_EFFECT_MAP 全部为 elastic-*（见上文测试）。
+  // 故覆盖全部 53 条弹性规则等价于「没有规则在 DEFAULT_EFFECT_MAP 中零条目」。
+  const EXPECTED_ELASTIC_COUNT = 53
 
-  it('DEFAULT_EFFECT_MAP 覆盖全部 50 条弹性规则', () => {
+  it('DEFAULT_EFFECT_MAP 覆盖全部 53 条弹性规则', () => {
     const ids = [...new Set(DEFAULT_EFFECT_MAP.map(e => e.ruleId))]
     expect(ids.length).toBe(EXPECTED_ELASTIC_COUNT)
   })
@@ -193,8 +193,11 @@ describe('宪法效果覆盖完整性（无零条目死开关）', () => {
     }
   })
 
-  it('第43-51条红线规则映射到的 target 类型合法', () => {
+  it('第43-55条红线规则映射到的 target 类型合法', () => {
     const ids = [
+      'elastic-perception-boundary',
+      'elastic-advisor-restraint',
+      'elastic-forget-right',
       'elastic-share-local',
       'elastic-no-disturb',
       'elastic-no-comparison',

@@ -6,28 +6,38 @@
       <div class="atmos-parchment"></div>
     </div>
 
-    <!-- 顶部标题 · 圣约卷轴 -->
-    <header data-enter class="scroll-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <div class="header-seal">⚜</div>
-      <h1 class="scroll-title">{{ store.name }}</h1>
-      <span class="scroll-version">v{{ store.version }}</span>
-      <p class="scroll-subtitle">世界的根基 · 不可动摇的契约</p>
-      <div class="scroll-meta">
-        <span>建立于 {{ formatDate(store.createdAt) }}</span>
-        <span class="meta-dot">·</span>
-        <span>最近修改 {{ formatDate(store.updatedAt) }}</span>
-      </div>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-    </header>
+    <!-- 顶部标题 · 圣约卷轴（统一页头组件，竖排居中保仪式感） -->
+    <RoomHeader
+      class="constitution-room-header"
+      data-enter
+      :ornament="false"
+      subtitle="世界的根基 · 不可动摇的契约"
+    >
+      <template #ornament>
+        <div class="header-ornament">
+          <span class="orn-line"></span>
+          <span class="orn-diamond">✦</span>
+          <span class="orn-line"></span>
+        </div>
+        <div class="header-seal">⚜</div>
+      </template>
+      <template #title>
+        <span class="scroll-title">{{ store.name }}</span>
+        <span class="scroll-version">v{{ store.version }}</span>
+      </template>
+      <template #meta>
+        <div class="scroll-meta">
+          <span>建立于 {{ formatDate(store.createdAt) }}</span>
+          <span class="meta-dot">·</span>
+          <span>最近修改 {{ formatDate(store.updatedAt) }}</span>
+        </div>
+        <div class="header-ornament">
+          <span class="orn-line"></span>
+          <span class="orn-diamond">✦</span>
+          <span class="orn-line"></span>
+        </div>
+      </template>
+    </RoomHeader>
 
     <!-- 序言 · 羊皮卷 -->
     <section data-enter class="parchment-section">
@@ -603,6 +613,7 @@ import { ruleHasRuntimeEffect } from '@/engine/constitution-effects'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import ConstitutionStatusPanel from '@/components/ConstitutionStatusPanel.vue'
 import OsNotificationAuditPanel from '@/components/OsNotificationAuditPanel.vue'
+import RoomHeader from '../components/RoomHeader.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useConstitutionStore()
@@ -963,12 +974,32 @@ function onThresholdChange(e: Event): void {
     radial-gradient(ellipse at 70% 80%, rgba(var(--accent-rgb), 0.02) 0%, transparent 50%);
 }
 
-/* ---- 卷轴头部 ---- */
-.scroll-header {
+/* ---- 卷轴头部（统一页头组件接管） ---- */
+.constitution-room-header {
   text-align: center;
   margin-bottom: 48px;
   position: relative;
   z-index: 1;
+}
+.constitution-room-header :deep(.rh-main) {
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.constitution-room-header :deep(.rh-titles) {
+  align-items: center;
+  gap: 0;
+}
+.constitution-room-header :deep(.rh-title) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.constitution-room-header :deep(.rh-subtitle) {
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin: 12px 0 8px;
 }
 
 .header-ornament {

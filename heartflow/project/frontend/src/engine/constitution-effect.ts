@@ -12,6 +12,7 @@ import {
   type ConstitutionEffect,
   type EffectTarget,
   getActiveEffects,
+  groupEffectsByTarget,
   DEFAULT_EFFECT_MAP,
 } from './constitution-effects'
 
@@ -52,7 +53,7 @@ export interface ConstitutionEffectState {
     effects: ConstitutionEffect[]
     sources: string[]  // 来源规则标题列表
   }>
-  /** 活跃效果总数 */
+  /** 活跃效果总数（= 当前激活的 ConstitutionEffect 条数，同 target 多 effect 会分别计数；与 targetStates.size 去重后的目标数语义不同） */
   activeEffectCount: number
   /** 已启用的规则 ID 列表 */
   enabledRuleIds: string[]
@@ -78,8 +79,19 @@ const defaultActiveTargets: Set<EffectTarget> = new Set(
   getActiveEffects(DEFAULT_ELASTIC_RULES).map((e) => e.target),
 )
 
+// 预建「目标 → 效果」索引（DEFAULT_EFFECT_MAP 为静态常量），避免每次规则切换都全量重扫 50+ 映射。
+const EFFECTS_BY_TARGET: Map<EffectTarget, ConstitutionEffect[]> = groupEffectsByTarget(DEFAULT_EFFECT_MAP)
+
+// 引擎未初始化时的回落基准：默认弹性条款激活的「目标 → 效果」快照，
+// 供 getTargetEffectState 与 isTargetActive 共享同一 fallback 真源（消除两套查询语义分歧）。
+const defaultTargetEffects: Map<EffectTarget, ConstitutionEffect[]> = groupEffectsByTarget(
+  getActiveEffects(DEFAULT_ELASTIC_RULES),
+)
+
 /** 计算宪法效果状态 */
 function computeEffectState(rules: MutableRule[]): ConstitutionEffectState {
+  // 预建 id→rule 索引，消除下方对每个 effect 做一次 O(n) 线性查找的 O(n²) 开销。
+  const ruleMap = new Map(rules.map(r => [r.id, r]))
   const enabledRules = rules.filter(r => r.enabled)
   const enabledRuleIds = enabledRules.map(r => r.id)
   const activeEffects = getActiveEffects(rules)
@@ -98,8 +110,8 @@ function computeEffectState(rules: MutableRule[]): ConstitutionEffectState {
       sources: [],
     }
     existing.effects.push(effect)
-    // 找到来源规则的标题
-    const rule = rules.find(r => r.id === effect.ruleId)
+    // 经预建索引取来源规则标题（O(1)）
+    const rule = ruleMap.get(effect.ruleId)
     if (rule && !existing.sources.includes(rule.title)) {
       existing.sources.push(rule.title)
     }
@@ -125,11 +137,15 @@ export function getTargetEffectState(target: EffectTarget): {
   effects: ConstitutionEffect[]
   sources: string[]
 } {
-  return currentEffectState.targetStates.get(target) ?? {
-    active: false,
-    effects: [],
-    sources: [],
+  const hit = currentEffectState.targetStates.get(target)
+  if (hit) return hit
+  // 引擎尚未按真实规则初始化时，回落默认基准态（与 isTargetActive 共用 defaultTargetEffects），
+  // 避免两套查询对同一 target 给出矛盾结论（isTargetActive=true 但 getTargetEffectState=空）。
+  if (!isInitialized) {
+    const effs = defaultTargetEffects.get(target)
+    if (effs) return { active: true, effects: effs, sources: [] }
   }
+  return { active: false, effects: [], sources: [] }
 }
 
 /** 检查指定目标是否活跃 */
@@ -194,7 +210,7 @@ export function getEffectMultiplier(target: EffectTarget): number {
  * 推导规则：仅 disable → whenDisabled；仅 enable → whenEnabled；两者皆有 → 取最严格(whenDisabled)；
  *           无对应宪法效果 → 不覆盖（保留 DEFAULT_CONFIG 默认或用户显式值）。
  */
-const EFFECT_TO_OVERRIDE_MAP: Partial<Record<EffectTarget, {
+export const EFFECT_TO_OVERRIDE_MAP: Partial<Record<EffectTarget, {
   key: keyof import('../types').AppConfig['complianceOverride']
   whenEnabled: boolean
   whenDisabled: boolean
@@ -253,9 +269,9 @@ function applyToComplianceOverride(
   for (const [target, mapping] of Object.entries(EFFECT_TO_OVERRIDE_MAP)) {
     if (!mapping) continue
 
-    // 取启用规则作用在该目标的宪法效果
-    const effects = DEFAULT_EFFECT_MAP.filter(
-      e => e.target === target && enabledIds.has(e.ruleId)
+    // 经预建索引取该目标下的宪法效果（避免每次规则切换全量重扫 DEFAULT_EFFECT_MAP）
+    const effects = (EFFECTS_BY_TARGET.get(target as EffectTarget) ?? []).filter(
+      e => enabledIds.has(e.ruleId),
     )
     const hasDisable = effects.some(e => e.type === 'disable')
     const hasEnable = effects.some(e => e.type === 'enable')
@@ -295,10 +311,22 @@ export function initConstitutionEffect(): () => void {
   const constitutionStore = useConstitutionStore()
   const configStore = useConfigStore()
 
-  // 初始计算效果状态
-  currentEffectState = computeEffectState(constitutionStore.mutableRules)
-  applyToComplianceOverride(constitutionStore.mutableRules, configStore)
-  applyConstitutionVisualEffects()
+  // 初始计算效果状态（各步骤独立隔离，单步失败不影响其余，避免畸形规则数据拖垮首屏初始化链）
+  try {
+    currentEffectState = computeEffectState(constitutionStore.mutableRules)
+  } catch (err) {
+    console.error('[宪法引擎] 计算效果状态失败', err)
+  }
+  try {
+    applyToComplianceOverride(constitutionStore.mutableRules, configStore)
+  } catch (err) {
+    console.error('[宪法引擎] 应用 complianceOverride 失败', err)
+  }
+  try {
+    applyConstitutionVisualEffects()
+  } catch (err) {
+    console.error('[宪法引擎] 应用视觉效果失败', err)
+  }
 
   // 监听宪法规则变化
   const stopWatch = watch(
@@ -326,12 +354,24 @@ export function initConstitutionEffect(): () => void {
 
       if (changedRules.length === 0) return
 
-      // 更新效果状态
-      currentEffectState = computeEffectState(constitutionStore.mutableRules)
+      // 更新效果状态（单步隔离，避免任一环节抛错中断整轮刷新）
+      try {
+        currentEffectState = computeEffectState(constitutionStore.mutableRules)
+      } catch (err) {
+        console.error('[宪法引擎] 计算效果状态失败', err)
+      }
 
       // 应用到 complianceOverride
-      applyToComplianceOverride(constitutionStore.mutableRules, configStore)
-      applyConstitutionVisualEffects()
+      try {
+        applyToComplianceOverride(constitutionStore.mutableRules, configStore)
+      } catch (err) {
+        console.error('[宪法引擎] 应用 complianceOverride 失败', err)
+      }
+      try {
+        applyConstitutionVisualEffects()
+      } catch (err) {
+        console.error('[宪法引擎] 应用视觉效果失败', err)
+      }
 
       // 通知事件
       for (const changed of changedRules) {
@@ -364,6 +404,9 @@ export function refreshConstitutionEffect(): void {
 
   currentEffectState = computeEffectState(constitutionStore.mutableRules)
   applyToComplianceOverride(constitutionStore.mutableRules, configStore)
+  // 同步刷新视觉宪法层（此前遗漏：手动刷新只更新 state + complianceOverride，漏掉 CSS 变量，
+  // 导致依赖 --hf-* 的组件在显式 refresh 后视觉陈旧）。与 init / watch 路径保持一致。
+  applyConstitutionVisualEffects()
 }
 
 // ---- 视觉宪法效果接线层（宪法之实 · 视觉/氛围维度）----
@@ -387,6 +430,10 @@ export function applyConstitutionVisualEffects(): void {
   root.style.setProperty('--hf-animate-speed', String(getEffectMultiplier('ui:animate-speed')))
   root.style.setProperty('--hf-breathing-speed', String(getEffectMultiplier('ui:breathing-speed')))
   root.style.setProperty('--hf-scene-transition', String(getEffectMultiplier('scene:transition')))
+  // 夜静调暗 / 数字安息日：强度倍率（默认 1，宪法 set/reduce/increase 可调）。
+  // 由宪法引擎注入为唯一真源；composable 不再用 1/0 覆盖，App.vue 叠层 opacity 消费之。
+  root.style.setProperty('--hf-night-dim', String(getEffectMultiplier('scene:night-dim')))
+  root.style.setProperty('--hf-sabbath', String(getEffectMultiplier('scene:sabbath')))
   root.style.setProperty('--hf-empty-space', String(isTargetActive('ui:empty-space') ? 1 : 0))
   root.style.setProperty('--hf-silence', String(isTargetActive('ui:silence') ? 1 : 0))
 }
@@ -438,6 +485,9 @@ export function getTargetLabel(target: EffectTarget): string {
     'scene:night-dim': '夜静调暗',
     'scene:sabbath': '数字安息日',
     'advisor:long-dormancy': '长眠守护',
+    'perception:enabled': '感知逐项授权',
+    'advisor:restraint': '幕僚克制',
+    'data:forget': '遗忘四态',
   }
   return labels[target] ?? target
 }

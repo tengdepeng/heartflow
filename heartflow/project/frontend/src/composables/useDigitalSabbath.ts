@@ -1,5 +1,5 @@
 // ============================================================
-// 数字安息日（宪法第50条 · elastic-digital-sabbath → scene:sabbath）
+// 数字安息日（宪法第54条 · elastic-digital-sabbath → scene:sabbath）
 // 当条款启用且当前为周日时，殿堂进入安息日：叠加冷色静谧叠层 + 阻断一切通知。
 // 与「夜静调暗」并列但语义不同：安息日是每周固定一日（周日）的全面断联。
 // ============================================================
@@ -26,8 +26,9 @@ export function useDigitalSabbath(pollMs = 60_000) {
 
   function applyDom(): void {
     if (typeof document === 'undefined') return
+    // 仅负责 on/off 门控（.active 类）；强度倍率 --hf-sabbath 由宪法引擎注入、App.vue 消费，
+    // 此处不再用 1/0 覆盖，避免抹掉用户宪法调校。
     document.documentElement.classList.toggle('sabbath', isSabbath.value)
-    document.documentElement.style.setProperty('--hf-sabbath', isSabbath.value ? '1' : '0')
   }
 
   function evaluate(): void {
@@ -51,7 +52,6 @@ export function useDigitalSabbath(pollMs = 60_000) {
     offEvent?.()
     if (typeof document !== 'undefined') {
       document.documentElement.classList.remove('sabbath')
-      document.documentElement.style.removeProperty('--hf-sabbath')
     }
   })
 

@@ -1,5 +1,5 @@
 // ============================================================
-// 长眠守护（宪法第51条 · elastic-long-dormancy → advisor:long-dormancy）
+// 长眠守护（宪法第55条 · elastic-long-dormancy → advisor:long-dormancy）
 // 在 App 挂载处调用一次：周期性驱动 advisor store 的 applyLongDormancy，
 // 使「长眠→沉睡 / 重新互动→唤醒」随时间真实生效。
 // 行为落实在 store（state 切换），本 composable 仅负责调度，复用夜静调暗/安息日模式；

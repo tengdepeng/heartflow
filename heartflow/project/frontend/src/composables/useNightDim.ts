@@ -1,5 +1,5 @@
 // ============================================================
-// 夜静调暗（宪法第49条 · elastic-night-dim → scene:night-dim）
+// 夜静调暗（宪法第53条 · elastic-night-dim → scene:night-dim）
 // 当条款启用且处于夜间时段（22:00–05:00）时，给全局叠加一层调暗遮罩，
 // 实现「殿堂自动调暗」。幕僚主动说话已由问候浮窗默认关闭保证，此处仅负责视觉调暗。
 // ============================================================
@@ -27,8 +27,9 @@ export function useNightDim(pollMs = 30_000) {
 
   function applyDom(): void {
     if (typeof document === 'undefined') return
+    // 仅负责 on/off 门控（.active 类）；强度倍率 --hf-night-dim 由宪法引擎注入、App.vue 消费，
+    // 此处不再用 1/0 覆盖，避免抹掉用户宪法调校。
     document.documentElement.classList.toggle('night-dim', isNight.value)
-    document.documentElement.style.setProperty('--hf-night-dim', isNight.value ? '1' : '0')
   }
 
   function evaluate(): void {
@@ -52,7 +53,6 @@ export function useNightDim(pollMs = 30_000) {
     offEvent?.()
     if (typeof document !== 'undefined') {
       document.documentElement.classList.remove('night-dim')
-      document.documentElement.style.removeProperty('--hf-night-dim')
     }
   })
 

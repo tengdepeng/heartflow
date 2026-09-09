@@ -1,6 +1,6 @@
 // ============================================================
 // 心流工坊 · 宪法透明度账本（A2-EXT-2a · 聚合原语）
-// 遍历 effect-consumer-map 的 42 个 EffectTarget，结合 isTargetActive
+// 遍历 effect-consumer-map 的 45 个 EffectTarget，结合 isTargetActive
 // 计算三态：生效中 / 已接线·未启用 / 声明式（零假消费）。
 //
 // 设计要点：
