@@ -3,7 +3,7 @@
 // 劳酬：记录收入与支出，支持搜索、筛选和月度趋势
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 
 interface RewardRecord {
   id: string
@@ -229,5 +229,40 @@ describe('Reward 视图', () => {
     mockKV.set('rewards', [])
     const wrapper = await getWrapper()
     expect(wrapper.text()).not.toContain('工作生涯总结')
+  })
+})
+
+// ============================================================
+// 集成：里程碑面板（INCR-166：补挂载 claim-but-orphan 面板）
+// ============================================================
+describe('集成：里程碑面板（劳酬）', () => {
+  beforeEach(() => {
+    mockKV.delete('hf:reward_milestones')
+  })
+
+  it('挂载里程碑面板并渲染标题与进度', async () => {
+    mockKV.set('hf:reward_milestones', [
+      { id: 'm1', title: '首笔收入', triggerType: 'income-single', threshold: 1000, achieved: true, description: '单笔入账达到 1000', achievedAt: '2026-07-01T00:00:00.000Z' },
+      { id: 'm2', title: '月光储蓄', triggerType: 'savings-rate', threshold: 20, achieved: false, description: '单月储蓄率达到 20%' },
+      { id: 'm3', title: '品类开拓', triggerType: 'project-count', threshold: 3, achieved: false, description: '收入品类达到 3 种' },
+    ])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    expect(wrapper.find('.rmp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('里程碑')
+    expect(wrapper.text()).toContain('已达成 1 / 3')
+    expect(wrapper.find('.rmp-item--done').exists()).toBe(true)
+    expect(wrapper.text()).toContain('首笔收入')
+    expect(wrapper.text()).toContain('月光储蓄')
+  })
+
+  it('无存储数据时回退到默认里程碑并展示 0 进度', async () => {
+    const wrapper = await getWrapper()
+    await flushPromises()
+    expect(wrapper.find('.rmp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('里程碑')
+    expect(wrapper.text()).toContain('已达成 0 / 5')
+    expect(wrapper.text()).toContain('第一桶金')
+    expect(wrapper.find('.rmp-item--done').exists()).toBe(false)
   })
 })

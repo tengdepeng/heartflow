@@ -514,6 +514,9 @@
     <!-- 财务目标 / 投资 / 健康 / 时间线（reward·finance-goals） -->
     <FinanceGoalsPanel :records="adaptedRecords" />
 
+    <!-- 里程碑（reward·milestones：收入/储蓄率/连续月/品类成就会员，INCR-166） -->
+    <RewardMilestonePanel :bridge="rewardBridge.milestones" />
+
     <!-- 空状态 -->
     <div v-if="!records.length" class="rw-empty">
       <p>天平静置，尚无记录。</p>
@@ -533,6 +536,7 @@ import type { RewardRecord as RewardRecordBridge, Budget, RewardStats, IncomeCat
 import { useReward, type RewardRecord } from '../modules/reward/reward-list'
 import { useAccounts } from '../modules/reward/accounts'
 import FinanceGoalsPanel from '../components/FinanceGoalsPanel.vue'
+import RewardMilestonePanel from '../components/RewardMilestonePanel.vue'
 import PeriodicRewardPanel from '../components/PeriodicRewardPanel.vue'
 import AccountManagerPanel from '../components/AccountManagerPanel.vue'
 import BudgetAlertPanel from '../components/BudgetAlertPanel.vue'
