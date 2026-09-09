@@ -60,6 +60,11 @@
       <AstronomyPanel />
     </div>
 
+    <!-- 时间星图 · 赤道→地平投影 / 四季回溯（sky 引擎，INCR-185） -->
+    <div data-enter class="tcv-skygaze">
+      <SkyGazePanel />
+    </div>
+
     <!-- 时光胶囊 · 接入已存在的 modules/capsule（本地私有/沉默默认/允许未定义） -->
     <section data-enter class="tcv-capsule">
       <header class="tcv-capsule-head">
@@ -110,6 +115,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { storage, storageVersion } from '../engine/storage'
 import TimeCorridor from '../components/TimeCorridor.vue'
 import AstronomyPanel from '../components/AstronomyPanel.vue'
+import SkyGazePanel from '../components/SkyGazePanel.vue'
 import type { FocusSession } from '../types'
 import { useTimeCapsule } from '../modules/capsule'
 

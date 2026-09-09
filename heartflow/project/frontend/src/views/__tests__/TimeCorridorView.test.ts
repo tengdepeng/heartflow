@@ -99,4 +99,17 @@ describe('TimeCorridorView 时间长廊', () => {
     expect(wrapper.text()).toContain('天文日历')
     expect(wrapper.find('.astro-panel').exists()).toBe(true)
   })
+
+  it('渲染时间星图面板（INCR-185 四季回溯）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.sg-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('时间星图')
+    expect(wrapper.text()).toContain('四季')
+  })
+
+  it('时间星图显示可见星数与季节切换', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('星可见')
+    expect(wrapper.find('.sg-toolbar').exists()).toBe(true)
+  })
 })
