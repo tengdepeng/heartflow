@@ -255,6 +255,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '数据档案馆' },
   }),
   withRoomMeta({
+    path: '/data-asset',
+    name: 'data-asset',
+    component: () => import('../views/DataAsset.vue'),
+    meta: { title: '数据资产' },
+  }),
+  withRoomMeta({
     path: '/all-selves',
     name: 'all-selves',
     component: () => import('../views/AllSelvesMirror.vue'),
