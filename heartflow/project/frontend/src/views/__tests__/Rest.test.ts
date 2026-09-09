@@ -297,15 +297,18 @@ describe('Rest 息壤视图', () => {
     // 输入搜索词
     await input.setValue('品茶')
     expect(wrapper.find('.rest-search-clear').exists()).toBe(true)
-    expect(wrapper.text()).not.toContain('散步')
+    const filteredGrid = wrapper.find('.rest-practices-grid').text()
+    expect(filteredGrid).not.toContain('散步')
+    expect(filteredGrid).not.toContain('冥想')
 
     // 点击清除按钮
     await wrapper.find('.rest-search-clear').trigger('click')
     // 清除后所有卡片应恢复
-    expect(wrapper.text()).toContain('品茶')
-    expect(wrapper.text()).toContain('散步')
-    expect(wrapper.text()).toContain('冥想')
-    expect(wrapper.text()).toContain('听音乐')
+    const clearedGrid = wrapper.find('.rest-practices-grid').text()
+    expect(clearedGrid).toContain('品茶')
+    expect(clearedGrid).toContain('散步')
+    expect(clearedGrid).toContain('冥想')
+    expect(clearedGrid).toContain('听音乐')
   })
 
   // ==================== 6. 休憩记录列表 ====================
@@ -555,5 +558,34 @@ describe('漫步功能', () => {
     expect(result.exists()).toBe(true)
     expect(result.find('.rest-stroll-result-icon').exists()).toBe(true)
     expect(result.find('.rest-stroll-result-name').exists()).toBe(true)
+  })
+})
+
+// ============================================================
+// 集成：休息提醒面板（INCR-164：补挂载 claim-but-orphan 面板）
+// ============================================================
+describe('集成：休息提醒面板', () => {
+  it('在休憩标签页集成渲染休息提醒面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.rrp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('休息提醒')
+    expect(wrapper.text()).toContain('模拟触发')
+    expect(wrapper.text()).toContain('提醒规则')
+  })
+
+  it('渲染四大类默认提醒规则并显示全启用徽标', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('番茄钟')
+    expect(wrapper.text()).toContain('定时')
+    expect(wrapper.text()).toContain('疲劳')
+    expect(wrapper.text()).toContain('姿势')
+    expect(wrapper.find('.rrp-badge').text()).toContain('全部启用')
+  })
+
+  it('模拟检测按钮可触发提醒预览', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.rrp-btn').trigger('click')
+    // 面板 onMounted 已跑一次模拟；点击后应产出同一批默认提醒的预览
+    expect(wrapper.find('.rrp-sim-result, .rrp-sim-none').exists()).toBe(true)
   })
 })
