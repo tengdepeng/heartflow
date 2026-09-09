@@ -20,6 +20,15 @@ vi.mock('../../composables/useDesktopTouchpoints', () => ({
   useDesktopTouchpoints: () => mockTouchpoints,
 }))
 
+// ---- 模拟子面板组件（INCR-177） ----
+vi.mock('../../components/GreetingWidgetPanel.vue', () => ({
+  default: { template: '<div data-test="greeting-widget-panel" />' },
+}))
+
+vi.mock('../../components/ClipboardPanel.vue', () => ({
+  default: { template: '<div data-test="clipboard-panel" />' },
+}))
+
 // ---- 辅助函数 ----
 async function createWrapper() {
   const { default: Touchpoints } = await import('../Touchpoints.vue')
@@ -194,6 +203,20 @@ describe('Touchpoints 殿堂触角视图', () => {
   it('渲染触达分析区域', async () => {
     const wrapper = await createWrapper()
     expect(wrapper.text()).toContain('触达分析')
+  })
+
+  // ------- 问候浮窗增强（INCR-177） -------
+  it('渲染 GreetingWidgetPanel 问候浮窗增强', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('[data-test="greeting-widget-panel"]')
+    expect(panel.exists()).toBe(true)
+  })
+
+  // ------- 剪贴板管理（INCR-177） -------
+  it('渲染 ClipboardPanel 剪贴板管理', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('[data-test="clipboard-panel"]')
+    expect(panel.exists()).toBe(true)
   })
 
 })

@@ -13,6 +13,11 @@ vi.mock('pinia', () => ({
   createPinia: () => ({}),
 }))
 
+// ---- 模拟 MeditationStudio（INCR-177） ----
+vi.mock('../../components/MeditationStudio.vue', () => ({
+  default: { template: '<div data-test="meditation-studio" />' },
+}))
+
 // ---- 模拟 useViewEntrance ----
 vi.mock('../../composables/useViewEntrance', () => ({
   useViewEntrance: () => ({
@@ -103,5 +108,20 @@ describe('DisciplineWorkshop 自律工坊', () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('已解锁徽章')
     expect(wrapper.text()).toContain('3')
+  })
+
+  it('标签导航包含冥想工坊', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('冥想工坊')
+  })
+
+  it('切换至冥想工坊标签页显示 MeditationStudio', async () => {
+    const wrapper = await getWrapper()
+    const meditationTab = wrapper.findAll('.dw-tab').find(t => t.text().includes('冥想工坊'))
+    expect(meditationTab).toBeTruthy()
+    await meditationTab!.trigger('click')
+    await wrapper.vm.$nextTick()
+    const studio = wrapper.find('[data-test="meditation-studio"]')
+    expect(studio.exists()).toBe(true)
   })
 })

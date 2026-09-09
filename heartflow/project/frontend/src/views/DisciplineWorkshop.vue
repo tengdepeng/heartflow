@@ -237,6 +237,11 @@
     <section v-if="activeTab === 'forest'" data-enter class="dw-section">
       <PomodoroForestPanel />
     </section>
+
+    <!-- 冥想工坊（discipline·meditation，INCR-177） -->
+    <section v-if="activeTab === 'meditation'" data-enter class="dw-section">
+      <MeditationStudio />
+    </section>
   </div>
 </template>
 
@@ -247,6 +252,7 @@ import type { Habit, DisciplineChallenge } from '../modules/discipline/types'
 import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
 import PomodoroForestPanel from '../components/discipline/PomodoroForestPanel.vue'
+import MeditationStudio from '../components/MeditationStudio.vue'
 
 const bridge = useDisciplineBridge()
 
@@ -257,6 +263,7 @@ const tabs = [
   { key: 'badges', icon: '🏅', label: '徽章墙' },
   { key: 'stats', icon: '📊', label: '统计' },
   { key: 'forest', icon: '🌳', label: '番茄树园' },
+  { key: 'meditation', icon: '🧘', label: '冥想工坊' },
 ]
 const activeTab = ref('checkin')
 

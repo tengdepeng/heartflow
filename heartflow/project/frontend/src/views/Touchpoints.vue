@@ -373,6 +373,12 @@
     <!-- 文本感知：剪贴板实体速识（text-sense 模块，原已实现但未挂载） -->
     <PerceptionPanel />
 
+    <!-- 问候浮窗增强（touchpoints·greeting-engine + widget-manager，INCR-177） -->
+    <GreetingWidgetPanel />
+
+    <!-- 剪贴板管理（touchpoints·clipboard，INCR-177） -->
+    <ClipboardPanel />
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
   </div>
 </template>
@@ -382,6 +388,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useDesktopTouchpoints } from '../composables/useDesktopTouchpoints'
 import PerceptionPanel from '../components/PerceptionPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import GreetingWidgetPanel from '../components/GreetingWidgetPanel.vue'
+import ClipboardPanel from '../components/ClipboardPanel.vue'
 import {
   useDeliveryStrategy,
   usePushChannel,
