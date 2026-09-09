@@ -99,4 +99,17 @@ describe('WordMirror 字镜阁', () => {
     const select = wrapper.find('.wm-filter-select')
     expect(select.exists()).toBe(true)
   })
+
+  it('渲染词源与语义网络面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.wnp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('词源与语义网络')
+    expect(wrapper.text()).toContain('词源追溯')
+  })
+
+  it('词源网络面板显示词典规模统计', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.wnp-stats').exists()).toBe(true)
+    expect(wrapper.text()).toContain('词典规模')
+  })
 })

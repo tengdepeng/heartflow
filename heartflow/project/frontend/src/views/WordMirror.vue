@@ -374,6 +374,9 @@
 
     <!-- 文字分析（词频 + 风格） -->
     <TextAnalysisPanel :words="wordEntries" />
+
+    <!-- 词源与语义网络（word-mirror/etymology 引擎，INCR-184） -->
+    <WordNetworkPanel />
   </div>
 </template>
 
@@ -388,6 +391,7 @@ import { useWordMirror, type WordItem } from '../modules/word-mirror/word-mirror
 import { isStale } from '../modules/word-mirror/stale'
 import { dueWords, nextReviewState } from '../modules/word-mirror/spaced-repetition'
 import TextAnalysisPanel from '../components/TextAnalysisPanel.vue'
+import WordNetworkPanel from '../components/WordNetworkPanel.vue'
 import WritingAssistantPanel from '../components/WritingAssistantPanel.vue'
 import ReviewSessionPanel from '../components/ReviewSessionPanel.vue'
 import DailyRecommendationPanel from '../components/DailyRecommendationPanel.vue'
