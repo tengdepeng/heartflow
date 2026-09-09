@@ -14,14 +14,24 @@ interface BodyMark {
   description: string
   scarType: ScarType
   at: string
+  recordedAt?: string
+  healingStage?: string
+  healingProgress?: number
+  worklogId?: string
+}
+
+const healFields = {
+  recordedAt: '2026-06-15T08:00:00.000Z',
+  healingStage: 'scarred',
+  healingProgress: 100,
 }
 
 const mockMarks: BodyMark[] = [
-  { id: 's1', bodyPart: '腰', severity: 3, description: '久坐腰酸', scarType: 'wear', at: '2026-06-15T08:00:00.000Z' },
-  { id: 's2', bodyPart: '肩', severity: 4, description: '长时间握鼠标', scarType: 'wear', at: '2026-06-20T10:00:00.000Z' },
-  { id: 's3', bodyPart: '眼', severity: 5, description: '熬夜写代码眼干', scarType: 'burn', at: '2026-07-10T08:00:00.000Z' },
-  { id: 's4', bodyPart: '颈', severity: 2, description: '低头看手机', scarType: 'wear', at: '2026-07-18T10:00:00.000Z' },
-  { id: 's5', bodyPart: '腰', severity: 4, description: '搬东西扭伤', scarType: 'impact', at: '2026-07-22T08:00:00.000Z' },
+  { id: 's1', bodyPart: '腰', severity: 3, description: '久坐腰酸', scarType: 'wear', at: '2026-06-15T08:00:00.000Z', ...healFields },
+  { id: 's2', bodyPart: '肩', severity: 4, description: '长时间握鼠标', scarType: 'wear', at: '2026-06-20T10:00:00.000Z', ...healFields },
+  { id: 's3', bodyPart: '眼', severity: 5, description: '熬夜写代码眼干', scarType: 'burn', at: '2026-07-10T08:00:00.000Z', ...healFields },
+  { id: 's4', bodyPart: '颈', severity: 2, description: '低头看手机', scarType: 'wear', at: '2026-07-18T10:00:00.000Z', ...healFields },
+  { id: 's5', bodyPart: '腰', severity: 4, description: '搬东西扭伤', scarType: 'impact', at: '2026-07-22T08:00:00.000Z', ...healFields },
 ]
 
 const mockKV = new Map<string, any>()
@@ -320,5 +330,25 @@ describe('Scar 视图', () => {
     expect(wrapper.text()).toContain('伤痕类型分布')
     expect(wrapper.text()).toContain('愈合时间线')
     expect(wrapper.text()).toContain('逆境成长曲线')
+  })
+
+  // ============================================================
+  // 集成：伤痕因果链面板（INCR-171：补挂载孤儿面板）
+  // ============================================================
+
+  it('有印记时集成渲染伤痕因果链面板', async () => {
+    const wrapper = await getWrapper()
+    const ccp = wrapper.find('.ccp')
+    expect(ccp.exists()).toBe(true)
+    expect(wrapper.text()).toContain('因果链')
+    expect(wrapper.text()).toContain('链路总览')
+  })
+
+  it('因果链面板渲染印记选择器并可展开链路时间线', async () => {
+    const wrapper = await getWrapper()
+    const pickers = wrapper.findAll('.ccp-pick')
+    expect(pickers.length).toBeGreaterThan(0)
+    await pickers[0].trigger('click')
+    expect(wrapper.text()).toContain('链路深度')
   })
 })

@@ -407,6 +407,11 @@
       <ScarVisualizationPanel />
     </section>
 
+    <!-- 伤痕因果链面板（INCR-171：补挂载孤儿面板，引擎 causal-chain.ts 完备） -->
+    <section data-enter class="sc-ccp-section" v-if="marks.length">
+      <CausalChainPanel :marks="adaptedMarks" />
+    </section>
+
     <!-- 空状态 -->
     <div data-enter v-if="!marks.length" class="sc-empty">
       <p>锻炉安静，尚无印记。</p>
@@ -424,6 +429,7 @@ import { useNarrativeEnhancer } from '../modules/scar/narrative-enhancer'
 import { useScarMarks } from '../modules/scar/marks'
 import type { BodyMark as ModuleBodyMark, ScarStats, HealingStage, SeverityLevel, BodyPart } from '../modules/scar/types'
 import ScarVisualizationPanel from '../components/ScarVisualizationPanel.vue'
+import CausalChainPanel from '../components/CausalChainPanel.vue'
 const { entranceRef, entranceClass } = useViewEntrance()
 const healingJourney = useHealingJourney()
 const narrative = useNarrativeEnhancer()
