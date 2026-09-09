@@ -138,7 +138,7 @@ export function useSelfReward() {
   }
 
   /** 标记为已兑现（仅可兑现态可兑现；手动 pending 也允许直接兑现） */
-  function redeem(id: string): void {
+  function redeem(id: string, options?: { note?: string }): void {
     const list = loadRewards()
     const idx = list.findIndex(r => r.id === id)
     if (idx < 0) return
@@ -147,6 +147,8 @@ export function useSelfReward() {
     r.status = 'redeemable' // 先置可兑现，再兑现（保证语义）
     r.status = 'redeemed'
     r.redeemedAt = new Date().toISOString()
+    // 兑现寄语（犒赏账本面板可通过 options.note 记录）
+    if (options?.note !== undefined) r.note = options.note
     persist(list)
     touch()
   }

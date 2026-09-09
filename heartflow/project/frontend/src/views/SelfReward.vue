@@ -179,12 +179,18 @@
         <p class="sr-empty-sub">为自己设第一份犒赏吧——可以是「连续早睡 7 天就去看场电影」。</p>
       </div>
     </section>
+
+    <!-- 犒赏账本（self-reward·reward-machine：兑现成本/节奏/里程碑/月度分布，INCR-165） -->
+    <section data-enter class="sr-ledger">
+      <RewardLedgerPanel />
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useSelfReward, SELF_REWARD_TRIGGER_META } from '../modules/self-reward'
+import RewardLedgerPanel from '../components/RewardLedgerPanel.vue'
 import { getHabits } from '../modules/discipline/workshop'
 import { useCraftBadges } from '../modules/craft/craft-badges'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -315,7 +321,9 @@ onMounted(() => { evaluate() })
 .atmos-warm-glow { position: absolute; top: 0; left: 0; right: 0; height: 280px; background: linear-gradient(180deg, rgba(224,169,109,0.05), transparent); }
 .atmos-work-light { position: absolute; bottom: 0; left: 0; right: 0; height: 200px; background: linear-gradient(0deg, rgba(160,124,140,0.04), transparent); }
 
-.sr-header, .sr-new-entry, .sr-list-section { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; }
+.sr-header, .sr-new-entry, .sr-list-section, .sr-ledger { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; }
+
+.sr-ledger { margin-top: 2.5rem; }
 
 .sr-header { text-align: center; margin-bottom: 2.5rem; }
 .sr-header-ornament { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; color: var(--accent, #e8c060); }

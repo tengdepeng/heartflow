@@ -50,15 +50,18 @@ vi.mock('../../modules/self-reward', () => ({
 }))
 
 vi.mock('../../modules/self-reward/reward-machine', () => ({
-  rewardLedger: () => ({
-    totalRedeemed: 0,
-    totalCost: 0,
-    cadenceDays: null,
-    noteRate: 0,
-    byMonth: [],
-    recent: [],
-  }),
-  redemptionMilestones: () => ({ reached: [], next: 1 }),
+  rewardLedger: () => {
+    const redeemed = rewards.value.filter(r => r.status === 'redeemed').sort((a, b) => (b.redeemedAt || '').localeCompare(a.redeemedAt || ''))
+    return {
+      totalRedeemed: redeemed.length,
+      totalCost: redeemed.reduce((s, r) => s + (r.cost || 0), 0),
+      cadenceDays: null,
+      noteRate: redeemed.length ? 100 : 0,
+      byMonth: [],
+      recent: redeemed.slice(0, 3),
+    }
+  },
+  redemptionMilestones: () => ({ reached: rewards.value.filter(r => r.status === 'redeemed').length >= 1 ? [1] : [], next: 1 }),
   suggestReward: () => null,
   REWARD_MILESTONES: [1, 3, 5, 10, 20],
 }))
@@ -103,5 +106,40 @@ describe('SelfReward 视图', () => {
     await wrapper.find('.sr-form input').setValue('看一场电影')
     await wrapper.findAll('button').find(b => b.text() === '创建')!.trigger('click')
     expect(rewards.value.length).toBe(1)
+  })
+})
+
+// ============================================================
+// 集成：犒赏账本面板（INCR-165：补挂载 claim-but-orphan 面板）
+// ============================================================
+describe('集成：犒赏账本面板', () => {
+  it('在自奖视图挂载犒赏账本面板并渲染核心区块', () => {
+    const wrapper = mount(SelfRewardView, { global: { stubs: { 'router-link': true } } })
+    expect(wrapper.find('.rlp').exists()).toBe(true)
+    expect(wrapper.find('.rlp-title').text()).toContain('犒赏账本')
+    expect(wrapper.find('.rlp-stats').exists()).toBe(true)
+    expect(wrapper.find('.rlp-milestones').exists()).toBe(true)
+  })
+
+  it('未兑现任何犒赏时展示账本空态文案', () => {
+    const wrapper = mount(SelfRewardView, { global: { stubs: { 'router-link': true } } })
+    expect(wrapper.text()).toContain('还没兑现过任何犒赏')
+  })
+
+  it('有已兑现奖励时渲染分段记账区', async () => {
+    rewards.value.push({
+      id: 'r_done1',
+      title: '看一场电影',
+      icon: '🎬',
+      trigger: { type: 'manual' },
+      status: 'redeemed',
+      createdAt: new Date().toISOString(),
+      redeemedAt: new Date().toISOString(),
+      note: '好好享受这一刻',
+      cost: 30,
+    })
+    const wrapper = mount(SelfRewardView, { global: { stubs: { 'router-link': true } } })
+    expect(wrapper.find('.rlp-recent').exists()).toBe(true)
+    expect(wrapper.text()).toContain('最近兑现')
   })
 })
