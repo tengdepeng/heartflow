@@ -163,6 +163,14 @@
 
     <!-- 心愿清单（garden/wish-list 引擎，习惯联动解锁，INCR-182） -->
     <WishListPanel />
+
+    <!-- 成长气象（garden/growth-meteor 引擎：目标/种子/习惯/光茧聚合总览，INCR-189） -->
+    <GrowthMeteorPanel
+      :targets="goal.targets.value"
+      :seeds="flourish.seeds.value"
+      :habits="flourish.habits.value"
+      :cocoons="cocoonStore.cocoons.value"
+    />
   </div>
 </template>
 
@@ -179,6 +187,7 @@ import GoalVisualizationPanel from '../components/GoalVisualizationPanel.vue'
 import GoalProgressPanel from '../components/GoalProgressPanel.vue'
 import HabitReviewPanel from '../components/HabitReviewPanel.vue'
 import WishListPanel from '../components/WishListPanel.vue'
+import GrowthMeteorPanel from '../components/GrowthMeteorPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

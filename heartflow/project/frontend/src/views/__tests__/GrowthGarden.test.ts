@@ -68,6 +68,25 @@ describe('GrowthGarden 成长庭院', () => {
     expect(wrapper.text()).toContain('休眠')
   })
 
+  it('渲染成长气象面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.gmp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('成长气象')
+    expect(wrapper.text()).toContain('目标开花率')
+  })
+
+  it('成长气象面板聚合目标与习惯数据', async () => {
+    useGoal().create('读完十本书', 'target', 'growth')
+    const f = useGardenFlourish()
+    f.plantSeed('晨跑')
+    f.addHabit('晨跑')
+    f.habits.value[0].ticks = [new Date().toISOString().slice(0, 10)]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('种子发芽率')
+    expect(wrapper.text()).toContain('光茧')
+  })
+
   it('无目标时显示空状态', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('还没有目标')
