@@ -89,6 +89,8 @@
       <HealthArchivePanel :meridian-logs="meridianLogs" :wisdom-logs="wisdomLogs" />
       <!-- 经络自检（meridian-check 引擎，自包含，INCR-179） -->
       <MeridianCheckPanel :records="meridianRecords" />
+      <!-- 经络可视化（meridian-visualization 引擎，INCR-180） -->
+      <MeridianVisualizationPanel :records="meridianRecords" />
     </div>
 
     <!-- ===== 感知层 ===== -->
@@ -192,6 +194,7 @@ import SolarTermPanel from '../components/body-wisdom/SolarTermPanel.vue'
 import MedicinalDietPanel from '../components/body-wisdom/MedicinalDietPanel.vue'
 import HealthArchivePanel from '../components/HealthArchivePanel.vue'
 import MeridianCheckPanel from '../components/MeridianCheckPanel.vue'
+import MeridianVisualizationPanel from '../components/MeridianVisualizationPanel.vue'
 import { MERIDIAN_HOURS } from '../modules/body-wisdom'
 import type { MeridianRecord } from '../modules/body-wisdom'
 
@@ -248,7 +251,7 @@ const meridianRecords = computed<MeridianRecord[]>(() =>
       id: `ml_${l.at}_${l.hour}`,
       meridian: mh?.meridian ?? 'liver',
       feeling,
-      recordedAt: l.at,
+      recordedAt: l.at ?? '',
       hour: l.hour,
     }
   }),

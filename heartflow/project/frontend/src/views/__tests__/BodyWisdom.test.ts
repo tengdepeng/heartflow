@@ -139,8 +139,8 @@ describe('BodyWisdom 藏象阁', () => {
   it('有经络记录时显示概览数字', async () => {
     const today = new Date().toISOString().slice(0, 10)
     mockMeridianLogs.value = [
-      { hour: 1, feeling: 'good', date: today },
-      { hour: 3, feeling: 'ok', date: today },
+      { hour: 1, feeling: 'good', at: '2026-09-01T06:00:00.000Z', date: today },
+      { hour: 3, feeling: 'ok', at: '2026-09-01T08:00:00.000Z', date: today },
     ]
     const wrapper = await getWrapper()
     const nums = wrapper.findAll('.bw-overview-num')
@@ -165,5 +165,24 @@ describe('BodyWisdom 藏象阁', () => {
     const btn = wrapper.find('.mc-btn')
     expect(btn.exists()).toBe(true)
     expect(btn.attributes('disabled')).toBeUndefined()
+  })
+
+  it('身体层渲染经络可视化面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.mvp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('经络可视化')
+    expect(wrapper.text()).toContain('子午流注 · 热力 · 五行 · 趋势')
+  })
+
+  it('经络可视化面板展示概览统计', async () => {
+    const today = new Date().toISOString().slice(0, 10)
+    mockMeridianLogs.value = [
+      { hour: 1, feeling: 'good', at: '2026-09-01T06:00:00.000Z', date: today },
+      { hour: 3, feeling: 'ok', at: '2026-09-01T08:00:00.000Z', date: today },
+    ]
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('经络健康概览')
+    expect(wrapper.text()).toContain('2')
+    expect(wrapper.text()).toContain('良好率')
   })
 })
