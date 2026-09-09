@@ -146,4 +146,24 @@ describe('BodyWisdom 藏象阁', () => {
     const nums = wrapper.findAll('.bw-overview-num')
     expect(nums[0].text()).toBe('2')
   })
+
+  it('身体层渲染经络自检面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.meridian-check').exists()).toBe(true)
+    expect(wrapper.text()).toContain('经络自检')
+    expect(wrapper.text()).toContain('藏象体检')
+  })
+
+  it('经络自检面板展示记录数量与自检按钮', async () => {
+    const today = new Date().toISOString().slice(0, 10)
+    mockMeridianLogs.value = [
+      { hour: 1, feeling: 'bad', at: '2026-09-01T06:00:00.000Z', date: today },
+      { hour: 3, feeling: 'good', at: '2026-09-01T08:00:00.000Z', date: today },
+    ]
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('已积累 2 条经络感受记录')
+    const btn = wrapper.find('.mc-btn')
+    expect(btn.exists()).toBe(true)
+    expect(btn.attributes('disabled')).toBeUndefined()
+  })
 })

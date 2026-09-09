@@ -87,6 +87,8 @@
       <MedicinalDietPanel />
       <!-- 健康档案（health-analysis 引擎） -->
       <HealthArchivePanel :meridian-logs="meridianLogs" :wisdom-logs="wisdomLogs" />
+      <!-- 经络自检（meridian-check 引擎，自包含，INCR-179） -->
+      <MeridianCheckPanel :records="meridianRecords" />
     </div>
 
     <!-- ===== 感知层 ===== -->
@@ -189,6 +191,9 @@ import ConstitutionTrendPanel from '../components/ConstitutionTrendPanel.vue'
 import SolarTermPanel from '../components/body-wisdom/SolarTermPanel.vue'
 import MedicinalDietPanel from '../components/body-wisdom/MedicinalDietPanel.vue'
 import HealthArchivePanel from '../components/HealthArchivePanel.vue'
+import MeridianCheckPanel from '../components/MeridianCheckPanel.vue'
+import { MERIDIAN_HOURS } from '../modules/body-wisdom'
+import type { MeridianRecord } from '../modules/body-wisdom'
 
 const health = useHealth()
 const { meridianLogs, wisdomLogs, readingLogs, bodyNotes, senseNotes, sutraNotes } = health
@@ -233,6 +238,21 @@ const meridianSummary = computed(()=>{
     bad:logs.filter(l=>l.feeling==='bad').length,
   }
 })
+
+// 经络自检数据源：子午流注记录（hf:meridian_logs）→ 模块 MeridianRecord 契约
+const meridianRecords = computed<MeridianRecord[]>(() =>
+  meridianLogs.value.map(l => {
+    const mh = MERIDIAN_HOURS.find(m => m.hour === l.hour)
+    const feeling = l.feeling === 'good' || l.feeling === 'ok' || l.feeling === 'bad' ? l.feeling : 'ok'
+    return {
+      id: `ml_${l.at}_${l.hour}`,
+      meridian: mh?.meridian ?? 'liver',
+      feeling,
+      recordedAt: l.at,
+      hour: l.hour,
+    }
+  }),
+)
 
 // ========================
 // 被动健康意象（#86 · 本地聚合，中性呈现，不评判）
