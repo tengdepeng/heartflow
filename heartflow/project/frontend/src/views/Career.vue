@@ -270,6 +270,11 @@
       </div>
     </section>
 
+    <!-- 可视化数据 · 技能雷达 + 职业路径（career/skill-path 引擎，INCR-194） -->
+    <section data-enter class="career-section cvp-section">
+      <CareerVisualizationPanel :skills="skillList" />
+    </section>
+
     <!-- 职业里程碑 -->
     <section data-enter class="career-section" v-if="milestoneList.length">
       <div class="section-label-row">
@@ -296,6 +301,16 @@
     <!-- 业脉档案（career·career-analytics：业脉健康/圈层/亲密度/角色/项目状态/洞察，INCR-168） -->
     <section data-enter class="career-section cap-section">
       <CareerArchivePanel :contacts="contacts" :projects="projects" :connections="connections" />
+    </section>
+
+    <!-- 职业模拟器 · 行动前先看一步棋（career/career-simulator 引擎，INCR-194） -->
+    <section data-enter class="career-section csp-section">
+      <CareerSimulatorPanel
+        :skills="skillList"
+        :contacts="contacts"
+        :connections="connections"
+        :milestones="milestoneAll"
+      />
     </section>
 
     <!-- 底部铭文 -->
@@ -443,6 +458,8 @@ import { useCareer, type CareerContact as Contact, type CareerProject, type Node
 import { useCareerMilestones, useSkillMap, MILESTONE_TYPE_META } from '../modules/career/skill-map'
 import RoomHeader from '../components/RoomHeader.vue'
 import CareerArchivePanel from '../components/CareerArchivePanel.vue'
+import CareerVisualizationPanel from '../components/CareerVisualizationPanel.vue'
+import CareerSimulatorPanel from '../components/CareerSimulatorPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const nav = useRoomNavigation()
@@ -954,6 +971,8 @@ function handleCanvasLeave() {
 
 onMounted(() => {
   nextTick(() => drawNetwork())
+  skillMap.loadSkills()
+  careerMilestones.loadMilestones()
 })
 
 watch(contacts, () => {
@@ -970,7 +989,8 @@ watch(connections, () => {
 
 const careerMilestones = useCareerMilestones()
 const skillMap = useSkillMap()
-
+const skillList = computed(() => skillMap.skills.value)
+const milestoneAll = computed(() => careerMilestones.milestones.value)
 const milestoneList = computed(() => {
   const ms = careerMilestones.milestones.value
   return ms.slice(0, 6).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

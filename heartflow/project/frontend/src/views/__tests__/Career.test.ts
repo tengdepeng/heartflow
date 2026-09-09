@@ -503,3 +503,40 @@ describe('集成：业脉档案面板', () => {
     expect(w.text()).toContain('圈层分布')
   })
 })
+
+// ============================================================
+// 集成：可视化数据 + 职业模拟器（INCR-194）
+// ============================================================
+describe('集成：可视化数据与职业模拟器', () => {
+  it('渲染可视化数据面板（空态引导）', async () => {
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    expect(w.find('.cvp').exists()).toBe(true)
+    expect(w.text()).toContain('可视化数据')
+  })
+
+  it('有技能数据时渲染技能雷达', async () => {
+    mockStore['hf:career:skills'] = [
+      { id: 's1', name: 'Vue', category: 'technical', proficiency: 'advanced', proficiencyScore: 70, yearsOfExperience: 3, relatedPositions: [], prerequisites: [], complements: [], isCore: true },
+      { id: 's2', name: '沟通', category: 'soft', proficiency: 'intermediate', proficiencyScore: 50, yearsOfExperience: 2, relatedPositions: [], prerequisites: [], complements: [], isCore: false },
+    ]
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    expect(w.text()).toContain('个维度')
+    expect(w.find('.cvp-radar').exists()).toBe(true)
+  })
+
+  it('渲染职业模拟器面板', async () => {
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    expect(w.find('.csp').exists()).toBe(true)
+    expect(w.text()).toContain('职业模拟器')
+  })
+
+  it('模拟器提供预设场景选择', async () => {
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    const scenarios = w.findAll('.csp-scenario')
+    expect(scenarios.length).toBeGreaterThan(0)
+  })
+})
