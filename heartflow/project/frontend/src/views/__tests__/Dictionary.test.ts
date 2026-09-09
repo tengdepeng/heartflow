@@ -285,4 +285,45 @@ describe('Dictionary 视图', () => {
     await wrapper.findAll('.poetry-btn')[1].trigger('click')
     expect(wrapper.find('.poetry-card').exists()).toBe(true)
   })
+
+  // ============================================================
+  // 集成：汉字档案画廊面板（INCR-206：补挂载孤儿面板 HanziGalleryPanel）
+  // ============================================================
+
+  it('渲染汉字档案画廊三入口与档案概览', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.hgp')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('查字台')
+    // 三 tab
+    expect(wrapper.findAll('.hgp-tab').length).toBe(3)
+    expect(wrapper.text()).toContain('拼音')
+    expect(wrapper.text()).toContain('部首')
+    expect(wrapper.text()).toContain('笔画')
+    // 档案概览
+    expect(wrapper.text()).toContain('汉字档案')
+    expect(wrapper.findAll('.hgp-metric').length).toBe(4)
+    expect(wrapper.text()).toContain('总字')
+    expect(wrapper.text()).toContain('部首')
+    expect(wrapper.text()).toContain('均画')
+    expect(wrapper.text()).toContain('简字')
+  })
+
+  it('拼音查字输入后展示结果网格', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.hgp-input').setValue('xin')
+    const chars = wrapper.findAll('.hgp-char')
+    expect(chars.length).toBeGreaterThan(0)
+  })
+
+  it('收录汉字到殿堂词库', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.hgp-input').setValue('xin')
+    const charBtn = wrapper.findAll('.hgp-char')[0]
+    await charBtn.trigger('click')
+    const collectBtn = wrapper.find('.hgp-collect')
+    expect(collectBtn.exists()).toBe(true)
+    await collectBtn.trigger('click')
+    expect(mockStore.addEntry).toHaveBeenCalled()
+  })
 })

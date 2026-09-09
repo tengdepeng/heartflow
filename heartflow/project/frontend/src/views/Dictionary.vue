@@ -126,6 +126,9 @@
     <!-- 诗词卡片（wisdom/poetry 引擎：今日一诗/搜索/收藏/洞察，INCR-205） -->
     <PoetryPanel />
 
+    <!-- 汉字档案画廊（hanzi 引擎：拼音/部首/笔画三入口+汉字档案概览/部首分布/洞察+收录到词库，INCR-206） -->
+    <HanziGalleryPanel :collectable="true" @collect="onCollectHanzi" />
+
     <!-- 自定义字库（hanzi 引擎，把查过的字收进字库，INCR-186） -->
     <CustomHanziPanel />
 
@@ -164,6 +167,8 @@ import HanziLookupPanel from '../components/HanziLookupPanel.vue'
 import HandwritingPanel from '../components/HandwritingPanel.vue'
 import CustomHanziPanel from '../components/CustomHanziPanel.vue'
 import PoetryPanel from '../components/PoetryPanel.vue'
+import HanziGalleryPanel from '../components/HanziGalleryPanel.vue'
+import type { HanziEntry } from '../modules/hanzi'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useDictionaryStore()
@@ -260,6 +265,15 @@ function closeEditor() {
   editCategory.value = ''
   editTags.value = []
   editTagInput.value = ''
+}
+
+function onCollectHanzi(entry: HanziEntry) {
+  store.addEntry(
+    entry.char,
+    entry.meaning || `${entry.radical}部 ${entry.strokes}画`,
+    '汉字',
+    [entry.pinyin || '', entry.radical].filter(Boolean),
+  )
 }
 function addEditTag() {
   const t = editTagInput.value.trim()
