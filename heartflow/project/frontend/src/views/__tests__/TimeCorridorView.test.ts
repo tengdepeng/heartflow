@@ -165,3 +165,42 @@ describe('集成：生命刻度面板', () => {
     expect(wrapper.findAll('.lep-milestone').length).toBe(7)
   })
 })
+
+// =============================================================
+// 集成：今夜观测计划（INCR-216：补挂载孤儿面板 ObservationPlanPanel）
+// =============================================================
+
+describe('集成：今夜观测计划', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockSessions.length = 0
+    Object.keys(mockKV).forEach((k) => delete mockKV[k])
+  })
+
+  it('渲染今夜观测计划面板（零 props 自包含直读 observing 配置）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.opp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('今夜观测计划')
+  })
+
+  it('展示观星指数、星等上限与分时段/最值得看区块', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.opp-overview').exists()).toBe(true)
+    expect(wrapper.text()).toContain('观星指数')
+    expect(wrapper.text()).toContain('星等上限')
+    expect(wrapper.find('.opp-block').exists()).toBe(true)
+    expect(wrapper.text()).toContain('分时段建议')
+    expect(wrapper.text()).toContain('今夜最值得看')
+  })
+
+  it('可点击「重新生成」刷新观测计划', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    const btn = wrapper.find('.opp-btn')
+    expect(btn.exists()).toBe(true)
+    await btn.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.opp').exists()).toBe(true)
+  })
+})

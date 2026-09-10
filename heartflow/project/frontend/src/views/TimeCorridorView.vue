@@ -60,6 +60,8 @@
       <AstronomyPanel />
       <!-- 月相历 · 逐月观星（timeline/astronomy 引擎：逐日月相+流星雨峰值，INCR-193） -->
       <AstronomyCalendarPanel />
+      <!-- 今夜观测计划（observing/observation-plan 引擎：月相/时段/深空/行星分时建议+观星指数，INCR-216） -->
+      <ObservationPlanPanel />
     </div>
 
     <!-- 时间星图 · 赤道→地平投影 / 四季回溯（sky 引擎，INCR-185） -->
@@ -125,6 +127,7 @@ import AstronomyPanel from '../components/AstronomyPanel.vue'
 import AstronomyCalendarPanel from '../components/AstronomyCalendarPanel.vue'
 import SkyGazePanel from '../components/SkyGazePanel.vue'
 import LifeEpochPanel from '../components/LifeEpochPanel.vue'
+import ObservationPlanPanel from '../components/ObservationPlanPanel.vue'
 import type { FocusSession } from '../types'
 import { useTimeCapsule } from '../modules/capsule'
 
