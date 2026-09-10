@@ -97,6 +97,11 @@
           </label>
         </div>
       </div>
+
+      <!-- 习惯预测档案（discipline/habit-predictor 引擎：健康度评分/连续预测/中断预警/趋势预测，INCR-213） -->
+      <div class="dw-predict">
+        <HabitPredictArchivePanel />
+      </div>
     </section>
 
     <!-- 挑战赛 -->
@@ -248,6 +253,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useDisciplineBridge } from '../modules/discipline/workshop-bridge'
+import HabitPredictArchivePanel from '../components/HabitPredictArchivePanel.vue'
 import type { Habit, DisciplineChallenge } from '../modules/discipline/types'
 import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
@@ -485,6 +491,7 @@ onMounted(() => {
 /* 区块 */
 .dw-section { margin-bottom: 2rem; }
 .dw-section h3 { font-size: 1.1rem; margin: 0 0 1rem; color: var(--color-text, #e2e8f0); }
+.dw-predict { margin-top: 1.4rem; }
 
 /* 空状态 */
 .empty-state { text-align: center; padding: 2rem; color: var(--color-text-muted, #94a3b8); }

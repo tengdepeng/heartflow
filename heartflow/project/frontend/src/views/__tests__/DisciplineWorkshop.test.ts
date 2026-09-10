@@ -27,6 +27,7 @@ vi.mock('../../composables/useViewEntrance', () => ({
 }))
 
 // ---- 模拟 workshop-bridge 模块 ----
+const mockHabits = ref<any[]>([])
 vi.mock('../../modules/discipline/workshop-bridge', () => ({
   useDisciplineBridge: () => ({
     init: vi.fn(),
@@ -42,6 +43,7 @@ vi.mock('../../modules/discipline/workshop-bridge', () => ({
     HABIT_TEMPLATES: [],
     CHALLENGE_TEMPLATES: [],
     streaks: ref([]),
+    habits: mockHabits,
     completeHabit: vi.fn(),
     createHabitFromTemplate: vi.fn(),
     createChallengeFromTemplate: vi.fn(),
@@ -123,5 +125,40 @@ describe('DisciplineWorkshop 自律工坊', () => {
     await wrapper.vm.$nextTick()
     const studio = wrapper.find('[data-test="meditation-studio"]')
     expect(studio.exists()).toBe(true)
+  })
+})
+
+// =============================================================
+// 集成：习惯预测档案面板（INCR-213：补挂载孤儿面板 HabitPredictArchivePanel）
+// =============================================================
+
+describe('集成：习惯预测档案面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockHabits.value = []
+  })
+
+  it('无习惯时渲染空态（工坊未启）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.hpap-archive').exists()).toBe(true)
+    expect(wrapper.text()).toContain('✨ 习惯预测档案')
+    expect(wrapper.text()).toContain('工坊未启')
+  })
+
+  it('有待启用的习惯时渲染健康度评分与连续预测', async () => {
+    mockHabits.value = [
+      {
+        id: 'h1', title: '晨跑', icon: '🏃', enabled: true, streak: 3,
+        bestStreak: 5, frequency: 'daily', createdAt: '2026-01-01',
+        completedDates: ['2026-09-08', '2026-09-07', '2026-09-06'],
+        targetDays: 7, autoCheckInOnFocus: false, area: 'body',
+      },
+    ]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.hpap-health').exists()).toBe(true)
+    expect(wrapper.text()).toContain('健康度评分')
+    expect(wrapper.text()).toContain('连续预测')
+    expect(wrapper.text()).toContain('晨跑')
   })
 })
