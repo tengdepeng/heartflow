@@ -28,6 +28,9 @@ vi.mock('../../composables/useViewEntrance', () => ({
 
 // ---- 模拟 workshop-bridge 模块 ----
 const mockHabits = ref<any[]>([])
+const mockFailures = ref<any[]>([])
+const mockGenerateSuggestions = vi.fn<() => Array<{ id: string; name: string; reason: string }>>(() => [])
+const mockAdoptSuggestion = vi.fn()
 vi.mock('../../modules/discipline/workshop-bridge', () => ({
   useDisciplineBridge: () => ({
     init: vi.fn(),
@@ -44,6 +47,10 @@ vi.mock('../../modules/discipline/workshop-bridge', () => ({
     CHALLENGE_TEMPLATES: [],
     streaks: ref([]),
     habits: mockHabits,
+    failures: mockFailures,
+    suggestions: mockGenerateSuggestions(),
+    generateSuggestions: mockGenerateSuggestions,
+    adoptSuggestion: mockAdoptSuggestion,
     completeHabit: vi.fn(),
     createHabitFromTemplate: vi.fn(),
     createChallengeFromTemplate: vi.fn(),
@@ -160,5 +167,45 @@ describe('集成：习惯预测档案面板', () => {
     expect(wrapper.text()).toContain('健康度评分')
     expect(wrapper.text()).toContain('连续预测')
     expect(wrapper.text()).toContain('晨跑')
+  })
+})
+
+// =============================================================
+// 集成：失败分析与习惯建议面板（INCR-214：补挂载孤儿面板 HabitFailurePanel + HabitSuggestionPanel）
+// =============================================================
+
+describe('集成：失败分析与习惯建议面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockHabits.value = []
+    mockFailures.value = []
+    mockGenerateSuggestions.mockReturnValue([])
+  })
+
+  it('无失败/建议时渲染空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.hfa').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🙏 失败分析')
+    expect(wrapper.text()).toContain('暂无失败记录')
+    expect(wrapper.find('.hsp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('💡 习惯建议')
+    expect(wrapper.text()).toContain('暂无建议')
+  })
+
+  it('有失败记录时展示中断复盘', async () => {
+    mockFailures.value = [{ id: 'f1', habitName: '熬夜', reason: '深夜无意识刷手机' }]
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.hfa-item').length).toBe(1)
+    expect(wrapper.text()).toContain('熬夜')
+    expect(wrapper.text()).toContain('深夜无意识刷手机')
+  })
+
+  it('有推荐建议时展示并采纳', async () => {
+    mockGenerateSuggestions.mockReturnValue([{ id: 's1', name: '午后运动', reason: '提振午后精力' }])
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.hsp-item').length).toBe(1)
+    expect(wrapper.text()).toContain('午后运动')
+    await wrapper.find('.hsp-btn').trigger('click')
+    expect(mockAdoptSuggestion).toHaveBeenCalledWith('s1')
   })
 })

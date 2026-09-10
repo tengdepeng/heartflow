@@ -102,6 +102,12 @@
       <div class="dw-predict">
         <HabitPredictArchivePanel />
       </div>
+
+      <!-- 失败分析与习惯建议（discipline/workshop-bridge 引擎：中断复盘支持，INCR-214） -->
+      <div class="dw-advice">
+        <HabitFailurePanel :bridge="bridge" />
+        <HabitSuggestionPanel :bridge="bridge" />
+      </div>
     </section>
 
     <!-- 挑战赛 -->
@@ -254,6 +260,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useDisciplineBridge } from '../modules/discipline/workshop-bridge'
 import HabitPredictArchivePanel from '../components/HabitPredictArchivePanel.vue'
+import HabitFailurePanel from '../components/HabitFailurePanel.vue'
+import HabitSuggestionPanel from '../components/HabitSuggestionPanel.vue'
 import type { Habit, DisciplineChallenge } from '../modules/discipline/types'
 import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
@@ -492,6 +500,22 @@ onMounted(() => {
 .dw-section { margin-bottom: 2rem; }
 .dw-section h3 { font-size: 1.1rem; margin: 0 0 1rem; color: var(--color-text, #e2e8f0); }
 .dw-predict { margin-top: 1.4rem; }
+.dw-advice {
+  margin-top: 1.4rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  /* 为集成面板补齐 --hf-* 设计令牌 */
+  --hf-primary: #f59e0b;
+  --hf-surface: #1b1b21;
+  --hf-border: #3a3f4d;
+  --hf-text: #eef0f4;
+  --hf-text-muted: #9aa3b2;
+  --hf-bg: #141418;
+  --hf-radius: 14px;
+  --hf-shadow: none;
+  --hf-bg-accent: rgba(245, 158, 11, 0.08);
+}
 
 /* 空状态 */
 .empty-state { text-align: center; padding: 2rem; color: var(--color-text-muted, #94a3b8); }
