@@ -3,6 +3,7 @@
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { nextTick } from 'vue'
 
 const mockStore: Record<string, any> = {}
 const mockGetKV = vi.fn((_key: string, def: any) => mockStore[_key] ?? def)
@@ -167,5 +168,66 @@ describe('TransformGallery 蜕变回廊视图', () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('2') // body 有2条
     expect(wrapper.text()).toContain('1') // mind 有1条
+  })
+
+  // ============================================================
+  // 集成：蜕变势能面板（INCR-225：补挂载孤儿面板 TransformMomentumPanel）
+  // ============================================================
+
+  it('渲染蜕变势能面板（含标题与空态引导）', async () => {
+    const wrapper = await getWrapper()
+    await nextTick()
+    expect(wrapper.find('.tmp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('蜕变势能')
+    expect(wrapper.find('.tmp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('记录第一段蜕变')
+  })
+
+  it('有记录时显示势能评分/档位/节奏四格/覆盖事实', async () => {
+    const now = new Date()
+    const day = 86_400_000
+    mockStore['hf:transformations'] = [
+      makeRecord({ id: 't1', type: 'body', createdAt: new Date(now.getTime() - day).toISOString() }),
+      makeRecord({ id: 't2', type: 'body', createdAt: new Date(now.getTime() - 2 * day).toISOString() }),
+      makeRecord({ id: 't3', type: 'mind', createdAt: new Date(now.getTime() - 3 * day).toISOString() }),
+    ]
+    const wrapper = await getWrapper()
+    await nextTick()
+    expect(wrapper.find('.tmp-score').exists()).toBe(true)
+    expect(wrapper.find('.tmp-level').exists()).toBe(true)
+    expect(wrapper.find('.tmp-momentum-facts').exists()).toBe(true)
+    expect(wrapper.text()).toContain('近7天')
+    const cells = wrapper.findAll('.tmp-cad-cell')
+    expect(cells.length).toBe(4)
+    expect(wrapper.text()).toContain('平均间隔')
+    expect(wrapper.text()).toContain('连续蜕变')
+  })
+
+  it('类型热度按占比渲染', async () => {
+    const now = new Date()
+    const day = 86_400_000
+    mockStore['hf:transformations'] = [
+      makeRecord({ id: 't1', type: 'body', createdAt: new Date(now.getTime() - day).toISOString() }),
+      makeRecord({ id: 't2', type: 'body', createdAt: new Date(now.getTime() - 2 * day).toISOString() }),
+      makeRecord({ id: 't3', type: 'mind', createdAt: new Date(now.getTime() - 3 * day).toISOString() }),
+    ]
+    const wrapper = await getWrapper()
+    await nextTick()
+    const rows = wrapper.findAll('.tmp-heat-row')
+    expect(rows.length).toBe(2)
+    expect(wrapper.text()).toContain('67%')
+  })
+
+  it('温和洞察随记录生成', async () => {
+    const now = new Date()
+    const day = 86_400_000
+    mockStore['hf:transformations'] = [
+      makeRecord({ id: 't1', type: 'body', createdAt: new Date(now.getTime() - day).toISOString() }),
+      makeRecord({ id: 't2', type: 'mind', createdAt: new Date(now.getTime() - 2 * day).toISOString() }),
+    ]
+    const wrapper = await getWrapper()
+    await nextTick()
+    expect(wrapper.find('.tmp-insights').exists()).toBe(true)
+    expect(wrapper.text()).toContain('近 30 天蜕变')
   })
 })

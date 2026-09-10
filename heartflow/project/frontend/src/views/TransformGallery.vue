@@ -31,6 +31,9 @@
       </article>
     </section>
 
+    <!-- 蜕变势能（transform-analytics 引擎：势能/节奏/类型热度/温和洞察，INCR-225） -->
+    <TransformMomentumPanel :records="records" />
+
     <!-- 类型分布 -->
     <section data-enter class="tg-distribution" v-if="records.length">
       <h3 class="section-title">类型分布</h3>
@@ -209,6 +212,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useTransformGallery } from '../modules/transform'
 import { useCocoonStore } from '../modules/seasonal/cocoon-store'
+import TransformMomentumPanel from '../components/TransformMomentumPanel.vue'
 import {
   DRIVING_FORCE_LABELS,
   DRIVING_FORCE_COLORS,
