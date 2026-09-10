@@ -422,6 +422,11 @@
       <ScarNarrativeWorkshopPanel :marks="adaptedMarks" />
     </section>
 
+    <!-- 愈合预测（scar/healing-predict 引擎：基线/多因子/区间预测，INCR-221 薄委托化） -->
+    <section data-enter class="sc-hpp-section">
+      <HealingPredictionPanel :marks="adaptedMarks" :growth="growthRecords" />
+    </section>
+
     <!-- 空状态 -->
     <div data-enter v-if="!marks.length" class="sc-empty">
       <p>锻炉安静，尚无印记。</p>
@@ -437,20 +442,26 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useHealingJourney } from '../modules/scar/healing-journey'
 import { useNarrativeEnhancer } from '../modules/scar/narrative-enhancer'
 import { useScarMarks } from '../modules/scar/marks'
-import type { BodyMark as ModuleBodyMark, ScarStats, HealingStage, SeverityLevel, BodyPart } from '../modules/scar/types'
+import type { BodyMark as ModuleBodyMark, ScarStats, HealingStage, SeverityLevel, BodyPart, GrowthRecord } from '../modules/scar/types'
+import { SCAR_STORAGE_KEYS } from '../modules/scar/types'
 import ScarVisualizationPanel from '../components/ScarVisualizationPanel.vue'
 import CausalChainPanel from '../components/CausalChainPanel.vue'
 import ScarArchivePanel from '../components/ScarArchivePanel.vue'
 import ScarNarrativeWorkshopPanel from '../components/ScarNarrativeWorkshopPanel.vue'
+import HealingPredictionPanel from '../components/HealingPredictionPanel.vue'
 const { entranceRef, entranceClass } = useViewEntrance()
 const healingJourney = useHealingJourney()
 const narrative = useNarrativeEnhancer()
 const scarMarks = useScarMarks()
 const displayCfg = storage.getConfig().display
 
+// 生长日志（愈合预测的历史基线样本，INCR-221 薄委托化）
+const growthRecords = ref<GrowthRecord[]>([])
+
 // 视图挂载时从存储载入痕记
 onMounted(() => {
   scarMarks.load()
+  growthRecords.value = storage.getKV<GrowthRecord[]>(SCAR_STORAGE_KEYS.GROWTH, [])
 })
 
 type ScarType = 'impact' | 'cut' | 'burn' | 'wear'

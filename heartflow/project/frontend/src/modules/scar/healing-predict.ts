@@ -274,7 +274,7 @@ export function useHealingPredictor() {
     })
 
     // 3. 身体部位因子
-    const partFactor = BODY_PART_HEALING_FACTOR[scar.bodyPart]
+    const partFactor = BODY_PART_HEALING_FACTOR[scar.bodyPart] ?? 1.0
     contributions.push({
       factor: `身体部位：${scar.bodyPart}`,
       direction: partFactor >= 1 ? 'accelerates' : 'slows',
@@ -343,9 +343,9 @@ export function useHealingPredictor() {
     const factors = analyzeFactors(scar, growthRecords, baselines)
 
     // 计算加权愈合速度
-    const typeFactor = SCAR_TYPE_HEALING_FACTOR[scar.scarType]
-    const sevFactor = SEVERITY_HEALING_FACTOR[scar.severity]
-    const partFactor = BODY_PART_HEALING_FACTOR[scar.bodyPart]
+    const typeFactor = SCAR_TYPE_HEALING_FACTOR[scar.scarType] ?? 1.0
+    const sevFactor = SEVERITY_HEALING_FACTOR[scar.severity] ?? 1.0
+    const partFactor = BODY_PART_HEALING_FACTOR[scar.bodyPart] ?? 1.0
 
     // 基础愈合速度：每天固定百分比
     let baseHealingRate = 0.02 // 每天 2% 基础愈合

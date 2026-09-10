@@ -432,3 +432,43 @@ describe('Scar 视图', () => {
     expect(wrapper.text()).toContain('还没有锻造仪式')
   })
 })
+
+// ============================================================
+// 集成：愈合预测（INCR-221：薄委托化 + 补挂载孤儿面板 HealingPredictionPanel）
+// ============================================================
+describe('集成：愈合预测', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockKV.set('scars', [...mockMarks])
+  })
+
+  it('空态：无印记时展示引导', async () => {
+    mockKV.set('scars', [])
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.hpp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('愈合预测')
+    expect(wrapper.text()).toContain('先记录一道工痕')
+  })
+
+  it('所有印记均已痊愈时展示暂无在途', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('在途预测')
+    expect(wrapper.text()).toContain('暂无在途工痕，所有印记均已痊愈')
+  })
+
+  it('存在在途印记时渲染预测卡片（含生长日志基线）', async () => {
+    mockKV.set('hf:scar_growth', [
+      { id: 'g1', markId: 's1', at: new Date().toISOString(), text: '腰酸缓解', type: 'healing' },
+    ])
+    mockKV.set('scars', [
+      { ...mockMarks[0], at: new Date().toISOString(), healingStage: 'proliferation', healingProgress: 20 },
+    ])
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('在途预测')
+    const card = wrapper.find('.hpp-card')
+    expect(card.exists()).toBe(true)
+    expect(wrapper.text()).toContain('置信度')
+  })
+})
