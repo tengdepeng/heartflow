@@ -112,6 +112,26 @@ vi.mock('../../engine/room-graph', () => ({
   })),
 }))
 
+// 5. Mock storage（CraftMaterialsPanel 直引 @/engine/storage，补隔离返回空材料库，INCR-209）
+vi.mock('../../engine/storage', () => ({
+  storage: {
+    getKV: (key: string, fallback?: any) => {
+      const store: Record<string, any> = {
+        'craft:materials': [],
+        'craft:usages': [],
+      }
+      return store[key] ?? fallback
+    },
+    setKV: vi.fn(),
+    getConfig: () => ({
+      display: { trendNoteCount: 20, titleTruncateLength: 8, excerptTruncateLength: 80, tagDisplayCount: 2, statsWindowDays: 30, searchResultLimit: 10, dreamStorageLimit: 100, cleanupThresholdDays: 30, moveTrajectoryCount: 20, healthRecentSleepCount: 14, healthRecentExerciseCount: 30, healthRecentMealCount: 5, noteMaxLength: 100, uploadImageMaxBytes: 5242880, uploadVideoMaxBytes: 104857600 },
+      health: { exerciseTarget: 150, sleepTarget: 7, sleepMinThreshold: 6, sleepCriticalThreshold: 5, sleepExcellentThreshold: 7.5 },
+      worklog: { overtimeRate: 1.5, nightRate: 1.3, defaultStart: '09:00', defaultEnd: '18:00', trendDays: 30, trendMonths: 6, recentShiftLimit: 15 },
+    }),
+    setConfig: vi.fn(),
+  },
+}))
+
 // =============================================================
 // 样本数据
 // =============================================================
@@ -191,7 +211,10 @@ describe('Craft 匠庐视图', () => {
     const wrapper = await getWrapper()
     await wrapper.vm.$nextTick()
 
-    const cards = wrapper.findAll('.stat-card')
+    // 限定主统计概览容器（CraftStatsOverview，排除材料库面板的 .mat-stats 统计，INCR-209）
+    const overview = wrapper.find('.stats-overview:not(.mat-stats)')
+    expect(overview.exists()).toBe(true)
+    const cards = overview.findAll('.stat-card')
     expect(cards).toHaveLength(4)
 
     // 总作品 = 3
@@ -549,5 +572,43 @@ describe('匠庐档案面板', () => {
     // 作品三无标签，作品一 tags=['vue','前端']，作品二 tags=['写作']
     expect(archive.text()).toContain('高频标签')
     expect(archive.find('.cap-insight').exists()).toBe(true)
+  })
+})
+
+// =============================================================
+// 集成：材料库面板（INCR-209：补挂载孤儿面板 CraftMaterialsPanel）
+// =============================================================
+
+describe('集成：材料库面板', () => {
+  it('渲染材料库含统计与空态', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    const panel = wrapper.find('.craft-section')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('材料库')
+    // 统计 3 格
+    expect(wrapper.text()).toContain('材料种类')
+    expect(wrapper.text()).toContain('库存总量')
+    expect(wrapper.text()).toContain('库存告急')
+    // 空态引导
+    expect(wrapper.find('.craft-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('材料库空空如也')
+  })
+
+  it('添加材料后出现在网格', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    // 限定在材料添加表单内查找输入框，避免命中其他面板同名 class（INCR-209）
+    const nameInput = wrapper.find('.mat-add-form .form-input[placeholder="材料名称"]')
+    expect(nameInput.exists()).toBe(true)
+    await nameInput.setValue('檀香木')
+    const addBtn = wrapper.find('.mat-add-form .craft-btn--primary')
+    expect(addBtn.attributes('disabled')).toBeUndefined()
+    await addBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.mat-grid').exists()).toBe(true)
+    expect(wrapper.find('.craft-empty').exists()).toBe(false)
+    expect(wrapper.text()).toContain('檀香木')
+    expect(wrapper.findAll('.mat-card').length).toBe(1)
   })
 })

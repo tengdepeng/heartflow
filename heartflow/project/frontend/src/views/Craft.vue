@@ -69,6 +69,8 @@
     <CraftWipBench />
     <CraftExhibitionShelf />
     <CraftEvolutionTimeline />
+    <!-- 材料库（craft/materials 引擎：材料种类/库存/低库存预警/添加消耗/来源标签，INCR-209） -->
+    <CraftMaterialsPanel />
     <CraftScenePresets />
     <WorkFormModal />
 
@@ -91,6 +93,7 @@ import CraftStatsOverview from '../components/craft/CraftStatsOverview.vue'
 import CraftArchivePanel from '../components/CraftArchivePanel.vue'
 import CraftWorkbench from '../components/craft/CraftWorkbench.vue'
 import CraftWipBench from '../components/craft/CraftWipBench.vue'
+import CraftMaterialsPanel from '../components/craft/CraftMaterialsPanel.vue'
 import CraftExhibitionShelf from '../components/craft/CraftExhibitionShelf.vue'
 import CraftEvolutionTimeline from '../components/craft/CraftEvolutionTimeline.vue'
 import CraftScenePresets from '../components/craft/CraftScenePresets.vue'
