@@ -2,7 +2,7 @@
 // ParallelWorld 视图测试 - 平行世界
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { mount, flushPromises } from '@vue/test-utils'
 
 // ---- 模拟 storage ----
 const mockStore: Record<string, any> = {}
@@ -112,6 +112,77 @@ describe('ParallelWorld 平行世界', () => {
 
   it('集成渲染分支可视化面板 BranchVisualizationPanel', async () => {
     const wrapper = await getWrapper()
-    expect(wrapper.findComponent({ name: 'BranchVisualizationPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({
+      name: 'BranchVisualizationPanel'
+    }).exists()).toBe(true)
+  })
+
+  // ============================================================
+  // 批量收口：场景同步面板（INCR-222 薄委托化）
+  // ============================================================
+
+  it('集成渲染场景同步面板 SceneSyncPanel', async () => {
+    const wrapper = await getWrapper()
+    await flushPromises()
+    expect(wrapper.findComponent({ name: 'SceneSyncPanel' }).exists()).toBe(true)
+  })
+
+  it('场景同步面板：默认仅主干分支时展示空态提示', async () => {
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wrapper.findComponent({ name: 'SceneSyncPanel' })
+    expect(panel.text()).toContain('场景同步')
+    expect(panel.text()).toContain('至少需要两个时间分支才能同步')
+  })
+
+  it('场景同步面板：多分支时展示同步表单与差异预览', async () => {
+    mockStore['hf:parallel-world:branches'] = [
+      { id: 'pw_trunk', name: '主干', description: '', color: '#4A90D9', createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined, isActive: true, checkpointCount: 2 },
+      { id: 'pw_b', name: '抉择分支', description: '', color: '#2E8B57', createdAt: '2026-01-02T00:00:00.000Z', parentBranchId: 'pw_trunk', isActive: false, checkpointCount: 1 },
+    ]
+    mockStore['hf:parallel-world:checkpoints'] = [
+      { id: 'cp1', branchId: 'pw_trunk', label: '起点', description: '', snapshot: { a: 1 }, createdAt: '2026-01-01T00:00:00.000Z', tags: ['重要'] },
+      { id: 'cp2', branchId: 'pw_trunk', label: '转折', description: '', snapshot: { b: 2 }, createdAt: '2026-01-02T00:00:00.000Z', tags: [] },
+      { id: 'cp3', branchId: 'pw_b', label: '另一种人生', description: '', snapshot: { c: 3 }, createdAt: '2026-01-03T00:00:00.000Z', tags: [] },
+    ]
+    mockStore['hf:parallel-world:snapshots'] = []
+
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wrapper.findComponent({ name: 'SceneSyncPanel' })
+    // 两个分支 → 源/目标两个下拉
+    expect(panel.findAll('.ssy-input').length).toBe(2)
+    // 默认选中不同分支 → 按钮可用
+    const pushBtn = panel.findAll('button').find(b => b.text().includes('推送'))
+    expect(pushBtn?.attributes('disabled')).toBeUndefined()
+    // 差异预览
+    expect(panel.text()).toContain('差异预览')
+    expect(panel.text()).toContain('独有')
+  })
+
+  it('场景同步面板：推送同步经宿主回调持久化检查点', async () => {
+    mockStore['hf:parallel-world:branches'] = [
+      { id: 'pw_trunk', name: '主干', description: '', color: '#4A90D9', createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined, isActive: true, checkpointCount: 2 },
+      { id: 'pw_b', name: '抉择分支', description: '', color: '#2E8B57', createdAt: '2026-01-02T00:00:00.000Z', parentBranchId: 'pw_trunk', isActive: false, checkpointCount: 1 },
+    ]
+    mockStore['hf:parallel-world:checkpoints'] = [
+      { id: 'cp1', branchId: 'pw_trunk', label: '起点', description: '', snapshot: { a: 1 }, createdAt: '2026-01-01T00:00:00.000Z', tags: ['重要'] },
+      { id: 'cp2', branchId: 'pw_trunk', label: '转折', description: '', snapshot: { b: 2 }, createdAt: '2026-01-02T00:00:00.000Z', tags: [] },
+      { id: 'cp3', branchId: 'pw_b', label: '另一种人生', description: '', snapshot: { c: 3 }, createdAt: '2026-01-03T00:00:00.000Z', tags: [] },
+    ]
+    mockStore['hf:parallel-world:snapshots'] = []
+
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wrapper.findComponent({ name: 'SceneSyncPanel' })
+    const pushBtn = panel.findAll('button').find(b => b.text().includes('推送'))!
+    await pushBtn.trigger('click')
+    await flushPromises()
+    // 宿主回调持久化：主干 2 个独有检查点推送到目标分支 → 3 + 2 = 5
+    expect(mockStore['hf:parallel-world:checkpoints'].length).toBe(5)
+    expect(mockStore['hf:parallel-world:checkpoints'].some((c: any) => c.branchId === 'pw_b' && c.label === '起点')).toBe(true)
+    // 面板展示最近同步记录
+    expect(panel.text()).toContain('最近同步')
+    expect(panel.text()).toContain('完成')
   })
 })

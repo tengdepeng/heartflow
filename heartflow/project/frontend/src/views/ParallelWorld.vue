@@ -235,6 +235,18 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 场景同步（parallel-world·useSceneSync，INCR-222 薄委托化） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <SceneSyncPanel
+        :branches="parallelWorld.branches.value"
+        :checkpoints="parallelWorld.checkpoints.value"
+        :create-checkpoint="syncCreateCheckpoint"
+        :update-checkpoint="syncUpdateCheckpoint"
+      />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 分支回放（parallel-world·useBranchReplay，INCR-176） -->
     <!-- ============================================================ -->
     <section data-enter class="pw-branch-panels">
@@ -289,9 +301,42 @@ import BranchManagementPanel from '../components/BranchManagementPanel.vue'
 import BranchReplayPanel from '../components/BranchReplayPanel.vue'
 import BranchTimelinePanel from '../components/BranchTimelinePanel.vue'
 import BranchVisualizationPanel from '../components/BranchVisualizationPanel.vue'
+import SceneSyncPanel from '../components/SceneSyncPanel.vue'
+import { PARALLEL_WORLD_STORAGE_KEYS } from '../modules/parallel-world/types'
+import type { Checkpoint } from '../modules/parallel-world/types'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const parallelWorld = useParallelWorld()
+
+// 场景同步的同步适配回调（INCR-222 薄委托化：宿主持久化，面板只读+回调）
+function syncCreateCheckpoint(
+  branchId: string,
+  label: string,
+  description = '',
+  snapshot: Record<string, unknown> = {},
+  tags: string[] = [],
+): Checkpoint {
+  const cp: Checkpoint = {
+    id: `cp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    branchId,
+    label,
+    description,
+    snapshot,
+    createdAt: new Date().toISOString(),
+    tags,
+  }
+  parallelWorld.checkpoints.value.push(cp)
+  storage.setKV(PARALLEL_WORLD_STORAGE_KEYS.CHECKPOINTS, parallelWorld.checkpoints.value)
+  return cp
+}
+
+function syncUpdateCheckpoint(checkpointId: string, updates: Partial<Checkpoint>): Checkpoint | undefined {
+  const cp = parallelWorld.checkpoints.value.find(c => c.id === checkpointId)
+  if (!cp) return undefined
+  Object.assign(cp, updates)
+  storage.setKV(PARALLEL_WORLD_STORAGE_KEYS.CHECKPOINTS, parallelWorld.checkpoints.value)
+  return cp
+}
 const { capsules, capForm, sortedCapsules, checkReady, tryOpenCapsule, addCapsule, removeCapsule, load: loadCapsules } = useTimeCapsule()
 const router = useRouter()
 
