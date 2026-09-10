@@ -67,6 +67,11 @@
       <SkyGazePanel />
     </div>
 
+    <!-- 生命刻度 · 生之时/死之时/里程碑（life-epoch 引擎，INCR-211） -->
+    <div data-enter class="tcv-lifeepoch">
+      <LifeEpochPanel />
+    </div>
+
     <!-- 时光胶囊 · 接入已存在的 modules/capsule（本地私有/沉默默认/允许未定义） -->
     <section data-enter class="tcv-capsule">
       <header class="tcv-capsule-head">
@@ -119,6 +124,7 @@ import TimeCorridor from '../components/TimeCorridor.vue'
 import AstronomyPanel from '../components/AstronomyPanel.vue'
 import AstronomyCalendarPanel from '../components/AstronomyCalendarPanel.vue'
 import SkyGazePanel from '../components/SkyGazePanel.vue'
+import LifeEpochPanel from '../components/LifeEpochPanel.vue'
 import type { FocusSession } from '../types'
 import { useTimeCapsule } from '../modules/capsule'
 
@@ -356,6 +362,13 @@ function navTo(path: string) {
 
 /* ---- 天文日历（INCR-05） ---- */
 .tcv-astro {
+  position: relative;
+  z-index: 1;
+  margin: 16px 24px 0;
+}
+
+/* ---- 生命刻度（INCR-211） ---- */
+.tcv-lifeepoch {
   position: relative;
   z-index: 1;
   margin: 16px 24px 0;

@@ -22,11 +22,14 @@ vi.mock('vue-router', () => ({
 const mockStorageVersion = ref(1)
 const mockSessions = [] as any[]
 const mockCrystals = [] as any[]
+const mockKV: Record<string, unknown> = {}
 
 vi.mock('../../engine/storage', () => ({
   storage: {
     getSessions: () => mockSessions,
     getCrystals: () => mockCrystals,
+    getKV: (k: string, fb?: unknown) => mockKV[k] ?? fb,
+    setKV: (k: string, v: unknown) => { mockKV[k] = v },
   },
   storageVersion: mockStorageVersion,
 }))
@@ -53,6 +56,7 @@ describe('TimeCorridorView 时间长廊', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockSessions.length = 0
+    Object.keys(mockKV).forEach((k) => delete mockKV[k])
   })
 
   it('渲染标题"时间长廊"', async () => {
@@ -126,5 +130,38 @@ describe('TimeCorridorView 时间长廊', () => {
     expect(grid.exists()).toBe(true)
     expect(wrapper.findAll('.acld-day').length).toBeGreaterThan(0)
     expect(wrapper.find('.acld-nav').exists()).toBe(true)
+  })
+})
+
+// =============================================================
+// 集成：生命刻度面板（INCR-211：补挂载孤儿面板 LifeEpochPanel）
+// =============================================================
+
+describe('集成：生命刻度面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockSessions.length = 0
+    Object.keys(mockKV).forEach((k) => delete mockKV[k])
+  })
+
+  it('渲染默认生命刻度（生之时/生命进度/默认里程碑）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.lep').exists()).toBe(true)
+    expect(wrapper.text()).toContain('生命刻度')
+    expect(wrapper.text()).toContain('生之时')
+    expect(wrapper.text()).toContain('生命进度')
+    expect(wrapper.text()).toContain('成年')
+    expect(wrapper.text()).toContain('而立之年')
+    expect(wrapper.findAll('.lep-elapsed-item').length).toBe(6)
+  })
+
+  it('可添加并展示新的里程碑', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('input.lep-input[placeholder="里程碑名（如：而立之年）"]').setValue('金婚之年')
+    await wrapper.find('input.lep-input--year').setValue(50)
+    await wrapper.find('form.lep-add').trigger('submit')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('金婚之年')
+    expect(wrapper.findAll('.lep-milestone').length).toBe(7)
   })
 })
