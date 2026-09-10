@@ -267,3 +267,63 @@ describe('集成：体质画像问卷面板', () => {
     expect(wrapper.text()).toContain('主体质')
   })
 })
+
+// =============================================================
+// 集成：经络穴位典籍（INCR-217：补挂载孤儿面板 TcmPanel）
+// =============================================================
+
+describe('集成：经络穴位典籍', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBodyLogs.value = []
+    mockMeridianLogs.value = []
+    mockWisdomLogs.value = []
+    mockReadingLogs.value = []
+  })
+
+  it('渲染经络穴位典籍面板（零 props 自包含直读 tcm 引擎）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.tcp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('经络穴位典籍')
+    expect(wrapper.text()).toContain('子午流注')
+  })
+
+  it('展示子午流注钟、温和洞察与经络列表', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.tcp-clock').exists()).toBe(true)
+    expect(wrapper.find('.tcp-insights').exists()).toBe(true)
+    expect(wrapper.findAll('.tcp-meridian').length).toBeGreaterThan(0)
+    expect(wrapper.text()).toContain('经络（')
+  })
+
+  it('穴位检索筛选并可点选查看详情', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.tcp-input').setValue('太冲')
+    // 期望命中至少一个穴位
+    const results = wrapper.findAll('.tcp-result')
+    expect(results.length).toBeGreaterThan(0)
+    await results[0].trigger('click')
+    expect(wrapper.find('.tcp-detail').exists()).toBe(true)
+    expect(wrapper.find('.tcp-detail-name').exists()).toBe(true)
+  })
+
+  it('无匹配穴位时展示空态提示', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.tcp-input').setValue('zzzzzz')
+    expect(wrapper.text()).toContain('没有匹配的穴位')
+  })
+
+  it('可收藏穴位并计入「我的收藏」', async () => {
+    const wrapper = await getWrapper()
+    // 先点选一个穴位打开详情（收藏按钮在详情区）
+    const firstResult = wrapper.find('.tcp-result')
+    expect(firstResult.exists()).toBe(true)
+    await firstResult.trigger('click')
+    expect(wrapper.find('.tcp-fav').exists()).toBe(true)
+    // 详情收藏按钮默认未收藏 → 点击收藏
+    expect(wrapper.find('.tcp-fav').text()).toContain('♡ 收藏')
+    await wrapper.find('.tcp-fav').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tcp-favs').text()).toContain('我的收藏（1）')
+  })
+})

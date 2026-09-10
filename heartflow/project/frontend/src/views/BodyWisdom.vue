@@ -95,6 +95,8 @@
       <MeridianVisualizationPanel :records="meridianRecords" />
       <!-- 健康分析 · 藏象体检单（health-analysis 引擎，INCR-188） -->
       <HealthAnalysisPanel :meridians="meridianRecords" :moods="moodRecords" />
+      <!-- 经络穴位典籍 · 子午流注/穴位检索/收藏/经典/歌诀（wisdom/tcm 引擎，INCR-217） -->
+      <TcmPanel />
     </div>
 
     <!-- ===== 感知层 ===== -->
@@ -201,6 +203,7 @@ import HealthArchivePanel from '../components/HealthArchivePanel.vue'
 import MeridianCheckPanel from '../components/MeridianCheckPanel.vue'
 import MeridianVisualizationPanel from '../components/MeridianVisualizationPanel.vue'
 import HealthAnalysisPanel from '../components/HealthAnalysisPanel.vue'
+import TcmPanel from '../components/TcmPanel.vue'
 import { MERIDIAN_HOURS } from '../modules/body-wisdom'
 import type { MeridianRecord, MoodRecord } from '../modules/body-wisdom'
 
