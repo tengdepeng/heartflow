@@ -10,6 +10,8 @@
 
     <!-- 档案陈列 -->
     <CapsuleArchivePanel :capsules="capsule.capsules.value" />
+    <!-- 胶囊库档案 · 状态分布/下一封/逾末催启/即将开启/最近开启回看（capsule/capsule-vault 引擎，INCR-218） -->
+    <CapsuleVaultPanel :capsules="capsule.capsules.value" />
 
     <!-- 新建胶囊 -->
     <section data-enter class="capsule-create">
@@ -124,6 +126,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useTimeCapsule, type CapsuleItemRef } from '../modules/capsule'
 import { getNoteStore } from '../modules/note'
 import CapsuleArchivePanel from '../components/CapsuleArchivePanel.vue'
+import CapsuleVaultPanel from '../components/CapsuleVaultPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const capsule = useTimeCapsule()
