@@ -141,3 +141,49 @@ describe('GrowthGarden 成长庭院', () => {
     expect(wrapper.find('.wlp-stat-num').text()).toBe('1')
   })
 })
+
+// =============================================================
+// 集成：目标成长状态机面板（INCR-212：补挂载孤儿面板 GoalGrowthStateMachinePanel）
+// =============================================================
+
+describe('集成：目标成长状态机面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(h.mockStore).forEach(k => delete h.mockStore[k])
+    if (typeof localStorage !== 'undefined') localStorage.clear()
+    useGoal().load()
+    const f = useGardenFlourish()
+    f.seeds.value = []
+    f.habits.value = []
+    f.compass.value = []
+    useCocoonStore().cocoons.value = []
+    ;(window as any).confirm = vi.fn(() => true)
+  })
+
+  it('渲染生命周期导览四个阶段（种子/发芽/生长中/已开花）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.gsm').exists()).toBe(true)
+    expect(wrapper.text()).toContain('目标 · 成长状态机')
+    expect(wrapper.findAll('.gsm-stage').length).toBe(4)
+    expect(wrapper.text()).toContain('种子')
+    expect(wrapper.text()).toContain('已开花')
+  })
+
+  it('无目标时显示空态提示', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('暂无目标可检视')
+  })
+
+  it('创建目标后可检视可用转换与健康度', async () => {
+    useGoal().create('读完十本书', 'target', 'growth')
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.gsm-pick-btn').length).toBeGreaterThan(0)
+    expect(wrapper.text()).toContain('读完十本书')
+    expect(wrapper.find('.gsm-pick-btn').exists()).toBe(true)
+    await wrapper.find('.gsm-pick-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('可用转换')
+    expect(wrapper.text()).toContain('健康度')
+  })
+})

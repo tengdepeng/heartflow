@@ -171,6 +171,9 @@
       :habits="flourish.habits.value"
       :cocoons="cocoonStore.cocoons.value"
     />
+
+    <!-- 目标 · 成长状态机（goal/goal-state-machine 引擎：种子→发芽→生长→开花 生命周期/健康度/转换，INCR-212） -->
+    <GoalGrowthStateMachinePanel />
   </div>
 </template>
 
@@ -188,6 +191,7 @@ import GoalProgressPanel from '../components/GoalProgressPanel.vue'
 import HabitReviewPanel from '../components/HabitReviewPanel.vue'
 import WishListPanel from '../components/WishListPanel.vue'
 import GrowthMeteorPanel from '../components/GrowthMeteorPanel.vue'
+import GoalGrowthStateMachinePanel from '../components/GoalGrowthStateMachinePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
