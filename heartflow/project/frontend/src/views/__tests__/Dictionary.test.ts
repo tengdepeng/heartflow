@@ -3,7 +3,7 @@
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 
 // spy on URL.createObjectURL
 const mockCreateObjectURL = vi.fn(() => 'blob:test')
@@ -36,6 +36,7 @@ const mockStore = {
   get totalCount() { return mockEntries.value.length },
   get categoryCount() { return getCategories().length },
   get archivedEntries() { return mockEntries.value.filter((e: any) => e.status === 'archived') },
+  get activeEntries() { return mockEntries.value.filter((e: any) => e.status !== 'archived') },
   addEntry: vi.fn((word: string, definition: string, category: string, tags?: string[]) => {
     mockEntries.value.push({
       id: `dict_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
@@ -325,5 +326,50 @@ describe('Dictionary 视图', () => {
     expect(collectBtn.exists()).toBe(true)
     await collectBtn.trigger('click')
     expect(mockStore.addEntry).toHaveBeenCalled()
+  })
+
+  // ============================================================
+  // 集成：每日荐字面板（INCR-224：补挂载孤儿面板 DailyWordPanel）
+  // ============================================================
+
+  it('渲染每日荐字面板（含标题与今日推荐包）', async () => {
+    mockEntries.value = [
+      { id: 'd1', word: '心流', definition: '完全沉浸的状态', category: '心理', createdAt: '2026-01-01' },
+    ]
+    const wrapper = await getWrapper()
+    await nextTick()
+    expect(wrapper.find('.dwp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('每日荐字')
+    // 挂载即自动生成今日推荐包
+    expect(wrapper.find('.dwp-pack').exists()).toBe(true)
+    expect(wrapper.find('.dwp-reason').exists()).toBe(true)
+  })
+
+  it('空词库时"换一批"按钮禁用', async () => {
+    const wrapper = await getWrapper()
+    await nextTick()
+    const refresh = wrapper.find('.dwp-refresh')
+    expect(refresh.exists()).toBe(true)
+    expect(refresh.attributes('disabled')).toBeDefined()
+  })
+
+  it('有词条时"换一批"按钮可用且可重新生成', async () => {
+    mockEntries.value = [
+      { id: 'd1', word: '心流', definition: '完全沉浸的状态', category: '心理', createdAt: '2026-01-01' },
+    ]
+    const wrapper = await getWrapper()
+    await nextTick()
+    const refresh = wrapper.find('.dwp-refresh')
+    expect(refresh.attributes('disabled')).toBeUndefined()
+    await refresh.trigger('click')
+    await nextTick()
+    expect(wrapper.find('.dwp-pack').exists()).toBe(true)
+  })
+
+  it('每日荐字统计随推荐生成更新', async () => {
+    const wrapper = await getWrapper()
+    await nextTick()
+    expect(wrapper.find('.dwp-stats').exists()).toBe(true)
+    expect(wrapper.text()).toContain('累计推荐')
   })
 })
