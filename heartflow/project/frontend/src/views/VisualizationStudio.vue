@@ -9,6 +9,7 @@ import {
 } from '../modules/visualization'
 import { useAdaptiveQuality } from '../modules/adaptive'
 import type { SevenDimensionOutput, VizSubject } from '../modules/visualization'
+import TransformPipelinePanel from '../components/TransformPipelinePanel.vue'
 
 useViewEntrance()
 
@@ -139,6 +140,9 @@ onMounted(renderToCanvas)
         </span>
       </p>
     </section>
+
+    <!-- 数据变换流水线（datasource-connector 引擎：为视觉转译备好精炼数据集，INCR-226） -->
+    <TransformPipelinePanel />
 
     <section class="studio-canvas-wrap">
       <canvas ref="canvasRef" class="studio-canvas" data-testid="studio-canvas"></canvas>

@@ -141,3 +141,42 @@ describe('VisualizationStudio 视图', () => {
     expect(wrapper.find('[data-testid="nl-hint"]').exists()).toBe(true)
   })
 })
+
+describe('集成：数据变换流水线面板（INCR-226：补挂载孤儿面板 TransformPipelinePanel）', () => {
+  it('渲染流水线面板（含标题/统计条/内置引导步骤）', () => {
+    const wrapper = mount(VisualizationStudio)
+    expect(wrapper.find('.tpp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('数据变换流水线')
+    expect(wrapper.text()).toContain('步骤')
+    expect(wrapper.text()).toContain('启用')
+    const steps = wrapper.findAll('.tpp-step')
+    expect(steps.length).toBe(3) // 内置引导：过滤/排序/截取
+    expect(wrapper.text()).toContain('过滤')
+    expect(wrapper.text()).toContain('排序')
+    expect(wrapper.text()).toContain('截取')
+  })
+
+  it('执行变换后输出预览表格与行数提示', async () => {
+    const wrapper = mount(VisualizationStudio)
+    await wrapper.find('.tpp-run .tpp-btn--primary').trigger('click')
+    expect(wrapper.find('.tpp-result').exists()).toBe(true)
+    expect(wrapper.find('.tpp-table').exists()).toBe(true)
+    expect(wrapper.text()).toContain('输入 7 行 → 输出 5 行')
+  })
+
+  it('添加过滤步骤后步骤数增加', async () => {
+    const wrapper = mount(VisualizationStudio)
+    await wrapper.find('.tpp-chip').trigger('click') // ＋过滤
+    expect(wrapper.find('.tpp-form').exists()).toBe(true)
+    await wrapper.find('.tpp-form').trigger('submit') // 添加（jsdom 下直接提交表单）
+    expect(wrapper.findAll('.tpp-step').length).toBe(4)
+  })
+
+  it('清空管线恢复空态', async () => {
+    const wrapper = mount(VisualizationStudio)
+    const clear = wrapper.findAll('.tpp-run .tpp-btn')[1]
+    await clear.trigger('click')
+    expect(wrapper.find('.tpp-steps').exists()).toBe(false)
+    expect(wrapper.text()).toContain('管线为空')
+  })
+})
