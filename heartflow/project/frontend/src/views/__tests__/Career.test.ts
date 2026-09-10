@@ -540,3 +540,53 @@ describe('集成：可视化数据与职业模拟器', () => {
     expect(scenarios.length).toBeGreaterThan(0)
   })
 })
+
+// ============================================================
+// 集成：技能缺口档案 + 可视化（INCR-220：补挂载孤儿面板 x2）
+// ============================================================
+describe('集成：技能缺口档案与可视化', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    for (const key of Object.keys(mockStore)) {
+      delete mockStore[key]
+    }
+    document.querySelectorAll('.career-modal-overlay').forEach(el => el.remove())
+  })
+
+  it('空态：无技能时双面板展示引导', async () => {
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    expect(w.find('.sgp-panel').exists()).toBe(true)
+    expect(w.text()).toContain('技能缺口档案')
+    expect(w.text()).toContain('技能未显影')
+    expect(w.find('.sgv').exists()).toBe(true)
+    expect(w.text()).toContain('先在技能图谱中录入技能')
+  })
+
+  it('有技能时渲染档案概览与技能缺口', async () => {
+    mockStore['hf:career:skills'] = [
+      { id: 's1', name: 'Vue', category: 'technical', proficiency: 'advanced', proficiencyScore: 70, yearsOfExperience: 3, relatedPositions: [], prerequisites: [], complements: [], isCore: true },
+      { id: 's2', name: '沟通', category: 'soft', proficiency: 'intermediate', proficiencyScore: 50, yearsOfExperience: 2, relatedPositions: [], prerequisites: [], complements: [], isCore: false },
+    ]
+    mockStore['hf:career:milestones'] = [
+      { id: 'm1', type: 'career', title: '晋升高级工程师', description: '带团队完成项目', date: '2026-06-01', impact: 8, relatedSkills: ['Vue'], relatedContacts: [] },
+    ]
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    // 档案概览
+    expect(w.text()).toContain('技能总数')
+    expect(w.text()).toContain('最强技能')
+    // 缺口分析（目标角色对照）
+    expect(w.text()).toContain('技能缺口')
+  })
+
+  it('有技能时可视化面板渲染热力图与路线', async () => {
+    mockStore['hf:career:skills'] = [
+      { id: 's1', name: 'Vue', category: 'technical', proficiency: 'advanced', proficiencyScore: 70, yearsOfExperience: 3, relatedPositions: [], prerequisites: [], complements: [], isCore: true },
+    ]
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    expect(w.text()).toContain('技术负责人')
+    expect(w.find('.sgv-heatmap').exists()).toBe(true)
+  })
+})

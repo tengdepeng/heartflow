@@ -313,6 +313,16 @@
       />
     </section>
 
+    <!-- 技能缺口档案 · 缺口分析/学习路线图/里程碑准备度（career/skill-gap-advisor 引擎，INCR-220） -->
+    <section data-enter class="career-section sga-section">
+      <SkillGapArchivePanel :skills="skillList" :milestones="milestoneAll" />
+    </section>
+
+    <!-- 技能缺口可视化 · 缺口热力图/矩阵/路线规划（career/skill-gap-visualization 引擎，INCR-220） -->
+    <section data-enter class="career-section sgv-section">
+      <SkillGapVisualizationPanel :skills="skillList" :milestones="milestoneAll" />
+    </section>
+
     <!-- 底部铭文 -->
     <footer class="career-colophon">
       <div class="colophon-ornament">
@@ -460,6 +470,8 @@ import RoomHeader from '../components/RoomHeader.vue'
 import CareerArchivePanel from '../components/CareerArchivePanel.vue'
 import CareerVisualizationPanel from '../components/CareerVisualizationPanel.vue'
 import CareerSimulatorPanel from '../components/CareerSimulatorPanel.vue'
+import SkillGapArchivePanel from '../components/SkillGapArchivePanel.vue'
+import SkillGapVisualizationPanel from '../components/SkillGapVisualizationPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const nav = useRoomNavigation()
