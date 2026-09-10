@@ -327,3 +327,45 @@ describe('集成：经络穴位典籍', () => {
     expect(wrapper.find('.tcp-favs').text()).toContain('我的收藏（1）')
   })
 })
+
+// =============================================================
+// 集成：指标趋势档案（INCR-219：补挂载孤儿面板 MetricTrendsPanel）
+// =============================================================
+
+describe('集成：指标趋势档案', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBodyLogs.value = []
+    mockMeridianLogs.value = []
+    mockWisdomLogs.value = []
+    mockReadingLogs.value = []
+  })
+
+  function seedLogs() {
+    mockBodyLogs.value = []
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date()
+      d.setDate(d.getDate() - i)
+      const dateStr = d.toISOString().slice(0, 10)
+      mockBodyLogs.value.push({ id: `s_${i}`, type: 'sleep', value: { hours: 7.5 }, at: `${dateStr}T22:00:00` })
+      mockBodyLogs.value.push({ id: `e_${i}`, type: 'exercise', value: { minutes: 30 }, at: `${dateStr}T08:00:00` })
+    }
+  }
+
+  it('渲染指标趋势档案面板（薄委托化 props 直传 health.bodyLogs）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.mtp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('指标趋势档案')
+    expect(wrapper.text()).toContain('趋势还没生成')
+  })
+
+  it('有足够健康记录时渲染整体评估与趋势卡片', async () => {
+    seedLogs()
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.mtp-assessment').exists()).toBe(true)
+    const labels = wrapper.findAll('.mtp-trend-label').map((t) => t.text())
+    expect(labels.some((t) => t.includes('睡眠'))).toBe(true)
+    expect(labels.some((t) => t.includes('运动'))).toBe(true)
+  })
+})
