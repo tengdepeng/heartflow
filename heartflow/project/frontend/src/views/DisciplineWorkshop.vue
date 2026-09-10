@@ -107,6 +107,12 @@
       <div class="dw-advice">
         <HabitFailurePanel :bridge="bridge" />
         <HabitSuggestionPanel :bridge="bridge" />
+        <HabitBundlePanel :bridge="bridge" />
+      </div>
+
+      <!-- 习惯健康度预测（discipline/habit-predictor 引擎：健康度评分/连续/完成率/中断/趋势预测，INCR-215） -->
+      <div class="dw-predict">
+        <HabitPredictorPanel :habits="bridge.habits.value" />
       </div>
     </section>
 
@@ -262,6 +268,8 @@ import { useDisciplineBridge } from '../modules/discipline/workshop-bridge'
 import HabitPredictArchivePanel from '../components/HabitPredictArchivePanel.vue'
 import HabitFailurePanel from '../components/HabitFailurePanel.vue'
 import HabitSuggestionPanel from '../components/HabitSuggestionPanel.vue'
+import HabitBundlePanel from '../components/HabitBundlePanel.vue'
+import HabitPredictorPanel from '../components/HabitPredictorPanel.vue'
 import type { Habit, DisciplineChallenge } from '../modules/discipline/types'
 import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'

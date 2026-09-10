@@ -31,6 +31,8 @@ const mockHabits = ref<any[]>([])
 const mockFailures = ref<any[]>([])
 const mockGenerateSuggestions = vi.fn<() => Array<{ id: string; name: string; reason: string }>>(() => [])
 const mockAdoptSuggestion = vi.fn()
+const mockBundles = ref<any[]>([])
+const mockCreateBundleFromPreset = vi.fn()
 vi.mock('../../modules/discipline/workshop-bridge', () => ({
   useDisciplineBridge: () => ({
     init: vi.fn(),
@@ -51,6 +53,9 @@ vi.mock('../../modules/discipline/workshop-bridge', () => ({
     suggestions: mockGenerateSuggestions(),
     generateSuggestions: mockGenerateSuggestions,
     adoptSuggestion: mockAdoptSuggestion,
+    bundles: mockBundles,
+    BUNDLE_PRESETS: [{ name: '晨间唤醒', habitIds: [], bonusMultiplier: 1.2 }],
+    createBundleFromPreset: mockCreateBundleFromPreset,
     completeHabit: vi.fn(),
     createHabitFromTemplate: vi.fn(),
     createChallengeFromTemplate: vi.fn(),
@@ -207,5 +212,61 @@ describe('集成：失败分析与习惯建议面板', () => {
     expect(wrapper.text()).toContain('午后运动')
     await wrapper.find('.hsp-btn').trigger('click')
     expect(mockAdoptSuggestion).toHaveBeenCalledWith('s1')
+  })
+})
+
+// =============================================================
+// 集成：习惯组合与健康度预测面板（INCR-215：补挂载孤儿面板 HabitBundlePanel + HabitPredictorPanel）
+// =============================================================
+
+describe('集成：习惯组合与健康度预测面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockHabits.value = []
+    mockBundles.value = []
+  })
+
+  it('习惯组合空态与预设速建', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.hbp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('◈ 习惯组合')
+    expect(wrapper.text()).toContain('还没有习惯组合')
+    // 预设按钮渲染，点击触发速建
+    const presetBtn = wrapper.find('.hbp-preset')
+    expect(presetBtn.exists()).toBe(true)
+    await presetBtn.trigger('click')
+    expect(mockCreateBundleFromPreset).toHaveBeenCalled()
+  })
+
+  it('有组合时展示全部组合', async () => {
+    mockBundles.value = [{ id: 'b1', name: '晨间唤醒', habitIds: ['h1', 'h2'], bonusMultiplier: 1.2 }]
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.hbp-item').length).toBe(1)
+    expect(wrapper.text()).toContain('晨间唤醒')
+    expect(wrapper.text()).toContain('2 习惯')
+  })
+
+  it('习惯健康度预测空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.hpp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('习惯健康度')
+    expect(wrapper.text()).toContain('还没有可预测的习惯')
+  })
+
+  it('有启用习惯时渲染健康度与连续预测', async () => {
+    mockHabits.value = [
+      {
+        id: 'h1', title: '晨跑', icon: '🏃', enabled: true, streak: 3,
+        bestStreak: 5, frequency: 'daily', createdAt: '2026-01-01',
+        completedDates: ['2026-09-08', '2026-09-07', '2026-09-06'],
+        targetDays: 7, autoCheckInOnFocus: false, area: 'body', difficulty: 'normal',
+      },
+    ]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.hpp-card').length).toBe(1)
+    expect(wrapper.text()).toContain('🔥 连续预测')
+    expect(wrapper.text()).toContain('✅ 完成率预测')
+    expect(wrapper.text()).toContain('晨跑')
   })
 })
