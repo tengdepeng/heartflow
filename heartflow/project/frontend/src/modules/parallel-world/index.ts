@@ -139,6 +139,24 @@ export type {
   ResolutionStrategy,
 } from './auto-conflict-resolution'
 
+// ---- 平行档案分析引擎（ParallelArchivePanel） ----
+export {
+  parallelOverview,
+  altSelfSourceRows,
+  capsuleStatusRows,
+  parallelRhythm,
+  branchDepthLabel,
+  parallelWorldHealth,
+  parallelInsights,
+} from './parallel-analytics'
+export type {
+  ParallelOverview,
+  ParallelRow,
+  ParallelRhythm,
+  ParallelArchiveHealth,
+  BranchExplorationRows,
+} from './parallel-analytics'
+
 // ---- 世界对比引擎（P19-6） ----
 export {
   useWorldComparison,

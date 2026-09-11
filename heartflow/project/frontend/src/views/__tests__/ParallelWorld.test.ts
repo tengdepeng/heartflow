@@ -251,3 +251,129 @@ describe('ParallelWorld 平行世界', () => {
     panel.unmount()
   })
 })
+
+// ============================================================
+// 集成：情景推演面板 ScenarioSimulationPanel（INCR-240 补挂载孤儿组件）
+// 引擎 useScenarioSimulation 内 refs 按调用创建 + loadAll 自 storage 读，清存储即复位
+// ============================================================
+describe('集成：情景推演面板', () => {
+  const K_SCN = 'hf:parallel-world:scenarios'
+  const K_OUT = 'hf:parallel-world:outcomes'
+  const K_TREE = 'hf:parallel-world:decision-trees'
+  const K_SIM = 'hf:parallel-world:simulations'
+
+  const SCENARIO = {
+    id: 'scn-1', title: '如果选择去远方', description: '离开家乡独自闯荡', branchId: '主干',
+    conditions: [], createdAt: '2026-09-10T00:00:00.000Z', updatedAt: '2026-09-10T00:00:00.000Z',
+  }
+  const OUTCOME = {
+    id: 'out-1', scenarioId: 'scn-1', label: '事业腾飞', description: '', probability: 0.7,
+    impact: 'high', impactScore: 7, resultDescription: '事业腾飞', tags: [],
+  }
+  const TREE = {
+    id: 'tree-1', title: '是否辞去工作', branchId: '主干', totalNodes: 3, leafCount: 2,
+    rootNode: {
+      id: 'n0', question: '该不该辞职？', children: [
+        { id: 'n1', choiceLabel: '辞职', label: '自由' },
+        { id: 'n2', choiceLabel: '留下', label: '稳定' },
+      ],
+    },
+  }
+
+  function seed(opts: { scenario?: boolean; outcome?: boolean; tree?: boolean } = {}) {
+    if (opts.scenario) mockStore[K_SCN] = [SCENARIO]
+    if (opts.outcome) mockStore[K_OUT] = [OUTCOME]
+    if (opts.tree) mockStore[K_TREE] = [TREE]
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  it('集成渲染情景推演面板 ScenarioSimulationPanel', async () => {
+    const wrapper = await getWrapper()
+    await flushPromises()
+    expect(wrapper.findComponent({ name: 'ScenarioSimulationPanel' }).exists()).toBe(true)
+  })
+
+  it('无数据时渲染情景推演骨架与四标签', async () => {
+    const { default: ScenarioSimulationPanel } = await import('../../components/ScenarioSimulationPanel.vue')
+    const panel = mount(ScenarioSimulationPanel, {
+      global: { stubs: { Teleport: true, Transition: true } },
+    })
+    await flushPromises()
+    expect(panel.find('.ssp').exists()).toBe(true)
+    expect(panel.text()).toContain('情景推演')
+    expect(panel.text()).toContain('0 场景 · 0 模拟')
+    const tabs = panel.findAll('.ssp-tab')
+    expect(tabs.length).toBe(4)
+    expect(tabs[0].text()).toContain('场景')
+    expect(tabs[1].text()).toContain('决策树')
+    expect(tabs[2].text()).toContain('What-If')
+    expect(tabs[3].text()).toContain('统计')
+    expect(panel.text()).toContain('还没有场景')
+  })
+
+  it('种场景种子后展示场景卡片', async () => {
+    seed({ scenario: true })
+    const { default: ScenarioSimulationPanel } = await import('../../components/ScenarioSimulationPanel.vue')
+    const panel = mount(ScenarioSimulationPanel, {
+      global: { stubs: { Teleport: true, Transition: true } },
+    })
+    await flushPromises()
+    expect(panel.text()).toContain('1 场景 · 0 模拟')
+    expect(panel.text()).toContain('如果选择去远方')
+    expect(panel.text()).toContain('离开家乡独自闯荡')
+    expect(panel.findAll('.ssp-card').length).toBe(1)
+  })
+
+  it('种子场景含结果时可运行推演并持久化模拟', async () => {
+    seed({ scenario: true, outcome: true })
+    const { default: ScenarioSimulationPanel } = await import('../../components/ScenarioSimulationPanel.vue')
+    const panel = mount(ScenarioSimulationPanel, {
+      global: { stubs: { Teleport: true, Transition: true } },
+    })
+    await flushPromises()
+    // 场景结果展示
+    expect(panel.text()).toContain('事业腾飞')
+    const runBtn = panel.find('.ssp-run')
+    expect(runBtn.attributes('disabled')).toBeUndefined()
+    await runBtn.trigger('click')
+    await flushPromises()
+    expect(mockStore[K_SIM].length).toBe(1)
+    expect(panel.text()).not.toContain('暂无结果数据')
+    expect(panel.find('.ssp-sim-result').exists()).toBe(true)
+  })
+
+  it('决策树标签展示树与根问题', async () => {
+    seed({ tree: true })
+    const { default: ScenarioSimulationPanel } = await import('../../components/ScenarioSimulationPanel.vue')
+    const panel = mount(ScenarioSimulationPanel, {
+      global: { stubs: { Teleport: true, Transition: true } },
+    })
+    await flushPromises()
+    const tabs = panel.findAll('.ssp-tab')
+    await tabs[1].trigger('click')
+    expect(panel.text()).toContain('是否辞去工作')
+    expect(panel.text()).toContain('该不该辞职？')
+    expect(panel.text()).toContain('辞职')
+    expect(panel.text()).toContain('留下')
+  })
+
+  it('统计标签展示平均置信与风险分布', async () => {
+    seed({ scenario: true, outcome: true })
+    const { default: ScenarioSimulationPanel } = await import('../../components/ScenarioSimulationPanel.vue')
+    const panel = mount(ScenarioSimulationPanel, {
+      global: { stubs: { Teleport: true, Transition: true } },
+    })
+    await flushPromises()
+    await panel.find('.ssp-run').trigger('click')
+    await flushPromises()
+    const tabs = panel.findAll('.ssp-tab')
+    await tabs[3].trigger('click')
+    expect(panel.text()).toContain('平均置信')
+    expect(panel.text()).toContain('风险分布')
+    expect(panel.text()).toContain('模拟')
+  })
+})

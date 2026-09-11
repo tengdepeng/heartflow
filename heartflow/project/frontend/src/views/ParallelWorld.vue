@@ -278,6 +278,13 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 情景推演（parallel-world·useScenarioSimulation，INCR-240 补挂载孤儿组件） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <ScenarioSimulationPanel />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 梦境碎片 -->
     <!-- ============================================================ -->
     <section data-enter class="pw-dream-section">
@@ -313,6 +320,7 @@ import BranchTimelinePanel from '../components/BranchTimelinePanel.vue'
 import BranchVisualizationPanel from '../components/BranchVisualizationPanel.vue'
 import SceneSyncPanel from '../components/SceneSyncPanel.vue'
 import WorldComparisonPanel from '../components/WorldComparisonPanel.vue'
+import ScenarioSimulationPanel from '../components/ScenarioSimulationPanel.vue'
 import { PARALLEL_WORLD_STORAGE_KEYS } from '../modules/parallel-world/types'
 import type { Checkpoint } from '../modules/parallel-world/types'
 
