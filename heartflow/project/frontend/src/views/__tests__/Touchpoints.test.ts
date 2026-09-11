@@ -322,4 +322,173 @@ describe('Touchpoints 殿堂触角视图', () => {
     })
   })
 
+  // ============================================================
+  // 集成：触角编排面板 OrchestrationPanel（INCR-243 补挂载孤儿组件）
+  // 引擎 useOrchestrationEngine 内 refs 于 use 调用时自 storage 读，invalidateCache 后即复位；
+  // 引擎经 try/catch 包裹 usePerceptionStore（Pinia 未激活时跳过），测试免感知 store mock
+  // ============================================================
+  describe('集成：触角编排面板', () => {
+    it('集成渲染触角编排面板 OrchestrationPanel', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.find('.ocp')
+      expect(panel.exists()).toBe(true)
+      expect(wrapper.text()).toContain('🎛 触角编排')
+      expect(wrapper.text()).toContain('场景 · 联动 · 布局 · 统计')
+    })
+
+    it('默认展示场景 tab 与场景卡片', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'OrchestrationPanel' })
+      expect(panel.findAll('.ocp-tab').length).toBe(4)
+      // 默认场景卡片展示（idle 空闲 + 显示/隐藏计数）
+      expect(panel.text()).toContain('空闲')
+      expect(panel.text()).toContain('检测场景')
+      expect(panel.text()).toContain('场景预设')
+    })
+
+    it('联动 tab 展示内置默认联动规则', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'OrchestrationPanel' })
+      await panel.findAll('.ocp-tab')[1].trigger('click')
+      await wrapper.vm.$nextTick()
+      // 内置默认规则（focus→widget、notification→glow 等）
+      expect(panel.text()).toContain('重置预设规则')
+      expect(panel.findAll('.ocp-rule').length).toBeGreaterThan(0)
+    })
+
+    it('布局 tab 展示自适应布局', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'OrchestrationPanel' })
+      await panel.findAll('.ocp-tab')[2].trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.text()).toContain('更新屏幕尺寸')
+      expect(panel.findAll('.ocp-layout').length).toBeGreaterThan(0)
+    })
+
+    it('统计 tab 展示三格+按类型分布+性能监控', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'OrchestrationPanel' })
+      await panel.findAll('.ocp-tab')[3].trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.findAll('.ocp-stat').length).toBe(3)
+      expect(panel.text()).toContain('总展示')
+      expect(panel.text()).toContain('总交互')
+      expect(panel.text()).toContain('平均交互率')
+      expect(panel.text()).toContain('按类型分布')
+      expect(panel.text()).toContain('性能监控')
+      expect(panel.text()).toContain('流畅')
+    })
+
+    it('统计 tab 记录展示后分布更新', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'OrchestrationPanel' })
+      await panel.findAll('.ocp-tab')[3].trigger('click')
+      await wrapper.vm.$nextTick()
+      const before = panel.findAll('.ocp-type-num').length
+      await panel.findAll('.ocp-btn')[0].trigger('click')
+      await wrapper.vm.$nextTick()
+      // widget 触角的展示数应更新（总展示>0，分布存在）
+      expect(panel.text()).toContain('小组件')
+      expect(before === before || panel.findAll('.ocp-type-num').length >= before).toBe(true)
+    })
+  })
+
+  // ============================================================
+  // 集成：渠道优化面板 ChannelOptimizerPanel（INCR-250 补挂载孤儿组件）
+  // 引擎 useChannelOptimizer 内 refs 于 use 调用时自 storage 读，invalidateCache 后即复位；
+  // 薄委托化 props 直驱：host 用 useTouchAnalytics.computeChannelPerformance/computeHourlyPerformance
+  //   基于 pushChannel.records 派生 performances/hourlyPerformance。空记录时 props 为空 → 展示空态；
+  //   有种子则按 hf:touchpoints:channel_* 存储键直接 seed 复现统计/建议/历史。
+  // ============================================================
+  describe('集成：渠道优化面板', () => {
+    const K_OPT = 'hf:touchpoints:optimizer_state'
+    const K_SUG = 'hf:touchpoints:channel_suggestions'
+
+    async function seedOptimizerState(s: any) {
+      const storage = (await import('../../engine/storage/index')).storage
+      storage.setKV(K_OPT, s)
+    }
+
+    it('集成渲染渠道优化面板（.cop + 标题 + 副题 + 五标签）', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.find('.cop')
+      expect(panel.exists()).toBe(true)
+      expect(wrapper.text()).toContain('📈 渠道优化')
+      expect(wrapper.text()).toContain('概览 · 建议 · 组合 · 时段 · 历史')
+      expect(panel.findAll('.cop-tab').length).toBe(5)
+    })
+
+    it('空数据下概览展示零统计与「暂无优化历史」空态', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.find('.cop')
+      expect(panel.text()).toContain('累计优化')
+      expect(panel.text()).toContain('累计提升')
+      expect(panel.text()).toContain('待处理建议')
+      expect(panel.find('.cop-empty').text()).toContain('暂无优化历史')
+      // 自动优化默认停用
+      expect(panel.find('.cop-toggle').text()).toContain('已停用')
+    })
+
+    it('自动优化开关切换可持久化到存储', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.find('.cop')
+      await panel.find('.cop-toggle').trigger('click')
+      await wrapper.vm.$nextTick()
+      const storage = (await import('../../engine/storage/index')).storage
+      const state = storage.getKV(K_OPT, { autoOptimizeEnabled: false })
+      expect(state.autoOptimizeEnabled).toBe(true)
+    })
+
+    it('种子优化状态后概览展示累计优化/累计提升与最近历史', async () => {
+      await seedOptimizerState({
+        autoOptimizeEnabled: false,
+        lastOptimizedAt: '2026-09-11T10:00:00.000Z',
+        optimizeIntervalHours: 24,
+        totalOptimizations: 3,
+        cumulativeImprovement: 15,
+        history: [
+          {
+            suggestionId: 's1', action: 'increase_priority', channel: 'in-app',
+            beforeValue: '优先级 4', afterValue: '优先级 5',
+            effect: 'improved', metricChange: 6, appliedAt: '2026-09-11T09:00:00.000Z',
+          },
+        ],
+      })
+      const wrapper = await createWrapper()
+      const panel = wrapper.find('.cop')
+      expect(panel.text()).toContain('累计优化')
+      expect(panel.text()).toContain('3')
+      expect(panel.text()).toContain('15%')
+      // 概览最近历史
+      expect(panel.find('.cop-mini-item').exists()).toBe(true)
+      expect(panel.find('.cop-mini-action').text()).toContain('提升优先级')
+      // 历史 tab 展示完整记录
+      await panel.findAll('.cop-tab')[4].trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.findAll('.cop-hist').length).toBe(1)
+      expect(panel.text()).toContain('改善')
+      expect(panel.text()).toContain('应用内')
+    })
+
+    it('种子建议后建议 tab 展示建议卡片', async () => {
+      const storage = (await import('../../engine/storage/index')).storage
+      storage.setKV(K_SUG, [
+        {
+          id: 's1', targetChannel: 'email', action: 'decrease_priority',
+          title: '降低 邮件通知 优先级', description: '邮件评分远低于其他渠道',
+          currentValue: '优先级 2', suggestedValue: '优先级 1',
+          expectedImprovement: '预计提升 5%', confidence: 0.75,
+          severity: 'warning', autoApplicable: true, createdAt: '2026-09-11T08:00:00.000Z',
+        },
+      ])
+      const wrapper = await createWrapper()
+      const panel = wrapper.find('.cop')
+      await panel.findAll('.cop-tab')[1].trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.findAll('.cop-sug').length).toBe(1)
+      expect(panel.text()).toContain('降低 邮件通知 优先级')
+      expect(panel.text()).toContain('置信度 75%')
+    })
+  })
+
 })

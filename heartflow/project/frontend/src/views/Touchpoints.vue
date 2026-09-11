@@ -386,6 +386,26 @@
       <NotificationCenterPanel />
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 触角编排（touchpoints·orchestration-engine，INCR-243 补挂载孤儿组件） -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <OrchestrationPanel />
+    </section>
+
+    <!-- ============================================================ -->
+    <!-- 渠道优化（touchpoints·channel-optimizer，INCR-250 补挂载孤儿组件） -->
+    <!-- 薄委托化 props 直驱：host 注入 channels/records/performances/hourlyPerformance -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <ChannelOptimizerPanel
+        :performances="channelPerformances"
+        :hourly-performance="hourlyPerformances"
+        :channels="pushChannel.channels.value"
+        :records="pushChannel.records.value"
+      />
+    </section>
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
   </div>
 </template>
@@ -398,6 +418,8 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import GreetingWidgetPanel from '../components/GreetingWidgetPanel.vue'
 import ClipboardPanel from '../components/ClipboardPanel.vue'
 import NotificationCenterPanel from '../components/NotificationCenterPanel.vue'
+import OrchestrationPanel from '../components/OrchestrationPanel.vue'
+import ChannelOptimizerPanel from '../components/ChannelOptimizerPanel.vue'
 import {
   useDeliveryStrategy,
   usePushChannel,
@@ -413,6 +435,10 @@ const touchpoints = useDesktopTouchpoints()
 const deliveryStrategy = useDeliveryStrategy()
 const pushChannel = usePushChannel()
 const analytics = useTouchAnalytics()
+
+// ---- 渠道优化数据（薄委托给 ChannelOptimizerPanel，INCR-250） ----
+const channelPerformances = computed(() => analytics.computeChannelPerformance(pushChannel.records.value))
+const hourlyPerformances = computed(() => analytics.computeHourlyPerformance(pushChannel.records.value))
 
 // ---- 优先级标签 ----
 const PRIORITY_LABELS: Record<DeliveryPriority, string> = {
