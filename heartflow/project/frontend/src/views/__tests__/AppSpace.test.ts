@@ -84,4 +84,68 @@ describe('AppSpace 本地注意力 · 数字健康', () => {
     expect(wrapper.find('.as-attn-value').exists()).toBe(false)
     expect(wrapper.find('.as-attn-toggle').text()).toContain('开启本地感知')
   })
+
+  // ============================================================
+  // 集成：应用市场面板 AppMarketPanel（INCR-242 补挂载孤儿组件）
+  // 引擎 useAppMarket 内 refs 于 use 调用时自 storage 读，beforeEach localStorage.clear() 后即复位
+  // ============================================================
+  describe('集成：应用市场面板', () => {
+    it('集成渲染应用市场面板 AppMarketPanel', async () => {
+      const wrapper = await getWrapper()
+      const panel = wrapper.find('.amp')
+      expect(panel.exists()).toBe(true)
+      expect(wrapper.text()).toContain('🛒 应用市场')
+    })
+
+    it('默认渲染市场 tab 与四条统计', async () => {
+      const wrapper = await getWrapper()
+      expect(wrapper.findAll('.amp-tab').length).toBe(4)
+      expect(wrapper.text()).toContain('浏览 · 安装 · 收藏 · 历史')
+      // 默认市场：18 条 MARKET_ITEMS 全展示（含内置默认条目）
+      expect(wrapper.findAll('.amp-item').length).toBeGreaterThan(0)
+      expect(wrapper.findAll('.amp-stat').length).toBe(3)
+    })
+
+    it('展示内置默认市场条目', async () => {
+      const wrapper = await getWrapper()
+      expect(wrapper.text()).toContain('极简仪表盘')
+      expect(wrapper.text()).toContain('番茄钟')
+      expect(wrapper.text()).toContain('暖琥珀')
+    })
+
+    it('搜索过滤市场条目', async () => {
+      const wrapper = await getWrapper()
+      await wrapper.find('.amp-search').setValue('番茄')
+      await nextTick()
+      // 搜索「番茄」仅命中番茄钟
+      expect(wrapper.findAll('.amp-item').length).toBe(1)
+      expect(wrapper.text()).toContain('番茄钟')
+      expect(wrapper.text()).not.toContain('极简仪表盘')
+    })
+
+    it('已安装 tab 展示空态', async () => {
+      const wrapper = await getWrapper()
+      await wrapper.findAll('.amp-tab')[1].trigger('click')
+      await nextTick()
+      expect(wrapper.text()).toContain('尚未安装任何应用')
+    })
+
+    it('收藏 tab 可收藏并展示', async () => {
+      const wrapper = await getWrapper()
+      // 市场 tab 默认展示第一条番茄钟的收藏按钮
+      await wrapper.findAll('.amp-item')[0].find('.amp-btn--small').trigger('click')
+      await nextTick()
+      // 切到收藏 tab
+      await wrapper.findAll('.amp-tab')[2].trigger('click')
+      await nextTick()
+      expect(wrapper.findAll('.amp-item').length).toBe(1)
+    })
+
+    it('历史 tab 展示空态', async () => {
+      const wrapper = await getWrapper()
+      await wrapper.findAll('.amp-tab')[3].trigger('click')
+      await nextTick()
+      expect(wrapper.text()).toContain('暂无安装历史')
+    })
+  })
 })

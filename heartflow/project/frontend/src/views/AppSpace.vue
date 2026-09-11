@@ -180,6 +180,16 @@
         </div>
       </div>
     </section>
+
+    <!-- 应用市场（space·app-market 引擎，INCR-242 补挂载孤儿组件） -->
+    <section data-enter class="as-section">
+      <h2 class="section-label">
+        <span class="section-label-icon">🛒</span>
+        应用市场
+        <span class="section-label-count">本地可安装 · 收藏 · 历史</span>
+      </h2>
+      <AppMarketPanel />
+    </section>
   </div>
 </template>
 
@@ -187,6 +197,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import AppMarketPanel from '../components/AppMarketPanel.vue'
 import { useAppSpaceManager } from '../modules/space/app-space-manager'
 import type { AppSpaceEntry } from '../modules/space/app-space-manager'
 import { getPerception, isPerceptionAllowed, setPerceptionAllowed } from '../modules/perception'
