@@ -359,3 +359,99 @@ describe('集成：房间模板面板', () => {
     expect(wrapper.text()).toContain('深夜书房')
   })
 })
+
+// ============================================================
+// 集成：空间编排面板 SpaceOrchestrationPanel（INCR-245 补挂载孤儿组件）
+// 引擎 useSpaceOrchestrator 内 refs 于 use 调用时自 storage 读，
+// 空 configs 时自动 initialize() 从真实 room-graph getAllRooms() 合并全部房间并 persist，
+// 故无需 seed，mock 的 storage.setKV 即可承接编排/转换/快照写入
+// ============================================================
+describe('集成：空间编排面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  it('集成渲染空间编排面板与四标签', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.sop').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🎛 空间编排')
+    expect(wrapper.text()).toContain('总览 · 转换 · 依赖 · 快照')
+    const tabs = wrapper.findAll('.sop-tab')
+    expect(tabs.length).toBe(4)
+    expect(wrapper.text()).toContain('总览')
+    expect(wrapper.text()).toContain('转换')
+    expect(wrapper.text()).toContain('依赖')
+    expect(wrapper.text()).toContain('快照')
+  })
+
+  it('总览 tab 展示六格统计与房间分类分组', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.sop-stats').exists()).toBe(true)
+    const stats = wrapper.findAll('.sop-stat')
+    expect(stats.length).toBeGreaterThanOrEqual(6)
+    expect(wrapper.text()).toContain('空间')
+    expect(wrapper.text()).toContain('活跃')
+    expect(wrapper.text()).toContain('空闲')
+    expect(wrapper.text()).toContain('异常')
+    // 从真实房间图自动派生分类分组
+    expect(wrapper.findAll('.sop-group').length).toBeGreaterThan(0)
+    expect(wrapper.findAll('.sop-chip').length).toBeGreaterThan(0)
+  })
+
+  it('依赖 tab 展示加载顺序与空间依赖链', async () => {
+    const wrapper = await getWrapper()
+    const depTab = wrapper.findAll('.sop-tab')[2]!
+    await depTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('加载顺序')
+    expect(wrapper.findAll('.sop-order-step').length).toBeGreaterThan(0)
+    expect(wrapper.findAll('.sop-dep').length).toBeGreaterThan(0)
+    expect(wrapper.text()).toContain('优先级')
+    expect(wrapper.text()).toContain('依赖')
+  })
+
+  it('依赖 tab 点击检查依赖显示结果', async () => {
+    const wrapper = await getWrapper()
+    const depTab = wrapper.findAll('.sop-tab')[2]!
+    await depTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    const checkBtn = wrapper.find('.sop-dep .sop-btn--small')
+    await checkBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    const result = wrapper.find('.sop-dep-result')
+    expect(result.exists()).toBe(true)
+    const text = result.text()
+    expect(text.includes('依赖满足') || text.includes('缺少')).toBe(true)
+  })
+
+  it('转换 tab 空态展示操作区与空态提示', async () => {
+    const wrapper = await getWrapper()
+    const transTab = wrapper.findAll('.sop-tab')[1]!
+    await transTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.sop-select').exists()).toBe(true)
+    expect(wrapper.text()).toContain('转换')
+    expect(wrapper.text()).toContain('批量预加载')
+    expect(wrapper.text()).toContain('最近转换')
+    expect(wrapper.text()).toContain('暂无转换记录')
+  })
+
+  it('快照 tab 空态可创建快照', async () => {
+    const wrapper = await getWrapper()
+    const snapTab = wrapper.findAll('.sop-tab')[3]!
+    await snapTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('创建快照')
+    expect(wrapper.text()).toContain('重置编排')
+    expect(wrapper.text()).toContain('快照（最多 10 个）')
+    expect(wrapper.text()).toContain('暂无快照。创建一份试试。')
+    // 创建快照后持久化一份快照（computed 读 storage 非响应式，故校验写入而非即时重渲染）
+    await wrapper.find('.sop-actions .sop-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    const persisted = (mockStore['hf_space_snapshots'] as any[]) ?? []
+    expect(persisted.length).toBe(1)
+    expect(persisted[0].activeSpaceId).toBe(null)
+    expect(Object.keys(persisted[0].spaces).length).toBeGreaterThan(0)
+  })
+})

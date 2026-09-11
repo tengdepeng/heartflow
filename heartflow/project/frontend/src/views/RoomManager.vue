@@ -26,6 +26,9 @@
 
     <!-- 房间模板（INCR-238 补挂载孤儿组件 RoomTemplatesPanel：模板/布局/场景，引擎唯一、零 props 直驱） -->
     <RoomTemplatesPanel />
+
+    <!-- 空间编排（INCR-245 补挂载孤儿组件 SpaceOrchestrationPanel：总览/转换/依赖/快照，引擎 useSpaceOrchestrator 自初始化房间图、零 props 直驱） -->
+    <SpaceOrchestrationPanel />
   </div>
 </template>
 
@@ -34,6 +37,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
 import SpaceHealthPanel from '../components/SpaceHealthPanel.vue'
 import RoomTemplatesPanel from '../components/RoomTemplatesPanel.vue'
+import SpaceOrchestrationPanel from '../components/SpaceOrchestrationPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 </script>
