@@ -313,6 +313,16 @@
       />
     </section>
 
+    <!-- 转业 · 转型推荐（career/transition-recommend 引擎：技能·人脉·里程碑综合评估，INCR-227） -->
+    <section data-enter class="career-section trp-section">
+      <TransitionRecommendPanel
+        :contacts="contacts"
+        :connections="connections"
+        :skills="skillList"
+        :milestones="milestoneAll"
+      />
+    </section>
+
     <!-- 技能缺口档案 · 缺口分析/学习路线图/里程碑准备度（career/skill-gap-advisor 引擎，INCR-220） -->
     <section data-enter class="career-section sga-section">
       <SkillGapArchivePanel :skills="skillList" :milestones="milestoneAll" />
@@ -472,6 +482,7 @@ import CareerVisualizationPanel from '../components/CareerVisualizationPanel.vue
 import CareerSimulatorPanel from '../components/CareerSimulatorPanel.vue'
 import SkillGapArchivePanel from '../components/SkillGapArchivePanel.vue'
 import SkillGapVisualizationPanel from '../components/SkillGapVisualizationPanel.vue'
+import TransitionRecommendPanel from '../components/TransitionRecommendPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const nav = useRoomNavigation()

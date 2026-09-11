@@ -590,3 +590,80 @@ describe('集成：技能缺口档案与可视化', () => {
     expect(w.find('.sgv-heatmap').exists()).toBe(true)
   })
 })
+
+// ============================================================
+// 集成：转业推荐面板（INCR-227：补挂载孤儿面板，Props 薄委托化）
+// ============================================================
+describe('集成：转业推荐面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    for (const key of Object.keys(mockStore)) {
+      delete mockStore[key]
+    }
+    document.querySelectorAll('.career-modal-overlay').forEach(el => el.remove())
+  })
+
+  it('空态：无技能无联系人时展示引导并禁用生成按钮', async () => {
+    const { default: TransitionRecommendPanel } = await import('../../components/TransitionRecommendPanel.vue')
+    const panel = mount(TransitionRecommendPanel, {
+      props: { contacts: [], connections: [], skills: [], milestones: [] },
+      attachTo: document.body,
+    })
+    await panel.vm.$nextTick()
+    expect(panel.find('.trp-panel').exists()).toBe(true)
+    expect(panel.text()).toContain('转业 · 转型推荐')
+    expect(panel.find('.trp-empty').text()).toContain('先补充技能图谱与人脉')
+    expect((panel.find('.trp-run').element as HTMLButtonElement).disabled).toBe(true)
+    panel.unmount()
+  })
+
+  it('有技能时生成推荐并渲染推荐卡', async () => {
+    mockStore['hf:career:skills'] = [
+      { id: 's1', name: 'Vue', category: 'technical', proficiency: 'advanced', proficiencyScore: 70, yearsOfExperience: 3, relatedPositions: [], prerequisites: [], complements: [], isCore: true },
+      { id: 's2', name: '沟通', category: 'soft', proficiency: 'intermediate', proficiencyScore: 50, yearsOfExperience: 2, relatedPositions: [], prerequisites: [], complements: [], isCore: false },
+    ]
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    expect((w.find('.trp-run').element as HTMLButtonElement).disabled).toBe(false)
+
+    await w.find('.trp-run').trigger('click')
+    await w.vm.$nextTick()
+    expect(w.find('.trp-summary').exists()).toBe(true)
+    const cards = w.findAll('.trp-card')
+    expect(cards.length).toBeGreaterThan(0)
+    expect(w.text()).toContain('% 匹配')
+  })
+
+  it('推荐卡展示四维匹配条与转型策略', async () => {
+    mockStore['hf:career:skills'] = [
+      { id: 's1', name: 'Vue', category: 'technical', proficiency: 'advanced', proficiencyScore: 70, yearsOfExperience: 3, relatedPositions: [], prerequisites: [], complements: [], isCore: true },
+    ]
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    await w.find('.trp-run').trigger('click')
+    await w.vm.$nextTick()
+
+    const firstCard = w.findAll('.trp-card')[0]
+    expect(firstCard).toBeDefined()
+    expect(firstCard.findAll('.trp-bar')).toHaveLength(4)
+    expect(firstCard.text()).toContain('技能')
+    expect(firstCard.text()).toContain('人脉')
+    expect(firstCard.text()).toContain('里程碑')
+    expect(firstCard.text()).toContain('市场')
+    expect(firstCard.text()).toContain('个月')
+  })
+
+  it('技能缺口展示缺口名称与优先级', async () => {
+    mockStore['hf:career:skills'] = [
+      { id: 's1', name: 'Vue', category: 'technical', proficiency: 'advanced', proficiencyScore: 70, yearsOfExperience: 3, relatedPositions: [], prerequisites: [], complements: [], isCore: true },
+    ]
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    await w.find('.trp-run').trigger('click')
+    await w.vm.$nextTick()
+
+    expect(w.find('.trp-gaps').exists()).toBe(true)
+    expect(w.findAll('.trp-gap').length).toBeGreaterThan(0)
+    expect(w.text()).toContain('技能缺口')
+  })
+})
