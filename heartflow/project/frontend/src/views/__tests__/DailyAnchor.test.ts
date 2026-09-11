@@ -483,6 +483,83 @@ describe('DailyAnchor 逐日心锚视图', () => {
   })
 })
 
+// ============================================================
+// ZeitgeistPanel 时令元数据 · 孤儿组件集成（INCR-256）
+// 消费 useZeitgeist（hf:zeitgeist_pref / hf:zeitgeist_last），经 storage getKV/setKV 读写。
+// ============================================================
+describe('ZeitgeistPanel 时令元数据集成', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAnchorData.value = []
+    Object.keys(mockKVStore).forEach(k => delete mockKVStore[k])
+  })
+
+  it('渲染时令元数据面板骨架', async () => {
+    const wrapper = await createWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('时令元数据')
+    expect(text).toContain('当前时令')
+    expect(text).toContain('十二时辰')
+    expect(text).toContain('时令采集')
+    expect(text).toContain('偏好')
+  })
+
+  it('十二时辰环渲染 12 个时辰按钮', async () => {
+    const wrapper = await createWrapper()
+    const ringItems = wrapper.findAll('.zgp-ring-item')
+    expect(ringItems.length).toBe(12)
+    expect(wrapper.text()).toContain('子')
+    expect(wrapper.text()).toContain('亥')
+  })
+
+  it('尚未采集时显示空态提示', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.text()).toContain('尚未采集')
+    expect(wrapper.text()).toContain('采集当前时令')
+  })
+
+  it('点击「采集当前时令」写入最近采集快照', async () => {
+    const wrapper = await createWrapper()
+    await wrapper.find('.zgp-collect').trigger('click')
+    const { storage } = await import('../../engine/storage')
+    expect(storage.setKV).toHaveBeenCalledWith(
+      'hf:zeitgeist_last',
+      expect.objectContaining({
+        date: expect.any(String),
+        weekday: expect.any(String),
+        shichen: expect.any(String),
+        season: expect.any(String),
+        weather: null,
+      }),
+    )
+  })
+
+  it('选择天气预设后采集写入对应天气', async () => {
+    const wrapper = await createWrapper()
+    const rainBtn = wrapper.findAll('.zgp-weather-item').find(b => b.text().includes('雨'))
+    expect(rainBtn).toBeTruthy()
+    await rainBtn!.trigger('click')
+    expect(rainBtn!.classes()).toContain('on')
+    await wrapper.find('.zgp-collect').trigger('click')
+    const { storage } = await import('../../engine/storage')
+    expect(storage.setKV).toHaveBeenCalledWith(
+      'hf:zeitgeist_last',
+      expect.objectContaining({ weather: 'rain' }),
+    )
+  })
+
+  it('切换自动采集偏好持久化到存储', async () => {
+    const wrapper = await createWrapper()
+    const checkbox = wrapper.find('.zgp-pref input')
+    await checkbox.setValue(false)
+    const { storage } = await import('../../engine/storage')
+    expect(storage.setKV).toHaveBeenCalledWith(
+      'hf:zeitgeist_pref',
+      expect.objectContaining({ autoCollect: false }),
+    )
+  })
+})
+
 describe('跨房间共鸣联动（双向收口）', () => {
   beforeEach(() => {
     clearRoomSignals()

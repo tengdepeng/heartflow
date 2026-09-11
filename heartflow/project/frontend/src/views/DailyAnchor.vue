@@ -10,24 +10,31 @@
       <div class="anchor-dust-particles" />
     </div>
 
-    <header class="anchor-header" data-enter>
-      <div class="header-ornament">
-        <span class="orn-line" />
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line" />
-      </div>
-      <p class="anchor-kicker">今日安放台</p>
-      <h1 class="anchor-title">逐日心锚</h1>
-      <p class="anchor-subtitle">{{ todayLabel }} · {{ scalePeriodLabel }} {{ pendingCount }} 个停留中 · 连续锚定 {{ currentStreak }} 天</p>
-      <p class="anchor-desc">先把脑子里的悬念放在这里，再看看今天想安放什么。没有完成也没关系，它们只是暂时停留。</p>
-      <div class="anchor-overview">
-        <article v-for="item in overviewCards" :key="item.label" class="overview-card">
-          <span class="ov-label">{{ item.label }}</span>
-          <strong class="ov-value">{{ item.value }}</strong>
-          <span class="ov-note">{{ item.note }}</span>
-        </article>
-      </div>
-    </header>
+    <RoomHeader
+      class="anchor-room-header"
+      data-enter
+      kicker="今日安放台"
+      title="逐日心锚"
+      :subtitle="`${todayLabel} · ${scalePeriodLabel} ${pendingCount} 个停留中 · 连续锚定 ${currentStreak} 天`"
+    >
+      <template #ornament>
+        <div class="header-ornament">
+          <span class="orn-line" />
+          <span class="orn-diamond">✦</span>
+          <span class="orn-line" />
+        </div>
+      </template>
+      <template #meta>
+        <p class="anchor-desc">先把脑子里的悬念放在这里，再看看今天想安放什么。没有完成也没关系，它们只是暂时停留。</p>
+        <div class="anchor-overview">
+          <article v-for="item in overviewCards" :key="item.label" class="overview-card">
+            <span class="ov-label">{{ item.label }}</span>
+            <strong class="ov-value">{{ item.value }}</strong>
+            <span class="ov-note">{{ item.note }}</span>
+          </article>
+        </div>
+      </template>
+    </RoomHeader>
 
     <!-- 跨房间共鸣联动（接收其他房间的光痕，过滤本房回声） -->
     <section v-if="externalFeed.length > 0" data-enter class="cross-room-strip">
@@ -473,6 +480,9 @@
 
     <!-- 时间流 · 尺度视图（INCR-01 逐日心锚时间流） -->
     <AnchorTimeScalePanel :anchors="anchor.allAnchors.value" />
+
+    <!-- 时令元数据（INCR-256 补挂载孤儿组件：时辰·节气·季节·天气采集） -->
+    <ZeitgeistPanel />
   </div>
 </template>
 
@@ -484,6 +494,7 @@ import { PRIORITY_COLORS, PRIORITY_LABELS } from '../modules/anchor/types'
 import { useAnchorJournals } from '../modules/anchor/anchor-journals'
 import AnchorLightThread from '../components/AnchorLightThread.vue'
 import AnchorCelebration from '../components/AnchorCelebration.vue'
+import RoomHeader from '../components/RoomHeader.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS, aggregateClimate } from '../modules/room-resonance'
 import type { RoomKey } from '../modules/room-resonance'
@@ -494,6 +505,7 @@ import PhotoDiaryPanel from '../components/PhotoDiaryPanel.vue'
 import SmartReminderPanel from '../components/SmartReminderPanel.vue'
 import CalendarExportPanel from '../components/CalendarExportPanel.vue'
 import AnchorTimeScalePanel from '../components/AnchorTimeScalePanel.vue'
+import ZeitgeistPanel from '../components/ZeitgeistPanel.vue'
 
 const { entranceClass } = useViewEntrance()
 
@@ -966,7 +978,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
 /* ============================================================
    头部 — "安放台" 的仪式感
    ============================================================ */
-.anchor-header {
+.anchor-room-header {
   position: relative;
   z-index: 1;
   text-align: center;
@@ -977,8 +989,13 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   gap: 10px;
   /* 标题背后的柔和光晕 */
 }
+.anchor-room-header :deep(.rh-main) {
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
 
-.anchor-header::before {
+.anchor-room-header::before {
   content: '';
   position: absolute;
   top: -30px;
@@ -992,7 +1009,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   filter: blur(16px);
 }
 
-/* 装饰线 + 菱形 — 更庄重 */
+/* 装饰线 + 菱形 — 更庄重（插槽内容，原类名直接命中） */
 .header-ornament {
   display: flex;
   align-items: center;
@@ -1035,7 +1052,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   50% { opacity: 0.7; text-shadow: 0 0 12px rgba(var(--accent-rgb), 0.35); }
 }
 
-.anchor-kicker {
+.anchor-room-header :deep(.rh-kicker) {
   font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -1044,7 +1061,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.08);
 }
 
-.anchor-title {
+.anchor-room-header :deep(.rh-title) {
   font-size: 32px;
   font-weight: 500;
   letter-spacing: 6px;
@@ -1055,7 +1072,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   position: relative;
 }
 
-.anchor-title::after {
+.anchor-room-header :deep(.rh-title)::after {
   content: '';
   position: absolute;
   bottom: -4px;
@@ -1066,7 +1083,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
 }
 
-.anchor-subtitle {
+.anchor-room-header :deep(.rh-subtitle) {
   font-size: 12px;
   color: var(--text-low);
   letter-spacing: 0.5px;
@@ -2782,7 +2799,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
 @media (max-width: 860px) {
   .anchor-page { padding: 24px 16px 72px; }
   .anchor-overview { grid-template-columns: 1fr; }
-  .anchor-title { font-size: 26px; letter-spacing: 4px; }
+  .anchor-room-header :deep(.rh-title) { font-size: 26px; letter-spacing: 4px; }
 }
 
 @media (max-width: 680px) {
@@ -2808,13 +2825,13 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
 
 @media (max-width: 480px) {
   .anchor-page { padding: 20px 12px 72px; }
-  .anchor-title { font-size: 22px; letter-spacing: 3px; }
-  .anchor-kicker { font-size: 10px; letter-spacing: 2px; }
+  .anchor-room-header :deep(.rh-title) { font-size: 22px; letter-spacing: 3px; }
+  .anchor-room-header :deep(.rh-kicker) { font-size: 10px; letter-spacing: 2px; }
 
-  .anchor-header-ornament { gap: 6px; margin-bottom: 8px; }
-  .anchor-orn-line { width: 28px; }
+  .header-ornament { gap: 6px; margin-bottom: 8px; }
+  .orn-line { width: 28px; }
 
-  .anchor-header-desc { font-size: 12px; }
+  .anchor-desc { font-size: 12px; }
 
   .anchor-overview { gap: 6px; }
   .anchor-stat-card { padding: 10px; min-height: 56px; }
