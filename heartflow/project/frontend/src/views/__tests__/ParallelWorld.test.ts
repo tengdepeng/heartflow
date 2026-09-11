@@ -485,3 +485,157 @@ describe('集成：分支权重面板', () => {
     expect(wrapper.findAll('.bwp-attention').length).toBe(1)
   })
 })
+
+// ============================================================
+// 集成：知识迁移面板 KnowledgeTransferPanel（INCR-265 补挂载孤儿组件）
+// 引擎 useKnowledgeTransfer 无状态（transfers 每次调用新建、无持久化），
+// 薄委托化：宿主注入 branches（≥2 个才可迁移），面板交互驱动引擎当前实例
+// 注意：页面存在其他同名 aria-label 的 select，一律在 .ktp 作用域内查找
+// ============================================================
+describe('集成：知识迁移面板', () => {
+  const K_BRANCHES = 'hf:parallel-world:branches'
+
+  function makeBranch(id: string, name: string, overrides: Record<string, any> = {}) {
+    return {
+      id, name, description: '', color: '#4A90D9',
+      createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined,
+      isActive: false, checkpointCount: 0, ...overrides,
+    }
+  }
+
+  function seedBranches(branches: any[]) {
+    mockStore[K_BRANCHES] = branches
+  }
+
+  function ktp(wrapper: any) {
+    const el = wrapper.find('.ktp')
+    expect(el.exists()).toBe(true)
+    return el
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  it('渲染骨架与成功率徽标', async () => {
+    const wrapper = await getWrapper()
+    const panel = ktp(wrapper)
+    expect(panel.text()).toContain('📤 知识迁移')
+    expect(panel.text()).toContain('跨分支经验传递 · 应用与沉淀')
+    expect(panel.text()).toContain('成功率 0%')
+  })
+
+  it('分支不足两个时显示空态引导', async () => {
+    const wrapper = await getWrapper()
+    expect(ktp(wrapper).text()).toContain('至少需要两个时间分支才能迁移知识。先在「分支星图」种下分支。')
+  })
+
+  it('单个分支仍视为不足并保持空态', async () => {
+    seedBranches([makeBranch('b1', '分支一')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = ktp(wrapper)
+    expect(panel.find('.ktp-form').exists()).toBe(false)
+    expect(panel.text()).toContain('至少需要两个时间分支才能迁移知识。')
+  })
+
+  it('两个分支渲染迁移表单（源/目标/类型下拉）', async () => {
+    seedBranches([makeBranch('b1', '分支一'), makeBranch('b2', '分支二')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = ktp(wrapper)
+    const form = panel.find('.ktp-form')
+    expect(form.exists()).toBe(true)
+    const selects = panel.findAll('select.ktp-input')
+    expect(selects.length).toBe(3)
+    // 类型下拉渲染五个档位
+    const typeOpts = panel.find('select[aria-label="知识类型"]').findAll('option')
+    expect(typeOpts.map((o: any) => o.text())).toEqual(['教训', '技能', '洞察', '模式', '决策'])
+  })
+
+  it('创建迁移生成待处理卡片并展示路由', async () => {
+    seedBranches([makeBranch('b1', '分支一'), makeBranch('b2', '分支二')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = ktp(wrapper)
+    // 源/目标分支默认初始化于挂载时（branches 异步加载后为空），显式选择
+    await pickSourceTarget(panel)
+    const input = panel.find('input.ktp-wide')
+    await input.setValue('在分支一学到的心法')
+    await nextTick()
+    await panel.find('.ktp-add').trigger('click')
+    await nextTick()
+    const card = panel.find('.ktp-card')
+    expect(card.exists()).toBe(true)
+    expect(card.text()).toContain('待处理')
+    expect(card.text()).toContain('分支一 → 分支二')
+    expect(card.text()).toContain('在分支一学到的心法')
+    expect(card.text()).toContain('适用性')
+  })
+
+  it('应用迁移后状态转为已应用并提升成功率', async () => {
+    seedBranches([makeBranch('b1', '分支一'), makeBranch('b2', '分支二')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = ktp(wrapper)
+    await pickSourceTarget(panel)
+    const input = panel.find('input.ktp-wide')
+    await input.setValue('值得复用的经验')
+    await nextTick()
+    await panel.find('.ktp-add').trigger('click')
+    await nextTick()
+    await panel.find('.ktp-apply').trigger('click')
+    await nextTick()
+    expect(panel.find('.ktp-card').text()).toContain('已应用')
+    expect(panel.text()).toContain('成功率 100%')
+    expect(panel.findAll('.ktp-apply').length).toBe(0)
+  })
+
+  it('拒绝迁移后状态转为已拒绝', async () => {
+    seedBranches([makeBranch('b1', '分支一'), makeBranch('b2', '分支二')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = ktp(wrapper)
+    await pickSourceTarget(panel)
+    const input = panel.find('input.ktp-wide')
+    await input.setValue('不合适的经验')
+    await nextTick()
+    await panel.find('.ktp-add').trigger('click')
+    await nextTick()
+    await panel.find('.ktp-reject').trigger('click')
+    await nextTick()
+    expect(panel.find('.ktp-card').text()).toContain('已拒绝')
+  })
+
+  it('改写应用走 prompt 并更新知识内容', async () => {
+    seedBranches([makeBranch('b1', '分支一'), makeBranch('b2', '分支二')])
+    vi.stubGlobal('prompt', vi.fn().mockReturnValue('改写后的心法'))
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = ktp(wrapper)
+    await pickSourceTarget(panel)
+    const input = panel.find('input.ktp-wide')
+    await input.setValue('原始经验')
+    await nextTick()
+    await panel.find('.ktp-add').trigger('click')
+    await nextTick()
+    await panel.find('.ktp-adapt').trigger('click')
+    await nextTick()
+    // 改写应用后的卡片状态即证明 prompt 返回了改写内容
+    const card = panel.find('.ktp-card')
+    expect(card.text()).toContain('改写应用')
+    expect(card.text()).toContain('改写后的心法')
+    expect(card.text()).not.toContain('原始经验')
+  })
+})
+
+async function pickSourceTarget(panel: any) {
+  const sourceSel = panel.find('select[aria-label="源分支"]')
+  await sourceSel.setValue('b1')
+  await sourceSel.trigger('change')
+  const targetSel = panel.find('select[aria-label="目标分支"]')
+  await targetSel.setValue('b2')
+  await targetSel.trigger('change')
+  await nextTick()
+}

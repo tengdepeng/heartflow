@@ -275,6 +275,13 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 知识迁移（parallel-world·useKnowledgeTransfer，INCR-265 补挂载孤儿组件，薄委托化） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <KnowledgeTransferPanel :branches="parallelWorld.branches.value" />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 世界对照（parallel-world·useWorldComparison，INCR-228 薄委托化） -->
     <!-- ============================================================ -->
     <section data-enter class="pw-branch-panels">
@@ -329,6 +336,7 @@ import SceneSyncPanel from '../components/SceneSyncPanel.vue'
 import WorldComparisonPanel from '../components/WorldComparisonPanel.vue'
 import ScenarioSimulationPanel from '../components/ScenarioSimulationPanel.vue'
 import BranchWeightsPanel from '../components/BranchWeightsPanel.vue'
+import KnowledgeTransferPanel from '../components/KnowledgeTransferPanel.vue'
 import { PARALLEL_WORLD_STORAGE_KEYS } from '../modules/parallel-world/types'
 import type { Checkpoint } from '../modules/parallel-world/types'
 
