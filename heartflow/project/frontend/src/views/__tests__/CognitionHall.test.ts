@@ -227,3 +227,76 @@ describe('CognitionHall 释光阁 · 素镜视图', () => {
     expect(wrapper.text()).toContain('还没有可供统计的澄明记录')
   })
 })
+
+// ============================================================
+// 集成：感知采集合规面板 PerceptionCompliancePanel（INCR-254 补挂载孤儿组件）
+// 消费 modules/perception/compliance 纯函数（getAllPerceptionPermissions/setPerceptionAllowed/
+// resetPerceptionPermissions），直接经 localStorage（hf:permission:perception:*）读写，
+// 非 storage 模块 mock、无模块级 ref → 无跨用例污染。默认全关（宪法第52条沉默默认）。
+// ============================================================
+describe('集成：感知采集合规面板', () => {
+  const K_BATTERY = 'hf:permission:perception:battery'
+
+  beforeEach(() => {
+    localStorage.clear()
+    vi.clearAllMocks()
+  })
+
+  it('渲染感知采集合规面板（标题/三条宪法约束/可配置项列表/恒开项/恢复默认）', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.pcm-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.attributes('aria-label')).toBe('感知采集合规')
+    expect(panel.find('.pcm-title').text()).toContain('感知采集合规')
+    // 三条宪法约束
+    const rules = panel.findAll('.pcm-rule')
+    expect(rules.length).toBe(3)
+    expect(rules[0].text()).toContain('第1条')
+    expect(rules[1].text()).toContain('第2条')
+    expect(rules[2].text()).toContain('第52条')
+    // 6 个可配置采集项 + 恒开项 chip + 恢复默认按钮
+    expect(panel.findAll('.pcm-item').length).toBe(6)
+    expect(panel.findAll('.pcm-alwayson-chip').length).toBeGreaterThan(0)
+    expect(panel.find('.pcm-btn').text()).toContain('恢复默认')
+  })
+
+  it('默认全部关闭：已授权 0/6 与「未授权·最私密」徽标、各开关未开启', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.pcm-panel')
+    expect(panel.find('.pcm-stat').text()).toContain('已授权 0/6')
+    expect(panel.find('.pcm-badge').text()).toBe('未授权·最私密')
+    // 无 is-on 项
+    expect(panel.findAll('.pcm-item.is-on').length).toBe(0)
+  })
+
+  it('种子开启电池电量后已授权 1/6、徽标「精简授权」且该项高亮', async () => {
+    localStorage.setItem(K_BATTERY, 'true')
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.pcm-panel')
+    expect(panel.find('.pcm-stat').text()).toContain('已授权 1/6')
+    expect(panel.find('.pcm-badge').text()).toBe('精简授权')
+    expect(panel.findAll('.pcm-item.is-on').length).toBe(1)
+    expect(panel.findAll('.pcm-item.is-on')[0].find('.pcm-item-name').text()).toBe('电池电量')
+  })
+
+  it('点击开关开启电池电量并持久化到 localStorage', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.pcm-panel')
+    await panel.find('button[aria-label="电池电量开关"]').trigger('click')
+    expect(localStorage.getItem(K_BATTERY)).toBe('true')
+    expect(panel.find('.pcm-stat').text()).toContain('已授权 1/6')
+    expect(panel.findAll('.pcm-item.is-on').length).toBe(1)
+  })
+
+  it('恢复默认（全部关闭）后授权归零并写回 localStorage false', async () => {
+    localStorage.setItem(K_BATTERY, 'true')
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.pcm-panel')
+    expect(panel.find('.pcm-stat').text()).toContain('已授权 1/6')
+    await panel.find('.pcm-btn').trigger('click')
+    expect(panel.find('.pcm-stat').text()).toContain('已授权 0/6')
+    expect(panel.find('.pcm-badge').text()).toBe('未授权·最私密')
+    expect(localStorage.getItem(K_BATTERY)).toBe('false')
+    expect(panel.findAll('.pcm-item.is-on').length).toBe(0)
+  })
+})

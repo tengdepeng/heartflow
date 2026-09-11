@@ -341,6 +341,9 @@
 
     <!-- 澄明统计（light·useClarityDashboard：冥想/释怀/趋势/最佳时段） -->
     <ClarionStatsPanel />
+
+    <!-- 感知采集合规（INCR-254 补挂载孤儿组件：宪法第52条沉默默认 · 可配置采集项授权开关） -->
+    <PerceptionCompliancePanel />
   </div>
 </template>
 
@@ -351,6 +354,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useMeditationAnalytics, evaluateFourLights, LIGHT_META, LIGHT_ORDER, type FourLightsInput, useCognitionReflections } from '../modules/cognition'
 import LightRecordsPanel from '../components/LightRecordsPanel.vue'
 import ClarionStatsPanel from '../components/ClarionStatsPanel.vue'
+import PerceptionCompliancePanel from '../components/PerceptionCompliancePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
