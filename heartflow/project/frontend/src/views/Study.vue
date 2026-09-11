@@ -213,6 +213,19 @@
                 <span v-for="t in recallNote.tags" :key="t" class="recall-tag">{{ t }}</span>
               </span>
             </div>
+            <!-- 双向链接（study/note-links 引擎·宿主薄委托数据，INCR-229） -->
+            <div class="recall-links">
+              <h4 class="recall-links-title">双向链接</h4>
+              <BacklinksPanel
+                v-if="recallNote"
+                :note-id="recallNote.id"
+                :notes="study.notes.value"
+                :outgoing="recallOutgoing"
+                :backlinks="recallBacklinks"
+                @open="openNoteById"
+              />
+              <p v-if="recallBacklinks.length === 0 && recallOutgoing.length === 0" class="recall-links-empty">这篇笔记还没有双向链接。</p>
+            </div>
             <div class="recall-actions">
               <button class="recall-btn" @click="randomRecall">🎲 再抽一条</button>
               <button class="recall-btn recall-btn--open" @click="openRecallTarget">打开编辑</button>
@@ -250,6 +263,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useStudy, tagFrequencies, pickRandom } from '../modules/study'
+import { useNoteLinks } from '../modules/study/note-links'
 import { getSpineColor, formatNoteDate } from '../modules/study/types'
 import { storage } from '../engine/storage'
 import NoteEditor from '../components/NoteEditor.vue'
@@ -260,6 +274,7 @@ import NoteAnalyticsPanel from '../components/NoteAnalyticsPanel.vue'
 import StudyWeatherPanel from '../components/StudyWeatherPanel.vue'
 import LettersPanel from '../components/LettersPanel.vue'
 import TapesPanel from '../components/TapesPanel.vue'
+import BacklinksPanel from '../components/BacklinksPanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
@@ -350,6 +365,11 @@ const recallNote = ref<Note | null>(null)
 function randomRecall() {
   recallNote.value = pickRandom(cloudNotes.value)
 }
+
+// ---- 双向链接（INCR-229 薄委托化）：宿主从 note-links 引擎取数据，面板纯展示） ----
+const { getBacklinks, getOutgoingLinks } = useNoteLinks()
+const recallBacklinks = computed(() => recallNote.value ? getBacklinks(recallNote.value.id) : [])
+const recallOutgoing = computed(() => recallNote.value ? getOutgoingLinks(recallNote.value.id) : [])
 
 // ---- 每日随机回顾：flomo 式 3 条历史笔记偶遇（日期种子，每天同一组） ----
 function dailySeed(dateStr: string): number {
@@ -1128,6 +1148,26 @@ function toggleArchive(note: Note) {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
+}
+
+.recall-links {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.04);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+}
+.recall-links-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: rgba(var(--accent-rgb), 0.6);
+}
+.recall-links-empty {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.35);
 }
 
 .recall-btn {

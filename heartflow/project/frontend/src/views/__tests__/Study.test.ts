@@ -87,6 +87,26 @@ vi.mock('../../components/NoteAnalyticsPanel.vue', () => ({
   },
 }))
 
+// 双向链接引擎（INCR-229 薄委托化）：视图测试 mock 链接数据，面板逻辑由组件专项测试背书
+const mockLinks: Record<string, { backlinks: any[]; outgoing: any[] }> = {}
+vi.mock('../../modules/study/note-links', () => ({
+  useNoteLinks: () => ({
+    getBacklinks: (id: string) => mockLinks[id]?.backlinks ?? [],
+    getOutgoingLinks: (id: string) => mockLinks[id]?.outgoing ?? [],
+  }),
+  getBlockContent: (_c: string, _b: string) => null,
+}))
+
+// 双向链接面板（INCR-229）：视图级用 stub 断言挂载；面板渲染逻辑由组件专项测试确认
+vi.mock('../../components/BacklinksPanel.vue', () => ({
+  default: {
+    name: 'BacklinksPanel',
+    template: '<div class="backlinks-stub" data-test="backlinks" />',
+    props: ['noteId', 'notes', 'outgoing', 'backlinks'],
+    emits: ['open'],
+  },
+}))
+
 async function getWrapper() {
   const { default: Study } = await import('../Study.vue')
   return mount(Study)
@@ -284,5 +304,48 @@ describe('Study 视图', () => {
     expect(wrapper.text()).toContain('搁置的笔记')
     // 温和洞察
     expect(wrapper.find('.swp-insights').exists()).toBe(true)
+  })
+
+  // ============================================================
+  // 双向链接（INCR-229：薄委托化挂载 BacklinksPanel 至随机回顾弹窗）
+  // ============================================================
+
+  it('随机回顾弹窗注入笔记后展示双向链接面板', async () => {
+    mockNotes.value = [sampleNote({ id: 'note_seed', title: '种子笔记' })]
+    const wrapper = await getWrapper()
+    // 触发随机回顾 → 弹窗出现
+    const recallBtn = wrapper.find('.st-btn-random')
+    expect(recallBtn.exists()).toBe(true)
+    await recallBtn.trigger('click')
+    await nextTick()
+    // 随机回顾弹窗经 Teleport 渲染到 body
+    const recallCard = document.querySelector('.recall-card') as HTMLElement | null
+    expect(recallCard).not.toBeNull()
+    // 弹窗中挂载反链 stub（有笔记时 v-if，backlinks/outgoing 来自宿主计算的空数据）
+    expect(recallCard!.querySelector('.recall-links-title')).not.toBeNull()
+    expect(recallCard!.querySelector('.backlinks-stub')).not.toBeNull()
+    // 空链接时展示兜底文案
+    expect(recallCard!.textContent).toContain('这篇笔记还没有双向链接')
+  })
+
+  it('随机回顾弹窗的拉黑面板接收宿主注入的链接数据', async () => {
+    // 清理上一用例 Teleport 到 body 的残留弹窗
+    document.querySelectorAll('.recall-card').forEach(el => el.remove())
+    mockNotes.value = [sampleNote({ id: 'note_seed', title: '种子笔记' })]
+    mockLinks['note_seed'] = {
+      backlinks: [{ id: 'l1', sourceId: 'note_a', targetId: 'note_seed' }],
+      outgoing: [],
+    }
+    const { default: Study } = await import('../Study.vue')
+    const w = mount(Study, { attachTo: document.body })
+    await w.find('.st-btn-random').trigger('click')
+    await nextTick()
+    const panel = w.findComponent({ name: 'BacklinksPanel' })
+    expect(panel.exists()).toBe(true)
+    expect(panel.props('noteId')).toBe('note_seed')
+    expect(panel.props('backlinks')).toHaveLength(1)
+    // 有链接时空态兜底文案消失
+    expect(w.find('.recall-links-empty').exists()).toBe(false)
+    w.unmount()
   })
 })

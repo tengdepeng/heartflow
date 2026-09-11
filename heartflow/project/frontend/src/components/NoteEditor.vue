@@ -88,6 +88,9 @@
           <BacklinksPanel
             v-if="props.note"
             :note-id="props.note.id"
+            :notes="study.notes.value"
+            :outgoing="editorOutgoing"
+            :backlinks="editorBacklinks"
             @open="emit('open', $event)"
           />
 
@@ -151,7 +154,7 @@ import type { Note } from '../types'
 import { SPINE_COLORS } from '../modules/study/types'
 import { renderMarkdown, countWords, countChars } from '../utils/markdown'
 import { useStudy } from '../modules/study'
-import { resolveTargetId } from '../modules/study/note-links'
+import { resolveTargetId, useNoteLinks } from '../modules/study/note-links'
 import BacklinksPanel from './BacklinksPanel.vue'
 
 const props = defineProps<{
@@ -183,6 +186,11 @@ const tagInput = ref('')
 const editMode = ref<'edit' | 'preview'>('edit')
 
 const study = useStudy()
+
+// 双向链接（INCR-229 薄委托化）：宿主计算后注入 BacklinksPanel
+const { getBacklinks, getOutgoingLinks } = useNoteLinks()
+const editorBacklinks = computed(() => props.note ? getBacklinks(props.note.id) : [])
+const editorOutgoing = computed(() => props.note ? getOutgoingLinks(props.note.id) : [])
 
 const renderedContent = computed(() => renderMarkdown(form.content))
 const wordCount = computed(() => countWords(form.content))

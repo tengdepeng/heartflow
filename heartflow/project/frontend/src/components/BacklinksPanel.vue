@@ -34,21 +34,21 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useNoteLinks, getBlockContent, type NoteLink } from '../modules/study/note-links'
-import { useStudy } from '../modules/study'
+import { getBlockContent, type NoteLink } from '../modules/study/note-links'
+import type { Note } from '../types'
 
-const props = defineProps<{ noteId: string }>()
+const props = defineProps<{
+  noteId: string
+  notes: Note[]
+  outgoing: NoteLink[]
+  backlinks: NoteLink[]
+}>()
 const emit = defineEmits<{ (e: 'open', noteId: string): void }>()
 
-const { getBacklinks, getOutgoingLinks } = useNoteLinks()
-const study = useStudy()
-
-const backlinks = computed(() => getBacklinks(props.noteId))
-const outgoing = computed(() => getOutgoingLinks(props.noteId))
-const hasLinks = computed(() => backlinks.value.length > 0 || outgoing.value.length > 0)
+const hasLinks = computed(() => props.backlinks.length > 0 || props.outgoing.length > 0)
 
 function titleOf(id: string): string {
-  const n = study.notes.value.find(x => x.id === id)
+  const n = props.notes.find(x => x.id === id)
   return n ? (n.title || '未命名笔记') : '（已不存在的笔记）'
 }
 
@@ -57,7 +57,7 @@ function blockText(l: NoteLink): string | null {
   if (!l.blockId) return null
   // 出链：锚点写在本笔记正文；反链：锚点写在来源笔记正文
   const ownerId = l.sourceId === props.noteId ? props.noteId : l.sourceId
-  const n = study.notes.value.find(x => x.id === ownerId)
+  const n = props.notes.find(x => x.id === ownerId)
   if (!n) return null
   const raw = getBlockContent(n.content, l.blockId)
   if (!raw) return null
