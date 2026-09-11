@@ -161,6 +161,12 @@
     <!-- 对话主题洞察（INCR-234 补挂载孤儿组件 TopicClusteringPanel：纯 props 驱动，同源 talks 注入） -->
     <TopicClusteringPanel :talks="talks" />
 
+    <!-- 人格建模（INCR-236 补挂载孤儿组件 PersonalityModelPanel：风格/价值观/轨迹/报告/预测，同源 talks 注入） -->
+    <PersonalityModelPanel :talks="talks" />
+
+    <!-- 意图反馈学习（INCR-244 补挂载孤儿组件 IntentFeedbackPanel：镜我对话意图学习——反馈总数/修正率/关键词权重/最近反馈，消费 modules/mirror 引擎 useIntentFeedbackLearning，零 props 直驱） -->
+    <IntentFeedbackPanel />
+
     <p class="asm-quote">"我看到了。我接受了。这些全都是我。"</p>
   </div>
 </template>
@@ -175,6 +181,8 @@ import { useSelfTalks } from '../modules/self'
 import MirrorSceneCards from '../components/MirrorSceneCards.vue'
 import SelfTalkArchivePanel from '../components/SelfTalkArchivePanel.vue'
 import TopicClusteringPanel from '../components/TopicClusteringPanel.vue'
+import PersonalityModelPanel from '../components/PersonalityModelPanel.vue'
+import IntentFeedbackPanel from '../components/IntentFeedbackPanel.vue'
 import { useTimer } from '../resonance/bridges/timer'
 import { getIntentRoute, isDirectAction } from '../modules/mirror/intent-launch'
 import { useMirrorToolCards, type MirrorToolCard } from '../modules/mirror'

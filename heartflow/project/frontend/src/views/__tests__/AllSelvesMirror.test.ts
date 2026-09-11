@@ -259,4 +259,137 @@ describe('AllSelvesMirror 万镜之厅视图', () => {
       expect(wrapper.text()).toContain('相关度')
     })
   })
+
+  // ============================================================
+  // 集成：人格建模面板 PersonalityModelPanel（INCR-236 补挂载孤儿组件）
+  // 引擎 usePersonalityModel 内部 ref 按调用自 storage 读，清存储即复位
+  // ============================================================
+  describe('集成：人格建模面板', () => {
+    // 生成 20+ 条可分析的自我对话（minDialoguesForStyle = 20）
+    function seedTalks(count: number = 20) {
+      const talks = Array.from({ length: count }, (_, i) => ({
+        id: `p-${i}`,
+        text: `保持习惯与思考，第 ${i + 1} 次复盘让我更平静专注`,
+        at: new Date(Date.now() + i * 60000).toISOString(),
+      }))
+      mockStore['hf:self_talks_v2'] = talks
+      return talks
+    }
+
+    it('无对话时渲染人格建模空态', async () => {
+      mockStore['hf:self_talks_v2'] = []
+      const wrapper = await createWrapper()
+      expect(wrapper.find('.pmp-panel').exists()).toBe(true)
+      expect(wrapper.text()).toContain('人格建模')
+      expect(wrapper.text()).toContain('暂无人格画像')
+    })
+
+    it('有对话时渲染徽章与五个标签导航', async () => {
+      seedTalks(2)
+      const wrapper = await createWrapper()
+      expect(wrapper.find('.pmp-badge').exists()).toBe(true)
+      expect(wrapper.text()).toContain('0 画像')
+      const tabs = wrapper.findAll('.pmp-tab')
+      expect(tabs.length).toBe(5)
+      expect(wrapper.text()).toContain('风格')
+      expect(wrapper.text()).toContain('价值观')
+      expect(wrapper.text()).toContain('预测')
+    })
+
+    it('积累 20 条对话后点击「分析风格」生成风格画像', async () => {
+      seedTalks(20)
+      const wrapper = await createWrapper()
+      const btn = wrapper.find('button.pmp-btn')
+      expect(btn.exists()).toBe(true)
+      await btn.trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('.pmp-chips').exists()).toBe(true)
+      expect(wrapper.text()).toContain('1 画像')
+      expect(wrapper.find('.pmp-bar-item').exists()).toBe(true)
+    })
+  })
+
+  // ============================================================
+  // 集成：意图反馈学习面板 IntentFeedbackPanel（INCR-244 补挂载孤儿组件）
+  // 引擎 useIntentFeedbackLearning 内 refs 于 use 调用时自 storage 读（hf:mirror_intent_feedback / hf:mirror_learning_model），
+  // 本文件 mock 的 storage.getKV 直读 mockStore，先 seed 键再挂载即复位
+  // ============================================================
+  describe('集成：意图反馈学习面板', () => {
+    const SEED_MODEL = {
+      keywordWeights: { focus: { 专注: 6, 番茄: 3 }, plan: { 计划: 4, 日程: 2 } },
+      totalFeedback: 10,
+      correctionRate: 0.3,
+      lastTrainedAt: '2026-09-11T08:00:00.000Z',
+    }
+
+    function seedLearning() {
+      mockStore['hf:mirror_intent_feedback'] = [
+        { input: '想开始专注', parsedIntent: 'focus', confirmed: true, feedbackAt: '2026-09-11T08:00:00.000Z' },
+        { input: '安排日程', parsedIntent: 'journal', confirmed: false, correctedIntent: 'plan', feedbackAt: '2026-09-11T09:00:00.000Z' },
+      ]
+      mockStore['hf:mirror_learning_model'] = SEED_MODEL
+    }
+
+    it('无学习数据时渲染面板骨架与空态引导', async () => {
+      mockStore['hf:mirror_intent_feedback'] = []
+      mockStore['hf:mirror_learning_model'] = undefined
+      const wrapper = await createWrapper()
+      expect(wrapper.find('.ifp').exists()).toBe(true)
+      expect(wrapper.text()).toContain('🧠 意图反馈学习')
+      expect(wrapper.text()).toContain('学习 · 反馈 · 权重')
+      expect(wrapper.text()).toContain('暂无学习数据')
+    })
+
+    it('有反馈数据时渲染四格学习统计', async () => {
+      seedLearning()
+      const wrapper = await createWrapper()
+      expect(wrapper.find('.ifp-stats').exists()).toBe(true)
+      expect(wrapper.text()).toContain('反馈总数')
+      expect(wrapper.text()).toContain('修正率')
+      expect(wrapper.text()).toContain('学习意图')
+      expect(wrapper.text()).toContain('最近训练')
+      expect(wrapper.text()).toContain('10') // 反馈总数
+      expect(wrapper.text()).toContain('30%') // 修正率
+    })
+
+    it('渲染关键词权重块与关键词计数', async () => {
+      seedLearning()
+      const wrapper = await createWrapper()
+      const weights = wrapper.findAll('.ifp-weight')
+      expect(weights.length).toBe(2)
+      expect(wrapper.text()).toContain('关键词权重')
+      expect(wrapper.text()).toContain('专注')
+      expect(wrapper.find('.ifp-kw').exists()).toBe(true)
+    })
+
+    it('渲染最近反馈（已确认/已修正徽章）', async () => {
+      seedLearning()
+      const wrapper = await createWrapper()
+      expect(wrapper.find('.ifp-fb').exists()).toBe(true)
+      expect(wrapper.text()).toContain('最近反馈')
+      expect(wrapper.text()).toContain('想开始专注')
+      expect(wrapper.text()).toContain('已确认')
+      expect(wrapper.text()).toContain('已修正')
+      expect(wrapper.find('.ifp-fb-badge--ok').exists()).toBe(true)
+      expect(wrapper.find('.ifp-fb-badge--fix').exists()).toBe(true)
+    })
+
+    it('无数据时重置按钮禁用，有数据时点击重置清空学习模型', async () => {
+      // 空态：禁用
+      mockStore['hf:mirror_intent_feedback'] = []
+      mockStore['hf:mirror_learning_model'] = undefined
+      let wrapper = await createWrapper()
+      expect(wrapper.find('.ifp-btn--danger').attributes('disabled')).toBeDefined()
+      // 有数据：可点击并重置
+      seedLearning()
+      wrapper = await createWrapper()
+      const btn = wrapper.find('.ifp-btn--danger')
+      expect(btn.attributes('disabled')).toBeUndefined()
+      await btn.trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(mockSetKV).toHaveBeenCalledWith('hf:mirror_intent_feedback', [])
+      expect(mockSetKV).toHaveBeenCalledWith('hf:mirror_learning_model', expect.objectContaining({ totalFeedback: 0, keywordWeights: {} }))
+      expect(wrapper.text()).toContain('暂无学习数据')
+    })
+  })
 })
