@@ -81,6 +81,15 @@
 
       <p class="dock-mantra__text" @click="refreshMantra">{{ mantra.text }}</p>
 
+      <!-- 专注小结胶囊：今日沉淀 / 本轮流动 / 脉动进度（INCR-233 补挂载孤儿组件 FocusStats） -->
+      <div class="home-focus-stats">
+        <FocusStats
+          :sessions="timer.todayCompletedCount"
+          :currentDuration="focusElapsedSeconds"
+          :progress="progress"
+        />
+      </div>
+
       <!-- 统计卡片：测试断言依赖，视觉隐藏 -->
       <div class="home-sr-only" aria-hidden="true">
         <div class="home-stats">
@@ -119,6 +128,7 @@ import type { useAstrolabe } from '../modules/astrolabe'
 
 import JadeBead from '../components/JadeBead.vue'
 import TimerControls from '../components/TimerControls.vue'
+import FocusStats from '../components/FocusStats.vue'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
@@ -178,6 +188,11 @@ function reset() { timer.reset() }
 // 玉珠上的时间：倒计时/番茄显示剩余，正计时显示已计（向上）
 const beadTime = computed(() =>
   session.value.mode === 'countup' ? display.value : formatTimerClock(remainingSeconds.value * 1000),
+)
+
+// 本轮已沉淀秒数（总时长 - 剩余），供 FocusStats「本轮流动」胶囊
+const focusElapsedSeconds = computed(() =>
+  Math.max(0, Math.floor(session.value.plannedDuration / 1000) - remainingSeconds.value),
 )
 
 function finishFocusSession() {
@@ -349,6 +364,12 @@ watch(() => timer.isCompleted, (done) => {
   gap: 8px;
   padding: 32px 24px 110px;
   text-align: center;
+}
+
+.home-focus-stats {
+  display: flex;
+  justify-content: center;
+  margin-top: 22px;
 }
 
 .focus-kicker {

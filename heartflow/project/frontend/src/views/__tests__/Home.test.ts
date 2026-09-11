@@ -172,7 +172,11 @@ vi.mock('../../modules/canvas/CanvasRoom.vue', () => ({
   default: { template: '<div class="mock-canvas-room" />' },
 }))
 vi.mock('../../components/FocusStats.vue', () => ({
-  default: { template: '<div class="mock-focus-stats" />' },
+  default: {
+    name: 'FocusStats',
+    props: { sessions: Number, currentDuration: Number, progress: Number },
+    template: '<div class="mock-focus-stats" />',
+  },
 }))
 vi.mock('../../components/JadeBead.vue', () => ({
   default: { template: '<div class="mock-jade-bead" />' },
@@ -246,5 +250,55 @@ describe('Home 心流视图', () => {
     const wrapper = await createWrapper()
     const timer = wrapper.findAll('.focus-orb')
     expect(timer.length).toBeGreaterThan(0)
+  })
+
+  // ==========================================================
+  // 集成：专注小结胶囊 FocusStats（INCR-233 补挂载孤儿组件）
+  // ==========================================================
+  describe('集成：专注小结胶囊 FocusStats', () => {
+    // 拉取 mockTimer 并设值：todayCompletedCount 为非响应式 number，progress/remainingSeconds 为 ref
+    it('挂载 FocusStats 胶囊，接收今日沉淀/本轮流动/脉动进度 props', async () => {
+      const { useTimer } = await import('../../resonance/bridges/timer')
+      const mockT: any = useTimer()
+      mockT.todayCompletedCount = 7
+      mockT.progress.value = 0.5
+      mockT.session.value = { plannedDuration: 25 * 60 * 1000, startedAt: '', elapsed: 0, status: 'running' as const }
+      mockT.remainingSeconds.value = 15 * 60 + 12 // 已过 9 分 48 秒
+
+      const wrapper = await createWrapper()
+      const fs = wrapper.findComponent({ name: 'FocusStats' })
+      expect(fs.exists()).toBe(true)
+      expect(fs.props('sessions')).toBe(7)
+      // 1500 - 912 = 588s → 09:48
+      expect(fs.props('currentDuration')).toBe(9 * 60 + 48)
+      expect(fs.props('progress')).toBeCloseTo(0.5, 5)
+    })
+
+    it('本轮流动秒数 = 总时长 - 剩余（plannedDuration/1000 - remainingSeconds）', async () => {
+      const { useTimer } = await import('../../resonance/bridges/timer')
+      const mockT: any = useTimer()
+      mockT.session.value = { plannedDuration: 60 * 60 * 1000, startedAt: '', elapsed: 0, status: 'running' as const }
+      mockT.remainingSeconds.value = 1000
+
+      const wrapper = await createWrapper()
+      const fs = wrapper.findComponent({ name: 'FocusStats' })
+      // 3600 - 1000 = 2600s
+      expect(fs.props('currentDuration')).toBe(2600)
+    })
+
+    it('剩余未超总时长时本轮流动不为负（idle 兜底为 0）', async () => {
+      const { useTimer } = await import('../../resonance/bridges/timer')
+      const mockT: any = useTimer()
+      mockT.todayCompletedCount = 0
+      mockT.progress.value = 0
+      mockT.session.value = { plannedDuration: 0, startedAt: '', elapsed: 0, status: 'idle' as const }
+      mockT.remainingSeconds.value = 0
+
+      const wrapper = await createWrapper()
+      const fs = wrapper.findComponent({ name: 'FocusStats' })
+      expect(fs.props('sessions')).toBe(0)
+      expect(fs.props('currentDuration')).toBe(0)
+      expect(fs.props('progress')).toBe(0)
+    })
   })
 })
