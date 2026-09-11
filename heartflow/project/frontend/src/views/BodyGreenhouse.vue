@@ -304,6 +304,9 @@
     <!-- 健康报告档案（body，需要 logs prop，INCR-178） -->
     <HealthReportPanel :logs="logs" />
 
+    <!-- 体质调理方案（INCR-257 补挂载孤儿组件：依体质选养法·吃动息按饮四季调护） -->
+    <WellnessPlanPanel />
+
     <!-- 近期记录 -->
     <section class="recent-logs" v-if="recentLogs.length">
       <h3 class="section-title">📜 近期记录</h3>
@@ -328,6 +331,7 @@ import ChronotypeAnalysisPanel from '../components/ChronotypeAnalysisPanel.vue'
 import HealthGoalsPanel from '../components/HealthGoalsPanel.vue'
 import HealthRemindersPanel from '../components/HealthRemindersPanel.vue'
 import HealthReportPanel from '../components/HealthReportPanel.vue'
+import WellnessPlanPanel from '../components/WellnessPlanPanel.vue'
 import { usePerceptionStore } from '../stores/perception'
 
 const { entranceRef, entranceClass } = useViewEntrance()

@@ -5,6 +5,8 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref, computed } from 'vue'
+import { invalidateCache } from '../../engine/storage/core'
+import { storage } from '../../engine/storage'
 
 interface BodyLog { id: string; type: string; value: Record<string, any>; at: string }
 
@@ -271,5 +273,84 @@ describe('BodyGreenhouse 视图', () => {
   it('挂载健康报告档案面板', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.find('.hrp-stub').exists()).toBe(true)
+  })
+})
+
+// ============================================================
+// WellnessPlanPanel 体质调理方案 · 孤儿组件集成（INCR-257）
+// 消费 useWellnessPlan（纯内存引擎）+ setup 顶层读体质画像（hf:body_wisdom_constitution）。
+// ============================================================
+describe('WellnessPlanPanel 体质调理方案集成', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBodyLogs = [...mockLogs]
+    mockDashboard.value = { overallScore: 85, achievementRate: 1, greenhouseHealth: 80, streak: 5, activeGoals: [{}] }
+    // 真实 storage 走 localStorage，清空并失效缓存保证隔离
+    localStorage.clear()
+    invalidateCache()
+  })
+
+  it('渲染体质调理方案面板骨架', async () => {
+    const wrapper = await getWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('体质调理方案')
+    expect(text).toContain('依体质选一方养法')
+    expect(wrapper.findAll('.wp-chip').length).toBe(9)
+  })
+
+  it('默认按平和质生成方案，渲染六大建议卡片', async () => {
+    const wrapper = await getWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('饮食建议')
+    expect(text).toContain('运动建议')
+    expect(text).toContain('作息建议')
+    expect(text).toContain('穴位按摩')
+    expect(text).toContain('推荐茶饮')
+    expect(text).toContain('四季调整')
+    expect(text).toContain('保持均衡饮食')
+    expect(text).toContain('足三里')
+    expect(text).toContain('绿茶')
+  })
+
+  it('点击气虚质 chip 切换为对应调理方案', async () => {
+    const wrapper = await getWrapper()
+    const qiChip = wrapper.findAll('.wp-chip').find(c => c.text().includes('气虚质'))
+    expect(qiChip).toBeTruthy()
+    await qiChip!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(qiChip!.classes()).toContain('wp-chip-on')
+    expect(wrapper.text()).toContain('多食补气食物')
+    expect(wrapper.text()).toContain('黄芪茶')
+  })
+
+  it('存储已有体质画像时显示预选提示并默认选中', async () => {
+    storage.setKV('hf:body_wisdom_constitution', {
+      type: 'qi-deficiency',
+      label: '气虚质',
+      scores: {},
+      characteristics: [],
+      recommendations: [],
+      analyzedAt: new Date().toISOString(),
+    })
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('已根据你的体质画像，为你预选「气虚质」')
+    expect(wrapper.findAll('.wp-chip').find(c => c.classes().includes('wp-chip-on'))!.text()).toContain('气虚质')
+  })
+
+  it('体质画像为阴虛质时默认生成滋阴方案', async () => {
+    storage.setKV('hf:body_wisdom_constitution', {
+      type: 'yin-deficiency',
+      label: '阴虚质',
+      scores: {},
+      characteristics: [],
+      recommendations: [],
+      analyzedAt: new Date().toISOString(),
+    })
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('已根据你的体质画像，为你预选「阴虚质」')
+    expect(wrapper.text()).toContain('多食滋阴食物')
+    expect(wrapper.text()).toContain('枸杞菊花茶')
   })
 })
