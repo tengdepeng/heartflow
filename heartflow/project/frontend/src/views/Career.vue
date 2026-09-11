@@ -333,6 +333,11 @@
       <SkillGapVisualizationPanel :skills="skillList" :milestones="milestoneAll" />
     </section>
 
+    <!-- 影响力分析 · 网络健康度/影响力排行/中心度/传播力（career/skill-path useInfluenceAnalysis 引擎，INCR-232） -->
+    <section data-enter class="career-section iap-section">
+      <InfluenceAnalysisPanel :contacts="contacts" :connections="connections" />
+    </section>
+
     <!-- 底部铭文 -->
     <footer class="career-colophon">
       <div class="colophon-ornament">
@@ -483,6 +488,7 @@ import CareerSimulatorPanel from '../components/CareerSimulatorPanel.vue'
 import SkillGapArchivePanel from '../components/SkillGapArchivePanel.vue'
 import SkillGapVisualizationPanel from '../components/SkillGapVisualizationPanel.vue'
 import TransitionRecommendPanel from '../components/TransitionRecommendPanel.vue'
+import InfluenceAnalysisPanel from '../components/InfluenceAnalysisPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const nav = useRoomNavigation()

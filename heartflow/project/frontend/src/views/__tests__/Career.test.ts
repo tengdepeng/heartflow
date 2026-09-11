@@ -667,3 +667,70 @@ describe('集成：转业推荐面板', () => {
     expect(w.text()).toContain('技能缺口')
   })
 })
+
+// =============================================================
+// 集成：影响力分析面板（INCR-232：补挂载孤儿面板 InfluenceAnalysisPanel）
+// =============================================================
+
+describe('集成：影响力分析面板', () => {
+  const CONTACTS = [
+    { id: 'c-001', name: '张老师', role: '导师', tier: 'core', nodeType: 'mentor', affinity: 10, tags: ['技术指导'], note: '' },
+    { id: 'c-002', name: '李工', role: '后端', tier: 'core', nodeType: 'colleague', affinity: 9, tags: [], note: '' },
+    { id: 'c-003', name: '赵前端', role: '前端', tier: 'active', nodeType: 'peer', affinity: 6, tags: [], note: '' },
+  ]
+  const CONNS = [
+    { id: 'x1', fromId: 'c-001', toId: 'c-002', type: 'strong', description: '合作' },
+    { id: 'x2', fromId: 'c-001', toId: 'c-003', type: 'medium', description: '' },
+    { id: 'x3', fromId: 'c-002', toId: 'c-003', type: 'weak', description: '' },
+  ]
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    for (const key of Object.keys(mockStore)) {
+      delete mockStore[key]
+    }
+    document.querySelectorAll('.career-modal-overlay').forEach(el => el.remove())
+  })
+
+  async function mountSeeded(contacts: any[], conns: any[]) {
+    mockStore['career:contacts'] = contacts
+    mockStore['career:connections'] = conns
+    const w = await getWrapper()
+    await w.vm.$nextTick()
+    return w
+  }
+
+  it('挂载后渲染面板骨架与影响力标题', async () => {
+    const w = await mountSeeded(CONTACTS, CONNS)
+    expect(w.find('.iap').exists()).toBe(true)
+    expect(w.text()).toContain('影响力分析')
+    expect(w.text()).toContain('健康度')
+  })
+
+  it('有联系人时渲染网络健康环与 6 项健康指标', async () => {
+    const w = await mountSeeded(CONTACTS, CONNS)
+    expect(w.find('.iap-health-ring').exists()).toBe(true)
+    expect(w.text()).toContain('健康度')
+    // 健康度网格共 6 项指标
+    expect(w.findAll('.iap-health-item').length).toBe(6)
+  })
+
+  it('渲染影响力排行行与趋势标签', async () => {
+    const w = await mountSeeded(CONTACTS, CONNS)
+    expect(w.findAll('.iap-rank-row').length).toBeGreaterThan(0)
+    expect(w.text()).toContain('影响力排行')
+    expect(w.text()).toContain('张老师')
+    expect(w.find('.iap-rank-trend').exists()).toBe(true)
+  })
+
+  it('点击排行条目展示所选联系人的中心度与传播力', async () => {
+    const w = await mountSeeded(CONTACTS, CONNS)
+    const firstRow = w.findAll('.iap-rank-row')[0]
+    expect(firstRow).toBeDefined()
+    await firstRow.trigger('click')
+    await w.vm.$nextTick()
+    expect(w.find('.iap-centrality').exists()).toBe(true)
+    expect(w.text()).toContain('中心度')
+    expect(w.findAll('.iap-cent-item').length).toBe(5)
+  })
+})
