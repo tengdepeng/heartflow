@@ -335,6 +335,9 @@
     <!-- 工时节奏分析（worklog·worklog-habits，INCR-174） -->
     <WorkRhythmPanel />
 
+    <!-- 任务拆解（INCR-247 补挂载孤儿组件 TaskDecomposerPanel：自然语言任务 → 可执行步骤陈列/保存计划，引擎 useDecomposer 唯一、零 props 直驱，与更漏"时间织机"主题契合） -->
+    <TaskDecomposerPanel />
+
     <!-- 记录列表 -->
     <section class="wl-shift-section" v-if="paginatedShifts.length > 0">
       <div class="wl-shift-list">
@@ -392,6 +395,7 @@ import WorklogExportPanel from '../components/WorklogExportPanel.vue'
 import WorklogRewardPanel from '../components/WorklogRewardPanel.vue'
 import ProductivityPanel from '../components/ProductivityPanel.vue'
 import WorkRhythmPanel from '../components/WorkRhythmPanel.vue'
+import TaskDecomposerPanel from '../components/TaskDecomposerPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

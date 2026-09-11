@@ -677,3 +677,132 @@ describe('集成：劳酬联动面板', () => {
     expect(wrapper.findComponent({ name: 'WorkRhythmPanel' }).exists()).toBe(true)
   })
 })
+
+// ============================================================
+// 集成：任务拆解面板 TaskDecomposerPanel（INCR-247 补挂载孤儿组件）
+// 引擎 useDecomposer 的 plans 为 use 调用时自 storage 读（storage-read，非模块级 ref），
+// 故空态/渲染用例在录入用例之前、保存用例置于最末，避免跨用例状态干扰
+// ============================================================
+describe('集成：任务拆解面板', () => {
+  const PLANS_KEY = 'mirror.decomposer.plans'
+
+  function makePlan(overrides: Record<string, any> = {}) {
+    return {
+      id: 'plan_1',
+      task: '写一篇季度复盘报告',
+      intent: 'output' as const,
+      source: 'template' as const,
+      createdAt: '2026-09-10T08:00:00.000Z',
+      steps: [
+        { id: 'st1', title: '收集素材', detail: undefined, priority: 'medium', status: 'pending', estimateMinutes: 20 },
+        { id: 'st2', title: '搭建框架', detail: undefined, priority: 'low', status: 'pending', estimateMinutes: 25 },
+        { id: 'st3', title: '撰写初稿', detail: undefined, priority: 'low', status: 'pending', estimateMinutes: 45 },
+        { id: 'st4', title: '修改润色', detail: undefined, priority: 'low', status: 'pending', estimateMinutes: 25 },
+      ],
+      ...overrides,
+    }
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['heartflow:shifts'] = []
+    mockStore['heartflow:hourly_rate'] = 0
+    mockStore[PLANS_KEY] = '[]'
+  })
+
+  it('集成渲染任务拆解面板骨架与标题', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.tdp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🧩 任务拆解')
+    expect(wrapper.text()).toContain('本地启发式')
+    expect(wrapper.text()).toContain('0 份计划')
+  })
+
+  it('无计划时展示拆解输入区与空态提示', async () => {
+    const wrapper = await getWrapper()
+    // 拆解输入框与按钮
+    expect(wrapper.find('.tdp-input').exists()).toBe(true)
+    expect(wrapper.find('.tdp-btn--primary').exists()).toBe(true)
+    // 空态
+    expect(wrapper.find('.tdp-empty').text()).toContain('还没有拆解计划')
+  })
+
+  it('输入自然语言任务后拆解出预览步骤与意图', async () => {
+    const wrapper = await getWrapper()
+    await (wrapper.find('.tdp-input') as any).setValue('写一篇季度复盘报告')
+    await wrapper.find('.tdp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tdp-preview').exists()).toBe(true)
+    // 意图识别为写作产出，预览任务回显输入
+    const chip = wrapper.find('.tdp-intent-chip')
+    expect(chip.text()).toContain('写作产出')
+    expect(wrapper.find('.tdp-preview-task').text()).toContain('写一篇季度复盘报告')
+    // 四条模板步骤
+    const steps = wrapper.findAll('.tdp-step')
+    expect(steps.length).toBe(4)
+    expect(wrapper.text()).toContain('收集素材')
+    expect(wrapper.text()).toContain('修改润色')
+  })
+
+  it('拆分含显式分句的任务直接陈列子步骤', async () => {
+    const wrapper = await getWrapper()
+    await (wrapper.find('.tdp-input') as any).setValue('整理房间，收拾衣物，打扫卫生')
+    await wrapper.find('.tdp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    const steps = wrapper.findAll('.tdp-step')
+    expect(steps.length).toBe(3)
+    expect(wrapper.text()).toContain('整理房间')
+    expect(wrapper.text()).toContain('收拾衣物')
+    expect(wrapper.text()).toContain('打扫卫生')
+  })
+
+  it('保存计划写入列表并持久化到存储', async () => {
+    const wrapper = await getWrapper()
+    await (wrapper.find('.tdp-input') as any).setValue('写一篇季度复盘报告')
+    await wrapper.find('.tdp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.tdp-preview .tdp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    // 计划进入列表，预览收起
+    const cards = wrapper.findAll('.tdp-card')
+    expect(cards.length).toBe(1)
+    expect(cards[0].text()).toContain('写一篇季度复盘报告')
+    expect(wrapper.find('.tdp-preview').exists()).toBe(false)
+    // 存储写了一份计划
+    const persisted = JSON.parse(mockStore[PLANS_KEY])
+    expect(persisted.length).toBe(1)
+    expect(persisted[0].task).toBe('写一篇季度复盘报告')
+  })
+
+  it('预置计划渲染卡片与进度，并可切换步骤状态', async () => {
+    mockStore[PLANS_KEY] = JSON.stringify([makePlan({
+      steps: [
+        { id: 'st1', title: '收集素材', detail: undefined, priority: 'medium', status: 'done', estimateMinutes: 20 },
+        { id: 'st2', title: '搭建框架', detail: undefined, priority: 'low', status: 'pending', estimateMinutes: 25 },
+        { id: 'st3', title: '撰写初稿', detail: undefined, priority: 'low', status: 'pending', estimateMinutes: 45 },
+        { id: 'st4', title: '修改润色', detail: undefined, priority: 'low', status: 'pending', estimateMinutes: 25 },
+      ],
+    })])
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.tdp-card').length).toBe(1)
+    expect(wrapper.text()).toContain('1 份计划')
+    expect(wrapper.text()).toContain('1/4 步完成')
+    // 点击第一个未完成步骤切换到"进行中"并写回存储
+    const chips = wrapper.findAll('.tdp-step-chip')
+    await chips[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    const persisted = JSON.parse(mockStore[PLANS_KEY])
+    expect(persisted[0].steps[1].status).toBe('doing')
+    expect(wrapper.find('.tdp-step-chip--doing').exists()).toBe(true)
+  })
+
+  it('删除预置计划后清空列表并恢复空态', async () => {
+    mockStore[PLANS_KEY] = JSON.stringify([makePlan()])
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.tdp-card').length).toBe(1)
+    await wrapper.find('.tdp-card .tdp-link').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(JSON.parse(mockStore[PLANS_KEY]).length).toBe(0)
+    expect(wrapper.find('.tdp-empty').text()).toContain('还没有拆解计划')
+  })
+})
