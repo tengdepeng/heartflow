@@ -119,6 +119,9 @@
 
     <!-- 护眼盾 -->
     <EyeShieldPanel />
+
+    <!-- 用眼休息调度（INCR-261 补挂载孤儿组件：20-20-20 实时倒计时 · 完成/稍后 · 今日节律） -->
+    <EyeBreakSchedulerPanel />
   </div>
 </template>
 
@@ -134,6 +137,7 @@ import HealthPanel from '../components/guard-room/HealthPanel.vue'
 import PsySafePanel from '../components/guard-room/PsySafePanel.vue'
 import SoundScenePanel from '../components/SoundScenePanel.vue'
 import EyeShieldPanel from '../components/EyeShieldPanel.vue'
+import EyeBreakSchedulerPanel from '../components/EyeBreakSchedulerPanel.vue'
 import EyeCarePanel from '../components/EyeCarePanel.vue'
 import SunSchedulePanel from '../components/SunSchedulePanel.vue'
 import WhiteNoisePanel from '../components/WhiteNoisePanel.vue'

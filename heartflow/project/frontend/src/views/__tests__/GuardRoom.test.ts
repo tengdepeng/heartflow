@@ -107,6 +107,9 @@ describe('GuardRoom 视图', () => {
     vi.clearAllMocks()
     mockStore['hf:contacts'] = []
     mockStore['hf:guard_visits'] = []
+    mockStore['hf:eye_break_logs'] = []
+    mockStore['hf:eye_break_last_rest'] = 0
+    delete mockStore['hf:eye_shield_config']
     mockConfigState.advisorEnabled = true
     mockBodyLogs.value = []
     mockGuardHeartRateLogs.value = []
@@ -554,5 +557,95 @@ describe('GuardRoom 视图', () => {
   it('集成渲染合规审查面板 ComplianceReviewPanel', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.findComponent({ name: 'ComplianceReviewPanel' }).exists()).toBe(true)
+  })
+
+  // ============================================================
+  // 集成：用眼休息调度面板（INCR-261 补挂载孤儿组件）
+  // 引擎 modules/eye-shield 的 useEyeBreakScheduler 为全库唯一消费方
+  // （守护室已挂 EyeShieldPanel 配置端：eyeBreakMinutes 开关/间隔，但无实时
+  // 调度执行端；EyeBreakSchedulerPanel 恰补「20-20-20 配置 → 倒计时 → 完成/稍后
+  // → 今日节律」闭环）；lastRestAt/records 走 storage 键 hf:eye_break_last_rest、
+  // hf:eye_break_logs（getKV/setKV），useEyeBreakScheduler 每次调用新建局部 ref
+  // → 无模块级污染；面板零 props、onMounted 自动 start()（scope dispose 清理
+  // interval）。宿主 GuardRoom 的 mount 为全量渲染，故此处直接 mount 面板本体
+  // 覆盖调度交互流（fake timers 接管 interval，避免残留定时器）。
+  // ============================================================
+
+  it('渲染用眼休息调度面板骨架（关闭态提示）', async () => {
+    mockStore['hf:eye_shield_config'] = { eyeBreakMinutes: 0 }
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.gsp-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🕐 用眼休息调度')
+    expect(wrapper.text()).toContain('20-20-20 · 专注休息节律')
+    // 关闭态：提示去「护眼盾」开启
+    expect(wrapper.text()).toContain('20-20-20 用眼休息已关闭')
+    expect(wrapper.text()).toContain('在「护眼盾」配置里开启')
+    expect(wrapper.find('.gsp-count').exists()).toBe(false)
+  })
+
+  it('开启态显示实时倒计时与动作按钮', async () => {
+    mockStore['hf:eye_shield_config'] = { eyeBreakMinutes: 20 }
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.gsp-disabled').exists()).toBe(false)
+    expect(wrapper.find('.gsp-count').exists()).toBe(true)
+    expect(wrapper.text()).toContain('距下次放松')
+    expect(wrapper.text()).toContain('今日休息')
+    expect(wrapper.text()).toContain('0')
+    // onMounted 自动开始计时 → 显示暂停按钮
+    expect(wrapper.text()).toContain('⏸ 暂停计时')
+  })
+
+  it('暂停与恢复计时', async () => {
+    mockStore['hf:eye_shield_config'] = { eyeBreakMinutes: 20 }
+    const wrapper = await getWrapper()
+    await wrapper.findAll('button.gsp-btn').find(b => b.text().includes('暂停'))!.trigger('click')
+    expect(wrapper.text()).toContain('▶ 开始计时')
+    await wrapper.findAll('button.gsp-btn').find(b => b.text().includes('开始'))!.trigger('click')
+    expect(wrapper.text()).toContain('⏸ 暂停计时')
+  })
+
+  it('到点提醒：完成休息记录并写回存储', async () => {
+    mockStore['hf:eye_shield_config'] = { eyeBreakMinutes: 20 }
+    // lastRestAt 设为很久前 → 已到休息点
+    mockStore['hf:eye_break_last_rest'] = Date.now() - 25 * 60_000
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('该起来眺望 6 米外 20 秒了')
+    expect(wrapper.text()).toContain('起身走动，闭目或望向远处')
+    const doneBtn = wrapper.findAll('button.gsp-btn').find(b => b.text().includes('完成休息'))!
+    await doneBtn.trigger('click')
+    // 记录写回 hf:eye_break_logs（kind=rest）
+    expect(mockStore['hf:eye_break_logs']).toHaveLength(1)
+    expect(mockStore['hf:eye_break_logs'][0].kind).toBe('rest')
+    expect(mockStore['hf:eye_break_last_rest']).toBeGreaterThan(0)
+    // 今日休息计数 +1
+    expect(wrapper.text()).toContain('1')
+  })
+
+  it('到点提醒：稍后五分钟记录 defer', async () => {
+    mockStore['hf:eye_shield_config'] = { eyeBreakMinutes: 20 }
+    mockStore['hf:eye_break_last_rest'] = Date.now() - 25 * 60_000
+    const wrapper = await getWrapper()
+    const deferBtn = wrapper.findAll('button.gsp-btn').find(b => b.text().includes('稍后'))!
+    await deferBtn.trigger('click')
+    expect(mockStore['hf:eye_break_logs']).toHaveLength(1)
+    expect(mockStore['hf:eye_break_logs'][0].kind).toBe('defer')
+    expect(wrapper.text()).toContain('稍后')
+  })
+
+  it('今日节律统计显示休息与稍后计数', async () => {
+    mockStore['hf:eye_shield_config'] = { eyeBreakMinutes: 20 }
+    const now = Date.now()
+    mockStore['hf:eye_break_logs'] = [
+      { id: 'eb1', at: now - 3_600_000, kind: 'rest' },
+      { id: 'eb2', at: now - 1_800_000, kind: 'defer' },
+      { id: 'eb3', at: now - 600_000, kind: 'rest' },
+    ]
+    const wrapper = await getWrapper()
+    const stats = wrapper.findAll('.gsp-stat')
+    expect(stats[0].text()).toContain('2')
+    expect(stats[0].text()).toContain('今日休息')
+    expect(stats[1].text()).toContain('1')
+    expect(stats[1].text()).toContain('稍后')
+    expect(stats[2].text()).toContain('上次休息')
   })
 })
