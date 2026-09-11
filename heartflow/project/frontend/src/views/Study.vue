@@ -56,6 +56,9 @@
     <!-- 笔记分析仪表盘（INCR-172：补挂载孤儿面板，引擎 note-analytics.ts 完备） -->
     <NoteAnalyticsPanel v-if="study.notes.value.length" :notes="study.notes.value" />
 
+    <!-- 知识图谱（note/knowledge-bridge 引擎：标签星座/枢纽/知识发现，INCR-230 薄委托化） -->
+    <KnowledgeGraphPanel v-if="study.notes.value.length" :notes="study.notes.value" />
+
     <!-- 书房气象档案（study/study-analytics 引擎：藏书概览/落字节奏/温故建议/书房健康/洞察，INCR-198） -->
     <StudyWeatherPanel />
 
@@ -272,6 +275,7 @@ import MindMapPanel from '../components/MindMapPanel.vue'
 import NoteSearchPanel from '../components/NoteSearchPanel.vue'
 import NoteAnalyticsPanel from '../components/NoteAnalyticsPanel.vue'
 import StudyWeatherPanel from '../components/StudyWeatherPanel.vue'
+import KnowledgeGraphPanel from '../components/KnowledgeGraphPanel.vue'
 import LettersPanel from '../components/LettersPanel.vue'
 import TapesPanel from '../components/TapesPanel.vue'
 import BacklinksPanel from '../components/BacklinksPanel.vue'

@@ -87,6 +87,15 @@ vi.mock('../../components/NoteAnalyticsPanel.vue', () => ({
   },
 }))
 
+// 知识图谱档案（INCR-230 薄委托化）：视图测试中以 stub 模拟（面板渲染由组件专项 Props 测试背书）
+vi.mock('../../components/KnowledgeGraphPanel.vue', () => ({
+  default: {
+    name: 'KnowledgeGraphPanel',
+    template: '<div class="kgp-stub" data-test="kgp">知识图谱</div>',
+    props: ['notes'],
+  },
+}))
+
 // 双向链接引擎（INCR-229 薄委托化）：视图测试 mock 链接数据，面板逻辑由组件专项测试背书
 const mockLinks: Record<string, { backlinks: any[]; outgoing: any[] }> = {}
 vi.mock('../../modules/study/note-links', () => ({
@@ -347,5 +356,27 @@ describe('Study 视图', () => {
     // 有链接时空态兜底文案消失
     expect(w.find('.recall-links-empty').exists()).toBe(false)
     w.unmount()
+  })
+
+  // ============================================================
+  // 知识图谱档案（INCR-230：薄委托化挂载 KnowledgeGraphPanel 至思绪书房）
+  // ============================================================
+
+  it('有笔记时渲染知识图谱面板', async () => {
+    mockNotes.value = [sampleNote({ id: 'note_seed', title: '种子笔记', tags: ['甲'] })]
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'KnowledgeGraphPanel' }).exists()).toBe(true)
+    expect(wrapper.find('.kgp-stub').exists()).toBe(true)
+  })
+
+  it('知识图谱面板接收宿主注入的笔记列表', async () => {
+    mockNotes.value = [
+      sampleNote({ id: 'n1', title: '甲', tags: ['甲'] }),
+      sampleNote({ id: 'n2', title: '乙', tags: ['甲'] }),
+    ]
+    const wrapper = await getWrapper()
+    const panel = wrapper.findComponent({ name: 'KnowledgeGraphPanel' })
+    expect(panel.props('notes').length).toBe(2)
+    expect(panel.props('notes')[0].tags).toContain('甲')
   })
 })
