@@ -455,3 +455,187 @@ describe('集成：空间编排面板', () => {
     expect(Object.keys(persisted[0].spaces).length).toBeGreaterThan(0)
   })
 })
+
+// ============================================================
+// 集成：空间路线谱面板 SpaceRouteArchivePanel（INCR-262 补挂载孤儿组件）
+// 引擎 useDynamicRoutes：hf_dynamic_routes 为空时自动自房间图初始化；
+// 可注入 hf_dynamic_routes / hf_route_events 种子验证路由构成与访问分析
+// ============================================================
+describe('集成：空间路线谱面板', () => {
+  const K_ROUTES = 'hf_dynamic_routes'
+  const K_EVENTS = 'hf_route_events'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  function makeRoute(name: string, overrides: Record<string, any> = {}) {
+    return {
+      path: '/' + name,
+      name,
+      source: 'static',
+      loadStrategy: 'lazy',
+      priority: 50,
+      enabled: true,
+      meta: {},
+      accessCount: 0,
+      ...overrides,
+    }
+  }
+
+  function seedRoutes(routes: Record<string, any>) {
+    mockStore[K_ROUTES] = routes
+  }
+
+  it('无种子数据时自房间图初始化并渲染骨架与统计', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.spr-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('空间 · 路线谱')
+    expect(wrapper.text()).toContain('基于空间模板与编排规则的路由构成与访问分析')
+    // 概览四格
+    const stats = wrapper.findAll('.spr-stat')
+    expect(stats.length).toBe(4)
+    expect(wrapper.text()).toContain('路线总数')
+    expect(wrapper.text()).toContain('启用中')
+    expect(wrapper.text()).toContain('累计访问')
+    expect(wrapper.text()).toContain('平均加载')
+    // 自动初始化后路线总数大于 0
+    const totalText = wrapper.findAll('.spr-stat-num')[0].text()
+    expect(Number(totalText)).toBeGreaterThan(0)
+    // 操作按钮
+    expect(wrapper.text()).toContain('同步房间布线')
+    expect(wrapper.text()).toContain('重置')
+  })
+
+  it('加载策略分布渲染四行且来源构成仅展示非零', async () => {
+    seedRoutes({
+      'a': makeRoute('a', { loadStrategy: 'eager' }),
+      'b': makeRoute('b', { loadStrategy: 'lazy' }),
+      'c': makeRoute('c', { loadStrategy: 'preload', source: 'plugin' }),
+    })
+    const wrapper = await getWrapper()
+    const rows = wrapper.findAll('.spr-strategy-row')
+    expect(rows.length).toBe(4)
+    expect(wrapper.text()).toContain('立即加载')
+    expect(wrapper.text()).toContain('按需加载')
+    expect(wrapper.text()).toContain('预加载')
+    expect(wrapper.text()).toContain('空闲加载')
+    // 静态 2 / 插件 1，动态、模板、用户为 0 不渲染 chip
+    const chips = wrapper.findAll('.spr-source-chip')
+    expect(chips.length).toBe(2)
+    expect(wrapper.text()).toContain('静态')
+    expect(wrapper.text()).toContain('插件')
+  })
+
+  it('无访问/耗时/事件数据时显示对应空态', async () => {
+    const wrapper = await getWrapper()
+    // 自动初始化后路由均无访问记录：最近/最慢/接入动态为空态
+    // （热门列表按访问次数降序仍会列出全 0 路由，故其空态分支不可达）
+    expect(wrapper.text()).toContain('暂无最近访问')
+    expect(wrapper.text()).toContain('暂无加载耗时数据')
+    expect(wrapper.text()).toContain('暂无接入动态')
+    const hotBlock = wrapper.findAll('.spr-grid .spr-block')[0]!
+    expect(hotBlock.findAll('.spr-row').length).toBeGreaterThan(0)
+  })
+
+  it('热门路线按访问次数降序展示排名与次数', async () => {
+    seedRoutes({
+      'hot-a': makeRoute('hot-a', { accessCount: 9 }),
+      'hot-b': makeRoute('hot-b', { accessCount: 3 }),
+      'cold': makeRoute('cold', { accessCount: 1 }),
+    })
+    const wrapper = await getWrapper()
+    const hotBlock = wrapper.findAll('.spr-grid .spr-block')[0]!
+    const names = hotBlock.findAll('.spr-row-name').map(n => n.text())
+    expect(names).toEqual(['hot-a', 'hot-b', 'cold'])
+    const ranks = hotBlock.findAll('.spr-rank').map(r => r.text())
+    expect(ranks).toEqual(['1', '2', '3'])
+    const vals = hotBlock.findAll('.spr-row-val').map(v => v.text())
+    expect(vals).toEqual(['9', '3', '1'])
+  })
+
+  it('最近访问按时间降序展示并格式化时间', async () => {
+    seedRoutes({
+      'older': makeRoute('older', { lastAccessedAt: '2026-09-10T08:00:00.000Z' }),
+      'newer': makeRoute('newer', { lastAccessedAt: '2026-09-11T09:30:00.000Z' }),
+      'never': makeRoute('never', {}),
+    })
+    const wrapper = await getWrapper()
+    const recentBlock = wrapper.findAll('.spr-grid .spr-block')[1]!
+    const names = recentBlock.findAll('.spr-row-name').map(n => n.text())
+    // never 无访问时间被过滤
+    expect(names).toEqual(['newer', 'older'])
+    // 时间格式化为 MM-DD HH:mm
+    const times = recentBlock.findAll('.spr-row-time').map(t => t.text())
+    expect(times).toHaveLength(2)
+    expect(times.every(t => /^\d{2}-\d{2} \d{2}:\d{2}$/.test(t))).toBe(true)
+  })
+
+  it('加载最慢按耗时降序展示', async () => {
+    seedRoutes({
+      'slow-a': makeRoute('slow-a', { avgLoadTimeMs: 800 }),
+      'slow-b': makeRoute('slow-b', { avgLoadTimeMs: 120 }),
+      'normal': makeRoute('normal', { avgLoadTimeMs: 45 }),
+    })
+    const wrapper = await getWrapper()
+    const slowBlock = wrapper.findAll('.spr-grid .spr-block')[2]!
+    const names = slowBlock.findAll('.spr-row-name').map(n => n.text())
+    expect(names).toEqual(['slow-a', 'slow-b', 'normal'])
+    const times = slowBlock.findAll('.spr-slow').map(t => t.text())
+    expect(times).toEqual(['800ms', '120ms', '45ms'])
+  })
+
+  it('接入动态渲染事件类型与成功标志', async () => {
+    seedRoutes({ 'room-a': makeRoute('room-a') })
+    mockStore[K_EVENTS] = [
+      { type: 'register', routeName: 'room-a', timestamp: '2026-09-11T00:00:00.000Z', source: 'static', success: true },
+      { type: 'update', routeName: 'room-a', timestamp: '2026-09-11T01:00:00.000Z', source: 'static', success: true },
+      { type: 'register', routeName: 'room-x', timestamp: '2026-09-11T02:00:00.000Z', source: 'dynamic', success: false, error: 'boom' },
+    ]
+    const wrapper = await getWrapper()
+    const events = wrapper.findAll('.spr-event')
+    expect(events.length).toBe(3)
+    expect(wrapper.text()).toContain('注册')
+    expect(wrapper.text()).toContain('更新')
+    expect(wrapper.text()).toContain('room-a')
+    expect(wrapper.text()).toContain('✓')
+    expect(wrapper.text()).toContain('✗')
+  })
+
+  it('点击同步房间布线保留房间既有配置并重建全量布线', async () => {
+    // 预置真实房间 home 的自定义配置 + 一条非房间自定义路由
+    seedRoutes({
+      'home': makeRoute('home', { source: 'user', accessCount: 42, loadStrategy: 'idle' }),
+      'custom': makeRoute('custom', { source: 'user' }),
+    })
+    const wrapper = await getWrapper()
+    // 配置非空不触发自动初始化，仅 2 条
+    expect(Object.keys(mockStore[K_ROUTES]).length).toBe(2)
+    const syncBtn = wrapper.find('.spr-btn')
+    await syncBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    const persisted = (mockStore[K_ROUTES] ?? {}) as Record<string, any>
+    // 真实房间的既有配置被保留（来源与访问数不变）
+    expect(persisted['home']).toBeDefined()
+    expect(persisted['home'].source).toBe('user')
+    expect(persisted['home'].accessCount).toBe(42)
+    // 非房间自定义路由被重建丢弃
+    expect(persisted['custom']).toBeUndefined()
+    // 重建后为全量房间布线
+    expect(Object.keys(persisted).length).toBeGreaterThan(2)
+  })
+
+  it('点击重置清空自定义路由并重建静态路由', async () => {
+    seedRoutes({ 'custom': makeRoute('custom', { source: 'user' }) })
+    const wrapper = await getWrapper()
+    const resetBtn = wrapper.find('.spr-btn--ghost')
+    await resetBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    const persisted = (mockStore[K_ROUTES] ?? {}) as Record<string, any>
+    expect(persisted['custom']).toBeUndefined()
+    expect(Object.keys(persisted).length).toBeGreaterThan(0)
+    const sources = Object.values(persisted).map((c: any) => c.source)
+    expect(sources.every(s => s === 'static')).toBe(true)
+  })
+})

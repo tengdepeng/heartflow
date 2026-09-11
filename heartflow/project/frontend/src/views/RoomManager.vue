@@ -29,6 +29,9 @@
 
     <!-- 空间编排（INCR-245 补挂载孤儿组件 SpaceOrchestrationPanel：总览/转换/依赖/快照，引擎 useSpaceOrchestrator 自初始化房间图、零 props 直驱） -->
     <SpaceOrchestrationPanel />
+
+    <!-- 空间路线谱（INCR-262 补挂载孤儿组件 SpaceRouteArchivePanel：路由构成与访问分析，引擎 useDynamicRoutes 自初始化静态路由、零 props 直驱） -->
+    <SpaceRouteArchivePanel />
   </div>
 </template>
 
@@ -38,6 +41,7 @@ import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
 import SpaceHealthPanel from '../components/SpaceHealthPanel.vue'
 import RoomTemplatesPanel from '../components/RoomTemplatesPanel.vue'
 import SpaceOrchestrationPanel from '../components/SpaceOrchestrationPanel.vue'
+import SpaceRouteArchivePanel from '../components/SpaceRouteArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 </script>
