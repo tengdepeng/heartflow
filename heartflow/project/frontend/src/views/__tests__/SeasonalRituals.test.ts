@@ -308,3 +308,62 @@ describe('蜕变光茧动画', () => {
     expect(document.querySelector('.cocoon-overlay')).toBeNull()
   })
 })
+
+// ============================================================
+// 集成：岁时气象面板 SeasonalHealthPanel（INCR-253 补挂载孤儿组件）
+// 消费 seasonal/seasonal-analytics 纯函数（seasonalOverview/seasonRows/
+// seasonHealth/seasonalInsights）由宿主注入 :rituals，无全局 store、无模块级 ref；
+// 空仪式 → 全 0 + 圆环 0，种子完成仪式(count>0, 今年内) → 得分>0 + 已拾起/覆盖季节上数 + 洞察。
+// ============================================================
+describe('集成：岁时气象面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:seasonal_rituals'] = []
+    mockStore['hf:rituals'] = []
+    mockStore['hf:life_rituals'] = []
+  })
+
+  it('空仪式下渲染岁岁气象面板（标题/三轴/五指标归零/四季分布/无数值洞察）', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.shp')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.shp-title').text()).toContain('岁时气象')
+    // 三轴（广度/深度/节律）
+    const axes = panel.findAll('.shp-axis')
+    expect(axes.length).toBe(3)
+    expect(panel.text()).toContain('广度')
+    expect(panel.text()).toContain('深度')
+    expect(panel.text()).toContain('节律')
+    // 五指标全 0
+    const metrics = panel.findAll('.shp-metric')
+    expect(metrics.length).toBe(5)
+    for (const m of metrics) expect(m.find('b').text()).toBe('0')
+    // 圆环得分 0/100，四季分布 4 行
+    expect(panel.find('.shp-ring-num').text()).toContain('0')
+    expect(panel.findAll('.shp-season').length).toBe(4)
+    // 空态仅一条温和提醒（无任何「已拾起」式统计洞察）
+    const insights = panel.findAll('.shp-insights li')
+    expect(insights.length).toBe(1)
+    expect(insights[0].text()).toContain('还没有仪式')
+  })
+
+  it('种子完成仪式后得分提升、已拾起/覆盖季节上数并给出洞察', async () => {
+    mockStore['hf:seasonal_rituals'] = [
+      { id: 'a', name: '夏至除湿', season: 'summer', description: '', tags: [], count: 2, lastCompletedAt: '2026-08-01T12:00:00.000Z', createdAt: '2024-01-01T00:00:00.000Z' } as any,
+      { id: 'b', name: '冬至进补', season: 'winter', description: '', tags: [], count: 1, lastCompletedAt: '2026-07-20T12:00:00.000Z', createdAt: '2024-01-01T00:00:00.000Z' } as any,
+    ]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    const panel = wrapper.find('.shp')
+    // 得分 > 0
+    const score = parseInt(panel.find('.shp-ring-num').text(), 10)
+    expect(score).toBeGreaterThan(0)
+    // 已拾起 = count>0 的仪式数 = 2；覆盖季节 = 2
+    const metrics = panel.findAll('.shp-metric')
+    expect(metrics[1].find('b').text()).toBe('2')
+    expect(metrics[3].find('b').text()).toBe('2')
+    // 洞察出现
+    expect(panel.find('.shp-insights').exists()).toBe(true)
+    expect(panel.text()).toContain('已拾起')
+  })
+})

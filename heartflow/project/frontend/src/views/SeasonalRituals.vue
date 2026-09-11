@@ -364,6 +364,11 @@
       :lifeRituals="prCtx.lifeRituals.value"
       :privateRituals="prCtx.rituals.value"
     />
+
+    <!-- 岁时气象（INCR-253 补挂载孤儿组件：seasonal/seasonal-analytics 岁时节气健康三轴圆环） -->
+    <SeasonalHealthPanel
+      :rituals="srCtx.rituals.value"
+    />
   </div>
 </template>
 
@@ -376,6 +381,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import JournalPanel from '../components/JournalPanel.vue'
 import SeasonalArchivePanel from '../components/SeasonalArchivePanel.vue'
 import SeasonalYearOverviewPanel from '../components/SeasonalYearOverviewPanel.vue'
+import SeasonalHealthPanel from '../components/SeasonalHealthPanel.vue'
 
 // ---- 模块化 composables ----
 const { entranceRef, entranceClass } = useViewEntrance()
