@@ -238,6 +238,14 @@ function generateId(prefix: string): string {
   return `${prefix}_${Date.now()}_${counter}`
 }
 
+/** 测试用：从 storage 重载模块级状态，避免跨用例污染 */
+export function _resetReadingModuleState() {
+  challenges.value = loadChallenges()
+  reviews.value = loadReviews()
+  readingNotes.value = loadNotes()
+  counter = 0
+}
+
 // ---- 阅读挑战 ----
 
 /**

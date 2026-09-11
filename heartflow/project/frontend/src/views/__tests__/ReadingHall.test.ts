@@ -3,6 +3,7 @@
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { _resetReadingModuleState } from '../../modules/reading/challenges'
 
 // ---- 模拟 storage ----
 const mockStore: Record<string, any> = {}
@@ -126,5 +127,113 @@ describe('ReadingHall 阅览殿', () => {
   it('集成渲染阅读总览仪表盘', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.find('reading-dashboard-panel-stub').exists()).toBe(true)
+  })
+
+  // ------- 集成：书评 · 笔记面板（INCR-239 补挂载孤儿组件）-------
+  it('挂载书评笔记面板 BookReviewsPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'BookReviewsPanel' }).exists()).toBe(true)
+  })
+})
+
+// ============================================================
+// 集成：书评 · 笔记面板 BookReviewsPanel（INCR-239 补挂载孤儿组件）
+// 引擎 useBookReviews/useReadingNotes 模块级 refs，测试用 _resetReadingModuleState 复位
+// ============================================================
+describe('集成：书评 · 笔记面板', () => {
+  const K_REV = 'hf:reading:reviews'
+  const K_NOTE = 'hf:reading:notes'
+
+  const REVIEW_A = {
+    id: 'r1', bookId: 'book_A', bookTitle: '活着', rating: 5, title: '读后随想', content: '非常震撼',
+    hasSpoiler: false, recommendationScore: 9, targetAudience: [], tags: ['小说'], readingTime: '2小时',
+    timestamp: '2026-09-10T00:00:00.000Z',
+  }
+  const REVIEW_B = {
+    id: 'r2', bookId: 'book_B', bookTitle: '平凡的世界', rating: 3, title: '还不够深', content: '现实主义',
+    hasSpoiler: false, recommendationScore: 6, targetAudience: [], tags: [], readingTime: '',
+    timestamp: '2026-09-09T00:00:00.000Z',
+  }
+  const NOTE_A = {
+    id: 'n1', bookId: 'book_A', content: '看到福贵的一生，想到平凡的价值', type: 'thought',
+    chapter: '第一章', page: 12, quoteId: undefined, relatedNoteIds: [], color: undefined,
+    timestamp: '2026-09-10T00:00:00.000Z',
+  }
+
+  function seed(opts: { reviews?: boolean; notes?: boolean } = {}) {
+    if (opts.reviews) mockStore[K_REV] = [REVIEW_A, REVIEW_B]
+    if (opts.notes) mockStore[K_NOTE] = [NOTE_A]
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+    _resetReadingModuleState()
+  })
+
+  async function getBrvWrapper() {
+    const { default: BookReviewsPanel } = await import('../../components/BookReviewsPanel.vue')
+    return mount(BookReviewsPanel, {
+      global: { stubs: { Teleport: true, Transition: true } },
+    })
+  }
+
+  it('无数据时渲染书评面板骨架与双标签', async () => {
+    const wrapper = await getBrvWrapper()
+    expect(wrapper.find('.brv').exists()).toBe(true)
+    expect(wrapper.text()).toContain('书评 · 笔记')
+    expect(wrapper.text()).toContain('0 条记录')
+    const tabs = wrapper.findAll('.brv-tab')
+    expect(tabs.length).toBe(2)
+    expect(tabs[0].text()).toContain('书评')
+    expect(tabs[1].text()).toContain('笔记')
+    expect(wrapper.text()).toContain('还没有书评')
+  })
+
+  it('种书评种子后展示统计、评分分布与书评列表', async () => {
+    seed({ reviews: true })
+    _resetReadingModuleState()
+    const wrapper = await getBrvWrapper()
+    expect(wrapper.text()).toContain('2 条记录')
+    expect(wrapper.text()).toContain('活着')
+    expect(wrapper.text()).toContain('平凡的世界')
+    expect(wrapper.text()).toContain('非常震撼')
+    const stats = wrapper.findAll('.brv-body')[0].findAll('.brv-stat')
+    expect(stats.length).toBe(3)
+    const distRows = wrapper.findAll('.brv-dist-row')
+    expect(distRows.length).toBe(5)
+  })
+
+  it('展开写书评表单并发布新增书评', async () => {
+    const wrapper = await getBrvWrapper()
+    await wrapper.find('.brv-toggle').trigger('click')
+    const inputs = wrapper.findAll('.brv-input')
+    await inputs[0].setValue('百年孤独')
+    await wrapper.find('.brv-textarea').setValue('魔幻现实主义的杰作')
+    await wrapper.find('form.brv-form').trigger('submit')
+    expect(wrapper.text()).toContain('百年孤独')
+    expect(wrapper.text()).toContain('1 条记录')
+  })
+
+  it('笔记标签展示笔记统计与类型分布', async () => {
+    seed({ reviews: true, notes: true })
+    _resetReadingModuleState()
+    const wrapper = await getBrvWrapper()
+    const tabs = wrapper.findAll('.brv-tab')
+    await tabs[1].trigger('click')
+    expect(wrapper.text()).toContain('3 条记录')
+    expect(wrapper.text()).toContain('笔记')
+    expect(wrapper.find('.brv-note').exists()).toBe(true)
+    expect(wrapper.text()).toContain('看到福贵的一生')
+    expect(wrapper.text()).toContain('思考')
+  })
+
+  it('删除书评后从列表消失', async () => {
+    seed({ reviews: true })
+    _resetReadingModuleState()
+    const wrapper = await getBrvWrapper()
+    expect(wrapper.findAll('.brv-review').length).toBe(2)
+    await wrapper.find('.brv-del').trigger('click')
+    expect(wrapper.findAll('.brv-review').length).toBe(1)
   })
 })

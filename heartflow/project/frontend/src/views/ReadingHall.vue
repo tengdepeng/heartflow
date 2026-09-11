@@ -158,6 +158,9 @@
     <!-- 阅读挑战面板（INCR-173：补挂载孤儿面板，reading·useReadingChallenges 完备） -->
     <ReadingChallengesPanel />
 
+    <!-- 书评 · 笔记面板（INCR-239：补挂载孤儿组件 BookReviewsPanel，reading·useBookReviews/useReadingNotes 完备） -->
+    <BookReviewsPanel />
+
     <!-- ========== 摘录对话框 ========== -->
     <div data-enter v-if="showDialog" class="rh-dialog-overlay" @click.self="closeDialog">
       <div class="rh-dialog-card">
@@ -189,6 +192,7 @@ import ReadingHabitsPanel from '../components/ReadingHabitsPanel.vue'
 import ReadingDashboardPanel from '../components/ReadingDashboardPanel.vue'
 import BookRecommendationsPanel from '../components/BookRecommendationsPanel.vue'
 import ReadingChallengesPanel from '../components/ReadingChallengesPanel.vue'
+import BookReviewsPanel from '../components/BookReviewsPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()
