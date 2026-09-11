@@ -513,3 +513,67 @@ describe('集成：情绪趋势深度分析面板', () => {
     expect(wrapper.text()).toContain('记录第一朵情绪之花')
   })
 })
+
+// ============================================================
+// 集成：访客足迹面板 VisitorFootprintsPanel（INCR-248 补挂载孤儿组件）
+// 引擎 useVisitorFootprints 为纯内存引擎（footprints 在每次 use 调用时初始化为空 ref，
+// 不读 storage、不持久化、无模块级 ref）——render 用例互不干扰，走 UI 交互流即可
+// ============================================================
+describe('集成：访客足迹面板', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRecords.value = []
+  })
+
+  it('集成渲染访客足迹面板骨架、标题与四项统计', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.vfp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🐾 访客足迹')
+    expect(wrapper.text()).toContain('访客 · 足迹 · 问候')
+    // 统计网格四项
+    const stats = wrapper.findAll('.vfp-stat')
+    expect(stats.length).toBe(4)
+    expect(wrapper.text()).toContain('访客')
+    expect(wrapper.text()).toContain('足迹')
+    expect(wrapper.text()).toContain('未回复')
+    expect(wrapper.text()).toContain('印记类型')
+  })
+
+  it('空态显示暂无访客足迹', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.vfp-empty').text()).toContain('暂无访客足迹')
+  })
+
+  it('添加访客足迹后出现足迹卡片与标签/留言', async () => {
+    const wrapper = await getWrapper()
+    const inputs = wrapper.findAll('.vfp-input')
+    await (inputs[0] as any).setValue('清风')
+    await (wrapper.findAll('.vfp-chip')[1] as any).trigger('click') // 💧 浇水
+    await (inputs[1] as any).setValue('路过，看见你的花开了')
+    await wrapper.find('.vfp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.vfp-item').length).toBe(1)
+    const item = wrapper.find('.vfp-item')
+    expect(item.find('.vfp-item-name').text()).toBe('清风')
+    expect(item.find('.vfp-tag').text()).toContain('浇水')
+    expect(item.find('.vfp-item-msg').text()).toContain('路过，看见你的花开了')
+    // 统计更新：足迹 1 / 未回复 1
+    expect(wrapper.text()).toContain('足迹')
+    expect(wrapper.find('.vfp-stat-value').exists()).toBe(true)
+  })
+
+  it('给访客回复后足迹卡片标记已回复并回显回复', async () => {
+    const wrapper = await getWrapper()
+    const inputs = wrapper.findAll('.vfp-input')
+    await (inputs[0] as any).setValue('青鸟')
+    await wrapper.find('.vfp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    // 未回复时显示回复输入区
+    expect(wrapper.find('.vfp-item .vfp-reply').exists()).toBe(true)
+    await (wrapper.find('.vfp-item .vfp-reply .vfp-input') as any).setValue('谢谢来访')
+    await wrapper.find('.vfp-item .vfp-reply .vfp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.vfp-item').classes()).toContain('replied')
+    expect(wrapper.text()).toContain('💬 回：谢谢来访')
+  })
+})

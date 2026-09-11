@@ -507,6 +507,9 @@
 
     <!-- 环境音景（emotion/flower-season 模块，INCR-181） -->
     <SoundscapePanel />
+
+    <!-- 访客足迹（INCR-248 补挂载孤儿组件 VisitorFootprintsPanel：访客对花朵的点赞/浇水/留言/礼物/欣赏与回访，引擎 useVisitorFootprints 唯一、零 props 直驱，同属 emotion/flower-season 域与音景/花园稳定共存） -->
+    <VisitorFootprintsPanel />
   </div>
 </template>
 
@@ -522,6 +525,7 @@ import GardenHealthPanel from '../components/GardenHealthPanel.vue'
 import HappyBoxPanel from '../components/HappyBoxPanel.vue'
 import SoundscapePanel from '../components/SoundscapePanel.vue'
 import EmotionTrendsPanel from '../components/EmotionTrendsPanel.vue'
+import VisitorFootprintsPanel from '../components/VisitorFootprintsPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'
