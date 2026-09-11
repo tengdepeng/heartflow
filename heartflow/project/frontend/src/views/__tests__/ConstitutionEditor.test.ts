@@ -6,6 +6,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { ref } from 'vue'
+import { invalidateCache } from '../../engine/storage/core'
 
 // ============================================================
 // 测试数据工厂
@@ -269,5 +270,209 @@ describe('ConstitutionEditor 宪法编辑器视图', () => {
 
     const textarea13 = wrapper.find('#article-13')
     expect((textarea13.element as HTMLTextAreaElement).value).toBe('自定义第13条描述')
+  })
+})
+
+// ============================================================
+// ClauseEditorPanel 立法厅 · 孤儿组件集成（INCR-258）
+// 消费 useClauseEditor（storage 读键 hf:constitution:*），无模块级 ref 污染。
+// 宿主宪法编辑器视图提供条款增删改 · 修订工作流 · 冲突检测的立法厅视角。
+// ============================================================
+describe('ClauseEditorPanel 立法厅集成', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockConstitution.mutableRules.value = createMockMutableRules(50)
+    // 真实 storage 走 localStorage，清空并失效缓存保证隔离
+    localStorage.clear()
+    invalidateCache()
+  })
+
+  // ------------------------------------------------------------------
+  // 1. 渲染立法厅骨架（标题/统计/系统条款/选项卡）
+  // ------------------------------------------------------------------
+  it('渲染立法厅面板骨架（标题/统计/系统条款/选项卡）', async () => {
+    const wrapper = await createWrapper()
+    const text = wrapper.text()
+
+    expect(text).toContain('立法厅 · 用户条款')
+    expect(text).toContain('条款总数')
+    // 空存储时初始化 5 条系统条款
+    expect(text).toContain('数据本地私有')
+    expect(text).toContain('心流第一')
+    // 选项卡
+    const tabs = wrapper.findAll('.cep-tab')
+    expect(tabs.map((t) => t.text())).toEqual(['条款', '修订', '冲突'])
+    // 统计：条款总数 5，用户条款 0
+    const statBlocks = wrapper.findAll('.cep-stat')
+    expect(statBlocks[0].find('.cep-stat-num').text()).toBe('5')
+    expect(statBlocks[1].find('.cep-stat-num').text()).toBe('0')
+  })
+
+  // ------------------------------------------------------------------
+  // 2. 新增用户条款后列表与统计更新
+  // ------------------------------------------------------------------
+  it('新增用户条款后列表与统计更新', async () => {
+    const wrapper = await createWrapper()
+
+    await wrapper.find('input[placeholder^="编号"]').setValue('6.1')
+    await wrapper.find('input[placeholder="条款标题"]').setValue('心流保护条款')
+    await wrapper.find('textarea[placeholder="条款正文…"]').setValue('系统须在用户专注时保持静默，减少打断')
+    await wrapper.find('.cep-add-form').trigger('submit')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('心流保护条款')
+    expect(wrapper.text()).toContain('第6.1条')
+    // 统计更新：条款总数 6，用户条款 1
+    const statBlocks = wrapper.findAll('.cep-stat')
+    expect(statBlocks[0].find('.cep-stat-num').text()).toBe('6')
+    expect(statBlocks[1].find('.cep-stat-num').text()).toBe('1')
+  })
+
+  // ------------------------------------------------------------------
+  // 3. 编辑用户条款并保存新内容
+  // ------------------------------------------------------------------
+  it('编辑用户条款并保存新内容', async () => {
+    const wrapper = await createWrapper()
+
+    await wrapper.find('input[placeholder^="编号"]').setValue('6.1')
+    await wrapper.find('input[placeholder="条款标题"]').setValue('心流保护条款')
+    await wrapper.find('textarea[placeholder="条款正文…"]').setValue('用户专注时段应减少通知')
+    await wrapper.find('.cep-add-form').trigger('submit')
+    await wrapper.vm.$nextTick()
+
+    const editBtn = wrapper.findAll('.cep-btn-sm').find((b) => b.text() === '编辑')
+    expect(editBtn).toBeTruthy()
+    await editBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('.cep-edit-form input').setValue('心流保护条款v2')
+    await wrapper.find('.cep-edit-form textarea').setValue('用户专注时段应完全静默')
+    await wrapper.findAll('.cep-btn-primary').find((b) => b.text() === '保存')!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('心流保护条款v2')
+    expect(wrapper.text()).toContain('用户专注时段应完全静默')
+  })
+
+  // ------------------------------------------------------------------
+  // 4. 废止用户条款
+  // ------------------------------------------------------------------
+  it('废止用户条款后状态变为已废止', async () => {
+    const wrapper = await createWrapper()
+
+    await wrapper.find('input[placeholder^="编号"]').setValue('6.1')
+    await wrapper.find('input[placeholder="条款标题"]').setValue('心流保护条款')
+    await wrapper.find('textarea[placeholder="条款正文…"]').setValue('用户专注时段应减少通知')
+    await wrapper.find('.cep-add-form').trigger('submit')
+    await wrapper.vm.$nextTick()
+
+    const repealBtn = wrapper.findAll('.cep-btn-warn').find((b) => b.text() === '废止')
+    expect(repealBtn).toBeTruthy()
+    await repealBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.cep-clause.is-repealed').exists()).toBe(true)
+    expect(wrapper.text()).toContain('已废止')
+  })
+
+  // ------------------------------------------------------------------
+  // 5. 修订工作流：创建→提交→通过→生效并应用变更
+  // ------------------------------------------------------------------
+  it('修订工作流：创建→提交→通过→生效并应用变更', async () => {
+    const wrapper = await createWrapper()
+
+    // 先新增一条用户条款作为修订对象
+    await wrapper.find('input[placeholder^="编号"]').setValue('6.1')
+    await wrapper.find('input[placeholder="条款标题"]').setValue('心流保护条款')
+    await wrapper.find('textarea[placeholder="条款正文…"]').setValue('用户专注时段应减少通知')
+    await wrapper.find('.cep-add-form').trigger('submit')
+    await wrapper.vm.$nextTick()
+
+    // 切到修订 tab，空态提示
+    await wrapper.findAll('.cep-tab').find((t) => t.text() === '修订')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('暂无修订案')
+
+    // 创建修订案（修改 6.1）
+    await wrapper.find('input[placeholder="修订案标题"]').setValue('强化心流保护')
+    await wrapper.find('textarea[placeholder="修订描述…"]').setValue('提高心流保护等级')
+    await wrapper.findAll('select')[0].setValue('6.1')
+    await wrapper.find('textarea[placeholder="新条款内容…"]').setValue('用户专注时段应完全静默且不可打断')
+    await wrapper.find('.cep-add-form').trigger('submit')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.text()).toContain('强化心流保护')
+    expect(wrapper.text()).toContain('草稿')
+
+    // 提交修订案
+    await wrapper.findAll('.cep-btn-sm').find((b) => b.text() === '提交')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('已提议')
+
+    // 通过（评审 + 批准）
+    await wrapper.findAll('.cep-btn-primary').find((b) => b.text() === '通过')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('已批准')
+
+    // 生效并应用变更
+    await wrapper.findAll('.cep-btn-primary').find((b) => b.text() === '生效')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('已生效')
+
+    // 切回条款 tab，验证条款内容已被修订
+    await wrapper.findAll('.cep-tab').find((t) => t.text() === '条款')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('用户专注时段应完全静默且不可打断')
+  })
+
+  // ------------------------------------------------------------------
+  // 6. 冲突检测：矛盾条款生成未决冲突并可标记解决
+  // ------------------------------------------------------------------
+  it('冲突检测：矛盾条款生成未决冲突并可标记解决', async () => {
+    const wrapper = await createWrapper()
+
+    // 条款 A：包含"必须"
+    await wrapper.find('input[placeholder^="编号"]').setValue('6.1')
+    await wrapper.find('input[placeholder="条款标题"]').setValue('强制备份')
+    await wrapper.find('textarea[placeholder="条款正文…"]').setValue('用户必须每日备份数据')
+    await wrapper.find('.cep-add-form').trigger('submit')
+    await wrapper.vm.$nextTick()
+
+    // 条款 B：包含"不应" → 与 A 构成矛盾
+    await wrapper.find('input[placeholder^="编号"]').setValue('6.2')
+    await wrapper.find('input[placeholder="条款标题"]').setValue('反对备份')
+    await wrapper.find('textarea[placeholder="条款正文…"]').setValue('任何人不应每日备份数据')
+    await wrapper.find('.cep-add-form').trigger('submit')
+    await wrapper.vm.$nextTick()
+
+    // 统计：未决冲突 = 1
+    const statBlocks = wrapper.findAll('.cep-stat')
+    expect(statBlocks[3].find('.cep-stat-num').text()).toBe('1')
+
+    // 切到冲突 tab
+    await wrapper.findAll('.cep-tab').find((t) => t.text() === '冲突')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.ct-contradiction').exists()).toBe(true)
+    expect(wrapper.text()).toContain('可能存在矛盾')
+
+    // 标记已解决
+    await wrapper.findAll('.cep-btn-primary').find((b) => b.text() === '标记已解决')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('暂无未决冲突')
+  })
+
+  // ------------------------------------------------------------------
+  // 7. 修订与冲突空状态提示
+  // ------------------------------------------------------------------
+  it('修订与冲突空状态提示', async () => {
+    const wrapper = await createWrapper()
+
+    await wrapper.findAll('.cep-tab').find((t) => t.text() === '修订')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('暂无修订案')
+
+    await wrapper.findAll('.cep-tab').find((t) => t.text() === '冲突')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('暂无未决冲突')
   })
 })

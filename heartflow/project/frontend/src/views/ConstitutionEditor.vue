@@ -120,6 +120,9 @@
       </p>
     </section>
 
+    <!-- 立法厅 · 用户条款（INCR-258 补挂载孤儿组件：条款增删改 · 修订工作流 · 冲突检测） -->
+    <ClauseEditorPanel />
+
     <!-- 底部保存栏 -->
     <footer data-enter class="ce-footer">
       <button
@@ -141,6 +144,7 @@ import { showToast } from '../modules/toast'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useConstitutionStore } from '../stores/constitution'
 import { ruleHasRuntimeEffect } from '../engine/constitution-effects'
+import ClauseEditorPanel from '../components/ClauseEditorPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useConstitutionStore()
