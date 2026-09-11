@@ -186,6 +186,9 @@
 
     <!-- 事件关联 -->
     <EventLinkagePanel :entries="allEntries" />
+
+    <!-- 叙事报告（INCR-255 补挂载孤儿组件：日·周·月·年叙事生成与导出） -->
+    <NarrativeReportPanel />
   </div>
 </template>
 
@@ -199,6 +202,7 @@ import type { IndexEntry } from '../modules/timeline-index'
 import AggregationPanel from '../components/AggregationPanel.vue'
 import FullTextSearchPanel from '../components/FullTextSearchPanel.vue'
 import EventLinkagePanel from '../components/EventLinkagePanel.vue'
+import NarrativeReportPanel from '../components/NarrativeReportPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
