@@ -23,6 +23,9 @@
 
     <!-- 空间健康（INCR-237 补挂载孤儿组件 SpaceHealthPanel：报告/问题/告警/趋势，引擎唯一、零 props 直驱） -->
     <SpaceHealthPanel />
+
+    <!-- 房间模板（INCR-238 补挂载孤儿组件 RoomTemplatesPanel：模板/布局/场景，引擎唯一、零 props 直驱） -->
+    <RoomTemplatesPanel />
   </div>
 </template>
 
@@ -30,6 +33,7 @@
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
 import SpaceHealthPanel from '../components/SpaceHealthPanel.vue'
+import RoomTemplatesPanel from '../components/RoomTemplatesPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 </script>

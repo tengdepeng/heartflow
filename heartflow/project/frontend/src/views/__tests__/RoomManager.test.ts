@@ -243,3 +243,119 @@ describe('集成：空间健康面板', () => {
     expect(wrapper.find('.shp-score-value').exists()).toBe(true)
   })
 })
+
+// ============================================================
+// 集成：房间模板面板 RoomTemplatesPanel（INCR-238 补挂载孤儿组件）
+// 引擎 useRoomTemplates 内部 ref 按调用自 storage 读，清存储即复位
+// ============================================================
+describe('集成：房间模板面板', () => {
+  const K_TEMPLATES = 'hf_space_templates'
+  const K_LAYOUTS = 'hf_room_layouts'
+  const K_SCENES = 'hf_space_scenes'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  function seed(opts: { templates?: boolean; scenes?: boolean } = {}) {
+    if (opts.templates) {
+      mockStore[K_TEMPLATES] = [
+        {
+          id: 'tpl-a',
+          name: '晚间专注',
+          description: '睡前复盘与明日规划',
+          icon: '🌙',
+          category: 'ritual',
+          builtIn: true,
+          useCount: 3,
+          roomIds: ['studio'],
+          tags: ['晚间', '复盘'],
+        },
+        {
+          id: 'tpl-b',
+          name: '晨间启动',
+          description: '清晨唤醒与目标设定',
+          icon: '☀️',
+          category: 'ritual',
+          builtIn: true,
+          useCount: 1,
+          roomIds: ['studio'],
+          tags: ['晨间', '目标'],
+        },
+      ]
+    }
+    if (opts.scenes) {
+      mockStore[K_SCENES] = [
+        {
+          id: 'scene-a',
+          name: '深夜书房',
+          description: '静谧阅读角落',
+          templateId: null,
+        },
+      ]
+    }
+  }
+
+  it('无数据时渲染房间模板骨架与三标签', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.rtp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('房间模板')
+    const tabs = wrapper.findAll('.rtp-tab')
+    expect(tabs.length).toBe(3)
+    expect(wrapper.text()).toContain('模板')
+    expect(wrapper.text()).toContain('布局')
+    expect(wrapper.text()).toContain('场景')
+  })
+
+  it('模板 tab 显示统计四格与模板列表', async () => {
+    seed({ templates: true })
+    const wrapper = await getWrapper()
+    const stats = wrapper.findAll('.rtp-stat-value')
+    expect(stats.length).toBe(4)
+    expect(wrapper.text()).toContain('总模板')
+    expect(wrapper.find('.rtp-tpl').exists()).toBe(true)
+    expect(wrapper.text()).toContain('晚间专注')
+  })
+
+  it('按关键词搜索过滤模板', async () => {
+    seed({ templates: true })
+    const wrapper = await getWrapper()
+    const search = wrapper.find('.rtp-input--grow')
+    await search.setValue('晨间')
+    await wrapper.vm.$nextTick()
+    const cards = wrapper.findAll('.rtp-tpl')
+    expect(cards.length).toBe(1)
+    expect(wrapper.text()).toContain('晨间启动')
+    expect(wrapper.text()).not.toContain('晚间专注')
+  })
+
+  it('布局 tab 展示已存布局', async () => {
+    mockStore[K_LAYOUTS] = [
+      {
+        layoutId: 'lay-a',
+        name: '三列网格',
+        type: 'grid',
+        columns: 3,
+        gap: 12,
+        cardSize: 'medium',
+      },
+    ]
+    const wrapper = await getWrapper()
+    const layoutTab = wrapper.findAll('.rtp-tab')[1]!
+    await layoutTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.rtp-layout').exists()).toBe(true)
+    expect(wrapper.text()).toContain('三列网格')
+  })
+
+  it('场景 tab 展示已存场景', async () => {
+    seed({ scenes: true })
+    const wrapper = await getWrapper()
+    const sceneTab = wrapper.findAll('.rtp-tab')[2]!
+    await sceneTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.rtp-scene').exists()).toBe(true)
+    expect(wrapper.text()).toContain('深夜书房')
+  })
+})
