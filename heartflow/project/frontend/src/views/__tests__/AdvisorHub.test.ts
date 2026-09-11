@@ -386,3 +386,51 @@ describe('AdvisorHub 视图（真实档案层）', () => {
     expect(wrapper.text()).toContain('源自镜我')
   })
 })
+
+// ============================================================
+// 集成：幕僚互动面板 AdvisorInteractionPanel（INCR-246 补挂载孤儿组件）
+// 引擎 useAdvisorInteraction 的 relations 为模块级 ref（import 时自 storage 读一次）——
+// 故本 describe 空态/渲染用例在 record 用例之前、record 用例置于最末，避免模块态污染
+// ============================================================
+describe('集成：幕僚互动面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAdvisors.length = 0
+    mockStore['hf:advisors'] = []
+  })
+
+  it('无幕僚时渲染互动面板骨架与空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.aip').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🤝 幕僚互动')
+    expect(wrapper.text()).toContain('幕僚之间的协作、互学与共处')
+    expect(wrapper.text()).toContain('先创建幕僚，才能记录他们之间的互动')
+  })
+
+  it('有幕僚无互动时展示录入区与"还没有关系"空态', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_i1', name: '墨染' }))
+    mockAdvisors.push(sampleProfile({ id: 'a_i2', name: '青鸟' }))
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('记录一次互动')
+    // aId/bId + 类型/结果 = 4 个选择器
+    expect(wrapper.findAll('.aip-select').length).toBe(4)
+    expect(wrapper.find('.aip-none').text()).toContain('还没有关系')
+  })
+
+  it('录入互动后出现关系卡片、亲密度条与互动计数', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_i1', name: '墨染' }))
+    mockAdvisors.push(sampleProfile({ id: 'a_i2', name: '青鸟' }))
+    const wrapper = await getWrapper()
+    const selects = wrapper.findAll('.aip-select')
+    await selects[0].setValue('a_i1')
+    await selects[1].setValue('a_i2')
+    await (wrapper.findAll('.aip-input')[1] as any).setValue('一起读书')
+    await wrapper.find('.aip-add-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.aip-rel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('墨染')
+    expect(wrapper.text()).toContain('青鸟')
+    expect(wrapper.find('.aip-closeness-bar').exists()).toBe(true)
+    expect(wrapper.text()).toContain('互动 1 次')
+  })
+})

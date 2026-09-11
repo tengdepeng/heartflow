@@ -144,6 +144,11 @@
       <p v-else class="ah-notes-empty">还没有笔记，点「+ 新建笔记」记录第一条。</p>
     </section>
 
+    <!-- 幕僚互动（INCR-246 补挂载孤儿组件 AdvisorInteractionPanel：幕僚↔幕僚关系/协作/互学/共处，引擎 useAdvisorInteraction 唯一、advisors props 薄委托注入） -->
+    <section data-enter class="ah-section">
+      <AdvisorInteractionPanel :advisors="advisors" />
+    </section>
+
     <div data-enter v-if="!advisors.length" class="ah-empty-hint"><span>🏛</span><p>幕僚大厅等待第一位居民</p></div>
 
     <!-- 编辑弹窗 -->
@@ -189,6 +194,7 @@ import { advisorCarrierStageOf, carrierGlyph, carrierIsImage } from '../types'
 import AdvisorScheduler from '../components/AdvisorScheduler.vue'
 import DialogueSessionList from '../components/DialogueSessionList.vue'
 import AdvisorCarrierEditor from '../components/AdvisorCarrierEditor.vue'
+import AdvisorInteractionPanel from '../components/AdvisorInteractionPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
 import { getNoteStore } from '../modules/note'
