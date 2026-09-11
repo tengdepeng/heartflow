@@ -172,6 +172,20 @@
       :cocoons="cocoonStore.cocoons.value"
     />
 
+    <!-- 蜕变光茧 + 季节日志（seasonal 薄委托面板：光茧阶段推进/年度回顾，INCR-235 补挂载孤儿组件） -->
+    <SeasonalDepthPanel
+      :cocoons="cocoonStore.cocoons.value"
+      :stats="cocoonStore.stats.value"
+      :journalEntries="journalStore.entries.value"
+      :yearReview="yearReview"
+      :season="currentSeason"
+      @advance="onCocoonAdvance"
+      @regress="onCocoonRegress"
+      @remove="onCocoonRemove"
+      @create="onCocoonCreate"
+      @journal="onJournalSubmit"
+    />
+
     <!-- 目标 · 成长状态机（goal/goal-state-machine 引擎：种子→发芽→生长→开花 生命周期/健康度/转换，INCR-212） -->
     <GoalGrowthStateMachinePanel />
   </div>
@@ -183,6 +197,8 @@ import { useGoal, DOMAIN_LABELS, STATUS_LABELS } from '../modules/goal'
 import { useGardenFlourish } from '../modules/garden'
 import { useCocoonStore } from '../modules/seasonal/cocoon-store'
 import { DRIVING_FORCE_LABELS, type DrivingForce } from '../modules/seasonal/cocoon'
+import { useJournalStore } from '../modules/seasonal/journal-store'
+import { generateYearReview, type Season, type SeasonalJournalEntry, type CocoonStage } from '../modules/seasonal'
 import { placeInUnfinishedGarden } from '../modules/unfinished'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import type { GoalStatus } from '../modules/goal'
@@ -192,6 +208,7 @@ import HabitReviewPanel from '../components/HabitReviewPanel.vue'
 import WishListPanel from '../components/WishListPanel.vue'
 import GrowthMeteorPanel from '../components/GrowthMeteorPanel.vue'
 import GoalGrowthStateMachinePanel from '../components/GoalGrowthStateMachinePanel.vue'
+import SeasonalDepthPanel from '../components/SeasonalDepthPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -199,6 +216,24 @@ const { entranceRef, entranceClass } = useViewEntrance()
 const goal = useGoal()
 const flourish = useGardenFlourish()
 const cocoonStore = useCocoonStore()
+const journalStore = useJournalStore()
+
+// ---- 蜕变光茧 + 季节日志（INCR-235）----
+const currentSeason = computed<Season>(() => {
+  const m = new Date().getMonth() + 1
+  if (m >= 3 && m <= 5) return 'spring'
+  if (m >= 6 && m <= 8) return 'summer'
+  if (m >= 9 && m <= 11) return 'autumn'
+  return 'winter'
+})
+const yearReview = computed(() =>
+  generateYearReview(new Date().getFullYear(), journalStore.entries.value, cocoonStore.cocoons.value, []),
+)
+function onCocoonAdvance(id: string, to: CocoonStage) { cocoonStore.advanceCocoon(id, to) }
+function onCocoonRegress(id: string) { cocoonStore.regressCocoon(id) }
+function onCocoonRemove(id: string) { cocoonStore.removeCocoon(id) }
+function onCocoonCreate(name: string, force: DrivingForce) { cocoonStore.createCocoon(name, currentSeason.value, undefined, undefined, undefined, force) }
+function onJournalSubmit(title: string, content: string, mood: SeasonalJournalEntry['mood']) { journalStore.createJournalEntry(title, content, mood, currentSeason.value) }
 
 const DOMAINS = ['work', 'growth', 'health', 'relation', 'wealth', 'play', 'other'] as const
 

@@ -33,6 +33,7 @@ vi.mock('../../composables/useViewEntrance', () => ({
 import { useGoal } from '../../modules/goal'
 import { useGardenFlourish } from '../../modules/garden'
 import { useCocoonStore } from '../../modules/seasonal/cocoon-store'
+import { useJournalStore } from '../../modules/seasonal/journal-store'
 
 async function getWrapper() {
   const { default: GrowthGarden } = await import('../GrowthGarden.vue')
@@ -157,6 +158,7 @@ describe('集成：目标成长状态机面板', () => {
     f.habits.value = []
     f.compass.value = []
     useCocoonStore().cocoons.value = []
+    useJournalStore().entries.value = []
     ;(window as any).confirm = vi.fn(() => true)
   })
 
@@ -185,5 +187,70 @@ describe('集成：目标成长状态机面板', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('可用转换')
     expect(wrapper.text()).toContain('健康度')
+  })
+})
+
+// =============================================================
+// 集成：蜕变光茧 + 季节日志面板（INCR-235：补挂载孤儿组件 SeasonalDepthPanel）
+// =============================================================
+
+describe('集成：蜕变光茧 + 季节日志面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(h.mockStore).forEach(k => delete h.mockStore[k])
+    if (typeof localStorage !== 'undefined') localStorage.clear()
+    useGoal().load()
+    const f = useGardenFlourish()
+    f.seeds.value = []
+    f.habits.value = []
+    f.compass.value = []
+    useCocoonStore().cocoons.value = []
+    useJournalStore().entries.value = []
+    ;(window as any).confirm = vi.fn(() => true)
+  })
+
+  it('渲染面板骨架与空态提示', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.sdp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('蜕变光茧')
+    expect(wrapper.text()).toContain('还没有光茧')
+  })
+
+  it('有光茧时渲染统计与光茧列表', async () => {
+    useCocoonStore().createCocoon('学会非线性代数')
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.sdp-stat').length).toBe(4)
+    expect(wrapper.text()).toContain('学会非线性代数')
+    expect(wrapper.text()).toContain('已化蝶')
+  })
+
+  it('通过表单孕育光茧并出现在列表', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.sdp-input').setValue('练习瑜伽')
+    await wrapper.find('.sdp-submit').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('练习瑜伽')
+    expect(wrapper.findAll('.sdp-cocoon').length).toBe(1)
+  })
+
+  it('可推进光茧阶段并回退', async () => {
+    useCocoonStore().createCocoon('进阶框架')
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.sdp-advance').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('破茧')
+  })
+
+  it('写入季节日志后显示在季节日志区块', async () => {
+    const wrapper = await getWrapper()
+    const inputs = wrapper.findAll('.sdp-input')
+    await inputs[1].setValue('秋日回顾')
+    await wrapper.find('.sdp-textarea').setValue('这个秋天收获颇多')
+    await wrapper.findAll('.sdp-submit')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('季节日志')
+    expect(wrapper.text()).toContain('秋日回顾')
   })
 })
