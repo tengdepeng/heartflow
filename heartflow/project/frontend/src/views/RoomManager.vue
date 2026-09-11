@@ -20,12 +20,16 @@
 
     <!-- 复用聚合面板（与殿堂设置内的「房间设置」同源，单一实现、两处入口） -->
     <RoomSettingsPanel />
+
+    <!-- 空间健康（INCR-237 补挂载孤儿组件 SpaceHealthPanel：报告/问题/告警/趋势，引擎唯一、零 props 直驱） -->
+    <SpaceHealthPanel />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
+import SpaceHealthPanel from '../components/SpaceHealthPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 </script>

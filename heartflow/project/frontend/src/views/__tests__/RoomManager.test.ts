@@ -115,3 +115,131 @@ describe('RoomManager 房间管理器', () => {
     expect(clearBtn.exists()).toBe(true)
   })
 })
+
+// ============================================================
+// 集成：空间健康面板 SpaceHealthPanel（INCR-237 补挂载孤儿组件）
+// 引擎 useSpaceHealth 内部 ref 按调用自 storage 读，清存储即复位
+// ============================================================
+describe('集成：空间健康面板', () => {
+  const K_REPORTS = 'hf_space_health_reports'
+  const K_ISSUES = 'hf_space_health_issues'
+  const K_ALERTS = 'hf_health_alerts'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  function seed(opts: { reports?: boolean; issues?: boolean; alerts?: boolean } = {}) {
+    if (opts.reports) {
+      mockStore[K_REPORTS] = {
+        'sanctuary': {
+          spaceId: 'sanctuary',
+          level: 'excellent',
+          score: 92,
+          metrics: [],
+          activeIssues: [],
+          reportedAt: '2026-09-11T00:00:00.000Z',
+        },
+        'craft': {
+          spaceId: 'craft',
+          level: 'poor',
+          score: 48,
+          metrics: [],
+          activeIssues: [],
+          reportedAt: '2026-09-11T00:00:00.000Z',
+        },
+      }
+    }
+    if (opts.issues) {
+      mockStore[K_ISSUES] = [
+        {
+          id: 'issue-1',
+          type: 'dependency',
+          severity: 'high',
+          description: '业脉缺少邻接依赖',
+          suggestion: '补全邻接关系',
+          detectedAt: '2026-09-11T00:00:00.000Z',
+          resolved: false,
+        },
+      ]
+    }
+    if (opts.alerts) {
+      mockStore[K_ALERTS] = [
+        {
+          id: 'alert-1',
+          level: 'warning',
+          title: '房间健康下降',
+          description: 'craft 房间健康分降至临界',
+          isRead: false,
+          isResolved: false,
+          createdAt: '2026-09-11T00:00:00.000Z',
+        },
+      ]
+    }
+  }
+
+  it('无报告时渲染空间健康空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.shp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('空间健康')
+    expect(wrapper.text()).toContain('尚未生成健康报告')
+    // 概览/报告/问题/告警 四标签
+    const tabs = wrapper.findAll('.shp-tab')
+    expect(tabs.length).toBe(4)
+    expect(wrapper.text()).toContain('生成全部报告')
+  })
+
+  it('有报告时概览显示平均分与空间数', async () => {
+    seed({ reports: true })
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.shp-score-value').text()).toBe('70')
+    expect(wrapper.text()).toContain('2 个空间')
+  })
+
+  it('报告 tab 列表展示各空间健康等级', async () => {
+    seed({ reports: true })
+    const wrapper = await getWrapper()
+    const reportTab = wrapper.findAll('.shp-tab')[1]!
+    await reportTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    const reports = wrapper.findAll('.shp-report')
+    expect(reports.length).toBe(2)
+    expect(wrapper.text()).toContain('sanctuary')
+    expect(wrapper.text()).toContain('craft')
+  })
+
+  it('问题 tab 展示活跃问题并可标记已解决', async () => {
+    seed({ issues: true })
+    const wrapper = await getWrapper()
+    const issueTab = wrapper.findAll('.shp-tab')[2]!
+    await issueTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.shp-issue').exists()).toBe(true)
+    expect(wrapper.text()).toContain('业脉缺少邻接依赖')
+    const resolveBtn = wrapper.find('.shp-btn--small')
+    await resolveBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 已解决后不再出现
+    expect(wrapper.find('.shp-issue').exists()).toBe(false)
+    expect(wrapper.text()).toContain('没有活跃问题')
+  })
+
+  it('告警 tab 展示未读告警并可标为已读', async () => {
+    seed({ alerts: true })
+    const wrapper = await getWrapper()
+    const alertTab = wrapper.findAll('.shp-tab')[3]!
+    await alertTab.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.shp-alert').exists()).toBe(true)
+    expect(wrapper.text()).toContain('房间健康下降')
+  })
+
+  it('点击生成全部报告后概览出现平均健康分', async () => {
+    const wrapper = await getWrapper()
+    const genBtn = wrapper.find('.shp-btn')
+    await genBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.shp-score-value').exists()).toBe(true)
+  })
+})
