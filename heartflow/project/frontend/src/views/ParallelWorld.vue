@@ -268,6 +268,16 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 世界对照（parallel-world·useWorldComparison，INCR-228 薄委托化） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <WorldComparisonPanel
+        :branches="parallelWorld.branches.value"
+        :checkpoints="parallelWorld.checkpoints.value"
+      />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 梦境碎片 -->
     <!-- ============================================================ -->
     <section data-enter class="pw-dream-section">
@@ -302,6 +312,7 @@ import BranchReplayPanel from '../components/BranchReplayPanel.vue'
 import BranchTimelinePanel from '../components/BranchTimelinePanel.vue'
 import BranchVisualizationPanel from '../components/BranchVisualizationPanel.vue'
 import SceneSyncPanel from '../components/SceneSyncPanel.vue'
+import WorldComparisonPanel from '../components/WorldComparisonPanel.vue'
 import { PARALLEL_WORLD_STORAGE_KEYS } from '../modules/parallel-world/types'
 import type { Checkpoint } from '../modules/parallel-world/types'
 

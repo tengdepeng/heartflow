@@ -185,4 +185,69 @@ describe('ParallelWorld 平行世界', () => {
     expect(panel.text()).toContain('最近同步')
     expect(panel.text()).toContain('完成')
   })
+
+  // ============================================================
+  // 批量收口：世界对照面板（INCR-228 薄委托化）
+  // ============================================================
+
+  const twoBranches = () => [
+    { id: 'pw_trunk', name: '主干', description: '', color: '#4A90D9', createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined, isActive: true, checkpointCount: 2 },
+    { id: 'pw_b', name: '抉择分支', description: '', color: '#2E8B57', createdAt: '2026-01-02T00:00:00.000Z', parentBranchId: 'pw_trunk', isActive: false, checkpointCount: 1 },
+  ]
+  const twoCheckpoints = () => [
+    { id: 'cp1', branchId: 'pw_trunk', label: '起点', description: '', snapshot: { a: 1 }, createdAt: '2026-01-01T00:00:00.000Z', tags: ['重要'] },
+    { id: 'cp2', branchId: 'pw_b', label: '另一种人生', description: '', snapshot: { c: 3 }, createdAt: '2026-01-03T00:00:00.000Z', tags: [] },
+  ]
+
+  it('集成渲染世界对照面板 WorldComparisonPanel', async () => {
+    const wrapper = await getWrapper()
+    await flushPromises()
+    expect(wrapper.findComponent({ name: 'WorldComparisonPanel' }).exists()).toBe(true)
+  })
+
+  it('世界对照面板：空 props 时展示空态引导', async () => {
+    const { default: WorldComparisonPanel } = await import('../../components/WorldComparisonPanel.vue')
+    const panel = mount(WorldComparisonPanel, {
+      props: { branches: [], checkpoints: [] },
+      attachTo: document.body,
+    })
+    await flushPromises()
+    expect(panel.text()).toContain('世界对照')
+    expect(panel.text()).toContain('至少需要两个时间分支才能对照')
+    panel.unmount()
+  })
+
+  it('世界对照面板：两个分支可对照并展示相似度', async () => {
+    const { default: WorldComparisonPanel } = await import('../../components/WorldComparisonPanel.vue')
+    const panel = mount(WorldComparisonPanel, {
+      props: { branches: twoBranches(), checkpoints: twoCheckpoints() },
+      attachTo: document.body,
+    })
+    await flushPromises()
+    // 两个下拉默认选中不同分支 → 对照按钮可用
+    expect(panel.findAll('select').length).toBe(2)
+    const compareBtn = panel.findAll('button').find(b => b.text().includes('对照'))
+    expect(compareBtn?.attributes('disabled')).toBeUndefined()
+
+    await compareBtn!.trigger('click')
+    await flushPromises()
+    expect(panel.text()).toContain('相似度')
+    panel.unmount()
+  })
+
+  it('世界对照面板：生成报告列出最相似与最分歧分支', async () => {
+    const { default: WorldComparisonPanel } = await import('../../components/WorldComparisonPanel.vue')
+    const panel = mount(WorldComparisonPanel, {
+      props: { branches: twoBranches(), checkpoints: twoCheckpoints() },
+      attachTo: document.body,
+    })
+    await flushPromises()
+    const reportBtn = panel.findAll('button').find(b => b.text().includes('生成报告'))
+    await reportBtn!.trigger('click')
+    await flushPromises()
+    expect(panel.text()).toContain('次对比')
+    expect(panel.text()).toContain('最相似')
+    expect(panel.text()).toContain('最分歧')
+    panel.unmount()
+  })
 })
