@@ -34,16 +34,21 @@
           />
         </div>
 
-    <header data-enter class="settings-header">
-      <div class="settings-ornament">
-        <span class="ornament-line"></span>
-        <span class="ornament-diamond">✦</span>
-        <span class="ornament-line"></span>
-      </div>
-      <p class="settings-kicker">CONTROL PANEL</p>
-      <h1>殿堂设置</h1>
-      <p class="settings-subtitle">自定义你的心流工坊环境与交互体验</p>
-    </header>
+    <RoomHeader
+      class="settings-room-header"
+      data-enter
+      kicker="CONTROL PANEL"
+      title="殿堂设置"
+      subtitle="自定义你的心流工坊环境与交互体验"
+    >
+      <template #ornament>
+        <div class="settings-ornament">
+          <span class="ornament-line"></span>
+          <span class="ornament-diamond">✦</span>
+          <span class="ornament-line"></span>
+        </div>
+      </template>
+    </RoomHeader>
 
     <div data-enter class="settings-section super-custom">
       <h2 class="section-title">超级自定义</h2>
@@ -700,6 +705,12 @@
 
       <!-- 数据整理（data:cleanup · 仅宪法显式启用后出现入口） -->
       <DataCleanupPanel />
+
+      <!-- 同步中心（INCR-251 补挂载孤儿组件：多端同步 · 冲突协调 · 快照备份） -->
+      <SyncCenterPanel />
+
+      <!-- A/B 测试（开发者工具，自包含，INCR-178） -->
+      <ABTestPanel />
     </div>
     </div>
     </div>
@@ -715,10 +726,13 @@ import { useBackgroundPreviewAudio, useBackgroundVideoSync, useVideoRateGuard } 
 import { useAstrolabeTheme, ASTROLABE_SCHEMES, ASTROLABE_SEARCH_STYLES } from '../modules/astrolabe/useAstrolabeTheme'
 import GestureConfigEditor from '../components/GestureConfigEditor.vue'
 import DataCleanupPanel from '../components/DataCleanupPanel.vue'
+import SyncCenterPanel from '../components/SyncCenterPanel.vue'
+import ABTestPanel from '../components/ABTestPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
 import IconPicker from '../components/IconPicker.vue'
 import DesktopIconWizard from '../components/DesktopIconWizard.vue'
+import RoomHeader from '../components/RoomHeader.vue'
 import { useConfigStore } from '../stores/config'
 import { useRoomTaxonomy } from '../modules/room-taxonomy'
 import type { GestureAction } from '../modules/gesture/contracts'
@@ -1233,11 +1247,20 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 /* =============================================
    Header — Ornament + Kicker
    ============================================= */
-.settings-header {
+.settings-room-header {
   position: relative;
   z-index: 1;
   margin-bottom: 40px;
   text-align: center;
+}
+.settings-room-header :deep(.rh-main) {
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.settings-room-header :deep(.rh-titles) {
+  align-items: center;
+  gap: 0;
 }
 
 .settings-ornament {
@@ -1270,7 +1293,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   100% { transform: rotate(360deg); }
 }
 
-.settings-kicker {
+.settings-room-header :deep(.rh-kicker) {
   font-size: 10px;
   letter-spacing: 0.35em;
   text-transform: uppercase;
@@ -1279,14 +1302,14 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   font-weight: 400;
 }
 
-.settings-header h1 {
+.settings-room-header :deep(.rh-title) {
   font-size: 22px;
   font-weight: 500;
   color: var(--text-primary, #e8e0d8);
   margin: 0;
 }
 
-.settings-subtitle {
+.settings-room-header :deep(.rh-subtitle) {
   font-size: 13px;
   color: var(--text-muted, var(--text-muted));
   margin-top: 6px;
@@ -2120,11 +2143,11 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
     padding: 24px 16px 64px;
   }
 
-  .settings-header {
+  .settings-room-header {
     margin-bottom: 28px;
   }
 
-  .settings-header h1 {
+  .settings-room-header :deep(.rh-title) {
     font-size: 20px;
   }
 
