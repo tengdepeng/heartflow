@@ -10,6 +10,7 @@ import {
 import { useAdaptiveQuality } from '../modules/adaptive'
 import type { SevenDimensionOutput, VizSubject } from '../modules/visualization'
 import TransformPipelinePanel from '../components/TransformPipelinePanel.vue'
+import VisualizationInteractionPanel from '../components/VisualizationInteractionPanel.vue'
 
 useViewEntrance()
 
@@ -143,6 +144,9 @@ onMounted(renderToCanvas)
 
     <!-- 数据变换流水线（datasource-connector 引擎：为视觉转译备好精炼数据集，INCR-226） -->
     <TransformPipelinePanel />
+
+    <!-- 可视化交互（INCR-252 补挂载孤儿组件：图表缩放/标注/断点 + 仪表盘布局控制） -->
+    <VisualizationInteractionPanel />
 
     <section class="studio-canvas-wrap">
       <canvas ref="canvasRef" class="studio-canvas" data-testid="studio-canvas"></canvas>

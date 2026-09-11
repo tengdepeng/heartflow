@@ -180,3 +180,57 @@ describe('集成：数据变换流水线面板（INCR-226：补挂载孤儿面�
     expect(wrapper.text()).toContain('管线为空')
   })
 })
+
+// ============================================================
+// 集成：可视化交互面板 VisualizationInteractionPanel（INCR-252 补挂载孤儿组件）
+// 引擎 useChartInteraction/useDashboardLayout 均为工厂函数（use 调用时自建本地 ref，
+// 纯内存、不读 storage、无模块级 ref）→ 无跨用例污染；按钮走 UI 交互流即可断言。
+// ============================================================
+describe('集成：可视化交互面板', () => {
+  it('渲染交互面板（标题/副题/两区块及统计与按钮）', () => {
+    const wrapper = mount(VisualizationStudio)
+    expect(wrapper.find('.vip-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('可视化交互')
+    expect(wrapper.text()).toContain('图表交互 · 可配置仪表盘布局')
+    const sections = wrapper.findAll('.vip-section')
+    expect(sections.length).toBe(2)
+    expect(sections[0].text()).toContain('图表交互')
+    expect(sections[1].text()).toContain('仪表盘布局')
+    expect(wrapper.text()).toContain('缩放')
+    expect(wrapper.text()).toContain('标注')
+    expect(wrapper.text()).toContain('面板')
+    expect(wrapper.text()).toContain('未修改')
+  })
+
+  it('图表交互区初始缩放为 1，点放大步进 0.1 变为 1.1', async () => {
+    const wrapper = mount(VisualizationStudio)
+    const chartSection = wrapper.findAll('.vip-section')[0]
+    expect(chartSection.find('.vip-stat').text()).toContain('缩放 1')
+    await chartSection.findAll('.vip-btn')[0].trigger('click') // 放大
+    expect(chartSection.find('.vip-stat').text()).toContain('缩放 1.1')
+  })
+
+  it('连续放大/缩小并复位视图回到缩放 1', async () => {
+    const wrapper = mount(VisualizationStudio)
+    const chartSection = wrapper.findAll('.vip-section')[0]
+    const btns = chartSection.findAll('.vip-btn')
+    await btns[0].trigger('click') // 放大 → 1.1
+    await btns[1].trigger('click') // 缩小 → 1.0
+    expect(chartSection.find('.vip-stat').text()).toContain('缩放 1')
+    await btns[0].trigger('click') // 放大 → 1.1
+    await btns[2].trigger('click') // 复位视图 → 1
+    expect(chartSection.find('.vip-stat').text()).toContain('缩放 1')
+  })
+
+  it('仪表盘布局区默认面板 0、未修改，布局与清空按钮可点不抛错', async () => {
+    const wrapper = mount(VisualizationStudio)
+    const layoutSection = wrapper.findAll('.vip-section')[1]
+    expect(layoutSection.text()).toContain('面板 0')
+    expect(layoutSection.text()).toContain('未修改')
+    const btns = layoutSection.findAll('.vip-btn')
+    expect(btns.length).toBe(2)
+    await btns[0].trigger('click') // 重置布局
+    await btns[1].trigger('click') // 清空面板
+    expect(wrapper.find('.vip-panel').exists()).toBe(true)
+  })
+})
