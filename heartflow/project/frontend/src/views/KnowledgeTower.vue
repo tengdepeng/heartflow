@@ -222,6 +222,9 @@
 
     <!-- 间隔复习 -->
     <FlashcardsPanel />
+
+    <!-- 版本留档（INCR-260 补挂载孤儿组件：节点快照 · 变更追踪 · 回滚预览） -->
+    <KnowledgeVersionPanel />
     </div>
   </div>
 </template>
@@ -254,6 +257,7 @@ import StewardPanel from '../components/knowledge-tower/StewardPanel.vue'
 import NodeEditModal from '../components/knowledge-tower/NodeEditModal.vue'
 import DecisionAnalysisPanel from '../components/DecisionAnalysisPanel.vue'
 import FlashcardsPanel from '../components/FlashcardsPanel.vue'
+import KnowledgeVersionPanel from '../components/knowledge-tower/KnowledgeVersionPanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
 import KnowledgeArchivePanel from '../components/KnowledgeArchivePanel.vue'
 

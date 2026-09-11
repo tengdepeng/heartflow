@@ -672,3 +672,161 @@ describe('KnowledgeTower 书架模式', () => {
     expect(wrapper.find('.kt-book').exists()).toBe(true)
   })
 })
+
+// ============================================================
+// 集成：版本留档面板 KnowledgeVersionPanel（INCR-260 补挂载孤儿组件）
+// 引擎 modules/knowledge 的 useVersionManager 为全库唯一消费方（经略阁已挂载
+// KnowledgeArchivePanel/StewardPanel/DecisionAnalysisPanel/FlashcardsPanel，
+// 但无「节点快照 · 变更追踪 · 回滚预览」版本留档视角，面板空态文案「先在经略阁
+// 添加节点」直接指宿主）；版本数据走 storage 键 hf:knowledge:versions（getKV/
+// setKV），useVersionManager 每次调用新建局部 ref → 无模块级污染；组件零 props、
+// 零 emits，onMounted 仅 loadVersions + 自动选中首个有留档节点。宿主 KnowledgeTower
+// 的 mount 为全量渲染（子面板真实挂载），此处直接在视图级断言面板行为。
+// ============================================================
+describe('KnowledgeTower 版本留档集成', () => {
+  const K_VERSIONS = 'hf:knowledge:versions'
+  const K_NODES = 'hf:knowledge_nodes'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore[K_NODES] = []
+    mockStore[K_VERSIONS] = []
+  })
+
+  afterEach(() => {
+    document.body.querySelectorAll('.kt-modal-overlay').forEach(el => el.remove())
+  })
+
+  function node(id: string, title: string, cat = 'concept') {
+    return { id, title, desc: '', cat, links: [], tags: [] }
+  }
+
+  function version(id: string, nodeId: string, v: number, overrides: Record<string, any> = {}) {
+    return {
+      id,
+      nodeId,
+      version: v,
+      title: `版本标题${v}`,
+      desc: `版本描述${v}`,
+      tags: ['标签A'],
+      category: 'concept',
+      changeType: 'update',
+      changeDescription: `更新说明${v}`,
+      changedAt: '2026-09-01T10:00:00.000Z',
+      ...overrides,
+    }
+  }
+
+  it('渲染版本留档面板骨架（标题/副题/统计/空态）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.kvp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('📜 版本留档')
+    expect(wrapper.text()).toContain('节点快照 · 变更追踪 · 回滚预览')
+    // 统计三块：总快照/留档节点/平均每节点
+    const stats = wrapper.findAll('.kvp-stat')
+    expect(stats.length).toBe(3)
+    expect(stats[0].text()).toContain('0')
+    expect(stats[0].text()).toContain('总快照')
+    // 无节点时显示空态
+    expect(wrapper.text()).toContain('还没有知识节点。先在经略阁添加节点')
+  })
+
+  it('有节点无留档时显示全部节点并可选中', async () => {
+    mockStore[K_NODES] = [node('kn1', '概念节点'), node('kn2', '法则节点')]
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.kvp-empty').exists()).toBe(false)
+    // 「全部节点」分组列出两个节点
+    const chips = wrapper.findAll('.kvp-chip')
+    expect(chips.length).toBe(2)
+    expect(chips[0].text()).toContain('概念节点')
+    // 选中节点后出现捕获快照按钮与子空态
+    await chips[0].trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('捕获快照')
+    expect(wrapper.text()).toContain('这个节点还没有留档')
+  })
+
+  it('捕获快照生成 v1 并写回存储', async () => {
+    mockStore[K_NODES] = [node('kn1', '概念节点')]
+    const wrapper = await getWrapper()
+    const chips = wrapper.findAll('.kvp-chip')
+    await chips[0].trigger('click')
+    await wrapper.vm.$nextTick()
+    const snapBtn = wrapper.findAll('button').find(b => b.text().includes('捕获快照'))
+    await snapBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 版本已写回存储
+    expect(mockStore[K_VERSIONS]).toHaveLength(1)
+    expect(mockStore[K_VERSIONS][0].nodeId).toBe('kn1')
+    expect(mockStore[K_VERSIONS][0].version).toBe(1)
+    expect(mockStore[K_VERSIONS][0].changeDescription).toBe('手动留档')
+    expect(wrapper.text()).toContain('已捕获 v1')
+    // 统计更新：总快照 1
+    expect(wrapper.findAll('.kvp-stat')[0].text()).toContain('1')
+  })
+
+  it('已有留档节点显示版本列表与差异对比', async () => {
+    mockStore[K_NODES] = [node('kn1', '概念节点')]
+    mockStore[K_VERSIONS] = [
+      version('ver-2', 'kn1', 2, { changeType: 'update', changeDescription: '第二次更新' }),
+      version('ver-1', 'kn1', 1, { changeType: 'create', changeDescription: '创建留档' }),
+    ]
+    const wrapper = await getWrapper()
+    // 自动选中首个有留档节点，展示版本条目
+    expect(wrapper.findAll('.kvp-version').length).toBe(2)
+    expect(wrapper.text()).toContain('v2')
+    expect(wrapper.text()).toContain('第二次更新')
+    expect(wrapper.text()).toContain('v1')
+    expect(wrapper.text()).toContain('创建留档')
+    // 「已有留档」分组带计数
+    const groupLabel = wrapper.findAll('.kvp-group-label').find(g => g.text().includes('已有留档'))
+    expect(groupLabel).toBeDefined()
+  })
+
+  it('展开版本显示快照详情与回滚按钮', async () => {
+    mockStore[K_NODES] = [node('kn1', '概念节点')]
+    mockStore[K_VERSIONS] = [version('ver-1', 'kn1', 1, { changeType: 'create' })]
+    const wrapper = await getWrapper()
+    const head = wrapper.find('.kvp-version-head')
+    await head.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 快照详情
+    expect(wrapper.find('.kvp-snapshot').exists()).toBe(true)
+    expect(wrapper.text()).toContain('版本标题1')
+    expect(wrapper.text()).toContain('版本描述1')
+    expect(wrapper.text()).toContain('标签A')
+    // 回滚按钮
+    expect(wrapper.text()).toContain('↩ 回滚到此版本')
+  })
+
+  it('回滚预览展示恢复内容并生成回滚记录', async () => {
+    mockStore[K_NODES] = [node('kn1', '概念节点')]
+    mockStore[K_VERSIONS] = [
+      version('ver-2', 'kn1', 2, { changeType: 'update' }),
+      version('ver-1', 'kn1', 1, { changeType: 'create', title: '旧版标题', desc: '旧版描述', tags: ['旧标签'] }),
+    ]
+    const wrapper = await getWrapper()
+    // 展开 v1（第二个版本条目）
+    const heads = wrapper.findAll('.kvp-version-head')
+    await heads[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    const rollbackBtn = wrapper.findAll('button').find(b => b.text().includes('回滚到此版本'))
+    await rollbackBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 回滚生成提示（回滚后列表折叠，恢复内容在存储侧生效）
+    expect(wrapper.text()).toContain('已回滚到 v1')
+    expect(wrapper.text()).toContain('并生成一条回滚记录')
+    // 生成回滚记录（major_update）
+    const versions = mockStore[K_VERSIONS]
+    expect(versions.length).toBe(3)
+    expect(versions[versions.length - 1].changeType).toBe('major_update')
+  })
+
+  it('节点无留档时「已有留档」分组不出现', async () => {
+    mockStore[K_NODES] = [node('kn1', '概念节点')]
+    const wrapper = await getWrapper()
+    const groupLabels = wrapper.findAll('.kvp-group-label').map(g => g.text())
+    expect(groupLabels).not.toContain('已有留档')
+    expect(groupLabels).toContain('全部节点')
+  })
+})
