@@ -4,6 +4,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref, computed, nextTick } from 'vue'
+import { storage } from '../../engine/storage'
 
 // ---- 模拟数据 ----
 const mockNotes = ref<NoteType[]>([])
@@ -210,8 +211,10 @@ describe('Study 视图', () => {
     if (vueChip.length > 0) {
       await vueChip[0].trigger('click')
       await nextTick()
-      expect(wrapper.text()).toContain('Vue 笔记')
-      expect(wrapper.text()).not.toContain('React 笔记')
+      // 书架作用域断言：匹配的笔记应显示、不匹配的应被过滤
+      const bookTitles = wrapper.findAll('.book-title').map(b => b.text())
+      expect(bookTitles).toContain('Vue 笔记')
+      expect(bookTitles).not.toContain('React 笔记')
     }
   })
 
@@ -378,5 +381,225 @@ describe('Study 视图', () => {
     const panel = wrapper.findComponent({ name: 'KnowledgeGraphPanel' })
     expect(panel.props('notes').length).toBe(2)
     expect(panel.props('notes')[0].tags).toContain('甲')
+  })
+
+  // ============================================================
+  // 版本历史面板（INCR-263：薄委托化挂载 VersionHistoryPanel 至思绪书房）
+  // 引擎 useVersionHistory 走真实 storage（hf:note_versions / hf:note_version_config）
+  // ============================================================
+
+  describe('集成：版本历史面板', () => {
+    const K_VERSIONS = 'hf:note_versions'
+    const K_CONFIG = 'hf:note_version_config'
+
+    function makeVersion(noteId: string, versionNumber: number, overrides: Record<string, any> = {}) {
+      return {
+        id: `ver_${noteId}_${versionNumber}`,
+        noteId,
+        versionNumber,
+        title: '测试笔记',
+        content: '初始内容',
+        tags: ['vue'],
+        createdAt: new Date(`2026-09-0${versionNumber}T08:00:00.000Z`).toISOString(),
+        description: versionNumber === 1 ? '初始版本' : `手动保存 (v${versionNumber})，变更 2 字符`,
+        autoSaved: false,
+        isMilestone: false,
+        changeSize: 4,
+        ...overrides,
+      }
+    }
+
+    function seedVersions(versions: any[]) {
+      storage.setKV(K_VERSIONS, versions)
+    }
+
+    beforeEach(() => {
+      storage.removeKV(K_VERSIONS)
+      storage.removeKV(K_CONFIG)
+    })
+
+    it('渲染骨架与概览统计', async () => {
+      mockNotes.value = [sampleNote()]
+      const wrapper = await getWrapper()
+      expect(wrapper.find('.vhp-panel').exists()).toBe(true)
+      expect(wrapper.text()).toContain('版本历史')
+      expect(wrapper.text()).toContain('自动保存 · 对比 · 恢复')
+      // 四格统计
+      const stats = wrapper.findAll('.vhp-stat')
+      expect(stats.length).toBe(4)
+      expect(wrapper.text()).toContain('总版本')
+      expect(wrapper.text()).toContain('有版本笔记')
+      expect(wrapper.text()).toContain('里程碑')
+      expect(wrapper.text()).toContain('总字符')
+      // 笔记选择器
+      expect(wrapper.find('.vhp-select').exists()).toBe(true)
+    })
+
+    it('无版本数据时统计为 0 且选择笔记显示空提示', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '未版本笔记' })]
+      const wrapper = await getWrapper()
+      const nums = wrapper.findAll('.vhp-stat-num').map(n => n.text())
+      expect(nums[0]).toBe('0')
+      expect(nums[1]).toBe('0')
+      expect(nums[2]).toBe('0')
+      // 选择笔记 → 无版本提示
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      expect(wrapper.text()).toContain('这篇笔记还没有版本')
+    })
+
+    it('种子版本按版本号渲染列表', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '版本笔记' })]
+      seedVersions([
+        makeVersion('note_1', 1),
+        makeVersion('note_1', 2, { content: '新增的一段内容', changeSize: 7 }),
+      ])
+      const wrapper = await getWrapper()
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      const versions = wrapper.findAll('.vhp-version')
+      expect(versions.length).toBe(2)
+      expect(wrapper.text()).toContain('v1')
+      expect(wrapper.text()).toContain('v2')
+      expect(wrapper.text()).toContain('初始版本')
+      expect(wrapper.text()).toContain('+7 字')
+    })
+
+    it('存为里程碑生成里程碑版本', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '里程碑笔记' })]
+      seedVersions([makeVersion('note_1', 1)])
+      const wrapper = await getWrapper()
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      // 填里程碑标签后点击「存为里程碑」
+      await wrapper.find('.vhp-input').setValue('首个版本')
+      await wrapper.find('.vhp-head-actions .vhp-btn').trigger('click')
+      await nextTick()
+      const persisted = (storage.getKV(K_VERSIONS, []) as any[])
+      expect(persisted.length).toBe(2)
+      const last = persisted[persisted.length - 1]
+      expect(last.isMilestone).toBe(true)
+      expect(last.milestoneLabel).toBe('首个版本')
+      // 列表渲染里程碑徽标
+      expect(wrapper.text()).toContain('★ 首个版本')
+    })
+
+    it('查看差异渲染相似度与变更行', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '差异笔记' })]
+      seedVersions([
+        makeVersion('note_1', 1, { content: '第一行\n第二行' }),
+        makeVersion('note_1', 2, { content: '第一行\n修改后的行' }),
+      ])
+      const wrapper = await getWrapper()
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      // 点击第二个版本的「查看差异」
+      const v2 = wrapper.findAll('.vhp-version')[1]!
+      const diffBtn = v2.findAll('button').find(b => b.text().includes('查看差异'))!
+      await diffBtn.trigger('click')
+      await nextTick()
+      expect(wrapper.find('.vhp-diff').exists()).toBe(true)
+      expect(wrapper.text()).toContain('相似度')
+      expect(wrapper.text()).toContain('变更 1 行')
+    })
+
+    it('恢复版本回写宿主更新笔记', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '恢复笔记' })]
+      seedVersions([
+        makeVersion('note_1', 1, { title: '旧标题', content: '旧内容', tags: ['old'] }),
+        makeVersion('note_1', 2, { title: '新标题', content: '新内容', tags: ['new'] }),
+      ])
+      const wrapper = await getWrapper()
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      const v1 = wrapper.findAll('.vhp-version')[0]!
+      const restoreBtn = v1.findAll('button').find(b => b.text().includes('恢复此版本'))!
+      await restoreBtn.trigger('click')
+      await nextTick()
+      expect(mockUpdate).toHaveBeenCalledWith(
+        'note_1',
+        expect.objectContaining({ title: '旧标题', content: '旧内容', tags: ['old'] }),
+      )
+    })
+
+    it('删除版本从存储移除', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '删除笔记' })]
+      seedVersions([
+        makeVersion('note_1', 1),
+        makeVersion('note_1', 2),
+      ])
+      const wrapper = await getWrapper()
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      const v1 = wrapper.findAll('.vhp-version')[0]!
+      const delBtn = v1.findAll('button').find(b => b.text().includes('删除'))!
+      await delBtn.trigger('click')
+      await nextTick()
+      const persisted = (storage.getKV(K_VERSIONS, []) as any[])
+      expect(persisted.length).toBe(1)
+      expect(persisted[0].versionNumber).toBe(2)
+    })
+
+    it('清空本笔记版本后显示空提示', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '清空笔记' })]
+      seedVersions([
+        makeVersion('note_1', 1),
+        makeVersion('note_1', 2),
+      ])
+      const wrapper = await getWrapper()
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      const clearBtn = wrapper.findAll('.vhp-head-actions .vhp-btn')[1]!
+      await clearBtn.trigger('click')
+      await nextTick()
+      expect((storage.getKV(K_VERSIONS, []) as any[]).length).toBe(0)
+      expect(wrapper.text()).toContain('这篇笔记还没有版本')
+    })
+
+    it('标记与取消里程碑', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '标记笔记' })]
+      seedVersions([makeVersion('note_1', 1)])
+      const wrapper = await getWrapper()
+      await wrapper.find('.vhp-select').setValue('note_1')
+      await nextTick()
+      // 标记里程碑
+      const v1 = wrapper.findAll('.vhp-version')[0]!
+      const markBtn = v1.findAll('button').find(b => b.text().includes('标记里程碑'))!
+      await markBtn.trigger('click')
+      await nextTick()
+      let persisted = (storage.getKV(K_VERSIONS, []) as any[])
+      expect(persisted[0].isMilestone).toBe(true)
+      // 里程碑徽标（标签沿用版本描述）
+      expect(wrapper.find('.vhp-badge').exists()).toBe(true)
+      expect(wrapper.text()).toContain('★ 初始版本')
+      // 取消里程碑
+      const unmarkBtn = wrapper.findAll('.vhp-version')[0]!.findAll('button').find(b => b.text().includes('取消里程碑'))!
+      await unmarkBtn.trigger('click')
+      await nextTick()
+      persisted = (storage.getKV(K_VERSIONS, []) as any[])
+      expect(persisted[0].isMilestone).toBe(false)
+    })
+
+    it('配置面板更新与恢复默认', async () => {
+      mockNotes.value = [sampleNote()]
+      const wrapper = await getWrapper()
+      // 展开配置
+      await wrapper.find('.vhp-config-toggle').trigger('click')
+      await nextTick()
+      expect(wrapper.find('.vhp-config-body').exists()).toBe(true)
+      // 修改每篇最大版本数 → 持久化
+      const maxInput = wrapper.findAll('.vhp-config-body input[type="number"]')[0]!
+      await maxInput.setValue('30')
+      await maxInput.trigger('change')
+      await nextTick()
+      const config = (storage.getKV(K_CONFIG, {}) as Record<string, any>)
+      expect(config.maxVersionsPerNote).toBe(30)
+      // 恢复默认设置
+      const resetBtn = wrapper.findAll('.vhp-btn').find(b => b.text().includes('恢复默认设置'))!
+      await resetBtn.trigger('click')
+      await nextTick()
+      const resetConfig = (storage.getKV(K_CONFIG, {}) as Record<string, any>)
+      expect(resetConfig.maxVersionsPerNote).toBe(50)
+    })
   })
 })

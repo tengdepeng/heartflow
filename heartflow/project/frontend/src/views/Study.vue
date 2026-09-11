@@ -59,6 +59,9 @@
     <!-- 知识图谱（note/knowledge-bridge 引擎：标签星座/枢纽/知识发现，INCR-230 薄委托化） -->
     <KnowledgeGraphPanel v-if="study.notes.value.length" :notes="study.notes.value" />
 
+    <!-- 版本历史（note/version-history 引擎：自动保存/对比/恢复/清理，INCR-263 补挂载孤儿组件，薄委托化：宿主注入笔记、restore 回写） -->
+    <VersionHistoryPanel :notes="study.notes.value" @restore="onRestoreVersion" />
+
     <!-- 书房气象档案（study/study-analytics 引擎：藏书概览/落字节奏/温故建议/书房健康/洞察，INCR-198） -->
     <StudyWeatherPanel />
 
@@ -279,6 +282,7 @@ import KnowledgeGraphPanel from '../components/KnowledgeGraphPanel.vue'
 import LettersPanel from '../components/LettersPanel.vue'
 import TapesPanel from '../components/TapesPanel.vue'
 import BacklinksPanel from '../components/BacklinksPanel.vue'
+import VersionHistoryPanel from '../components/VersionHistoryPanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
@@ -476,6 +480,13 @@ function handleSave(data: { title: string; content: string; tags: string[]; isAt
     study.create(data.title, data.content, data.tags, data.isAtomic)
   }
   onEditorClose()
+}
+
+// 版本历史恢复回写：将快照写入目标笔记（保留原子笔记标记，INCR-263）
+function onRestoreVersion(payload: { noteId: string; snapshot: { title: string; content: string; tags: string[] } }) {
+  const target = study.notes.value.find(n => n.id === payload.noteId)
+  if (!target) return
+  study.update(payload.noteId, { ...payload.snapshot, isAtomic: target.isAtomic })
 }
 
 function onEditorClose() {
