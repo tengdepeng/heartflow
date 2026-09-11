@@ -217,4 +217,46 @@ describe('AllSelvesMirror 万镜之厅视图', () => {
     const particles = wrapper.findAll('.asm-mp')
     expect(particles.length).toBe(60)
   })
+
+  // ============================================================
+  // 集成：对话主题洞察面板 TopicClusteringPanel（INCR-234 补挂载孤儿组件）
+  // 面板消费真实 useTopicClustering 纯计算引擎，经 storage 喂 SelfTalk
+  // ============================================================
+  describe('集成：对话主题洞察面板', () => {
+    it('无对话时渲染面板骨架与空态引导', async () => {
+      mockStore['hf:self_talks_v2'] = []
+      const wrapper = await createWrapper()
+      expect(wrapper.find('.tcl-panel').exists()).toBe(true)
+      expect(wrapper.text()).toContain('对话主题洞察')
+      expect(wrapper.text()).toContain('还没有足够的自我对话')
+    })
+
+    it('有共享关键词的对话时聚出主题卡片与高频关键词', async () => {
+      mockStore['hf:self_talks_v2'] = [
+        { id: 't1', text: '阅读能带来平静的夜晚', at: new Date().toISOString() },
+        { id: 't2', text: '阅读完把体悟写进日记', at: new Date().toISOString() },
+        { id: 't3', text: '保持每晚阅读的好习惯', at: new Date().toISOString() },
+      ]
+      const wrapper = await createWrapper()
+      expect(wrapper.find('.tcl-card').exists()).toBe(true)
+      expect(wrapper.text()).toContain('阅读')
+      const statNum = wrapper.find('.tcl-stat-value')
+      expect(statNum.exists()).toBe(true)
+      expect(parseInt(statNum.text(), 10)).toBeGreaterThan(0)
+    })
+
+    it('关键词搜索命中主题并显示相关度', async () => {
+      mockStore['hf:self_talks_v2'] = [
+        { id: 't1', text: '阅读让我专注平静', at: new Date().toISOString() },
+        { id: 't2', text: '专注很难，但阅读是捷径', at: new Date().toISOString() },
+        { id: 't3', text: '每天阅读保持专注', at: new Date().toISOString() },
+      ]
+      const wrapper = await createWrapper()
+      const input = wrapper.find('.tcl-input')
+      await input.setValue('阅读')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('.tcl-results').exists()).toBe(true)
+      expect(wrapper.text()).toContain('相关度')
+    })
+  })
 })

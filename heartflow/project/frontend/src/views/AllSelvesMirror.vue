@@ -158,6 +158,9 @@
     <!-- 自我对话档案（INCR-08·镜我：数据背书分析引擎，薄委托层） -->
     <SelfTalkArchivePanel :talks="talks" />
 
+    <!-- 对话主题洞察（INCR-234 补挂载孤儿组件 TopicClusteringPanel：纯 props 驱动，同源 talks 注入） -->
+    <TopicClusteringPanel :talks="talks" />
+
     <p class="asm-quote">"我看到了。我接受了。这些全都是我。"</p>
   </div>
 </template>
@@ -171,6 +174,7 @@ import { useStatsStore } from '../stores'
 import { useSelfTalks } from '../modules/self'
 import MirrorSceneCards from '../components/MirrorSceneCards.vue'
 import SelfTalkArchivePanel from '../components/SelfTalkArchivePanel.vue'
+import TopicClusteringPanel from '../components/TopicClusteringPanel.vue'
 import { useTimer } from '../resonance/bridges/timer'
 import { getIntentRoute, isDirectAction } from '../modules/mirror/intent-launch'
 import { useMirrorToolCards, type MirrorToolCard } from '../modules/mirror'
