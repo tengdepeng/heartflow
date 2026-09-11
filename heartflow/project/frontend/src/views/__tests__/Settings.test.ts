@@ -10,6 +10,8 @@ vi.mock('vue-router', () => ({
 
 import Settings from '../Settings.vue'
 import SyncCenterPanel from '../../components/SyncCenterPanel.vue'
+import LanguageSettingsPanel from '../../components/LanguageSettingsPanel.vue'
+import { setLocale } from '../../modules/i18n'
 
 beforeEach(() => {
   setActivePinia(createPinia())
@@ -153,5 +155,93 @@ describe('集成：同步中心面板', () => {
     await tabs[1].trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).toContain('无冲突记录')
+  })
+})
+
+// ============================================================
+// 集成：语言设置面板 LanguageSettingsPanel（INCR-259 补挂载孤儿组件）
+// 引擎 modules/i18n 的 useI18n 为全库唯一消费方（无任何视图接入语言切换），
+// 挂载前该能力完全断开；注意 i18n 引擎 currentLocale 为**模块级 ref**
+// （初始化读 storage.getConfig().locale），跨用例会残留，故 beforeEach 经
+// setLocale('zh-CN') 重置并写回 mock 存储。面板在 Settings 中 shallowMount
+// 系被 stub，故此处直接 mount 面板本体以覆盖渲染/切换/持久化/覆盖统计。
+// ============================================================
+describe('集成：语言设置面板', () => {
+  let storage: any
+
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    ;(globalThis as any).localStorage = createMockStorage()
+    const { invalidateCache } = await import('../../engine/storage/core')
+    invalidateCache()
+    storage = (await import('../../engine/storage/index')).storage
+    // 重置 i18n 模块级 currentLocale，防跨用例残留
+    setLocale('zh-CN')
+  })
+
+  it('渲染语言设置面板骨架（标题/副题/三语言卡片/预览/覆盖）', () => {
+    const wrapper = mount(LanguageSettingsPanel)
+    const panel = wrapper.find('.lsp-panel')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('语言设置')
+    expect(wrapper.text()).toContain('界面语言 · 翻译状态')
+    expect(panel.findAll('.lsp-card').length).toBe(3)
+    expect(wrapper.text()).toContain('中文')
+    expect(wrapper.text()).toContain('English')
+    expect(wrapper.text()).toContain('日本語')
+    expect(wrapper.text()).toContain('翻译预览')
+    expect(wrapper.text()).toContain('翻译覆盖')
+  })
+
+  it('默认中文激活且预览显示中文翻译', () => {
+    const wrapper = mount(LanguageSettingsPanel)
+    const active = wrapper.findAll('.lsp-card--active')
+    expect(active.length).toBe(1)
+    expect(active[0].text()).toContain('中文')
+    expect(active[0].text()).toContain('当前')
+    // 预览样本为中文
+    expect(wrapper.text()).toContain('思绪书房')
+    expect(wrapper.text()).toContain('5分钟前')
+  })
+
+  it('点击 English 切换激活并持久化 locale', async () => {
+    const wrapper = mount(LanguageSettingsPanel)
+    const enCard = wrapper.findAll('.lsp-card').find((c) => c.text().includes('English'))!
+    await enCard.trigger('click')
+    await wrapper.vm.$nextTick()
+    const active = wrapper.findAll('.lsp-card--active')
+    expect(active.length).toBe(1)
+    expect(active[0].text()).toContain('English')
+    // 预览切换为英文
+    expect(wrapper.text()).toContain('Study')
+    expect(wrapper.text()).toContain('5 min ago')
+    // 持久化到 config
+    expect(storage.getConfig().locale).toBe('en')
+  })
+
+  it('点击日本語 切换激活并持久化 locale', async () => {
+    const wrapper = mount(LanguageSettingsPanel)
+    const jaCard = wrapper.findAll('.lsp-card').find((c) => c.text().includes('日本語'))!
+    await jaCard.trigger('click')
+    await wrapper.vm.$nextTick()
+    const active = wrapper.findAll('.lsp-card--active')
+    expect(active.length).toBe(1)
+    expect(active[0].text()).toContain('日本語')
+    // 预览切换为日文
+    expect(wrapper.text()).toContain('思索の書斎')
+    expect(wrapper.text()).toContain('5分前')
+    expect(storage.getConfig().locale).toBe('ja')
+  })
+
+  it('翻译覆盖展示各语言覆盖率（中文 100%）', () => {
+    const wrapper = mount(LanguageSettingsPanel)
+    const rows = wrapper.findAll('.lsp-cov-row')
+    expect(rows.length).toBe(3)
+    // 中文（zh-CN）覆盖条满格
+    expect(rows[0].find('.lsp-cov-fill').attributes('style')).toContain('width: 100%')
+    // 每行有 X/total 计数
+    rows.forEach((row) => {
+      expect(row.find('.lsp-cov-n').text()).toMatch(/\d+\/\d+/)
+    })
   })
 })

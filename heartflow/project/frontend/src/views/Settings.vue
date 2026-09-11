@@ -711,6 +711,9 @@
 
       <!-- A/B 测试（开发者工具，自包含，INCR-178） -->
       <ABTestPanel />
+
+      <!-- 语言设置（INCR-259 补挂载孤儿组件：界面语言 · 翻译状态） -->
+      <LanguageSettingsPanel />
     </div>
     </div>
     </div>
@@ -730,6 +733,7 @@ import SyncCenterPanel from '../components/SyncCenterPanel.vue'
 import ABTestPanel from '../components/ABTestPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
+import LanguageSettingsPanel from '../components/LanguageSettingsPanel.vue'
 import IconPicker from '../components/IconPicker.vue'
 import DesktopIconWizard from '../components/DesktopIconWizard.vue'
 import RoomHeader from '../components/RoomHeader.vue'
