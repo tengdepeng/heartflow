@@ -369,3 +369,80 @@ describe('集成：指标趋势档案', () => {
     expect(labels.some((t) => t.includes('运动'))).toBe(true)
   })
 })
+
+// =============================================================
+// 集成：经书注解（INCR-249：补挂载孤儿面板 SutraAnnotationPanel）
+// 引擎 useSutraAnnotations 为 storage 读取/保存的本地 ref，每次 use 独立实例、
+// 无模块级污染；storage.getKV 对注解键回退空数组，故渲染用例互不干扰，走 UI 交互流
+// =============================================================
+
+describe('集成：经书注解', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBodyLogs.value = []
+    mockMeridianLogs.value = []
+    mockWisdomLogs.value = []
+    mockReadingLogs.value = []
+  })
+
+  async function openSutraTab() {
+    const wrapper = await getWrapper()
+    await wrapper.findAll('.bw-tab')[2].trigger('click')
+    await wrapper.vm.$nextTick()
+    return wrapper
+  }
+
+  it('切到护持层渲染经书注解面板骨架、标题与统计', async () => {
+    const wrapper = await openSutraTab()
+    expect(wrapper.find('.sap-panel').exists()).toBe(true)
+    expect(wrapper.text()).toContain('经书注解')
+    expect(wrapper.text()).toContain('注解统计')
+    expect(wrapper.text()).toContain('冥想引导')
+    expect(wrapper.find('.sap-save').exists()).toBe(true)
+  })
+
+  it('空态显示暂无注解', async () => {
+    const wrapper = await openSutraTab()
+    expect(wrapper.find('.sap-empty').text()).toContain('暂无注解')
+  })
+
+  it('添加注解后出现注解卡片、统计更新并可消化', async () => {
+    const wrapper = await openSutraTab()
+    await wrapper.find('.sap-input[aria-label="注解位置"]').setValue('第一章·第二段')
+    const textarea = wrapper.find('.sap-textarea')
+    await textarea.setValue('学而时习之，不亦说乎。')
+    await wrapper.find('.sap-save').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.sap-ann').length).toBe(1)
+    expect(wrapper.text()).toContain('学而时习之，不亦说乎。')
+    expect(wrapper.text()).toContain('第一章·第二段')
+    // 统计更新：总注解 1
+    expect(wrapper.find('.sap-cell b').text()).toBe('1')
+  })
+
+  it('消化注解后可标记已消化', async () => {
+    const wrapper = await openSutraTab()
+    await wrapper.find('.sap-textarea').setValue('温故而知新。')
+    await wrapper.find('.sap-save').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.sap-digest').exists()).toBe(true)
+    await wrapper.find('.sap-digest').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.sap-ann--digested').exists()).toBe(true)
+    expect(wrapper.text()).toContain('已消化')
+  })
+
+  it('创建冥想引导后展示引导卡片与步骤', async () => {
+    const wrapper = await openSutraTab()
+    // 引导区块内的输入
+    const guides = wrapper.findAll('.sap-block')
+    const guideBlock = guides[guides.length - 1]
+    await guideBlock.find('.sap-input--wide').setValue('静坐观息引导')
+    // 默认已有 1 步，给默认步骤填指令
+    await guideBlock.find('.sap-step .sap-input--wide').setValue('自然呼吸，观照鼻端')
+    await guideBlock.find('.sap-save').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.sap-guide').length).toBe(1)
+    expect(wrapper.text()).toContain('静坐观息引导')
+  })
+})

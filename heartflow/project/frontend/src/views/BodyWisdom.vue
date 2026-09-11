@@ -176,6 +176,9 @@
         <div v-for="(n,i) in sutraNotes.slice(0,5)" :key="i" class="bw-note-item">{{n}}</div>
       </section>
       <button class="bw-note-btn" @click="openNote('sutra')">✎ 记一笔</button>
+      <!-- 经书注解（body-wisdom/five-movements 模块，INCR-249 补挂载孤儿组件 SutraAnnotationPanel：
+           零 props 自包含，引擎 useSutraAnnotations 视图层唯一，在护持层补齐注解/消化/冥想引导 -->
+      <SutraAnnotationPanel />
     </div>
 
     <!-- ===== 笔记弹窗 ===== -->
@@ -207,6 +210,7 @@ import MeridianVisualizationPanel from '../components/MeridianVisualizationPanel
 import HealthAnalysisPanel from '../components/HealthAnalysisPanel.vue'
 import TcmPanel from '../components/TcmPanel.vue'
 import MetricTrendsPanel from '../components/MetricTrendsPanel.vue'
+import SutraAnnotationPanel from '../components/SutraAnnotationPanel.vue'
 import { MERIDIAN_HOURS } from '../modules/body-wisdom'
 import type { MeridianRecord, MoodRecord } from '../modules/body-wisdom'
 
