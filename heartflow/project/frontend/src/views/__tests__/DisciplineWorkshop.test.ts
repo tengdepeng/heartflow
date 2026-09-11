@@ -33,6 +33,7 @@ const mockGenerateSuggestions = vi.fn<() => Array<{ id: string; name: string; re
 const mockAdoptSuggestion = vi.fn()
 const mockBundles = ref<any[]>([])
 const mockCreateBundleFromPreset = vi.fn()
+const mockCreateChallenge = vi.fn()
 vi.mock('../../modules/discipline/workshop-bridge', () => ({
   useDisciplineBridge: () => ({
     init: vi.fn(),
@@ -59,6 +60,7 @@ vi.mock('../../modules/discipline/workshop-bridge', () => ({
     completeHabit: vi.fn(),
     createHabitFromTemplate: vi.fn(),
     createChallengeFromTemplate: vi.fn(),
+    createChallenge: mockCreateChallenge,
   }),
   getHabitTemplatesByCategory: () => [],
   getChallengeTemplatesByDifficulty: () => [],
@@ -268,5 +270,84 @@ describe('集成：习惯组合与健康度预测面板', () => {
     expect(wrapper.text()).toContain('🔥 连续预测')
     expect(wrapper.text()).toContain('✅ 完成率预测')
     expect(wrapper.text()).toContain('晨跑')
+  })
+})
+
+// =============================================================
+// 集成：挑战顾问面板（INCR-231：补挂载孤儿面板 ChallengeAdvisorPanel）
+// =============================================================
+
+describe('集成：挑战顾问面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockHabits.value = []
+  })
+
+  async function switchToChallenges(wrapper: any) {
+    const tab = wrapper.findAll('.dw-tab').find((t: any) => t.text().includes('挑战赛'))
+    expect(tab).toBeTruthy()
+    await tab.trigger('click')
+    await wrapper.vm.$nextTick()
+  }
+
+  it('仅在挑战赛标签页渲染面板骨架', async () => {
+    const wrapper = await getWrapper()
+    // 默认在今日打卡页，不应渲染
+    expect(wrapper.find('.cap').exists()).toBe(false)
+    await switchToChallenges(wrapper)
+    expect(wrapper.find('.cap').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🧭 挑战顾问')
+  })
+
+  it('无习惯时渲染空白画像与推荐列表', async () => {
+    const wrapper = await getWrapper()
+    await switchToChallenges(wrapper)
+    expect(wrapper.find('.cap-profile').exists()).toBe(true)
+    expect(wrapper.find('.cap-level-sub').text()).toContain('0 个活跃习惯')
+    // 推荐区始终渲染（可给出自适应候选）
+    expect(wrapper.find('.cap-block').exists()).toBe(true)
+  })
+
+  it('有启用习惯时渲染画像概览与推荐卡片', async () => {
+    mockHabits.value = [
+      {
+        id: 'h1', title: '晨跑', icon: '🏃', description: '晨间跑步', difficulty: 'medium',
+        frequency: 'daily', target: 1, streak: 8, bestStreak: 12, totalCompleted: 40,
+        enabled: true, createdAt: '2026-01-01', completedDates: ['2026-09-08', '2026-09-07'],
+      },
+      {
+        id: 'h2', title: '阅读', icon: '📖', description: '每日读书', difficulty: 'easy',
+        frequency: 'daily', target: 1, streak: 5, bestStreak: 7, totalCompleted: 30,
+        enabled: true, createdAt: '2026-01-01', completedDates: ['2026-09-06'],
+      },
+    ]
+    const wrapper = await getWrapper()
+    await switchToChallenges(wrapper)
+    expect(wrapper.find('.cap-level-sub').text()).toContain('2 个活跃习惯')
+    expect(wrapper.find('.cap-profile-stats').exists()).toBe(true)
+    expect(wrapper.find('.cap-diff').exists()).toBe(true)
+    expect(wrapper.findAll('.cap-rec').length).toBeGreaterThan(0)
+  })
+
+  it('采纳推荐时调用 createChallenge 并传入推荐字段', async () => {
+    mockHabits.value = [
+      {
+        id: 'h1', title: '晨跑', icon: '🏃', description: '晨间跑步', difficulty: 'medium',
+        frequency: 'daily', target: 1, streak: 8, bestStreak: 12, totalCompleted: 40,
+        enabled: true, createdAt: '2026-01-01', completedDates: ['2026-09-08', '2026-09-07'],
+      },
+    ]
+    const wrapper = await getWrapper()
+    await switchToChallenges(wrapper)
+    const recCards = wrapper.findAll('.cap-rec')
+    expect(recCards.length).toBeGreaterThan(0)
+    await recCards[0].find('.cap-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(mockCreateChallenge).toHaveBeenCalledTimes(1)
+    const [title, description, duration, habitIds] = mockCreateChallenge.mock.calls[0]
+    expect(typeof title).toBe('string')
+    expect(typeof description).toBe('string')
+    expect(typeof duration).toBe('number')
+    expect(Array.isArray(habitIds)).toBe(true)
   })
 })

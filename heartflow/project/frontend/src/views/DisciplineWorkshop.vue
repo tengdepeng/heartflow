@@ -163,6 +163,13 @@
           </div>
         </div>
       </div>
+
+      <!-- 挑战推荐面板（discipline/challenge-recommender + habit-correlation 引擎，INCR-231） -->
+      <ChallengeAdvisorPanel
+        :habits="bridge.habits.value"
+        :challenges="activeChallenges"
+        @adopt="createChallengeFromRecommendation"
+      />
     </section>
 
     <!-- 徽章墙 -->
@@ -275,6 +282,8 @@ import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
 import PomodoroForestPanel from '../components/discipline/PomodoroForestPanel.vue'
 import MeditationStudio from '../components/MeditationStudio.vue'
+import ChallengeAdvisorPanel from '../components/ChallengeAdvisorPanel.vue'
+import type { ChallengeRecommendation } from '../modules/discipline/challenge-recommender'
 
 const bridge = useDisciplineBridge()
 
@@ -456,6 +465,12 @@ function createFromTemplate(template: HabitTemplate) {
 
 function createChallengeFromTpl(template: ChallengeTemplate) {
   bridge.createChallengeFromTemplate(template, todayHabits.value)
+  loadData()
+}
+
+// 采纳挑战顾问推荐（INCR-231）
+function createChallengeFromRecommendation(rec: ChallengeRecommendation) {
+  bridge.createChallenge(rec.title, rec.description, rec.duration, rec.suggestedHabits, rec.suggestedReward)
   loadData()
 }
 
