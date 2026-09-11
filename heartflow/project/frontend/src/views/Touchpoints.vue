@@ -379,6 +379,13 @@
     <!-- 剪贴板管理（touchpoints·clipboard，INCR-177） -->
     <ClipboardPanel />
 
+    <!-- ============================================================ -->
+    <!-- 通知中心（touchpoints·notification-engine，INCR-241 补挂载孤儿组件） -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <NotificationCenterPanel />
+    </section>
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
   </div>
 </template>
@@ -390,6 +397,7 @@ import PerceptionPanel from '../components/PerceptionPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import GreetingWidgetPanel from '../components/GreetingWidgetPanel.vue'
 import ClipboardPanel from '../components/ClipboardPanel.vue'
+import NotificationCenterPanel from '../components/NotificationCenterPanel.vue'
 import {
   useDeliveryStrategy,
   usePushChannel,

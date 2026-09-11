@@ -219,4 +219,107 @@ describe('Touchpoints 殿堂触角视图', () => {
     expect(panel.exists()).toBe(true)
   })
 
+  // ============================================================
+  // 集成：通知中心面板 NotificationCenterPanel（INCR-241 补挂载孤儿组件）
+  // 引擎 useNotificationEngine 内 refs 于 use 调用时自 storage 读，invalidateCache 后即复位
+  // ============================================================
+  describe('集成：通知中心面板', () => {
+    const K_NOTIF = 'hf:touchpoints:notifications'
+    const K_PREFS = 'hf:touchpoints:notification_prefs'
+
+    async function seedNotification(n: any[]) {
+      const storage = (await import('../../engine/storage/index')).storage
+      storage.setKV(K_NOTIF, JSON.stringify(n))
+    }
+
+    it('集成渲染通知中心面板 NotificationCenterPanel', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'NotificationCenterPanel' })
+      expect(panel.exists()).toBe(true)
+    })
+
+    it('空存储渲染收件箱空态与四标签', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'NotificationCenterPanel' })
+      expect(panel.text()).toContain('通知中心')
+      expect(panel.text()).toContain('收件箱 · 规则 · 偏好 · 统计')
+      expect(panel.findAll('.ncp-tab').length).toBe(4)
+      expect(panel.text()).toContain('收件箱空空如也')
+      // 规则 tab 展示 5 条默认预设规则
+      await panel.findAll('.ncp-tab')[1].trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.text()).toContain('每日问候')
+      expect(panel.text()).toContain('专注连击')
+      expect(panel.text()).toContain('周回顾提醒')
+      expect(panel.text()).toContain('结晶里程碑')
+      expect(panel.text()).toContain('洞察摘要')
+    })
+
+    it('种通知种子后收件箱展示未读项并可标已读', async () => {
+      await seedNotification([
+        {
+          id: 'n1', type: 'reminder', priority: 'urgent',
+          title: '专注计时结束', message: '25 分钟专注已完成',
+          icon: '⏰', channel: 'log', read: false, dismissed: false,
+          createdAt: '2026-09-11T08:00:00.000Z',
+        },
+        {
+          id: 'n2', type: 'achievement', priority: 'normal',
+          title: '达成新成就', message: '连续专注 7 天',
+          icon: '🏆', channel: 'log', read: false, dismissed: false,
+          createdAt: '2026-09-11T09:00:00.000Z',
+        },
+      ])
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'NotificationCenterPanel' })
+      expect(panel.text()).toContain('专注计时结束')
+      expect(panel.text()).toContain('达成新成就')
+      expect(panel.findAll('.ncp-item').length).toBe(2)
+      // 标为已读后 hf 存储持久化：重挂载后不再显示
+      const readBtn = panel.findAll('.ncp-btn--small').find(b => b.text() === '标为已读')!
+      await readBtn.trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.findAll('.ncp-item').length).toBe(1)
+    })
+
+    it('偏好 tab 切换启用持久化 enable', async () => {
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'NotificationCenterPanel' })
+      await panel.findAll('.ncp-tab')[2].trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.text()).toContain('免打扰开始')
+      const checkbox = panel.find('.ncp-pref-row input[type="checkbox"]')
+      await checkbox.setValue(true)
+      await wrapper.vm.$nextTick()
+      const storage = (await import('../../engine/storage/index')).storage
+      const prefs = JSON.parse(storage.getKV(K_PREFS, '') || '{}')
+      expect(prefs.enabled).toBe(true)
+    })
+
+    it('统计 tab 展示已发送/已读/已读率', async () => {
+      await seedNotification([
+        {
+          id: 'n1', type: 'reminder', priority: 'normal',
+          title: '周回顾', message: '回顾本周', icon: '📊', channel: 'widget',
+          read: true, dismissed: false, createdAt: '2026-09-11T08:00:00.000Z',
+        },
+        {
+          id: 'n2', type: 'insight', priority: 'low',
+          title: '今日洞察', message: '发现', icon: '💡', channel: 'log',
+          read: false, dismissed: false, createdAt: '2026-09-11T09:00:00.000Z',
+        },
+      ])
+      const wrapper = await createWrapper()
+      const panel = wrapper.findComponent({ name: 'NotificationCenterPanel' })
+      await panel.findAll('.ncp-tab')[3].trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(panel.text()).toContain('已发送')
+      expect(panel.text()).toContain('已读')
+      expect(panel.text()).toContain('已读率')
+      expect(panel.text()).toContain('按类型分布')
+      expect(panel.text()).toContain('提醒')
+      expect(panel.text()).toContain('洞察')
+    })
+  })
+
 })
