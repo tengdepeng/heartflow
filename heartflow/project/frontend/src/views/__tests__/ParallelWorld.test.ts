@@ -3,6 +3,7 @@
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount, flushPromises } from '@vue/test-utils'
+import { nextTick } from 'vue'
 
 // ---- 模拟 storage ----
 const mockStore: Record<string, any> = {}
@@ -375,5 +376,112 @@ describe('集成：情景推演面板', () => {
     expect(panel.text()).toContain('平均置信')
     expect(panel.text()).toContain('风险分布')
     expect(panel.text()).toContain('模拟')
+  })
+})
+
+// ============================================================
+// 集成：分支权重面板 BranchWeightsPanel（INCR-264 补挂载孤儿组件）
+// 引擎 useBranchWeights 无状态（weightConfigs 每次调用新建、无持久化），
+// 薄委托化：宿主注入 branches，面板交互驱动引擎当前实例
+// ============================================================
+describe('集成：分支权重面板', () => {
+  const K_BRANCHES = 'hf:parallel-world:branches'
+
+  function makeBranch(id: string, name: string, overrides: Record<string, any> = {}) {
+    return {
+      id, name, description: '', color: '#4A90D9',
+      createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined,
+      isActive: false, checkpointCount: 0, ...overrides,
+    }
+  }
+
+  function seedBranches(branches: any[]) {
+    mockStore[K_BRANCHES] = branches
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  it('渲染骨架与需关注徽标', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.bwp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('⚖️ 分支权重')
+    expect(wrapper.text()).toContain('关注度分配 · 优先级排序')
+    expect(wrapper.text()).toContain('0 需关注')
+  })
+
+  it('空分支时显示空态引导', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('还没有时间分支。先在「分支星图」种下分支，再为每个世界分配关注权重。')
+  })
+
+  it('分支渲染权重配置行（默认权重与未设置优先级）', async () => {
+    seedBranches([makeBranch('b1', '分支一')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const rows = wrapper.findAll('.bwp-row')
+    expect(rows.length).toBe(1)
+    expect(wrapper.text()).toContain('分支一')
+    expect(wrapper.text()).toContain('未设置')
+    expect(wrapper.text()).toContain('50%')
+    // 优先级下拉渲染五个档位（默认选中态由交互用例覆盖）
+    const opts = wrapper.findAll('.bwp-select option')
+    expect(opts.map(o => o.text())).toEqual(['关键', '高', '中', '低', '归档'])
+  })
+
+  it('调整滑块触发权重设置并展示综合权重', async () => {
+    seedBranches([makeBranch('b1', '分支一')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const slider = wrapper.find('.bwp-slider')
+    await slider.setValue('0.8')
+    await slider.trigger('change')
+    await nextTick()
+    expect(wrapper.text()).toContain('80%')
+    // composite = 0.8*0.6 + 0.5*0.4 = 0.68 → 综合权重 68%、关注度 68
+    expect(wrapper.text()).toContain('综合权重 68%')
+    expect(wrapper.text()).toContain('关注度 68')
+  })
+
+  it('设为关键优先级后进入需关注列表', async () => {
+    seedBranches([makeBranch('b1', '分支一')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const sel = wrapper.find('.bwp-select')
+    await sel.setValue('critical')
+    await sel.trigger('change')
+    await nextTick()
+    expect(wrapper.text()).toContain('关键')
+    expect(wrapper.text()).toContain('1 需关注')
+    const attention = wrapper.find('.bwp-attention')
+    expect(attention.exists()).toBe(true)
+    expect(attention.text()).toContain('分支一')
+    // composite = 0.5*0.6 + 0.5*0.4 = 0.5 → attention = 0.5*1.5 = 0.75 → 75 分
+    expect(attention.text()).toContain('75 分')
+  })
+
+  it('需关注列表展示高优先级分支', async () => {
+    seedBranches([makeBranch('b1', '分支一'), makeBranch('b2', '分支二')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    // 分支一设为高优先级
+    const rows = wrapper.findAll('.bwp-row')
+    const sliderA = rows[0].find('.bwp-slider')
+    await sliderA.setValue('0.6')
+    await sliderA.trigger('change')
+    const selA = rows[0].find('.bwp-select')
+    await selA.setValue('high')
+    await selA.trigger('change')
+    await nextTick()
+    const attention = wrapper.find('.bwp-attention')
+    expect(attention.exists()).toBe(true)
+    expect(attention.text()).toContain('分支一')
+    expect(attention.text()).toContain('高')
+    // composite = 0.6*0.6 + 0.5*0.4 = 0.56 → attention = 0.56*1.2 = 0.672 → 67 分
+    expect(attention.text()).toContain('67 分')
+    // 分支二未设置不进入需关注
+    expect(wrapper.findAll('.bwp-attention').length).toBe(1)
   })
 })
