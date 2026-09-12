@@ -536,3 +536,148 @@ describe('集成：见证收件箱', () => {
     expect(wrapper.find('.awp-item.unviewed').text()).toContain('连击记录')
   })
 })
+
+// ============================================================
+// 集成：庆祝与退休 AdvisorCelebrationPanel（INCR-280 补挂载孤儿组件）
+// 引擎 useAdvisorCelebration 的 celebrations/retirements 为模块级 ref（import 时自 storage 读一次）——
+// 故本 describe 每个用例 beforeEach 先 vi.resetModules() 再 seed mockStore，
+// 使各用例独立、无模块态污染
+// ============================================================
+describe('集成：庆祝与退休', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAdvisors.length = 0
+    mockStore['hf:advisors'] = []
+    delete mockStore['hf:advisor:celebrations']
+    delete mockStore['hf:advisor:retirements']
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    if (activeWrapper) {
+      activeWrapper.unmount()
+      activeWrapper = null
+    }
+    document.querySelectorAll('.ah-dialog-overlay').forEach(el => el.remove())
+  })
+
+  function seedCelebrations(entries: any[]) {
+    mockStore['hf:advisor:celebrations'] = JSON.stringify(entries)
+  }
+  function seedRetirements(entries: any[]) {
+    mockStore['hf:advisor:retirements'] = JSON.stringify(entries)
+  }
+
+  it('无幕僚时渲染骨架与空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.acp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🎉 庆祝与退休')
+    expect(wrapper.text()).toContain('为幕僚的里程碑举杯，为告别留一份遗产')
+    expect(wrapper.find('.acp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('先创建幕僚，才能为他们庆祝')
+  })
+
+  it('有幕僚无庆祝时展示录入区并预填第一位幕僚', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_c1', name: '墨染' }))
+    mockAdvisors.push(sampleProfile({ id: 'a_c2', name: '青鸟' }))
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('创建庆祝事件')
+    // 幕僚选择器 + 类型选择器 = 2 个
+    expect(wrapper.findAll('.acp-select').length).toBe(2)
+    // onMounted 预填第一位幕僚
+    expect((wrapper.find('.acp-select').element as HTMLSelectElement).value).toBe('a_c1')
+    expect(wrapper.find('.acp-add-btn').exists()).toBe(true)
+    expect(wrapper.text()).toContain('还没有庆祝事件')
+  })
+
+  it('创建庆祝事件后展示列表、仪式与完成按钮并写回存储', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_c1', name: '墨染' }))
+    const wrapper = await getWrapper()
+    await (wrapper.findAll('.acp-input')[0] as any).setValue('入幕满百日')
+    await (wrapper.findAll('.acp-input')[1] as any).setValue('共同走过一百天')
+    await wrapper.find('.acp-add-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.acp-item').exists()).toBe(true)
+    expect(wrapper.text()).toContain('入幕满百日')
+    expect(wrapper.text()).toContain('共同走过一百天')
+    expect(wrapper.text()).toContain('里程碑')
+    // 未庆祝 → 仪式展示 + 完成按钮，无已庆祝标签
+    expect(wrapper.find('.acp-ritual').exists()).toBe(true)
+    expect(wrapper.text()).toContain('授勋仪式')
+    expect(wrapper.find('.acp-done').exists()).toBe(false)
+    expect(wrapper.find('.acp-item .acp-btn--small').text()).toBe('完成')
+    const saved = JSON.parse(mockStore['hf:advisor:celebrations'])
+    expect(saved.length).toBe(1)
+    expect(saved[0].advisorId).toBe('a_c1')
+    expect(saved[0].type).toBe('milestone')
+    expect(saved[0].title).toBe('入幕满百日')
+    expect(saved[0].celebrated).toBe(false)
+  })
+
+  it('点击完成标记已庆祝并写回存储', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_c1', name: '墨染' }))
+    const wrapper = await getWrapper()
+    await (wrapper.findAll('.acp-input')[0] as any).setValue('入幕满百日')
+    await wrapper.find('.acp-add-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.acp-done').exists()).toBe(false)
+    await wrapper.find('.acp-item .acp-btn--small').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.acp-done').exists()).toBe(true)
+    expect(wrapper.text()).toContain('已庆祝')
+    const saved = JSON.parse(mockStore['hf:advisor:celebrations'])
+    expect(saved[0].celebrated).toBe(true)
+  })
+
+  it('已有历史庆祝时渲染列表与已庆祝状态', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_c1', name: '墨染' }))
+    seedCelebrations([
+      { id: 'c1', type: 'milestone', advisorId: 'a_c1', title: '入幕满百日', description: '共同走过一百天', date: '2026-09-01', celebrated: true, ritual: { name: '授勋仪式', steps: ['点燃烛火'], participants: ['a_c1'] } },
+      { id: 'c2', type: 'birthday', advisorId: 'a_c1', title: '诞辰之庆', description: '', date: '2026-09-10', celebrated: false, ritual: { name: '庆生典礼', steps: ['点燃烛火'], participants: ['a_c1'] } },
+    ])
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.acp-item').length).toBe(2)
+    expect(wrapper.text()).toContain('入幕满百日')
+    expect(wrapper.text()).toContain('诞辰之庆')
+    expect(wrapper.text()).toContain('共同走过一百天')
+    expect(wrapper.findAll('.acp-done').length).toBe(1)
+    expect(wrapper.find('.acp-item.done').text()).toContain('入幕满百日')
+    expect(wrapper.findAll('.acp-item .acp-btn--small').length).toBe(1)
+  })
+
+  it('已有退休仪式时展示阶段、推进与遗产', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_c1', name: '墨染' }))
+    seedRetirements([
+      {
+        id: 'ret1',
+        advisorId: 'a_c1',
+        reason: '完成使命，荣休归隐',
+        phase: 'contemplation',
+        startedAt: '2026-09-01T10:00:00.000Z',
+        legacies: [
+          { id: 'leg1', type: 'wisdom', title: '十年箴言', content: '慢即是快', inheritable: true },
+        ],
+      },
+    ])
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.acp-retire').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🕊 退休与遗产')
+    // stats.completed=0（未完成）· legacies 1 件
+    expect(wrapper.text()).toContain('0 场完成 · 1 件遗产')
+    expect(wrapper.text()).toContain('墨染 的退休仪式')
+    expect(wrapper.text()).toContain('沉思')
+    expect(wrapper.text()).toContain('完成使命，荣休归隐')
+    expect(wrapper.find('.acp-legacy').exists()).toBe(true)
+    expect(wrapper.text()).toContain('十年箴言')
+    expect(wrapper.text()).toContain('慢即是快')
+    expect(wrapper.text()).toContain('可继承')
+    // 推进阶段：contemplation → farewell
+    await wrapper.find('.acp-retire-item .acp-btn--small').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('告别')
+    const saved = JSON.parse(mockStore['hf:advisor:retirements'])
+    expect(saved.length).toBe(1)
+    expect(saved[0].phase).toBe('farewell')
+    expect(saved[0].completedAt).toBeUndefined()
+  })
+})

@@ -154,6 +154,11 @@
       <AdvisorWitnessPanel :advisors="advisors" />
     </section>
 
+    <!-- 庆祝与退休（INCR-280 补挂载孤儿组件 AdvisorCelebrationPanel：里程碑庆祝/完成仪式/退休阶段推进/遗产传承，引擎 useAdvisorCelebration 唯一、advisors props 薄委托注入） -->
+    <section data-enter class="ah-section">
+      <AdvisorCelebrationPanel :advisors="advisors" />
+    </section>
+
     <div data-enter v-if="!advisors.length" class="ah-empty-hint"><span>🏛</span><p>幕僚大厅等待第一位居民</p></div>
 
     <!-- 编辑弹窗 -->
@@ -201,6 +206,7 @@ import DialogueSessionList from '../components/DialogueSessionList.vue'
 import AdvisorCarrierEditor from '../components/AdvisorCarrierEditor.vue'
 import AdvisorInteractionPanel from '../components/AdvisorInteractionPanel.vue'
 import AdvisorWitnessPanel from '../components/AdvisorWitnessPanel.vue'
+import AdvisorCelebrationPanel from '../components/AdvisorCelebrationPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
 import { getNoteStore } from '../modules/note'
