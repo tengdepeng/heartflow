@@ -591,3 +591,124 @@ describe('跨房间共鸣联动（双向收口）', () => {
     clearRoomSignals()
   })
 })
+
+// ============================================================
+// 集成：手札档案（INCR-273：薄委托化挂载 AnchorJournalPanel 至逐日心锚）
+// 引擎 useAnchorJournal 有状态：journals 经 storage.getKV/setKV('hf:anchor_journals') 持久化
+// （模块级单例，但 onMounted 的 load() 每次从 mockKVStore 刷新 → seed 可驱动）；
+// props『anchors: Anchor[]』由宿主 anchor.allAnchors 注入（测试 seed mockAnchorData）。
+// 年尺度摘要 currentYear = new Date().getFullYear()（2026），锚点需 targetDate 前缀 '2026-'。
+// ============================================================
+describe('集成：手札档案', () => {
+  const KEY = 'hf:anchor_journals'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAnchorData.value = []
+    Object.keys(mockKVStore).forEach(k => delete mockKVStore[k])
+  })
+
+  function anchor(id: string, text: string, over: Record<string, any> = {}): Anchor {
+    return {
+      id, text, done: false, targetDate: '2026-07-20',
+      createdAt: '2026-07-20T08:00:00Z',
+      priority: 'must', stage: 'active', driftCount: 0,
+      ...over,
+    } as Anchor
+  }
+  function journal(over: Record<string, any> = {}) {
+    return { id: 'j1', anchorId: '', title: '', content: '手札内容', type: 'diary', linkedAnchorIds: [], createdAt: '2026-07-21T10:00:00Z', updatedAt: '2026-07-21T10:00:00Z', ...over }
+  }
+  function ajp(wrapper: any) {
+    const el = wrapper.find('.ajp')
+    expect(el.exists()).toBe(true)
+    return el
+  }
+
+  it('空态：标题/零统计/手札与光丝空态/年尺度空态', async () => {
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    const el = ajp(wrapper)
+    expect(el.text()).toContain('📖 手札档案')
+    expect(el.text()).toContain('日记 · 复盘 · 洞见 · 感恩')
+    expect(el.find('.ajp-stat-value').text()).toBe('0')
+    expect(el.text()).toContain('暂无手札，为锚点写下第一篇手札吧。')
+    expect(el.text()).toContain('暂无光丝连接，锚点间共享标签或同日安放会产生连接。')
+    expect(el.text()).toContain('今年暂无锚点数据。')
+  })
+
+  it('新建手札：选择锚点+输入内容保存后入列表并落持久化', async () => {
+    mockAnchorData.value = [anchor('a1', '读一本书')]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    const el = ajp(wrapper)
+    await el.find('.ajp-select').setValue('a1')
+    await el.find('.ajp-textarea').setValue('今日思绪')
+    await el.find('.ajp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(el.text()).toContain('今日思绪')
+    expect((mockKVStore[KEY] as any[]).length).toBe(1)
+    expect(mockKVStore[KEY][0].anchorId).toBe('a1')
+  })
+
+  it('手札统计按类型分布渲染且列表全渲染', async () => {
+    mockKVStore[KEY] = [
+      journal({ id: 'j1', type: 'diary', anchorId: 'a1' }),
+      journal({ id: 'j2', type: 'diary', anchorId: 'a1' }),
+      journal({ id: 'j3', type: 'review', anchorId: 'a1' }),
+      journal({ id: 'j4', type: 'insight', anchorId: 'a1' }),
+      journal({ id: 'j5', type: 'gratitude', anchorId: 'a1' }),
+    ]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    const el = ajp(wrapper)
+    const values = el.findAll('.ajp-stat-value').map((v: any) => v.text())
+    expect(values[0]).toBe('5')
+    expect(values[1]).toBe('2')
+    expect(values[2]).toBe('1')
+    expect(values[3]).toBe('2')
+    expect(el.findAll('.ajp-item').length).toBe(5)
+  })
+
+  it('删除手札后列表更新并落持久化', async () => {
+    mockAnchorData.value = [anchor('a1', '读一本书')]
+    mockKVStore[KEY] = [journal({ id: 'j1', anchorId: 'a1', title: '独处时刻', content: '记下今天的足迹' })]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    const el = ajp(wrapper)
+    expect(el.text()).toContain('独处时刻')
+    await el.find('.ajp-btn--danger').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(el.text()).toContain('暂无手札，为锚点写下第一篇手札吧。')
+    expect((mockKVStore[KEY] as any[]).length).toBe(0)
+  })
+
+  it('光丝连接：共享标签生成线程并显示强度与原因', async () => {
+    mockAnchorData.value = [
+      anchor('a1', '左锚', { tags: ['工作'], category: '工作' }),
+      anchor('a2', '右锚', { tags: ['工作'], category: '工作' }),
+    ]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    const el = ajp(wrapper)
+    expect(el.findAll('.ajp-thread').length).toBe(1)
+    expect(el.text()).toContain('左锚 ↔ 右锚')
+    expect(el.text()).toContain('共享标签')
+    expect(el.find('.ajp-thread-strength').text()).toBe('70')
+  })
+
+  it('年尺度摘要渲染总锚点/完成率/高频标签与分类', async () => {
+    mockAnchorData.value = [
+      anchor('a1', '工作目标', { done: true, tags: ['工作'], category: '工作' }),
+      anchor('a2', '健康跑', { done: false, tags: ['健康'], targetDate: '2026-07-21' }),
+    ]
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    const el = ajp(wrapper)
+    expect(el.text()).toContain('年尺度摘要')
+    expect(el.text()).toContain('总锚点 2')
+    expect(el.text()).toContain('完成率 50%')
+    expect(el.text()).toContain('工作 ×1')
+    expect(el.text()).toContain('健康 ×1')
+  })
+})

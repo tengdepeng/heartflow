@@ -481,6 +481,9 @@
     <!-- 时间流 · 尺度视图（INCR-01 逐日心锚时间流） -->
     <AnchorTimeScalePanel :anchors="anchor.allAnchors.value" />
 
+    <!-- 手札档案 · 日记/复盘/洞见/感恩 + 光丝连接 + 年尺度摘要（anchor/anchor-journal 引擎，INCR-273 补挂载孤儿组件，薄委托化：宿主注入锚点） -->
+    <AnchorJournalPanel :anchors="anchor.allAnchors.value" />
+
     <!-- 时令元数据（INCR-256 补挂载孤儿组件：时辰·节气·季节·天气采集） -->
     <ZeitgeistPanel />
   </div>
@@ -505,6 +508,7 @@ import PhotoDiaryPanel from '../components/PhotoDiaryPanel.vue'
 import SmartReminderPanel from '../components/SmartReminderPanel.vue'
 import CalendarExportPanel from '../components/CalendarExportPanel.vue'
 import AnchorTimeScalePanel from '../components/AnchorTimeScalePanel.vue'
+import AnchorJournalPanel from '../components/AnchorJournalPanel.vue'
 import ZeitgeistPanel from '../components/ZeitgeistPanel.vue'
 
 const { entranceClass } = useViewEntrance()
