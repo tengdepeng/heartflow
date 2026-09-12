@@ -41,6 +41,11 @@
     <!-- 结晶相性图鉴 -->
     <CrystalArchivePanel />
 
+    <!-- 星盘档案 · 星座/落点/引力（canvas/canvas-gravity 引擎，INCR-271 补挂载孤儿组件，薄委托化：组件自包含） -->
+    <section data-enter class="cga-section">
+      <CanvasGravityArchivePanel />
+    </section>
+
     <!-- 页脚 -->
     <footer class="crystal-colophon" data-enter>
       <div class="crystal-header-ornament">
@@ -58,6 +63,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import CrystalGalleryPanel from '../components/crystal/CrystalGalleryPanel.vue'
 import CrystalGenePanel from '../components/crystal/CrystalGenePanel.vue'
 import CrystalArchivePanel from '../components/crystal/CrystalArchivePanel.vue'
+import CanvasGravityArchivePanel from '../components/CanvasGravityArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 </script>
