@@ -10,15 +10,24 @@ interface Props {
   ctaLabel?: string
   /** 是否显示氛围光晕，默认 true */
   glow?: boolean
+  /** 主行动按钮禁用态（默认 false，对既有调用零行为变更） */
+  ctaDisabled?: boolean
 }
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   icon: '✿',
   title: '',
   hint: '',
   ctaLabel: '新建',
   glow: true,
+  ctaDisabled: false,
 })
 const emit = defineEmits<{ (e: 'cta'): void }>()
+
+function onCta() {
+  // 原生 disabled 已阻断 click；此处再拦一道，防止插槽内自定义 cta 时漏网
+  if (props.ctaDisabled) return
+  emit('cta')
+}
 </script>
 
 <template>
@@ -33,7 +42,8 @@ const emit = defineEmits<{ (e: 'cta'): void }>()
       v-if="$slots.cta || ctaLabel"
       type="button"
       class="hf-empty__cta"
-      @click="emit('cta')"
+      :disabled="ctaDisabled || undefined"
+      @click="onCta"
     >
       <slot name="cta">{{ ctaLabel }}</slot>
     </button>
@@ -76,12 +86,15 @@ const emit = defineEmits<{ (e: 'cta'): void }>()
 }
 .hf-empty__title {
   font-size: 15px;
-  color: var(--text-secondary);
+  /* 主文案上提一档（α0.55 → α0.7），与下方引导语拉开清晰层级 */
+  color: var(--text-bright);
   margin: 0 0 var(--spacing-xs);
 }
 .hf-empty__hint {
   font-size: 13px;
-  color: var(--text-muted);
+  /* 对比度修复：原 --text-muted（α0.3≈2.5:1）不达 WCAG AA 4.5:1；
+     --text-secondary（α0.55≈4.9:1）达标，且仍弱于标题，层级不塌 */
+  color: var(--text-secondary);
   margin: 0;
   /* 沉默条款（--hf-silence=1）激活时隐藏引导文案，仅留主文案 */
   opacity: calc(1 - var(--hf-silence, 0));
@@ -96,12 +109,31 @@ const emit = defineEmits<{ (e: 'cta'): void }>()
   font-size: 14px;
   cursor: pointer;
   transition:
-    background calc(0.3s / var(--hf-animate-speed, 1)) ease,
-    transform calc(0.3s / var(--hf-animate-speed, 1)) ease;
+    background-color calc(0.18s / var(--hf-animate-speed, 1)) ease,
+    border-color calc(0.18s / var(--hf-animate-speed, 1)) ease,
+    box-shadow calc(0.18s / var(--hf-animate-speed, 1)) ease,
+    transform calc(0.18s / var(--hf-animate-speed, 1)) ease;
 }
-.hf-empty__cta:hover {
-  background: var(--accent-dim);
-  transform: translateY(-1px);
+@media (hover: hover) {
+  .hf-empty__cta:hover:not(:disabled) {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+}
+.hf-empty__cta:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+.hf-empty__cta:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--bg-primary),
+    0 0 0 4px rgba(var(--accent-rgb), 0.6);
+}
+.hf-empty__cta:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
 }
 @keyframes hf-empty-breathe {
   0%, 100% { opacity: 0.35; transform: scale(1); }

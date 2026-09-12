@@ -7,6 +7,9 @@ import './assets/animations.css'
 import './assets/layout-contract.css'
 import './assets/room-adaptive.css'
 import './assets/glass-fallback.css'
+// 全局交互状态基线层（焦点环兜底 / 语义态反馈原语 / reduced-motion 守卫）；
+// 置末位以作为最终基线覆盖，样式内用 :where() 保持零特异性，不抢组件规则
+import './assets/states.css'
 import { useStyleStore } from './stores/style'
 import { initStorage, flushStorage } from './engine/storage'
 import { initPlatform } from './utils/platform'

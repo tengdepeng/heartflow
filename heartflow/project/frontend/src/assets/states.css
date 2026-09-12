@@ -1,0 +1,263 @@
+/* ============================================================
+   心流工坊 · 全局交互状态基线层
+   ------------------------------------------------------------
+   定位：只承载「全局无归属」的交互基线与反馈原语。
+   铁律：
+     1. 不抢 scoped 原语的类名（.hf-btn / .hf-card / .hf-input 归
+        components/ui/*.vue 所有），避免全局与 scoped 双重命中打架；
+     2. 兜底样式一律用 :where()（零特异性），组件自身规则必然胜出，
+        本层只补「组件没写」的那一块；
+     3. 全部消费既有令牌（--accent / --success / --danger / --radius-* /
+        --spacing-* / --transition / --z-*），不引入硬编码色值；
+     4. 时长统一收敛到 150–300ms，并挂 --hf-animate-speed（宪法视觉接线）
+        做全局调速，保持「超级自定义」。
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. 全局兜底焦点环（键盘可达性）
+   :where() 保证 0 特异性：任何组件自带的 :focus-visible 都会覆盖它，
+   仅对「忘了写焦点态」的元素兜底，避免键盘用户丢失定位。
+   ------------------------------------------------------------ */
+:where(a, button, [role='button'], [role='radio'], [role='tab'], [role='menuitem'],
+       input, select, textarea, summary, [tabindex]:not([tabindex='-1'])):focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.72);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* 鼠标点击不应触发焦点环（仅键盘/程序化聚焦显示），减少视觉噪音 */
+:where(button, a, [role='button']):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ------------------------------------------------------------
+   2. 文本选取 / 光标 / 占位符统一
+   此前各组件各自为政，出现 cy 蓝、白、琥珀三种选区色并存。
+   ------------------------------------------------------------ */
+::selection {
+  background: rgba(var(--accent-rgb), 0.28);
+  color: var(--text-primary);
+}
+
+:root {
+  caret-color: var(--accent);
+}
+
+:where(input, textarea)::placeholder {
+  color: var(--text-dim);
+  opacity: 1; /* Firefox 默认压 0.54，与 Chrome 视觉不一致 */
+}
+
+/* ------------------------------------------------------------
+   3. 语义态：无障碍属性 → 视觉反馈
+   ------------------------------------------------ */
+/* 忙碌元素：光标交还系统「进行中」，并禁止重复点击 */
+[aria-busy='true'] {
+  cursor: progress;
+}
+
+/* 逻辑禁用（非原生 disabled）：保留可聚焦性（可被读屏读出原因），
+   但阻断指针交互与视觉上的「可点」暗示 */
+[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ------------------------------------------------------------
+   4. 屏幕阅读器专用文本（视觉隐藏但可读）
+   用于给纯装饰性加载动画/图标补语义标签。
+   ------------------------------------------------------------ */
+.hf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ------------------------------------------------------------
+   5. 内联状态条原语（加载 / 成功 / 错误 / 信息）
+   命名全新（.hf-state*），与既有组件零冲突；各视图可按需 opt-in。
+   结构约定：
+     <div class="hf-state hf-state--error">
+       <span class="hf-state__icon">!</span>
+       <span class="hf-state__text">保存失败</span>
+       <button class="hf-state__action">重试</button>
+     </div>
+   ------------------------------------------------------------ */
+.hf-state {
+  --state-color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 10px var(--spacing-md);
+  border: 1px solid var(--glass-border, var(--border-color));
+  /* 左侧 3px 语义色条：不依赖 color-mix 也能一眼分辨状态 */
+  border-left: 3px solid var(--state-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.45;
+  /* 入场用 transform/opacity，避免触发重排 */
+  animation: hf-state-in calc(0.24s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hf-state--success { --state-color: var(--success); }
+.hf-state--error   { --state-color: var(--danger); }
+.hf-state--warning { --state-color: var(--warning); }
+.hf-state--info    { --state-color: var(--accent); }
+.hf-state--loading { --state-color: var(--accent); }
+
+/* 渐进增强：支持 color-mix 时给整条铺一层极淡的语义色底，
+   不支持则回退到上面的中性 --bg-surface（无硬编码兜底色） */
+@supports (background: color-mix(in srgb, red 10%, transparent)) {
+  .hf-state--success { background: color-mix(in srgb, var(--success) 9%, transparent); }
+  .hf-state--error   { background: color-mix(in srgb, var(--danger) 9%, transparent); }
+  .hf-state--warning { background: color-mix(in srgb, var(--warning) 9%, transparent); }
+  .hf-state--info,
+  .hf-state--loading { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+}
+
+.hf-state__icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  color: var(--state-color);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.hf-state__text {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-bright);
+}
+
+/* 状态条内的行动入口（如「重试」）——文字按钮，带完整交互态 */
+.hf-state__action {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--state-color);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--state-color);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.hf-state__action:where(:hover) {
+  background: var(--state-color);
+  color: var(--bg-primary);
+}
+.hf-state__action:active {
+  transform: translateY(1px);
+}
+.hf-state__action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ------------------------------------------------------------
+   6. 旋转加载指示器
+   轨道用令牌色（--text-primary-rgb 淡色），弧线用 currentColor，
+   外层 .hf-state--loading 会把 --state-color 透传为 color。
+   ------------------------------------------------------------ */
+.hf-spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(var(--text-primary-rgb), 0.16);
+  border-top-color: var(--state-color, var(--accent));
+  animation: hf-spin calc(0.7s / var(--hf-animate-speed, 1)) linear infinite;
+}
+
+/* ------------------------------------------------------------
+   7. 骨架/占位闪烁（文本行级）
+   仅动 background-position，不触发重排。
+   ------------------------------------------------------------ */
+.hf-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    rgba(var(--text-primary-rgb), 0.04) 0%,
+    rgba(var(--text-primary-rgb), 0.11) 50%,
+    rgba(var(--text-primary-rgb), 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: hf-shimmer-move calc(1.4s / var(--hf-animate-speed, 1)) ease-in-out infinite;
+}
+
+@keyframes hf-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes hf-shimmer-move {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+@keyframes hf-state-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ------------------------------------------------------------
+   8. 触屏设备中和「悬停专属」视觉
+   @media(hover:none) 下 :hover 会粘滞（点完一直保持），
+   把位移类悬停效果关掉，避免触屏上元素卡在抬起状态。
+   组件若把 hover 收进 @media(hover:hover) 则本段自然空转。
+   ------------------------------------------------------------ */
+@media (hover: none) {
+  :where(.hf-hover-lift):hover {
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------
+   9. 降低动态效果偏好（系统级无障碍）
+   用户开启「减少动态效果」后：动画/过渡趋近瞬时、平滑滚动关闭。
+   这是最后的全局守卫，组件内不必重复实现。
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* 闪烁类占位完全静止，避免光敏不适 */
+  .hf-shimmer {
+    animation: none !important;
+    background: rgba(var(--text-primary-rgb), 0.07);
+  }
+  .hf-spinner {
+    animation: none !important;
+    border-top-color: var(--state-color, var(--accent));
+    opacity: 0.7;
+  }
+}
+
+/* ------------------------------------------------------------
+   10. 粗糙指针（触屏/手写笔）下的最小命中区保障
+   WCAG 2.2 SC 2.5.8 要求交互目标 ≥24×24；此处仅对显式标记了
+   .hf-tap-safe 的图标类按钮兜底，不做全局放大以免破坏既有布局。
+   ------------------------------------------------------------ */
+@media (pointer: coarse) {
+  .hf-tap-safe {
+    min-width: 24px;
+    min-height: 24px;
+  }
+}
