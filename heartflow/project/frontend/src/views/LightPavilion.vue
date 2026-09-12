@@ -301,6 +301,11 @@
       </div>
     </section>
 
+    <!-- 目标生长进度档案 · 进度快照/生长日志/里程碑轨迹（goal/goal-progress 引擎，INCR-270 补挂载孤儿组件，薄委托化：宿主注入目标） -->
+    <section data-enter class="ggap-section">
+      <GoalGrowthArchivePanel :goals="goal.goals.value" />
+    </section>
+
     <!-- 专项规划创建弹窗 -->
     <Teleport to="body"><Transition name="modal">
       <div v-if="showSpecialPlanModal" class="modal-overlay" @click.self="showSpecialPlanModal = false">
@@ -368,6 +373,7 @@ import type { GoalTier, GoalStatus, Goal } from '../modules/goal/types'
 import type { SpecialPlan } from '../modules/goal/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useLightPavilionData } from '../modules/light/pavilion-data'
+import GoalGrowthArchivePanel from '../components/GoalGrowthArchivePanel.vue'
 import { useRoomResonance } from '../modules/room-resonance'
 
 const { entranceRef, entranceClass } = useViewEntrance()

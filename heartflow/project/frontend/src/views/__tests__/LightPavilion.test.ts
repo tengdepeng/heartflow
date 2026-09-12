@@ -310,4 +310,137 @@ describe('LightPavilion 概览统计口径', () => {
     expect(completedVal).toBe('1') // 已完成目标 = 1
     expect(milestoneVal).toBe('1') // 已完成计划（里程碑） = 1
   })
+
+  // ============================================================
+  // 目标生长进度档案（INCR-270：薄委托化挂载 GoalGrowthArchivePanel 至留光阁）
+  // 引擎 useProgressSnapshots/useGrowthLogs/useMilestoneTimeline 有状态：经 storage.getKV/setKV('hf:goal_progress_snapshots'/'hf:goal_progress_logs'/'hf:goal_milestones') 持久化，测试直接 seed kvStore；
+  // goal.goals 经 storage.getGoals(savedGoals) 注入，目标 status 即生长阶段（computeStats 直接计 status 分布）
+  // ============================================================
+  describe('集成：目标生长进度档案', () => {
+    const SNAP = 'hf:goal_progress_snapshots'
+    const LOG = 'hf:goal_progress_logs'
+    const MS = 'hf:goal_milestones'
+
+    function gs(wrapper: any) {
+      const el = wrapper.find('.ggap-panel')
+      expect(el.exists()).toBe(true)
+      return el
+    }
+
+    function seedGoals(over: any[] = []) {
+      savedGoals = [
+        {
+          id: 'g1', title: '掌握 Vue 3', description: '', tier: 'target',
+          status: 'growing', domain: 'growth', order: 0,
+          createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-02T00:00:00Z',
+          anchorCount: 3, anchorDone: 2,
+        },
+        ...over,
+      ]
+    }
+
+    it('无目标时显示空态引导与「尚未启程」徽标', async () => {
+      savedGoals = []
+      const wrapper = await getWrapper()
+      const el = gs(wrapper)
+      expect(el.text()).toContain('🌱 目标生长进度档案')
+      expect(el.text()).toContain('尚未启程')
+      expect(el.text()).toContain('留光阁尚未点亮目标。在穹顶点亮一颗星')
+      expect(el.text()).toContain('0 个目标')
+    })
+
+    it('有目标时渲染档案概览六格与生长阶段分布', async () => {
+      seedGoals([{ id: 'g2', title: '完成的项目A', description: '', tier: 'target', status: 'bloom', domain: 'work', order: 1, createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-03T00:00:00Z', completedAt: '2026-01-03T00:00:00Z', anchorCount: 0, anchorDone: 0 }])
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      const el = gs(wrapper)
+      expect(el.text()).toContain('2 个目标 · 已开花 1 个')
+      expect(el.text()).toContain('生长中')
+      expect(el.findAll('.ggap-cell').length).toBe(6)
+      expect(el.text()).toContain('总目标')
+      expect(el.text()).toContain('进行中')
+      expect(el.text()).toContain('已开花')
+      expect(el.findAll('.ggap-phase-row').length).toBe(5)
+      expect(el.text()).toContain('发芽')
+      expect(el.text()).toContain('休眠中')
+    })
+
+    it('目标标签与详情展示状态、步骤、进度', async () => {
+      seedGoals()
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      const el = gs(wrapper)
+      expect(el.findAll('.ggap-target-tab').length).toBe(1)
+      expect(el.find('.ggap-target-tab').text()).toContain('掌握 Vue 3')
+      expect(el.find('.ggap-target-detail').exists()).toBe(true)
+      expect(el.text()).toContain('2/3 步')
+      expect(el.text()).toContain('进度 67%')
+      expect(el.text()).toContain('已记录快照 0 次')
+    })
+
+    it('里程碑时间线渲染并计算进度', async () => {
+      seedGoals()
+      kvStore[MS] = [{ goalId: 'g1', title: '掌握 Vue 3', milestones: [
+        { id: 'm1', label: '学习 API', date: '2026-01-05T00:00:00Z', status: 'achieved', type: 'checkpoint' },
+        { id: 'm2', label: '完成项目', date: '2026-02-01T00:00:00Z', status: 'pending', type: 'completion' },
+      ] }]
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      const el = gs(wrapper)
+      expect(el.findAll('.ggap-ms-row').length).toBe(2)
+      expect(el.text()).toContain('学习 API')
+      expect(el.text()).toContain('完成项目')
+      expect(el.find('.ggap-ms-progress').text()).toContain('50%')
+    })
+
+    it('记录进度快照写入存储并更新计数', async () => {
+      seedGoals()
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      await gs(wrapper).find('.ggap-snap-btn').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(kvStore[SNAP].length).toBe(1)
+      expect(gs(wrapper).text()).toContain('已记录快照 1 次')
+    })
+
+    it('添加里程碑生成条目并落持久化', async () => {
+      seedGoals()
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      await gs(wrapper).find('.ggap-ms-input').setValue('新里程碑')
+      await gs(wrapper).find('.ggap-ms-add-btn').trigger('click')
+      await wrapper.vm.$nextTick()
+      const el = gs(wrapper)
+      expect(el.findAll('.ggap-ms-row').length).toBe(1)
+      expect(el.text()).toContain('新里程碑')
+      expect(kvStore[MS][0].milestones.length).toBe(1)
+    })
+
+    it('切换里程碑达成状态标记划线', async () => {
+      seedGoals()
+      kvStore[MS] = [{ goalId: 'g1', title: '掌握 Vue 3', milestones: [
+        { id: 'm1', label: '学习 API', date: '2026-01-05T00:00:00Z', status: 'pending', type: 'checkpoint' },
+      ] }]
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      await gs(wrapper).find('.ggap-ms-check').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(gs(wrapper).find('.ggap-ms-row.ms-achieved').exists()).toBe(true)
+      expect(kvStore[MS][0].milestones[0].status).toBe('achieved')
+    })
+
+    it('渲染近期生长日志', async () => {
+      seedGoals()
+      kvStore[LOG] = [
+        { id: 'l1', goalId: 'g1', event: '进度更新', detail: '完成 2/3 步', recordedAt: '2026-01-10T00:00:00Z' },
+        { id: 'l2', goalId: 'g1', event: '状态变更', detail: '发芽 → 生长中', fromStatus: 'sprout', toStatus: 'growing', recordedAt: '2026-01-11T00:00:00Z' },
+      ]
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      const el = gs(wrapper)
+      expect(el.findAll('.ggap-log-row').length).toBe(2)
+      expect(el.text()).toContain('进度更新')
+      expect(el.text()).toContain('状态变更')
+    })
+  })
 })
