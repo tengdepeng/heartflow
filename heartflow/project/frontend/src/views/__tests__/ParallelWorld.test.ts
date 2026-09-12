@@ -630,6 +630,202 @@ describe('集成：知识迁移面板', () => {
   })
 })
 
+// ============================================================
+// 集成：世界融合面板 WorldMergePanel（INCR-266 补挂载孤儿组件）
+// 引擎 useWorldMergeEngine 无状态（mergePreviews/mergeResults/rollbackHistory 每次调用新建局部 ref、无持久化），
+// 薄委托化：宿主注入 branches/checkpoints/snapshots，面板直驱引擎当前实例
+// 注意：页面存在其他同名 aria-label 的 select（源分支/目标分支），一律在 .wmp 作用域内查找
+// ============================================================
+describe('集成：世界融合面板', () => {
+  const K_BRANCHES = 'hf:parallel-world:branches'
+  const K_CHECKPOINTS = 'hf:parallel-world:checkpoints'
+  const K_SNAPSHOTS = 'hf:parallel-world:snapshots'
+
+  function makeBranch(id: string, name: string, overrides: Record<string, any> = {}) {
+    return {
+      id, name, description: '', color: '#4A90D9',
+      createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined,
+      isActive: false, checkpointCount: 0, ...overrides,
+    }
+  }
+
+  function makeCheckpoint(id: string, branchId: string, label: string, overrides: Record<string, any> = {}) {
+    return {
+      id, branchId, label, description: '',
+      snapshot: { [id]: 1 }, createdAt: '2026-01-01T00:00:00.000Z',
+      tags: [], ...overrides,
+    }
+  }
+
+  function seedWorld(branches: any[], checkpoints: any[] = [], snapshots: any[] = []) {
+    mockStore[K_BRANCHES] = branches
+    mockStore[K_CHECKPOINTS] = checkpoints
+    mockStore[K_SNAPSHOTS] = snapshots
+  }
+
+  function wmp(wrapper: any) {
+    const el = wrapper.find('.wmp')
+    expect(el.exists()).toBe(true)
+    return el
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+  })
+
+  it('渲染骨架与融合统计徽标', async () => {
+    const wrapper = await getWrapper()
+    const panel = wmp(wrapper)
+    expect(panel.text()).toContain('🧬 世界融合')
+    expect(panel.text()).toContain('分支合并 · 遗产继承 · 回滚')
+    expect(panel.text()).toContain('0 次融合 · 0 回滚')
+  })
+
+  it('分支不足两个时显示空态引导', async () => {
+    const wrapper = await getWrapper()
+    expect(wmp(wrapper).text()).toContain('至少需要两个时间分支才能融合。先在「分支星图」种下分支与检查点。')
+  })
+
+  it('单个分支仍视为不足并保持空态', async () => {
+    seedWorld([makeBranch('b1', '分支一')])
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wmp(wrapper)
+    expect(panel.find('.wmp-form').exists()).toBe(false)
+    expect(panel.text()).toContain('至少需要两个时间分支才能融合。')
+  })
+
+  it('两个分支渲染合并表单与策略推荐', async () => {
+    seedWorld(
+      [makeBranch('b1', '分支一'), makeBranch('b2', '分支二')],
+      [makeCheckpoint('cp1', 'b1', '起点')],
+    )
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wmp(wrapper)
+    // 源/目标两个下拉
+    const selects = panel.findAll('select.wmp-input')
+    expect(selects.length).toBe(2)
+    // 两个操作按钮（预览/执行融合）
+    expect(panel.findAll('.wmp-run').length).toBe(1)
+    // 选好源/目标后出现策略推荐（目标分支无检查点 → 快进合并）
+    await pickSourceTarget(panel)
+    expect(panel.find('.wmp-reco').exists()).toBe(true)
+    expect(panel.text()).toContain('快进合并')
+    expect(panel.text()).toContain('目标分支无检查点，建议快进合并')
+  })
+
+  it('预览合并展示统计与冲突列表', async () => {
+    seedWorld(
+      [makeBranch('b1', '分支一'), makeBranch('b2', '分支二')],
+      [
+        makeCheckpoint('cp1', 'b1', '起点', { tags: ['重要'] }),
+        makeCheckpoint('cp2', 'b2', '起点', { tags: ['重要'] }),
+      ],
+    )
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wmp(wrapper)
+    await pickSourceTarget(panel)
+    await panel.find('.wmp-btn').trigger('click')
+    await nextTick()
+    // 合并预览统计块（新增/修改/冲突）
+    expect(panel.find('.wmp-preview-grid').exists()).toBe(true)
+    expect(panel.text()).toContain('合并预览')
+    expect(panel.text()).toContain('三方合并')
+    // 同标签同标签集 → 修改 1 + 标签冲突 + 标签名冲突
+    expect(panel.text()).toContain('标签冲突')
+    expect(panel.text()).toContain('标签名冲突')
+    expect(panel.findAll('.wmp-conflict').length).toBeGreaterThan(0)
+  })
+
+  it('自动解决非关键冲突后标记已解决', async () => {
+    seedWorld(
+      [makeBranch('b1', '分支一'), makeBranch('b2', '分支二')],
+      [
+        makeCheckpoint('cp1', 'b1', '起点', { tags: ['重要'] }),
+        makeCheckpoint('cp2', 'b2', '起点', { tags: ['重要'] }),
+      ],
+    )
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wmp(wrapper)
+    await pickSourceTarget(panel)
+    await panel.find('.wmp-btn').trigger('click')
+    await nextTick()
+    expect(panel.findAll('.wmp-conflict').length).toBeGreaterThan(0)
+    await panel.find('.wmp-auto').trigger('click')
+    await nextTick()
+    // 标签冲突(info)与标签名冲突(warning)均为非关键 → 自动解决
+    expect(panel.findAll('.wmp-conflict-done').length).toBe(panel.findAll('.wmp-conflict').length)
+  })
+
+  it('执行融合成功并展示遗产与回滚历史', async () => {
+    seedWorld(
+      [makeBranch('b1', '分支一'), makeBranch('b2', '分支二')],
+      [
+        makeCheckpoint('cp1', 'b1', '起点'),
+        makeCheckpoint('cp2', 'b2', '转折'),
+      ],
+    )
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wmp(wrapper)
+    await pickSourceTarget(panel)
+    await panel.find('.wmp-run').trigger('click')
+    await nextTick()
+    // 无冲突 → 三方合并成功
+    const result = panel.find('.wmp-result')
+    expect(result.exists()).toBe(true)
+    expect(result.text()).toContain('✓ 融合成功')
+    expect(result.text()).toContain('三方合并')
+    // 遗产继承
+    expect(panel.text()).toContain('遗产继承')
+    expect(panel.text()).toContain('检查点')
+    // 回滚历史
+    expect(panel.text()).toContain('回滚历史')
+    expect(panel.text()).toContain('合并"分支一"到"分支二"')
+    // 徽标计数更新
+    expect(panel.text()).toContain('1 次融合 · 1 回滚')
+  })
+
+  it('关键冲突未解决时执行无结果，手动解决后可融合成功', async () => {
+    seedWorld(
+      [makeBranch('b1', '分支一'), makeBranch('b2', '分支二')],
+      [
+        makeCheckpoint('cp1', 'b1', '起点', { snapshot: { a: 1 } }),
+        makeCheckpoint('cp2', 'b2', '起点', { snapshot: { a: 2 } }),
+      ],
+    )
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const panel = wmp(wrapper)
+    await pickSourceTarget(panel)
+    await panel.find('.wmp-btn').trigger('click')
+    await nextTick()
+    // 同标签共享字段不一致 → 关键数据冲突（severity 类在 .wmp-conflict-sev 上）
+    expect(panel.findAll('.wmp-conflict-sev.sev-critical').length).toBeGreaterThan(0)
+    // 关键冲突未解决 → 引擎拒绝合并，失败结果不落 mergeResults → 面板无结果展示
+    await panel.find('.wmp-run').trigger('click')
+    await nextTick()
+    expect(panel.find('.wmp-result').exists()).toBe(false)
+    // 手动解决全部冲突（合并）→ 执行融合成功
+    const mergeBtns = panel.findAll('.wmp-conflict .wmp-merge')
+    expect(mergeBtns.length).toBeGreaterThan(0)
+    for (const b of mergeBtns) {
+      await b.trigger('click')
+      await nextTick()
+    }
+    expect(panel.findAll('.wmp-conflict-done').length).toBe(panel.findAll('.wmp-conflict').length)
+    await panel.find('.wmp-run').trigger('click')
+    await nextTick()
+    const result = panel.find('.wmp-result')
+    expect(result.exists()).toBe(true)
+    expect(result.text()).toContain('✓ 融合成功')
+  })
+})
+
 async function pickSourceTarget(panel: any) {
   const sourceSel = panel.find('select[aria-label="源分支"]')
   await sourceSel.setValue('b1')
