@@ -434,3 +434,105 @@ describe('集成：幕僚互动面板', () => {
     expect(wrapper.text()).toContain('互动 1 次')
   })
 })
+
+// ============================================================
+// 集成：见证收件箱 AdvisorWitnessPanel（INCR-279 补挂载孤儿组件）
+// 引擎 useAdvisorWitness 的 witnesses 为模块级 ref（import 时自 storage 读一次）——
+// 故本 describe 每个用例 beforeEach 先 vi.resetModules() 再 seed mockStore，
+// 使各用例独立、无模块态污染
+// ============================================================
+describe('集成：见证收件箱', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAdvisors.length = 0
+    mockStore['hf:advisors'] = []
+    delete mockStore['hf:advisor:witnesses']
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    if (activeWrapper) {
+      activeWrapper.unmount()
+      activeWrapper = null
+    }
+    document.querySelectorAll('.ah-dialog-overlay').forEach(el => el.remove())
+  })
+
+  function seedWitnesses(entries: any[]) {
+    mockStore['hf:advisor:witnesses'] = JSON.stringify(entries)
+  }
+
+  it('无幕僚时渲染骨架与空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.awp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('📜 见证收件箱')
+    expect(wrapper.text()).toContain('幕僚见证你的每一次成长')
+    expect(wrapper.find('.awp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('先创建幕僚，才能记录见证')
+  })
+
+  it('有幕僚无见证时展示录入区并预填第一位幕僚', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_w1', name: '墨染' }))
+    mockAdvisors.push(sampleProfile({ id: 'a_w2', name: '青鸟' }))
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('记录一次见证')
+    // 幕僚选择器 + 事件类型选择器 = 2 个
+    expect(wrapper.findAll('.awp-select').length).toBe(2)
+    // onMounted 预填第一位幕僚
+    expect((wrapper.find('.awp-select').element as HTMLSelectElement).value).toBe('a_w1')
+    expect(wrapper.find('.awp-add-btn').exists()).toBe(true)
+    expect(wrapper.text()).toContain('还没有见证')
+  })
+
+  it('记录见证后展示统计、列表与未读标记并写回存储', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_w1', name: '墨染' }))
+    const wrapper = await getWrapper()
+    await wrapper.find('.awp-input').setValue('连续专注 7 天')
+    await wrapper.find('.awp-add-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('1 次见证')
+    expect(wrapper.find('.awp-stat b').text()).toBe('1')
+    expect(wrapper.text()).toContain('首次专注')
+    expect(wrapper.text()).toContain('连续专注 7 天')
+    expect(wrapper.find('.awp-unviewed-dot').exists()).toBe(true)
+    const saved = JSON.parse(mockStore['hf:advisor:witnesses'])
+    expect(saved.length).toBe(1)
+    expect(saved[0].advisorId).toBe('a_w1')
+    expect(saved[0].eventType).toBe('first-focus')
+  })
+
+  it('点击未读见证标记已读并展示幕僚反应', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_w1', name: '墨染', personality: 'steady' }))
+    const wrapper = await getWrapper()
+    const selects = wrapper.findAll('.awp-select')
+    await selects[1].setValue('emotion-breakthrough')
+    await wrapper.find('.awp-input').setValue('情绪突破之夜')
+    await wrapper.find('.awp-add-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.awp-unviewed-dot').exists()).toBe(true)
+    await wrapper.find('.awp-item').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.awp-unviewed-dot').exists()).toBe(false)
+    expect(wrapper.find('.awp-reaction').exists()).toBe(true)
+    // steady 性格不在 reactions 映射（guardian/scholar/craftsman/hermit）→ 走默认反应池
+    expect(wrapper.text()).toMatch(/情绪的突破|你正在变得更完整/)
+  })
+
+  it('已有历史见证时渲染列表、统计与已读反应', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_w1', name: '墨染', personality: 'steady' }))
+    seedWitnesses([
+      { id: 'w1', advisorId: 'a_w1', eventType: 'first-focus', title: '第一次专注', timestamp: '2026-09-01T10:00:00.000Z', viewed: true },
+      { id: 'w2', advisorId: 'a_w1', eventType: 'streak-record', title: '连击 7 天', timestamp: '2026-09-02T10:00:00.000Z', viewed: false },
+    ])
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('2 次见证')
+    expect(wrapper.text()).toContain('第一次专注')
+    expect(wrapper.text()).toContain('连击 7 天')
+    expect(wrapper.findAll('.awp-item').length).toBe(2)
+    // 已读项展示反应、未读项保留未读圆点
+    expect(wrapper.findAll('.awp-reaction').length).toBe(1)
+    expect(wrapper.findAll('.awp-unviewed-dot').length).toBe(1)
+    expect(wrapper.find('.awp-item.unviewed').text()).toContain('连击 7 天')
+    expect(wrapper.find('.awp-item.unviewed').text()).toContain('连击记录')
+  })
+})

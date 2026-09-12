@@ -149,6 +149,11 @@
       <AdvisorInteractionPanel :advisors="advisors" />
     </section>
 
+    <!-- 见证收件箱（INCR-279 补挂载孤儿组件 AdvisorWitnessPanel：记录见证/事件统计/未读已读/幕僚反应，引擎 useAdvisorWitness 唯一、advisors props 薄委托注入） -->
+    <section data-enter class="ah-section">
+      <AdvisorWitnessPanel :advisors="advisors" />
+    </section>
+
     <div data-enter v-if="!advisors.length" class="ah-empty-hint"><span>🏛</span><p>幕僚大厅等待第一位居民</p></div>
 
     <!-- 编辑弹窗 -->
@@ -195,6 +200,7 @@ import AdvisorScheduler from '../components/AdvisorScheduler.vue'
 import DialogueSessionList from '../components/DialogueSessionList.vue'
 import AdvisorCarrierEditor from '../components/AdvisorCarrierEditor.vue'
 import AdvisorInteractionPanel from '../components/AdvisorInteractionPanel.vue'
+import AdvisorWitnessPanel from '../components/AdvisorWitnessPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
 import { getNoteStore } from '../modules/note'
