@@ -304,3 +304,92 @@ describe('SpaceCustomizer 维度编辑器', () => {
     expect(editBtn.length).toBeGreaterThan(0)
   })
 })
+
+// ============================================================
+// 集成：装修档案（INCR-272：薄委托化挂载 RenovationArchivePanel 至空间自定义）
+// 引擎 useCustomizationBridge 部分有状态：
+//  - activeConfig 经 getKV('hf:space_configs'/'hf:active_space_config') 每次读库 → seed mockStore 可驱动；
+//  - recentActivity 经 usePreviewEngine history=getKV('hf:customization:history' JSON 字符串) 实例级读库 → seed 可驱动；
+//  - 主题/布局为模块级单例（默认 theme_dusk/layout_grid_3x3 恒定 +15/+10），快照单例不复读 → 不 seed 快照驱动。
+// 健康度按 createConfig(7 维全配 + standard 预设)=20+15+30+15+10=90。
+// ============================================================
+describe('集成：装修档案', () => {
+  const HISTORY = 'hf:customization:history'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:space_configs'] = []
+    mockStore['hf:active_space_config'] = null
+    mockStore[HISTORY] = '[]'
+    mockStore['hf:customization:snapshots'] = []
+  })
+
+  function rnp(wrapper: any) {
+    const el = wrapper.find('.rnp-panel')
+    expect(el.exists()).toBe(true)
+    return el
+  }
+
+  it('空态：标题/「装修未启」徽标/空态引导文案', async () => {
+    const wrapper = await getWrapper()
+    const el = rnp(wrapper)
+    expect(el.text()).toContain('🏛️ 装修档案')
+    expect(el.text()).toContain('装修未启')
+    expect(el.text()).toContain('还没有空间配置与装修活动。定制第一个空间、点亮主题与布局后，健康度、维度配置与最近活动便会在此显影。')
+  })
+
+  it('有活跃配置：渲染装修健康度分数与「装修完备」徽标', async () => {
+    const config = createConfig()
+    mockStore['hf:space_configs'] = [config]
+    mockStore['hf:active_space_config'] = config.id
+    const wrapper = await getWrapper()
+    const el = rnp(wrapper)
+    expect(el.text()).not.toContain('装修未启')
+    expect(el.text()).toContain('装修健康度')
+    expect(el.find('.rnp-health-score b').text()).toBe('90')
+    expect(el.text()).toContain('装修完备')
+  })
+
+  it('渲染维度配置：全配时七个维度均为已配置点', async () => {
+    const config = createConfig()
+    mockStore['hf:space_configs'] = [config]
+    mockStore['hf:active_space_config'] = config.id
+    const wrapper = await getWrapper()
+    const el = rnp(wrapper)
+    expect(el.findAll('.rnp-dim').length).toBe(7)
+    expect(el.text()).toContain('空间结构')
+    expect(el.findAll('.rnp-dim-dot--on').length).toBe(7)
+  })
+
+  it('部分维度配置时仅显示已配置点亮且健康度「装修推进中」', async () => {
+    mockStore['hf:space_configs'] = [{
+      id: 'scP', name: '部分配置', description: '', presetId: '',
+      dimensions: [
+        { dimension: 'structure', label: '空间结构', icon: 'Layout', options: { layout: 'grid' } },
+      ],
+      createdAt: '2026-07-01T00:00:00Z', updatedAt: '2026-07-01T00:00:00Z',
+    }]
+    mockStore['hf:active_space_config'] = 'scP'
+    const wrapper = await getWrapper()
+    const el = rnp(wrapper)
+    expect(el.findAll('.rnp-dim').length).toBe(7)
+    expect(el.findAll('.rnp-dim-dot--on').length).toBe(1)
+    expect(el.text()).toContain('装修推进中')
+  })
+
+  it('渲染最近装修活动（更新/创建）', async () => {
+    mockStore[HISTORY] = JSON.stringify([
+      { id: 'h1', type: 'update', description: '调整了空间结构', changes: [], timestamp: '2026-08-01T10:00:00.000Z' },
+      { id: 'h2', type: 'create', description: '创建了首个配置', changes: [], timestamp: '2026-08-02T10:00:00.000Z' },
+    ])
+    const wrapper = await getWrapper()
+    const el = rnp(wrapper)
+    expect(el.text()).toContain('最近装修活动')
+    const acts = el.findAll('.rnp-activity')
+    expect(acts.length).toBe(2)
+    expect(el.text()).toContain('更新')
+    expect(el.text()).toContain('创建')
+    expect(el.text()).toContain('调整了空间结构')
+    expect(el.text()).toContain('创建了首个配置')
+  })
+})

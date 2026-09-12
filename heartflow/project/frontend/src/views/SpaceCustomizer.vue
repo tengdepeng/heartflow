@@ -284,6 +284,11 @@
       </div>
     </section>
 
+    <!-- 装修档案 · 健康度/维度/最近活动（customization/customization-bridge 引擎，INCR-272 补挂载孤儿组件，薄委托化：组件自包含） -->
+    <section data-enter class="sc-section">
+      <RenovationArchivePanel />
+    </section>
+
     <!-- 高级定制 -->
     <section data-enter class="sc-section">
       <h3 class="sc-section-title">高级定制</h3>
@@ -320,6 +325,7 @@ import { useAppSpaceManager } from '../modules/space/app-space-manager'
 import CustomizationAdvancedPanel from '../components/CustomizationAdvancedPanel.vue'
 import WorkspaceAdvancedPanel from '../components/WorkspaceAdvancedPanel.vue'
 import PreviewEnginePanel from '../components/PreviewEnginePanel.vue'
+import RenovationArchivePanel from '../components/RenovationArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { recordActivity } = useAppSpaceManager()
