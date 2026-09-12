@@ -33,6 +33,13 @@ vi.mock('../../engine/storage', () => ({
   },
 }))
 
+// 隔离「数字安息日」门控：本套用例仅锁定宪法第5条 notificationBlocked 门控，
+// 与安息日无关。安息日按 getDay()===0 判定（仅周日触发），会导致用例在周日
+// 时被 isSabbathOn() 提前拦截而失败（日期依赖）。固定为非安息日保证用例确定。
+vi.mock('../../../composables/useDigitalSabbath', () => ({
+  isSabbathOn: () => false,
+}))
+
 import { usePushChannel } from '../push-channel'
 
 describe('push-channel · 宪法第5条无推送硬门控', () => {
