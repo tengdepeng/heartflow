@@ -17,7 +17,9 @@ import {
 import type { RiverSource, RiverItem } from '../index'
 
 const NOW = new Date()
-const today = NOW.toISOString().slice(0, 10)
+// 会话固定用 2026-09-11（周五）：weekdayFocusRatio 断言依赖会话落在工作日，
+// 若改用"今天"，周末运行（两个会话都在周末）会令断言失败。
+const SESSION_DATE = '2026-09-11'
 
 function makeSource(partial?: Partial<RiverSource>): RiverSource {
   return {
@@ -25,14 +27,14 @@ function makeSource(partial?: Partial<RiverSource>): RiverSource {
     sessions: [
       {
         id: 's1', status: 'completed', mode: 'focus', plannedDuration: 1500000,
-        elapsed: 1500000, startedAt: `${today}T09:00:00`, pausedDuration: 0,
-        pausedAt: null, completedAt: `${today}T09:25:00`, tags: ['写作'],
+        elapsed: 1500000, startedAt: `${SESSION_DATE}T09:00:00`, pausedDuration: 0,
+        pausedAt: null, completedAt: `${SESSION_DATE}T09:25:00`, tags: ['写作'],
         note: '', carrierId: null,
       },
       {
         id: 's2', status: 'completed', mode: 'focus', plannedDuration: 3600000,
-        elapsed: 3600000, startedAt: `${today}T14:00:00`, pausedDuration: 0,
-        pausedAt: null, completedAt: `${today}T15:00:00`, tags: ['阅读'],
+        elapsed: 3600000, startedAt: `${SESSION_DATE}T14:00:00`, pausedDuration: 0,
+        pausedAt: null, completedAt: `${SESSION_DATE}T15:00:00`, tags: ['阅读'],
         note: '', carrierId: null,
       },
     ],

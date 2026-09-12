@@ -830,3 +830,182 @@ describe('KnowledgeTower 版本留档集成', () => {
     expect(groupLabels).toContain('全部节点')
   })
 })
+
+// ============================================================
+// 集成：间隔复习面板 knowledge-tower/SpacedReviewPanel（INCR-278 补挂载孤儿组件）
+// 引擎 modules/knowledge 的 useSpacedReview 为全库唯一消费方（经略阁已挂载
+// KnowledgeArchivePanel/StewardPanel/DecisionAnalysisPanel/FlashcardsPanel/
+// KnowledgeVersionPanel，但无「艾宾浩斯遗忘曲线 · 到期提醒 · 熟练度追踪」复习视角，
+// 面板空态文案「先在经略阁添加节点」直接指宿主）；复习计划走 storage 键
+// hf:knowledge:review_plans（loadPlans/savePlans getKV/setKV），useSpacedReview
+// 每次调用新建局部 ref → 无模块级污染；知识节点源 getNodes() 读 hf:knowledge_nodes
+// 为非响应式纯函数 → seed 需先于 mount。组件零 props、零 emits，onMounted 仅
+// loadPlans + computeReviewStats。宿主 KnowledgeTower 的 mount 为全量渲染，此处
+// 直接在视图级断言面板行为。
+// ============================================================
+describe('KnowledgeTower 间隔复习集成', () => {
+  const K_NODES = 'hf:knowledge_nodes'
+  const K_REVIEW = 'hf:knowledge:review_plans'
+  // 引擎以 new Date().toISOString() 为锚（UTC 日）——测试种子日期须与之一致
+  const todayStr = new Date().toISOString().split('T')[0]
+  const tomorrowStr = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+
+  function node(id: string, title: string, cat = 'concept', tags: string[] = []) {
+    return { id, title, desc: `${title}要点`, cat, links: [], tags }
+  }
+
+  function planItem(nodeId: string, title: string, mastery: number, overrides: Record<string, any> = {}) {
+    return {
+      nodeId,
+      title,
+      category: 'concept',
+      reviewCount: 1,
+      lastReviewedAt: todayStr,
+      nextReviewAt: tomorrowStr,
+      due: false,
+      mastery,
+      difficulty: 0.5,
+      ...overrides,
+    }
+  }
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore[K_NODES] = []
+    mockStore[K_REVIEW] = []
+  })
+
+  afterEach(() => {
+    document.body.querySelectorAll('.kt-modal-overlay').forEach(el => el.remove())
+  })
+
+  it('无节点无计划时展示标题与空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.srp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🕐 间隔复习')
+    expect(wrapper.text()).toContain('艾宾浩斯遗忘曲线 · 到期提醒 · 熟练度追踪')
+    expect(wrapper.find('.srp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('还没有知识节点。先在经略阁添加节点')
+  })
+
+  it('有节点无计划时展示待纳入CTA与生成按钮', async () => {
+    mockStore[K_NODES] = [node('kn_a', '艾宾浩斯曲线'), node('kn_b', '间隔效应')]
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.srp-block--cta').exists()).toBe(true)
+    expect(wrapper.text()).toContain('共 2 个知识节点待纳入复习节奏。')
+    const genBtn = wrapper.findAll('button').find(b => b.text().includes('生成今日复习计划'))
+    expect(genBtn).toBeDefined()
+  })
+
+  it('点击生成今日复习计划后展示统计与复习卡片', async () => {
+    // 难度 = tags*0.1+0.3 → kn_b(0.5) 高于 kn_a(0.4)，排序后 kn_b 在前
+    mockStore[K_NODES] = [
+      node('kn_a', '艾宾浩斯曲线', 'concept', ['记忆']),
+      node('kn_b', '间隔效应', 'rule', ['记忆', '学习']),
+    ]
+    const wrapper = await getWrapper()
+    const genBtn = wrapper.findAll('button').find(b => b.text().includes('生成今日复习计划'))
+    await genBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 统计总览出现（今日到期 2）
+    expect(wrapper.find('.srp-stats').exists()).toBe(true)
+    expect(wrapper.text()).toContain('今日到期')
+    expect(wrapper.text()).toContain('间隔效应')
+    // 复习卡片展示首个节点
+    expect(wrapper.find('.srp-card').exists()).toBe(true)
+    expect(wrapper.find('.srp-card').text()).toContain('间隔效应')
+    // 计划已写回存储
+    expect(mockStore[K_REVIEW]).toHaveLength(1)
+    expect(mockStore[K_REVIEW][0].date).toBe(todayStr)
+    expect(mockStore[K_REVIEW][0].items).toHaveLength(2)
+  })
+
+  it('点击卡片翻面展示要点内容', async () => {
+    mockStore[K_NODES] = [node('kn_a', '艾宾浩斯曲线', 'concept', ['记忆'])]
+    const wrapper = await getWrapper()
+    const genBtn = wrapper.findAll('button').find(b => b.text().includes('生成今日复习计划'))
+    await genBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.srp-front').isVisible()).toBe(true)
+    await wrapper.find('.srp-card').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.srp-card').classes()).toContain('flipped')
+    expect(wrapper.text()).toContain('艾宾浩斯曲线要点')
+    expect(wrapper.text()).toContain('还没记住')
+    expect(wrapper.text()).toContain('记得')
+  })
+
+  it('点击「记得」记录复习并推进到下一项', async () => {
+    mockStore[K_NODES] = [
+      node('kn_a', '艾宾浩斯曲线', 'concept', ['记忆']),
+      node('kn_b', '间隔效应', 'rule', ['记忆', '学习']),
+    ]
+    const wrapper = await getWrapper()
+    const genBtn = wrapper.findAll('button').find(b => b.text().includes('生成今日复习计划'))
+    await genBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 复习 kn_b → 翻面 → 记得
+    expect(wrapper.find('.srp-card').text()).toContain('间隔效应')
+    await wrapper.find('.srp-card').trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.srp-quality--good').trigger('click')
+    await wrapper.vm.$nextTick()
+    // 推进到 kn_a，且 mastery 已提升并写回存储
+    expect(wrapper.find('.srp-card').text()).toContain('艾宾浩斯曲线')
+    expect(mockStore[K_REVIEW][0].items.find((i: any) => i.nodeId === 'kn_b').mastery).toBe(0.15)
+    expect(mockStore[K_REVIEW][0].items.find((i: any) => i.nodeId === 'kn_b').due).toBe(false)
+  })
+
+  it('全部复习完成后展示完成态并写回存储', async () => {
+    mockStore[K_NODES] = [node('kn_a', '艾宾浩斯曲线', 'concept', ['记忆'])]
+    const wrapper = await getWrapper()
+    const genBtn = wrapper.findAll('button').find(b => b.text().includes('生成今日复习计划'))
+    await genBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.srp-card').trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.srp-quality--good').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('🎉 今日复习已完成，全部掌握！')
+    expect(mockStore[K_REVIEW][0].completed).toBe(true)
+    expect(mockStore[K_REVIEW][0].correctCount).toBe(1)
+  })
+
+  it('点击「还没记住」后该项保持到期且熟练度降低', async () => {
+    mockStore[K_NODES] = [node('kn_a', '艾宾浩斯曲线', 'concept', ['记忆'])]
+    const wrapper = await getWrapper()
+    const genBtn = wrapper.findAll('button').find(b => b.text().includes('生成今日复习计划'))
+    await genBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.srp-card').trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.srp-quality--forgot').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(mockStore[K_REVIEW][0].incorrectCount).toBe(1)
+    const item = mockStore[K_REVIEW][0].items[0]
+    expect(item.mastery).toBe(0)
+    expect(item.due).toBe(true)
+    expect(item.nextReviewAt).toBe(tomorrowStr)
+  })
+
+  it('有历史计划时统计区块展示平均熟练度与分布', async () => {
+    mockStore[K_NODES] = [node('kn_a', '艾宾浩斯曲线'), node('kn_b', '间隔效应')]
+    mockStore[K_REVIEW] = [{
+      id: `review-plan-${todayStr}`,
+      date: todayStr,
+      completed: true,
+      correctCount: 2,
+      incorrectCount: 0,
+      totalCount: 2,
+      items: [
+        planItem('kn_a', '艾宾浩斯曲线', 0.8),
+        planItem('kn_b', '间隔效应', 0.6),
+      ],
+    }]
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('70%') // (0.8+0.6)/2
+    expect(wrapper.text()).toContain('精通')
+    expect(wrapper.text()).toContain('熟悉')
+    expect(wrapper.text()).toContain('连续天数')
+  })
+})

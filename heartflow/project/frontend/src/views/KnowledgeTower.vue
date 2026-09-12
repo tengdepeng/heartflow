@@ -225,6 +225,9 @@
 
     <!-- 版本留档（INCR-260 补挂载孤儿组件：节点快照 · 变更追踪 · 回滚预览） -->
     <KnowledgeVersionPanel />
+
+    <!-- 间隔复习（INCR-278 补挂载孤儿组件：艾宾浩斯遗忘曲线 · 到期提醒 · 熟练度追踪） -->
+    <SpacedReviewPanel />
     </div>
   </div>
 </template>
@@ -258,6 +261,7 @@ import NodeEditModal from '../components/knowledge-tower/NodeEditModal.vue'
 import DecisionAnalysisPanel from '../components/DecisionAnalysisPanel.vue'
 import FlashcardsPanel from '../components/FlashcardsPanel.vue'
 import KnowledgeVersionPanel from '../components/knowledge-tower/KnowledgeVersionPanel.vue'
+import SpacedReviewPanel from '../components/knowledge-tower/SpacedReviewPanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
 import KnowledgeArchivePanel from '../components/KnowledgeArchivePanel.vue'
 

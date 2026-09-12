@@ -197,8 +197,11 @@ function loadAuditLog(): AuditLogEntry[] {
 }
 
 function loadRules(): ThreatRule[] {
-  try { return storage.getKV<ThreatRule[]>(RULES_KEY, DEFAULT_RULES) }
-  catch { return [...DEFAULT_RULES] }
+  try {
+    // 必须复制，避免 updateRule/toggleRule 原地改写到 DEFAULT_RULES 常量
+    return storage.getKV<ThreatRule[]>(RULES_KEY, DEFAULT_RULES).map(r => ({ ...r }))
+  }
+  catch { return DEFAULT_RULES.map(r => ({ ...r })) }
 }
 
 function persistIncidents() { storage.setKV(INCIDENT_KEY, incidents.value) }
