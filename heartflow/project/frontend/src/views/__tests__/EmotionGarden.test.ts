@@ -577,3 +577,97 @@ describe('集成：访客足迹面板', () => {
     expect(wrapper.text()).toContain('💬 回：谢谢来访')
   })
 })
+
+// ============================================================
+// 集成：花种杂交面板 FlowerHybridPanel（INCR-267 补挂载孤儿组件）
+// 引擎 useCrossBreeding 无状态（recipes/results 每次调用新建局部 ref、无 storage 读写、无持久化），
+// 零 props 直驱，onMounted 同步 initRecipes；默认季候 autumn（秋）。
+// 注意：①performCrossBreed 用 Math.random 判成功（actualRate = successRate ± 季候/情绪加成），
+//   以 vi.spyOn(Math,'random') 控制分支；②getAvailableRecipes 仅过滤季候与父本拥有，不过滤情绪，
+//   「愉悦心境」配方（无 requiredSeason）会在任意季候显示；③season 默认 autumn → 秋限定配方 + 愉悦配方。
+// ============================================================
+describe('集成：花种杂交面板', () => {
+  function cbp(wrapper: any) {
+    const el = wrapper.find('.cbp')
+    expect(el.exists()).toBe(true)
+    return el
+  }
+
+  function clickChip(wrapper: any, label: string) {
+    const el = cbp(wrapper)
+    const chip = el.findAll('.cbp-chip').find((c: any) => c.text().includes(label))
+    expect(chip).toBeTruthy()
+    return chip!.trigger('click')
+  }
+
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRecords.value = []
+    vi.restoreAllMocks()
+  })
+
+  it('渲染骨架、标题与初始统计徽标', async () => {
+    const wrapper = await getWrapper()
+    const panel = cbp(wrapper)
+    expect(panel.text()).toContain('🌼 花种杂交')
+    expect(panel.text()).toContain('配方 · 季候 · 变异')
+    // 四个统计徽标初始全 0
+    expect(panel.findAll('.cbp-stat').length).toBe(4)
+    expect(panel.text()).toContain('总尝试')
+    expect(panel.text()).toContain('成功')
+    expect(panel.text()).toContain('成功率')
+    expect(panel.text()).toContain('唯一产出')
+  })
+
+  it('默认季候秋展示秋限定与愉悦心境配方', async () => {
+    const wrapper = await getWrapper()
+    const panel = cbp(wrapper)
+    // 秋限定配方（nostalgia-maple × calm-chrysanthemum → reflective-cosmos）
+    expect(panel.text()).toContain('怀旧枫叶 × 平静菊花 → 沉思波斯菊')
+    expect(panel.text()).toContain('怀旧枫叶与平静菊花的杂交，产出沉思波斯菊')
+    expect(panel.text()).toContain('成功率 50%')
+    expect(panel.text()).toContain('秋限定')
+    // 愉悦心境配方（无 requiredSeason，任意季候显示）
+    expect(panel.text()).toContain('喜悦樱花 × 希望百合 → 灿烂莲花')
+    expect(panel.text()).toContain('愉悦心境')
+    // 春限定配方默认被过滤
+    expect(panel.text()).not.toContain('平和牡丹')
+  })
+
+  it('切换季候过滤配方列表', async () => {
+    const wrapper = await getWrapper()
+    await clickChip(wrapper, '春')
+    const panel = cbp(wrapper)
+    // 春限定配方出现，秋限定配方消失
+    expect(panel.text()).toContain('喜悦玫瑰 × 宁静薰衣草 → 平和牡丹')
+    expect(panel.text()).toContain('春限定')
+    expect(panel.text()).not.toContain('怀旧枫叶')
+    // 愉悦心境配方不受季候影响仍显示
+    expect(panel.text()).toContain('灿烂莲花')
+  })
+
+  it('杂交成功展示成功结果并更新统计', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.1) // 0.1 < autumn 配方成功率 0.5 → 成功
+    const wrapper = await getWrapper()
+    const panel = cbp(wrapper)
+    await panel.find('.cbp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(panel.find('.cbp-result').exists()).toBe(true)
+    expect(panel.text()).toContain('🌸杂交成功')
+    expect(panel.text()).toContain('怀旧枫叶 × 平静菊花')
+    // 统计：总尝试 1 / 成功 1 / 成功率 100%
+    expect(panel.text()).toContain('100%')
+  })
+
+  it('杂交失败展示失败与变异产出，成功率保持 0%', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.9) // 0.9 ≥ 成功率 → 失败
+    const wrapper = await getWrapper()
+    const panel = cbp(wrapper)
+    await panel.find('.cbp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(panel.find('.cbp-result.fail').exists()).toBe(true)
+    expect(panel.text()).toContain('🍂杂交失败')
+    // 失败时产生变异花朵（mutation）
+    expect(panel.text()).not.toContain('无收获')
+  })
+})
