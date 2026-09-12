@@ -715,4 +715,114 @@ describe('Study 视图', () => {
       expect(preview.text()).toContain('预览的正文内容')
     })
   })
+
+  // 笔记模板面板（INCR-274：薄委托化挂载 NoteTemplatePanel 至思绪书房）
+  // 引擎 useNoteTemplates 为无状态纯函数（每次调用新建 ref，无 storage 读写），面板渲染/创建/自定义逻辑由真实引擎背书
+  describe('集成：笔记模板面板', () => {
+    async function pickTemplate(wrapper: any, name: string) {
+      const card = wrapper.findAll('.ntp-list .ntp-card').find((c: any) => c.text().includes(name))
+      expect(card).toBeTruthy()
+      await card.find('.ntp-btn').trigger('click')
+      await nextTick()
+    }
+
+    function fieldOf(wrapper: any, label: string) {
+      const field = wrapper.findAll('.ntp-field').find((f: any) =>
+        f.find('.ntp-field-label').text().includes(label),
+      )
+      expect(field).toBeTruthy()
+      return field
+    }
+
+    function findBtn(wrapper: any, text: string) {
+      const btn = wrapper.findAll('.ntp-actions .ntp-btn').find((b: any) => b.text().includes(text))
+      expect(btn).toBeTruthy()
+      return btn
+    }
+
+    it('渲染骨架标题、副题与三个标签页', async () => {
+      mockNotes.value = [sampleNote()]
+      const wrapper = await getWrapper()
+      const el = wrapper.find('.ntp')
+      expect(el.exists()).toBe(true)
+      expect(el.text()).toContain('📋 笔记模板')
+      expect(el.text()).toContain('模板库 · 从模板创建 · 自定义')
+      expect(el.findAll('.ntp-tab').map((b: any) => b.text())).toEqual(['模板库', '创建笔记', '自定义'])
+    })
+
+    it('模板库展示内置模板列表与使用按钮', async () => {
+      const wrapper = await getWrapper()
+      const cards = wrapper.findAll('.ntp-list .ntp-card')
+      expect(cards.length).toBeGreaterThanOrEqual(8)
+      expect(wrapper.text()).toContain('会议笔记')
+      expect(wrapper.text()).toContain('灵感捕捉')
+      expect(cards[0]!.find('.ntp-btn').text()).toContain('使用')
+    })
+
+    it('未选模板时创建页显示空态引导', async () => {
+      const wrapper = await getWrapper()
+      await wrapper.findAll('.ntp-tab').find((b: any) => b.text() === '创建笔记')!.trigger('click')
+      await nextTick()
+      expect(wrapper.text()).toContain('先在「模板库」选择一个模板')
+    })
+
+    it('预览模板填充结果', async () => {
+      const wrapper = await getWrapper()
+      await pickTemplate(wrapper, '灵感捕捉')
+      await fieldOf(wrapper, '灵感标题').find('input').setValue('清晨的代码灵光')
+      await findBtn(wrapper, '预览').trigger('click')
+      await nextTick()
+      const preview = wrapper.find('.ntp-preview')
+      expect(preview.exists()).toBe(true)
+      expect(preview.text()).toContain('灵感: 清晨的代码灵光')
+    })
+
+    it('从模板创建笔记并回写宿主 study.create', async () => {
+      const wrapper = await getWrapper()
+      await pickTemplate(wrapper, '灵感捕捉')
+      await fieldOf(wrapper, '灵感标题').find('input').setValue('清晨的代码想法')
+      await fieldOf(wrapper, '详细描述').find('textarea').setValue('用一行代码捕捉一闪而过的灵感')
+      await findBtn(wrapper, '创建笔记').trigger('click')
+      await nextTick()
+      expect(mockCreate).toHaveBeenCalledTimes(1)
+      expect(mockCreate).toHaveBeenCalledWith(
+        '灵感: 清晨的代码想法',
+        expect.stringContaining('清晨的代码想法'),
+        ['灵感', '创意'],
+        false,
+      )
+    })
+
+    it('从笔记保存自定义模板并在列表展示', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '风格笔记', content: '模板正文', tags: ['风格'] })]
+      const wrapper = await getWrapper()
+      await wrapper.findAll('.ntp-tab').find((b: any) => b.text() === '自定义')!.trigger('click')
+      await nextTick()
+      await wrapper.find('.ntp-note-select').setValue('note_1')
+      await wrapper.find('.ntp-custom-name').setValue('我的风格模板')
+      await wrapper.find('.ntp-save-btn').trigger('click')
+      await nextTick()
+      expect(wrapper.text()).toContain('我的风格模板')
+      expect(wrapper.text()).toContain('工作 · 使用 0 次')
+      expect(wrapper.text()).toContain('删除')
+    })
+
+    it('删除自定义模板后列表回到空态', async () => {
+      mockNotes.value = [sampleNote({ id: 'note_1', title: '风格笔记', content: '模板正文', tags: ['风格'] })]
+      const wrapper = await getWrapper()
+      await wrapper.findAll('.ntp-tab').find((b: any) => b.text() === '自定义')!.trigger('click')
+      await nextTick()
+      await wrapper.find('.ntp-note-select').setValue('note_1')
+      await wrapper.find('.ntp-custom-name').setValue('待删模板')
+      await wrapper.find('.ntp-save-btn').trigger('click')
+      await nextTick()
+      expect(wrapper.text()).toContain('待删模板')
+      const card = wrapper.findAll('.ntp-block .ntp-card').find((c: any) => c.text().includes('待删模板'))
+      expect(card).toBeTruthy()
+      await card!.find('.ntp-btn--danger').trigger('click')
+      await nextTick()
+      expect(wrapper.text()).not.toContain('待删模板')
+      expect(wrapper.text()).toContain('还没有自定义模板')
+    })
+  })
 })

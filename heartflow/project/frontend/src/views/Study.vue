@@ -65,6 +65,9 @@
     <!-- 笔记导出（note/markdown-export 引擎：单篇/批量 Markdown/HTML/PDF/复制/预览/下载，INCR-268 补挂载孤儿组件，薄委托化：宿主注入笔记） -->
     <MarkdownExportPanel :notes="study.notes.value" />
 
+    <!-- 笔记模板（note/note-templates 引擎：模板库/从模板创建/自定义模板，INCR-274 补挂载孤儿组件，薄委托化：宿主注入笔记、create-note 回写作废） -->
+    <NoteTemplatePanel :notes="study.notes.value" @create-note="handleCreateNoteFromTemplate" />
+
     <!-- 书房气象档案（study/study-analytics 引擎：藏书概览/落字节奏/温故建议/书房健康/洞察，INCR-198） -->
     <StudyWeatherPanel />
 
@@ -287,6 +290,7 @@ import TapesPanel from '../components/TapesPanel.vue'
 import BacklinksPanel from '../components/BacklinksPanel.vue'
 import VersionHistoryPanel from '../components/VersionHistoryPanel.vue'
 import MarkdownExportPanel from '../components/MarkdownExportPanel.vue'
+import NoteTemplatePanel from '../components/NoteTemplatePanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
@@ -514,6 +518,11 @@ function openBlock(noteId: string, blockId: string) {
 // 快速记录：原子卡片落库（无标题 / 自动标签）
 function onQuickCapture(raw: string) {
   study.quickCapture(raw)
+}
+
+// 笔记模板创建落库：薄委托化，把面板生成的笔记写入书房（INCR-274）
+function handleCreateNoteFromTemplate(payload: { title: string; content: string; tags: string[] }) {
+  study.create(payload.title, payload.content, payload.tags, false)
 }
 
 // 删除
