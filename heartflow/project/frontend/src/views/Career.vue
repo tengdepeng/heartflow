@@ -333,6 +333,11 @@
       <SkillGapVisualizationPanel :skills="skillList" :milestones="milestoneAll" />
     </section>
 
+    <!-- 学习路径 · 缺口拆解/路径生成/进度追踪（career/skill-path useLearningPath 引擎，INCR-269 补挂载孤儿组件，薄委托化：宿主注入技能） -->
+    <section data-enter class="career-section lpp-section">
+      <LearningPathPanel :skills="skillList" />
+    </section>
+
     <!-- 影响力分析 · 网络健康度/影响力排行/中心度/传播力（career/skill-path useInfluenceAnalysis 引擎，INCR-232） -->
     <section data-enter class="career-section iap-section">
       <InfluenceAnalysisPanel :contacts="contacts" :connections="connections" />
@@ -487,6 +492,7 @@ import CareerVisualizationPanel from '../components/CareerVisualizationPanel.vue
 import CareerSimulatorPanel from '../components/CareerSimulatorPanel.vue'
 import SkillGapArchivePanel from '../components/SkillGapArchivePanel.vue'
 import SkillGapVisualizationPanel from '../components/SkillGapVisualizationPanel.vue'
+import LearningPathPanel from '../components/LearningPathPanel.vue'
 import TransitionRecommendPanel from '../components/TransitionRecommendPanel.vue'
 import InfluenceAnalysisPanel from '../components/InfluenceAnalysisPanel.vue'
 

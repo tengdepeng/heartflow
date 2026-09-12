@@ -733,4 +733,129 @@ describe('集成：影响力分析面板', () => {
     expect(w.text()).toContain('中心度')
     expect(w.findAll('.iap-cent-item').length).toBe(5)
   })
+
+  // ============================================================
+  // 学习路径面板（INCR-269：薄委托化挂载 LearningPathPanel 至业脉）
+  // 引擎 useLearningPath 有状态：经 storage.getKV/setKV('hf:career_learning_paths') 持久化，测试直接 seed mockStore；
+  // analyzeSkillGaps 对未掌握技能以 novice(内置 -1) 起算 → 新技能注定产生缺口，无需 seed 技能图谱亦可确定性驱动
+  // ============================================================
+  describe('集成：学习路径面板', () => {
+    const LP_KEY = 'hf:career_learning_paths'
+
+    function lpp(w: any) {
+      const el = w.find('.lpp')
+      expect(el.exists()).toBe(true)
+      return el
+    }
+
+    function findLppBtn(w: any, text: string) {
+      const btn = lpp(w).findAll('.lpp-btn').find((b: any) => b.text().includes(text))
+      expect(btn).toBeTruthy()
+      return btn
+    }
+
+    function seedPath() {
+      mockStore[LP_KEY] = [{
+        id: 'lp1',
+        type: 'linear',
+        name: '测试学习路径',
+        description: '',
+        targetRole: '技术负责人',
+        nodes: [{
+          id: 'n1', skillId: 's1', skillName: 'Vue', level: 1, prerequisites: [],
+          estimatedHours: 40, actualHours: 0, completed: false,
+          resources: [], description: '',
+        }],
+        totalEstimatedHours: 40, totalActualHours: 0, progress: 0,
+        createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-02T00:00:00Z',
+      }]
+    }
+
+    it('渲染骨架标题、副题与四指标', async () => {
+      const w = await getWrapper()
+      const el = lpp(w)
+      expect(el.text()).toContain('🧭 学习路径')
+      expect(el.text()).toContain('把技能缺口拆成可执行的路径，一步步走完')
+      expect(el.findAll('.lpp-metric').length).toBe(4)
+      expect(el.text()).toContain('路径总数')
+      expect(el.text()).toContain('进行中')
+      expect(el.text()).toContain('已完成')
+      expect(el.text()).toContain('平均进度')
+    })
+
+    it('无路径时显示空态与零指标', async () => {
+      const w = await getWrapper()
+      const el = lpp(w)
+      expect(el.find('.lpp-empty').exists()).toBe(true)
+      expect(el.text()).toContain('还没有学习路径，先分析技能缺口并生成一条吧')
+      expect(el.findAll('.lpp-metric b')[0].text()).toBe('0')
+    })
+
+    it('无必需技能时「分析缺口」按钮禁用', async () => {
+      const w = await getWrapper()
+      const disabled = lpp(w).findAll('.lpp-btn').filter((b: any) => b.attributes('disabled') !== undefined)
+      expect(disabled.length).toBeGreaterThan(0)
+    })
+
+    it('添加必需技能生成芯片', async () => {
+      const w = await getWrapper()
+      await lpp(w).find('.lpp-input--sm').setValue('设计')
+      await findLppBtn(w, '添加').trigger('click')
+      await w.vm.$nextTick()
+      const el = lpp(w)
+      expect(el.findAll('.lpp-chip').length).toBe(1)
+      expect(el.text()).toContain('设计 · 技术技能 → 中级')
+    })
+
+    it('分析缺口展示缺口列表与时长的', async () => {
+      const w = await getWrapper()
+      await lpp(w).find('.lpp-input--sm').setValue('设计')
+      await findLppBtn(w, '添加').trigger('click')
+      await findLppBtn(w, '分析缺口').trigger('click')
+      await w.vm.$nextTick()
+      const el = lpp(w)
+      expect(el.findAll('.lpp-gap').length).toBe(1)
+      expect(el.text()).toContain('设计')
+      expect(el.find('.lpp-gap-hours').text()).toContain('h')
+    })
+
+    it('生成学习路径后展示路径并更新指标', async () => {
+      const w = await getWrapper()
+      await lpp(w).find('.lpp-input').setValue('技术负责人')
+      await lpp(w).find('.lpp-input--sm').setValue('设计')
+      await findLppBtn(w, '添加').trigger('click')
+      await findLppBtn(w, '分析缺口').trigger('click')
+      await findLppBtn(w, '生成学习路径').trigger('click')
+      await w.vm.$nextTick()
+      const el = lpp(w)
+      expect(el.findAll('.lpp-path').length).toBe(1)
+      expect(el.find('.lpp-path-name').text()).toContain('技术负责人')
+      expect(el.findAll('.lpp-metric b')[0].text()).toBe('1')
+    })
+
+    it('展示已存路径并可展开/收起节点', async () => {
+      seedPath()
+      const w = await getWrapper()
+      const el = lpp(w)
+      expect(el.find('.lpp-path-name').text()).toContain('测试学习路径')
+      expect(el.find('.lpp-path-meta').text()).toContain('目标：技术负责人 · 1 节点 · 40h')
+      expect(el.find('.lpp-path-pct').text()).toContain('0%')
+      expect(el.find('.lpp-path-done').text()).toContain('0/1 已完成')
+      await el.find('.lpp-path-toggle').trigger('click')
+      await w.vm.$nextTick()
+      expect(el.findAll('.lpp-node').length).toBe(1)
+      expect(el.find('.lpp-node-name').text()).toContain('Vue')
+    })
+
+    it('勾选节点更新完成计数', async () => {
+      seedPath()
+      const w = await getWrapper()
+      const el = lpp(w)
+      await el.find('.lpp-path-toggle').trigger('click')
+      await w.vm.$nextTick()
+      await el.find('.lpp-node-check').trigger('click')
+      await w.vm.$nextTick()
+      expect(el.find('.lpp-path-done').text()).toContain('1/1 已完成')
+    })
+  })
 })
