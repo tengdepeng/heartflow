@@ -602,4 +602,117 @@ describe('Study 视图', () => {
       expect(resetConfig.maxVersionsPerNote).toBe(50)
     })
   })
+
+  // 笔记导出面板（INCR-268：薄委托化挂载 MarkdownExportPanel 至思绪书房）
+  // 引擎 useMarkdownExport 为无状态纯函数（无 ref、无 storage 读写、无持久化），单篇/批量 Markdown/HTML/PDF/复制/预览
+  describe('集成：笔记导出面板', () => {
+    function mdx(wrapper: any) {
+      const el = wrapper.find('.mdx')
+      expect(el.exists()).toBe(true)
+      return el
+    }
+
+    async function selectNote(wrapper: any, index: number) {
+      const item = mdx(wrapper).findAll('.mdx-item')[index]!
+      await item.find('input').setValue(true)
+      await nextTick()
+    }
+
+    function findBtn(wrapper: any, text: string) {
+      const btn = mdx(wrapper).findAll('.mdx-btn').find((b: any) => b.text().includes(text))
+      expect(btn).toBeTruthy()
+      return btn
+    }
+
+    it('渲染骨架标题、副题与三档格式', async () => {
+      mockNotes.value = [sampleNote()]
+      const wrapper = await getWrapper()
+      const el = mdx(wrapper)
+      expect(el.text()).toContain('📤 笔记导出')
+      expect(el.text()).toContain('单篇 · 批量 · Markdown / HTML / PDF')
+      expect(el.findAll('.mdx-fmt').length).toBe(3)
+      expect(el.text()).toContain('Markdown')
+      expect(el.text()).toContain('HTML')
+      expect(el.text()).toContain('PDF')
+    })
+
+    it('无笔记时显示书架空态引导', async () => {
+      mockNotes.value = []
+      const wrapper = await getWrapper()
+      const el = mdx(wrapper)
+      expect(el.find('.mdx-empty').exists()).toBe(true)
+      expect(el.text()).toContain('书架还空着，先写一篇笔记吧。')
+    })
+
+    it('有笔记时渲染笔记选择列表与标题标签', async () => {
+      mockNotes.value = [
+        sampleNote({ title: '导出笔记A', tags: ['vue'] }),
+        sampleNote({ id: 'n2', title: '导出笔记B', tags: ['test'] }),
+      ]
+      const wrapper = await getWrapper()
+      const el = mdx(wrapper)
+      const items = el.findAll('.mdx-item')
+      expect(items.length).toBe(2)
+      expect(el.text()).toContain('导出笔记A')
+      expect(el.text()).toContain('导出笔记B')
+      expect(el.text()).toContain('#vue')
+      expect(el.text()).toContain('#test')
+    })
+
+    it('未选中笔记时导出按钮禁用', async () => {
+      mockNotes.value = [sampleNote()]
+      const wrapper = await getWrapper()
+      const disabled = mdx(wrapper).findAll('.mdx-btn').filter((b: any) => b.attributes('disabled') !== undefined)
+      expect(disabled.length).toBeGreaterThan(0)
+    })
+
+    it('选中笔记后导出单篇生成结果并统计', async () => {
+      mockNotes.value = [sampleNote({ title: '导出单篇' })]
+      const wrapper = await getWrapper()
+      await selectNote(wrapper, 0)
+      await findBtn(wrapper, '导出单篇').trigger('click')
+      await nextTick()
+      const el = mdx(wrapper)
+      expect(el.find('.mdx-result').exists()).toBe(true)
+      expect(el.text()).toContain('导出单篇')
+      expect(el.text()).toContain('1 篇')
+      expect(el.find('.mdx-result-name').text()).toContain('.md')
+      expect(el.find('.mdx-btn--small').text()).toContain('下载')
+    })
+
+    it('切换 HTML 格式导出生成 .html 结果', async () => {
+      mockNotes.value = [sampleNote({ title: '导出HTML' })]
+      const wrapper = await getWrapper()
+      await selectNote(wrapper, 0)
+      await mdx(wrapper).findAll('.mdx-fmt').find((b: any) => b.text() === 'HTML')!.trigger('click')
+      await findBtn(wrapper, '导出单篇').trigger('click')
+      await nextTick()
+      expect(mdx(wrapper).find('.mdx-result-name').text()).toContain('.html')
+    })
+
+    it('批量导出多篇展示篇数与下载', async () => {
+      mockNotes.value = [
+        sampleNote({ title: '批量A' }),
+        sampleNote({ id: 'n2', title: '批量B' }),
+      ]
+      const wrapper = await getWrapper()
+      await selectNote(wrapper, 0)
+      await selectNote(wrapper, 1)
+      await findBtn(wrapper, '批量导出').trigger('click')
+      await nextTick()
+      expect(mdx(wrapper).text()).toContain('2 篇')
+      expect(mdx(wrapper).find('.mdx-result').exists()).toBe(true)
+    })
+
+    it('预览展示导出内容', async () => {
+      mockNotes.value = [sampleNote({ title: '预览笔记', content: '预览的正文内容' })]
+      const wrapper = await getWrapper()
+      await selectNote(wrapper, 0)
+      await findBtn(wrapper, '预览').trigger('click')
+      await nextTick()
+      const preview = mdx(wrapper).find('.mdx-preview')
+      expect(preview.exists()).toBe(true)
+      expect(preview.text()).toContain('预览的正文内容')
+    })
+  })
 })
