@@ -25,6 +25,9 @@
     <!-- 更漏本体：工作光仪 -->
     <ClepsydraPanel data-enter />
 
+    <!-- 四象限看板：任务管理（INCR-298 补挂载孤儿组件 QuadrantKanban：紧急×重要矩阵，新增/状态切换/删除/完成率统计，消费 useTaskManager + buildQuadrantBoard，宿主内引擎唯一，零 props 自持读桥） -->
+    <QuadrantKanban data-enter />
+
     <!-- 工作类子空间入口 -->
     <section data-enter class="clps-subgrid">
       <h2 class="clps-sub-title">工作类空间</h2>
@@ -46,6 +49,7 @@
 <script setup lang="ts">
 import { useViewEntrance } from '../composables/useViewEntrance'
 import ClepsydraPanel from '../components/ClepsydraPanel.vue'
+import QuadrantKanban from '../components/QuadrantKanban.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
