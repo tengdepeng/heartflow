@@ -511,19 +511,21 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
 .bar-sheen {
   position: absolute;
   top: 0;
-  left: -100%;
+  left: 0;
   width: 100%;
   height: 100%;
   background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.16) 45%, rgba(255, 246, 230, 0.26) 50%, rgba(255, 255, 255, 0.14) 55%, transparent 100%);
-  transform: rotate(0deg);
+  /* 扫光用 transform 平移（合成层，零布局）；原 left:-100%→100% 每帧触发布局 —— 全局常驻故是主因 */
+  transform: translateX(-100%);
+  will-change: transform, opacity;
   pointer-events: none;
   overflow: hidden;
   animation: bar-sheen calc(var(--bar-breath-dur, 7s) * 1.6) ease-in-out infinite;
 }
 @keyframes bar-sheen {
-  0%, 100% { left: -100%; opacity: 0; }
+  0%, 100% { transform: translateX(-100%); opacity: 0; }
   45% { opacity: 0.85; }
-  60% { left: 100%; opacity: 0; }
+  60% { transform: translateX(100%); opacity: 0; }
 }
 
 /* ---- 通用图标按钮（玻璃质感，背景/描边/内高光均随 --bar-a 收放，通透度无死角覆盖） ---- */

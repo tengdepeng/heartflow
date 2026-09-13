@@ -158,7 +158,12 @@
 .light-gate-branch-enter-to,
 .light-gate-return-enter-to {
   opacity: 1;
-  transform: scale(1) translate(0, 0);
+  /* 终态必须是 none，不能写 scale(1) translate(0, 0)：
+     任何非 none 的 transform（哪怕是恒等矩阵）都会为后代创建 containing block，
+     使房间内的 position:fixed 背景层被钉在内容容器上而非视口
+     （实测 .garden-ambient 由 720px 变 4242px，装饰层放大 5.9 倍，
+     单次布局达 303ms）。transform:none 与恒等变换视觉完全等价，故零视觉变化。 */
+  transform: none;
 }
 
 /* ---- 光门遮罩：方向区分的扫光效果 ---- */
@@ -305,7 +310,8 @@
 
 .view-entrance.enter-to > [data-enter] {
   opacity: 1;
-  transform: translateY(0);
+  /* 同上：终态用 none，避免恒等 transform 为后代创建 containing block */
+  transform: none;
 }
 
 .view-entrance.enter-to > [data-enter]:nth-child(1) { transition-delay: calc((var(--enter-delay) + 0ms) / var(--hf-animate-speed, 1)); }
