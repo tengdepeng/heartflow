@@ -1,6 +1,6 @@
 // ============================================================
 // 插件管理器 · 市场与依赖管理增强
-// 依赖解析、市场评分、更新管理
+// 依赖解析、更新管理
 // ============================================================
 
 import { ref, computed } from 'vue'
@@ -45,33 +45,6 @@ export interface VersionConflict {
   actualVersion: string
 }
 
-/** 插件评分 */
-export interface PluginRating {
-  pluginId: string
-  /** 平均评分 1-5 */
-  averageRating: number
-  /** 评分人数 */
-  ratingCount: number
-  /** 各星级分布 */
-  distribution: { stars: number; count: number }[]
-  /** 用户评论 */
-  reviews: PluginReview[]
-}
-
-/** 用户评论 */
-export interface PluginReview {
-  id: string
-  pluginId: string
-  userId: string
-  rating: number
-  title: string
-  content: string
-  /** 有用投票 */
-  helpfulCount: number
-  createdAt: string
-  updatedAt?: string
-}
-
 /** 插件更新 */
 export interface PluginUpdate {
   id: string
@@ -104,14 +77,10 @@ export interface MarketplaceStats {
   installedCount: number
   /** 可用更新数 */
   availableUpdates: number
-  /** 热门插件 */
-  popularPlugins: string[]
   /** 分类统计 */
   categoryStats: { category: string; count: number }[]
   /** 总下载量 */
   totalDownloads: number
-  /** 平均评分 */
-  averageRating: number
 }
 
 /** 更新策略 */
@@ -133,7 +102,6 @@ export interface UpdatePolicy {
 // ============================================================
 
 /** 存储键 */
-const PLUGIN_RATINGS_KEY = 'hf:plugin:ratings'
 const PLUGIN_UPDATES_KEY = 'hf:plugin:updates'
 const PLUGIN_POLICY_KEY = 'hf:plugin:policy'
 
@@ -143,23 +111,11 @@ const PLUGIN_POLICY_KEY = 'hf:plugin:policy'
 
 export function usePluginMarketplace() {
   // ---- 状态 ----
-  const ratings = ref<Map<string, PluginRating>>(new Map(loadRatings()))
   const updates = ref<PluginUpdate[]>(loadUpdates())
   const updatePolicy = ref<UpdatePolicy>(loadPolicy())
   const installedPlugins = ref<Map<string, string>>(new Map()) // pluginId -> version
 
   // ---- 持久化 ----
-
-  function loadRatings(): [string, PluginRating][] {
-    try {
-      const raw = storage.getKV<string>(PLUGIN_RATINGS_KEY, '[]')
-      return JSON.parse(raw).map((r: PluginRating) => [r.pluginId, r] as [string, PluginRating])
-    } catch { return [] }
-  }
-
-  function saveRatings() {
-    storage.setKV(PLUGIN_RATINGS_KEY, JSON.stringify([...ratings.value.values()]))
-  }
 
   function loadUpdates(): PluginUpdate[] {
     try {
@@ -284,90 +240,6 @@ export function usePluginMarketplace() {
     }
   }
 
-  // ---- 评分系统 ----
-
-  /** 添加评分 */
-  function addRating(
-    pluginId: string,
-    userId: string,
-    rating: number,
-    title: string,
-    content: string,
-  ): PluginRating {
-    let pluginRating = ratings.value.get(pluginId)
-    if (!pluginRating) {
-      pluginRating = {
-        pluginId,
-        averageRating: 0,
-        ratingCount: 0,
-        distribution: [1, 2, 3, 4, 5].map(stars => ({ stars, count: 0 })),
-        reviews: [],
-      }
-    }
-
-    // 检查是否已有评分
-    const existingReview = pluginRating.reviews.find(r => r.userId === userId)
-    const review: PluginReview = {
-      id: existingReview?.id ?? `review_${Date.now()}`,
-      pluginId,
-      userId,
-      rating,
-      title,
-      content,
-      helpfulCount: existingReview?.helpfulCount ?? 0,
-      createdAt: existingReview?.createdAt ?? new Date().toISOString(),
-      updatedAt: existingReview ? new Date().toISOString() : undefined,
-    }
-
-    if (existingReview) {
-      // 更新旧评分
-      const oldRating = existingReview.rating
-      const distEntry = pluginRating.distribution.find(d => d.stars === oldRating)
-      if (distEntry) distEntry.count--
-      const idx = pluginRating.reviews.indexOf(existingReview)
-      pluginRating.reviews[idx] = review
-    } else {
-      pluginRating.reviews.push(review)
-      pluginRating.ratingCount++
-    }
-
-    // 更新分布
-    const newDistEntry = pluginRating.distribution.find(d => d.stars === rating)
-    if (newDistEntry) newDistEntry.count++
-
-    // 重新计算平均分
-    const totalStars = pluginRating.reviews.reduce((s, r) => s + r.rating, 0)
-    pluginRating.averageRating = Math.round((totalStars / pluginRating.reviews.length) * 10) / 10
-
-    ratings.value.set(pluginId, pluginRating)
-    saveRatings()
-    return pluginRating
-  }
-
-  /** 获取插件评分 */
-  function getRating(pluginId: string): PluginRating | undefined {
-    return ratings.value.get(pluginId)
-  }
-
-  /** 标记评论有用 */
-  function markReviewHelpful(pluginId: string, reviewId: string): void {
-    const rating = ratings.value.get(pluginId)
-    if (!rating) return
-    const review = rating.reviews.find(r => r.id === reviewId)
-    if (review) {
-      review.helpfulCount++
-      saveRatings()
-    }
-  }
-
-  /** 热门插件 */
-  const topRatedPlugins = computed(() => {
-    return [...ratings.value.values()]
-      .sort((a, b) => b.averageRating - a.averageRating)
-      .slice(0, 10)
-      .map(r => r.pluginId)
-  })
-
   // ---- 更新管理 ----
 
   /** 检查更新 */
@@ -449,19 +321,12 @@ export function usePluginMarketplace() {
       categories.set(cat, (categories.get(cat) || 0) + 1)
     }
 
-    const allRatings = [...ratings.value.values()]
-    const avgRating = allRatings.length > 0
-      ? Math.round(allRatings.reduce((s, r) => s + r.averageRating, 0) / allRatings.length * 10) / 10
-      : 0
-
     return {
       totalPlugins: plugins.length,
       installedCount: installedPlugins.value.size,
       availableUpdates: availableUpdates.value.length,
-      popularPlugins: topRatedPlugins.value,
       categoryStats: [...categories.entries()].map(([category, count]) => ({ category, count })),
       totalDownloads: 0,
-      averageRating: avgRating,
     }
   }
 
@@ -472,24 +337,17 @@ export function usePluginMarketplace() {
 
   return {
     // 状态
-    ratings,
     updates,
     updatePolicy,
     installedPlugins,
 
     // 计算属性
-    topRatedPlugins,
     availableUpdates,
     pendingUpdateCount,
 
     // 依赖
     resolveDependencies,
     getDependencyTree,
-
-    // 评分
-    addRating,
-    getRating,
-    markReviewHelpful,
 
     // 更新
     checkForUpdates,

@@ -47,6 +47,7 @@ vi.mock('../../stores/plugin', () => ({
 vi.mock('../../modules/plugin/types', () => ({
   CORE_PLUGINS: [],
   PluginTier: {},
+  PERMISSION_LABELS: { 'data:read': '读取数据', 'data:write': '写入数据' },
 }))
 
 // ---- 模拟 pinia ----

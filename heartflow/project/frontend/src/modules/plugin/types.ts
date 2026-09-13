@@ -36,6 +36,20 @@ export interface PluginMeta {
   icon: string
 }
 
+/** 插件对外提供的能力（蓝图 L10612：经能力扩展对话分身） */
+export interface PluginCapability {
+  /** 能力标识 */
+  id: string
+  /** 中文名 */
+  label: string
+  /** 说明 */
+  description: string
+  /** 对话命中关键词（最长优先） */
+  keywords: string[]
+  /** 调用该能力所需权限 */
+  permission: PluginPermission
+}
+
 /** 插件声明（安装时公开） */
 export interface PluginManifest {
   meta: PluginMeta
@@ -54,6 +68,8 @@ export interface PluginManifest {
   entry: string
   /** 注册的钩子列表 */
   hooks?: string[]
+  /** 对外提供的能力清单（供房间经能力注册表调用） */
+  capabilities?: PluginCapability[]
 }
 
 /** 插件运行时状态 */
@@ -103,6 +119,22 @@ export const CORE_PLUGINS: PluginManifest[] = [
     permissions: ['read:current', 'write:data'],
     sandbox: { isolateFS: false, isolateNetwork: true, isolateDOM: false },
     entry: 'core:timer',
+    capabilities: [
+      {
+        id: 'start-focus',
+        label: '启动专注',
+        description: '启动一段专注计时（默认 25 分钟）',
+        keywords: ['专注', '开始专注', '番茄钟', '进入专注', '专注计时'],
+        permission: 'write:data',
+      },
+      {
+        id: 'start-rest',
+        label: '开始休息',
+        description: '进入休息 / 安全岛',
+        keywords: ['开始休息', '小憩', '歇一会', '休息一下'],
+        permission: 'write:data',
+      },
+    ],
   },
   {
     meta: {
@@ -117,6 +149,15 @@ export const CORE_PLUGINS: PluginManifest[] = [
     permissions: ['read:history', 'write:data'],
     sandbox: { isolateFS: false, isolateNetwork: true, isolateDOM: false },
     entry: 'core:crystal',
+    capabilities: [
+      {
+        id: 'crystal-stats',
+        label: '结晶统计',
+        description: '查看时间结晶的数量与近况',
+        keywords: ['时间结晶', '结晶统计', '多少结晶', '几颗结晶', '攒了多少结晶', '结晶架'],
+        permission: 'read:history',
+      },
+    ],
   },
   {
     meta: {
@@ -159,6 +200,15 @@ export const CORE_PLUGINS: PluginManifest[] = [
     permissions: ['read:history', 'write:data', 'export:data'],
     sandbox: { isolateFS: false, isolateNetwork: true, isolateDOM: false },
     entry: 'core:constitution',
+    capabilities: [
+      {
+        id: 'lookup-article',
+        label: '查宪法条款',
+        description: '按编号或浏览心流宪法条款',
+        keywords: ['宪法', '宪法条款', '第几条', '宪法第', '不可变条款'],
+        permission: 'read:history',
+      },
+    ],
   },
 ]
 

@@ -211,14 +211,12 @@ function makeMarketplaceStats(): MarketplaceStats {
     totalPlugins: 5,
     installedCount: 5,
     availableUpdates: 2,
-    popularPlugins: ['core-timer', 'core-crystal'],
     categoryStats: [
       { category: 'timer', count: 1 },
       { category: 'visual', count: 3 },
       { category: 'other', count: 1 },
     ],
     totalDownloads: 1000,
-    averageRating: 4.5,
   }
 }
 
@@ -328,7 +326,6 @@ function createMockManager(runtimes: PluginRuntime[]) {
 
 function createMockMarketplace() {
   return {
-    ratings: ref(new Map()),
     updates: ref([]),
     updatePolicy: ref({
       autoUpdate: false,
@@ -338,14 +335,10 @@ function createMockMarketplace() {
       lastCheckAt: null,
     }),
     installedPlugins: ref(new Map<string, string>()),
-    topRatedPlugins: computed(() => [] as string[]),
     availableUpdates: computed(() => [] as any[]),
     pendingUpdateCount: computed(() => 0),
     resolveDependencies: vi.fn(),
     getDependencyTree: vi.fn(),
-    addRating: vi.fn(),
-    getRating: vi.fn(),
-    markReviewHelpful: vi.fn(),
     checkForUpdates: vi.fn(),
     installUpdate: vi.fn(),
     installAllUpdates: vi.fn(),

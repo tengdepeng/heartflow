@@ -5,6 +5,11 @@
 
 import { usePluginStore } from '../../stores/plugin'
 import { storeToRefs } from 'pinia'
+import {
+  invokePluginCapability,
+  listAvailableCapabilities,
+  findCapabilityByKeyword,
+} from '../../modules/plugin/capability-registry'
 
 export function usePlugin() {
   const store = usePluginStore()
@@ -32,5 +37,10 @@ export function usePlugin() {
     revokeAllPermissions: store.revokeAllPermissions?.bind(store),
     installPlugin: store.installPlugin?.bind(store),
     uninstallPlugin: store.uninstallPlugin?.bind(store),
+
+    // 能力通道（蓝图 L10612：插件经能力扩展房间）
+    listCapabilities: listAvailableCapabilities,
+    findCapability: findCapabilityByKeyword,
+    invokeCapability: invokePluginCapability,
   }
 }

@@ -7,6 +7,7 @@ import type { PluginRuntime, PluginPermission } from './types'
 import { CORE_PLUGINS } from './types'
 import { storage } from '../../engine/storage'
 import { initPluginAPIs } from './api'
+import { registerCorePluginCapabilities } from './capability-impls'
 
 export type { PluginManifest, PluginRuntime, PluginPermission } from './types'
 export { CORE_PLUGINS, PERMISSION_LABELS } from './types'
@@ -54,6 +55,21 @@ export type {
 
 // ---- 插件市场与依赖管理 ----
 export { usePluginMarketplace } from './plugin-marketplace'
+
+// ---- 插件能力通道（蓝图 L10612：经能力扩展对话分身） ----
+export {
+  registerPluginCapability,
+  invokePluginCapability,
+  listAvailableCapabilities,
+  findCapabilityByKeyword,
+  getPluginCapabilities,
+  resolvePluginState,
+} from './capability-registry'
+export type {
+  CapabilityInvocationResult,
+  CapabilityFailure,
+  AvailableCapability,
+} from './capability-registry'
 export type {
   PluginDependency,
   DependencyResolution,
@@ -204,6 +220,9 @@ export function usePluginManager() {
 
 // 初始化插件API
 initPluginAPIs()
+
+// 注册内置核心插件的能力实现（能力声明见 types.CORE_PLUGINS）
+registerCorePluginCapabilities()
 
 // 自动初始化
 init()

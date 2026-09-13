@@ -44,6 +44,19 @@
               <span class="pl-plugin-version">v{{ p.manifest.meta.version }}</span>
             </div>
             <div class="pl-plugin-desc">{{ p.manifest.meta.description }}</div>
+            <div v-if="capsOf(p).length" class="plugin-caps">
+              <div class="caps-head">
+                <span class="caps-head-title">提供的能力</span>
+                <span class="caps-count">{{ capsOf(p).length }}</span>
+              </div>
+              <div class="caps-list">
+                <div v-for="cap in capsOf(p)" :key="cap.id" class="cap-row" :title="cap.description">
+                  <span class="cap-dot" :class="capState(p, cap)"></span>
+                  <span class="cap-label">{{ cap.label }}</span>
+                  <span class="cap-state" :class="capState(p, cap)">{{ capStateLabel(capState(p, cap)) }}</span>
+                </div>
+              </div>
+            </div>
             <div class="plugin-perms">
               <div class="perm-head">
                 <span class="perm-head-title">所需权限</span>
@@ -100,6 +113,19 @@
             <div class="pl-plugin-desc">{{ p.manifest.meta.description }}</div>
             <div v-if="p.manifest.meta.author" class="plugin-author">
               by {{ p.manifest.meta.author }}
+            </div>
+            <div v-if="capsOf(p).length" class="plugin-caps">
+              <div class="caps-head">
+                <span class="caps-head-title">提供的能力</span>
+                <span class="caps-count">{{ capsOf(p).length }}</span>
+              </div>
+              <div class="caps-list">
+                <div v-for="cap in capsOf(p)" :key="cap.id" class="cap-row" :title="cap.description">
+                  <span class="cap-dot" :class="capState(p, cap)"></span>
+                  <span class="cap-label">{{ cap.label }}</span>
+                  <span class="cap-state" :class="capState(p, cap)">{{ capStateLabel(capState(p, cap)) }}</span>
+                </div>
+              </div>
             </div>
             <div class="plugin-perms">
               <div class="perm-head">
@@ -158,7 +184,12 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { usePlugin } from '../resonance/bridges/plugin'
-import type { PluginTier, PluginRuntime, PluginPermission } from '../modules/plugin/types'
+import type {
+  PluginTier,
+  PluginRuntime,
+  PluginPermission,
+  PluginCapability,
+} from '../modules/plugin/types'
 import { PERMISSION_LABELS } from '../modules/plugin/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
@@ -202,6 +233,23 @@ function togglePerm(p: PluginRuntime, perm: string) {
 /** 一键撤销：清空该插件全部权限 */
 function revokeAll(p: PluginRuntime) {
   pluginBridge.revokeAllPermissions(p.manifest.meta.id)
+}
+
+/** 该插件对外声明的能力 */
+function capsOf(p: PluginRuntime): PluginCapability[] {
+  return p.manifest.capabilities ?? []
+}
+
+/** 能力就绪状态（与能力注册表前四重门控一致：插件启用 + 权限已授予） */
+type CapState = 'ready' | 'unauthorized' | 'disabled'
+function capState(p: PluginRuntime, cap: PluginCapability): CapState {
+  if (!p.enabled) return 'disabled'
+  if (!isGranted(p, cap.permission)) return 'unauthorized'
+  return 'ready'
+}
+
+function capStateLabel(s: CapState): string {
+  return s === 'ready' ? '就绪' : s === 'unauthorized' ? '未授权' : '已禁用'
 }
 
 function uninstall(id: string) {
@@ -464,6 +512,90 @@ function uninstall(id: string) {
   flex-direction: column;
   gap: 8px;
   margin-top: 6px;
+}
+
+.plugin-caps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.caps-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caps-head-title {
+  font-size: 11px;
+  color: rgba(232, 221, 208, 0.5);
+  letter-spacing: 1px;
+}
+
+.caps-count {
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
+}
+
+.caps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cap-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(232, 221, 208, 0.25);
+}
+
+.cap-dot.ready {
+  background: #a5d6a7;
+  box-shadow: 0 0 6px rgba(165, 214, 167, 0.5);
+}
+
+.cap-dot.unauthorized {
+  background: #ffc107;
+}
+
+.cap-dot.disabled {
+  background: rgba(232, 221, 208, 0.2);
+}
+
+.cap-label {
+  font-size: 12px;
+  color: rgba(232, 221, 208, 0.72);
+}
+
+.cap-state {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: rgba(232, 221, 208, 0.4);
+}
+
+.cap-state.ready {
+  color: #a5d6a7;
+}
+
+.cap-state.unauthorized {
+  color: #ffc107;
+}
+
+.cap-state.disabled {
+  color: rgba(232, 221, 208, 0.3);
 }
 
 .perm-head {

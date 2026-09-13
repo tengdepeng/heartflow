@@ -387,7 +387,6 @@ export function usePluginEcosystemBridge() {
         : '市场状态正常',
       availableUpdates: overview.availableUpdates,
       pendingUpdateCount: marketplace.pendingUpdateCount.value,
-      topRatedPlugins: marketplace.topRatedPlugins.value,
     }
   })
 

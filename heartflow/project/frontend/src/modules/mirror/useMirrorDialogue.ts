@@ -19,7 +19,10 @@ import type {
   IntentCategory,
 } from './types'
 import type { ActionHandlerRegistry } from './executor'
-import { useTimer } from '../../resonance/bridges/timer'
+import {
+  invokePluginCapability,
+  findCapabilityByKeyword,
+} from '../plugin/capability-registry'
 import { useStudy } from '../study'
 import { storage } from '../../engine/storage'
 import { getLocalDateKey } from '../../utils/time'
@@ -36,33 +39,28 @@ function createDefaultHandlers(): ActionHandlerRegistry {
   const handlers: Partial<ActionHandlerRegistry> = {}
 
   // ---- start-focus: 启动专注计时 ----
+  // 实现由核心插件 core-timer 提供（声明见 types.CORE_PLUGINS.capabilities），
+  // 经能力注册表三重门控：插件禁用 / 权限回收 → 该能力即刻失效。
+  // 这是插件「被真实消费」的第一个链路（蓝图 L10612）。
   handlers['start-focus'] = (params: Record<string, unknown>): StepResult => {
-    try {
-      const timer = useTimer()
-      const duration = (params.duration as number) || 25
-      const taskName = (params.taskName as string) || ''
-
-      // 如果当前正在专注，先中断
-      if (timer.isFocusing || timer.isPaused) {
-        timer.interrupt()
-      }
-
-      timer.setMode('focus', duration)
-      timer.start()
-
-      return {
-        order: 0,
-        action: 'start-focus',
-        success: true,
-        data: { duration, taskName },
-      }
-    } catch (err) {
+    const r = invokePluginCapability<{ duration: number; taskName: string }>(
+      'core-timer',
+      'start-focus',
+      params,
+    )
+    if (!r.ok) {
       return {
         order: 0,
         action: 'start-focus',
         success: false,
-        error: err instanceof Error ? err.message : String(err),
+        error: r.error || '专注计时启动失败',
       }
+    }
+    return {
+      order: 0,
+      action: 'start-focus',
+      success: true,
+      data: r.value,
     }
   }
 
@@ -288,29 +286,14 @@ function createDefaultHandlers(): ActionHandlerRegistry {
     }
   }
 
-  // ---- start-rest: 开始休息（进入安全岛） ----
+  // ---- start-rest: 开始休息（进入安全岛）----
+  // 同 start-focus：实现由核心插件 core-timer 提供，经能力通道门控
   handlers['start-rest'] = (params: Record<string, unknown>): StepResult => {
-    try {
-      const duration = (params.duration as number) || 5
-      // 暂停计时器（如果有正在进行的专注）
-      const timer = useTimer()
-      if (timer.isFocusing || timer.isPaused) {
-        timer.pauseForSanctuary()
-      }
-      return {
-        order: 0,
-        action: 'start-rest',
-        success: true,
-        data: { duration },
-      }
-    } catch (err) {
-      return {
-        order: 0,
-        action: 'start-rest',
-        success: false,
-        error: err instanceof Error ? err.message : String(err),
-      }
+    const r = invokePluginCapability<{ duration: number }>('core-timer', 'start-rest', params)
+    if (!r.ok) {
+      return { order: 0, action: 'start-rest', success: false, error: r.error || '休息启动失败' }
     }
+    return { order: 0, action: 'start-rest', success: true, data: r.value }
   }
 
   // ---- navigate: 导航到房间 ----
@@ -500,6 +483,53 @@ export function useMirrorDialogue() {
             ambiguous: false,
           }
         }
+        // 3.1 插件能力路由（蓝图 L10612）：既有意图都处理不了时，交给已启用插件提供的能力。
+        // 放在兜底之前、资产感知之后，确保不会截胡正常意图。
+        const capHit = findCapabilityByKeyword(text)
+        if (capHit) {
+          const capRes = invokePluginCapability<{ summary?: string }>(
+            capHit.pluginId,
+            capHit.capability.id,
+            { query: text },
+          )
+          const capText = capRes.ok
+            ? capRes.value?.summary ?? `「${capHit.capability.label}」已执行。`
+            : capRes.error ?? '该能力暂时不可用。'
+
+          const capEntry: DialogueEntry = {
+            id: generateDialogueId(),
+            role: 'mirror',
+            text: capText,
+            timestamp: Date.now(),
+          }
+          dialogue.value.push(capEntry)
+          lastResponse.value = capText
+
+          const capResult: ExecutionResult = {
+            success: capRes.ok,
+            stepsExecuted: capRes.ok ? 1 : 0,
+            stepsTotal: 1,
+            message: capText,
+            stepResults: [
+              {
+                order: 0,
+                action: 'respond',
+                success: capRes.ok,
+                data: { pluginId: capHit.pluginId, capability: capHit.capability.id },
+                error: capRes.ok ? undefined : capRes.error,
+              },
+            ],
+          }
+          lastExecutionResult.value = capResult
+
+          return {
+            response: capText,
+            result: capResult,
+            parsedTask: null,
+            ambiguous: false,
+          }
+        }
+
         const fallbackResponse = '收到你的消息，但我不太确定你想做什么。试试说「开始专注」或「记录笔记」？'
         const mirrorEntry: DialogueEntry = {
           id: generateDialogueId(),
