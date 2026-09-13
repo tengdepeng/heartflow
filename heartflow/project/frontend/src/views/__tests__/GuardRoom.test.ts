@@ -649,3 +649,167 @@ describe('GuardRoom 视图', () => {
     expect(stats[2].text()).toContain('上次休息')
   })
 })
+
+// ============================================================
+// 集成：隐私仪表盘 PrivacyDashboardPanel（INCR-284 补挂载孤儿组件）
+// 引擎 modules/safety/privacy-dashboard.ts 的 usePrivacyDashboard 为应用库内唯一
+// （rg 排除 __tests__、safety barrel 后仅本组件消费）。零 props，自持读 storage.getKV，
+// 存储键 hf:privacy:exposures/permissions/audits/scores/warnings/lock_state/config。
+// 引擎 refs 为 per-instance（每次 use 时 loadExposures() 读 storage）→ 无模块级污染，
+// 测试仅需在 mount 前 seed mockStore['hf:privacy:*']。
+// 注意：GuardRoom 全量 mount，断言须 .pdp 作用域隔离；permission 区 .pdp-stats 为第二个。
+// ============================================================
+describe('集成：隐私仪表盘', () => {
+  const PRIV = 'hf:privacy'
+
+  function clearPrivacy() {
+    ;['exposures', 'permissions', 'audits', 'scores', 'warnings', 'lock_state', 'config'].forEach(
+      (k) => delete mockStore[`${PRIV}:${k}`],
+    )
+  }
+
+  const now = new Date().toISOString()
+
+  const exposures = [
+    {
+      category: 'health', label: '健康数据', description: '心率与情绪轨迹', sensitivity: 'critical',
+      storageLocation: 'local', encrypted: false, estimatedCount: 120, estimatedSize: 4096,
+      exposureStatus: 'breached', recentAccessCount: 3, lastAccessedAt: now,
+      relatedModules: ['health'], riskScore: 90,
+    },
+    {
+      category: 'emotion', label: '情绪数据', description: '每日情绪记录', sensitivity: 'internal',
+      storageLocation: 'encrypted_local', encrypted: true, estimatedCount: 200, estimatedSize: 8192,
+      exposureStatus: 'safe', recentAccessCount: 1, lastAccessedAt: now,
+      relatedModules: ['emotion'], riskScore: 12,
+    },
+  ]
+
+  const permissions = [
+    {
+      id: 'p1', name: '情绪读取', description: '读取情绪记录', module: 'emotion', dataCategories: ['emotion'],
+      level: 'read', granted: true, grantedAt: now, grantedBy: 'user', revocable: true,
+      lastUsedAt: now, riskLevel: 'high',
+    },
+    {
+      id: 'p2', name: '定位权限', description: '访问位置', module: 'location', dataCategories: ['location'],
+      level: 'write', granted: true, grantedAt: now, grantedBy: 'user', revocable: true,
+      lastUsedAt: null, riskLevel: 'critical',
+    },
+    {
+      id: 'p3', name: '系统日志', description: '读写系统日志', module: 'system', dataCategories: ['system'],
+      level: 'read', granted: false, grantedAt: null, grantedBy: 'user', revocable: true,
+      lastUsedAt: null, riskLevel: 'low',
+    },
+  ]
+
+  const audits = [
+    {
+      id: 'a1', auditedAt: now, totalPermissions: 3, grantedPermissions: 2,
+      highRiskPermissions: 2, unusedPermissions: 1, overGrantedPermissions: 1,
+      permissions, recommendations: ['建议撤销未使用的高风险权限', '定期复核授权清单'],
+    },
+  ]
+
+  const scores = [
+    {
+      total: 85, grade: 'B',
+      dimensions: [
+        { name: '暴露面控制', score: 80, weight: 1, items: [] },
+        { name: '权限规范', score: 90, weight: 1, items: [] },
+      ],
+      scoredAt: now, trend: 'stable', delta: 0,
+    },
+  ]
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    clearPrivacy()
+  })
+
+  it('无种子数据时引擎自动初始化暴露面并渲染填充仪表盘', async () => {
+    const wrapper = await getWrapper()
+    const pdp = wrapper.find('.pdp-panel')
+    expect(pdp.find('.pdp-title').text()).toBe('🔐 隐私仪表盘')
+    // 空态「数据未显影」为理论兜底：usePrivacyDashboard 初始化时 exposures 为空会
+    // 自动 initializeExposures() 扫描并填充各数据类别 → hasData 恒为真 → 走填充态
+    expect(pdp.find('.pdp-badge-neutral').exists()).toBe(false)
+    expect(pdp.find('.pdp-block').exists()).toBe(true)
+    expect(pdp.findAll('.pdp-exposure').length).toBeGreaterThan(0)
+  })
+
+  it('有数据暴露面时渲染概览与徽章并标记需关注', async () => {
+    mockStore['hf:privacy:exposures'] = exposures
+    const wrapper = await getWrapper()
+    const pdp = wrapper.find('.pdp-panel')
+    // 有 breached 类别且无预警 → overallStatus=warning → 徽章「需关注」
+    expect(pdp.find('.pdp-badge').text()).toBe('需关注')
+    expect(pdp.findAll('.pdp-block-title').map((t) => t.text())).toContain('数据暴露面')
+    // 概览统计：总 2 / 安全 1 / 需关注 0 / 已泄露 1
+    const stats = pdp.find('.pdp-stats').findAll('.pdp-stat-num')
+    expect(stats.map((s) => s.text())).toEqual(['2', '1', '0', '1'])
+    expect(pdp.findAll('.pdp-exposure').length).toBe(2)
+    expect(pdp.find('.pdp-status--breached').exists()).toBe(true)
+    expect(pdp.find('.pdp-status--safe').exists()).toBe(true)
+  })
+
+  it('渲染隐私评分维度与权限审计建议', async () => {
+    mockStore['hf:privacy:exposures'] = exposures
+    mockStore['hf:privacy:scores'] = scores
+    mockStore['hf:privacy:permissions'] = permissions
+    mockStore['hf:privacy:audits'] = audits
+    const wrapper = await getWrapper()
+    const pdp = wrapper.find('.pdp-panel')
+    // 隐私评分：85 分 / B 级 / 趋势平稳 / 两个维度
+    expect(pdp.find('.pdp-score-num').text()).toBe('85')
+    expect(pdp.find('.pdp-score-grade').text()).toBe('B')
+    expect(pdp.find('.pdp-score-meta').text()).toContain('良好')
+    expect(pdp.find('.pdp-score-meta').text()).toContain('平稳')
+    expect(pdp.findAll('.pdp-dim').length).toBe(2)
+    // 权限审计：总 3 / 已授权 2 / 高风险 2 / 未使用 1（第二个 .pdp-stats 块）
+    const auditStats = pdp.findAll('.pdp-stats')[1].findAll('.pdp-stat-num')
+    expect(auditStats.map((s) => s.text())).toEqual(['3', '2', '2', '1'])
+    expect(pdp.findAll('.pdp-rec').length).toBe(2)
+    expect(pdp.text()).toContain('建议撤销未使用的高风险权限')
+  })
+
+  it('泄露预警展示警告卡片与危险徽章', async () => {
+    mockStore['hf:privacy:exposures'] = exposures
+    mockStore['hf:privacy:warnings'] = [
+      {
+        id: 'w1', level: 'critical', title: '检测到健康数据外发的可疑链路',
+        description: '疑似后台同步将健康数据发往外部服务', affectedCategories: ['health'],
+        probability: 0.85, impact: 'severe', recommendations: ['立即断开并锁定'],
+        warnedAt: now, acknowledged: false, resolved: false, autoGenerated: true,
+      },
+    ]
+    const wrapper = await getWrapper()
+    const pdp = wrapper.find('.pdp-panel')
+    // 存在 critical 未解决预警 → overallStatus=danger → 徽章「危险」
+    expect(pdp.find('.pdp-badge').text()).toBe('危险')
+    expect(pdp.findAll('.pdp-warning').length).toBe(1)
+    expect(pdp.find('.pdp-warning--critical').exists()).toBe(true)
+    expect(pdp.text()).toContain('检测到健康数据外发')
+  })
+
+  it('一键锁定可锁定与解锁并写回存储', async () => {
+    mockStore['hf:privacy:permissions'] = [permissions[1]] // 使 hasData 为真
+    mockStore['hf:privacy:lock_state'] = {
+      locked: false, lockedAt: null, reason: '', scope: 'all', duration: 0,
+      expiresAt: null, unlockMethod: 'password', lockedBy: '',
+    }
+    const wrapper = await getWrapper()
+    const pdp = wrapper.find('.pdp-panel')
+    expect(pdp.find('.pdp-lock-status').text()).toBe('未锁定')
+    // 立即锁定
+    await pdp.find('.pdp-lock .pdp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(pdp.find('.pdp-lock-status').text()).toBe('已锁定')
+    expect(mockStore['hf:privacy:lock_state'].locked).toBe(true)
+    // 解锁
+    await pdp.find('.pdp-lock .pdp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(pdp.find('.pdp-lock-status').text()).toBe('未锁定')
+    expect(mockStore['hf:privacy:lock_state'].locked).toBe(false)
+  })
+})

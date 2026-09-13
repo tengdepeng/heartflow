@@ -117,6 +117,9 @@
     <!-- 合规审查（guard·compliance-review，INCR-176） -->
     <ComplianceReviewPanel />
 
+    <!-- 隐私仪表盘（INCR-284 补挂载孤儿组件 PrivacyDashboardPanel：隐私评分/数据暴露面/权限审计/泄露预警/一键锁定，经 usePrivacyDashboard 桥自持读取存储） -->
+    <PrivacyDashboardPanel />
+
     <!-- 护眼盾 -->
     <EyeShieldPanel />
 
@@ -147,6 +150,7 @@ import AnomalyDetectorPanel from '../components/AnomalyDetectorPanel.vue'
 import GuardArchivePanel from '../components/GuardArchivePanel.vue'
 import AuditTimelinePanel from '../components/AuditTimelinePanel.vue'
 import ComplianceReviewPanel from '../components/ComplianceReviewPanel.vue'
+import PrivacyDashboardPanel from '../components/PrivacyDashboardPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
