@@ -860,13 +860,6 @@ describe('应用市场 - 常量', () => {
     }
   })
 
-  it('所有市场条目评分在有效范围', () => {
-    for (const item of MARKET_ITEMS) {
-      expect(item.rating).toBeGreaterThanOrEqual(0)
-      expect(item.rating).toBeLessThanOrEqual(5)
-    }
-  })
-
   it('各类型都有条目', () => {
     const types = new Set(MARKET_ITEMS.map(i => i.type))
     expect(types.has('template')).toBe(true)
@@ -889,8 +882,6 @@ describe('MarketItem 类型', () => {
       author: '测试作者',
       version: '1.0.0',
       tags: ['测试'],
-      rating: 4.0,
-      ratingCount: 10,
       installCount: 100,
       status: 'not_installed',
       updatedAt: '2026-08-03T00:00:00Z',
@@ -911,8 +902,6 @@ describe('MarketItem 类型', () => {
       author: '作者',
       version: '2.0.0',
       tags: [],
-      rating: 5.0,
-      ratingCount: 1,
       installCount: 200,
       status: 'installed',
       updatedAt: '2026-08-03T00:00:00Z',
@@ -927,12 +916,12 @@ describe('MarketItem 类型', () => {
 describe('MarketFilter 类型', () => {
   it('默认筛选', () => {
     const filter: MarketFilter = {
-      sortBy: 'popular',
+      sortBy: 'newest',
       query: '',
       installedOnly: false,
       freeOnly: false,
     }
-    expect(filter.sortBy).toBe('popular')
+    expect(filter.sortBy).toBe('newest')
     expect(filter.installedOnly).toBe(false)
   })
 

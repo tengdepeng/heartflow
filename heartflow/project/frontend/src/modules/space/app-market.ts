@@ -1,7 +1,7 @@
 // ============================================================
 // 心流工坊 · 应用市场模块
 // 管理可安装的应用、模板、主题、组件市场
-// 提供浏览、搜索、安装、卸载、评分功能
+// 提供浏览、搜索、安装、卸载功能
 // ============================================================
 
 import { ref, computed } from 'vue'
@@ -35,10 +35,6 @@ export interface MarketItem {
   version: string
   /** 标签 */
   tags: string[]
-  /** 评分 (1-5) */
-  rating: number
-  /** 评分人数 */
-  ratingCount: number
   /** 安装次数 */
   installCount: number
   /** 预览图 */
@@ -58,7 +54,7 @@ export interface MarketFilter {
   /** 类型筛选 */
   type?: MarketItemType | 'all'
   /** 排序方式 */
-  sortBy: 'popular' | 'newest' | 'rating' | 'installs'
+  sortBy: 'newest'
   /** 搜索关键词 */
   query: string
   /** 是否只显示已安装 */
@@ -100,7 +96,6 @@ export interface InstallRecord {
 const STORAGE_KEYS = {
   installedItems: 'hf_market_installed',
   installHistory: 'hf_market_history',
-  ratings: 'hf_market_ratings',
   favorites: 'hf_market_favorites',
 } as const
 
@@ -116,8 +111,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.2.0',
     tags: ['仪表盘', '数据', '极简'],
-    rating: 4.5,
-    ratingCount: 128,
     installCount: 3420,
     status: 'not_installed',
     updatedAt: '2026-07-15T10:00:00Z',
@@ -133,8 +126,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.0.0',
     tags: ['日记', '记录', '日常'],
-    rating: 4.3,
-    ratingCount: 89,
     installCount: 2100,
     status: 'not_installed',
     updatedAt: '2026-06-20T10:00:00Z',
@@ -150,8 +141,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.1.0',
     tags: ['项目管理', '看板', '拖拽'],
-    rating: 4.7,
-    ratingCount: 56,
     installCount: 1800,
     status: 'not_installed',
     updatedAt: '2026-07-01T10:00:00Z',
@@ -167,8 +156,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.0.0',
     tags: ['阅读', '追踪', '笔记'],
-    rating: 4.1,
-    ratingCount: 34,
     installCount: 950,
     status: 'not_installed',
     updatedAt: '2026-05-10T10:00:00Z',
@@ -186,8 +173,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '2.0.0',
     tags: ['温暖', '琥珀', '舒适'],
-    rating: 4.8,
-    ratingCount: 210,
     installCount: 5200,
     status: 'not_installed',
     updatedAt: '2026-07-20T10:00:00Z',
@@ -203,8 +188,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.5.0',
     tags: ['深色', '夜间', '柔和'],
-    rating: 4.6,
-    ratingCount: 167,
     installCount: 4300,
     status: 'not_installed',
     updatedAt: '2026-07-10T10:00:00Z',
@@ -220,8 +203,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.0.0',
     tags: ['自然', '绿色', '禅意'],
-    rating: 4.4,
-    ratingCount: 98,
     installCount: 2800,
     status: 'not_installed',
     updatedAt: '2026-06-15T10:00:00Z',
@@ -239,8 +220,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.0.0',
     tags: ['进度', '环形', '动画'],
-    rating: 4.2,
-    ratingCount: 45,
     installCount: 1600,
     status: 'not_installed',
     updatedAt: '2026-04-20T10:00:00Z',
@@ -256,8 +235,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.2.0',
     tags: ['时间线', '图表', '可视化'],
-    rating: 4.5,
-    ratingCount: 72,
     installCount: 2100,
     status: 'not_installed',
     updatedAt: '2026-07-05T10:00:00Z',
@@ -273,8 +250,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.0.0',
     tags: ['心情', '选择器', '情绪'],
-    rating: 4.0,
-    ratingCount: 38,
     installCount: 1200,
     status: 'not_installed',
     updatedAt: '2026-05-25T10:00:00Z',
@@ -292,8 +267,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '社区开发者',
     version: '1.1.0',
     tags: ['天气', '小部件', '实时'],
-    rating: 4.3,
-    ratingCount: 156,
     installCount: 3800,
     status: 'not_installed',
     updatedAt: '2026-06-30T10:00:00Z',
@@ -309,8 +282,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '2.0.0',
     tags: ['番茄钟', '专注', '计时'],
-    rating: 4.9,
-    ratingCount: 320,
     installCount: 6800,
     status: 'not_installed',
     updatedAt: '2026-07-25T10:00:00Z',
@@ -326,8 +297,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '社区开发者',
     version: '1.0.0',
     tags: ['名言', '每日', '收藏'],
-    rating: 4.1,
-    ratingCount: 87,
     installCount: 2500,
     status: 'not_installed',
     updatedAt: '2026-05-15T10:00:00Z',
@@ -345,8 +314,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.0.0',
     tags: ['双栏', '分栏', '布局'],
-    rating: 4.0,
-    ratingCount: 23,
     installCount: 800,
     status: 'not_installed',
     updatedAt: '2026-04-10T10:00:00Z',
@@ -362,8 +329,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.1.0',
     tags: ['网格', '仪表盘', '拖拽'],
-    rating: 4.4,
-    ratingCount: 45,
     installCount: 1500,
     status: 'not_installed',
     updatedAt: '2026-06-01T10:00:00Z',
@@ -381,8 +346,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '心流官方',
     version: '1.0.0',
     tags: ['图书馆', '静谧', '阅读'],
-    rating: 4.6,
-    ratingCount: 67,
     installCount: 1900,
     status: 'not_installed',
     updatedAt: '2026-06-10T10:00:00Z',
@@ -398,8 +361,6 @@ export const MARKET_ITEMS: MarketItem[] = [
     author: '社区开发者',
     version: '1.0.0',
     tags: ['咖啡', '温暖', '创意'],
-    rating: 4.2,
-    ratingCount: 45,
     installCount: 1200,
     status: 'not_installed',
     updatedAt: '2026-05-20T10:00:00Z',
@@ -423,14 +384,11 @@ export function useAppMarket() {
   const installHistory = ref<InstallRecord[]>(
     storage.getKV<InstallRecord[]>(STORAGE_KEYS.installHistory, []),
   )
-  const userRatings = ref<Record<string, number>>(
-    storage.getKV<Record<string, number>>(STORAGE_KEYS.ratings, {}),
-  )
   const favorites = ref<Set<string>>(
     new Set(storage.getKV<string[]>(STORAGE_KEYS.favorites, [])),
   )
   const filter = ref<MarketFilter>({
-    sortBy: 'popular',
+    sortBy: 'newest',
     query: '',
     installedOnly: false,
     freeOnly: false,
@@ -468,20 +426,9 @@ export function useAppMarket() {
       result = result.filter(i => i.isFree)
     }
 
-    // 排序
-    switch (filter.value.sortBy) {
-      case 'popular':
-        result.sort((a, b) => b.rating * b.ratingCount - a.rating * a.ratingCount)
-        break
-      case 'newest':
-        result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-        break
-      case 'rating':
-        result.sort((a, b) => b.rating - a.rating)
-        break
-      case 'installs':
-        result.sort((a, b) => b.installCount - a.installCount)
-        break
+    // 排序：仅按最近更新（最新上架），不做排行/评分
+    if (filter.value.sortBy === 'newest') {
+      result.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
     }
 
     return result
@@ -525,13 +472,6 @@ export function useAppMarket() {
     }
   })
 
-  /** 热门条目 */
-  const hotItems = computed<MarketItem[]>(() => {
-    return [...items.value]
-      .sort((a, b) => b.installCount - a.installCount)
-      .slice(0, 8)
-  })
-
   /** 已安装条目 */
   const installedItems = computed<MarketItem[]>(() => {
     return items.value.filter(i => installedIds.value.has(i.id))
@@ -552,7 +492,7 @@ export function useAppMarket() {
   /** 重置筛选 */
   function resetFilter(): void {
     filter.value = {
-      sortBy: 'popular',
+      sortBy: 'newest',
       query: '',
       installedOnly: false,
       freeOnly: false,
@@ -649,34 +589,6 @@ export function useAppMarket() {
     return true
   }
 
-  // ---- 评分 ----
-
-  /** 评分 */
-  function rateItem(itemId: string, rating: number): void {
-    const item = items.value.find(i => i.id === itemId)
-    if (!item || rating < 1 || rating > 5) return
-
-    const oldRating = userRatings.value[itemId]
-    if (oldRating) {
-      // 更新已有评分
-      const totalRating = item.rating * item.ratingCount
-      item.rating = (totalRating - oldRating + rating) / item.ratingCount
-    } else {
-      // 新评分
-      const totalRating = item.rating * item.ratingCount
-      item.ratingCount++
-      item.rating = (totalRating + rating) / item.ratingCount
-    }
-
-    userRatings.value[itemId] = rating
-    persist()
-  }
-
-  /** 获取用户评分 */
-  function getUserRating(itemId: string): number | undefined {
-    return userRatings.value[itemId]
-  }
-
   // ---- 收藏 ----
 
   /** 切换收藏 */
@@ -731,7 +643,6 @@ export function useAppMarket() {
     items.value = [...MARKET_ITEMS]
     installedIds.value = new Set()
     installHistory.value = []
-    userRatings.value = {}
     favorites.value = new Set()
     persist()
   }
@@ -740,7 +651,6 @@ export function useAppMarket() {
     storage.setKV('hf_market_items', items.value)
     storage.setKV(STORAGE_KEYS.installedItems, [...installedIds.value])
     storage.setKV(STORAGE_KEYS.installHistory, installHistory.value)
-    storage.setKV(STORAGE_KEYS.ratings, userRatings.value)
     storage.setKV(STORAGE_KEYS.favorites, [...favorites.value])
   }
 
@@ -750,14 +660,12 @@ export function useAppMarket() {
     filter,
     installedIds,
     installHistory,
-    userRatings,
     favorites,
 
     // 计算属性
     filteredItems,
     itemsByType,
     marketStats,
-    hotItems,
     installedItems,
     favoriteItems,
 
@@ -769,10 +677,6 @@ export function useAppMarket() {
     installItem,
     uninstallItem,
     updateItem,
-
-    // 评分
-    rateItem,
-    getUserRating,
 
     // 收藏
     toggleFavorite,
