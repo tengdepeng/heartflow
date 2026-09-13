@@ -367,3 +367,88 @@ describe('集成：岁时气象面板', () => {
     expect(panel.text()).toContain('已拾起')
   })
 })
+
+// ============================================================
+// 集成：此刻时令 DiaryAutoMeta（INCR-304 补挂载孤儿组件）
+// 零 props 自持读桥：modules/zeitgeist 的 useZeitgeist()（pref/updatePref/
+// collectNow/lastMeta，存储键 hf:zeitgeist_pref / hf:zeitgeist_last）。
+// 宿主 SeasonalRituals 内 zeitgeist 零消费方（ZeitgeistPanel 仅在 DailyAnchor
+// 跨宿主消费）→ 引擎唯一；组件无模块级 ref，setup 时经 lastMeta() 读库，
+// 故在 createWrapper 前预置 mockStore 即可。
+// 徽章顺序：.zim-chip[0] 天气(.zim-chip-btn) / [1] 时辰(.zim-branch+.zim-sub+.zim-element)
+// / [2] 节气(.zim-sub 图标 + .zim-branch 名) / [3] 季节(.zim-season)。
+// ============================================================
+describe('集成：此刻时令（DiaryAutoMeta）', () => {
+  const FIXED_META = {
+    date: '2026-09-14',
+    weekday: '星期一',
+    shichen: '申',
+    shichenAlias: '晡时',
+    shichenElement: '金',
+    solarTerm: '白露',
+    solarTermIcon: '💧',
+    season: '秋',
+    weather: 'sunny',
+  }
+
+  beforeEach(() => {
+    delete mockStore['hf:zeitgeist_last']
+    delete mockStore['hf:zeitgeist_pref']
+  })
+
+  it('预置时令元数据：渲染日期/时辰/节气/季节/天气四徽章', async () => {
+    mockStore['hf:zeitgeist_last'] = { ...FIXED_META }
+    const wrapper = await createWrapper()
+    const zim = wrapper.find('.zim')
+    expect(zim.exists()).toBe(true)
+    // 开关行：日期 + 星期
+    expect(zim.find('.zim-date').text()).toContain('2026-09-14')
+    expect(zim.find('.zim-date').text()).toContain('星期一')
+    // 四个徽章：天气/时辰/节气/季节
+    const chips = zim.findAll('.zim-chip')
+    expect(chips.length).toBe(4)
+    expect(chips[0].find('.zim-chip-btn').text()).toContain('☀️')
+    expect(chips[1].find('.zim-branch').text()).toBe('申')
+    expect(chips[1].find('.zim-sub').text()).toBe('晡时')
+    expect(chips[1].find('.zim-element').text()).toBe('金')
+    expect(chips[2].find('.zim-sub').text()).toBe('💧')
+    expect(chips[2].find('.zim-branch').text()).toBe('白露')
+    expect(chips[3].classes()).toContain('zim-season')
+    expect(chips[3].text()).toBe('秋')
+  })
+
+  it('空态：挂载即采集当前时令并显影徽章', async () => {
+    const wrapper = await createWrapper()
+    const zim = wrapper.find('.zim')
+    // onMounted 自动 collectNow → meta 就绪：日期行 + 徽章条 + 刷新按钮
+    expect(zim.find('.zim-date').text()).toContain('·')
+    expect(zim.find('.zim-bar').exists()).toBe(true)
+    expect(zim.findAll('.zim-chip').length).toBeGreaterThanOrEqual(3)
+    expect(zim.find('.zim-refresh').text()).toBe('↻')
+  })
+
+  it('切换「自动记录时令」开关写入偏好', async () => {
+    mockStore['hf:zeitgeist_pref'] = { autoCollect: true, defaultWeather: null }
+    const wrapper = await createWrapper()
+    const cb = wrapper.find('.zim-on input')
+    expect((cb.element as HTMLInputElement).checked).toBe(true)
+    await cb.setValue(false)
+    expect(mockStore['hf:zeitgeist_pref']).toMatchObject({ autoCollect: false })
+  })
+
+  it('更换天气：选择器 7 预设，选雨后更新元数据与存储', async () => {
+    mockStore['hf:zeitgeist_last'] = { ...FIXED_META }
+    const wrapper = await createWrapper()
+    const zim = wrapper.find('.zim')
+    // 点击天气徽章进入编辑
+    await zim.find('.zim-chip-btn').trigger('click')
+    const picker = zim.find('.zim-picker')
+    expect(picker.exists()).toBe(true)
+    const weatherBtns = picker.findAll('.zim-w')
+    expect(weatherBtns.length).toBe(7)
+    // WEATHER_PRESETS 顺序：晴/多云/阴/雨/雪/风/雾 → 下标 3 为雨 🌧️
+    await weatherBtns[3].trigger('click')
+    expect(zim.find('.zim-chip-btn').text()).toContain('🌧️')
+    expect(mockStore['hf:zeitgeist_last'].weather).toBe('rain')
+  })
+})

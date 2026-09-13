@@ -141,6 +141,13 @@
       <div><strong>{{termCtx.currentTerm.value.name}}</strong><p class="sr-term-desc">{{termCtx.currentTerm.value.desc}}</p></div>
     </div>
 
+    <!-- 此刻时令 · 自动记录时辰/节气/天气/季节（zeitgeist 引擎，INCR-304 补挂载孤儿组件 DiaryAutoMeta：零 props 自持读桥，宿主内 zeitgeist 无第二消费方） -->
+    <section data-enter class="sr-zeitgeist-section">
+      <h3>⏱ 此刻时令</h3>
+      <p class="sr-zeitgeist-desc">为日志自动附上时令上下文：时辰、节气、天气与季节，一笔记下。</p>
+      <DiaryAutoMeta />
+    </section>
+
     <!-- 四季仪式 -->
     <section data-enter class="sr-rituals-section">
       <h3>🌿 四季仪式</h3>
@@ -379,6 +386,7 @@ import { SOLAR_TERMS, SEASON_META, getTermCustoms, getFestivalInfo } from '../mo
 import type { SolarTerm, Festival } from '../modules/seasonal/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import JournalPanel from '../components/JournalPanel.vue'
+import DiaryAutoMeta from '../components/DiaryAutoMeta.vue'
 import SeasonalArchivePanel from '../components/SeasonalArchivePanel.vue'
 import SeasonalYearOverviewPanel from '../components/SeasonalYearOverviewPanel.vue'
 import SeasonalHealthPanel from '../components/SeasonalHealthPanel.vue'
@@ -860,6 +868,18 @@ const srStats = srCtx.stats
   margin-bottom: 24px;
   position: relative;
   z-index: 1;
+}
+
+/* 此刻时令 */
+.sr-zeitgeist-section {
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+.sr-zeitgeist-desc {
+  margin: 4px 0 12px;
+  font-size: 12px;
+  opacity: 0.62;
 }
 
 .sr-season-tabs {
