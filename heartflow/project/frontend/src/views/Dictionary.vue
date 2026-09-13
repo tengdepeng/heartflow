@@ -135,6 +135,9 @@
     <!-- 每日荐字（word-mirror/daily-recommendation 引擎：每日一词/复习/主题包/个性化推荐，INCR-224） -->
     <DailyWordPanel :words="wordItems" />
 
+    <!-- 词源网络（word-mirror/etymology 引擎：词源追溯/字根分解/同源词/共享词根/词源分布，INCR-305 补挂载孤儿组件） -->
+    <EtymologyNetworkPanel />
+
     <!-- 编辑模态框 -->
     <div data-enter v-if="showEditor" class="modal-overlay" @click.self="closeEditor">
       <div class="modal">
@@ -172,6 +175,7 @@ import CustomHanziPanel from '../components/CustomHanziPanel.vue'
 import PoetryPanel from '../components/PoetryPanel.vue'
 import HanziGalleryPanel from '../components/HanziGalleryPanel.vue'
 import DailyWordPanel from '../components/DailyWordPanel.vue'
+import EtymologyNetworkPanel from '../components/EtymologyNetworkPanel.vue'
 import type { HanziEntry } from '../modules/hanzi'
 import type { WordItem } from '../modules/word-mirror/word-mirror-store'
 

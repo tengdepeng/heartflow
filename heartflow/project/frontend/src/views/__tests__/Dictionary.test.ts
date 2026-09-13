@@ -372,4 +372,98 @@ describe('Dictionary 视图', () => {
     expect(wrapper.find('.dwp-stats').exists()).toBe(true)
     expect(wrapper.text()).toContain('累计推荐')
   })
+
+  // ============================================================
+  // 集成：词源网络面板（INCR-305：补挂载孤儿面板 EtymologyNetworkPanel）
+  // 零 props 自持读桥：modules/word-mirror/etymology 的 useEtymologyNetwork()
+  // （etymologies/getEtymology/getRootRelatives/getDictionarySize/
+  //  getEtymologiesByLanguage/searchEtymologies，存储键 hf:word_networks）。
+  // 宿主 Dictionary 内 etymology 零消费方（字镜阁 WordNetworkPanel 属跨宿主，
+  // 殿堂辞典仅消费 hanzi/wisdom-poetry/daily-recommendation 引擎）→ 引擎唯一。
+  // 引擎无模块级 ref（etymologies 为实例内 ref），setup 时经异步 load() 读库
+  // （mock getKV 对 hf:word_networks 返回 fallback [] → 仅内置 57 条，源注释
+  // 「55 条」与实际不符，运行时为准）；
+  // load 的 await 微任务先于 getWrapper 的续延 → await 后已落库。
+  // onMounted 自动选中在 load 落库前执行（load 异步）→ 初始无详情，搜索驱动。
+  // 内置首词「心」：字根分解 1 chip / 同源词 4 钮（芯沁吣杺）/ 共享词根 5 钮
+  // （思意志爱德，均含组件根「心」）。
+  // ============================================================
+  describe('集成：词源网络（EtymologyNetworkPanel）', () => {
+    it('渲染面板头部与词典规模（内置 57 条）', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      expect(wrapper.find('.enp').exists()).toBe(true)
+      expect(wrapper.find('.enp-title').text()).toBe('🔍 词源网络')
+      expect(wrapper.find('.enp-size').text()).toContain('词典 57 条')
+      expect(wrapper.find('.enp-input').exists()).toBe(true)
+      // 初始未选中 → 无详情，等待搜索驱动
+      expect(wrapper.find('.enp-detail').exists()).toBe(false)
+    })
+
+    it('搜索「心」并点击结果进入词源详情', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      await wrapper.find('.enp-input').setValue('心')
+      await nextTick()
+      const results = wrapper.findAll('.enp-result')
+      expect(results.length).toBeGreaterThan(0)
+      expect(results[0].find('.enp-result-word').text()).toBe('心')
+      await results[0].trigger('click')
+      await nextTick()
+      const detail = wrapper.find('.enp-detail')
+      expect(detail.exists()).toBe(true)
+      expect(detail.find('.enp-word').text()).toBe('心')
+      expect(detail.find('.enp-lang').text()).toBe('甲骨文')
+      expect(detail.text()).toContain('象形字，甲骨文像心脏之形')
+      // 字根分解
+      expect(detail.find('.enp-chip').text()).toContain('心(独体象形)')
+      // 同源词 4 钮（芯沁吣杺）
+      const cognates = detail.findAll('.enp-cognate')
+      expect(cognates.length).toBe(4)
+      expect(cognates.map((b) => b.text()).join('')).toContain('芯')
+      // 共享词根 5 钮（思意志爱德）
+      expect(detail.findAll('.enp-relative').length).toBe(5)
+    })
+
+    it('共享词根跳转：从「心」点「思」切换详情', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      await wrapper.find('.enp-input').setValue('心')
+      await nextTick()
+      await wrapper.findAll('.enp-result')[0].trigger('click')
+      await nextTick()
+      const relBtn = wrapper.findAll('.enp-relative')[0]
+      expect(relBtn.find('b').text()).toBe('思')
+      await relBtn.trigger('click')
+      await nextTick()
+      expect(wrapper.find('.enp-word').text()).toBe('思')
+      expect(wrapper.find('.enp-lang').text()).toBe('金文')
+      expect(wrapper.text()).toContain('从心囟声')
+    })
+
+    it('搜索无结果时显示未找到提示', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      await wrapper.find('.enp-input').setValue('不存在的字词')
+      await nextTick()
+      const none = wrapper.find('.enp-none')
+      expect(none.exists()).toBe(true)
+      expect(none.text()).toContain('未找到「不存在的字词」的词源')
+    })
+
+    it('词源分布统计：三种语言分组与占比条', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      const stats = wrapper.find('.enp-stats')
+      expect(stats.exists()).toBe(true)
+      const rows = stats.findAll('.enp-lang-row')
+      expect(rows.length).toBe(3)
+      const names = rows.map((r) => r.find('.enp-lang-name').text())
+      expect(names).toContain('甲骨文')
+      expect(names).toContain('金文')
+      expect(names).toContain('说文')
+      // 占比条宽度存在
+      expect(rows[0].find('.enp-lang-bar i').attributes('style')).toMatch(/width:\s*\d+%/)
+    })
+  })
 })
