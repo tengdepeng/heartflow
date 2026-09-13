@@ -213,6 +213,9 @@
 
     <!-- 词汇游戏（word-mirror/word-games 引擎：闪卡·配对·填空·词源，INCR-192） -->
     <WordGamesPanel :words="wordEntries" />
+
+    <!-- 字镜档案（INCR-289 补挂载孤儿组件 WordMirrorArchivePanel：概览/熟练度分布/词条状态/复习节律/近期打磨词/字镜健康/温和回看，消费 word-mirror-analytics 纯函数，引擎应用库内唯一，零 props 自持读桥经 useWordMirror） -->
+    <WordMirrorArchivePanel />
     </template>
 
     <!-- ============== Tab 3: 联想网络 ============== -->
@@ -403,6 +406,7 @@ import WordGamesPanel from '../components/WordGamesPanel.vue'
 import WritingAssistantPanel from '../components/WritingAssistantPanel.vue'
 import ReviewSessionPanel from '../components/ReviewSessionPanel.vue'
 import DailyRecommendationPanel from '../components/DailyRecommendationPanel.vue'
+import WordMirrorArchivePanel from '../components/WordMirrorArchivePanel.vue'
 import type { WordEntry } from '../modules/word-mirror/types'
 
 /* ============== 类型定义 ============== */
