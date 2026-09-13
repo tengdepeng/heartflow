@@ -200,6 +200,11 @@
 
     <!-- 网页剪藏（bookmarks·clip） -->
     <ClipPanel />
+
+    <!-- 收藏气象（INCR-288 补挂载孤儿组件 BookmarkArchivePanel：已读/回访/整理三轴 + 健康徽章 + 概览 + 类型分布 + 今日最值得打开 + 温和洞察，消费 modules/bookmarks/bookmarks-analytics 纯函数，引擎应用库内唯一） -->
+    <div data-enter class="bm-archive">
+      <BookmarkArchivePanel :bookmarks="bookmarks" @open="openBookmark" />
+    </div>
   </div>
 </template>
 
@@ -208,6 +213,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useBookmarks } from '../modules/bookmarks'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import ClipPanel from '../components/ClipPanel.vue'
+import BookmarkArchivePanel from '../components/BookmarkArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -1218,6 +1224,16 @@ function fmt(iso: string) {
   text-align: center;
   position: relative;
   z-index: 1;
+}
+
+/* ===== 收藏气象（BookmarkArchivePanel 容器） ===== */
+.bm-archive {
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ===== 空状态 ===== */

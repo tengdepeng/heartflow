@@ -33,6 +33,9 @@ function mkbm(over: any = {}) {
     related_note_ids: [],
     note: over.note || '',
     status: over.status || 'active',
+    content_type: over.content_type,
+    reading_time: over.reading_time,
+    is_read: over.is_read,
   }
 }
 
@@ -150,5 +153,98 @@ describe('Bookmarks 视图 (v2)', () => {
     await delBtn.trigger('click')
     await nextTick()
     expect(mockStore[K]).toHaveLength(0)
+  })
+
+  // ============================================================
+  // 集成：收藏气象面板 BookmarkArchivePanel（INCR-288 补挂载孤儿组件）
+  // 引擎 modules/bookmarks/bookmarks-analytics.ts 的纯函数
+  // （collectionOverview / collectionRhythm / collectionHealth /
+  //   revisitSuggestion / collectionInsights）应用库内仅本组件消费
+  //   （rg 排除 __tests__ 后仅 BookmarkArchivePanel 引用）→ 应用库内唯一。
+  // Props 契约 bookmarks: Bookmark[]，宿主 Bookmarks.vue 经 useBookmarks
+  //   （modules/bookmarks，K='hf:bookmarks_v2'，加载时归一化 is_read/content_type/
+  //   reading_time）持有同名数组，直接 :bookmarks="bookmarks" 薄委托 + @open="openBookmark"。
+  // 注：Panel setup 先 refresh() 一次(空 props)，随 onMounted load() 填充 props 由
+  //   deep watch 再次 refresh → 断言前须 await nextTick 等 watch flush。
+  // 种子 mkbm 可直接传 is_read/content_type/reading_time，useBookmarks 归一化。
+  // ============================================================
+  describe('集成：收藏气象面板', () => {
+    it('空态渲染面板且徽章「空书架」+ 空建议', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      const bap = wrapper.find('.bap')
+      expect(bap.exists()).toBe(true)
+      expect(bap.find('.bap-title').text()).toContain('收藏气象')
+      expect(bap.find('.bap-tag').text()).toBe('空书架')
+      expect(bap.find('.bap-suggest-empty').exists()).toBe(true)
+      // 温和洞察：收藏架还空着
+      const ins = bap.findAll('.bap-insights li').map(i => i.text())
+      expect(ins.some(t => t.includes('收藏架还空着'))).toBe(true)
+    })
+
+    it('概览指标反映收藏数据（全部 4 · 待读 1 · 分类 1 · 标签 1）', async () => {
+      mockStore[K] = [
+        mkbm({ bookmark_id: 'a', title: 'A', content_type: 'article', is_read: false, reading_time: 30 }),
+        mkbm({ bookmark_id: 'b', title: 'B', content_type: 'video', is_read: true, visit_count: 3, folder: '休闲', tags: ['设计'] }),
+        mkbm({ bookmark_id: 'c', title: 'C', content_type: 'other' }),
+        mkbm({ bookmark_id: 'd', title: 'D', status: 'archived', content_type: 'image' }),
+      ]
+      const wrapper = await getWrapper()
+      await nextTick()
+      const bap = wrapper.find('.bap')
+      const m = bap.findAll('.bap-metric').map(c => ({ label: c.find('span').text(), value: c.find('b').text() }))
+      const v = (l: string) => m.find(x => x.label === l)?.value
+      expect(v('全部')).toBe('4')
+      expect(v('待读')).toBe('1')
+      expect(v('分类')).toBe('1')
+      expect(v('标签')).toBe('1')
+      expect(v('小时')).toBe('0.5')
+    })
+
+    it('健康三轴与徽章（渐有条理）', async () => {
+      mockStore[K] = [
+        mkbm({ bookmark_id: 'a', title: 'A', is_read: false }),
+        mkbm({ bookmark_id: 'b', title: 'B', is_read: true, visit_count: 3, folder: '休闲' }),
+        mkbm({ bookmark_id: 'c', title: 'C', is_read: true }),
+      ]
+      const wrapper = await getWrapper()
+      await nextTick()
+      const bap = wrapper.find('.bap')
+      expect(bap.find('.bap-tag').text()).toBe('渐有条理')
+      const rows = bap.findAll('.bap-health-row')
+      const rowText = rows.map(r => r.text())
+      expect(rowText.some(t => t.startsWith('已读率'))).toBe(true)
+      expect(rowText.some(t => t.startsWith('回访率'))).toBe(true)
+      expect(rowText.some(t => t.startsWith('整理度'))).toBe(true)
+    })
+
+    it('今日最值得打开呈现待读推荐并可打开', async () => {
+      mockStore[K] = [
+        mkbm({ bookmark_id: 'a', title: '收藏的文章', url: 'https://paper.example', is_read: false, created_at: '2026-01-01T00:00:00Z' }),
+      ]
+      const wrapper = await getWrapper()
+      await nextTick()
+      const bap = wrapper.find('.bap')
+      const main = bap.find('.bap-suggest-main')
+      expect(main.exists()).toBe(true)
+      expect(main.find('.bap-suggest-title').text()).toBe('收藏的文章')
+      expect(main.find('.bap-suggest-reason').text()).toContain('待读箱')
+      expect(main.find('.bap-open').exists()).toBe(true)
+    })
+
+    it('内容类型分布渲染文章/视频/图片行', async () => {
+      mockStore[K] = [
+        mkbm({ bookmark_id: 'a', title: 'A', content_type: 'article' }),
+        mkbm({ bookmark_id: 'b', title: 'B', content_type: 'video' }),
+        mkbm({ bookmark_id: 'c', title: 'C', content_type: 'image' }),
+      ]
+      const wrapper = await getWrapper()
+      await nextTick()
+      const bap = wrapper.find('.bap')
+      const labels = bap.findAll('.bap-type-label').map(t => t.text())
+      expect(labels).toContain('文章')
+      expect(labels).toContain('视频')
+      expect(labels).toContain('图片')
+    })
   })
 })
