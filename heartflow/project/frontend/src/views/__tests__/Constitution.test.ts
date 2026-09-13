@@ -628,3 +628,67 @@ describe('集成：合规守卫 · 宪法体检', () => {
     expect(panel.text()).toContain('共 1 条')
   })
 })
+
+// ============================================================
+// 集成：宪法生效 · 实时变量（INCR-296 补挂载 ConstitutionLiveVars）
+// 面板 onMounted 读 getComputedStyle + isTargetActive；jsdom 下自定义 CSS 变量
+// 一律返回空串 → 6 个数值型显示 '—'；2 个 enable 型目标（夜静调暗/数字安息日）
+// 读 isTargetActive 显示真实开关态 0/1（引擎默认基准态含二者，值不依赖引擎初始化序）。
+// ============================================================
+describe('集成：宪法生效 · 实时变量', () => {
+  it('渲染实时变量面板标题与 8 个变量项', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.live-vars-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.lv-title').text()).toBe('宪法生效 · 实时变量')
+    expect(panel.find('.lv-sub').text()).toContain('拨动上方戒律开关')
+    expect(panel.findAll('.lv-item').length).toBe(8)
+  })
+
+  it('变量标签与键名完整', async () => {
+    const wrapper = await createWrapper()
+    const labels = wrapper.findAll('.lv-label').map((n) => n.text())
+    expect(labels).toEqual([
+      '粒子密度', '动画速度', '呼吸速度', '场景过渡',
+      '夜静调暗', '数字安息日', '静默', '留白',
+    ])
+    const keys = wrapper.findAll('.lv-var').map((n) => n.text())
+    expect(keys).toContain('--hf-particle-density')
+    expect(keys).toContain('--hf-night-dim')
+    expect(keys).toContain('--hf-sabbath')
+    expect(keys).toContain('--hf-silence')
+    expect(keys).toContain('--hf-empty-space')
+  })
+
+  it('数值型变量在 jsdom 中显示占位横线', async () => {
+    const wrapper = await createWrapper()
+    // jsdom 的 getComputedStyle 对未设置的 custom property 返回空串 → 回落 '—'
+    const items = wrapper.findAll('.lv-item')
+    for (const item of items) {
+      const label = item.find('.lv-label').text()
+      if (label === '夜静调暗' || label === '数字安息日') continue
+      expect(item.find('.lv-value').text()).toBe('—')
+    }
+  })
+
+  it('enable 型目标读 isTargetActive 显示真实开关态 0/1', async () => {
+    const wrapper = await createWrapper()
+    const night = wrapper
+      .findAll('.lv-item')
+      .find((n) => n.find('.lv-label').text() === '夜静调暗')!
+    const sabbath = wrapper
+      .findAll('.lv-item')
+      .find((n) => n.find('.lv-label').text() === '数字安息日')!
+    expect(night.find('.lv-value').text()).toMatch(/^[01]$/)
+    expect(sabbath.find('.lv-value').text()).toMatch(/^[01]$/)
+  })
+
+  it('每个变量项渲染描述文本', async () => {
+    const wrapper = await createWrapper()
+    const descs = wrapper.findAll('.lv-desc').map((n) => n.text())
+    expect(descs).toContain('界面粒子浓度倍率')
+    expect(descs).toContain('夜间屏幕调暗强度')
+    expect(descs).toContain('周日断联强度')
+    expect(descs).toContain('抑制提示 0/1')
+  })
+})
