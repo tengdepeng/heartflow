@@ -466,4 +466,93 @@ describe('Dictionary 视图', () => {
       expect(rows[0].find('.enp-lang-bar i').attributes('style')).toMatch(/width:\s*\d+%/)
     })
   })
+
+  // ============================================================
+  // 集成：语义网络面板（INCR-306：补挂载孤儿面板 SemanticNetworkPanel）
+  // 数据桥 props: words: WordItem[]（复用 INCR-224 的 wordItems 计算属性）：
+  // modules/word-mirror/semantic-network 的 useSemanticNetwork()
+  // （networks/buildNetwork/suggestRelatedWords/saveNetwork，存储键 hf:word_networks）。
+  // 宿主 Dictionary 内 semantic-network 零消费方（字镜阁 WordNetworkPanel 属跨宿主，
+  // 殿堂辞典仅消费 hanzi/wisdom-poetry/daily-recommendation/etymology）→ 引擎唯一。
+  // 引擎无模块级 ref（networks 为实例内 ref），setup 时经异步 load() 读库
+  // （mock getKV 对 hf:word_networks 返回 fallback [] → 初始已存网络为空）。
+  // 内置词典：近义 SYNONYM_DICT（思考→思索/考虑/琢磨/沉思/冥想 5 词，strength .9）、
+  // 反义 ANTONYM_DICT、搭配 COLLOCATION_DICT；词库标签(tags)非空才产 related 边，
+  // 而 Dictionary 的 wordItems 桥不含 tags（toEntries 置空）→ 池内词不进关系图，
+  // 仅经 suggestPool（24 预设 + props.words，截 30）进 datalist 建议与关联推荐
+  // （suggestRelatedWords 按 SYNONYM_DICT 匹配池中词）。
+  // ============================================================
+  describe('集成：语义网络（SemanticNetworkPanel）', () => {
+    it('渲染面板头部与空态引导', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      expect(wrapper.find('.snp').exists()).toBe(true)
+      expect(wrapper.find('.snp-title').text()).toBe('🕸 语义网络')
+      expect(wrapper.find('.snp-empty').exists()).toBe(true)
+      // 初始无已存网络徽章
+      expect(wrapper.find('.snp-saved').exists()).toBe(false)
+    })
+
+    it('构建「思考」语义网络：SVG 图/中心节点/近义图例/关系明细', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      await wrapper.find('.snp-input').setValue('思考')
+      await wrapper.find('.snp-go').trigger('click')
+      await nextTick()
+      expect(wrapper.find('.snp-graph').exists()).toBe(true)
+      expect(wrapper.find('.snp-node-center').text()).toBe('思考')
+      // 图例：仅近义一类
+      const legend = wrapper.findAll('.snp-legend-item')
+      expect(legend.length).toBe(1)
+      expect(legend[0].text()).toContain('近义')
+      // 关系明细 5 行：思考 ≈ 思索/考虑/琢磨/沉思/冥想
+      const edges = wrapper.findAll('.snp-edge')
+      expect(edges.length).toBe(5)
+      expect(edges[0].find('.snp-edge-src').text()).toBe('思考')
+      expect(edges[0].find('.snp-edge-tgt').text()).toBe('思索')
+      expect(edges[0].find('.snp-edge-rel').text()).toContain('近义')
+      expect(edges[0].find('.snp-edge-strength').text()).toBe('90%')
+    })
+
+    it('词库词进入输入建议池（datalist）', async () => {
+      mockEntries.value = [
+        { id: 'd1', word: '心流', definition: 'Flow', category: '', createdAt: '2026-01-01' },
+      ]
+      const wrapper = await getWrapper()
+      await nextTick()
+      const options = wrapper.findAll('#snp-suggest option')
+      expect(options.length).toBeGreaterThan(0)
+      const vals = options.map((o) => o.attributes('value'))
+      expect(vals).toContain('心流')
+    })
+
+    it('词库近义词触发关联推荐', async () => {
+      mockEntries.value = [
+        { id: 'd1', word: '思索', definition: '深入思考', category: '', createdAt: '2026-01-01' },
+      ]
+      const wrapper = await getWrapper()
+      await nextTick()
+      await wrapper.find('.snp-input').setValue('思考')
+      await wrapper.find('.snp-go').trigger('click')
+      await nextTick()
+      const suggs = wrapper.findAll('.snp-sugg-item')
+      expect(suggs.length).toBe(1)
+      expect(suggs[0].find('b').text()).toBe('思索')
+      expect(suggs[0].text()).toContain('近义')
+      expect(suggs[0].text()).toContain('近义词')
+    })
+
+    it('保存网络：已存徽章与存储写入', async () => {
+      const wrapper = await getWrapper()
+      await nextTick()
+      await wrapper.find('.snp-input').setValue('思考')
+      await wrapper.find('.snp-go').trigger('click')
+      await nextTick()
+      await wrapper.find('.snp-save').trigger('click')
+      await nextTick()
+      expect(wrapper.find('.snp-saved').text()).toContain('已存 1 个网络')
+      const { storage } = await import('../../engine/storage')
+      expect(storage.setKV).toHaveBeenCalledWith('hf:word_networks', expect.any(Array))
+    })
+  })
 })

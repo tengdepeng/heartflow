@@ -138,6 +138,9 @@
     <!-- 词源网络（word-mirror/etymology 引擎：词源追溯/字根分解/同源词/共享词根/词源分布，INCR-305 补挂载孤儿组件） -->
     <EtymologyNetworkPanel />
 
+    <!-- 语义网络（word-mirror/semantic-network 引擎：近义/反义/搭配/相关关系图+关联推荐+保存网络，INCR-306 补挂载孤儿组件） -->
+    <SemanticNetworkPanel :words="wordItems" />
+
     <!-- 编辑模态框 -->
     <div data-enter v-if="showEditor" class="modal-overlay" @click.self="closeEditor">
       <div class="modal">
@@ -176,6 +179,7 @@ import PoetryPanel from '../components/PoetryPanel.vue'
 import HanziGalleryPanel from '../components/HanziGalleryPanel.vue'
 import DailyWordPanel from '../components/DailyWordPanel.vue'
 import EtymologyNetworkPanel from '../components/EtymologyNetworkPanel.vue'
+import SemanticNetworkPanel from '../components/SemanticNetworkPanel.vue'
 import type { HanziEntry } from '../modules/hanzi'
 import type { WordItem } from '../modules/word-mirror/word-mirror-store'
 
