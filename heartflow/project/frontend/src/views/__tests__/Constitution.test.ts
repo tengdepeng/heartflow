@@ -165,6 +165,38 @@ vi.mock('../../modules/toast', () => ({
   showToast: vi.fn(),
 }))
 
+// ---- 合规守卫面板引擎 mock（引擎含模块级 ref，mock 以隔离跨用例污染）----
+const mockGenerateReport = vi.fn()
+const mockGetAuditLog = vi.fn()
+const mockGetAuditStats = vi.fn()
+const mockDetectConflicts = vi.fn()
+
+vi.mock('../../modules/constitution/compliance-baseline', () => ({
+  useComplianceBaseline: () => ({
+    generateReport: mockGenerateReport,
+    getAuditLog: mockGetAuditLog,
+    getAuditStats: mockGetAuditStats,
+    detectConflicts: mockDetectConflicts,
+  }),
+}))
+
+// 面板在整份测试中都会挂载，需给予所有用例可用的默认返回（模块级，避免渲染期报错）
+mockGetAuditLog.mockReturnValue([])
+mockGetAuditStats.mockReturnValue({ totalEntries: 0, byType: {}, firstEntryAt: '', lastEntryAt: '', recentChanges: 0 })
+mockDetectConflicts.mockReturnValue([])
+mockGenerateReport.mockReturnValue({
+  generatedAt: '2025-01-01T00:00:00.000Z',
+  constitutionVersion: '1.0.0',
+  totalRules: 38,
+  enabledRules: 25,
+  score: 100,
+  violations: [],
+  warnings: [],
+  conflicts: [],
+  auditSummary: { totalEntries: 0, byType: {}, firstEntryAt: '', lastEntryAt: '', recentChanges: 0 },
+  health: 'healthy',
+})
+
 // ============================================================
 // Wrapper 工厂
 // ============================================================
@@ -489,5 +521,110 @@ describe('Constitution 心流宪法视图', () => {
     await delBtn.trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.neutral-ext-card').text()).not.toContain('务必完成')
+  })
+})
+
+// ============================================================
+// 集成：合规守卫 · 宪法体检（INCR-282 补挂载 ConstitutionGuardianPanel）
+// ============================================================
+describe('集成：合规守卫 · 宪法体检', () => {
+  const baseStats = {
+    byType: {},
+    firstEntryAt: '',
+    lastEntryAt: '',
+  }
+  const healthyReport = {
+    generatedAt: '2025-01-01T00:00:00.000Z',
+    constitutionVersion: '1.0.0',
+    totalRules: 38,
+    enabledRules: 25,
+    score: 100,
+    violations: [],
+    warnings: [],
+    conflicts: [],
+    auditSummary: { totalEntries: 0, recentChanges: 0, ...baseStats },
+    health: 'healthy',
+  }
+
+  beforeEach(() => {
+    mockGetAuditLog.mockReset()
+    mockGetAuditLog.mockReturnValue([])
+    mockGetAuditStats.mockReset()
+    mockGetAuditStats.mockReturnValue({ totalEntries: 0, recentChanges: 0, ...baseStats })
+    mockDetectConflicts.mockReset()
+    mockDetectConflicts.mockReturnValue([])
+    mockGenerateReport.mockReset()
+    mockGenerateReport.mockReturnValue(healthyReport)
+  })
+
+  it('渲染合规守卫面板标题与初始提示', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.cgr-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.text()).toContain('合规守卫 · 宪法体检报告')
+    expect(panel.text()).toContain('运行合规检查')
+    // 初始未运行检查：显示提示而非报告
+    expect(panel.find('[data-testid="cgr-report"]').exists()).toBe(false)
+    expect(panel.text()).toContain('点击下方按钮')
+  })
+
+  it('展示空审计日志与无冲突提示', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.cgr-panel')
+    expect(panel.text()).toContain('暂无审计记录')
+    expect(panel.text()).toContain('未发现规则冲突')
+    expect(panel.text()).toContain('共 0 条')
+    expect(panel.text()).toContain('近 7 天 0 条')
+  })
+
+  it('触发运行后展示评分与健康徽章', async () => {
+    const wrapper = await createWrapper()
+    const btn = wrapper.findAll('button').find((b) => b.text().includes('运行合规检查'))
+    await btn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(mockGenerateReport).toHaveBeenCalledTimes(1)
+    const panel = wrapper.find('.cgr-panel')
+    const report = panel.find('[data-testid="cgr-report"]')
+    expect(report.exists()).toBe(true)
+    expect(report.text()).toContain('100')
+    expect(report.text()).toContain('规则总数 38')
+    expect(wrapper.find('.cgr-badge').text()).toBe('健康')
+  })
+
+  it('展示违规项与严重度标签', async () => {
+    mockGenerateReport.mockReturnValue({
+      ...healthyReport,
+      score: 45,
+      health: 'critical',
+      violations: [
+        {
+          ruleId: 'rule-1',
+          ruleTitle: '测试',
+          coreValue: '心流第一',
+          description: '规则「测试」包含推送关键词',
+          severity: 'critical',
+          suggestion: '请移除',
+        },
+      ],
+    })
+    const wrapper = await createWrapper()
+    const btn = wrapper.findAll('button').find((b) => b.text().includes('运行合规检查'))
+    await btn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.cgr-badge').text()).toBe('危险')
+    expect(wrapper.text()).toContain('严重')
+    expect(wrapper.text()).toContain('规则「测试」包含推送关键词')
+  })
+
+  it('展示审计日志条目与统计', async () => {
+    mockGetAuditLog.mockReturnValue([
+      { id: 'a1', eventType: 'rule_added', description: '新增规则：专注', timestamp: '2025-01-01T00:00:00.000Z' },
+    ])
+    mockGetAuditStats.mockReturnValue({ totalEntries: 1, recentChanges: 1, ...baseStats })
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.cgr-panel')
+    expect(panel.text()).toContain('rule_added')
+    expect(panel.text()).toContain('新增规则：专注')
+    expect(panel.text()).toContain('共 1 条')
   })
 })

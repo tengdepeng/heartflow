@@ -276,6 +276,9 @@
       </div>
     </section>
 
+    <!-- 合规守卫 · 宪法体检（INCR-282 补挂载孤儿组件 ConstitutionGuardianPanel：合规自查/审计日志/冲突检测，引擎 useComplianceBaseline 唯一，经 useConstitution 桥只读消费商店） -->
+    <ConstitutionGuardianPanel />
+
     <!-- 宪法透明度账本 · 名实对照 -->
     <ConstitutionStatusPanel />
 
@@ -613,6 +616,7 @@ import { ruleHasRuntimeEffect } from '@/engine/constitution-effects'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import ConstitutionStatusPanel from '@/components/ConstitutionStatusPanel.vue'
 import OsNotificationAuditPanel from '@/components/OsNotificationAuditPanel.vue'
+import ConstitutionGuardianPanel from '@/components/ConstitutionGuardianPanel.vue'
 import RoomHeader from '../components/RoomHeader.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
