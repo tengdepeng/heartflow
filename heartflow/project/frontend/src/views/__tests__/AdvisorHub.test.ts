@@ -681,3 +681,117 @@ describe('集成：庆祝与退休', () => {
     expect(saved[0].completedAt).toBeUndefined()
   })
 })
+
+// ============================================================
+// 集成：作息与场景 AdvisorDailyLifePanel（INCR-281 补挂载孤儿组件）
+// 引擎 useAdvisorDailyLife 的 schedules/currentActivities/scenes 为模块级 ref（import 时自 storage 读一次）——
+// 故本 describe 每个用例 beforeEach 先 vi.resetModules() 再清 mockStore['hf:advisor:schedules']，
+// 使各用例独立、无模块态污染。注意：currentActivities 为运行时态不持久化；
+// 当前时段活动（.adp-item-acts）依赖运行小时，断言避免精确活动名
+// ============================================================
+describe('集成：作息与场景', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAdvisors.length = 0
+    mockStore['hf:advisors'] = []
+    delete mockStore['hf:advisor:schedules']
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    if (activeWrapper) {
+      activeWrapper.unmount()
+      activeWrapper = null
+    }
+    document.querySelectorAll('.ah-dialog-overlay').forEach(el => el.remove())
+  })
+
+  it('无幕僚时渲染骨架与空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.adp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🌗 作息与场景')
+    expect(wrapper.text()).toContain('幕僚此刻在做什么')
+    expect(wrapper.find('.adp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('先创建幕僚，才能安排他们的作息')
+    // 时段徽标（时段文案依赖运行小时，仅断言前缀）
+    expect(wrapper.find('.adp-slot').text()).toMatch(/^🌗/)
+  })
+
+  it('有幕僚时展示作息列表与场景网格，onMounted 初始化作息并落库', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_d1', name: '墨染' }))
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.adp-item').length).toBe(1)
+    expect(wrapper.text()).toContain('墨染')
+    // onMounted 预填活动选择器为 resting
+    expect((wrapper.find('.adp-select').element as HTMLSelectElement).value).toBe('resting')
+    // initSchedule 写回存储：schedules 落库且 isActive
+    const saved = JSON.parse(mockStore['hf:advisor:schedules'])
+    expect(Object.keys(saved).length).toBe(1)
+    expect(saved.a_d1).toBeDefined()
+    expect(saved.a_d1.isActive).toBe(true)
+    expect(saved.a_d1.slots).toBeDefined()
+    // 六场景网格渲染
+    expect(wrapper.findAll('.adp-scene').length).toBe(6)
+  })
+
+  it('点击开始启动活动，展示场景占位与活动片段', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_d1', name: '墨染' }))
+    const wrapper = await getWrapper()
+    // 初始无场景活动 → 各场景空
+    expect(wrapper.findAll('.adp-scene-empty').length).toBe(6)
+    await wrapper.find('.adp-item .adp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    // 默认进入第一个场景（书房），occ 1/3，active 高亮
+    expect(wrapper.find('.adp-scene.active .adp-scene-occ').text()).toBe('1/3')
+    expect(wrapper.find('.adp-scene.active').text()).toContain('书房')
+    // 场景活动片段：名字 + 默认休息活动
+    expect(wrapper.find('.adp-scene-acts .adp-act-chip').text()).toContain('墨染')
+    expect(wrapper.find('.adp-scene-acts .adp-act-chip').text()).toContain('休息')
+  })
+
+  it('点击结束终止活动，场景恢复空', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_d1', name: '墨染' }))
+    const wrapper = await getWrapper()
+    await wrapper.find('.adp-item .adp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.adp-scene-empty').length).toBe(5)
+    // 结束按钮（ghost 变体）
+    await wrapper.find('.adp-btn--ghost').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.adp-scene-empty').length).toBe(6)
+    expect(wrapper.find('.adp-scene.active').exists()).toBe(false)
+  })
+
+  it('场景网格展示全部六场景的容量与描述', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_d1', name: '墨染' }))
+    const wrapper = await getWrapper()
+    const sceneNames = ['书房', '庭院', '厨房', '工坊', '客厅', '卧室']
+    sceneNames.forEach(name => expect(wrapper.text()).toContain(name))
+    // 各场景初始 occ 0/N 容量
+    expect(wrapper.text()).toContain('0/3')
+    expect(wrapper.text()).toContain('0/4')
+    expect(wrapper.text()).toContain('0/2')
+    expect(wrapper.text()).toContain('0/5')
+    expect(wrapper.text()).toContain('0/1')
+    // 场景描述
+    expect(wrapper.text()).toContain('书架环绕的安静空间')
+    expect(wrapper.text()).toContain('草木葱茏的户外空间')
+  })
+
+  it('多幕僚各自独立作息与活动控制', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_d1', name: '墨染' }))
+    mockAdvisors.push(sampleProfile({ id: 'a_d2', name: '青鸟' }))
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.adp-item').length).toBe(2)
+    expect(wrapper.findAll('.adp-select').length).toBe(2)
+    const saved = JSON.parse(mockStore['hf:advisor:schedules'])
+    expect(Object.keys(saved).length).toBe(2)
+    expect(saved.a_d1.isActive).toBe(true)
+    expect(saved.a_d2.isActive).toBe(true)
+    // 只启动第一位幕僚 → 书房仅占 1 席
+    await wrapper.findAll('.adp-item')[0].find('.adp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.adp-scene.active .adp-scene-occ').text()).toBe('1/3')
+    expect(wrapper.findAll('.adp-item')[1].find('.adp-btn--ghost').exists()).toBe(true)
+  })
+})

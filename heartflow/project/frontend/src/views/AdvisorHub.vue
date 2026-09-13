@@ -159,6 +159,11 @@
       <AdvisorCelebrationPanel :advisors="advisors" />
     </section>
 
+    <!-- 作息与场景（INCR-281 补挂载孤儿组件 AdvisorDailyLifePanel：时段/场景分布/活动开始结束，引擎 useAdvisorDailyLife 唯一、advisors props 薄委托注入） -->
+    <section data-enter class="ah-section">
+      <AdvisorDailyLifePanel :advisors="advisors" />
+    </section>
+
     <div data-enter v-if="!advisors.length" class="ah-empty-hint"><span>🏛</span><p>幕僚大厅等待第一位居民</p></div>
 
     <!-- 编辑弹窗 -->
@@ -207,6 +212,7 @@ import AdvisorCarrierEditor from '../components/AdvisorCarrierEditor.vue'
 import AdvisorInteractionPanel from '../components/AdvisorInteractionPanel.vue'
 import AdvisorWitnessPanel from '../components/AdvisorWitnessPanel.vue'
 import AdvisorCelebrationPanel from '../components/AdvisorCelebrationPanel.vue'
+import AdvisorDailyLifePanel from '../components/AdvisorDailyLifePanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
 import { getNoteStore } from '../modules/note'
