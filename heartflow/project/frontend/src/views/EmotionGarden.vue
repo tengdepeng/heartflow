@@ -165,6 +165,9 @@
       <!-- 花园状态面板（接线 useEmotionBridge · 图鉴/健康度/季节/品种，任务①体验闭环） -->
       <GardenHealthPanel />
 
+      <!-- 花丛分布（INCR-283 补挂载孤儿组件 FlowerClusterArchivePanel：按情绪品种统计花丛/健康分，经 useEmotionGarden 桥只读聚合记录，引擎与宿主同源但无归档等价物） -->
+      <FlowerClusterArchivePanel />
+
       <!-- 筛选 -->
       <section class="filter-section">
         <div class="filter-group">
@@ -530,6 +533,7 @@ import SoundscapePanel from '../components/SoundscapePanel.vue'
 import EmotionTrendsPanel from '../components/EmotionTrendsPanel.vue'
 import VisitorFootprintsPanel from '../components/VisitorFootprintsPanel.vue'
 import FlowerHybridPanel from '../components/FlowerHybridPanel.vue'
+import FlowerClusterArchivePanel from '../components/FlowerClusterArchivePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'

@@ -671,3 +671,78 @@ describe('集成：花种杂交面板', () => {
     expect(panel.text()).not.toContain('无收获')
   })
 })
+
+// ============================================================
+// 集成：花丛分布面板 FlowerClusterArchivePanel（INCR-283 补挂载孤儿组件）
+// 引擎 useEmotionGarden 与宿主 GardenHealthPanel 同源，但无归档/花丛聚合等价物：
+// 本面板按情绪品种统计花丛分布与花田健康分，零 props 只读消费（经 useEmotionGarden 桥）。
+// 空态/聚合/健康分/LOD 标签四场景验证，mock 数据形态与 LOD 用例一致（记录 { type, ... }）。
+// 注意：面板 onMounted 调用 garden.load()，mockRecords 需在 getWrapper 之前写入。
+// ============================================================
+describe('集成：花丛分布面板', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRecords.value = []
+  })
+
+  it('无记录时渲染空态引导', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.gcp').exists()).toBe(true)
+    expect(wrapper.find('.gcp-title').text()).toBe('花丛分布')
+    expect(wrapper.find('.gcp-empty').text()).toContain('暂无情绪记录，先去种下一朵花吧')
+  })
+
+  it('有记录时按情绪品种聚合花丛分布', async () => {
+    // 5 条记录覆盖 5 种情绪 → 花丛总数 5 / 情绪种类 5 / 5 个分布条目
+    mockRecords.value = createRecords(5)
+    const wrapper = await getWrapper()
+    const gcp = wrapper.find('.gcp')
+    expect(gcp.find('.gcp-empty').exists()).toBe(false)
+    expect(gcp.text()).toContain('花丛总数 5')
+    expect(gcp.text()).toContain('情绪种类 5')
+    expect(gcp.findAll('.gcp-cluster').length).toBe(5)
+    // 每种情绪 1 株
+    expect(gcp.find('.gcp-cluster').text()).toContain('1 株')
+  })
+
+  it('同类记录聚为单簇并累计株数', async () => {
+    // 3 条 happy → 单簇 3 株，情绪种类 1
+    mockRecords.value = Array.from({ length: 3 }, (_, i) => ({
+      id: `hp_${i}`,
+      type: 'happy',
+      note: '',
+      createdAt: new Date(Date.now() - i * 86400000).toISOString(),
+    }))
+    const wrapper = await getWrapper()
+    const gcp = wrapper.find('.gcp')
+    expect(gcp.text()).toContain('花丛总数 3')
+    expect(gcp.text()).toContain('情绪种类 1')
+    expect(gcp.findAll('.gcp-cluster').length).toBe(1)
+    expect(gcp.find('.gcp-cluster').text()).toContain('happy · 3 株')
+  })
+
+  it('花田健康分按 happy 占比计算', async () => {
+    // 3 happy + 2 calm → 总 5，happy 3/5 = 60
+    mockRecords.value = [
+      { id: 'h1', type: 'happy', note: '', createdAt: new Date().toISOString() },
+      { id: 'h2', type: 'happy', note: '', createdAt: new Date().toISOString() },
+      { id: 'h3', type: 'happy', note: '', createdAt: new Date().toISOString() },
+      { id: 'c1', type: 'calm', note: '', createdAt: new Date().toISOString() },
+      { id: 'c2', type: 'calm', note: '', createdAt: new Date().toISOString() },
+    ]
+    const wrapper = await getWrapper()
+    const gcp = wrapper.find('.gcp')
+    expect(gcp.find('.gcp-health-label').text()).toBe('花田健康分')
+    expect(gcp.find('.gcp-health-score').text()).toBe('60')
+  })
+
+  it('有数据时不显示空态且 LOD 标签标记高精度', async () => {
+    mockRecords.value = createRecords(3)
+    const wrapper = await getWrapper()
+    const gcp = wrapper.find('.gcp')
+    expect(gcp.find('.gcp-empty').exists()).toBe(false)
+    const tag = gcp.find('.gcp-lod-tag')
+    expect(tag.exists()).toBe(true)
+    expect(tag.text()).toBe('高精度')
+  })
+})
