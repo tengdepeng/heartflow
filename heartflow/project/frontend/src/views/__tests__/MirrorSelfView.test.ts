@@ -16,6 +16,7 @@ async function createWrapper() {
 }
 
 const SESSIONS_KEY = 'hf:mirror_sessions'
+const TEMPLATES_KEY = 'hf:mirror_templates'
 
 function seedSessions() {
   const now = Date.now()
@@ -162,5 +163,88 @@ describe('集成：自我认知档案面板', () => {
     const wrapper = await createWrapper()
     const pac = wrapper.find('.pac-panel')
     expect(pac.find('.pac-empty').exists()).toBe(true)
+  })
+})
+
+// ============================================================
+// 集成：对话模板面板（INCR-297 补挂载孤儿组件 DialogueTemplatesPanel）
+// 面板 onMounted 起即经 useDialogueTemplates 从 storage 读模板（缺省回落 8 条
+// DEFAULT_TEMPLATES）；推荐区块按时段/星期（getRecommendedTemplates），
+// 热门区块按 usageCount 排序（popularTemplates），使用按钮写回 recordUsage。
+// 测试清理 hf:mirror_templates 键，使各用例从默认模板起步。
+// ============================================================
+describe('集成：对话模板面板', () => {
+  beforeEach(() => {
+    removeKV(SESSIONS_KEY)
+    removeKV(TEMPLATES_KEY)
+  })
+
+  it('渲染面板标题与副标题', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('.dtp')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.dtp-title').text()).toContain('对话模板')
+    expect(panel.find('.dtp-sub').text()).toContain('模板 · 推荐 · 使用')
+  })
+
+  it('缺省模板落地：渲染全部模板列表（8 条含名称/描述/引导语）', async () => {
+    const wrapper = await createWrapper()
+    const cards = wrapper.findAll('.dtp-tpl')
+    expect(cards.length).toBe(8)
+    const names = cards.map((c) => c.find('.dtp-tpl-name').text())
+    expect(names).toContain('晨间签到')
+    expect(names).toContain('晚间反思')
+    expect(names).toContain('周回顾')
+    expect(names).toContain('决策辅助')
+    // 每条模板都带描述与引导问题
+    expect(cards[0].find('.dtp-tpl-desc').text()).not.toBe('')
+    expect(cards[0].findAll('.dtp-prompt').length).toBeGreaterThan(0)
+    // 空态不存在
+    expect(wrapper.find('.dtp-empty').exists()).toBe(false)
+  })
+
+  it('渲染热门模板区（按使用次数排序）', async () => {
+    setKV(TEMPLATES_KEY, [
+      { id: 't_hot', type: 'gratitude', name: '感恩练习', description: '练习感恩', icon: '🙏', prompts: ['a'], expectedIntents: ['reflect'], usageCount: 5 },
+      { id: 't_cold', type: 'focus_prep', name: '专注准备', description: '进入专注', icon: '🎯', prompts: ['b'], expectedIntents: ['focus'], usageCount: 1 },
+    ])
+    const wrapper = await createWrapper()
+    const pops = wrapper.findAll('.dtp-pop')
+    expect(pops.length).toBe(2)
+    // 热门首位是使用次数最高的
+    expect(pops[0].find('.dtp-pop-name').text()).toBe('感恩练习')
+    expect(pops[0].find('.dtp-pop-count').text()).toContain('5 次')
+    expect(pops[1].find('.dtp-pop-name').text()).toBe('专注准备')
+  })
+
+  it('推荐模板按时段出现（早间 8 点 → 晨间签到）', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 0, 15, 8, 0, 0)) // 2026-01-15 08:00 周四
+    try {
+      const wrapper = await createWrapper()
+      const recs = wrapper.findAll('.dtp-rec')
+      expect(recs.length).toBeGreaterThan(0)
+      const recNames = recs.map((r) => r.find('.dtp-rec-name').text())
+      expect(recNames).toContain('晨间签到')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('点击「使用此模板」记录使用次数并持久化', async () => {
+    const wrapper = await createWrapper()
+    const morning = wrapper
+      .findAll('.dtp-tpl')
+      .find((c) => c.find('.dtp-tpl-name').text() === '晨间签到')!
+    expect(morning.find('.dtp-tpl-count').text()).toContain('使用 0 次')
+    await morning.find('.dtp-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(morning.find('.dtp-tpl-count').text()).toContain('使用 1 次')
+    // 存储已持久化，再次挂载仍为 1 次
+    const again = await createWrapper()
+    const morningAgain = again
+      .findAll('.dtp-tpl')
+      .find((c) => c.find('.dtp-tpl-name').text() === '晨间签到')!
+    expect(morningAgain.find('.dtp-tpl-count').text()).toContain('使用 1 次')
   })
 })

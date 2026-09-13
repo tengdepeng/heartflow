@@ -50,6 +50,12 @@
       </ul>
     </section>
 
+    <!-- 对话模板：晨昏签到/周回顾/专注准备/情绪检查/决策辅助 预设引导（INCR-297 补挂载孤儿组件 DialogueTemplatesPanel：消费 useDialogueTemplates 引擎的推荐/列表/热门/使用记录，引擎应用库内唯一，零 props 自持读桥） -->
+    <section data-enter class="msr-templates" aria-label="对话模板">
+      <h2 class="msr-section-title">对话模板</h2>
+      <DialogueTemplatesPanel />
+    </section>
+
     <!-- 自我认知档案：人格风格/价值观取向/成长阶段/温和洞察（INCR-294 补挂载孤儿组件 PersonalityArchivePanel：消费 self-cognition-analytics 五纯函数，面板级应用库内唯一，薄委托化） -->
     <section data-enter class="msr-portrait" aria-label="自我认知档案">
       <h2 class="msr-section-title">自我认知档案</h2>
@@ -82,6 +88,7 @@ import TwelveHousesGrid from '../components/TwelveHousesGrid.vue'
 import SelfAstrolabeChart from '../components/SelfAstrolabeChart.vue'
 import PersonalityPortraitPanel from '../components/PersonalityPortraitPanel.vue'
 import PersonalityArchivePanel from '../components/PersonalityArchivePanel.vue'
+import DialogueTemplatesPanel from '../components/DialogueTemplatesPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import { getDialogueSessions } from '../modules/mirror/dialogue-persistence'
@@ -184,6 +191,7 @@ onMounted(() => {
 .msr-stage,
 .msr-climate,
 .msr-reflections,
+.msr-templates,
 .msr-portrait,
 .msr-selfmirror {
   position: relative;
