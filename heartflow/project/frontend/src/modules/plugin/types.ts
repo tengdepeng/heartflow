@@ -84,6 +84,8 @@ export interface PluginRuntime {
     /** 是否隔离 DOM */
     isolateDOM: boolean
   }
+  /** 已授予的权限子集（用户可逐项开关；缺省为声明全集） */
+  granted?: PluginPermission[]
 }
 
 /** 内置核心插件（最小可运行单元） */

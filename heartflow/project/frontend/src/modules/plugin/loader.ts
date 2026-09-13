@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { PluginManifest, PluginRuntime } from './types'
+import { storage } from '../../engine/storage'
 
 /** 插件实例注册表 */
 const loadedPlugins = new Map<string, PluginRuntime>()
@@ -46,6 +47,7 @@ export async function loadPlugin(manifest: PluginManifest): Promise<PluginRuntim
       isolateNetwork: manifest.meta.tier === 'official',
       isolateDOM: manifest.meta.tier !== 'experimental',
     },
+    granted: [...manifest.permissions],
   }
 
   loadedPlugins.set(manifest.meta.id, runtime)
@@ -70,11 +72,19 @@ export function getLoadedPlugins(): PluginRuntime[] {
 /** 检查插件是否有权限 */
 export function hasPluginPermission(pluginId: string, permission: string): boolean {
   const runtime = loadedPlugins.get(pluginId)
-  if (!runtime) return false
-  const { manifest } = runtime
-  if (manifest.meta.tier === 'official') return true
-  if (manifest.meta.tier === 'community') return manifest.permissions.includes(permission as any)
-  return false
+  if (runtime) {
+    if (runtime.manifest.meta.tier === 'official') return true
+    if (runtime.manifest.meta.tier === 'experimental') return false
+    const granted = runtime.granted ?? runtime.manifest.permissions
+    return granted.includes(permission as any)
+  }
+  // 回退：查持久化注册表（来自 UI 逐项开关）
+  const reg = storage.getPluginRegistry?.()
+  const entry = reg?.[pluginId]
+  if (!entry) return false
+  if (entry.enabled === false) return false
+  const granted = entry.granted ?? entry.permissions ?? []
+  return granted.includes(permission)
 }
 
 /** 重置加载器状态（仅用于测试） */

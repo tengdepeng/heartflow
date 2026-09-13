@@ -28,6 +28,8 @@ export function usePlugin() {
     enable: store.enable?.bind(store),
     disable: store.disable?.bind(store),
     toggle: store.toggle?.bind(store),
+    setPermission: store.setPermission?.bind(store),
+    revokeAllPermissions: store.revokeAllPermissions?.bind(store),
     installPlugin: store.installPlugin?.bind(store),
     uninstallPlugin: store.uninstallPlugin?.bind(store),
   }

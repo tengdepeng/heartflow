@@ -1,3 +1,3 @@
 import { loadSchema, saveSchema } from './core'
-export function getPluginRegistry(): Record<string, { enabled: boolean; permissions: string[] }> { const s = loadSchema(); return (s as any).pluginRegistry ?? {} }
-export function setPluginRegistry(registry: Record<string, { enabled: boolean; permissions: string[] }>): void { const s = loadSchema(); (s as any).pluginRegistry = registry; saveSchema(s) }
+export function getPluginRegistry(): Record<string, { enabled: boolean; permissions: string[]; granted?: string[] }> { const s = loadSchema(); return (s as any).pluginRegistry ?? {} }
+export function setPluginRegistry(registry: Record<string, { enabled: boolean; permissions: string[]; granted?: string[] }>): void { const s = loadSchema(); (s as any).pluginRegistry = registry; saveSchema(s) }

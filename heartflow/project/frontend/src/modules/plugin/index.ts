@@ -58,18 +58,16 @@ export type {
   PluginDependency,
   DependencyResolution,
   VersionConflict,
-  PluginRating,
-  PluginReview,
   PluginUpdate,
   MarketplaceStats,
   UpdatePolicy,
 } from './plugin-marketplace'
 
-function loadRegistry(): Record<string, { enabled: boolean; permissions: string[] }> {
+function loadRegistry(): Record<string, { enabled: boolean; permissions: string[]; granted?: string[] }> {
   return storage.getPluginRegistry?.() ?? {}
 }
 
-function saveRegistry(reg: Record<string, { enabled: boolean; permissions: string[] }>) {
+function saveRegistry(reg: Record<string, { enabled: boolean; permissions: string[]; granted?: string[] }>) {
   storage.setPluginRegistry?.(reg)
 }
 
@@ -90,6 +88,7 @@ function init() {
       installedAt: new Date().toISOString(),
       hooks: new Map(),
       sandbox: { ...m.sandbox },
+      granted: (entry?.granted ?? entry?.permissions ?? m.permissions) as PluginPermission[],
     }
   })
 }
@@ -113,11 +112,19 @@ function toggle(id: string): boolean {
   return rt.enabled
 }
 
-/** 检查插件是否有所需权限 */
+/**
+ * 检查插件是否有所需权限（运行时门控唯一真相）
+ * 直接读持久化注册表里的 granted 子集，使 UI 的逐项开关实时生效，
+ * 不依赖内存中 runtimes 是否与 store 同步。
+ */
 function checkPermission(id: string, permission: PluginPermission): boolean {
   const rt = runtimes.value.find(r => r.manifest.meta.id === id)
-  if (!rt || !rt.enabled) return false
-  return rt.manifest.permissions.includes(permission)
+  if (!rt) return false
+  const entry = loadRegistry()[id]
+  const enabled = entry?.enabled ?? rt.enabled
+  if (!enabled) return false
+  const granted = entry?.granted ?? entry?.permissions ?? rt.manifest.permissions
+  return granted.includes(permission)
 }
 
 /** 按分类获取插件 */
@@ -125,13 +132,14 @@ function getByCategory(category: string): PluginRuntime[] {
   return runtimes.value.filter(r => r.manifest.meta.category === category)
 }
 
-/** 持久化注册表 */
+/** 持久化注册表（合并写入，保留其它来源管理的条目） */
 function persist() {
-  const reg: Record<string, { enabled: boolean; permissions: string[] }> = {}
+  const reg = loadRegistry()
   for (const rt of runtimes.value) {
     reg[rt.manifest.meta.id] = {
       enabled: rt.enabled,
       permissions: rt.manifest.permissions,
+      granted: rt.granted ?? rt.manifest.permissions,
     }
   }
   saveRegistry(reg)

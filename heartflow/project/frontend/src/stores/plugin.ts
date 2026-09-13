@@ -42,6 +42,7 @@ export const usePluginStore = defineStore('plugin', () => {
         installedAt: new Date().toISOString(),
         hooks: new Map(),
         sandbox: { ...manifest.sandbox },
+        granted: (saved?.granted ?? saved?.permissions ?? manifest.permissions) as PluginPermission[],
       }
     })
 
@@ -94,6 +95,7 @@ export const usePluginStore = defineStore('plugin', () => {
       installedAt: new Date().toISOString(),
       hooks: new Map(),
       sandbox: { ...manifest.sandbox },
+      granted: [...manifest.permissions],
     })
     persist()
     return true
@@ -111,13 +113,37 @@ export const usePluginStore = defineStore('plugin', () => {
     return true
   }
 
+  // ---- 权限逐项开关 ----
+  function setPermission(id: string, perm: PluginPermission, on: boolean): boolean {
+    const p = plugins.value.find(p => p.manifest.meta.id === id)
+    if (!p) return false
+    const granted = p.granted ? [...p.granted] : [...p.manifest.permissions]
+    const idx = granted.indexOf(perm)
+    if (on && idx === -1) granted.push(perm)
+    if (!on && idx !== -1) granted.splice(idx, 1)
+    p.granted = granted
+    persist()
+    return true
+  }
+
+  /** 一键撤销：清空该插件所有已授予权限 */
+  function revokeAllPermissions(id: string): boolean {
+    const p = plugins.value.find(p => p.manifest.meta.id === id)
+    if (!p) return false
+    p.granted = []
+    persist()
+    return true
+  }
+
   // ---- 持久化 ----
   function persist() {
-    const registry: Record<string, { enabled: boolean; permissions: string[] }> = {}
+    const registry: Record<string, { enabled: boolean; permissions: string[]; granted?: string[] }> =
+      storage.getPluginRegistry?.() ?? {}
     for (const p of plugins.value) {
       registry[p.manifest.meta.id] = {
         enabled: p.enabled,
         permissions: p.manifest.permissions,
+        granted: (p.granted ?? p.manifest.permissions) as PluginPermission[],
       }
     }
     storage.setPluginRegistry(registry)
@@ -135,6 +161,8 @@ export const usePluginStore = defineStore('plugin', () => {
     enable,
     disable,
     toggle,
+    setPermission,
+    revokeAllPermissions,
     installPlugin,
     uninstallPlugin,
   }

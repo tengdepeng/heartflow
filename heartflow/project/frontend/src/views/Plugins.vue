@@ -45,11 +45,29 @@
             </div>
             <div class="pl-plugin-desc">{{ p.manifest.meta.description }}</div>
             <div class="plugin-perms">
-              <span
-                v-for="perm in p.manifest.permissions"
-                :key="perm"
-                class="perm-badge"
-              >{{ perm }}</span>
+              <div class="perm-head">
+                <span class="perm-head-title">所需权限</span>
+                <button
+                  type="button"
+                  class="perm-revoke-all"
+                  :disabled="(p.granted ?? p.manifest.permissions).length === 0"
+                  @click="revokeAll(p)"
+                >撤销全部</button>
+              </div>
+              <div class="perm-list">
+                <div v-for="perm in p.manifest.permissions" :key="perm" class="perm-row">
+                  <span class="perm-label">{{ permLabel(perm) }}</span>
+                  <button
+                    type="button"
+                    class="perm-switch"
+                    role="switch"
+                    :aria-checked="isGranted(p, perm)"
+                    :class="{ on: isGranted(p, perm) }"
+                    :title="isGranted(p, perm) ? '点击撤销该权限' : '点击授予该权限'"
+                    @click="togglePerm(p, perm)"
+                  ><span class="perm-knob"></span></button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="plugin-status">
@@ -84,11 +102,29 @@
               by {{ p.manifest.meta.author }}
             </div>
             <div class="plugin-perms">
-              <span
-                v-for="perm in p.manifest.permissions"
-                :key="perm"
-                class="perm-badge"
-              >{{ perm }}</span>
+              <div class="perm-head">
+                <span class="perm-head-title">所需权限</span>
+                <button
+                  type="button"
+                  class="perm-revoke-all"
+                  :disabled="(p.granted ?? p.manifest.permissions).length === 0"
+                  @click="revokeAll(p)"
+                >撤销全部</button>
+              </div>
+              <div class="perm-list">
+                <div v-for="perm in p.manifest.permissions" :key="perm" class="perm-row">
+                  <span class="perm-label">{{ permLabel(perm) }}</span>
+                  <button
+                    type="button"
+                    class="perm-switch"
+                    role="switch"
+                    :aria-checked="isGranted(p, perm)"
+                    :class="{ on: isGranted(p, perm) }"
+                    :title="isGranted(p, perm) ? '点击撤销该权限' : '点击授予该权限'"
+                    @click="togglePerm(p, perm)"
+                  ><span class="perm-knob"></span></button>
+                </div>
+              </div>
             </div>
           </div>
           <div class="pl-plugin-actions">
@@ -122,7 +158,8 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { usePlugin } from '../resonance/bridges/plugin'
-import type { PluginTier } from '../modules/plugin/types'
+import type { PluginTier, PluginRuntime, PluginPermission } from '../modules/plugin/types'
+import { PERMISSION_LABELS } from '../modules/plugin/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -144,6 +181,27 @@ function tierLabel(t: PluginTier): string {
     experimental: '实验',
   }
   return map[t] ?? t
+}
+
+/** 权限中文名（缺省回退原始串） */
+function permLabel(perm: string): string {
+  return PERMISSION_LABELS[perm as PluginPermission] ?? perm
+}
+
+/** 该权限当前是否已授予 */
+function isGranted(p: PluginRuntime, perm: string): boolean {
+  const granted = p.granted ?? p.manifest.permissions
+  return (granted as string[]).includes(perm)
+}
+
+/** 逐项开关：授予 / 撤销 */
+function togglePerm(p: PluginRuntime, perm: string) {
+  pluginBridge.setPermission(p.manifest.meta.id, perm as PluginPermission, !isGranted(p, perm))
+}
+
+/** 一键撤销：清空该插件全部权限 */
+function revokeAll(p: PluginRuntime) {
+  pluginBridge.revokeAllPermissions(p.manifest.meta.id)
 }
 
 function uninstall(id: string) {
@@ -403,8 +461,105 @@ function uninstall(id: string) {
 
 .plugin-perms {
   display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.perm-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.perm-head-title {
+  font-size: 11px;
+  color: rgba(232, 221, 208, 0.5);
+  letter-spacing: 1px;
+}
+
+.perm-revoke-all {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(239, 154, 154, 0.25);
+  background: transparent;
+  color: rgba(239, 154, 154, 0.8);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.25s;
+}
+
+.perm-revoke-all:hover:not(:disabled) {
+  background: rgba(239, 154, 154, 0.1);
+  border-color: rgba(239, 154, 154, 0.45);
+  color: #ef9a9a;
+}
+
+.perm-revoke-all:disabled {
+  opacity: 0.35;
+  cursor: default;
+  border-color: rgba(232, 221, 208, 0.12);
+  color: rgba(232, 221, 208, 0.3);
+}
+
+.perm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.perm-label {
+  font-size: 12px;
+  color: rgba(232, 221, 208, 0.6);
+}
+
+/* 权限开关 */
+.perm-switch {
+  position: relative;
+  width: 38px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  background: rgba(232, 221, 208, 0.08);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: all 0.25s;
+}
+
+.perm-switch .perm-knob {
+  position: absolute;
+  top: 50%;
+  left: 2px;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(232, 221, 208, 0.55);
+  transition: all 0.25s;
+}
+
+.perm-switch.on {
+  background: rgba(var(--accent-rgb), 0.35);
+  border-color: rgba(var(--accent-rgb), 0.5);
+}
+
+.perm-switch.on .perm-knob {
+  left: 20px;
+  background: var(--accent, #d4a574);
+}
+
+.perm-switch:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: 2px;
 }
 
 .perm-badge {
