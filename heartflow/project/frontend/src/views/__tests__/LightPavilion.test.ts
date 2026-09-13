@@ -444,3 +444,91 @@ describe('LightPavilion 概览统计口径', () => {
     })
   })
 })
+
+// ============================================================
+// 集成：专项档案面板 SpecialPlanArchivePanel（INCR-286 补挂载孤儿组件）
+// 引擎 modules/goal/special-plan-analytics.ts 的纯函数
+// （computeSpecialPlanOverview / computePlanProgress / orphanPlans, 另含
+//   milestoneStat / plansForGoal / planSuggestion）在应用内仅本组件消费
+//   （rg 排除 __tests__ 后仅 SpecialPlanArchivePanel 引用）→ 应用库内唯一。
+// Props 契约 plans: SpecialPlan[]，宿主 LightPavilion.vue 经 useLightPavilionData
+//   （模块 light/pavilion-data.ts，SPECIAL_PLANS_KEY='hf:special_plans'）持有同名
+//   SpecialPlan[]，直接 :plans="specialPlans" 薄委托。放置于专项规划创建弹窗之前、
+//   GoalGrowthArchivePanel 之后。
+// 注：addedThisWeek 以真实 Date.now() 为基准，故测试用旧 createdAt(2026-07-01)
+//   使「近7天新增=0」稳定；宿主 .special-plan-section 空态文案与面板 .spp-empty
+//   都含「还没有跨目标规划」，断言须 .spp-panel 作用域隔离。
+// ============================================================
+describe('集成：专项档案面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    savedGoals = []
+    Object.keys(kvStore).forEach(k => delete kvStore[k])
+  })
+
+  const plan = (id: string, over: any) => ({
+    id, title: over.title || '专项', description: '',
+    relatedGoalIds: over.relatedGoalIds ?? [], milestones: over.milestones ?? [],
+    createdAt: '2026-07-01T00:00:00Z', updatedAt: '2026-07-01T00:00:00Z',
+  })
+
+  it('无专项规划时渲染空态（专项未立）', async () => {
+    const wrapper = await getWrapper()
+    const spp = wrapper.find('.spp-panel')
+    expect(spp.exists()).toBe(true)
+    expect(spp.find('.spp-title').text()).toContain('专项档案')
+    expect(spp.find('.spp-badge-neutral').text()).toBe('专项未立')
+    expect(spp.find('.spp-grid').exists()).toBe(false)
+  })
+
+  it('有专项规划时渲染档案概览与里程碑进度', async () => {
+    kvStore['hf:special_plans'] = [
+      plan('spA', { title: '推进中的规划', relatedGoalIds: ['g1'], milestones: [{ label: '一', done: true }, { label: '二', done: false }] }),
+      plan('spB', { title: '孤儿规划' }),
+    ]
+    const wrapper = await getWrapper()
+    const spp = wrapper.find('.spp-panel')
+    expect(spp.find('.spp-badge-neutral').exists()).toBe(false)
+    expect(spp.find('.spp-badge').text()).toBe('推进中')
+    const cells = spp.findAll('.spp-cell').map(c => ({ label: c.find('span').text(), value: c.find('b').text() }))
+    const v = (l: string) => cells.find(x => x.label === l)?.value
+    expect(v('规划总数')).toBe('2')
+    expect(v('关联目标')).toBe('1')
+    expect(v('含里程碑')).toBe('1')
+    expect(v('平均完成度')).toBe('25%')
+    expect(v('总里程碑')).toBe('2')
+    expect(v('已完成')).toBe('1')
+    expect(v('整体完成度')).toBe('50%')
+    expect(v('近7天新增')).toBe('0')
+    expect(spp.find('.spp-progress-meta').text()).toContain('1 / 2 里程碑')
+    expect(spp.find('.spp-progress-meta').text()).toContain('50%')
+  })
+
+  it('游离专项区块渲染未关联目标的规划及其占位进度', async () => {
+    kvStore['hf:special_plans'] = [
+      plan('spA', { title: '推进中的规划', relatedGoalIds: ['g1'], milestones: [{ label: '一', done: true }, { label: '二', done: false }] }),
+      plan('spB', { title: '孤儿规划' }),
+    ]
+    const wrapper = await getWrapper()
+    const spp = wrapper.find('.spp-panel')
+    const orphans = spp.findAll('.spp-orphan')
+    expect(orphans.length).toBe(1)
+    expect(spp.find('.spp-orphan-title').text()).toBe('孤儿规划')
+    expect(spp.find('.spp-orphan-progress').text()).toBe('0%')
+    // 温和洞察：平均完成度 + 游离专项提示
+    const ins = spp.findAll('.spp-insight').map(i => i.text())
+    expect(ins.some(t => t.includes('规划平均完成度'))).toBe(true)
+    expect(ins.some(t => t.includes('尚未关联目标'))).toBe(true)
+  })
+
+  it('全部里程碑完成时徽章显示「全部点亮」', async () => {
+    kvStore['hf:special_plans'] = [
+      plan('spC', { title: '点亮的规划', relatedGoalIds: ['g1'], milestones: [{ label: '一', done: true }, { label: '二', done: true }] }),
+    ]
+    const wrapper = await getWrapper()
+    const spp = wrapper.find('.spp-panel')
+    expect(spp.find('.spp-badge').text()).toBe('全部点亮')
+    expect(spp.find('.spp-progress-meta').text()).toContain('2 / 2 里程碑')
+    expect(spp.find('.spp-progress-meta').text()).toContain('100%')
+  })
+})

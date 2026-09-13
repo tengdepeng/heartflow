@@ -306,6 +306,9 @@
       <GoalGrowthArchivePanel :goals="goal.goals.value" />
     </section>
 
+    <!-- 专项档案（INCR-286 补挂载孤儿组件 SpecialPlanArchivePanel：档案概览/里程碑进度/游离专项/温和洞察，消费 goal/special-plan-analytics 纯函数，引擎应用内唯一） -->
+    <SpecialPlanArchivePanel :plans="specialPlans" />
+
     <!-- 专项规划创建弹窗 -->
     <Teleport to="body"><Transition name="modal">
       <div v-if="showSpecialPlanModal" class="modal-overlay" @click.self="showSpecialPlanModal = false">
@@ -374,6 +377,7 @@ import type { SpecialPlan } from '../modules/goal/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useLightPavilionData } from '../modules/light/pavilion-data'
 import GoalGrowthArchivePanel from '../components/GoalGrowthArchivePanel.vue'
+import SpecialPlanArchivePanel from '../components/SpecialPlanArchivePanel.vue'
 import { useRoomResonance } from '../modules/room-resonance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
