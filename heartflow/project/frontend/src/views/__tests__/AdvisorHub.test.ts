@@ -16,7 +16,7 @@ vi.mock('vue-router', () => ({
 const mockStore: Record<string, any> = {}
 const mockGetKV = vi.fn((_key: string, def: any) => mockStore[_key] ?? def)
 const mockSetKV = vi.fn((key: string, val: any) => { mockStore[key] = val })
-const mockGetAdvisors = vi.fn(() => [])
+const mockGetAdvisors = vi.fn<() => ProfileType[]>(() => [])
 
 vi.mock('../../engine/storage', () => ({
   storage: {
@@ -793,5 +793,66 @@ describe('集成：作息与场景', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.adp-scene.active .adp-scene-occ').text()).toBe('1/3')
     expect(wrapper.findAll('.adp-item')[1].find('.adp-btn--ghost').exists()).toBe(true)
+  })
+})
+
+describe('集成：协调权设置面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAdvisors.length = 0
+    mockStore['hf:advisors'] = []
+    delete mockStore['advisor:coordinator']
+    mockGetAdvisors.mockReturnValue([])
+  })
+
+  it('无幕僚时渲染协调权面板与未设置态', async () => {
+    const wrapper = await getWrapper()
+    const csp = wrapper.find('.csp-panel')
+    expect(csp.exists()).toBe(true)
+    expect(csp.find('.csp-title').text()).toContain('协调权')
+    expect(csp.find('.csp-current-value--none').text()).toBe('未设置协调者')
+    expect(csp.findAll('.csp-mode').length).toBe(3)
+    expect(csp.find('.csp-mode[data-mode="jingwo"]').exists()).toBe(true)
+    expect(csp.find('.csp-mode[data-mode="custom"]').exists()).toBe(true)
+    expect(csp.find('.csp-mode[data-mode="off"]').exists()).toBe(true)
+  })
+
+  it('有幕僚时显示当前协调者镜我', async () => {
+    mockGetAdvisors.mockReturnValue([
+      sampleProfile({ id: 'preset-jingwo', name: '镜我', role: 'coordinator' }),
+      sampleProfile({ id: 'adv_b1', name: '墨染', role: 'guardian' }),
+    ])
+    const wrapper = await getWrapper()
+    const csp = wrapper.find('.csp-panel')
+    expect(csp.find('.csp-current-value').text()).toContain('镜我')
+    expect(csp.find('.csp-current-role').text()).toBe('coordinator')
+  })
+
+  it('关闭集中协调后持久化 off 并显示未设置', async () => {
+    mockGetAdvisors.mockReturnValue([
+      sampleProfile({ id: 'preset-jingwo', name: '镜我', role: 'coordinator' }),
+    ])
+    const wrapper = await getWrapper()
+    await wrapper.find('.csp-mode[data-mode="off"]').trigger('click')
+    expect(mockStore['advisor:coordinator'].mode).toBe('off')
+    const csp = wrapper.find('.csp-panel')
+    expect(csp.find('.csp-current-value--none').exists()).toBe(true)
+  })
+
+  it('指定幕僚并持久化 advisorId', async () => {
+    mockGetAdvisors.mockReturnValue([
+      sampleProfile({ id: 'preset-jingwo', name: '镜我', role: 'coordinator' }),
+      sampleProfile({ id: 'adv_b2', name: '墨染', role: 'guardian' }),
+    ])
+    const wrapper = await getWrapper()
+    await wrapper.find('.csp-mode[data-mode="custom"]').trigger('click')
+    const select = wrapper.find('.csp-input')
+    expect(select.exists()).toBe(true)
+    expect(select.findAll('option').length).toBeGreaterThanOrEqual(2)
+    await select.setValue('preset-jingwo')
+    expect(mockStore['advisor:coordinator'].mode).toBe('custom')
+    expect(mockStore['advisor:coordinator'].advisorId).toBe('preset-jingwo')
+    const csp = wrapper.find('.csp-panel')
+    expect(csp.find('.csp-current-value').text()).toContain('镜我')
   })
 })

@@ -104,6 +104,12 @@
       <AdvisorScheduler />
     </section>
 
+    <!-- 协调权（INCR-295 补挂载孤儿组件 CoordinatorSettingsPanel：协调者转移/关闭集中协调，引擎 modules/advisor/coordinator 应用库内唯一，零 props 自持读桥） -->
+    <section data-enter class="ah-scheduler-section">
+      <h3 class="ah-scheduler-heading">🧭 协调权</h3>
+      <CoordinatorSettingsPanel />
+    </section>
+
     <!-- 氛围主题（原右下角常驻浮层：迁至此处与设置页两入口） -->
     <section data-enter class="ah-aura-section">
       <h3 class="ah-scheduler-heading">🌌 氛围主题</h3>
@@ -208,6 +214,7 @@ import type { AdvisorProfile, AdvisorRole, AdvisorPersonality, AdvisorCarrier } 
 import { advisorCarrierStageOf, carrierGlyph, carrierIsImage } from '../types'
 import AdvisorScheduler from '../components/AdvisorScheduler.vue'
 import DialogueSessionList from '../components/DialogueSessionList.vue'
+import CoordinatorSettingsPanel from '../components/CoordinatorSettingsPanel.vue'
 import AdvisorCarrierEditor from '../components/AdvisorCarrierEditor.vue'
 import AdvisorInteractionPanel from '../components/AdvisorInteractionPanel.vue'
 import AdvisorWitnessPanel from '../components/AdvisorWitnessPanel.vue'
