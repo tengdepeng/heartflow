@@ -50,6 +50,12 @@
       </ul>
     </section>
 
+    <!-- 人格画像：自我认知报告/常用词汇/演化趋势/成长轨迹/温和洞察（INCR-293 补挂载孤儿组件 PersonalityPortraitPanel：消费 buildPersonalityPortrait 纯函数，应用库内唯一，薄委托化） -->
+    <section data-enter class="msr-portrait" aria-label="人格画像">
+      <h2 class="msr-section-title">人格画像</h2>
+      <PersonalityPortraitPanel :dialogues="dialogues" />
+    </section>
+
     <!-- 自体镜像：四柱画像 / 自体镜像 / 十二宫格 / 自体星盘（原已实现但未挂载的 self-mirror 面板） -->
     <section data-enter class="msr-selfmirror" aria-label="自体镜像">
       <h2 class="msr-section-title">自体镜像</h2>
@@ -68,6 +74,7 @@ import FourPillarsPanel from '../components/FourPillarsPanel.vue'
 import SelfMirrorPanel from '../components/SelfMirrorPanel.vue'
 import TwelveHousesGrid from '../components/TwelveHousesGrid.vue'
 import SelfAstrolabeChart from '../components/SelfAstrolabeChart.vue'
+import PersonalityPortraitPanel from '../components/PersonalityPortraitPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import { getDialogueSessions } from '../modules/mirror/dialogue-persistence'
@@ -119,6 +126,9 @@ function relTime(ts: number): string {
   return new Date(ts).toLocaleDateString()
 }
 
+// ---- 人格画像：全部镜面对话条目（喂给 PersonalityPortraitPanel） ----
+const dialogues = computed(() => getDialogueSessions().flatMap((s) => s.entries))
+
 // 进入房间即向跨房间态势注入一道镜我信号（双向联动）
 onMounted(() => {
   const count = getDialogueSessions().length
@@ -167,6 +177,7 @@ onMounted(() => {
 .msr-stage,
 .msr-climate,
 .msr-reflections,
+.msr-portrait,
 .msr-selfmirror {
   position: relative;
   z-index: 1;
