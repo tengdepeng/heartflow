@@ -49,11 +49,17 @@
         </li>
       </ul>
     </section>
+
+    <!-- 外流态势（INCR-287 补挂载孤儿组件 OutflowArchivePanel：总览/渠道分布/近7天节奏/温和洞察，消费 guard/outflow-analytics 纯函数，引擎应用库内唯一） -->
+    <section data-enter class="dov-archive">
+      <OutflowArchivePanel :logs="logs" />
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import OutflowArchivePanel from '../components/OutflowArchivePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useDataOutflow, type OutflowChannel } from '../engine/data-outflow'
 
@@ -122,12 +128,15 @@ onMounted(() => {
 }
 
 .dov-header,
-.dov-body {
+.dov-body,
+.dov-archive {
   position: relative;
   z-index: 1;
   width: 100%;
   max-width: 640px;
 }
+
+.dov-archive { display: flex; flex-direction: column; gap: 0; }
 
 .dov-header {
   text-align: center;
