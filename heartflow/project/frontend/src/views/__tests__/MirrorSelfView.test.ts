@@ -248,3 +248,96 @@ describe('集成：对话模板面板', () => {
     expect(morningAgain.find('.dtp-tpl-count').text()).toContain('使用 1 次')
   })
 })
+
+// ============================================================
+// 集成：镜我深处面板（INCR-301 补挂载孤儿组件 MirrorDeepPanel）
+// 零 props 自持读桥：年度对话(collectAnnual←storage 情绪/专注/锚点) /
+// 幕僚调度(useDispatch←mirror.dispatch.records) / 任务拆解(useDecomposer←
+// mirror.decomposer.plans)。useDispatch/useDecomposer 每次调用新建 ref，
+// 用例间仅需清理 storage 键；storage.getEmotions 等空数据回落 → 年度信静默。
+// ============================================================
+describe('集成：镜我深处面板', () => {
+  beforeEach(() => {
+    removeKV(SESSIONS_KEY)
+    removeKV('mirror.dispatch.records')
+    removeKV('mirror.decomposer.plans')
+  })
+
+  it('渲染面板标题与三个 Tab（默认年度对话激活）', async () => {
+    const wrapper = await createWrapper()
+    const mdp = wrapper.find('.mirror-deep')
+    expect(mdp.exists()).toBe(true)
+    expect(mdp.find('.mdp-title').text()).toBe('镜我深处')
+    const tabs = mdp.findAll('.mdp-tab').map((t) => t.text())
+    expect(tabs).toEqual(['年度对话', '幕僚调度', '任务拆解'])
+    // 默认年度对话 Tab 激活且年度表单可见
+    expect(mdp.findAll('.mdp-tab')[0].classes()).toContain('is-active')
+    expect(mdp.find('.mdp-annual-ctrl').exists()).toBe(true)
+  })
+
+  it('年度对话：空数据展开时呈现静默空态', async () => {
+    const wrapper = await createWrapper()
+    const mdp = wrapper.find('.mirror-deep')
+    // 点击「展开这一年」（空情绪/专注/锚点 → tone 静默）
+    const genBtn = mdp.findAll('.mdp-btn').find((b) => b.text() === '展开这一年')!
+    await genBtn.trigger('click')
+    expect(mdp.find('.mdp-letter').exists()).toBe(true)
+    expect(mdp.find('.mdp-letter-empty').text()).toContain('这一年还没有留下任何痕迹')
+  })
+
+  it('幕僚调度：下达调令后生成记录（含策略标签与状态徽章）', async () => {
+    const wrapper = await createWrapper()
+    const mdp = wrapper.find('.mirror-deep')
+    // 切到幕僚调度 Tab
+    await mdp.findAll('.mdp-tab').find((t) => t.text() === '幕僚调度')!.trigger('click')
+    // 空态：v-show 使各 Tab 均留 DOM，.mdp-empty 首现为调度区
+    expect(mdp.findAll('.mdp-empty')[0].text()).toContain('尚未下达调令')
+    // 填写调令并勾选幕僚
+    await mdp.find('.mdp-dispatch-form input').setValue('先拟大纲，再成文')
+    await mdp.findAll('.mdp-chip').find((c) => c.text() === '镜我')!.trigger('click')
+    // 策略标签出现（单一）
+    expect(mdp.find('.mdp-strategy').text()).toContain('策略：单一')
+    // 测试环境点击 submit 按钮不派发 form submit，直接触发表单提交
+    await mdp.find('.mdp-dispatch-form').trigger('submit')
+    // 调令记录生成
+    expect(mdp.findAll('.mdp-dispatch-item').length).toBe(1)
+    expect(mdp.find('.mdp-dispatch-order').text()).toBe('先拟大纲，再成文')
+    expect(mdp.find('.mdp-dispatch-badge').text()).toBe('待命')
+    expect(mdp.findAll('.mdp-step-pill').length).toBeGreaterThan(0)
+  })
+
+  it('任务拆解：输入任务后生成拆解计划与步骤', async () => {
+    const wrapper = await createWrapper()
+    const mdp = wrapper.find('.mirror-deep')
+    // 切到任务拆解 Tab
+    await mdp.findAll('.mdp-tab').find((t) => t.text() === '任务拆解')!.trigger('click')
+    // 拆解区空态是 .mdp-empty 的末现（调度区空态残留于 DOM）
+    const empties = mdp.findAll('.mdp-empty')
+    expect(empties[empties.length - 1].text()).toContain('还没有拆解过的任务')
+    // 输入任务并拆解
+    await mdp.find('.mdp-decompose-form input').setValue('整理房间')
+    await mdp.find('.mdp-decompose-form').trigger('submit')
+    expect(mdp.findAll('.mdp-plan-item').length).toBe(1)
+    expect(mdp.find('.mdp-plan-task').text()).toBe('整理房间')
+    expect(mdp.findAll('.mdp-plan-step').length).toBeGreaterThan(0)
+    expect(mdp.find('.mdp-plan-intent').text()).toContain('·')
+  })
+
+  it('Tab 切换后功能区互不串扰（调度记录仅在调度 Tab 可见）', async () => {
+    const wrapper = await createWrapper()
+    const mdp = wrapper.find('.mirror-deep')
+    // 在调度 Tab 下达一条调令
+    await mdp.findAll('.mdp-tab').find((t) => t.text() === '幕僚调度')!.trigger('click')
+    await mdp.find('.mdp-dispatch-form input').setValue('复盘本周')
+    await mdp.findAll('.mdp-chip').find((c) => c.text() === '时痕')!.trigger('click')
+    await mdp.find('.mdp-dispatch-form').trigger('submit')
+    expect(mdp.find('.mdp-dispatch-order').text()).toBe('复盘本周')
+    // 切到年度对话：激活态正确切换（happy-dom 下 v-show display 恒为空，改用 is-active 判定）
+    await mdp.findAll('.mdp-tab').find((t) => t.text() === '年度对话')!.trigger('click')
+    const activeTab = mdp.findAll('.mdp-tab').find((t) => t.classes().includes('is-active'))!.text()
+    expect(activeTab).toBe('年度对话')
+    // 切回调度 Tab：记录仍在（同挂载内状态保持）
+    await mdp.findAll('.mdp-tab').find((t) => t.text() === '幕僚调度')!.trigger('click')
+    expect(mdp.find('.mdp-dispatch-order').text()).toBe('复盘本周')
+  })
+})

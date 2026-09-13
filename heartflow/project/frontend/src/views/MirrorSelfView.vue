@@ -76,6 +76,12 @@
       <TwelveHousesGrid />
       <SelfAstrolabeChart />
     </section>
+
+    <!-- 镜我深处：年度对话 / 幕僚调度 / 任务拆解 深度能力（INCR-301 补挂载孤儿组件 MirrorDeepPanel：消费 annual-review/dispatch/decomposer 引擎，零 props 自持读桥） -->
+    <section data-enter class="msr-deep" aria-label="镜我深处">
+      <h2 class="msr-section-title">镜我深处</h2>
+      <MirrorDeepPanel />
+    </section>
   </div>
 </template>
 
@@ -89,6 +95,7 @@ import SelfAstrolabeChart from '../components/SelfAstrolabeChart.vue'
 import PersonalityPortraitPanel from '../components/PersonalityPortraitPanel.vue'
 import PersonalityArchivePanel from '../components/PersonalityArchivePanel.vue'
 import DialogueTemplatesPanel from '../components/DialogueTemplatesPanel.vue'
+import MirrorDeepPanel from '../components/MirrorDeepPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import { getDialogueSessions } from '../modules/mirror/dialogue-persistence'
@@ -193,7 +200,8 @@ onMounted(() => {
 .msr-reflections,
 .msr-templates,
 .msr-portrait,
-.msr-selfmirror {
+.msr-selfmirror,
+.msr-deep {
   position: relative;
   z-index: 1;
   width: 100%;
