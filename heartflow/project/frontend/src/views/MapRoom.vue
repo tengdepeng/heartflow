@@ -160,6 +160,12 @@
 
     <!-- 环球投影 -->
     <GeoProjectionPanel :places="places" />
+
+    <!-- 3D 地球：环球立体标记（INCR-299 补挂载孤儿组件 Globe3D：WebGL 三维地球 + 经纬度地点立体标记，薄委托化 places 注入，与环球投影(2D 正射) 形成 2D/3D 互补；无 WebGL 环境优雅降级） -->
+    <section data-enter class="mr-section">
+      <h3 class="section-title">3D 地球 · 环球立体标记</h3>
+      <Globe3D :places="globePlaces" />
+    </section>
   </div>
 </template>
 
@@ -175,6 +181,7 @@ import ObservingPanel from '../components/ObservingPanel.vue'
 import TravelAnalyticsPanel from '../components/TravelAnalyticsPanel.vue'
 import SpatialPatternPanel from '../components/SpatialPatternPanel.vue'
 import GeoProjectionPanel from '../components/GeoProjectionPanel.vue'
+import Globe3D from '../components/Globe3D.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { places, lifeNodes, load, save, loadNodes, saveNodes } = useMap()
@@ -216,6 +223,19 @@ const uniqueCities = computed(() => new Set(places.value.map(p => p.city).filter
 const totalVisits = computed(() => places.value.reduce((s, p) => s + p.visitCount, 0))
 const locatedCount = computed(() => places.value.filter(p => isFinite(p.lng ?? NaN) && isFinite(p.lat ?? NaN)).length)
 const plotted = computed(() => places.value.filter(p => isFinite(p.lng ?? NaN) && isFinite(p.lat ?? NaN)))
+
+// INCR-299：喂给 Globe3D 的已定位地点（仅带经纬度的点可立体标记）
+const globePlaces = computed(() =>
+  plotted.value.map(p => ({
+    id: p.id,
+    name: p.name,
+    city: p.city,
+    lng: p.lng as number,
+    lat: p.lat as number,
+    type: p.type,
+    visitCount: p.visitCount,
+  })),
+)
 
 const topCities = computed(() => {
   const map = new Map<string, number>()
