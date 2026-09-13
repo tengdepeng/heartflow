@@ -71,18 +71,62 @@
         'crystal-node--selected': state.selectedCrystalId === cc.crystal.id,
         'crystal-node--ambient': renderMode === 'ambient' || intensity < 0.5,
       }"
-      :style="crystalStyle(cc, renderMode)"
+      :style="crystalNodeStyle(cc, renderMode)"
       @click="interactionEnabled && selectCrystal(cc.crystal.id)"
     >
-      <svg viewBox="0 0 48 48" class="crystal-shape">
-        <polygon
-          :points="shapePoints(cc.crystal.shape)"
-          :fill="cc.crystal.color + (renderMode === 'full' && intensity >= 0.5 ? '18' : '0a')"
-          :stroke="cc.crystal.color"
-          :stroke-width="renderMode === 'full' && intensity >= 0.5 ? '1.2' : '0.6'"
-          :opacity="renderMode === 'full' && intensity >= 0.5 ? '0.85' : '0.35'"
-        />
+      <div class="crystal-float">
+      <svg viewBox="0 0 48 48" class="crystal-shape" :class="`crystal-style-${crystalStyle}`">
+        <defs>
+          <radialGradient v-if="crystalStyle !== 'glass'" :id="gradId(cc)" cx="38%" cy="30%" r="82%">
+            <stop offset="0%" :stop-color="shadeColor(cc.crystal.color, 0.5)" />
+            <stop offset="52%" :stop-color="cc.crystal.color" />
+            <stop offset="100%" :stop-color="shadeColor(cc.crystal.color, -0.38)" />
+          </radialGradient>
+          <linearGradient v-if="crystalStyle !== 'glass'" :id="sheenId(cc)" x1="18%" y1="8%" x2="92%" y2="100%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6" />
+            <stop offset="42%" stop-color="#ffffff" stop-opacity="0.08" />
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
+          </linearGradient>
+          <radialGradient v-if="crystalStyle === 'glass'" :id="glassId(cc)" cx="38%" cy="30%" r="78%">
+            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+            <stop offset="46%" :stop-color="shadeColor(cc.crystal.color, 0.28)" />
+            <stop offset="100%" :stop-color="shadeColor(cc.crystal.color, -0.32)" />
+          </radialGradient>
+          <linearGradient v-if="crystalStyle === 'prism'" :id="prismId(cc)" x1="6%" y1="4%" x2="94%" y2="96%">
+            <stop offset="0%" stop-color="#79f6c8" />
+            <stop offset="48%" stop-color="#6ab8ff" />
+            <stop offset="100%" stop-color="#e79bff" />
+          </linearGradient>
+        </defs>
+
+        <!-- 玻璃光球 + 辉光 -->
+        <g v-if="crystalStyle === 'glass'">
+          <circle cx="24" cy="24" r="16" :fill="`url(#${glassId(cc)})`" :opacity="strong ? 0.98 : 0.5" />
+          <circle cx="24" cy="24" r="16" fill="none" :stroke="shadeColor(cc.crystal.color, 0.35)" stroke-width="0.9" :opacity="strong ? 0.7 : 0.4" />
+          <circle cx="19" cy="19" r="3.2" fill="#ffffff" :fill-opacity="strong ? 0.9 : 0.5" />
+        </g>
+
+        <!-- 极简线晶（仅描边） -->
+        <g v-else-if="crystalStyle === 'line'">
+          <polygon :points="shapePoints(cc.crystal.shape)" fill="none" :stroke="cc.crystal.color" :stroke-width="strong ? 1.5 : 0.9" :opacity="strong ? 0.95 : 0.5" stroke-linejoin="round" />
+          <polygon :points="shapePoints(cc.crystal.shape)" fill="none" :stroke="shadeColor(cc.crystal.color, 0.45)" :stroke-width="0.5" :opacity="strong ? 0.5 : 0.3" stroke-linejoin="round" />
+        </g>
+
+        <!-- 极光棱镜 -->
+        <g v-else-if="crystalStyle === 'prism'">
+          <polygon :points="shapePoints(cc.crystal.shape)" :fill="`url(#${prismId(cc)})`" :opacity="strong ? 0.94 : 0.5" />
+          <polygon :points="shapePoints(cc.crystal.shape)" :fill="`url(#${sheenId(cc)})`" :opacity="strong ? 0.85 : 0.4" />
+          <circle :cx="topVertex(cc.crystal.shape).x" :cy="topVertex(cc.crystal.shape).y" r="1.7" fill="#ffffff" :fill-opacity="strong ? 0.9 : 0.45" />
+        </g>
+
+        <!-- 真实切面宝石（默认） -->
+        <g v-else>
+          <polygon :points="shapePoints(cc.crystal.shape)" :fill="`url(#${gradId(cc)})`" :stroke="shadeColor(cc.crystal.color, 0.32)" :stroke-width="strong ? 1.3 : 0.7" :opacity="strong ? 0.97 : 0.42" />
+          <polygon :points="shapePoints(cc.crystal.shape)" :fill="`url(#${sheenId(cc)})`" :opacity="strong ? 0.9 : 0.38" />
+          <circle :cx="topVertex(cc.crystal.shape).x" :cy="topVertex(cc.crystal.shape).y" r="1.7" fill="#ffffff" :fill-opacity="strong ? 0.85 : 0.4" />
+        </g>
       </svg>
+      </div>
     </div>
 
     <!-- 结晶详情弹窗 — 仅在 full 模式显示 -->
@@ -110,6 +154,11 @@
       :landing-y="landingY"
       @animation-done="onCrystalLandingDone"
     />
+
+    <!-- 浮动便签层（INCR-302 补挂载孤儿组件 CanvasNotes：App.vue 注释「浮动便签本身由
+         CanvasRoom 内的 CanvasNotes 渲染」为设计宿主，实现遗漏；emit('edit') 由
+         NoteLayer 全局编辑器承接；ambient 模式降透明度不参与交互） -->
+    <CanvasNotes :ambient="renderMode === 'ambient'" />
   </div>
 </template>
 
@@ -118,15 +167,18 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCanvasRoom } from './index'
 import type { CrystalShape } from '../../types'
+import type { CanvasCrystal } from './types'
 import CrystalDetail from '../../components/CrystalDetail.vue'
 import CanvasCarrier from './components/CanvasCarrier.vue'
 import CrystalLanding from './components/CrystalLanding.vue'
+import CanvasNotes from '../../components/CanvasNotes.vue'
 import { useCanvasBreathing } from './composables/useCanvasBreathing'
 import { useRuntimeState } from '../../resonance/bridges/runtime'
 import { useTimer } from '../../resonance/bridges/timer'
 import { getEffectMultiplier } from '../../engine/constitution-effect'
 import { useAdaptiveQuality } from '../../modules/adaptive'
 import { useConfigStore } from '../../stores/config'
+import { useAppearance } from '../../modules/customization/useAppearance'
 import { createShell } from '../../modules/world-shell'
 import { getRoomsBySlot } from '../../engine/room-graph'
 import { setScreenRect, resetScreenRect } from '../../modules/world-shell/screenContract'
@@ -150,6 +202,10 @@ const {
 } = useCanvasRoom()
 
 const router = useRouter()
+
+// ---- 结晶渲染风格（宪法第二条超级自定义 · facet/glass/line/prism，设置可切换） ----
+const { crystalStyle } = useAppearance()
+const strong = computed(() => props.renderMode === 'full' && props.intensity >= 0.5)
 
 // ---- 世界壳（里程碑B）----
 const configStore = useConfigStore()
@@ -322,12 +378,13 @@ function onCrystalLandingDone() {
 }
 
 /** 计算结晶样式 */
-function crystalStyle(cc: { x: number; y: number; scale: number; opacity: number; floatPhase: number }, mode: 'full' | 'ambient') {
-  const floatY = Math.sin(Date.now() / 2000 + cc.floatPhase) * (mode === 'full' ? 6 : 3)
+function crystalNodeStyle(cc: { x: number; y: number; scale: number; opacity: number; floatPhase: number }, mode: 'full' | 'ambient') {
+  // 静态定位只设一次（left/top 为布局属性，禁止每帧写，否则触发持续 reflow；
+  // 浮动改走内层 .crystal-float 的 --float-y，transform 合成零布局）
   return {
     left: `${cc.x}px`,
-    top: `${cc.y + floatY}px`,
-    transform: `translate(-50%, -50%) scale(${mode === 'full' ? cc.scale : cc.scale * 0.6})`,
+    top: `${cc.y}px`,
+    '--crystal-scale': mode === 'full' ? cc.scale : cc.scale * 0.6,
     opacity: mode === 'full' ? cc.opacity * props.intensity : cc.opacity * 0.4 * props.intensity,
     pointerEvents: (interactionEnabled.value ? 'auto' : 'none') as 'auto' | 'none',
   }
@@ -343,6 +400,59 @@ function shapePoints(shape: CrystalShape): string {
     irregular: '24,4 38,12 44,28 32,44 16,40 6,28 8,12',
   }
   return map[shape] ?? '24,4 44,24 24,44 4,24'
+}
+
+/** 每颗结晶的径向渐变唯一 id（宝石本体明暗） */
+function gradId(cc: CanvasCrystal): string {
+  return `crystal-grad-${cc.crystal.id}`
+}
+
+/** 每颗结晶的玻璃光泽渐变唯一 id（高光层） */
+function sheenId(cc: CanvasCrystal): string {
+  return `crystal-sheen-${cc.crystal.id}`
+}
+
+/** 每颗结晶的玻璃光球渐变唯一 id（glass 风格） */
+function glassId(cc: CanvasCrystal): string {
+  return `crystal-glass-${cc.crystal.id}`
+}
+
+/** 每颗结晶的极光棱镜渐变唯一 id（prism 风格） */
+function prismId(cc: CanvasCrystal): string {
+  return `crystal-prism-${cc.crystal.id}`
+}
+
+/**
+ * 颜色明暗调整：amt ∈ [-1,1]
+ *  - amt > 0 → 朝白色提亮（高光/亮部）
+ *  - amt < 0 → 朝黑色压暗（暗部/描边）
+ * 非 #rrggbb 输入原样返回，避免误伤主题色。
+ */
+function shadeColor(hex: string, amt: number): string {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim())
+  if (!m) return hex
+  const num = parseInt(m[1], 16)
+  let r = (num >> 16) & 0xff
+  let g = (num >> 8) & 0xff
+  let b = num & 0xff
+  const target = amt < 0 ? 0 : 255
+  const p = Math.min(1, Math.abs(amt))
+  r = Math.round((target - r) * p) + r
+  g = Math.round((target - g) * p) + g
+  b = Math.round((target - b) * p) + b
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+}
+
+/** 取形状最高顶点（最小 y），用于顶部星火定位 */
+function topVertex(shape: CrystalShape): { x: number; y: number } {
+  const pts = shapePoints(shape)
+    .trim()
+    .split(/\s+/)
+    .map((p) => {
+      const [x, y] = p.split(',').map(Number)
+      return { x, y }
+    })
+  return pts.reduce((min, p) => (p.y < min.y ? p : min), pts[0])
 }
 
 // ---- 尺寸更新 ----
@@ -708,7 +818,8 @@ function floatLoop(timestamp: number) {
         if (el) {
           const amplitude = props.renderMode === 'full' ? 6 : 3
           const floatY = Math.sin(timestamp / 2000 + cc.floatPhase) * amplitude
-          el.style.top = `${cc.y + floatY}px`
+          // 只更新 transform 合成用的 CSS 变量，不触发布局
+          el.style.setProperty('--float-y', `${floatY}px`)
         }
       })
     }
@@ -854,8 +965,17 @@ onUnmounted(() => {
   height: 40px;
   cursor: pointer;
   z-index: 2;
+  /* 居中 + 缩放放外层，保留 0.6s 缓动（入场/模式切换原样）；浮动交由内层 .crystal-float */
+  transform: translate(-50%, -50%) scale(var(--crystal-scale, 1));
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
-  will-change: transform, top, left;
+  will-change: transform;
+}
+.crystal-float {
+  width: 100%;
+  height: 100%;
+  /* 每帧浮动走 transform 合成，零布局；无 transition 保持修改前一致的即时浮动观感 */
+  transform: translateY(var(--float-y, 0px));
+  will-change: transform;
 }
 .crystal-node:hover {
   filter: brightness(1.3) drop-shadow(0 0 12px currentColor);
@@ -884,5 +1004,16 @@ onUnmounted(() => {
   height: 100%;
   display: block;
   filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* 结晶风格辉光（宪法第二条超级自定义） */
+.crystal-shape.crystal-style-glass {
+  filter: drop-shadow(0 0 16px currentColor) drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+.crystal-shape.crystal-style-prism {
+  filter: drop-shadow(0 0 13px #8be0ff);
+}
+.crystal-shape.crystal-style-line {
+  filter: drop-shadow(0 0 5px currentColor);
 }
 </style>
