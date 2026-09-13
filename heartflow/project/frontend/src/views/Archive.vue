@@ -76,6 +76,16 @@
       <p class="section-desc">集中管理可归档的内容：留光阁的冥想与释怀记录、镜我对白会话。也可在各自房间内直接归档，这里作为统一入口。</p>
       <LightRecordsPanel />
       <DialogueSessionList />
+
+      <!-- 自动归档台 · 阈值触发/还原（archive/auto-archive + useAutoArchive 引擎，INCR-275 补挂载孤儿组件） -->
+      <AutoArchivePanel />
+    </section>
+
+    <!-- 笔记健康档案 · 健康度/写作/标签/生命周期/质量（note/note-analytics + study 引擎，INCR-303 补挂载孤儿组件 NoteHealthArchivePanel：零 props 自持读桥，宿主内 useNoteAnalytics/useStudy 无第二消费方） -->
+    <section data-enter class="archive-section">
+      <h2>📖 笔记健康档案</h2>
+      <p class="section-desc">为每篇思绪把脉：健康度、写作、标签、生命周期与内容质量，逐一显影。</p>
+      <NoteHealthArchivePanel />
     </section>
   </div>
 </template>
@@ -89,6 +99,8 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useStatsStore } from '../stores'
 import LightRecordsPanel from '../components/LightRecordsPanel.vue'
 import DialogueSessionList from '../components/DialogueSessionList.vue'
+import AutoArchivePanel from '../components/AutoArchivePanel.vue'
+import NoteHealthArchivePanel from '../components/NoteHealthArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const dataPort = useDataPort()
