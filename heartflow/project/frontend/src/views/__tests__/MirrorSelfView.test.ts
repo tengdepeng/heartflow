@@ -113,3 +113,54 @@ describe('集成：人格画像面板', () => {
     expect(pcp.find('.pcp-badge-neutral').text()).toBe('待显影')
   })
 })
+
+describe('集成：自我认知档案面板', () => {
+  beforeEach(() => {
+    removeKV(SESSIONS_KEY)
+  })
+
+  it('无对话时渲染空态引导', async () => {
+    const wrapper = await createWrapper()
+    const pac = wrapper.find('.pac-panel')
+    expect(pac.exists()).toBe(true)
+    expect(pac.find('.pac-title').text()).toContain('自我认知档案')
+    expect(pac.find('.pac-empty').text()).toContain('与镜我深度对话')
+  })
+
+  it('有对话时渲染概览四格与人格风格', async () => {
+    seedSessions()
+    const wrapper = await createWrapper()
+    const pac = wrapper.find('.pac-panel')
+    expect(pac.find('.pac-empty').exists()).toBe(false)
+    expect(pac.findAll('.pac-ov-item').length).toBe(4)
+    expect(pac.text()).toContain('次留声')
+    expect(pac.text()).toContain('字沉淀')
+    expect(pac.text()).toContain('覆盖天数')
+    expect(pac.find('.pac-block-title').text()).toBe('人格风格')
+  })
+
+  it('有对话时渲染价值观取向与成长阶段', async () => {
+    seedSessions()
+    const wrapper = await createWrapper()
+    const pac = wrapper.find('.pac-panel')
+    expect(pac.text()).toContain('价值观取向')
+    expect(pac.findAll('.pac-val-row').length).toBeGreaterThan(0)
+    expect(pac.text()).toContain('成长阶段')
+    expect(pac.find('.pac-growth-label').exists()).toBe(true)
+    expect(pac.text()).toContain('次留声')
+  })
+
+  it('有对话时渲染温和洞察', async () => {
+    seedSessions()
+    const wrapper = await createWrapper()
+    const pac = wrapper.find('.pac-panel')
+    expect(pac.text()).toContain('温和洞察')
+    expect(pac.findAll('.pac-insight').length).toBeGreaterThan(0)
+  })
+
+  it('清理后恢复空态（无跨用例污染）', async () => {
+    const wrapper = await createWrapper()
+    const pac = wrapper.find('.pac-panel')
+    expect(pac.find('.pac-empty').exists()).toBe(true)
+  })
+})

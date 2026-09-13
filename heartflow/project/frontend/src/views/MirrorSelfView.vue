@@ -50,6 +50,12 @@
       </ul>
     </section>
 
+    <!-- 自我认知档案：人格风格/价值观取向/成长阶段/温和洞察（INCR-294 补挂载孤儿组件 PersonalityArchivePanel：消费 self-cognition-analytics 五纯函数，面板级应用库内唯一，薄委托化） -->
+    <section data-enter class="msr-portrait" aria-label="自我认知档案">
+      <h2 class="msr-section-title">自我认知档案</h2>
+      <PersonalityArchivePanel :dialogues="dialogues" />
+    </section>
+
     <!-- 人格画像：自我认知报告/常用词汇/演化趋势/成长轨迹/温和洞察（INCR-293 补挂载孤儿组件 PersonalityPortraitPanel：消费 buildPersonalityPortrait 纯函数，应用库内唯一，薄委托化） -->
     <section data-enter class="msr-portrait" aria-label="人格画像">
       <h2 class="msr-section-title">人格画像</h2>
@@ -75,6 +81,7 @@ import SelfMirrorPanel from '../components/SelfMirrorPanel.vue'
 import TwelveHousesGrid from '../components/TwelveHousesGrid.vue'
 import SelfAstrolabeChart from '../components/SelfAstrolabeChart.vue'
 import PersonalityPortraitPanel from '../components/PersonalityPortraitPanel.vue'
+import PersonalityArchivePanel from '../components/PersonalityArchivePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import { getDialogueSessions } from '../modules/mirror/dialogue-persistence'
