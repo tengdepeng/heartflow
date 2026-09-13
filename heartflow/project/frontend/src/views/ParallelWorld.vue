@@ -228,6 +228,18 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 平行世界档案（INCR-290 补挂载孤儿组件 ParallelWorldArchivePanel：概览/平行自我来源/胶囊状态/抉择节奏/分支绽开/健康维度/温和回看，消费 parallel-analytics 纯函数，引擎应用库内唯一，薄委托化） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <ParallelWorldArchivePanel
+        :forks="forks"
+        :alts="altSelves"
+        :capsules="capsules"
+        :branches="parallelWorld.branches.value"
+      />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 分支管理（parallel-world·useParallelWorld，INCR-176） -->
     <!-- ============================================================ -->
     <section data-enter class="pw-branch-panels">
@@ -340,6 +352,7 @@ import { useParallelWorld, useTimeCapsule, useParallelSelves } from '../modules/
 import type { Fork } from '../modules/parallel-world'
 import { DREAM_REALM_ID } from '../stores/dreamNook'
 import BranchManagementPanel from '../components/BranchManagementPanel.vue'
+import ParallelWorldArchivePanel from '../components/ParallelWorldArchivePanel.vue'
 import BranchReplayPanel from '../components/BranchReplayPanel.vue'
 import BranchTimelinePanel from '../components/BranchTimelinePanel.vue'
 import BranchVisualizationPanel from '../components/BranchVisualizationPanel.vue'

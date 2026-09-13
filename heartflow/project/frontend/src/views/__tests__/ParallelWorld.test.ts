@@ -835,3 +835,109 @@ async function pickSourceTarget(panel: any) {
   await targetSel.trigger('change')
   await nextTick()
 }
+
+// ============================================================
+// 集成：平行世界档案面板 ParallelWorldArchivePanel（INCR-290 补挂载孤儿组件）
+// 引擎 modules/parallel-world/parallel-analytics.ts 的纯函数
+// （parallelOverview / altSelfSourceRows / capsuleStatusRows / parallelRhythm /
+//   branchDepthLabel / parallelWorldHealth / parallelInsights；全纯函数零副作用，
+//   now 可测）应用库内仅本组件消费（rg 排除 __tests__ 后仅本组件 + index.ts
+//   re-export 引用）→ 应用库内唯一。薄委托化：宿主注入 4 数组 props
+//   (forks=hf:decision_forks / alts=hf:parallel_alts / capsules=hf:time_capsules /
+//    branches=hf:parallel-world:branches)，宿主 ParallelWorld.vue 经
+//   pw.load()/loadCapsules()/parallelWorld.load() 从 storage 载入同名数组。
+// 挂载于平行世界档案区段（平行自我区之后、分支管理之前）。
+// 注：Fork.at(Capsule.at/openDate) 为日期字符串；分支绽开 depthLabel 与健康
+//   徽章跟在有数据时恒渲染；健康 label 依 avgCapsuleWait 估算但仍稳居
+//   「新芽微露」区间(种子两胶囊 wait≈33 天 → continuity≈23 → score≈27)。
+// ============================================================
+describe('集成：平行世界档案面板', () => {
+  const KF = 'hf:decision_forks'
+  const KA = 'hf:parallel_alts'
+  const KC = 'hf:time_capsules'
+  const KB = 'hf:parallel-world:branches'
+  const DAY = 24 * 3600 * 1000
+  const iso = (daysAgo: number) => new Date(Date.now() - daysAgo * DAY).toISOString()
+
+  function seedFilled() {
+    mockStore[KF] = [
+      { id: 'f1', description: '岔路A', chosen: '选择了A', alternative: '没走的B', date: '2026-01-01', at: iso(0) },
+      { id: 'f2', description: '岔路B', chosen: '选择了C', alternative: '没走的D', date: '2026-01-02', at: iso(10) },
+    ]
+    mockStore[KA] = [
+      { id: 'a1', title: '甲', desc: '分叉映照的你', icon: '🌿', color: '#c4956a', expanded: false, originForkId: 'f1', createdAt: iso(1) },
+      { id: 'a2', title: '乙', desc: '自由映照的你', icon: '🌟', color: '#6b9fc4', expanded: false, originForkId: null, createdAt: iso(2) },
+    ]
+    mockStore[KC] = JSON.stringify([
+      { id: 'c1', message: '给未来', text: '给未来', opened: false, at: iso(5), openDate: iso(-30) },
+      { id: 'c2', message: '开过的信', text: '开过的信', opened: true, at: iso(20), openDate: iso(-5) },
+    ])
+    mockStore[KB] = [
+      { id: 'pw_b1', name: '一条枝', description: '', color: '#2E8B57', createdAt: iso(3), parentBranchId: undefined, isActive: false, checkpointCount: 2 },
+    ]
+  }
+
+  it('无数据时渲染空态引导', async () => {
+    const wrapper = await getWrapper()
+    const pwap = wrapper.find('.pwap')
+    expect(pwap.exists()).toBe(true)
+    expect(pwap.find('.pwap-title').text()).toContain('平行世界档案')
+    expect(pwap.text()).toContain('平行世界还是空的')
+    expect(pwap.find('.pwap-stats').exists()).toBe(false)
+  })
+
+  it('概览统计反映四类数据（分叉2·自我2·胶囊2·分支1·检查点2）', async () => {
+    seedFilled()
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const pwap = wrapper.find('.pwap')
+    const stats = pwap.findAll('.pwap-stat').map(s => ({
+      label: s.find('.pwap-stat-label').text(),
+      num: s.find('.pwap-stat-num').text(),
+    }))
+    const v = (l: string) => stats.find(x => x.label === l)?.num
+    expect(v('抉择分叉')).toBe('2')
+    expect(v('平行自我')).toBe('2')
+    expect(v('时间胶囊')).toBe('2')
+    expect(v('时间分支')).toBe('1')
+    expect(v('检查点')).toBe('2')
+  })
+
+  it('来源分布与胶囊状态行渲染', async () => {
+    seedFilled()
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const pwap = wrapper.find('.pwap')
+    expect(pwap.text()).toContain('平行自我来源')
+    expect(pwap.text()).toContain('分叉映照')
+    expect(pwap.text()).toContain('自由映照')
+    expect(pwap.text()).toContain('时间胶囊状态')
+    expect(pwap.text()).toContain('已开启')
+    expect(pwap.text()).toContain('仍在等')
+  })
+
+  it('抉择节奏反映近7/近30天分叉且健康徽章新芽微露', async () => {
+    seedFilled()
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const pwap = wrapper.find('.pwap')
+    const rhythm = pwap.findAll('.pwap-rhythm-item').map(r => ({
+      label: r.find('.pwap-rhythm-label').text(),
+      num: r.find('.pwap-rhythm-num').text(),
+    }))
+    expect(rhythm.find(x => x.label === '近 7 天分叉')?.num).toBe('1')
+    expect(rhythm.find(x => x.label === '近 30 天分叉')?.num).toBe('2')
+    expect(pwap.find('.pwap-health-label').text()).toBe('新芽微露')
+  })
+
+  it('温和回看给出时间胶囊洞察与健康沉淀', async () => {
+    seedFilled()
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const pwap = wrapper.find('.pwap')
+    const ins = pwap.findAll('.pwap-insight').map(i => i.text())
+    expect(ins.some(t => t.includes('时间胶囊被未来的你开启'))).toBe(true)
+    expect(ins.some(t => t.includes('新芽微露'))).toBe(true)
+  })
+})
+
