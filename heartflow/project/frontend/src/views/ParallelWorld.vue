@@ -315,6 +315,16 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 冲突仲裁（INCR-291 补挂载孤儿组件 AutoConflictPanel：自动解决/规则引擎/模式分析，消费 useAutoConflictResolution 引擎，薄委托化） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <AutoConflictPanel
+        :branches="parallelWorld.branches.value"
+        :checkpoints="parallelWorld.checkpoints.value"
+      />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 情景推演（parallel-world·useScenarioSimulation，INCR-240 补挂载孤儿组件） -->
     <!-- ============================================================ -->
     <section data-enter class="pw-branch-panels">
@@ -353,6 +363,7 @@ import type { Fork } from '../modules/parallel-world'
 import { DREAM_REALM_ID } from '../stores/dreamNook'
 import BranchManagementPanel from '../components/BranchManagementPanel.vue'
 import ParallelWorldArchivePanel from '../components/ParallelWorldArchivePanel.vue'
+import AutoConflictPanel from '../components/AutoConflictPanel.vue'
 import BranchReplayPanel from '../components/BranchReplayPanel.vue'
 import BranchTimelinePanel from '../components/BranchTimelinePanel.vue'
 import BranchVisualizationPanel from '../components/BranchVisualizationPanel.vue'

@@ -8,7 +8,12 @@ import { nextTick } from 'vue'
 // ---- 模拟 storage ----
 const mockStore: Record<string, any> = {}
 const mockGetKV = vi.fn((_key: string, def: any) => mockStore[_key] ?? def)
-const mockSetKV = vi.fn((key: string, val: any) => { mockStore[key] = val })
+const mockSetKV = vi.fn((key: string, val: any) => {
+  if (String(key).includes('parallel-world:branches')) {
+    console.log('DEBUG-setKV-branches:', JSON.stringify(val?.map((b: any) => b.name)))
+  }
+  mockStore[key] = val
+})
 
 vi.mock('../../engine/storage', () => ({
   storage: {
@@ -859,6 +864,14 @@ describe('集成：平行世界档案面板', () => {
   const DAY = 24 * 3600 * 1000
   const iso = (daysAgo: number) => new Date(Date.now() - daysAgo * DAY).toISOString()
 
+  beforeEach(() => {
+    vi.clearAllMocks()
+    delete mockStore[KF]
+    delete mockStore[KA]
+    delete mockStore[KC]
+    delete mockStore[KB]
+  })
+
   function seedFilled() {
     mockStore[KF] = [
       { id: 'f1', description: '岔路A', chosen: '选择了A', alternative: '没走的B', date: '2026-01-01', at: iso(0) },
@@ -938,6 +951,125 @@ describe('集成：平行世界档案面板', () => {
     const ins = pwap.findAll('.pwap-insight').map(i => i.text())
     expect(ins.some(t => t.includes('时间胶囊被未来的你开启'))).toBe(true)
     expect(ins.some(t => t.includes('新芽微露'))).toBe(true)
+  })
+})
+
+// ============================================================
+// 集成：冲突仲裁面板（INCR-291 补挂载孤儿组件）
+// 引擎 modules/parallel-world/auto-conflict-resolution.ts 的
+// useAutoConflictResolution 组合式引擎（规则驱动自动解决/冲突模式分析/
+// 多策略/优先级规则/解决历史；实例级 ref + storage 持久化，初始化
+// loadRules/loadHistory/loadDefaultStrategy，键 hf:parallel-world:
+// resolution-rules / resolution-history / default-strategy）。
+// 引擎消费方核验: 排除 __tests__ 后生产消费方仅 AutoConflictPanel 与
+// ConflictResolutionPanel 两个**孤儿**组件（均未挂载任何视图）；本 INCR
+// 挂载 AutoConflictPanel 后引擎生产消费方唯一。ConflictResolutionPanel
+// 同为孤儿且功能重复（直接内联 useParallelWorld 自载数据，非薄委托），
+// 记录为**重复孤儿**，后续扫描排除。薄委托化：宿主注入 branches /
+// checkpoints 两数组 props（hf:parallel-world:branches / checkpoints），
+// 挂载于世界对照之后、情景推演之前（与合并/对照/仲裁语义聚类）。
+// 注：引擎初始化读不到规则键时自动落默认 5 规则并回写 storage；
+//   冲突检测源/目标检查点同分支时 canDetect 为 false。
+//   宿主最小状态：useParallelWorld.load() 空存储时自动落默认主干分支
+//   （worlds.ts 空分支 → branches=[DEFAULT_TRUNK] 并 persistBranches），
+//   故面板「还没有平行分支可仲裁」空态在宿主内不可达，最小为单分支引导。
+// ============================================================
+describe('集成：冲突仲裁面板', () => {
+  const KB = 'hf:parallel-world:branches'
+  const KC = 'hf:parallel-world:checkpoints'
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+    delete mockStore[KB]
+    delete mockStore[KC]
+    delete mockStore['hf:parallel-world:resolution-rules']
+    delete mockStore['hf:parallel-world:resolution-history']
+    delete mockStore['hf:parallel-world:default-strategy']
+  })
+
+  function twoBranches() {
+    return [
+      { id: 'a', name: '主世界', description: '', color: '#4A90D9', createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined, isActive: true, checkpointCount: 2 },
+      { id: 'b', name: '平行世界', description: '', color: '#2E8B57', createdAt: '2026-01-02T00:00:00.000Z', parentBranchId: 'a', isActive: false, checkpointCount: 2 },
+    ]
+  }
+
+  function conflictingCheckpoints() {
+    return [
+      { id: 'sa', branchId: 'a', label: '源', description: '', snapshot: { v: 1 }, createdAt: '2026-01-01T00:00:00.000Z', tags: ['life', 'work'] },
+      { id: 'sb', branchId: 'b', label: '目标', description: '', snapshot: { v: 2 }, createdAt: '2026-02-01T00:00:00.000Z', tags: ['life'] },
+    ]
+  }
+
+  it('默认主干（空存储）时渲染仲裁引导', async () => {
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const acp = wrapper.find('.acp-panel')
+    expect(acp.exists()).toBe(true)
+    expect(acp.text()).toContain('冲突仲裁')
+    // 空存储 → useParallelWorld.load() 自动落默认主干分支并回写 storage
+    // （worlds.ts load() 空分支时 branches=[DEFAULT_TRUNK] 主干），
+    // 故宿主内该面板的最小状态是单分支引导而非「还没有平行分支可仲裁」。
+    expect(acp.text()).toContain('至少需要两个分支才能仲裁')
+    expect(acp.text()).toContain('主干')
+    expect(acp.find('.acp-badge').text()).toBe('0 次解决 · 5 条规则')
+  })
+
+  it('单分支时给出至少两分支引导', async () => {
+    mockStore[KB] = [{ id: 'a', name: '主世界', description: '', color: '#4A90D9', createdAt: '2026-01-01T00:00:00.000Z', parentBranchId: undefined, isActive: true, checkpointCount: 2 }]
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const acp = wrapper.find('.acp-panel')
+    expect(acp.text()).toContain('至少需要两个分支才能仲裁')
+    expect(acp.text()).toContain('主世界')
+  })
+
+  it('双分支：检测冲突显示冲突列表', async () => {
+    mockStore[KB] = twoBranches()
+    mockStore[KC] = conflictingCheckpoints()
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const acp = wrapper.find('.acp-panel')
+    const selects = acp.findAll('.acp-input')
+    await selects[0].setValue('sa')
+    await selects[1].setValue('sb')
+    await wrapper.vm.$nextTick()
+    await acp.find('.acp-detect').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(acp.text()).toContain('检测到 4 个冲突')
+    expect(acp.text()).toContain('标签名称冲突')
+    expect(acp.text()).toContain('数据字段冲突')
+  })
+
+  it('双分支：一键解决生成结果摘要并更新徽标', async () => {
+    mockStore[KB] = twoBranches()
+    mockStore[KC] = conflictingCheckpoints()
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const acp = wrapper.find('.acp-panel')
+    const selects = acp.findAll('.acp-input')
+    await selects[0].setValue('sa')
+    await selects[1].setValue('sb')
+    await wrapper.vm.$nextTick()
+    await acp.find('.acp-detect').trigger('click')
+    await wrapper.vm.$nextTick()
+    await acp.find('.acp-run').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(acp.find('.acp-result').exists()).toBe(true)
+    expect(acp.text()).toContain('✓ 全部解决')
+    expect(acp.text()).toContain('共解决 4 个冲突')
+    expect(acp.find('.acp-badge').text()).toContain('1 次解决')
+  })
+
+  it('规则页：默认规则列表渲染', async () => {
+    mockStore[KB] = twoBranches()
+    const wrapper = await getWrapper()
+    await flushPromises()
+    const acp = wrapper.find('.acp-panel')
+    await acp.findAll('.acp-tab')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(acp.text()).toContain('时间戳冲突取最新')
+    expect(acp.text()).toContain('标签合并')
   })
 })
 
