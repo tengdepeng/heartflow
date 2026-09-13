@@ -182,3 +182,78 @@ describe('AssociationGraph 共鸣图谱（C1-EXT）', () => {
     expect(rings.length).toBeGreaterThanOrEqual(1)
   })
 })
+
+// ============================================================
+// 集成：关联档案面板 AssociationArchivePanel（INCR-285 补挂载孤儿组件）
+// 引擎 modules/association/association-archive-analytics.ts 的纯函数
+// （associationArchiveOverview / linkTypeRows / domainPairRows /
+//   associationArchiveHealth / associationInsights）在应用内仅本组件消费：
+//   advisor/knowledge-scope.ts 只 import 常量 DOMAIN_ARCHIVE_META，非这些函数。
+// 零副作用；Props 契约 graph: AssociationGraph，宿主 AssociationGraph.vue 已有
+//   graph = computeAssociationGraph()，直接 :graph="graph" 薄委托，v-if 有数据才渲染。
+// 测试沿用 getWrapper() 的 n1(笔记·成长) + e1(情绪·成长) → 1 条 shared-tag 关联。
+// ============================================================
+describe('集成：关联档案面板', () => {
+  beforeEach(() => {
+    setupMemoryStorage()
+  })
+
+  it('有跨域数据时渲染关联档案面板（标题/健康圆环/三轴）', async () => {
+    const wrapper = await getWrapper()
+    const aap = wrapper.find('.aap')
+    expect(aap.exists()).toBe(true)
+    expect(aap.find('.aap-title').text()).toContain('关联档案')
+    // 健康圆环：score + /100
+    expect(aap.find('.aap-ring').exists()).toBe(true)
+    expect(aap.find('.aap-ring-num').text()).toContain('/100')
+    // 健康三轴
+    const axes = aap.findAll('.aap-axis-label').map(t => t.text())
+    expect(axes).toContain('涉域广度')
+    expect(axes).toContain('连线密度')
+    expect(axes).toContain('关联强度')
+  })
+
+  it('概览指标反映图谱数据（记录节点 2 · 关联连线 2）', async () => {
+    const wrapper = await getWrapper()
+    const aap = wrapper.find('.aap')
+    const metrics = aap.findAll('.aap-metric').map(m => ({
+      label: m.find('span').text(),
+      value: m.find('b').text(),
+    }))
+    const nodes = metrics.find(m => m.label === '记录节点')
+    const links = metrics.find(m => m.label === '关联连线')
+    expect(nodes?.value).toBe('2')
+    // n1(2026-01-01) 与 e1(2026-01-02) 既共享「成长」标签又时间邻近 → 2 条连线
+    expect(links?.value).toBe('2')
+  })
+
+  it('类型分布渲染「共享标签」行（shared-tag 1 条）', async () => {
+    const wrapper = await getWrapper()
+    const aap = wrapper.find('.aap')
+    const types = aap.findAll('.aap-type')
+    const tagRow = types.find(t =>
+      t.find('.aap-type-label').text() === '共享标签',
+    )
+    expect(tagRow?.exists()).toBe(true)
+    expect(tagRow!.find('.aap-type-count').text()).toBe('1条')
+  })
+
+  it('域对分布渲染「笔记 × 情绪」并给出温和洞察', async () => {
+    const wrapper = await getWrapper()
+    const aap = wrapper.find('.aap')
+    const pairLabel = aap.find('.aap-pair-label').text()
+    expect(pairLabel).toContain('笔记')
+    expect(pairLabel).toContain('情绪')
+    // 温和洞察：共享标签经线
+    const insights = aap.findAll('.aap-insights li').map(t => t.text())
+    expect(insights.some(t => t.includes('共享标签牵起了'))).toBe(true)
+  })
+
+  it('无跨域记录时不渲染关联档案面板（v-if 随图谱数据）', async () => {
+    const { storage } = await import('../../engine/storage')
+    storage.clear()
+    const { default: AssociationGraph } = await import('../AssociationGraph.vue')
+    const wrapper = mount(AssociationGraph, {})
+    expect(wrapper.find('.aap').exists()).toBe(false)
+  })
+})

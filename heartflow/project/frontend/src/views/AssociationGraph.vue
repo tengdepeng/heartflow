@@ -170,6 +170,9 @@
       <p>暂无可关联的跨域记录。当你在不同空间留下笔记、情绪、锚点或结晶时，它们之间的联系会在此显现。</p>
     </div>
 
+    <!-- 关联档案（INCR-285 补挂载孤儿组件 AssociationArchivePanel：健康圆环/概览/类型分布/域对分布/温和洞察，消费 association-archive-analytics 纯函数，引擎应用内唯一） -->
+    <AssociationArchivePanel v-if="graph.nodes.length" :graph="graph" />
+
     <!-- 返回 -->
     <div data-enter class="ag-back-row">
       <button class="ag-back-btn" @click="$router.back()">← 返回</button>
@@ -185,6 +188,7 @@ import {
   type CrossDomainLink, type DomainKey, type LinkType,
 } from '../modules/association'
 import { computeLayout, type GraphLayout } from '../modules/association/layout'
+import AssociationArchivePanel from '../components/AssociationArchivePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
