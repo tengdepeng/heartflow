@@ -66,6 +66,16 @@ vi.mock('../../modules/discipline/workshop-bridge', () => ({
   getChallengeTemplatesByDifficulty: () => [],
 }))
 
+// ---- 模拟 modules/tasks（四象限看板引擎；importOriginal 保留 buildQuadrantBoard 等计算用于真实分类） ----
+const mockBoardTasks = ref<any[]>([])
+vi.mock('../../modules/tasks', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../modules/tasks')>()
+  return {
+    ...actual,
+    useTaskManager: () => ({ tasks: mockBoardTasks, load: vi.fn() }),
+  }
+})
+
 async function getWrapper() {
   const { default: DisciplineWorkshop } = await import('../DisciplineWorkshop.vue')
   return mount(DisciplineWorkshop, {
@@ -349,5 +359,47 @@ describe('集成：挑战顾问面板', () => {
     expect(typeof description).toBe('string')
     expect(typeof duration).toBe('number')
     expect(Array.isArray(habitIds)).toBe(true)
+  })
+})
+
+// =============================================================
+// 集成：四象限任务看板（INCR-318：补挂载孤儿面板 QuadrantBoardPanel → 任务看板 tab）
+// =============================================================
+
+describe('集成：四象限任务看板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockBoardTasks.value = []
+  })
+
+  async function switchToTasks(wrapper: any) {
+    const tab = wrapper.findAll('.dw-tab').find((t: any) => t.text().includes('任务看板'))
+    expect(tab).toBeTruthy()
+    await tab.trigger('click')
+    await wrapper.vm.$nextTick()
+  }
+
+  it('默认页不渲染看板，切至任务看板后显示面板骨架', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.qbp-archive').exists()).toBe(false)
+    await switchToTasks(wrapper)
+    expect(wrapper.find('.qbp-archive').exists()).toBe(true)
+    expect(wrapper.text()).toContain('🗂️ 四象限看板')
+  })
+
+  it('播种任务后按四象限分桶渲染且列统计正确', async () => {
+    mockBoardTasks.value = [
+      { id: 't1', title: '紧急重要', urgency: true, importance: true, status: 'todo', focusCount: 0, createdAt: '2026-01-01T00:00:00Z' },
+      { id: 't2', title: '重要不紧急', urgency: false, importance: true, status: 'adjourn', focusCount: 0, createdAt: '2026-01-01T00:00:00Z' },
+    ]
+    const wrapper = await getWrapper()
+    await switchToTasks(wrapper)
+    expect(wrapper.findAll('.qbp-col')).toHaveLength(4)
+    expect(wrapper.text()).toContain('要事紧急')
+    expect(wrapper.text()).toContain('紧急重要')
+    expect(wrapper.text()).toContain('要事从容')
+    expect(wrapper.text()).toContain('重要不紧急')
+    // 两件任务进入两格，看板总览徽章显示 2 件
+    expect(wrapper.text()).toContain('2 件任务')
   })
 })

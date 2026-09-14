@@ -266,6 +266,11 @@
     <section v-if="activeTab === 'meditation'" data-enter class="dw-section">
       <MeditationStudio />
     </section>
+
+    <!-- 任务看板（tasks/quadrant-board 引擎：紧急×重要 四象限分桶 · 列统计 · 温和洞察，INCR-318） -->
+    <section v-if="activeTab === 'tasks'" data-enter class="dw-section">
+      <QuadrantBoardPanel />
+    </section>
   </div>
 </template>
 
@@ -284,8 +289,12 @@ import PomodoroForestPanel from '../components/discipline/PomodoroForestPanel.vu
 import MeditationStudio from '../components/MeditationStudio.vue'
 import ChallengeAdvisorPanel from '../components/ChallengeAdvisorPanel.vue'
 import type { ChallengeRecommendation } from '../modules/discipline/challenge-recommender'
+import QuadrantBoardPanel from '../components/QuadrantBoardPanel.vue'
+import { useTaskManager } from '../modules/tasks'
 
 const bridge = useDisciplineBridge()
+
+const taskManager = useTaskManager()
 
 // 标签状态
 const tabs = [
@@ -295,6 +304,7 @@ const tabs = [
   { key: 'stats', icon: '📊', label: '统计' },
   { key: 'forest', icon: '🌳', label: '番茄树园' },
   { key: 'meditation', icon: '🧘', label: '冥想工坊' },
+  { key: 'tasks', icon: '🗂️', label: '任务看板' },
 ]
 const activeTab = ref('checkin')
 
@@ -476,6 +486,7 @@ function createChallengeFromRecommendation(rec: ChallengeRecommendation) {
 
 onMounted(() => {
   bridge.init()
+  taskManager.load()
   loadData()
 })
 </script>
