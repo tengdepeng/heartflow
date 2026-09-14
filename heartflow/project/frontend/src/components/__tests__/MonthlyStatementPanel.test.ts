@@ -1,6 +1,17 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import type { RewardRecord } from '../../modules/reward/reward-list'
+
+// 面板默认月份取系统当前月：钉时到 2026-08，使「默认本月」断言与样例数据一致，
+// 避免测试随实际日期漂移（9 月运行时默认月落在 2026-09，样例 8 月数据被归入上月）。
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(2026, 7, 10, 12, 0, 0))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 function rec(o: Partial<RewardRecord> = {}): RewardRecord {
   return {

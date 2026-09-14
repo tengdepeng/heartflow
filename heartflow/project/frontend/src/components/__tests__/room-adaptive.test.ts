@@ -14,6 +14,17 @@ vi.mock('../../engine/storage', () => ({
   storage: {
     getKV: (k: string, def: any) => mockStore[k] ?? def,
     setKV: (k: string, v: any) => { mockStore[k] = v },
+    removeKV: (k: string) => { delete mockStore[k] },
+    getConfig: () => ({
+      locale: 'zh-CN' as const,
+      background: { type: 'none' as const, image: '', video: '', overlayEnabled: true, overlayMode: 'minimal' as const, blur: 0, brightness: 100 },
+      gestures: { enabled: false, bindings: {} as Record<string, string> },
+      display: { uploadImageMaxBytes: 2 * 1024 * 1024, uploadVideoMaxBytes: 4 * 1024 * 1024, trendNoteCount: 20, titleTruncateLength: 8, excerptTruncateLength: 80, tagDisplayCount: 2, statsWindowDays: 30, searchResultLimit: 10, dreamStorageLimit: 100, cleanupThresholdDays: 30, moveTrajectoryCount: 20 },
+      tags: { categories: [] },
+      notifications: { native: true, focusComplete: true, advisorGreet: true },
+      touchpoints: { lockScreenGlow: { enabled: false, color: '#d4a574', intensity: 50 }, greetingFloating: { enabled: false, size: 'medium' as const, position: 'bottom-right' as const }, overlay: { mode: 'minimal' as const } },
+      complianceOverride: { forbiddenPatterns: false, notificationBlocked: true, advisorEnabled: false, comparativePhrases: false, personification: false, autoStartOverwrite: false, hapticFeedbackOverwrite: false, dataDriven: false },
+    }),
   },
 }))
 
@@ -36,12 +47,12 @@ describe('item2 房间自适应排版基底接入', () => {
     expect(cardsInGrid).toBe(allCards)
   })
 
-  it('Settings：默认仅展开首个分组（bg），其余 12 个折叠', () => {
+  it('Settings：默认仅展开首个分组（bg），其余 13 个折叠', () => {
     const wrapper = shallowMount(Settings)
     const groups = wrapper.findAll('.sub-group')
-    expect(groups.length).toBe(13)
+    expect(groups.length).toBe(14)
     const collapsed = groups.filter((g) => g.classes().includes('is-collapsed'))
-    expect(collapsed.length).toBe(12)
+    expect(collapsed.length).toBe(13)
     expect(groups[0].classes()).not.toContain('is-collapsed')
   })
 
@@ -54,11 +65,19 @@ describe('item2 房间自适应排版基底接入', () => {
     }
     const { default: PlayGallery } = await import('../../views/PlayGallery.vue')
     const wrapper = mount(PlayGallery)
+    // 游戏 tab（默认）：列表为 --wide 网格
     const gameList = wrapper.find('.game-list')
     expect(gameList.exists()).toBe(true)
     expect(gameList.classes()).toContain('hf-room-grid--wide')
-    const itemGrids = wrapper.findAll('.item-grid')
-    expect(itemGrids.length).toBe(3)
-    itemGrids.forEach((g) => expect(g.classes()).toContain('hf-room-grid'))
+    // 依次切换 玩具/模型/其他：各收藏列表均接入默认网格
+    const tabLabels: Record<string, string> = { toy: '玩具', model: '模型', other: '其他' }
+    for (const label of Object.values(tabLabels)) {
+      const tab = wrapper.findAll('.tab').find((b) => b.text().includes(label))!
+      await tab.trigger('click')
+      await wrapper.vm.$nextTick()
+      const grids = wrapper.findAll('.item-grid')
+      expect(grids.length).toBe(1)
+      expect(grids[0].classes()).toContain('hf-room-grid')
+    }
   })
 })

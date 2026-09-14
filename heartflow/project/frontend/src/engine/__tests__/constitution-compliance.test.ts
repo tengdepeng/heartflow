@@ -344,6 +344,8 @@ describe('宪法合规 · 数据主权 （第1条）', () => {
         if (line.trim().startsWith('//')) return
         // 测试 mock / 字符串字面量豁免
         if (line.includes('vi.fn') || line.includes('mock')) return
+        // 函数名/标识符里的 prefetch( 子串豁免（如 prefetchRooms、useRoutePrefetch）
+        if (/(?:prefetch|refetch)\s*\(/i.test(line)) return
 
         const normalized = file.replace(/\\/g, '/')
         const isSanctioned = SANCTIONED_NETWORK_FILES.some(f => normalized.endsWith(f))

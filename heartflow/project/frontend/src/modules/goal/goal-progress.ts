@@ -319,7 +319,7 @@ export function useMilestoneTimeline() {
     if (!timeline) return null
 
     const entry: MilestoneEntry = {
-      id: `ms-${Date.now()}`,
+      id: `ms-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       label,
       date,
       status: 'pending',

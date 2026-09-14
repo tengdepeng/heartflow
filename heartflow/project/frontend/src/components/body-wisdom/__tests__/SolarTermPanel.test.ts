@@ -1,9 +1,20 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createMockStorage } from '../../../engine/storage/__tests__/test-utils'
 import { invalidateCache } from '../../../engine/storage/core'
 
 const CHECKINS_KEY = 'hf:body-wisdom:solar-term-checkins'
+
+// 节气由系统日期推导：钉时到 2026-08-26（处暑 8/23 ～ 白露 9/7 区间内），
+// 避免测试随实际日期漂移（9 月中运行会落在白露导致断言失败）。
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(2026, 7, 26, 12, 0, 0))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 async function mountPanel(kv: Record<string, any> = {}) {
   vi.resetModules()

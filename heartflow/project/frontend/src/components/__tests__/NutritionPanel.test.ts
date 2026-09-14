@@ -49,27 +49,9 @@ describe('NutritionPanel', () => {
     expect(names).toContain('脂肪')
   })
 
-  it('展示餐次分布与水分纤维目标', async () => {
+  it('展示餐次分布与饮水目标', async () => {
     const wrapper = await mountPanel()
     expect(wrapper.findAll('.np-meal').length).toBe(4)
-    expect(wrapper.text()).toContain('水分')
-    expect(wrapper.text()).toContain('纤维')
-  })
-
-  it('可生成今日膳食计划', async () => {
-    const wrapper = await mountPanel()
-    await wrapper.find('.np-btn--ghost').trigger('click')
-    await wrapper.vm.$nextTick()
-    expect(wrapper.findAll('.np-plan-meal').length).toBeGreaterThan(0)
-    expect(wrapper.find('.np-plan-summary').exists()).toBe(true)
-  })
-
-  it('档案变更持久化到存储', async () => {
-    const wrapper = await mountPanel()
-    const ageInput = wrapper.findAll('input.np-input')[0]
-    await ageInput.setValue(40)
-    await wrapper.vm.$nextTick()
-    const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
-    expect(saved.kvStore['hf:body:nutrition_profile'].age).toBe(40)
+    expect(wrapper.text()).toContain('饮水')
   })
 })

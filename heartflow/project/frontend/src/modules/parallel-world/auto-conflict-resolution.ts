@@ -585,12 +585,12 @@ export function useAutoConflictResolution() {
         return conflict.targetValue
 
       case 'merge-fields':
-        // 合并字段
-        if (typeof conflict.sourceValue === 'object' && typeof conflict.targetValue === 'object') {
-          return { ...(conflict.targetValue as Record<string, unknown>), ...(conflict.sourceValue as Record<string, unknown>) }
-        }
+        // 合并字段（数组优先于对象判断，数组也是 object）
         if (Array.isArray(conflict.sourceValue) && Array.isArray(conflict.targetValue)) {
           return [...new Set([...(conflict.sourceValue as unknown[]), ...(conflict.targetValue as unknown[])])]
+        }
+        if (typeof conflict.sourceValue === 'object' && typeof conflict.targetValue === 'object') {
+          return { ...(conflict.targetValue as Record<string, unknown>), ...(conflict.sourceValue as Record<string, unknown>) }
         }
         return conflict.targetValue
 
@@ -635,11 +635,12 @@ export function useAutoConflictResolution() {
         return conflict.sourceValue
 
       case 'merge':
-        if (typeof conflict.sourceValue === 'object' && typeof conflict.targetValue === 'object') {
-          return { ...(conflict.targetValue as Record<string, unknown>), ...(conflict.sourceValue as Record<string, unknown>) }
-        }
+        // 合并（数组优先于对象判断，数组也是 object）
         if (Array.isArray(conflict.sourceValue) && Array.isArray(conflict.targetValue)) {
           return [...new Set([...(conflict.targetValue as unknown[]), ...(conflict.sourceValue as unknown[])])]
+        }
+        if (typeof conflict.sourceValue === 'object' && typeof conflict.targetValue === 'object') {
+          return { ...(conflict.targetValue as Record<string, unknown>), ...(conflict.sourceValue as Record<string, unknown>) }
         }
         return conflict.targetValue
 

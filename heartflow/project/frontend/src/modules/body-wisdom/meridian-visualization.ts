@@ -278,6 +278,10 @@ export function useMeridianVisualization() {
 
   /** 根据经络健康数据调整生克强度 */
   function computeElementRelations(records: MeridianRecord[]): FiveElementRelation[] {
+    // 五行中文名 → 英文键（FIVE_ELEMENT_RELATIONS 用中文，MERIDIAN_HOURS 用英文）
+    const ELEMENT_KEY: Record<string, string> = {
+      木: 'wood', 火: 'fire', 土: 'earth', 金: 'metal', 水: 'water',
+    }
     // 统计各元素的健康率
     const elementHealth = new Map<string, { good: number; total: number }>()
 
@@ -294,8 +298,8 @@ export function useMeridianVisualization() {
 
     // 调整关系强度
     return FIVE_ELEMENT_RELATIONS.map(rel => {
-      const sourceHealth = elementHealth.get(rel.source)
-      const targetHealth = elementHealth.get(rel.target)
+      const sourceHealth = elementHealth.get(ELEMENT_KEY[rel.source] ?? rel.source)
+      const targetHealth = elementHealth.get(ELEMENT_KEY[rel.target] ?? rel.target)
 
       const sourceRate = sourceHealth && sourceHealth.total > 0
         ? sourceHealth.good / sourceHealth.total

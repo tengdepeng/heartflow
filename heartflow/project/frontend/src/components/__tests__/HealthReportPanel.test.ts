@@ -47,7 +47,7 @@ describe('HealthReportPanel · 健康报告档案（INCR-135）', () => {
   it('空态洞察：无报告时给出守候引导', () => {
     const wrapper = getWrapper([])
     expect(wrapper.find('.hrp-insight').exists()).toBe(true)
-    expect(wrapper.text()).toContain('还没有生成过健康报告')
+    expect(wrapper.text()).toContain('暂无健康报告，点击「生成报告」创建一份')
   })
 
   it('生成周报：点击生成后报告出现在列表', async () => {

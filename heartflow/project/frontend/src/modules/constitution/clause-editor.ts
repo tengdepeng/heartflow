@@ -273,7 +273,7 @@ export function useClauseEditor() {
     const maxOrder = Math.max(...clauses.value.map((c) => c.order), 0)
 
     const clause: Clause = {
-      id: `clause-${Date.now()}`,
+      id: `clause-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       number,
       title,
       content,

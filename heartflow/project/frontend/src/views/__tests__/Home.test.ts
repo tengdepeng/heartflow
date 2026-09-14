@@ -131,8 +131,19 @@ vi.mock('../../modules/gesture/actionMap', () => ({
 }))
 
 // ---- 模拟 storage ----
+const mockKV = vi.hoisted(() => new Map<string, unknown>())
 vi.mock('../../engine/storage', () => ({
   storage: {
+    getKV: <T>(key: string, defaultValue: T): T => {
+      const val = mockKV.get(key)
+      return val !== undefined ? val as T : defaultValue
+    },
+    setKV: (key: string, value: unknown) => {
+      mockKV.set(key, value)
+    },
+    removeKV: (key: string) => {
+      mockKV.delete(key)
+    },
     getSessions: () => [],
     getAnchors: () => [],
     getNotes: () => [],

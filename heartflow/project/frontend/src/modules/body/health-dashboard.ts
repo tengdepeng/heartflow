@@ -5,6 +5,8 @@
 
 import { ref } from 'vue'
 import type { BodyMetric, BodyMetricType, SleepRecord } from './types'
+import { BODY_STORAGE_KEYS } from './types'
+import { storage } from '../../engine/storage'
 import { computeNutritionScoreFromMetrics } from './nutrition-scoring'
 
 // ---- 健康目标 ----
@@ -414,7 +416,14 @@ function isInRange(value: number, range: [number, number]): boolean {
 // ============================================================
 
 export function useHealthGoals() {
-  const goals = ref<HealthGoal[]>([])
+  const goals = ref<HealthGoal[]>(loadGoals())
+
+  function loadGoals(): HealthGoal[] {
+    try { return JSON.parse(storage.getKV<string>(BODY_STORAGE_KEYS.goals, '[]')) } catch { return [] }
+  }
+  function saveGoals(): void {
+    storage.setKV(BODY_STORAGE_KEYS.goals, JSON.stringify(goals.value))
+  }
 
   /** 创建健康目标 */
   function createGoal(
@@ -446,6 +455,7 @@ export function useHealthGoals() {
     }
 
     goals.value.push(goal)
+    saveGoals()
     return goal
   }
 
@@ -468,6 +478,7 @@ export function useHealthGoals() {
     }
 
     goal.updatedAt = new Date().toISOString()
+    saveGoals()
     return goal
   }
 
@@ -487,6 +498,7 @@ export function useHealthGoals() {
     if (!goal) return undefined
     goal.status = 'paused'
     goal.updatedAt = new Date().toISOString()
+    saveGoals()
     return goal
   }
 
@@ -496,6 +508,7 @@ export function useHealthGoals() {
     if (!goal) return undefined
     goal.status = 'active'
     goal.updatedAt = new Date().toISOString()
+    saveGoals()
     return goal
   }
 
@@ -504,6 +517,7 @@ export function useHealthGoals() {
     const idx = goals.value.findIndex((g) => g.id === goalId)
     if (idx === -1) return false
     goals.value.splice(idx, 1)
+    saveGoals()
     return true
   }
 
@@ -545,7 +559,9 @@ export function useChronotypeAnalysis() {
 
     const avgBedtime = bedtimes.reduce((a, b) => a + b, 0) / bedtimes.length
     const avgWaketime = waketimes.reduce((a, b) => a + b, 0) / waketimes.length
-    const midpoint = ((avgBedtime + avgWaketime) / 2) % (24 * 60)
+    // 起床早于入睡时刻时视为跨日（如 22:00 入睡、次日 6:00 起床），中点须加 24h 再折算
+    const effectiveWaketime = avgWaketime < avgBedtime ? avgWaketime + 24 * 60 : avgWaketime
+    const midpoint = ((avgBedtime + effectiveWaketime) / 2) % (24 * 60)
 
     // 判断生物钟类型
     let chronotype: ChronotypeAnalysis['chronotype']

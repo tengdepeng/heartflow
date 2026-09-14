@@ -16,7 +16,7 @@ import {
 } from '../narrative-generator'
 
 // Mock storage
-const storageMock = new Map<string, unknown>()
+const storageMock = vi.hoisted(() => new Map<string, unknown>())
 
 vi.mock('../../../engine/storage', () => ({
   storage: {

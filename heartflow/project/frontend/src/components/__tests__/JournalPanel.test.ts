@@ -89,13 +89,17 @@ describe('JournalPanel 季节日志', () => {
   })
 
   it('展示情绪分析', async () => {
+    // 情绪分析块按当前季节过滤：动态取当前季节种入，避免随系统日期漂移
+    const { getCurrentSeason } = await import('../../modules/seasonal/seasonal-journal')
+    const season = getCurrentSeason()
     const wrapper = await mountPanel({
       [JOURNAL_KEY]: [
-        entry({ mood: 'reflective' }),
-        entry({ mood: 'peaceful' }),
-        entry({ mood: 'reflective' }),
+        entry({ season, mood: 'reflective' }),
+        entry({ season, mood: 'peaceful' }),
+        entry({ season, mood: 'reflective' }),
       ],
     })
+    expect(wrapper.text()).toContain('情绪趋势')
     expect(wrapper.text()).toContain('本季情绪分析')
     expect(wrapper.text()).toContain('主导情绪')
   })

@@ -320,6 +320,8 @@ export function useChallengeRecommender() {
     challenges: DisciplineChallenge[],
     profile?: HabitProfile,
   ): ChallengeRecommendation[] {
+    const active = habits.filter(h => h.enabled)
+    if (active.length === 0) return []
     const p = profile || buildProfile(habits, challenges)
     const recommendations: ChallengeRecommendation[] = []
 

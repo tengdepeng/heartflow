@@ -2,7 +2,7 @@
 // 报表可视化引擎测试（INCR-29）
 // 覆盖同比环比 / 分类占比 / 分类趋势 / 排行榜 / 年度热力图
 // ============================================================
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import {
   monthStat,
   compareMonth,
@@ -16,6 +16,10 @@ import type { RewardRecord } from '../reward-list'
 function rec(o: Partial<RewardRecord>): RewardRecord {
   return { id: 'r', type: 'expense', category: 'social', amount: 100, description: '', at: '2026-08-10', account: undefined, ...o }
 }
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 describe('monthStat / prevMonthKey / prevYearMonthKey', () => {
   it('汇总单月收支结余与标签', () => {
@@ -102,6 +106,10 @@ describe('categoryShare 分类占比', () => {
 
 describe('categoryTrend 分类趋势', () => {
   it('生成最近 N 月序列，末位为数据所在月', () => {
+    // 趋势序列以系统当前月为末位：钉时到数据所在月（2026-08），
+    // 使「末位为数据所在月」断言成立，避免随实际日期漂移。
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date(2026, 7, 10, 12, 0, 0))
     const records = []
     for (let i = 0; i < 120; i++) {
       records.push(rec({ type: 'expense', category: 'food', amount: 10, at: '2024-08-01' }))

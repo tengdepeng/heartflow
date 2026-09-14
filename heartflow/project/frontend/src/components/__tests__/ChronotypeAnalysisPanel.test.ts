@@ -10,8 +10,12 @@ function seedSleep(dayOffset: number, bedHour: number, bedMin: number, wakeHour:
   d.setDate(d.getDate() - dayOffset)
   const sleepAt = new Date(d)
   sleepAt.setHours(bedHour, bedMin, 0, 0)
-  const wakeAt = new Date(sleepAt.getTime() + duration * 60000)
+  // 入睡晚于起床时刻时视为跨日：wakeAt = sleepAt + duration，确保时间线正确
+  const wakeAt = new Date(d)
   wakeAt.setHours(wakeHour, wakeMin, 0, 0)
+  if (wakeAt.getTime() < sleepAt.getTime()) {
+    wakeAt.setDate(wakeAt.getDate() + 1)
+  }
   return {
     id: `s_${dayOffset}`,
     sleepAt: sleepAt.toISOString(),

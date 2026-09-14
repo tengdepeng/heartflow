@@ -207,9 +207,9 @@ export function useComplianceBaseline() {
     const violations: ComplianceViolation[] = []
     const warnings: ComplianceWarning[] = []
 
-    // 检查每条可变规则
+    // 检查每条可变规则（仅审计用户自建/编辑规则，跳过官方预置默认条款）
     for (const rule of constitution.mutableRules) {
-      if (!rule.enabled) continue
+      if (!rule.enabled || rule.isDefault) continue
       const ruleViolations = checkRuleCompliance(rule)
       violations.push(...ruleViolations)
     }

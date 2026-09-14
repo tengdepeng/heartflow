@@ -50,7 +50,7 @@ describe('ExerciseTrackerPanel 身体数据接入面板', () => {
     ])
     expect(wrapper.text()).toContain('累计运动')
     expect(wrapper.text()).toContain('2')
-    expect(wrapper.text()).toContain('75')
+    expect(wrapper.text()).toContain('1.3时')
     expect(wrapper.text()).toContain('300')
   })
 

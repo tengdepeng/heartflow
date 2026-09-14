@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
 import { invalidateCache } from '../../engine/storage/core'
@@ -9,6 +9,17 @@ import type {
   GuardContact,
   GuardCrashLog,
 } from '../../modules/guard/useGuard'
+
+// 节律摘要以系统当前时间为锚：钉时到 2026-08-27，使 8/26-8/27 造访落在
+// 「近 7 天」窗口内，避免测试随实际日期漂移。
+beforeEach(() => {
+  vi.useFakeTimers({ toFake: ['Date'] })
+  vi.setSystemTime(new Date(2026, 7, 27, 12, 0, 0))
+})
+
+afterEach(() => {
+  vi.useRealTimers()
+})
 
 function visit(overrides: Record<string, any> = {}): GuardVisitLog {
   return { id: `v${Math.random().toString(36).slice(2, 8)}`, at: '2026-08-27T08:00:00.000Z', action: '访问守护室', ...overrides }

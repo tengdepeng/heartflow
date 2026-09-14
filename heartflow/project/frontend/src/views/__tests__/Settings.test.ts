@@ -22,15 +22,15 @@ beforeEach(() => {
 const SIDEBAR_IDX = 9
 
 describe('Settings 两栏导航 + 搜索过滤（② 自适应）', () => {
-  // 13 = 原有 12 个 + Item 3 新增的「应用图标」分区
-  it('渲染 13 个分组导航锚点', () => {
+  // 14 = 原有 12 个 + 「应用图标」+ 并发新增「房间背景」分区
+  it('渲染 14 个分组导航锚点', () => {
     const wrapper = shallowMount(Settings)
-    expect(wrapper.findAll('.settings-nav__item').length).toBe(13)
+    expect(wrapper.findAll('.settings-nav__item').length).toBe(14)
   })
 
-  it('渲染 13 个可折叠子分组', () => {
+  it('渲染 14 个可折叠子分组', () => {
     const wrapper = shallowMount(Settings)
-    expect(wrapper.findAll('.sub-group').length).toBe(13)
+    expect(wrapper.findAll('.sub-group').length).toBe(14)
   })
 
   it('点击导航锚点展开对应分组', async () => {

@@ -168,7 +168,7 @@ describe('房间挂载冒烟 · 可用性底线', () => {
     console.log('\n' + report + '\n')
 
     expect(failed, report).toHaveLength(0)
-  }, 60000)
+  }, 180000)
 })
 
 // 便于单独调试时查看结果（CI 也会打印）

@@ -80,4 +80,5 @@ export const BODY_STORAGE_KEYS = {
   metrics: 'hf:body:metrics',
   sleep: 'hf:body:sleep',
   state: 'hf:body:state',
+  goals: 'hf:body:goals',
 } as const
