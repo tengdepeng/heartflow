@@ -237,6 +237,9 @@
 
     <!-- 场景规划（INCR-311 补挂载孤儿组件：驱动因素 · What-If · 对比矩阵） -->
     <ScenarioPlannerPanel />
+
+    <!-- 掌握度（INCR-315 补挂载孤儿组件：Khan 式知识掌握追踪 · 待加强优先 · 掌握档案） -->
+    <MasteryDashboardPanel />
     </div>
   </div>
 </template>
@@ -274,6 +277,7 @@ import SpacedReviewPanel from '../components/knowledge-tower/SpacedReviewPanel.v
 import KnowledgeStewardPanel from '../components/knowledge-tower/KnowledgeStewardPanel.vue'
 import DecisionTreePanel from '../components/knowledge-tower/DecisionTreePanel.vue'
 import ScenarioPlannerPanel from '../components/knowledge-tower/ScenarioPlannerPanel.vue'
+import MasteryDashboardPanel from '../components/MasteryDashboardPanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
 import KnowledgeArchivePanel from '../components/KnowledgeArchivePanel.vue'
 
