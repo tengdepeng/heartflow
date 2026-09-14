@@ -62,6 +62,12 @@
       <p v-else class="ah-command-empty">还没有调令。试着下达第一条，让管家动起来。</p>
     </section>
 
+    <!-- 功能直达（INCR-312 补挂载孤儿组件 FeatureSearchPanel：关键词搜索/直达跳转/推荐快捷入口，featureDictionary 引擎应用内唯一） -->
+    <section data-enter class="ah-scheduler-section">
+      <h3 class="ah-scheduler-heading">🧭 功能直达</h3>
+      <FeatureSearchPanel />
+    </section>
+
     <!-- 幕僚卡片 -->
     <div data-enter class="ah-advisor-grid" v-if="advisors.length">
       <div v-for="a in advisors" :key="a.id" class="ah-advisor-card" :class="{ dormant: a.state === 'slumber' }" @click="editAdvisor(a)">
@@ -221,6 +227,7 @@ import AdvisorWitnessPanel from '../components/AdvisorWitnessPanel.vue'
 import AdvisorCelebrationPanel from '../components/AdvisorCelebrationPanel.vue'
 import AdvisorDailyLifePanel from '../components/AdvisorDailyLifePanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
+import FeatureSearchPanel from '../components/FeatureSearchPanel.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
 import { getNoteStore } from '../modules/note'
 import { useNoteEditor } from '../modules/note/useNoteEditor'
