@@ -287,6 +287,11 @@
 
     <!-- 根脉可视化 -->
     <VisualTreePanel :roots="roots" />
+
+    <!-- ============================================================ -->
+    <!-- 根脉叙事档案（INCR-292 补挂载孤儿组件 RootNarrativeArchivePanel：溯源叙事/时代回顾/支线故事/关键人物/时间脉络/情感曲线/温和洞察，消费 root-narrative 叙事生成函数 + root-tree weaveTraceTree，应用库内唯一，零 props 自持读桥） -->
+    <!-- ============================================================ -->
+    <RootNarrativeArchivePanel />
   </div>
 </template>
 
@@ -299,6 +304,7 @@ import { useRootGarden } from '../modules/roots/roots-garden'
 import type { Root } from '../modules/roots/roots-garden'
 import VisualTreePanel from '../components/VisualTreePanel.vue'
 import RootVisualizationPanel from '../components/RootVisualizationPanel.vue'
+import RootNarrativeArchivePanel from '../components/RootNarrativeArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const rootGarden = useRootGarden()
