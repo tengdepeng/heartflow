@@ -228,6 +228,9 @@
 
     <!-- 间隔复习（INCR-278 补挂载孤儿组件：艾宾浩斯遗忘曲线 · 到期提醒 · 熟练度追踪） -->
     <SpacedReviewPanel />
+
+    <!-- AI管家·连接与追问（INCR-309 补挂载孤儿组件：知识串网建议 · 苏格拉底追问） -->
+    <KnowledgeStewardPanel />
     </div>
   </div>
 </template>
@@ -262,6 +265,7 @@ import DecisionAnalysisPanel from '../components/DecisionAnalysisPanel.vue'
 import FlashcardsPanel from '../components/FlashcardsPanel.vue'
 import KnowledgeVersionPanel from '../components/knowledge-tower/KnowledgeVersionPanel.vue'
 import SpacedReviewPanel from '../components/knowledge-tower/SpacedReviewPanel.vue'
+import KnowledgeStewardPanel from '../components/knowledge-tower/KnowledgeStewardPanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
 import KnowledgeArchivePanel from '../components/KnowledgeArchivePanel.vue'
 
