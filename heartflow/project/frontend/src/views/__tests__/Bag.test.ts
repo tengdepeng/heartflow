@@ -5,6 +5,7 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref, computed } from 'vue'
 import { DEFAULT_CATEGORIES, DEFAULT_EVOLUTION } from '../../modules/bag/defaults'
+import { useLauncher } from '../../modules/launcher/useLauncher'
 
 // =============================================================
 // Mock 数据 — 使用 ref 确保 Vue 模板自动追踪响应式变更
@@ -172,6 +173,12 @@ async function getWrapper() {
 // =============================================================
 // 测试套件
 // =============================================================
+
+// 顶层重置：useLauncher 模块级单例（键 launcher:entries）对所有 describe 生效，
+// 防止「集成：外部应用启动台」用例间 entries 累积污染（INCR-300）
+beforeEach(() => {
+  useLauncher().entries.value = []
+})
 
 describe('Bag 行囊视图', () => {
   beforeEach(() => {
@@ -458,5 +465,85 @@ describe('集成：物品进化面板', () => {
     await wrapper.find('.bep-btn--danger').trigger('click')
     expect(wrapper.findAll('.bep-path').length).toBe(0)
     expect(wrapper.find('.bep-empty').exists()).toBe(true)
+  })
+})
+
+// ============================================================
+// 集成：外部应用启动台（INCR-300：补挂载孤儿组件 LauncherPanel）
+// useLauncher 模块级单例，beforeEach 已重置 entries 防用例污染；
+// launchEntry 走 open.ts(Tauri 启动)，测试环境不点击「启动」
+// ============================================================
+
+describe('集成：外部应用启动台', () => {
+  it('渲染启动台面板（标题、副题、空态与表单）', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.lcp')
+    expect(panel.exists()).toBe(true)
+    expect(wrapper.text()).toContain('🚀 启动台')
+    expect(wrapper.text()).toContain('外部应用 · 启动 · 管理')
+    // 空态引导
+    expect(wrapper.find('.lcp-empty').exists()).toBe(true)
+    expect(wrapper.text()).toContain('还没有启动条目')
+    // 表单要素
+    expect(wrapper.find('.lcp-input--name').exists()).toBe(true)
+    expect(wrapper.find('.lcp-input--icon').exists()).toBe(true)
+    expect(wrapper.find('.lcp-input--launch').exists()).toBe(true)
+    expect(wrapper.find('.lcp-btn--primary').exists()).toBe(true)
+  })
+
+  it('添加条目后按分类分组渲染并显示计数', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.lcp-input--name').setValue('网易云音乐')
+    await wrapper.find('.lcp-input--icon').setValue('🎵')
+    await wrapper.find('.lcp-input--cat').setValue('影音')
+    await wrapper.find('.lcp-input--launch').setValue('netease-music://')
+    await wrapper.find('.lcp-btn--primary').trigger('click')
+    expect(wrapper.text()).toContain('网易云音乐')
+    // 分类分组 + 计数
+    expect(wrapper.find('.lcp-group-cat').text()).toBe('影音')
+    expect(wrapper.find('.lcp-group-count').text()).toBe('1 项')
+    // 空态消失
+    expect(wrapper.find('.lcp-empty').exists()).toBe(false)
+  })
+
+  it('编辑条目回填表单并保存更新', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.lcp-input--name').setValue('网易云音乐')
+    await wrapper.find('.lcp-input--launch').setValue('netease-music://')
+    await wrapper.find('.lcp-btn--primary').trigger('click')
+    // 点击「编辑」
+    await wrapper.findAll('.lcp-btn').find(b => b.text() === '编辑')!.trigger('click')
+    // 表单回填
+    expect((wrapper.find('.lcp-input--name').element as HTMLInputElement).value).toBe('网易云音乐')
+    // 改名称并保存更新
+    await wrapper.find('.lcp-input--name').setValue('网易云音乐 Pro')
+    await wrapper.find('.lcp-btn--primary').trigger('click')
+    expect(wrapper.find('.lcp-item-name').text()).toBe('网易云音乐 Pro')
+  })
+
+  it('删除条目后回到空态', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.lcp-input--name').setValue('网易云音乐')
+    await wrapper.find('.lcp-input--launch').setValue('netease-music://')
+    await wrapper.find('.lcp-btn--primary').trigger('click')
+    expect(wrapper.findAll('.lcp-item').length).toBe(1)
+    await wrapper.find('.lcp-btn--danger').trigger('click')
+    expect(wrapper.findAll('.lcp-item').length).toBe(0)
+    expect(wrapper.find('.lcp-empty').exists()).toBe(true)
+  })
+
+  it('重命名分类后分组名更新', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.lcp-input--name').setValue('网易云音乐')
+    await wrapper.find('.lcp-input--cat').setValue('影音')
+    await wrapper.find('.lcp-input--launch').setValue('netease-music://')
+    await wrapper.find('.lcp-btn--primary').trigger('click')
+    // 点「重命名」→ 输入新名 → 确定
+    await wrapper.findAll('.lcp-btn').find(b => b.text() === '重命名')!.trigger('click')
+    const renameInput = wrapper.find('.lcp-input--rename')
+    expect(renameInput.exists()).toBe(true)
+    await renameInput.setValue('音乐工具')
+    await wrapper.findAll('.lcp-btn').find(b => b.text() === '确定')!.trigger('click')
+    expect(wrapper.find('.lcp-group-cat').text()).toBe('音乐工具')
   })
 })

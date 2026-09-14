@@ -214,6 +214,11 @@
       </div>
     </section>
 
+    <!-- ===== 外部应用启动台（INCR-300 补挂载孤儿组件 LauncherPanel：外部应用入口的增删改/分类重命名/排序/启动，消费 useLauncher(键 launcher:entries)，宿主内引擎唯一，零 props 自持读桥） ===== -->
+    <section class="bag-section">
+      <LauncherPanel />
+    </section>
+
     <!-- ===== 底部导航 ===== -->
     <section class="bag-section">
       <div class="bag-footer-nav">
@@ -333,6 +338,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import BagAnalyticsPanel from '../components/BagAnalyticsPanel.vue'
 import BagOrganizePanel from '../components/bag/BagOrganizePanel.vue'
 import BagEvolutionPanel from '../components/BagEvolutionPanel.vue'
+import LauncherPanel from '../components/LauncherPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
