@@ -401,6 +401,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '心流宪法' },
   }),
   withRoomMeta({
+    path: '/constitution/editor',
+    name: 'constitution-editor',
+    component: () => import('../views/ConstitutionEditor.vue'),
+    meta: { title: '宪法编辑器' },
+  }),
+  withRoomMeta({
     path: '/plugins',
     name: 'plugins',
     component: () => import('../views/Plugins.vue'),

@@ -98,6 +98,10 @@
           </span>
         </div>
         <div class="section-header-actions">
+          <RouterLink to="/constitution/editor" class="stylus-btn stylus-btn-primary" title="打开宪法编辑器，按条序编辑第3-52条定义">
+            <span class="stylus-icon">✎</span>
+            <span class="stylus-label">宪法编辑器</span>
+          </RouterLink>
           <button class="stylus-btn" @click="handleExport" title="导出宪法">
             <span class="stylus-icon">↓</span>
             <span class="stylus-label">导出</span>
@@ -1649,6 +1653,7 @@ function onThresholdChange(e: Event): void {
   gap: 6px;
   background: transparent;
   color: var(--text-secondary);
+  text-decoration: none;
 }
 
 .stylus-btn:hover {
