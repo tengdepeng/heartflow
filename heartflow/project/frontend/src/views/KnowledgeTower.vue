@@ -234,6 +234,9 @@
 
     <!-- 决策树（INCR-310 补挂载孤儿组件：期望值计算 · 路径分析 · 灵敏度测试） -->
     <DecisionTreePanel />
+
+    <!-- 场景规划（INCR-311 补挂载孤儿组件：驱动因素 · What-If · 对比矩阵） -->
+    <ScenarioPlannerPanel />
     </div>
   </div>
 </template>
@@ -270,6 +273,7 @@ import KnowledgeVersionPanel from '../components/knowledge-tower/KnowledgeVersio
 import SpacedReviewPanel from '../components/knowledge-tower/SpacedReviewPanel.vue'
 import KnowledgeStewardPanel from '../components/knowledge-tower/KnowledgeStewardPanel.vue'
 import DecisionTreePanel from '../components/knowledge-tower/DecisionTreePanel.vue'
+import ScenarioPlannerPanel from '../components/knowledge-tower/ScenarioPlannerPanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
 import KnowledgeArchivePanel from '../components/KnowledgeArchivePanel.vue'
 
