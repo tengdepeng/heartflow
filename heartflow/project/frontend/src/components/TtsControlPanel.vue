@@ -1,0 +1,214 @@
+<template>
+  <section class="ttp-panel">
+    <h4 class="ttp-title">🎧 听书</h4>
+    <p v-if="!supported" class="ttp-unsupported">当前环境不支持语音朗读（需 Web Speech API）。</p>
+    <template v-else>
+      <div class="ttp-controls">
+        <button class="ttp-btn ttp-btn-primary" @click="onToggle">{{ toggleLabel }}</button>
+        <button class="ttp-btn ttp-btn-stop" :disabled="state === 'idle'" @click="stop">⏹ 停止</button>
+        <div class="ttp-rate">
+          <span class="ttp-rate-label">倍速</span>
+          <div class="ttp-rate-btns">
+            <button
+              v-for="r in RATES"
+              :key="r"
+              :class="['ttp-rate-btn', { active: rate === r }]"
+              @click="setRate(r)"
+            >{{ r }}x</button>
+          </div>
+        </div>
+      </div>
+      <div v-if="progress.total > 0" class="ttp-progress">
+        <span class="ttp-progress-text">{{ progressText }}</span>
+        <div class="ttp-progress-bar">
+          <div class="ttp-progress-fill" :style="{ width: progressPct }"></div>
+        </div>
+      </div>
+    </template>
+  </section>
+</template>
+
+<script setup lang="ts">
+import { computed, watch, onBeforeUnmount } from 'vue'
+import { useReadingTts } from '../modules/reading/tts'
+
+const props = defineProps<{ text: string }>()
+
+const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2] as const
+const { state, rate, progress, supported, speak, pause, resume, stop, setRate } = useReadingTts()
+
+const toggleLabel = computed(() => {
+  if (state.value === 'playing') return '⏸ 暂停'
+  if (state.value === 'paused') return '▶ 续播'
+  return '▶ 朗读'
+})
+
+const progressPct = computed(() => {
+  if (progress.value.total === 0) return '0%'
+  const done = Math.min(progress.value.index, progress.value.total)
+  return `${Math.round((done / progress.value.total) * 100)}%`
+})
+
+const progressText = computed(() => {
+  if (progress.value.total === 0) return ''
+  if (state.value === 'idle' && progress.value.index >= progress.value.total) return '已读完'
+  return `第 ${Math.min(progress.value.index + 1, progress.value.total)} / ${progress.value.total} 句`
+})
+
+function onToggle() {
+  if (state.value === 'playing') {
+    pause()
+  } else if (state.value === 'paused') {
+    resume()
+  } else {
+    speak(props.text)
+  }
+}
+
+// 文本变化时停止朗读，避免读到旧内容
+watch(
+  () => props.text,
+  () => {
+    if (state.value !== 'idle') stop()
+  },
+)
+
+onBeforeUnmount(() => {
+  if (state.value !== 'idle') stop()
+})
+</script>
+
+<style scoped>
+.ttp-panel {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(var(--accent-rgb), 0.1);
+  background: rgba(var(--bg-card-rgb), 0.45);
+}
+
+.ttp-title {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.ttp-unsupported {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: rgba(var(--text-primary-rgb), 0.45);
+  line-height: 1.5;
+}
+
+.ttp-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.ttp-btn {
+  padding: 7px 16px;
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), 0.06);
+  color: rgba(var(--text-primary-rgb), 0.8);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ttp-btn:hover:not(:disabled) {
+  background: rgba(var(--accent-rgb), 0.12);
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+.ttp-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.ttp-btn-primary {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: rgba(var(--accent-rgb), 0.3);
+  color: var(--accent);
+}
+
+.ttp-rate {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.ttp-rate-label {
+  font-size: 12px;
+  color: rgba(var(--text-primary-rgb), 0.45);
+}
+
+.ttp-rate-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.ttp-rate-btn {
+  padding: 4px 8px;
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(var(--text-primary-rgb), 0.55);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ttp-rate-btn:hover {
+  color: var(--accent);
+}
+
+.ttp-rate-btn.active {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: rgba(var(--accent-rgb), 0.3);
+  color: var(--accent);
+}
+
+.ttp-progress {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ttp-progress-text {
+  font-size: 12px;
+  color: rgba(var(--text-primary-rgb), 0.5);
+  white-space: nowrap;
+}
+
+.ttp-progress-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(var(--accent-rgb), 0.1);
+  overflow: hidden;
+}
+
+.ttp-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.5), var(--accent));
+  transition: width 0.3s;
+}
+
+@media (max-width: 480px) {
+  .ttp-rate {
+    margin-left: 0;
+    width: 100%;
+  }
+}
+</style>
