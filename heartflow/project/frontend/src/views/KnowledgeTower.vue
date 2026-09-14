@@ -231,6 +231,9 @@
 
     <!-- AI管家·连接与追问（INCR-309 补挂载孤儿组件：知识串网建议 · 苏格拉底追问） -->
     <KnowledgeStewardPanel />
+
+    <!-- 决策树（INCR-310 补挂载孤儿组件：期望值计算 · 路径分析 · 灵敏度测试） -->
+    <DecisionTreePanel />
     </div>
   </div>
 </template>
@@ -266,6 +269,7 @@ import FlashcardsPanel from '../components/FlashcardsPanel.vue'
 import KnowledgeVersionPanel from '../components/knowledge-tower/KnowledgeVersionPanel.vue'
 import SpacedReviewPanel from '../components/knowledge-tower/SpacedReviewPanel.vue'
 import KnowledgeStewardPanel from '../components/knowledge-tower/KnowledgeStewardPanel.vue'
+import DecisionTreePanel from '../components/knowledge-tower/DecisionTreePanel.vue'
 import KnowledgeCircle from '../components/knowledge/KnowledgeCircle.vue'
 import KnowledgeArchivePanel from '../components/KnowledgeArchivePanel.vue'
 
