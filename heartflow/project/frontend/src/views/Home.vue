@@ -104,6 +104,9 @@
         </div>
       </div>
     </main>
+
+    <!-- 桌面小组件（INCR-317 补挂载孤儿组件 WidgetBox：番茄钟/逐日心锚/情绪速记/便签/季节/一言 · 可拖动浮层画布） -->
+    <WidgetBox />
   </div>
 </template>
 
@@ -129,6 +132,7 @@ import type { useAstrolabe } from '../modules/astrolabe'
 import JadeBead from '../components/JadeBead.vue'
 import TimerControls from '../components/TimerControls.vue'
 import FocusStats from '../components/FocusStats.vue'
+import WidgetBox from '../components/WidgetBox.vue'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
@@ -386,7 +390,9 @@ watch(() => timer.isCompleted, (done) => {
   font-weight: 400;
   line-height: 1.2;
   color: #dfe6f2;
-  margin: 0;
+  /* 让出幕僚珠列的纵向空间（珠列由 App.vue 绝对定位在视口中线偏上，
+     标题不留白会被实心珠压住） */
+  margin: 0 0 44px;
   opacity: 0.42;
   text-shadow: 0 0 20px rgba(120, 150, 200, 0.18);
 }
@@ -468,19 +474,24 @@ watch(() => timer.isCompleted, (done) => {
   filter: drop-shadow(0 0 30px rgba(165, 195, 235, 0.45));
 }
 
-/* 把玉珠主体改为冷白玉盘（CSS fill 覆盖 SVG 渐变属性） */
+/* 对调：大珠 = 月华光晕 + 玉白核（发光月轮；白色实心已移交幕僚球） */
 .focus-orb :deep(.bead-body) {
-  fill: #e7ecf5;
+  fill: url(#moonDisc);
+  filter: none;
 }
 
 .focus-orb :deep(.bead-gloss) {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
-/* 外光晕改为清冷月华 */
+.focus-orb :deep(.bead-core) {
+  filter: drop-shadow(0 0 28px rgba(226, 238, 255, 0.92));
+}
+
+/* 外光晕：清冷月华（对调后由它承担大珠的「光晕」主体） */
 .focus-orb :deep(.bead-aura) {
-  inset: -54px;
-  background: radial-gradient(circle at 50% 50%, rgba(170, 195, 230, 0.12) 0%, transparent 70%);
+  inset: -72px;
+  background: radial-gradient(circle at 50% 50%, rgba(216, 232, 252, 0.3) 0%, rgba(188, 212, 248, 0.13) 40%, rgba(164, 196, 242, 0.05) 62%, transparent 80%);
 }
 
 /* 呼吸环 / 进度弧改为冷调 */
@@ -509,8 +520,8 @@ watch(() => timer.isCompleted, (done) => {
 
 .focus-orb :deep(.bead-time) {
   font-size: 48px;
-  color: #2a3142;
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5), 0 0 18px rgba(180, 205, 235, 0.35);
+  color: #26324a;
+  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.85), 0 0 22px rgba(200, 222, 252, 0.75);
 }
 
 /* 悬停舞台：玉珠 + 控件共享同一 hover 区；控件收起时仍属此区，
