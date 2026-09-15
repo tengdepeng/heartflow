@@ -24,9 +24,17 @@ fn set_exit_to_aura(value: bool) -> Result<(), String> {
     Ok(())
 }
 
+/// 启动配对接收服务。
+/// - `bind_lan`：false（推荐默认）只绑 127.0.0.1；true 才绑 0.0.0.0 供局域网配对。
+/// - `token`：配对凭据，对端须以 `X-HF-Pair-Token` 头携带；空串将拒绝所有请求。
 #[tauri::command]
-async fn start_pairing_server(app: tauri::AppHandle, port: u16) -> Result<(), String> {
-    touchpoints::start_server(app, port).await
+async fn start_pairing_server(
+    app: tauri::AppHandle,
+    port: u16,
+    bind_lan: bool,
+    token: String,
+) -> Result<(), String> {
+    touchpoints::start_server(app, port, bind_lan, token).await
 }
 
 #[tauri::command]
@@ -53,9 +61,12 @@ fn is_pairing_server_running() -> bool {
 fn cmd_get_device_secret(app: tauri::AppHandle) -> Result<String, String> {
     // 设备绑定兜底密钥源：生成本机持久化随机 secret，存 app config 目录独立文件。
     // 明文语义 = 本机可读（仅防存储文件被拷走 / 落入同步盘），与「本地私有」一致。
+    // 加固：无论新建还是读取既有文件，均收紧为「仅当前用户可读写」，
+    // 避免同机其他用户/进程读取；生成侧使用 CSPRNG，强度本身无问题。
     let dir = app.path().app_config_dir().map_err(|e| e.to_string())?;
     let path = dir.join("device_secret.txt");
     if path.exists() {
+        harden_secret_file(&path);
         if let Ok(s) = fs::read_to_string(&path) {
             let t = s.trim();
             if !t.is_empty() {
@@ -68,7 +79,31 @@ fn cmd_get_device_secret(app: tauri::AppHandle) -> Result<String, String> {
         let _ = fs::create_dir_all(parent);
     }
     fs::write(&path, &secret).map_err(|e| e.to_string())?;
+    harden_secret_file(&path);
     Ok(secret)
+}
+
+/// 收紧 secret 文件权限为「仅当前用户可读写」。
+/// 失败仅忽略（不阻断主流程），因为该 secret 仅作本机兜底凭据。
+fn harden_secret_file(path: &std::path::Path) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = fs::set_permissions(path, fs::Permissions::from_mode(0o600));
+    }
+    #[cfg(windows)]
+    {
+        // Windows：移除继承权限，仅授予当前用户读写
+        let user = std::env::var("USERNAME").unwrap_or_default();
+        if !user.is_empty() {
+            let _ = std::process::Command::new("icacls")
+                .arg(path)
+                .arg("/inheritance:r")
+                .arg("/grant:r")
+                .arg(format!("{}:(R,W)", user))
+                .output();
+        }
+    }
 }
 
 fn generate_device_secret() -> String {

@@ -68,6 +68,8 @@
             @click="onParagraphClick(idx, para)"
           >{{ para }}</p>
         </div>
+        <!-- 听书 · 本地朗读控制（INCR-276 补挂载孤儿组件 TtsControlPanel，reading/tts 引擎完备） -->
+        <TtsControlPanel :text="readingText" />
         <!-- 选中文本后的摘录按钮 -->
         <div v-if="pendingText" class="excerpt-float-bar">
           <span class="float-preview">"{{ pendingText.slice(0, 60) }}{{ pendingText.length > 60 ? '…' : '' }}"</span>
@@ -193,6 +195,7 @@ import ReadingDashboardPanel from '../components/ReadingDashboardPanel.vue'
 import BookRecommendationsPanel from '../components/BookRecommendationsPanel.vue'
 import ReadingChallengesPanel from '../components/ReadingChallengesPanel.vue'
 import BookReviewsPanel from '../components/BookReviewsPanel.vue'
+import TtsControlPanel from '../components/TtsControlPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()

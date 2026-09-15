@@ -36,6 +36,25 @@
       />
     </label>
 
+    <div class="cp-controls">
+      <label class="cp-range">
+        <span class="cp-range-label">通透度 <em>{{ Math.round((modelValue.glass ?? 1) * 100) }}%</em></span>
+        <input type="range" min="0" max="1" step="0.05" :value="modelValue.glass ?? 1" @input="onGlass" />
+      </label>
+      <label class="cp-range">
+        <span class="cp-range-label">辉光 <em>{{ Math.round((modelValue.glow ?? 0.6) * 100) }}%</em></span>
+        <input type="range" min="0" max="1" step="0.05" :value="modelValue.glow ?? 0.6" @input="onGlow" />
+      </label>
+      <label class="cp-range">
+        <span class="cp-range-label">缩放 <em>{{ Math.round((modelValue.size ?? 1) * 100) }}%</em></span>
+        <input type="range" min="0.8" max="1.4" step="0.05" :value="modelValue.size ?? 1" @input="onSize" />
+      </label>
+      <label class="cp-color">
+        <span class="cp-range-label">色调</span>
+        <input type="color" :value="modelValue.tint ?? '#d4a574'" @input="onTint" />
+      </label>
+    </div>
+
     <p v-if="imgError" class="cp-error">{{ imgError }}</p>
     <p class="cp-hint">系统不强制形态——几何或你自己的图片皆可；蓝图要求形象由你定义。</p>
   </div>
@@ -85,6 +104,22 @@ async function onImage(e: Event) {
 
 function onLabel(e: Event) {
   patch({ formLabel: (e.target as HTMLInputElement).value })
+}
+
+function onGlass(e: Event) {
+  patch({ glass: Number((e.target as HTMLInputElement).value) })
+}
+
+function onGlow(e: Event) {
+  patch({ glow: Number((e.target as HTMLInputElement).value) })
+}
+
+function onSize(e: Event) {
+  patch({ size: Number((e.target as HTMLInputElement).value) })
+}
+
+function onTint(e: Event) {
+  patch({ tint: (e.target as HTMLInputElement).value })
 }
 </script>
 
@@ -182,6 +217,58 @@ function onLabel(e: Event) {
   font-size: 11px;
   color: rgba(var(--accent-rgb), 0.5);
   line-height: 1.5;
+}
+
+/* ---- 视觉自定义控件（通透度 / 辉光 / 缩放 / 色调） ---- */
+.cp-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.05);
+  border: 1px dashed rgba(var(--accent-rgb), 0.16);
+}
+.cp-range {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.75);
+}
+.cp-range-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  letter-spacing: 1px;
+}
+.cp-range-label em {
+  font-style: normal;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent, #d4a574);
+  font-weight: 600;
+}
+.cp-range input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent, #d4a574);
+  cursor: pointer;
+}
+.cp-color {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.75);
+}
+.cp-color input[type='color'] {
+  width: 40px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
 }
 .cp-error {
   font-size: 12px;

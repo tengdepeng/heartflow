@@ -95,7 +95,14 @@ import {
   setSyncDirectory,
   type SyncTarget,
 } from '../sync'
-import { exportAllJSON, __getLastImported } from '../../../engine/data-port'
+import * as dataPortModule from '../../../engine/data-port'
+
+const { exportAllJSON } = dataPortModule
+// __getLastImported 是 vi.mock 工厂注入的测试专用钩子，真实 data-port 不导出它，
+// 因此走命名空间断言取值：运行时仍拿到 mock，类型层不再报 TS2305。
+const { __getLastImported } = dataPortModule as unknown as {
+  __getLastImported: () => string
+}
 
 beforeEach(() => {
   hoisted.store.clear()

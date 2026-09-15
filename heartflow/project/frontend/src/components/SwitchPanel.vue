@@ -106,16 +106,14 @@ function pickSurface(v: SurfaceState) {
 
 .switch-panel {
   width: min(440px, calc(100vw - 32px));
-  padding: 18px 20px 22px;
-  background: rgba(26, 22, 17, 0.82);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
-  border: 1px solid rgba(212, 175, 116, 0.42);
-  border-radius: 20px;
-  box-shadow:
-    0 24px 70px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(212, 175, 116, 0.14) inset;
-  color: #ece6da;
+  padding: var(--glass-pad-sm) 20px calc(var(--glass-pad-sm) + 8px);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  color: var(--text-primary);
 }
 
 .sp-head {
@@ -140,12 +138,12 @@ function pickSurface(v: SurfaceState) {
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
-  color: #cbbfa9;
+  color: var(--text-secondary);
   cursor: pointer;
   transition: background 0.16s ease, color 0.16s ease;
 }
 .sp-close:hover {
-  background: rgba(212, 175, 116, 0.18);
+  background: rgba(var(--accent-rgb), 0.18);
   color: var(--accent, #d4af74);
 }
 

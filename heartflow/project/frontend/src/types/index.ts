@@ -243,7 +243,7 @@ export interface ScenePreset {
 }
 
 export interface BackgroundMediaConfig {
-  type: 'default' | 'image' | 'video' | 'preset'
+  type: 'default' | 'image' | 'video' | 'preset' | 'gradient'
   presetScene: PresetScene
   dataUrl: string | null
   mimeType: string | null
@@ -251,6 +251,16 @@ export interface BackgroundMediaConfig {
   updatedAt: string | null
   /** 视频背景是否静音；省略或 true 表示静音播放（默认行为），false 表示保留原声 */
   muted?: boolean
+  /** 渐变背景（type==='gradient' 时生效）：线性渐变角度 + 有序色标 */
+  gradient?: GradientConfig
+}
+
+/** 渐变背景配置（宪法第二条超级自定义 · 纯本地、无外部资源） */
+export interface GradientConfig {
+  /** 线性渐变角度（度，0=自下而上，90=自左向右，顺时针） */
+  angle: number
+  /** 有序色标（at 为 0–100 的百分比位置） */
+  stops: { color: string; at: number }[]
 }
 
 // ---- 健康配置 ----

@@ -21,3 +21,22 @@ export type {
   EyeShieldState,
   EyeBreakPoint,
 } from './eye-shield'
+
+// ---- 休息调度器（EyeBreakSchedulerPanel） ----
+export {
+  useEyeBreakScheduler,
+  formatCountdown,
+  nextRestAt,
+  secondsUntilRest,
+  isBreakDue,
+  todayRecords,
+  eyeBreakStats,
+  EYE_BREAK_LOGS_KEY,
+  EYE_BREAK_LAST_REST_KEY,
+  DEFER_MINUTES,
+} from './scheduler'
+export type {
+  BreakKind,
+  EyeBreakRecord,
+  EyeBreakStats,
+} from './scheduler'

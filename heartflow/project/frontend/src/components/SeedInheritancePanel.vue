@@ -124,7 +124,7 @@ function send() {
   emit('sent', log)
 }
 
-/** 导出礼包为本地 .seed-gift 文件（第43条本地边界：仅本地文件，不触云） */
+/** 导出礼包为本地 .seed-gift 文件（第49条本地边界：仅本地文件，不触云） */
 function downloadGift(json: string) {
   if (typeof document === 'undefined') return
   try {

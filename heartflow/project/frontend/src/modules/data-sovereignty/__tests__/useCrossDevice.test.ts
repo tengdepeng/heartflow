@@ -65,7 +65,7 @@ describe('跨端接续 · 纯函数数据交接', () => {
     const parsed = JSON.parse(json)
     expect(parsed.constitutionStatus).toBeTruthy()
     expect(parsed.constitutionStatus.schema).toBe('heartflow.constitution.status/v1')
-    expect(parsed.constitutionStatus.items.length).toBe(42)
+    expect(parsed.constitutionStatus.items.length).toBe(45)
   })
 
   it('applyContinuityPayload 把源端数据真实回写到本地存储', () => {

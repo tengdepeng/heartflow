@@ -134,6 +134,21 @@ describe('ReadingHall 阅览殿', () => {
     const wrapper = await getWrapper()
     expect(wrapper.findComponent({ name: 'BookReviewsPanel' }).exists()).toBe(true)
   })
+
+  // ------- 集成：听书控制（INCR-276 补挂载孤儿组件 TtsControlPanel，reading/tts 引擎完备）-------
+  it('无正文时书卷页显示来源输入，听书面板不出现', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.rh-textarea').exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'TtsControlPanel' }).exists()).toBe(false)
+  })
+
+  it('载入正文后挂载听书面板并传入正文文本', async () => {
+    mockStore['hf:reading_text'] = '第一段正文。第二段正文。'
+    const wrapper = await getWrapper()
+    const panel = wrapper.findComponent({ name: 'TtsControlPanel' })
+    expect(panel.exists()).toBe(true)
+    expect(panel.props('text')).toContain('第一段正文')
+  })
 })
 
 // ============================================================

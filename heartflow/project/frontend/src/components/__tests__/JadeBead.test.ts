@@ -71,10 +71,13 @@ describe('JadeBead', () => {
     expect(wrapper.find('filter#innerGlow').exists()).toBe(true)
   })
 
-  it('渲染两个径向渐变', () => {
+  it('渲染径向渐变（玉质 / 光泽 / 月白珠体 / 玉白核）', () => {
     const wrapper = mount(JadeBead, { props: baseProps })
     const gradients = wrapper.findAll('radialGradient')
-    expect(gradients).toHaveLength(2)
+    expect(gradients).toHaveLength(4)
+    for (const id of ['jadeGradient', 'jadeGloss', 'moonDisc', 'moonCore']) {
+      expect(wrapper.find(`radialGradient#${id}`).exists()).toBe(true)
+    }
   })
 
   it('点击触发 toggle 事件', async () => {

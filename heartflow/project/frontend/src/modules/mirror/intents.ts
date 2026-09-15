@@ -5,6 +5,22 @@
 
 import type { IntentMeta, IntentCategory } from './types'
 
+/**
+ * 导航「打开/前往」动词共享常量。
+ * explore 意图分类用的 patterns 与参数抽取用的 paramExtractors.roomTarget
+ * **必须共用这一份清单**——两者 verb 不一致会导致「被判为 navigate 却抽不到目标」
+ * 的静默 bug（用户说「打开 XX」→ 无跳转）。
+ * 多字动词放前面，避免正则前缀截断（如「导航到」必须先于「导航」）。
+ */
+export const NAV_OPEN_VERBS = [
+  '导航到', '跳转到', '切换到',
+  '导航', '跳转', '切到', '转往', '转到',
+  '走去', '走到', '去到', '前往', '来到', '到访', '访问',
+  '唤出', '展开', '打开', '开启', '进入',
+  '记录',
+  '逛', '进', '去', '到', '走', '查看', '看看',
+].join('|')
+
 // ---- 专注 (focus) ----
 const focusIntent: IntentMeta = {
   category: 'focus',
@@ -19,7 +35,8 @@ const focusIntent: IntentMeta = {
     /(?:开始|启动|进入|来一[个次]|想)\s*(?:专注|focus|计时|番茄|番茄钟|工作)/i,
     /(?:专注|focus|番茄|工作)\s*(?:一[下会]|开始)/i,
     /(?:我要|我想|我来)\s*(?:专注|工作|专心|集中)/i,
-    /(?:干活|开工|撸起袖子)/,
+    // 边界锚：避免「打开工时」中的「开工」子串被误判为计时
+    /(?:^|[\s，。、！？]|我要|我想|咱们|准备|开始|该|咱)(?:干活|开工|撸起袖子)/,
   ],
   paramExtractors: [
     {
@@ -285,7 +302,8 @@ const exploreIntent: IntentMeta = {
     /(?:有多少|几个|多少)\s*(?:次|个|篇|条|朵)/i,
     /(?:怎么|如何|哪里|什么)\s*(?:用|操作|看|去|是)/i,
     /(?:显示|展示|看看)\s*(?:我的|统计|数据|进度)/i,
-    /(?:去|前往|到|进入|打开)\s*(?:一下|看看|吧)?\s*(.+?)(?:$|[。！？，,.])/i,
+    // 导航打开：与 paramExtractors.roomTarget 共用 NAV_OPEN_VERBS（单一真源）
+    new RegExp(`(?:${NAV_OPEN_VERBS})\\s*(?:一下|看看|吧)?\\s*(.+?)(?:$|[。！？,.]])`, 'i'),
   ],
   paramExtractors: [
     {
@@ -295,7 +313,7 @@ const exploreIntent: IntentMeta = {
     },
     {
       name: 'roomTarget',
-      pattern: /(?:去|到|进入|打开|前往)\s*(.+?)(?:$|[。！？，,.])/i,
+      pattern: new RegExp(`(?:${NAV_OPEN_VERBS})\\s*(.+?)(?:$|[。！？,.])`, 'i'),
       transform: (m) => m.trim(),
     },
   ],

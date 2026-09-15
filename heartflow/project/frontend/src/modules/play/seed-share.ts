@@ -35,7 +35,7 @@ export interface ExportedSeed {
 
 /** 将种子导出为分享格式 */
 export function exportSeed(seed: TimeSeed): SeedSharePayload {
-  // 第43条本地边界：种子分享仅限本地文件，拦截任何云端目标
+  // 第49条本地边界：种子分享仅限本地文件，拦截任何云端目标
   assertShareLocalOnly('local')
   const exported: ExportedSeed = {
     name: seed.name,

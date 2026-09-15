@@ -7,7 +7,9 @@
 import {
   NAV_TARGETS,
   buildFeatureHint,
+  matchExactDestination,
   pickDirectJump,
+  resolveDestination,
   searchFeatures,
   type FeatureHit,
 } from './featureDictionary'
@@ -133,6 +135,41 @@ function matchNavTarget(text: string): { route: string; name: string } | null {
   return null
 }
 
+// 导航动词按长度降序（剥离前缀时「带我去」须先于「去」命中，否则残余会多出「带我」）
+const NAV_VERBS_BY_LEN = [...NAVIGATE_KW].sort((a, b) => b.length - a.length)
+
+/** 剥离开头的导航动词，得到目的地短语；开头无动词则返回 null */
+function stripNavVerb(text: string): string | null {
+  for (const v of NAV_VERBS_BY_LEN) {
+    if (text.startsWith(v)) {
+      const rest = text.slice(v.length).trim()
+      return rest || null
+    }
+  }
+  return null
+}
+
+/**
+ * 解析导航目标（调令「去 X / 打开 X / 裸房名」→ 真实路由，运行时对齐全量房间图）：
+ *   1) 整句恰为房间名/功能说法 → 直达（裸房名，如「家」「幕僚好感」「心流」）
+ *   2) 含导航动词 → 剥离动词后按残余短语定向（精确优先，避免「未完成花园」被「花园」劫持）
+ *   3) 回退旧别名子串匹配（兼容「我要打开设置」这类动词不居首的说法）
+ * 无动词且非裸房名 → null（不跳转，交回常规意图判定，防「帮我设个锚点」被误判为跳转）。
+ */
+function resolveNavTarget(text: string): { route: string; name: string } | null {
+  const bare = matchExactDestination(text)
+  if (bare) return { route: bare.route, name: bare.name }
+
+  if (!hit(text, NAVIGATE_KW)) return null
+
+  const residue = stripNavVerb(text)
+  if (residue) {
+    const dest = resolveDestination(residue)
+    if (dest) return { route: dest.route, name: dest.name }
+  }
+  return matchNavTarget(text)
+}
+
 /** 是否为财务/记账意图（强词直接命中；弱词需无明确记录动作词） */
 function isFinance(text: string): boolean {
   if (hit(text, FINANCE_STRONG_KW)) return true
@@ -152,9 +189,9 @@ function isFinance(text: string): boolean {
 export function parseCommandIntent(text: string): CommandIntent {
   const t = (text || '').trim()
 
-  // 导航需双条件：命中目的地别名 + 出现导航动词
-  const nav = matchNavTarget(t)
-  const isNav = !!nav && hit(t, NAVIGATE_KW)
+  // 导航：裸房名直达，或「导航动词 + 目的地」双条件命中
+  const nav = resolveNavTarget(t)
+  const isNav = !!nav
 
   let taskType: CommandTaskType = 'general'
   if (isNav) taskType = 'navigate'

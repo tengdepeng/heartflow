@@ -3,7 +3,7 @@
        关键：video 元素一旦创建就保活，仅用 v-show 隐藏，避免切换房间
        （video ↔ preset/default）反复销毁重建 <video> 造成重新播放、多路音频叠加。 -->
   <div
-    v-if="isPreset || mediaSlot"
+    v-if="isPreset || isGradient || mediaSlot"
     class="home-background-media"
   >
     <!-- ===== Preset Scene（覆盖在媒体之上，自带不透明渐变） ===== -->
@@ -99,6 +99,13 @@
       </div>
     </template>
 
+    <!-- ===== 渐变背景（纯本地、无外部资源） ===== -->
+    <template v-else-if="isGradient">
+      <div class="bg-gradient" :style="gradientStyle" />
+      <div class="home-background-media__veil home-background-media__veil--gradient" />
+      <div class="home-background-media__grain" />
+    </template>
+
     <!-- ===== Image / Video（稳定保活，仅 visible 时显示并播放） ===== -->
     <div v-if="mediaSlot" class="home-background-media__media" v-show="mediaVisible">
       <img
@@ -157,6 +164,20 @@ const isPreset = computed(
     !!props.background.presetScene &&
     props.background.presetScene !== 'none',
 )
+
+// 是否为渐变背景（宪法第二条超级自定义 · 纯本地、无外部资源）
+const isGradient = computed(() => props.background.type === 'gradient')
+
+// 渐变层内联样式：线性渐变角度 + 有序色标；缺省兜底为双向暖暗渐变，避免空配置白屏
+const gradientStyle = computed(() => {
+  const g = props.background.gradient
+  const stops =
+    g && g.stops.length
+      ? g.stops.map((s) => `${s.color} ${Math.max(0, Math.min(100, s.at))}%`).join(', ')
+      : '#1a1208 0%, #0a0a0f 100%'
+  const angle = g?.angle ?? 160
+  return { background: `linear-gradient(${angle}deg, ${stops})` }
+})
 
 // 媒体插槽：一旦出现过图片/视频就保留其 DOM，避免切换房间（video ↔ preset/default）
 // 反复销毁重建 <video> 造成重新播放、甚至多路音频叠加；仅用 v-show 隐藏/恢复。
@@ -342,6 +363,20 @@ const snowParticles = computed(() =>
   inset: 0;
   opacity: 0;
   animation: background-fade-in 0.8s ease forwards;
+}
+
+/* ---- 渐变背景层 ---- */
+.bg-gradient {
+  position: absolute;
+  inset: 0;
+  animation: background-fade-in 0.8s ease forwards;
+}
+
+.home-background-media__veil--gradient {
+  background:
+    radial-gradient(circle at 22% 16%, rgba(124, 108, 240, 0.14), transparent 34%),
+    radial-gradient(circle at 82% 14%, rgba(54, 214, 231, 0.07), transparent 28%),
+    linear-gradient(180deg, rgba(8, 10, 18, 0.12), rgba(8, 10, 18, 0.5));
 }
 
 .preset-scene__gradient {

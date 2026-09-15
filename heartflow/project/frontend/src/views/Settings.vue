@@ -94,6 +94,9 @@
         <button class="bg-btn" type="button" :disabled="backgroundBusy" @click="pickVideoBackground">
           导入视频
         </button>
+        <button class="bg-btn" type="button" :disabled="backgroundBusy" @click="setGradientBackground">
+          渐变
+        </button>
         <button class="bg-btn bg-btn--ghost" type="button" :disabled="backgroundBusy" @click="resetBackgroundMedia">
           回到默认
         </button>
@@ -175,6 +178,11 @@
         </div>
       </div>
 
+      <div v-if="currentBackground.type === 'gradient'" class="bg-gradient-edit">
+        <h3 class="preset-title">渐变编辑</h3>
+        <GradientEditor :model-value="currentGradient" @update:model-value="onGradientEdit" />
+      </div>
+
       <p class="bg-summary">{{ backgroundSummary }}</p>
       <p class="bg-meta">{{ backgroundMeta }}</p>
       <p v-if="backgroundAppliedMessage" class="bg-success">{{ backgroundAppliedMessage }}</p>
@@ -195,6 +203,77 @@
         @change="onBackgroundFileChange($event, 'video')"
       />
     </div>
+
+
+      <!-- 房间背景（宪法第二条超级自定义 · 每个房间可单独设背景 / 跟随全局 / 多房间选同一项即天然分组） -->
+      <div class="sub-group" :class="sectionClass('roombg')" :data-section="'roombg'">
+        <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('roombg')" @keydown.enter="toggleSection('roombg')" @keydown.space.prevent="toggleSection('roombg')">
+          <span class="sub-group__chevron">{{ openSections.roombg ? '▾' : '▸' }}</span>
+          <div class="sub-group__heading">
+            <h3 class="sub-title">房间背景</h3>
+            <p class="sub-desc">为每个房间单独指定背景，或统一跟随全局；多房间选同一项即天然「分组」。与主题色正交。</p>
+          </div>
+        </div>
+
+        <div class="roombg-body">
+          <div class="roombg-room-select">
+            <label class="rm-detail-label">选择房间</label>
+            <select class="roombg-select" v-model="selectedRoomId">
+              <option v-for="r in roomList" :key="r.id" :value="r.id">{{ r.icon }} {{ r.name }}</option>
+            </select>
+          </div>
+
+          <div class="seg-row">
+            <span class="seg-label">背景模式</span>
+            <div class="seg">
+              <button
+                v-for="m in roomBgModeOptions"
+                :key="m.value"
+                type="button"
+                :class="['seg-btn', { active: roomBgMode === m.value }]"
+                @click="setRoomBgMode(m.value)"
+              >{{ m.label }}</button>
+            </div>
+          </div>
+
+          <p v-if="roomBgMode === 'global'" class="sub-desc">该房间当前跟随全局背景（与其他房间共享同一背景）。切到其它模式可单独指定。</p>
+
+          <div v-else-if="roomBgMode === 'preset'" class="bg-presets">
+            <div class="preset-grid">
+              <button
+                v-for="s in presetScenes"
+                :key="s.value"
+                class="preset-btn"
+                :class="{ 'preset-btn--active': roomCurrentBg && roomCurrentBg.type === 'preset' && roomCurrentBg.presetScene === s.value }"
+                type="button"
+                :disabled="roomBgBusy"
+                @click="setRoomPreset(s.value)"
+              >
+                <span class="preset-btn__dot" :style="{ background: s.color }" />
+                <span class="preset-btn__label">{{ s.label }}</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-else-if="roomBgMode === 'gradient'" class="bg-gradient-edit">
+            <GradientEditor :model-value="roomGradient" @update:model-value="onRoomGradientEdit" />
+          </div>
+
+          <div v-else-if="roomBgMode === 'image'" class="roombg-image">
+            <div class="bg-preview" :class="{ 'bg-preview--default': !(roomCurrentBg && roomCurrentBg.type === 'image' && roomCurrentBg.dataUrl) }">
+              <img v-if="roomCurrentBg && roomCurrentBg.type === 'image' && roomCurrentBg.dataUrl" class="bg-preview__asset" :src="roomCurrentBg.dataUrl" :alt="roomCurrentBg.fileName ?? '房间背景预览'" />
+              <div v-else class="bg-preview__empty"><span>尚未导入图片</span></div>
+            </div>
+            <div class="bg-actions">
+              <button class="bg-btn" type="button" :disabled="roomBgBusy" @click="pickRoomImage">导入图片</button>
+            </div>
+            <input ref="roomImageInputRef" class="sr-only" type="file" accept="image/png,image/jpeg,image/webp" @change="onRoomImageChange" />
+          </div>
+
+          <p v-if="roomBgMessage" class="bg-success">{{ roomBgMessage }}</p>
+          <p v-if="roomBgError" class="bg-error">{{ roomBgError }}</p>
+        </div>
+      </div>
 
       <!-- 氛围主题（原右下角常驻浮层：迁至此处与幕僚阁两入口） -->
       <div class="sub-group" :class="{ 'is-collapsed': !openSections.aura }">
@@ -349,6 +428,28 @@
           </div>
         </div>
 
+      <!-- 琉璃通透度：净透琉璃材质主控，统管全部玻璃面（对话框/状态面板/流星标签/侧栏/浮岛） -->
+      <div class="slider-group">
+        <label class="slider-label">
+          <span>琉璃通透度</span>
+          <span class="slider-value">{{ glassClearAlpha }}%</span>
+        </label>
+        <input
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+          class="slider-input"
+          :value="glassClearAlpha"
+          @input="onAlpha(setGlassClearAlpha, $event)"
+        />
+        <div class="slider-hints">
+          <span>透</span>
+          <span>实</span>
+        </div>
+      </div>
+      <p class="field-desc seg-desc">统管镜我对话框、状态面板、流星标签、侧边栏与悬浮浮岛的玻璃透明度（与幕僚球同源材质）；各面旧滑块降级为其叠加倍率。</p>
+
       <div class="slider-group">
         <label class="slider-label">
           <span>粒子画布强度</span>
@@ -448,6 +549,35 @@
           <span>实底</span>
         </div>
       </div>
+
+      <!-- 对话框形态 + 结晶风格（宪法第二条超级自定义 · 多选择可切换，保留全部选项） -->
+      <div class="seg-row">
+        <span class="seg-label">对话框形态</span>
+        <div class="seg">
+          <button
+            v-for="opt in dialogueShapeOptions"
+            :key="opt.value"
+            type="button"
+            :class="['seg-btn', { active: dialogueShape === opt.value }]"
+            @click="setDialogueShape(opt.value)"
+          >{{ opt.label }}</button>
+        </div>
+      </div>
+      <p class="field-desc seg-desc">镜我对话气泡外形，告别方盒：对话泡 / 有机斑团 / 弧顶卡 / 极简胶囊。</p>
+
+      <div class="seg-row">
+        <span class="seg-label">结晶风格</span>
+        <div class="seg">
+          <button
+            v-for="opt in crystalStyleOptions"
+            :key="opt.value"
+            type="button"
+            :class="['seg-btn', { active: crystalStyle === opt.value }]"
+            @click="setCrystalStyle(opt.value)"
+          >{{ opt.label }}</button>
+        </div>
+      </div>
+      <p class="field-desc seg-desc">专注结晶渲染形态：真实切面宝石 / 玻璃光球 / 极简线晶 / 极光棱镜。</p>
       </div>
 
       <div class="sub-group" :class="{ 'is-collapsed': !openSections.chrome }">
@@ -539,7 +669,7 @@
 
         <div class="slider-group" v-if="sidebarBgMode === 'glass'" style="margin-top: 14px">
           <label class="slider-label">
-            <span>通透强度</span>
+            <span>叠加倍率</span>
             <span class="slider-value">{{ sidebarGlass }}%</span>
           </label>
           <input
@@ -552,8 +682,8 @@
             @input="onSidebarGlass"
           />
           <div class="slider-hints">
-            <span>实</span>
-            <span>透</span>
+            <span>淡</span>
+            <span>浓</span>
           </div>
         </div>
 
@@ -726,6 +856,10 @@ import { useConfig } from '../resonance/bridges/config'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useAppearance } from '../modules/customization/useAppearance'
 import { useBackgroundPreviewAudio, useBackgroundVideoSync, useVideoRateGuard } from '../modules/background'
+import { useRoomStyle } from '../modules/customization/useRoomStyle'
+import { getAllRooms } from '../engine/room-graph'
+import GradientEditor from '../components/GradientEditor.vue'
+import type { GradientConfig, PresetScene } from '../types'
 import { useAstrolabeTheme, ASTROLABE_SCHEMES, ASTROLABE_SEARCH_STYLES } from '../modules/astrolabe/useAstrolabeTheme'
 import GestureConfigEditor from '../components/GestureConfigEditor.vue'
 import DataCleanupPanel from '../components/DataCleanupPanel.vue'
@@ -794,6 +928,7 @@ onUnmounted(() => {
 // 改为「一眼扫到全部分组标题 → 按需展开」，其余分组由左栏 TOC 点击（onNavClick）展开并平滑定位。
 const openSections = reactive<Record<string, boolean>>({
   bg: true,
+  roombg: false,
   aura: false,
   operation: false,
   gesture: false,
@@ -815,6 +950,7 @@ function toggleSection(key: string) {
 // navItems 顺序须与模板中 sub-group 出现顺序一致，保证滚动高亮与点击跳转索引对齐。
 const NAV_ITEMS = [
   { key: 'bg', label: '背景介质' },
+  { key: 'roombg', label: '房间背景' },
   { key: 'aura', label: '氛围主题' },
   { key: 'taxonomy', label: '侧栏分类' },
   { key: 'rooms', label: '房间设置' },
@@ -973,6 +1109,7 @@ const backgroundTypeLabel = computed(() => {
     case 'image': return '图片'
     case 'video': return '视频'
     case 'preset': return '场景'
+    case 'gradient': return '渐变'
     default: return '默认'
   }
 })
@@ -1015,6 +1152,24 @@ function resetBackgroundMedia() {
   backgroundError.value = ''
   backgroundAppliedMessage.value = '已经回到默认背景。'
   window.setTimeout(() => { backgroundAppliedMessage.value = '' }, 1500)
+}
+
+
+// 全局渐变背景：宪法第二条超级自定义 · 纯本地、无外部资源
+const DEFAULT_GRADIENT: GradientConfig = { angle: 160, stops: [{ color: '#1a1208', at: 0 }, { color: '#0a0a0f', at: 100 }] }
+
+const currentGradient = computed<GradientConfig>(
+  () => currentBackground.value.gradient ?? DEFAULT_GRADIENT,
+)
+
+function onGradientEdit(g: GradientConfig) {
+  configBridge.updateBackgroundMedia({ ...currentBackground.value, type: 'gradient', gradient: g })
+}
+
+function setGradientBackground() {
+  configBridge.updateBackgroundMedia({ ...currentBackground.value, type: 'gradient', gradient: currentGradient.value })
+  backgroundAppliedMessage.value = '已切换至渐变背景。'
+  window.setTimeout(() => { backgroundAppliedMessage.value = '' }, 1600)
 }
 
 async function onBackgroundFileChange(event: Event, kind: 'image' | 'video') {
@@ -1069,6 +1224,146 @@ function readFileAsDataUrl(file: File): Promise<string> {
   })
 }
 
+
+// ---- 房间背景（宪法第二条超级自定义 · 每房间可单独设背景 / 跟随全局 / 多房间选同一项即天然分组） ----
+const roomStyle = useRoomStyle()
+const EXCLUDED_ROOM_IDS = ['home', 'home-space', 'settings']
+const roomList = computed(() => getAllRooms().filter((r) => !EXCLUDED_ROOM_IDS.includes(r.id)))
+const selectedRoomId = ref<string>(roomList.value[0]?.id ?? '')
+watch(roomList, () => {
+  if (!roomList.value.some((r) => r.id === selectedRoomId.value)) {
+    selectedRoomId.value = roomList.value[0]?.id ?? ''
+  }
+})
+
+const roomBgModeOptions = [
+  { value: 'global', label: '跟随全局' },
+  { value: 'preset', label: '场景' },
+  { value: 'gradient', label: '渐变' },
+  { value: 'image', label: '图片' },
+] as const
+
+const roomCurrentBg = computed(() => roomStyle.roomBackground(selectedRoomId.value))
+const roomBgMode = computed<typeof roomBgModeOptions[number]['value']>(() => {
+  const bg = roomCurrentBg.value
+  if (!bg) return 'global'
+  if (bg.type === 'preset') return 'preset'
+  if (bg.type === 'gradient') return 'gradient'
+  if (bg.type === 'image' || bg.type === 'video') return 'image'
+  return 'global'
+})
+
+const roomGradient = computed<GradientConfig>(
+  () => (roomBgMode.value === 'gradient' && roomCurrentBg.value?.gradient ? roomCurrentBg.value.gradient : DEFAULT_GRADIENT),
+)
+
+const roomBgMessage = ref('')
+const roomBgError = ref('')
+const roomBgBusy = ref(false)
+let roomBgMessageTimer: number | undefined
+function scheduleRoomBgMessageClear() {
+  if (roomBgMessageTimer) window.clearTimeout(roomBgMessageTimer)
+  roomBgMessageTimer = window.setTimeout(() => { roomBgMessage.value = '' }, 1600)
+}
+
+function setRoomBgMode(mode: typeof roomBgModeOptions[number]['value']) {
+  const id = selectedRoomId.value
+  roomBgError.value = ''
+  if (mode === 'global') {
+    roomStyle.clearRoomBackground(id)
+    roomBgMessage.value = '该房间已设为跟随全局背景。'
+  } else if (mode === 'preset') {
+    roomStyle.setRoomBackground(id, {
+      type: 'preset',
+      presetScene: 'forest-dawn',
+      dataUrl: null,
+      mimeType: null,
+      fileName: null,
+      updatedAt: null,
+    })
+    roomBgMessage.value = '已为该房间指定场景背景。'
+  } else if (mode === 'gradient') {
+    roomStyle.setRoomBackground(id, {
+      type: 'gradient',
+      presetScene: 'none',
+      dataUrl: null,
+      mimeType: null,
+      fileName: null,
+      updatedAt: null,
+      gradient: { angle: 160, stops: [{ color: '#1a1208', at: 0 }, { color: '#0a0a0f', at: 100 }] },
+    })
+    roomBgMessage.value = '已为该房间指定渐变背景。'
+  } else if (mode === 'image') {
+    pickRoomImage()
+    return
+  }
+  scheduleRoomBgMessageClear()
+}
+
+function setRoomPreset(scene: PresetScene) {
+  roomStyle.setRoomBackground(selectedRoomId.value, {
+    type: 'preset',
+    presetScene: scene,
+    dataUrl: null,
+    mimeType: null,
+    fileName: null,
+    updatedAt: null,
+  })
+  roomBgMessage.value = '已为该房间指定场景背景。'
+  scheduleRoomBgMessageClear()
+}
+
+function onRoomGradientEdit(g: GradientConfig) {
+  roomStyle.setRoomBackground(selectedRoomId.value, {
+    type: 'gradient',
+    presetScene: 'none',
+    dataUrl: null,
+    mimeType: null,
+    fileName: null,
+    updatedAt: null,
+    gradient: g,
+  })
+}
+
+const roomImageInputRef = ref<HTMLInputElement | null>(null)
+function pickRoomImage() {
+  roomImageInputRef.value?.click()
+}
+async function onRoomImageChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  roomBgError.value = ''
+  if (!file.type.startsWith('image/')) {
+    roomBgError.value = '这里只接收图片文件。'
+    return
+  }
+  if (file.size > IMAGE_MAX_BYTES) {
+    roomBgError.value = '图片超过 2MB，可以换一张更轻一些的。'
+    return
+  }
+  roomBgBusy.value = true
+  try {
+    const dataUrl = await readFileAsDataUrl(file)
+    roomStyle.setRoomBackground(selectedRoomId.value, {
+      type: 'image',
+      presetScene: 'none',
+      dataUrl,
+      mimeType: file.type,
+      fileName: file.name,
+      updatedAt: new Date().toISOString(),
+      muted: true,
+    })
+    roomBgMessage.value = '该房间的图片背景已经落下。'
+    scheduleRoomBgMessageClear()
+  } catch {
+    roomBgError.value = '导入没有完成，可以换个文件再试。'
+  } finally {
+    roomBgBusy.value = false
+  }
+}
+
 // ---- 手势映射 ----
 function updateGestureBinding(gesture: GestureType, action: GestureAction) {
   configBridge.updateGestureBinding(gesture, action)
@@ -1088,6 +1383,7 @@ const {
   ambientGrainAlpha,
   ambientDustAlpha,
   appBgAlpha,
+  glassClearAlpha,
   autoHideChrome,
   autoHideDelay,
   sidebarWidth,
@@ -1097,11 +1393,14 @@ const {
   sidebarDensity,
   edgeBarAlpha,
   bgVideoRate,
+  dialogueShape,
+  crystalStyle,
   setCanvasAlpha,
   setAmbientGlowAlpha,
   setAmbientGrainAlpha,
   setAmbientDustAlpha,
   setAppBgAlpha,
+  setGlassClearAlpha,
   setAutoHideChrome,
   setAutoHideDelay,
   setSidebarWidth,
@@ -1111,7 +1410,23 @@ const {
   setSidebarDensity,
   setEdgeBarAlpha,
   setBgVideoRate,
+  setDialogueShape,
+  setCrystalStyle,
 } = useAppearance()
+
+// ---- 对话框形态 / 结晶风格可选项（宪法第二条超级自定义 · 全部保留、设置可切换） ----
+const dialogueShapeOptions = [
+  { value: 'bubble', label: '对话泡' },
+  { value: 'blob', label: '有机斑团' },
+  { value: 'arc', label: '弧顶卡' },
+  { value: 'capsule', label: '极简胶囊' },
+]
+const crystalStyleOptions = [
+  { value: 'facet', label: '切面宝石' },
+  { value: 'glass', label: '玻璃光球' },
+  { value: 'line', label: '极简线晶' },
+  { value: 'prism', label: '极光棱镜' },
+]
 
 // 背景视频播放速度实时应用到设置页预览。
 // 此前仅 HomeBackgroundMedia 内的全局视频消费 bgVideoRate，设置页预览 <video> 无绑定，
@@ -1954,6 +2269,40 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   font-size: 12px;
   color: #c47a6a;
   margin: 6px 0 0;
+}
+
+
+/* ---- 房间背景（每房间单独背景 / 跟随全局） ---- */
+.roombg-body {
+  padding: 4px 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.roombg-room-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.rm-detail-label {
+  font-size: 13px;
+  color: var(--text-secondary, #b8b0a8);
+  margin: 0;
+}
+.roombg-select {
+  width: 100%;
+  max-width: 320px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(138, 138, 138, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary, #e8e0d8);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.roombg-select:focus {
+  border-color: rgba(138, 138, 138, 0.32);
 }
 
 /* ---- 滑块 ---- */

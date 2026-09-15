@@ -13,10 +13,12 @@ export default defineConfig(async () => ({
   //
   // 1. prevent Vite from obscuring rust errors
   clearScreen: false,
-  // 2. tauri expects a fixed port, fail if that port is not available
+  // 2. 基础端口 1001；被占用时自动顺延（1002 → 1003 → …），不再硬失败。
+  //    Tauri 链路走 scripts/tauri-dev.mjs + find-port.mjs 先行探测，再用 --port 显式传入并回写 devUrl，
+  //    所以关掉 strictPort 不影响 tauri dev。需要改起点时用 VITE_DEV_PORT。
   server: {
     port: Number(process.env.VITE_DEV_PORT) || 1001,
-    strictPort: true,
+    strictPort: false,
     host: host || false,
     hmr: host
       ? {

@@ -7,7 +7,12 @@ import { storage } from '../storage'
 import type { AIEngineConfig, AIProviderConfig, AIMemoryConfig } from './types'
 import { DEFAULT_AI_ENGINE_CONFIG } from './types'
 
-/** 从 storage 读取 AI 引擎配置 */
+/**
+ * 从 storage 读取 AI 引擎配置。
+ * 哨兵层：无论存量数据来自旧版本迁移还是被外部改脏，返回的对象一定具备完整形状
+ * （providers 为对象、enabled/memory/activeProviderId/streamEnabled/debugMode 齐全），
+ * 避免消费方对 ai.providers 调 Object.entries(undefined) 抛错、整块外链房白屏。
+ */
 export function getAIEngineConfig(): AIEngineConfig {
   const appConfig = storage.getConfig()
   // 若尚未初始化，嵌入默认配置
@@ -18,8 +23,44 @@ export function getAIEngineConfig(): AIEngineConfig {
       appConfig.ai.providers[key] = { ...val, model: { ...val.model } }
     }
     storage.setConfig(appConfig)
+    return appConfig.ai
   }
-  return appConfig.ai
+  // 存量（旧版本迁移 / 外部改脏）可能缺字段却仍为真值，逐项补齐。
+  const ai = appConfig.ai
+  let dirty = false
+  if (!ai.providers || typeof ai.providers !== 'object') {
+    ai.providers = {}
+    dirty = true
+  }
+  if (typeof ai.enabled !== 'boolean') {
+    ai.enabled = DEFAULT_AI_ENGINE_CONFIG.enabled
+    dirty = true
+  }
+  if (!ai.memory || typeof ai.memory !== 'object') {
+    ai.memory = { ...DEFAULT_AI_ENGINE_CONFIG.memory }
+    dirty = true
+  }
+  if (typeof ai.activeProviderId !== 'string' || !ai.activeProviderId) {
+    ai.activeProviderId = DEFAULT_AI_ENGINE_CONFIG.activeProviderId
+    dirty = true
+  }
+  if (typeof ai.streamEnabled !== 'boolean') {
+    ai.streamEnabled = DEFAULT_AI_ENGINE_CONFIG.streamEnabled
+    dirty = true
+  }
+  if (typeof ai.debugMode !== 'boolean') {
+    ai.debugMode = DEFAULT_AI_ENGINE_CONFIG.debugMode
+    dirty = true
+  }
+  if (dirty) {
+    // 脏数据落盘愈合；锁定 / 不可写时仅内存兜底，不阻断读取。
+    try {
+      storage.setConfig(appConfig)
+    } catch {
+      /* noop */
+    }
+  }
+  return ai
 }
 
 /** 保存完整的 AI 引擎配置 */

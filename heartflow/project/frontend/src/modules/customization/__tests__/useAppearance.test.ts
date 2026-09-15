@@ -44,10 +44,24 @@ describe('useAppearance · 视觉强度与界面设置', () => {
     expect(a.autoHideChrome.value).toBe(true)
     expect(a.autoHideDelay.value).toBe(3000)
     expect(a.sidebarWidth.value).toBe(220)
-    expect(a.sidebarBgMode.value).toBe('solid')
+    // 净透琉璃铺开：侧栏默认走净透琉璃（glass），侧栏滑块降级为主控的叠加倍率（默认 100）
+    expect(a.sidebarBgMode.value).toBe('glass')
+    expect(a.sidebarGlass.value).toBe(100)
+    // 琉璃通透度主控默认 45
+    expect(a.glassClearAlpha.value).toBe(45)
     expect(a.navMode.value).toBe('floating')
     expect(a.dialogueShape.value).toBe('bubble')
     expect(a.crystalStyle.value).toBe('facet')
+  })
+
+  it('琉璃通透度 set 写入 --glass-clear-alpha（0-100 钳制）并持久化', async () => {
+    const a = await loadApi()
+    a.setGlassClearAlpha(72)
+    expect(a.glassClearAlpha.value).toBe(72)
+    expect(document.documentElement.style.getPropertyValue('--glass-clear-alpha').trim()).toBe('0.72')
+    expect(mockSetKV).toHaveBeenCalledWith('ui:glass-clear-alpha', 72)
+    a.setGlassClearAlpha(200)
+    expect(a.glassClearAlpha.value).toBe(100)
   })
 
   it('alpha 强度 set 写入 CSS 变量（0-100 钳制）并持久化', async () => {

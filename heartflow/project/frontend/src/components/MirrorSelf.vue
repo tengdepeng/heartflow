@@ -17,25 +17,11 @@
       :class="{ 'mirror-self--embedded': embedded, 'mirror-self--hall': !!hallAnchor, 'mirror-self--home-centered': homeCentered, 'is-dragging': isDragging }"
       :style="wrapperStyle"
     >
-      <!-- 常驻操作钮（触屏可点，不再依赖 hover 显形）：ℹ 状态 / ✕ 隐藏 -->
-      <div class="ms-actions">
-        <button class="ms-info-btn" type="button" @click.stop="toggleInfoSheet" :aria-expanded="showInfoSheet" :title="showInfoSheet ? '收起状态' : '查看状态'" aria-label="查看幕僚状态">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" />
-            <line x1="12" y1="11" x2="12" y2="16.5" />
-            <circle cx="12" cy="8" r="0.7" class="ms-info-dot" />
-          </svg>
-        </button>
-        <button class="ms-hide-btn" type="button" @click.stop="hideBead" aria-label="隐藏幕僚" title="隐藏幕僚">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="8" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
-      </div>
+      <!-- 常驻操作钮（ℹ/✕）已并入流星径向菜单 -->
 
       <!-- 载体光点 -->
       <button
+        ref="orbBtn"
         class="mirror-self"
         type="button"
         :class="{ 'mirror-self--active': showDialogue }"
@@ -46,12 +32,10 @@
         @pointercancel="onPointerCancel"
         @click="onBeadClick"
       >
-        <div class="ms-orb" :class="[orbState, `mood-${orbMood}`, `form-${form}`, { active: !!advisor.currentBubble || showDialogue }]">
+        <div class="ms-orb" :class="[orbState, `form-${form}`, { active: !!advisor.currentBubble || showDialogue, 'meteor-bloom': meteorOpen, 'meteor-flash': orbFlash }]" :style="orbStyle">
           <div class="ms-aura" />
-          <div class="ms-ring" />
           <img v-if="carrierImage" class="ms-img" :src="carrierImage" alt="" />
-          <div v-else-if="form === 'orb'" class="ms-core" />
-          <svg v-else class="ms-shape" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+          <svg v-else-if="form !== 'orb'" class="ms-shape" viewBox="0 0 100 100" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
             <g v-if="form === 'crystal'">
               <path class="ms-shape-fill" d="M50 16 L76 40 L64 78 L36 78 L24 40 Z" />
               <path class="ms-shape-line" d="M50 16 L50 78 M24 40 L76 40" />
@@ -65,11 +49,16 @@
               <path class="ms-shape-line" d="M50 20 L50 82" />
             </g>
           </svg>
+          <!-- 净透琉璃层：触碰微光 → 下缘焦散 → 上缘高光 → 掠光 → 厚边环（自下而上叠） -->
+          <div class="ms-glow" />
+          <div class="ms-caustic" />
+          <div class="ms-spec" />
+          <div class="ms-orb-sheen" />
+          <div class="ms-rim" />
         </div>
 
         <!-- 名称 + 时段标签 -->
         <span class="ms-name">{{ displayName }}</span>
-        <span class="ms-time-badge">{{ timeLabel }}</span>
       </button>
 
       <!-- 气泡文字 -->
@@ -149,28 +138,61 @@
           </div>
 
           <!-- 手势提示 -->
-          <p class="ms-swipe-hint">点 ⓘ 看状态 · 按住拖动重定位 · 单击唤对话</p>
+          <p class="ms-swipe-hint">点珠唤起流星 · 按住拖动重定位 · 点流星触发功能</p>
         </div>
       </Transition>
 
-      <!-- 定音锤四幕入口 -->
-      <button
-        v-if="!showDialogue"
-        class="dingyin-entry-btn"
-        @click="openFourActs"
-        title="定音锤四幕"
-      >
-        <svg class="dingyin-entry-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 3h9l4 4v14H6z" />
-          <path d="M9 3v5h5" />
-        </svg>
-        <span class="dingyin-entry-label">四幕</span>
-      </button>
+      <!-- 定音锤四幕已并入流星（专注/情绪/笔记/回响） -->
 
       <!-- 幕僚对话面板：用 Teleport 送到 body 之外，避免被 .mirror-self-wrapper 的
            transform 创建包含块，导致 position:fixed 锚定到珠子而非视口（面板跑到屏幕顶部） -->
       <Teleport to="body">
         <MirrorDialogue :visible="showDialogue" :active-room-id="activeRoomId" @close="showDialogue = false" />
+      </Teleport>
+
+      <!-- 流星径向菜单：点珠展开，功能化作流星环向铺开（暖琥珀） -->
+      <Teleport to="body">
+        <div v-if="meteorOpen" class="ms-meteor-layer">
+          <div class="ms-meteor-center" :style="{ left: meteorCenter.x + 'px', top: meteorCenter.y + 'px' }">
+            <div class="ms-meteor-flash" />
+          </div>
+          <div class="ms-meteor-ring" :style="{ left: meteorCenter.x + 'px', top: meteorCenter.y + 'px' }">
+            <div
+              v-for="m in meteorItems"
+              :key="m.key"
+              class="ms-meteor"
+              :class="{ fired: firedKey === m.key }"
+              :style="meteorStyle(m)"
+              @click.stop="onMeteorClick(m)"
+              :title="m.desc"
+            >
+              <div class="ms-hit" />
+              <div class="ms-comet">
+                <svg class="ms-tails" width="200" height="200" viewBox="-100 -100 200 200" aria-hidden="true">
+                  <path :d="`M0 0 Q ${m.ccx.toFixed(1)} ${m.ccy.toFixed(1)} ${m.dx.toFixed(1)} ${m.dy.toFixed(1)}`" fill="none" stroke="url(#msDustGrad)" stroke-width="2.8" stroke-linecap="round" />
+                  <path :d="`M0 0 Q ${m.ccx.toFixed(1)} ${m.ccy.toFixed(1)} ${m.dx.toFixed(1)} ${m.dy.toFixed(1)}`" fill="none" stroke="url(#msIonGrad)" stroke-width="7" stroke-linecap="round" opacity="0.4" />
+                  <path :d="`M0 0 L ${m.ix.toFixed(1)} ${m.iy.toFixed(1)}`" fill="none" stroke="url(#msIonGrad)" stroke-width="3.2" stroke-linecap="round" opacity="0.5" />
+                  <circle class="ms-sp" :cx="m.sx1" :cy="m.sy1" r="1.2" fill="#fff" />
+                  <circle class="ms-sp" :cx="m.sx2" :cy="m.sy2" r="1" fill="#ffe" />
+                </svg>
+                <div class="ms-head" />
+              </div>
+              <div class="ms-mlabel" :style="m.leftSide ? 'right:14px' : 'left:14px'">{{ m.name }}</div>
+            </div>
+          </div>
+          <svg class="ms-meteor-defs" width="0" height="0" aria-hidden="true"><defs>
+            <radialGradient id="msDustGrad" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="110">
+              <stop offset="0%" stop-color="#fff6e8" stop-opacity="0.85" />
+              <stop offset="26%" stop-color="#f0d2a6" stop-opacity="0.5" />
+              <stop offset="66%" stop-color="#d4a574" stop-opacity="0.16" />
+              <stop offset="100%" stop-color="#d4a574" stop-opacity="0" />
+            </radialGradient>
+            <radialGradient id="msIonGrad" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="86">
+              <stop offset="0%" stop-color="#e8c9a0" stop-opacity="0.42" />
+              <stop offset="100%" stop-color="#d4a574" stop-opacity="0" />
+            </radialGradient>
+          </defs></svg>
+        </div>
       </Teleport>
     </div>
   </div>
@@ -180,7 +202,7 @@
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
-import { useTimer } from '../resonance/bridges/timer'
+import { useRoomAtmosphere, ROOM_SCENES } from '../composables/useRoomAtmosphere'
 import { storage } from '../engine/storage'
 import { FloatAnchor, FloatPos, ZERO_SAFE, floatPosToPx, pxToFloatPos } from '../utils/float-pos'
 import { HOME_ROOMS } from '../modules/home/rooms'
@@ -191,7 +213,6 @@ import MirrorDialogue from './MirrorDialogue.vue'
 const router = useRouter()
 const route = useRoute()
 const advisor = useAdvisor()
-const timer = useTimer()
 
 // 主陪伴幕僚（原镜我/玉珠）：合并为一颗「幕僚」珠，在「幕僚设置」里改载体几何，珠子实时反映。
 const COMPANION_ID = 'preset-jingwo'
@@ -232,6 +253,30 @@ const form = computed<AdvisorCarrierGeometry>(() => {
   const c = companion.value
   if (!c || !c.carrier || c.carrier.kind === 'user-image') return 'orb'
   return (c.carrier.geometry as AdvisorCarrierGeometry) || 'orb'
+})
+
+// ---- 载体视觉自定义（通透度 glass / 辉光 glow / 缩放 size / 色调 tint）----
+// 宪法第二条超级自定义：幕僚设置里调过的透明度/辉光/缩放/色调，珠子实时反映。
+const carrierVisual = computed(() => {
+  const c = companion.value?.carrier
+  const tint = c?.tint
+  return {
+    glass: typeof c?.glass === 'number' ? c.glass : 1,
+    glow: typeof c?.glow === 'number' ? c.glow : 0.6,
+    size: typeof c?.size === 'number' ? c.size : 1,
+    tint: tint ?? '',
+    tintOn: !!tint,
+  }
+})
+const orbStyle = computed<Record<string, string>>(() => {
+  const v = carrierVisual.value
+  return {
+    '--orb-glass': String(v.glass),
+    '--orb-glow': String(v.glow),
+    '--orb-size': String(v.size),
+    '--orb-tint': v.tintOn ? v.tint : 'transparent',
+    '--orb-tint-opacity': v.tintOn ? '0.55' : '0',
+  }
 })
 const displayName = DISPLAY_NAME
 
@@ -344,6 +389,7 @@ function onPointerUp(e: PointerEvent) {
       persistWidget()
       suppressClick = true
       setTimeout(() => { suppressClick = false }, 0)
+      closeMeteors()   // 拖动珠体即收起径向菜单（点击仍由 onBeadClick 切换）
     }
     moved = false
     return
@@ -357,12 +403,12 @@ function onPointerCancel() {
 }
 function onBeadClick() {
   if (suppressClick) { suppressClick = false; return }
-  toggleDialogue()
+  toggleMeteors()
 }
 // 触屏不再依赖 hover 显形：状态面板改由 ℹ 按钮点击切换（T3）
 
 // 门厅态定位：玉珠光球锚定到屏风计时器旁（固定屏位，不随背景转动）
-// centered（宅院壳激活）：玉珠居中悬浮（中央留白给幕僚）
+// centered（按需启用）：玉珠居中悬浮。曾随宅院壳全局触发，实测遮挡所有页面中央内容，现仅由宿主按页显式开启
 const wrapperStyle = computed(() => {
   if (props.embedded) return {}
   const base: Record<string, string> = {
@@ -460,29 +506,12 @@ const roomNoteCount = computed<number | null>(() => {
 const now = new Date()
 const hour = now.getHours()
 
-/** 时段标签 */
-const timeLabel = computed(() => {
-  if (hour >= 5 && hour < 12) return '晨'
-  if (hour >= 12 && hour < 14) return '午'
-  if (hour >= 14 && hour < 18) return '昼'
-  if (hour >= 18 && hour < 22) return '暮'
-  return '夜'
-})
-
 /** 光球状态：根据时段变换颜色 */
 const orbState = computed(() => {
   if (hour >= 5 && hour < 8) return 'orb-dawn'
   if (hour >= 8 && hour < 17) return 'orb-day'
   if (hour >= 17 && hour < 20) return 'orb-dusk'
   return 'orb-night'
-})
-
-/** 玉珠生命态拟态（M5）：专注→稳定微光 / 忙碌→核心加速搏动 / 安睡→灰度下沉 / 常态→呼吸 */
-const orbMood = computed<'idle' | 'focus' | 'busy' | 'asleep'>(() => {
-  if (timer.isFocusing) return 'focus'
-  if (showDialogue.value || advisor.currentBubble) return 'busy'
-  if (hour >= 22 || hour < 6) return 'asleep'
-  return 'idle'
 })
 
 /** 定音锤进度列表 */
@@ -512,9 +541,199 @@ function switchRoom(dir: 1 | -1 = 1) {
   emit('update:activeRoomId', next.id)
 }
 
-function openFourActs() {
-  router.push('/dingyin-four-acts')
+// ================= 流星径向菜单（点珠唤起，功能化作流星环向铺开，暖琥珀） =================
+interface MeteorItem {
+  key: string
+  name: string
+  desc: string
+  i: number
+  cx: number
+  cy: number
+  dx: number
+  dy: number
+  ix: number
+  iy: number
+  ccx: number
+  ccy: number
+  sx1: number
+  sy1: number
+  sx2: number
+  sy2: number
+  leftSide: boolean
+  bobDur: string
+  bobDelay: string
+  bobX: string
+  bobY: string
+  bobRot: string
 }
+const METEOR_FUNCS = [
+  { key: 'dialogue', name: '对话', desc: '唤出幕僚对话' },
+  { key: 'status', name: '状态', desc: '今日笔记 / 锚点 / 花房' },
+  { key: 'focus', name: '专注', desc: '心流页·计时器' },
+  { key: 'emotion', name: '情绪', desc: '情绪花房' },
+  { key: 'note', name: '笔记', desc: '思绪书房' },
+  { key: 'echo', name: '回响', desc: '共鸣图谱' },
+  { key: 'room', name: '切房', desc: '切换所在房间' },
+  { key: 'hide', name: '隐藏', desc: '隐藏幕僚' },
+]
+const METEOR_R = 88
+const meteorOpen = ref(false)
+const orbFlash = ref(false)
+const firedKey = ref<string | null>(null)
+const meteorCenter = ref({ x: 0, y: 0 })
+const orbBtn = ref<HTMLElement | null>(null)
+let meteorDocHandler: ((e: MouseEvent) => void) | null = null
+let meteorRAF: number | null = null
+// 流星展开时持续把中心同步到珠体实时位置（覆盖 resize / 拖拽 / 0.3s 定位过渡），避免流星不跟随
+function trackMeteorCenter() {
+  if (!meteorOpen.value) { meteorRAF = null; return }
+  const r = orbBtn.value?.getBoundingClientRect()
+  if (r) {
+    const nx = r.left + r.width / 2
+    const ny = r.top + r.height / 2
+    const cur = meteorCenter.value
+    // 珠体静止时不改写 ref → 不触发重渲染 → 流星空闲浮动动画不受影响
+    if (Math.abs(nx - cur.x) > 0.5 || Math.abs(ny - cur.y) > 0.5) {
+      meteorCenter.value = { x: nx, y: ny }
+    }
+  }
+  meteorRAF = requestAnimationFrame(trackMeteorCenter)
+}
+
+const meteorItems = computed<MeteorItem[]>(() => {
+  const N = METEOR_FUNCS.length
+  const startA = -Math.PI / 2
+  return METEOR_FUNCS.map((f, i) => {
+    const a = startA + (Math.PI * 2 * i) / N
+    const px = Math.cos(a) * METEOR_R
+    const py = Math.sin(a) * METEOR_R
+    const tx = Math.sin(a)
+    const ty = -Math.cos(a)
+    const ox = Math.cos(a)
+    const oy = Math.sin(a)
+    const Ld = 44
+    const Li = 32
+    const dx = tx * Ld
+    const dy = ty * Ld
+    const ix = ox * Li
+    const iy = oy * Li
+    const ccx = tx * Ld * 0.5 - oy * 12
+    const ccy = ty * Ld * 0.5 + ox * 12
+    const sx1 = tx * Ld * 0.42
+    const sy1 = ty * Ld * 0.42
+    const sx2 = tx * Ld * 0.72
+    const sy2 = ty * Ld * 0.72
+    const leftSide = Math.cos(a) < 0
+    // bob 随机值放进记忆化 computed：每流星只算一次，避免每次重渲染重掷导致空闲浮动动画被重置
+    const bobDur = (2.6 + Math.random() * 1.6).toFixed(2) + 's'
+    const bobDelay = (Math.random() * 2).toFixed(2) + 's'
+    const bobX = ((Math.random() * 2 - 1) * 4).toFixed(1) + 'px'
+    const bobY = (11 + Math.random() * 5).toFixed(1) + 'px'          // 垂直摆幅 11~16px（重力浮动）
+    const bobRot = ((Math.random() * 2 - 1) * 3.5).toFixed(2) + 'deg' // 钟摆倾角 ±3.5deg
+    return { ...f, i, cx: px, cy: py, dx, dy, ix, iy, ccx, ccy, sx1, sy1, sx2, sy2, leftSide, bobDur, bobDelay, bobX, bobY, bobRot }
+  })
+})
+
+function meteorStyle(m: MeteorItem): Record<string, string> {
+  return {
+    '--cx': m.cx.toFixed(1) + 'px',
+    '--cy': m.cy.toFixed(1) + 'px',
+    '--i': String(m.i),
+    '--bobdur': m.bobDur,
+    '--bobdelay': m.bobDelay,
+    '--bobx': m.bobX,
+    '--boby': m.bobY,
+    '--bobrot': m.bobRot,
+  }
+}
+
+function computeMeteorCenter() {
+  const r = orbBtn.value?.getBoundingClientRect()
+  if (r) meteorCenter.value = { x: r.left + r.width / 2, y: r.top + r.height / 2 }
+}
+function closeMeteors() {
+  meteorOpen.value = false
+  firedKey.value = null
+  if (meteorRAF !== null) { cancelAnimationFrame(meteorRAF); meteorRAF = null }
+  if (meteorDocHandler) {
+    document.removeEventListener('click', meteorDocHandler, true)
+    meteorDocHandler = null
+  }
+}
+function toggleMeteors() {
+  if (meteorOpen.value) closeMeteors()
+  else burstMeteors()
+}
+function burstMeteors() {
+  if (meteorOpen.value) return
+  computeMeteorCenter()
+  showInfoSheet.value = false
+  showDialogue.value = false
+  meteorOpen.value = true
+  if (meteorRAF === null) meteorRAF = requestAnimationFrame(trackMeteorCenter)
+  setTimeout(() => {
+    meteorDocHandler = (e: MouseEvent) => {
+      const t = e.target as HTMLElement | null
+      if (!t || !t.closest) return
+      if (t.closest('.mirror-self-wrapper')) return   // 点珠体：交给 onBeadClick 切换（开/收）
+      if (t.closest('.ms-meteor-layer')) return        // 点流星：交给 onMeteorClick 执行动作并收起
+      closeMeteors()
+    }
+    // 冒泡阶段注册：保证在 onBeadClick 之后执行，避免捕获阶段「先关又被 toggle 重开」的竞态
+    document.addEventListener('click', meteorDocHandler, false)
+  }, 0)
+}
+function onMeteorClick(m: MeteorItem) {
+  if (firedKey.value) return
+  firedKey.value = m.key
+  orbFlash.value = true
+  setTimeout(() => { orbFlash.value = false }, 600)
+  // 状态/对话是就地面板，无需等流星飞行动画，立即执行以消除"点击后卡顿"
+  const instant = m.key === 'status' || m.key === 'dialogue'
+  setTimeout(() => runMeteorAction(m), instant ? 0 : 440)
+}
+function runMeteorAction(m: MeteorItem) {
+  switch (m.key) {
+    case 'dialogue':
+      toggleDialogue()
+      break
+    case 'status':
+      toggleInfoSheet()
+      break
+    case 'focus':
+      router.push('/')
+      break
+    case 'note':
+      router.push('/study')
+      break
+    case 'emotion':
+      router.push('/garden')
+      break
+    case 'echo':
+      router.push('/association-graph')
+      break
+    case 'room': {
+      // 切家内部房间：心流页看不到场景切换，故直接跳到家视图并带 ?room= 下一间（HomeSpace 经 ROOM_ID_ALIAS→switchScene 真正切房，可见且不与 /study 等视图撞 id）
+      const atmos = useRoomAtmosphere()
+      const ids = ROOM_SCENES.map((s) => s.id)
+      const cur = atmos.currentSceneId.value
+      const idx = ids.indexOf(cur)
+      const base = idx < 0 ? 0 : idx
+      const next = ids[(base + 1) % ids.length]
+      if (next) router.push({ path: '/home-space', query: { room: next } })
+      break
+    }
+    case 'hide':
+      hideBead()
+      break
+  }
+  closeMeteors()
+}
+
+onUnmounted(() => {
+  if (meteorDocHandler) document.removeEventListener('click', meteorDocHandler, true)
+  if (meteorRAF !== null) cancelAnimationFrame(meteorRAF)
+})
 </script>
 
 <style scoped>
@@ -585,50 +804,87 @@ function openFourActs() {
 }
 .is-dragging .mirror-self { cursor: grabbing; }
 
-/* ========== 载体光点（幕僚 · 玉珠拟态 + 多形态） ==========
+/* ========== 载体光点（幕僚 · 净透琉璃 + 多形态） ==========
+   材质：近无色玻璃球 —— 上缘锐高光 + 侧壁冷调折射 + 下缘焦散亮弧 + 厚边环定义轮廓。
+   球心静默干净；被触（hover / 唤出对话）时才透出一团淡暖光（触碰微光）。
    官方抽象几何形态：玉珠 orb / 晶簇 crystal / 焰 flame / 种 seed（蓝图16「载体几何」）。
    珠子实时反映主陪伴幕僚在「幕僚设置」里设定的几何；用户导入图片则直接呈现 img。 */
 .ms-orb {
   position: relative;
-  width: 54px;
-  height: 54px;
+  width: calc(54px * var(--orb-size, 1));
+  height: calc(54px * var(--orb-size, 1));
+  opacity: var(--orb-glass, 1);
   border-radius: 50%;
-  transition: transform 0.3s ease, filter 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   background:
-    radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.55), rgba(210, 224, 245, 0.12) 46%, rgba(150, 172, 210, 0.05) 70%),
-    radial-gradient(circle at 50% 60%, rgba(170, 196, 230, 0.18), transparent 72%);
-  border: 1px solid rgba(205, 220, 245, 0.28);
+    linear-gradient(178deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.07) 24%, rgba(255, 255, 255, 0) 44%),
+    radial-gradient(ellipse 80% 32% at 50% 97%, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 74%),
+    radial-gradient(circle at 74% 66%, rgba(150, 176, 216, 0.15), rgba(150, 176, 216, 0) 58%),
+    radial-gradient(circle at 40% 34%, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025) 56%, rgba(255, 255, 255, 0.008) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(3px) saturate(1.5) brightness(1.08);
+  -webkit-backdrop-filter: blur(3px) saturate(1.5) brightness(1.08);
   box-shadow:
-    inset 0 1px 6px rgba(255, 255, 255, 0.35),
-    inset 0 -6px 12px rgba(90, 120, 170, 0.18),
-    0 0 18px rgba(170, 196, 230, 0.22);
-  backdrop-filter: blur(10px);
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.78),
+    inset 2px 3px 7px rgba(255, 255, 255, 0.28),
+    inset -3px -4px 10px rgba(142, 172, 216, 0.2),
+    inset 0 -2px 5px rgba(255, 255, 255, 0.22),
+    0 4px 14px rgba(4, 8, 16, 0.3),
+    0 0 calc(6px + 22px * var(--orb-glow, 0.6)) var(--orb-state-glow, rgba(var(--accent-rgb), calc(0.1 + 0.32 * var(--orb-glow, 0.6))));
 }
 
-/* 嵌入幕僚坞时稍收，避免挤压坞身 */
+/* 色调叠加层：随载体 tint 着色（soft-light 混合，不破坏玉质高光） */
+.ms-orb::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--orb-tint, transparent);
+  mix-blend-mode: soft-light;
+  opacity: var(--orb-tint-opacity, 0);
+  pointer-events: none;
+}
+
+/* 嵌入幕僚坞时稍收，避免挤压坞身（仍随 size 变量缩放） */
 .mirror-self--embedded .ms-orb {
-  width: 46px;
-  height: 46px;
+  width: calc(46px * var(--orb-size, 1));
+  height: calc(46px * var(--orb-size, 1));
 }
 
-/* 时段微差：仅以极淡外晕色相区分晨/昼/暮/夜，保持玉质统一不脏 */
-.orb-dawn { box-shadow: inset 0 1px 6px rgba(255, 255, 255, 0.35), inset 0 -6px 12px rgba(220, 175, 120, 0.16), 0 0 18px rgba(255, 205, 150, 0.2); }
-.orb-day { box-shadow: inset 0 1px 6px rgba(255, 255, 255, 0.4), inset 0 -6px 12px rgba(120, 160, 210, 0.16), 0 0 18px rgba(190, 215, 245, 0.22); }
-.orb-dusk { box-shadow: inset 0 1px 6px rgba(255, 255, 255, 0.32), inset 0 -6px 12px rgba(200, 130, 90, 0.16), 0 0 18px rgba(255, 170, 120, 0.2); }
-.orb-night { box-shadow: inset 0 1px 6px rgba(220, 230, 255, 0.3), inset 0 -6px 12px rgba(90, 110, 180, 0.2), 0 0 18px rgba(150, 170, 230, 0.26); }
+/* 时段微差：净透琉璃本体无色，时段只改「外晕色相」。
+   外晕幅度仍受载体辉光 --orb-glow 驱动（宪法第二条超级自定义） */
+.orb-dawn {
+  --orb-aura: rgba(255, 214, 180, 0.3);
+  --orb-state-glow: rgba(255, 214, 180, calc(0.1 + 0.3 * var(--orb-glow, 0.6)));
+}
+.orb-day {
+  --orb-aura: rgba(206, 224, 255, 0.3);
+  --orb-state-glow: rgba(206, 224, 255, calc(0.12 + 0.34 * var(--orb-glow, 0.6)));
+}
+.orb-dusk {
+  --orb-aura: rgba(var(--accent-rgb), 0.32);
+  --orb-state-glow: rgba(var(--accent-rgb), calc(0.11 + 0.32 * var(--orb-glow, 0.6)));
+}
+.orb-night {
+  --orb-aura: rgba(150, 168, 215, 0.32);
+  --orb-state-glow: rgba(150, 168, 215, calc(0.1 + 0.3 * var(--orb-glow, 0.6)));
+}
 
-.mirror-self:hover .ms-orb {
-  transform: scale(1.08);
-  filter: brightness(1.08);
+/* 悬停/激活：只做「珠体微放大 + 珠缘提亮」，不用 filter，避免与 backdrop-filter 打架 */
+.mirror-self:hover .ms-orb,
+.mirror-self--active .ms-orb {
+  transform: scale(1.06);
 }
 
 .mirror-self:active .ms-orb {
   transform: scale(0.96);
 }
 
-.mirror-self--active .ms-orb {
-  transform: scale(1.05);
-  filter: brightness(1.12);
+.mirror-self:hover .ms-rim,
+.mirror-self--active .ms-rim {
+  box-shadow:
+    inset 0 0 0 1.4px rgba(255, 255, 255, 0.38),
+    inset 0 0 7px rgba(255, 255, 255, 0.24);
 }
 
 /* 用户导入图片形态 */
@@ -651,7 +907,7 @@ function openFourActs() {
   filter: drop-shadow(0 0 6px rgba(190, 214, 245, 0.5));
 }
 .ms-shape-fill {
-  fill: rgba(205, 224, 248, 0.85);
+  fill: var(--orb-tint, rgba(205, 224, 248, 0.85));
   stroke: rgba(255, 255, 255, 0.55);
   stroke-width: 1.6;
   stroke-linejoin: round;
@@ -663,160 +919,145 @@ function openFourActs() {
   stroke-linecap: round;
 }
 
-/* 清透玉白核：取代原棕色脏渐变（玉珠态） */
-.ms-core {
+/* 触碰微光：球心偏下一团淡暖光。静默不可见，hover / 唤出对话时透出并随呼吸明灭。
+   刻意偏下 + 大范围虚化，读作「玉中有光」，不构成瞳孔（幕僚无脸）。 */
+.ms-glow {
   position: absolute;
-  inset: 29%;
+  inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 44% 38%, rgba(255, 255, 255, 0.92), rgba(200, 220, 245, 0.5) 60%, rgba(150, 175, 215, 0.25));
-  animation: core-breathe 4.4s ease-in-out infinite;
-  box-shadow: 0 0 14px rgba(205, 222, 248, 0.5);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.ms-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 46% 34% at 52% 63%,
+    rgba(255, 238, 212, 0.44) 0%,
+    rgba(255, 226, 190, 0.16) 44%,
+    rgba(255, 220, 180, 0) 74%
+  );
+  filter: blur(2px);
+  animation: ms-glow-pulse 5.4s ease-in-out infinite;
+}
+.mirror-self:hover .ms-glow,
+.mirror-self--active .ms-glow,
+.ms-orb.active .ms-glow {
+  opacity: 1;
 }
 
-@keyframes core-breathe {
-  0%, 100% { transform: scale(0.86); opacity: 0.85; }
-  50% { transform: scale(1.12); opacity: 1; }
+/* 下缘焦散亮弧：光自玻璃底缘汇聚（screen 只加光不减光） */
+.ms-caustic {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  filter: blur(0.6px);
+  background: radial-gradient(
+    ellipse 54% 22% at 50% 91%,
+    rgba(255, 255, 255, 0.62),
+    rgba(255, 255, 255, 0) 72%
+  );
 }
 
-/* 外柔光晕：极淡月华 */
+/* 上缘锐高光 + 柔光斑：玻璃第一高光 */
+.ms-spec {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 24% 15% at 30% 21%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(ellipse 38% 20% at 34% 29%, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 76%);
+}
+
+/* 玻璃厚边环：利落珠缘，任何背景上都能定义轮廓（替代原 ::before 细 rim） */
+.ms-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow:
+    inset 0 0 0 1.4px rgba(255, 255, 255, 0.2),
+    inset 0 0 5px rgba(255, 255, 255, 0.13);
+}
+
+/* 外柔光晕：净透琉璃的外晕（色相随时段 --orb-aura，幅度随载体辉光 --orb-glow） */
 .ms-aura {
   position: absolute;
-  inset: -42%;
+  inset: -40%;
   border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, rgba(185, 208, 240, 0.1), transparent 68%);
-  animation: aura-pulse 6s ease-in-out infinite;
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--orb-aura, rgba(var(--accent-rgb), 0.26)),
+    transparent 68%
+  );
+  pointer-events: none;
+  animation: ms-aura-breathe 7s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+/* 游走高光 sheen：玉珠水头（9s 缓扫一次，克制） */
+.ms-orb-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
   pointer-events: none;
 }
-
-/* 内描金细环：玉珠轮廓微光 */
-.ms-ring {
+.ms-orb-sheen::after {
+  content: '';
   position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 0 8px rgba(200, 220, 250, 0.12) inset;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: linear-gradient(
+    115deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.14) 50%,
+    transparent 62%
+  );
+  transform: translateX(-32%);
+  animation: ms-orb-sheen-sweep 9s ease-in-out infinite;
+  will-change: transform;
 }
 
-@keyframes aura-pulse {
-  0%, 100% { transform: scale(0.78); opacity: 0.4; }
-  50% { transform: scale(1.15); opacity: 0.72; }
+@keyframes ms-aura-breathe {
+  0%, 100% { opacity: 0.78; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+@keyframes ms-orb-sheen-sweep {
+  0% { transform: translateX(-32%); }
+  50% { transform: translateX(32%); }
+  100% { transform: translateX(-32%); }
+}
+@keyframes ms-glow-pulse {
+  0%, 100% { opacity: 0.62; }
+  50% { opacity: 1; }
 }
 
-/* ========== 玉珠生命态拟态（M5） ========== */
-/* 专注：稳定冷光，核心缓慢而明亮地呼吸 */
-.mood-focus .ms-core {
-  animation: core-steady 3.8s ease-in-out infinite;
-  background: radial-gradient(circle at 44% 38%, rgba(235, 244, 255, 0.95), rgba(160, 196, 238, 0.55) 60%, rgba(120, 160, 220, 0.3));
-  box-shadow: 0 0 22px rgba(165, 205, 255, 0.45);
-}
-.mood-focus .ms-shape-fill { fill: rgba(235, 244, 255, 0.95); }
-.mood-focus .ms-aura {
-  animation: aura-pulse 8s ease-in-out infinite;
-  opacity: 0.6;
-}
-@keyframes core-steady {
-  0%, 100% { transform: scale(0.92); }
-  50% { transform: scale(1.08); }
-}
-
-/* 忙碌：核心加速搏动，暖玉光 */
-.mood-busy .ms-core {
-  animation: core-breathe 1.7s ease-in-out infinite;
-  background: radial-gradient(circle at 44% 38%, rgba(255, 246, 230, 0.95), rgba(240, 200, 155, 0.55) 60%, rgba(210, 160, 110, 0.3));
-  box-shadow: 0 0 22px rgba(255, 205, 155, 0.42);
-}
-.mood-busy .ms-shape-fill { fill: rgba(255, 246, 230, 0.95); }
-.mood-busy .ms-aura {
-  animation: aura-pulse 3s ease-in-out infinite;
-}
-
-/* 安睡：灰度下沉，缓慢沉降，冷月光 */
-.mood-asleep {
-  filter: grayscale(0.55) brightness(0.72);
-}
-.mood-asleep .ms-core {
-  animation: core-sink 6.5s ease-in-out infinite;
-  background: radial-gradient(circle at 44% 38%, rgba(225, 232, 248, 0.8), rgba(160, 178, 215, 0.45) 60%, rgba(120, 140, 185, 0.25));
-  box-shadow: 0 0 12px rgba(160, 175, 215, 0.3);
-}
-.mood-asleep .ms-shape { filter: grayscale(0.55) brightness(0.72) drop-shadow(0 0 6px rgba(190, 214, 245, 0.5)); }
-.mood-asleep .ms-aura {
-  animation: aura-pulse 10s ease-in-out infinite;
-  opacity: 0.3;
-}
-@keyframes core-sink {
-  0%, 100% { transform: translateY(0) scale(0.84); }
-  50% { transform: translateY(2px) scale(0.88); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .mood-focus .ms-core,
-  .mood-busy .ms-core,
-  .mood-asleep .ms-core,
-  .mood-focus .ms-aura,
-  .mood-busy .ms-aura,
-  .mood-asleep .ms-aura,
-  .ms-core,
-  .ms-aura { animation: none; }
-}
-
-/* ========== 名称 + 时段标签 ========== */
+/* ========== 名称（精简：去掉时段标签；静默不显形，hover / 唤出对话时淡入） ========== */
 .ms-name {
   font-size: 10px;
   letter-spacing: 2px;
-  color: rgba(255, 255, 255, 0.55);
-  transition: color 0.3s;
+  color: rgba(255, 255, 255, 0.62);
+  opacity: 0;
+  transition: opacity 0.3s ease, color 0.3s ease;
 }
-.mirror-self:hover .ms-name {
-  color: rgba(255, 255, 255, 0.8);
-}
-.ms-time-badge {
-  font-size: 8px;
-  letter-spacing: 1px;
-  color: rgba(255, 255, 255, 0.25);
-  transition: color 0.3s;
-}
-.mirror-self:hover .ms-time-badge {
-  color: rgba(255, 255, 255, 0.5);
+.mirror-self:hover .ms-name,
+.mirror-self:focus-visible .ms-name,
+.mirror-self--active .ms-name {
+  opacity: 1;
+  color: rgba(255, 255, 255, 0.85);
 }
 
-/* ========== 常驻操作钮（ℹ 状态 / ✕ 隐藏，触屏可点） ========== */
-.ms-actions {
-  position: absolute;
-  top: -8px;
-  right: -6px;
-  display: flex;
-  gap: 4px;
-  z-index: 3;
-}
-.ms-info-btn,
-.ms-hide-btn {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(14, 16, 24, 0.9);
-  color: rgba(255, 255, 255, 0.6);
-  cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-}
-.ms-info-btn:hover,
-.ms-hide-btn:hover,
-.ms-info-btn:focus-visible,
-.ms-hide-btn:focus-visible {
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.4);
-  background: rgba(20, 24, 34, 0.95);
-}
-.ms-info-btn svg,
-.ms-hide-btn svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.8; }
-.ms-info-dot { fill: currentColor; stroke: none; }
-/* 展开态高亮 ℹ 按钮 */
-.ms-info-btn[aria-expanded='true'] { color: var(--accent, #fff); border-color: rgba(var(--accent-rgb), 0.5); }
-.mirror-self--embedded .ms-actions { display: none; }
+/* 常驻操作钮（ℹ/✕）已并入流星径向菜单 */
 
 /* ========== 隐藏态恢复药丸 ========== */
 .ms-restore-pill {
@@ -875,11 +1116,18 @@ function openFourActs() {
 .ms-tooltip {
   padding: 12px 14px;
   border-radius: 14px;
-  background: rgba(14, 16, 24, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
+  /* 净透琉璃面板：露底透明 + 上缘反射 + 厚边环（全局「琉璃通透度」主控驱动），
+     与镜我对话框 / 幕僚球同源材质，取代原先 0.92 冷黑实底。 */
+  background:
+    var(--glass-clear-sheen),
+    rgba(26, 24, 30, var(--glass-clear-a-surface));
+  border: 1px solid var(--glass-clear-rim);
+  backdrop-filter: blur(14px) saturate(1.5) brightness(1.06);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5) brightness(1.06);
   min-width: 180px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-clear-a-sheen) * 0.6));
 }
 
 /* 浮动态（非内嵌）：限制最大宽度，避免在窄屏左侧溢出视口 */
@@ -995,13 +1243,14 @@ function openFourActs() {
 }
 
 /* ========== 动画 ========== */
-.bubble-enter-active { transition: all 0.4s ease-out; }
-.bubble-leave-active { transition: all 0.6s ease-in; }
+.bubble-enter-active { transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
+.bubble-leave-active { transition: opacity 0.6s ease-in, transform 0.6s ease-in; }
 .bubble-enter-from { opacity: 0; transform: translateY(8px); }
 .bubble-leave-to { opacity: 0; transform: translateY(-4px); }
 
-.tooltip-enter-active { transition: all 0.3s ease-out; }
-.tooltip-leave-active { transition: all 0.25s ease-in; }
+/* 仅过渡合成层属性，避免 animate backdrop-filter/box-shadow 触发主线程卡顿 */
+.tooltip-enter-active { transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
+.tooltip-leave-active { transition: opacity 0.25s ease-in, transform 0.25s ease-in; }
 .tooltip-enter-from { opacity: 0; transform: translateY(6px) scale(0.96); }
 .tooltip-leave-to { opacity: 0; transform: translateY(-2px) scale(0.96); }
 
@@ -1010,37 +1259,11 @@ function openFourActs() {
 }
 
 .mirror-self:focus-visible .ms-orb {
-  box-shadow: 0 0 0 4px rgba(124, 108, 240, 0.18), 0 0 0 1px rgba(124, 108, 240, 0.3) inset;
+  outline: 2px solid rgba(var(--accent-rgb), 0.6);
+  outline-offset: 3px;
 }
 
-/* ========== 定音锤四幕入口 ========== */
-.dingyin-entry-btn {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 32px;
-  padding: 6px 12px;
-  border: 1px solid rgba(var(--accent-rgb), 0.1);
-  border-radius: 20px;
-  background: rgba(var(--accent-rgb), 0.04);
-  color: rgba(var(--accent-rgb), 0.5);
-  font-size: 10px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.2s;
-  letter-spacing: 0.5px;
-}
-.dingyin-entry-btn:hover {
-  background: rgba(var(--accent-rgb), 0.1);
-  border-color: rgba(var(--accent-rgb), 0.25);
-  color: var(--accent);
-}
-.dingyin-entry-icon { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; }
-.dingyin-entry-label { font-weight: 500; }
-.dingyin-entry-btn:focus-visible {
-  outline: 2px solid rgba(124, 108, 240, 0.6);
-  outline-offset: 2px;
-}
+/* 定音锤四幕入口已并入流星（专注/情绪/笔记/回响） */
 
 /* ---- 移动端：避让底部安全区与幕僚坞（移至左下，避免与右下浮坞碰撞） ---- */
 @media (max-width: 640px) {
@@ -1103,5 +1326,204 @@ function openFourActs() {
   color: rgba(255, 255, 255, 0.32);
   text-align: center;
   letter-spacing: 0.5px;
+}
+
+/* ========== 流星径向菜单（点珠唤起，暖琥珀） ========== */
+.ms-meteor-layer {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-jade, 20) + 5);
+  pointer-events: none;
+}
+.ms-meteor-center {
+  position: absolute;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+}
+.ms-meteor-flash {
+  position: absolute;
+  left: -72px;
+  top: -72px;
+  width: 144px;
+  height: 144px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(248, 230, 198, 0.8);
+  box-shadow:
+    0 0 16px 3px rgba(212, 165, 116, 0.38),
+    0 0 38px 10px rgba(212, 165, 116, 0.16),
+    inset 0 0 14px rgba(212, 165, 116, 0.22);
+  opacity: 0.9;
+  animation: ms-flash-out 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  pointer-events: none;
+}
+@keyframes ms-flash-out {
+  0% { transform: scale(0.35); opacity: 0.95; }
+  100% { transform: scale(4.6); opacity: 0; }
+}
+.ms-meteor-ring {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+.ms-meteor {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  opacity: 1;
+  transform: translate(var(--cx), var(--cy)) scale(1);
+  animation: ms-meteor-in 0.7s cubic-bezier(0.25, 0.8, 0.4, 1) backwards;
+  animation-delay: calc(var(--i) * 42ms);
+  will-change: transform, opacity;
+}
+.ms-hit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 68px;
+  height: 68px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 3;
+  cursor: pointer;
+}
+@keyframes ms-meteor-in {
+  from { opacity: 0; transform: translate(var(--cx), var(--cy)) scale(0.15) rotate(-14deg); }
+  55% { opacity: 1; transform: translate(var(--cx), var(--cy)) scale(1.2) rotate(5deg); }
+  to { opacity: 1; transform: translate(var(--cx), var(--cy)) scale(1) rotate(0deg); }
+}
+.ms-meteor.fired {
+  opacity: 0;
+  transform: translate(0px, 0px) scale(0.2);
+  transition: transform 0.55s cubic-bezier(0.45, 0, 0.55, 1), opacity 0.5s ease 0.08s;
+}
+.ms-comet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  /* 物理浮动：上升减速(ease-out) → 落回加速(ease-in)，模拟重力抛物线轨迹 */
+  animation: ms-bob var(--bobdur, 4s) infinite;
+  animation-delay: var(--bobdelay, 0s);
+  will-change: transform;
+  pointer-events: none; /* 可见光晕/彗尾不拦截点击，全部穿透给 .ms-hit，使整颗流星可点 */
+}
+@keyframes ms-bob {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); /* 上升：减速至顶点 */
+  }
+  50% {
+    transform: translate(var(--bobx, 3px), calc(-1 * var(--boby, 14px))) rotate(var(--bobrot, 3deg));
+    animation-timing-function: cubic-bezier(0.64, 0, 0.78, 0); /* 下落：自顶点加速 */
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+.ms-tails {
+  position: absolute;
+  left: -100px;
+  top: -100px;
+  overflow: visible;
+  filter: drop-shadow(0 0 12px rgba(212, 165, 116, 0.85));
+  transition: transform 0.5s ease;
+  transform-origin: 100px 100px;
+  pointer-events: none;
+}
+.ms-meteor.fired .ms-tails { transform: scale(1.18); }
+.ms-sp { animation: ms-spk 3s ease-in-out infinite; }
+@keyframes ms-spk {
+  0%, 100% { opacity: 0.15; }
+  50% { opacity: 0.95; }
+}
+.ms-head {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #fffdf8 0%, #f6e6cf 44%, #d4a574 100%);
+  box-shadow: 0 0 11px rgba(255, 255, 255, 0.95), 0 0 26px rgba(212, 165, 116, 0.82), 0 0 50px rgba(180, 130, 80, 0.48);
+  animation: ms-head-pulse 3.2s ease-in-out infinite;
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+.ms-head::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(212, 165, 116, 0.35), transparent 70%);
+  opacity: 0;
+  transform: scale(1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+.ms-meteor:hover .ms-head::after {
+  opacity: 1;
+  transform: scale(1.15);
+}
+@keyframes ms-head-pulse {
+  0%, 100% { box-shadow: 0 0 11px rgba(255, 255, 255, 0.9), 0 0 22px rgba(212, 165, 116, 0.7), 0 0 44px rgba(180, 130, 80, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(255, 255, 255, 1), 0 0 34px rgba(224, 184, 130, 0.95), 0 0 62px rgba(190, 140, 90, 0.6); }
+}
+.ms-mlabel {
+  position: absolute;
+  top: -12px;
+  pointer-events: auto;
+  padding: 3px 12px 3px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text-primary, #e8e0d8);
+  /* 净透琉璃小件：近无色 chip 底 + 上缘反射 + 厚边环（全局「琉璃通透度」主控驱动），
+     取代原先 0.93 暖黑磨砂，与幕僚球同源材质。 */
+  background:
+    var(--glass-clear-sheen),
+    rgba(26, 24, 30, var(--glass-clear-a-chip));
+  border: 1px solid var(--glass-clear-rim);
+  backdrop-filter: blur(8px) saturate(1.5) brightness(1.06);
+  -webkit-backdrop-filter: blur(8px) saturate(1.5) brightness(1.06);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(212, 165, 116, 0.16), inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-clear-a-sheen) * 0.6));
+  transition: color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.ms-mlabel::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+  background: #f6e6cf;
+  box-shadow: 0 0 7px rgba(212, 165, 116, 0.85);
+}
+.ms-meteor:hover .ms-head {
+  transform: scale(1.2);
+  box-shadow: 0 0 17px rgba(255, 255, 255, 1), 0 0 40px rgba(224, 184, 130, 1), 0 0 66px rgba(190, 140, 90, 0.65);
+}
+.ms-meteor:hover .ms-mlabel {
+  color: #fff;
+  border-color: rgba(224, 184, 130, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 18px rgba(212, 165, 116, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+.meteor-bloom,
+.meteor-flash { animation: ms-bloom 0.6s ease-out; }
+@keyframes ms-bloom {
+  0% { transform: scale(1); filter: brightness(1); }
+  45% { transform: scale(1.12); filter: brightness(1.18) drop-shadow(0 0 14px rgba(212, 165, 116, 0.7)); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* 减弱动态：关闭 idle 动画，保留交互态（hover/active 由 transform 即时响应） */
+@media (prefers-reduced-motion: reduce) {
+  .ms-aura,
+  .ms-orb-sheen::after,
+  .ms-glow::after { animation: none; }
+  .ms-orb-sheen::after { transform: translateX(0); }
 }
 </style>

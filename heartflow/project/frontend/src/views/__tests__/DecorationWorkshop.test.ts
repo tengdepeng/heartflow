@@ -130,3 +130,32 @@ describe('DecorationWorkshop 殿堂装修工坊', () => {
     expect(wrapper.find('.decoration-workshop').exists()).toBe(true)
   })
 })
+
+describe('DecorationWorkshop 场景编排面板集成 (INCR-223)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('集成渲染场景序列面板 SceneSequencePanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'SceneSequencePanel' }).exists()).toBe(true)
+    expect(wrapper.text()).toContain('场景编排')
+  })
+
+  it('集成渲染环境模板面板 EnvironmentTemplatePanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'EnvironmentTemplatePanel' }).exists()).toBe(true)
+  })
+
+  it('场景序列面板展示内置序列(空存储回落内置数据)', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('✦ 场景序列')
+    expect(wrapper.text()).toContain('一日循环')
+  })
+
+  it('环境模板面板展示内置模板(空存储回落内置数据)', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('◈ 环境模板')
+    expect(wrapper.text()).toContain('暖琥珀')
+  })
+})

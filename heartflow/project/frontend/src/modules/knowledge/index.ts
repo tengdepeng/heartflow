@@ -152,3 +152,11 @@ export type {
   ImportOverview,
   KnowledgeInsight,
 } from './knowledge-analytics'
+
+// ---- 决策分析单例仓库（DecisionTreePanel / ScenarioPlannerPanel / StrategyEvaluatorPanel） ----
+export { getDecisionAnalysisStore } from './decision-analysis-store'
+export {
+  STRATEGIES_KEY,
+  DECISION_TREES_KEY,
+  SCENARIOS_KEY,
+} from './decision-analysis-store'

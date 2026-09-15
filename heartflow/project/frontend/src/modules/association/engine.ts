@@ -167,21 +167,23 @@ export function linkBySharedTag(items: NormalizedItem[]): CrossDomainLink[] {
     for (let j = i + 1; j < items.length; j++) {
       const a = items[i]
       const b = items[j]
-      if (a.domain === b.domain) continue
-      // C1：用近义词扩展后的标签集求交集
-      const expA = expandTags(a.tags)
-      const expB = expandTags(b.tags)
+      // 同域也连线（用户拍板）：但同域仅用真实用户标签，剔除 ':' 伪标签（如 advisor-personality:[object Object]），避免退化毛球；跨域保留伪标签+近义扩展以发现弱关联
+      const sameDomain = a.domain === b.domain
+      const baseA = sameDomain ? a.tags.filter(t => !t.includes(':')) : a.tags
+      const baseB = sameDomain ? b.tags.filter(t => !t.includes(':')) : b.tags
+      const expA = expandTags(baseA)
+      const expB = expandTags(baseB)
       const shared = expA.filter(t => expB.includes(t))
       if (shared.length === 0) continue
       const id = makeId(a, b, 'shared-tag')
       if (seen.has(id)) continue
       seen.add(id)
       // 直连标签（两方原标签直接相交）vs 经近义词命中
-      const direct = a.tags.filter(t => b.tags.includes(t))
+      const direct = baseA.filter(t => baseB.includes(t))
       const strength = Math.min(0.3 + 0.15 * shared.length, 1)
       const reason = direct.length > 0
         ? `共享标签：${direct.join('、')}`
-        : `共享近义词：${shared.join('、')}（${a.tags.join('/')} ≈ ${b.tags.join('/')}）`
+        : `共享近义词：${shared.join('、')}（${baseA.join('/')} ≈ ${baseB.join('/')}）`
       links.push({
         id,
         sourceDomain: a.domain,
@@ -208,6 +210,7 @@ export function linkByTemporalProximity(items: NormalizedItem[]): CrossDomainLin
     for (let j = i + 1; j < sorted.length; j++) {
       const a = sorted[i]
       const b = sorted[j]
+      // 同域不连时间邻近：用户拍板「同域仅经真实用户 tags 连线」，时间邻近保持跨域（避免同域幕僚因同刻播种形成无意义毛球）
       if (a.domain === b.domain) continue
       const distMin = (b.ts - a.ts) / 60000
       if (distMin > TEMPORAL_WINDOW_MIN) break // 已超出窗口，后续更远

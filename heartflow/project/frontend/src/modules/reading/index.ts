@@ -57,3 +57,23 @@ export type { SrsGrade, SrsReviewItem } from './srs'
 // ---- 阅读内容数据层（正文 + 摘录） ----
 export { useReading } from './reading-content'
 export type { Excerpt } from './reading-content'
+
+// ---- 古典竖排阅读（ClassicalVerticalReader） ----
+export {
+  useClassicalVertical,
+  buildVerticalLayout,
+  organizeAnnotations,
+  defaultVerticalMetrics,
+  PUNCTUATION_MODES,
+  PUNCTUATION_MODE_META,
+} from './classical-vertical'
+export type {
+  PunctuationMode,
+  ClassicalView,
+  ClassicalBook,
+  ClassicalAnnotation,
+  VerticalColumn,
+  VerticalLayout,
+  VerticalMetrics,
+  AnnotationGroup,
+} from './classical-vertical'

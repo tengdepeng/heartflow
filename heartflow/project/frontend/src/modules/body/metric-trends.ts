@@ -1079,3 +1079,47 @@ export function useMetricTrends() {
     clearAlerts,
   }
 }
+
+// ============================================================
+// 温和洞察
+// ============================================================
+
+/**
+ * 由趋势分析 / 显著关联 / 未确认预警生成不超过 4 条的温和观察。
+ * 不给医疗结论、不制造焦虑；无分析时只给一句守候引导。
+ */
+export function metricTrendsInsights(
+  analysis: TrendAnalysis | null,
+  correlations: MetricCorrelation[] = [],
+  alerts: TrendAlert[] = [],
+): string[] {
+  if (!analysis) return ['趋势还没生成，先多记录几天，曲线自然会浮出来。']
+
+  const out: string[] = []
+  const trends = analysis.metricTrends ?? []
+  const onTarget = trends.filter((t) => t.targetStatus === 'on_target').length
+  out.push(
+    trends.length
+      ? `共追踪 ${trends.length} 项指标，其中 ${onTarget} 项落在目标区间。`
+      : '共追踪 0 项指标，再积累几天记录就能看出走向。',
+  )
+
+  if (analysis.bestMetric) {
+    out.push(`${analysis.bestMetric.label} 是这段时间最稳的一项，值得保持。`)
+  }
+
+  const significant = (correlations ?? []).filter((c) => c.isSignificant)
+  if (significant.length) {
+    const c = significant[0]
+    const dir = c.coefficient >= 0 ? '同向' : '反向'
+    out.push(`关联线索：${c.metricALabel}与${c.metricBLabel}${dir}变化，${c.interpretation}。`)
+  }
+
+  const pending = (alerts ?? []).filter((a) => !a.acknowledged)
+  if (pending.length) {
+    const a = pending[0]
+    out.push(`趋势预警：${a.metricLabel} ${a.title}，${a.suggestion}`)
+  }
+
+  return out.slice(0, 4)
+}

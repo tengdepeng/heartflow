@@ -78,16 +78,17 @@ function calcTargetPosition(
     }
   }
 
-  // 引力模式：围绕中心呈放射状分布
+  // 引力模式：围绕中心呈放射状分布，但整体外推到四周（不再堆在正中）
   const cx = width * gravityConfig.value.centerX
   const cy = height * gravityConfig.value.centerY
-  // 用 intensity 决定距中心的距离（高强度更靠近中心）
-  const distRatio = 0.15 + (1 - crystal.intensity) * 0.7
-  const maxRadius = Math.min(cw, ch) * 0.4
+  // 用 intensity 决定距中心的距离：高强度→更靠外缘（向四周散开）；
+  // 即便最弱也有 0.42 的下限，绝不瘫在正中心。
+  const distRatio = 0.42 + crystal.intensity * 0.5
+  const maxRadius = Math.min(cw, ch) * 0.46
   const radius = maxRadius * distRatio
   // 用 index 均匀分布在圆周上 + 小随机偏移
   const angleOffset = (index / Math.max(1, total)) * Math.PI * 2 + Math.random() * 0.5
-  const jitter = (Math.random() - 0.5) * 20
+  const jitter = (Math.random() - 0.5) * 24
 
   return {
     x: cx + Math.cos(angleOffset) * (radius + jitter),

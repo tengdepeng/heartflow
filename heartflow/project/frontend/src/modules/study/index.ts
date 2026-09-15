@@ -7,6 +7,7 @@ import type { Note } from './types'
 import { notes, loadNotesState, persistNotesState } from '../../engine/storage/notes-state'
 import { syncLinksForNote, removeLinksForNote } from './note-links'
 import { tagFrequencies, pickRandom } from './explore'
+import { useNote } from '../note'
 
 export type { Note }
 export { tagFrequencies, pickRandom }
@@ -41,6 +42,8 @@ export function useStudy() {
     notes.value.unshift(note)
     persist()
     syncLinksForNote(note.id, content, notes.value)
+    // 创建即入复习：共享 note 模块的 Ebbinghaus 年轮单例（幂等）
+    useNote().initRing(note.id)
     return note
   }
 
@@ -88,6 +91,8 @@ export function useStudy() {
     notes.value.unshift(note)
     persist()
     syncLinksForNote(note.id, content, notes.value)
+    // 创建即入复习：共享 note 模块的 Ebbinghaus 年轮单例（幂等）
+    useNote().initRing(note.id)
     return note
   }
 

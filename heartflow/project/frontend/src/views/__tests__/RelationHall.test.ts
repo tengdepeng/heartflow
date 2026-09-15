@@ -408,4 +408,102 @@ describe('RelationHall 视图', () => {
     expect(reasonBtns[1].classes()).toContain('active')
     expect(reasonBtns[0].classes()).not.toContain('active')
   })
+
+  // ============================================================
+  // 集成：纪念日与羁绊健康（INCR-277 补挂载孤儿组件 AnniversaryHealthPanel）
+  // ============================================================
+
+  describe('集成：纪念日与羁绊健康', () => {
+    /** 相对今天偏移 days 天的日期字符串（与引擎 getNextDate 以今天为锚的语义一致） */
+    function dateOffset(days: number): string {
+      const d = new Date(Date.now() + days * 86400000)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }
+
+    function seedPersons() {
+      mockPersons.value = [
+        { id: 'p1', name: '张三', relation: 'friend', color: '#7c5cfc', closeness: 0.8, notes: '好朋友', importantDates: [], tags: [], lastContact: null, createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+        { id: 'p2', name: '李四', relation: 'family', color: '#4f8cff', closeness: 0.9, notes: '家人', importantDates: [], tags: [], lastContact: null, createdAt: '2026-01-01', updatedAt: '2026-01-01' },
+      ]
+    }
+
+    beforeEach(() => {
+      // 既有用例会用 mockGetKV.mockReturnValue([]) 替换实现 → 恢复为读 mockStore
+      mockGetKV.mockImplementation((_key: string, def: any) => mockStore[_key] ?? def)
+      // 清空跨用例残留的 mockStore（既有用例 setKV 写入的键）
+      for (const k of Object.keys(mockStore)) delete mockStore[k]
+    })
+
+    it('无人物无纪念日时展示标题与空态', async () => {
+      const wrapper = await getWrapper()
+      expect(wrapper.text()).toContain('纪念日与羁绊健康')
+      expect(wrapper.text()).toContain('总纪念日')
+      expect(wrapper.text()).toContain('暂无纪念日，在下方添加第一个纪念日。')
+      expect(wrapper.text()).toContain('还没有人物数据，添加羁绊后查看关系健康。')
+    })
+
+    it('有纪念日时展示统计与列表（标题/人物/日期）', async () => {
+      seedPersons()
+      mockStore['hf:relation_anniversaries'] = [
+        { id: 'a1', personId: 'p1', title: '相识纪念日', date: '2026-05-01', type: 'meet', recurring: true, reminderDays: 3, createdAt: '2026-01-01' },
+      ]
+      const wrapper = await getWrapper()
+      expect(wrapper.text()).toContain('总纪念日')
+      const ann = wrapper.find('.ahp-ann')
+      expect(ann.text()).toContain('相识纪念日')
+      expect(ann.text()).toContain('张三')
+      expect(ann.text()).toContain('2026-05-01')
+    })
+
+    it('通过表单添加纪念日并落库', async () => {
+      seedPersons()
+      const wrapper = await getWrapper()
+      await wrapper.find('.ahp-select').setValue('p1')
+      await wrapper.findAll('.ahp-input')[0].setValue('结缘纪念日')
+      await wrapper.findAll('.ahp-input')[1].setValue(dateOffset(30))
+      await wrapper.find('.ahp-save').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.find('.ahp-ann').text()).toContain('结缘纪念日')
+      expect(mockStore['hf:relation_anniversaries']).toHaveLength(1)
+      expect(mockStore['hf:relation_anniversaries'][0].personId).toBe('p1')
+    })
+
+    it('即将到来与需提醒区块展示临近纪念日', async () => {
+      seedPersons()
+      mockStore['hf:relation_anniversaries'] = [
+        { id: 'a1', personId: 'p1', title: '相识纪念日', date: dateOffset(5), type: 'meet', recurring: true, reminderDays: 10, createdAt: '2026-01-01' },
+      ]
+      const wrapper = await getWrapper()
+      expect(wrapper.text()).toContain('即将到来')
+      expect(wrapper.text()).toContain('相识纪念日')
+      expect(wrapper.text()).toContain('天后')
+      expect(wrapper.text()).toContain('需提醒')
+    })
+
+    it('关系健康区块展示人物分数与等级', async () => {
+      seedPersons()
+      mockStore['hf:relation_interactions'] = [
+        { id: 'i1', personId: 'p1', kind: 'meeting', date: new Date().toISOString(), mood: 'positive', summary: '见面', tags: [], createdAt: new Date().toISOString() },
+      ]
+      const wrapper = await getWrapper()
+      const health = wrapper.find('.ahp-health')
+      expect(health.text()).toContain('张三')
+      // 频率 1→10 + 今天互动→30 + 无纪念日→0 + 亲密度 0.8→8 = 48 → 需关注
+      expect(health.text()).toContain('48')
+      expect(health.text()).toContain('需关注')
+    })
+
+    it('删除纪念日后列表回到空态', async () => {
+      seedPersons()
+      mockStore['hf:relation_anniversaries'] = [
+        { id: 'a1', personId: 'p1', title: '待删纪念日', date: '2026-05-01', type: 'custom', recurring: false, reminderDays: 0, createdAt: '2026-01-01' },
+      ]
+      const wrapper = await getWrapper()
+      expect(wrapper.find('.ahp-ann').text()).toContain('待删纪念日')
+      await wrapper.find('.ahp-ann-del').trigger('click')
+      await wrapper.vm.$nextTick()
+      expect(wrapper.text()).toContain('暂无纪念日，在下方添加第一个纪念日。')
+      expect(mockStore['hf:relation_anniversaries']).toHaveLength(0)
+    })
+  })
 })

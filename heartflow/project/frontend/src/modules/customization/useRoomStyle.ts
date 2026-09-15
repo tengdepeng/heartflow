@@ -14,7 +14,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
-import type { PresetScene } from '../../types'
+import type { PresetScene, BackgroundMediaConfig } from '../../types'
 
 export interface RoomStyleOverride {
   /** 是否启用本房间独立主题（false / 缺省 = 跟随全局） */
@@ -25,6 +25,8 @@ export interface RoomStyleOverride {
   bgPrimary: string
   /** 背景预设场景 */
   presetScene: PresetScene
+  /** 本房间独立背景介质；null / 缺省 = 跟随全局背景（与主题色正交，可单独设置） */
+  background: BackgroundMediaConfig | null
 }
 
 const STORAGE_KEY = 'customization:room-style-overrides'
@@ -34,6 +36,7 @@ const DEFAULT_OVERRIDE: RoomStyleOverride = {
   accent: '#7c6cf0',
   bgPrimary: '#0a0a0f',
   presetScene: 'none',
+  background: null,
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -122,6 +125,50 @@ export function useRoomStyle() {
     return ov.presetScene
   }
 
+  /**
+   * 返回本房间独立背景介质（宪法第二条超级自定义 · 房间背景）。
+   * 与主题色正交：只要设置了 background（非 null）即生效，不受 enabled 影响；
+   * null / 缺省 = 跟随全局背景。分组（几个房间共用一个背景）由多房间选同一配置天然实现。
+   */
+  function roomBackground(roomId: string): BackgroundMediaConfig | null {
+    const ov = overrides.value[roomId]
+    if (!ov) return null
+    if (ov.background) return ov.background
+    // 向后兼容：旧覆盖仅设了 presetScene（未设 background 字段）时，映射为预设场景背景
+    if (ov.enabled && ov.presetScene && ov.presetScene !== 'none') {
+      return {
+        type: 'preset',
+        presetScene: ov.presetScene,
+        dataUrl: null,
+        mimeType: null,
+        fileName: null,
+        updatedAt: null,
+      }
+    }
+    return null
+  }
+
+  /** 设置 / 更新某房间的独立背景介质（不触碰主题色 enabled，二者独立） */
+  function setRoomBackground(roomId: string, config: BackgroundMediaConfig): void {
+    const current = overrides.value[roomId] ?? { ...DEFAULT_OVERRIDE }
+    overrides.value = {
+      ...overrides.value,
+      [roomId]: { ...current, background: config },
+    }
+    persist()
+  }
+
+  /** 清除某房间的独立背景，回到跟随全局 */
+  function clearRoomBackground(roomId: string): void {
+    const current = overrides.value[roomId]
+    if (!current) return
+    overrides.value = {
+      ...overrides.value,
+      [roomId]: { ...current, background: null },
+    }
+    persist()
+  }
+
   return {
     overrides,
     getRoomOverride,
@@ -130,5 +177,8 @@ export function useRoomStyle() {
     clearRoomOverride,
     roomStyleVars,
     roomBackgroundScene,
+    roomBackground,
+    setRoomBackground,
+    clearRoomBackground,
   }
 }

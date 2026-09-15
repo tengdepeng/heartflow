@@ -71,6 +71,12 @@ annotated_screenshot.png
 .git-corrupt-backup/
 # 临时产物目录
 _临时产物/
+# 2026-09-11 对象库索引重建恢复：归档/备份/恢复临时目录（留盘不入库）
+_hf-archive-20260906/
+_v213bak/
+_packrecover/
+.hf-tmp/
+--full-page
 # 废弃的 backend 分叉树（7.5G target/debug，非真源；真源 = project/frontend + project/src-tauri）
 heartflow/project/backend/
 # 运行时本地数据库（明文存储引擎写入，非源码）

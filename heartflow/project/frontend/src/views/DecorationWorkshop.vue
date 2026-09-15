@@ -64,6 +64,18 @@
       </div>
     </section>
 
+    <!-- 场景编排（customization·useSceneSequences/useEnvironmentTemplates，INCR-223 面板集成） -->
+    <section data-enter class="dw-section">
+      <h2 class="section-label">
+        <span class="section-label-icon">🎬</span>
+        场景编排
+      </h2>
+      <div class="dw-orchestration-grid">
+        <SceneSequencePanel />
+        <EnvironmentTemplatePanel />
+      </div>
+    </section>
+
     <!-- 装修历史 -->
     <section data-enter class="dw-section" v-if="recentHistory.length > 0">
       <h2 class="section-label">
@@ -130,6 +142,8 @@ import { useScenes } from '../modules/scene'
 import { useCarrier } from '../modules/carrier'
 import { useInteractionConfigs } from '../modules/interaction'
 import { useDecorationHistory } from '../modules/decoration-history'
+import SceneSequencePanel from '../components/SceneSequencePanel.vue'
+import EnvironmentTemplatePanel from '../components/EnvironmentTemplatePanel.vue'
 import { formatDateTime as formatTime } from '../utils/time'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -516,6 +530,13 @@ function navTo(path: string) {
   flex-shrink: 0;
 }
 
+/* ---- 场景编排 ---- */
+.dw-orchestration-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
 /* ---- 装修历史 ---- */
 .history-list {
   display: flex;
@@ -600,6 +621,9 @@ function navTo(path: string) {
 /* ---- 响应式 ---- */
 @media (max-width: 768px) {
   .tool-grid {
+    grid-template-columns: 1fr;
+  }
+  .dw-orchestration-grid {
     grid-template-columns: 1fr;
   }
   .overview-cards {

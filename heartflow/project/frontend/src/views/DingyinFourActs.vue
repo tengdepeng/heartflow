@@ -186,6 +186,7 @@ onMounted(() => {
   // 再执行初始敲锤
   knock()
 })
+
 </script>
 
 <style scoped>

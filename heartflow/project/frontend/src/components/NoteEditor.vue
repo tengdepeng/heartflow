@@ -367,7 +367,7 @@ function chipStyle(tag: string) {
   max-width: 90vw;
   max-height: 85vh;
   background: #18181f;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--glass-border-faint);
   border-radius: 16px;
   padding: 24px;
   display: flex;
@@ -388,7 +388,7 @@ function chipStyle(tag: string) {
   font-weight: 600;
   padding: 8px 0;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid var(--glass-border-faint);
   background: transparent;
   color: var(--text-disabled);
   font-family: inherit;
@@ -459,7 +459,7 @@ function chipStyle(tag: string) {
 
 .tag-input {
   padding: 4px 8px;
-  border: 1px dashed rgba(255,255,255,0.1);
+  border: 1px dashed var(--glass-border-faint);
   border-radius: 6px;
   background: transparent;
   color: rgba(255,255,255,0.6);
@@ -470,7 +470,7 @@ function chipStyle(tag: string) {
 }
 
 .tag-input:focus {
-  border-color: rgba(255,255,255,0.25);
+  border-color: var(--glass-border);
 }
 
 .tag-input::placeholder {
@@ -487,7 +487,7 @@ function chipStyle(tag: string) {
 .tool-btn {
   padding: 6px 12px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border-faint);
   background: transparent;
   color: rgba(255, 255, 255, 0.55);
   font-size: 12px;
@@ -523,7 +523,7 @@ function chipStyle(tag: string) {
   max-width: 88vw;
   max-height: 70vh;
   background: #1e1e26;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--glass-border);
   border-radius: 14px;
   padding: 16px;
   display: flex;
@@ -563,7 +563,7 @@ function chipStyle(tag: string) {
 
 .lp-search {
   padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
   background: transparent;
   color: rgba(255, 255, 255, 0.8);
@@ -574,7 +574,7 @@ function chipStyle(tag: string) {
 }
 
 .lp-search:focus {
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: var(--glass-border);
 }
 
 .lp-list {
@@ -624,7 +624,7 @@ function chipStyle(tag: string) {
 .editor-tabs {
   display: flex;
   gap: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border-faint);
   border-radius: 8px;
   overflow: hidden;
   width: fit-content;
@@ -642,7 +642,7 @@ function chipStyle(tag: string) {
 }
 
 .tab-btn:first-child {
-  border-right: 1px solid rgba(255,255,255,0.08);
+  border-right: 1px solid var(--glass-border-faint);
 }
 
 .tab-btn:hover {
@@ -659,7 +659,7 @@ function chipStyle(tag: string) {
   width: 100%;
   min-height: 180px;
   padding: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border-faint);
   border-radius: 10px;
   background: var(--bg-surface);
   color: rgba(255,255,255,0.75);
@@ -672,7 +672,7 @@ function chipStyle(tag: string) {
 }
 
 .content-area:focus {
-  border-color: rgba(255,255,255,0.2);
+  border-color: var(--glass-border);
 }
 
 .content-area::placeholder {
@@ -684,7 +684,7 @@ function chipStyle(tag: string) {
   width: 100%;
   min-height: 180px;
   padding: 12px;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--glass-border-faint);
   border-radius: 10px;
   background: var(--bg-surface);
   color: rgba(255,255,255,0.75);
@@ -784,7 +784,7 @@ function chipStyle(tag: string) {
 
 .preview-area :deep(hr) {
   border: none;
-  border-top: 1px solid rgba(255,255,255,0.1);
+  border-top: 1px solid var(--glass-border-faint);
   margin: 1em 0;
 }
 
@@ -809,7 +809,7 @@ function chipStyle(tag: string) {
 .btn-cancel {
   padding: 8px 20px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid var(--glass-border-faint);
   background: transparent;
   color: rgba(255,255,255,0.5);
   font-size: 13px;

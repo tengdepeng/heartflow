@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "com.heartflow.app",
   "build": {
-    "beforeDevCommand": "npm run dev --prefix ../frontend",
+    "beforeDevCommand": "npm run dev --prefix ../frontend -- --port 1001 --strictPort",
     "devUrl": "http://localhost:1001",
     "beforeBuildCommand": "npm run build --prefix ../frontend",
     "frontendDist": "../frontend/dist"
@@ -31,7 +31,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: asset: http://asset.localhost; font-src 'self' data:; media-src 'self' data: blob:; connect-src 'self' ipc: http://ipc.localhost http: https:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
     }
   },
   "bundle": {

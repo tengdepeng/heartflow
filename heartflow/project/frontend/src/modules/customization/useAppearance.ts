@@ -65,6 +65,12 @@ const ambientGrainAlphaCtrl = createAlphaControl('ui:ambient-grain-alpha', '--am
 const ambientDustAlphaCtrl = createAlphaControl('ui:ambient-dust-alpha', '--ambient-dust-alpha', 30)
 const appBgAlphaCtrl = createAlphaControl('ui:app-bg-alpha', '--app-bg-alpha', 100)
 
+// ---- 琉璃通透度（净透琉璃材质主控 · 统管全部玻璃面） ----
+// 一个滑块统管：镜我对话框 / 状态面板 / 流星标签 / 侧边栏 / 悬浮浮岛。
+// 写入 :root 的 --glass-clear-alpha（0–1，默认 0.45），各面基底 alpha = 基底系数 × 此值 × 该面叠加倍率。
+// 0 = 近乎全透（仅余描边与上缘反射）；100 = 最实（仍为半透玻璃，不回到实底磨砂）。
+const glassClearAlphaCtrl = createAlphaControl('ui:glass-clear-alpha', '--glass-clear-alpha', 45)
+
 // ---- 界面自动隐藏（侧边栏 + 悬浮按钮）开关：默认开启（沉浸式默认隐藏） ----
 const autoHideChromeState = ref<boolean>(storage.getKV<boolean>('ui:auto-hide-chrome', true))
 function setAutoHideChrome(value: boolean): void {
@@ -78,10 +84,11 @@ const autoHideDelayCtrl = createSimple<number>('ui:auto-hide-delay', 3000)
 // ---- 侧边栏自定义（超级自定义 · 侧边栏子组） ----
 // 宽度（px）：默认 220；可选 180 / 220 / 260 / 300
 const sidebarWidthCtrl = createSimple<number>('ui:sidebar-width', 220)
-// 毛玻璃通透度（0–100）：仅“毛玻璃”背景模式下生效，越高越透、模糊越强
-const sidebarGlassCtrl = createSimple<number>('ui:sidebar-glass', 40)
-// 背景模式：solid 独立深色实底（默认，等同现状）/ glass 毛玻璃透明，露出全局背景
-const sidebarBgModeCtrl = createSimple<string>('ui:sidebar-bg-mode', 'solid')
+// 侧栏毛玻璃叠加倍率（0–100）：仅“毛玻璃”背景模式下生效；现为「琉璃通透度」的叠加倍率
+// （100 = 完全跟随主控 --glass-clear-alpha；越低越透）。
+const sidebarGlassCtrl = createSimple<number>('ui:sidebar-glass', 100)
+// 背景模式：solid 独立深色实底 / glass 净透琉璃 + 毛玻璃（默认，与全局「琉璃通透度」同源）
+const sidebarBgModeCtrl = createSimple<string>('ui:sidebar-bg-mode', 'glass')
 // 桌面端启动默认状态：true=默认进入沉浸（侧栏收起）/ false=启动即展开
 const sidebarDefaultCollapsedCtrl = createSimple<boolean>('ui:sidebar-default-collapsed', true)
 // 项目组密度：compact / standard / relaxed
@@ -116,6 +123,14 @@ const barBreathSpeedCtrl = createSimple<number>('ui:bar-breath-speed', 1)
 // ---- 导航布局模式：floating（悬浮双浮岛，默认）/ docked（桌面端上下固定栏） ----
 const navModeCtrl = createSimple<string>('ui:nav-mode', 'floating')
 
+// ---- 对话框形态（宪法第二条超级自定义 · 非方盒） ----
+// bubble 对话泡(带尾) / blob 有机斑团 / arc 弧顶卡 / capsule 极简胶囊
+const dialogueShapeCtrl = createSimple<string>('ui:dialogue-shape', 'bubble')
+
+// ---- 结晶渲染风格（宪法第二条超级自定义） ----
+// facet 真实切面宝石 / glass 玻璃光球+辉光 / line 极简线晶 / prism 极光棱镜
+const crystalStyleCtrl = createSimple<string>('ui:crystal-style', 'facet')
+
 export function useAppearance() {
   return {
     // ---- 状态（Ref，模板自动解包） ----
@@ -124,6 +139,7 @@ export function useAppearance() {
     ambientGrainAlpha: ambientGrainAlphaCtrl.state,
     ambientDustAlpha: ambientDustAlphaCtrl.state,
     appBgAlpha: appBgAlphaCtrl.state,
+    glassClearAlpha: glassClearAlphaCtrl.state,
     autoHideChrome: autoHideChromeState,
     autoHideDelay: autoHideDelayCtrl.state,
     sidebarWidth: sidebarWidthCtrl.state,
@@ -141,12 +157,15 @@ export function useAppearance() {
     barBreathEnabled: barBreathEnabledCtrl.state,
     barBreathSpeed: barBreathSpeedCtrl.state,
     navMode: navModeCtrl.state,
+    dialogueShape: dialogueShapeCtrl.state,
+    crystalStyle: crystalStyleCtrl.state,
     // ---- 设置器（写入 CSS 变量 + 持久化） ----
     setCanvasAlpha: canvasAlphaCtrl.set,
     setAmbientGlowAlpha: ambientGlowAlphaCtrl.set,
     setAmbientGrainAlpha: ambientGrainAlphaCtrl.set,
     setAmbientDustAlpha: ambientDustAlphaCtrl.set,
     setAppBgAlpha: appBgAlphaCtrl.set,
+    setGlassClearAlpha: glassClearAlphaCtrl.set,
     setAutoHideChrome,
     setAutoHideDelay: autoHideDelayCtrl.set,
     setSidebarWidth: sidebarWidthCtrl.set,
@@ -164,6 +183,8 @@ export function useAppearance() {
     setBarBreathEnabled: barBreathEnabledCtrl.set,
     setBarBreathSpeed: barBreathSpeedCtrl.set,
     setNavMode: navModeCtrl.set,
+    setDialogueShape: dialogueShapeCtrl.set,
+    setCrystalStyle: crystalStyleCtrl.set,
   }
 }
 
@@ -175,4 +196,5 @@ export function initAppearance(): void {
   ambientGrainAlphaCtrl.set(ambientGrainAlphaCtrl.state.value)
   ambientDustAlphaCtrl.set(ambientDustAlphaCtrl.state.value)
   appBgAlphaCtrl.set(appBgAlphaCtrl.state.value)
+  glassClearAlphaCtrl.set(glassClearAlphaCtrl.state.value)
 }

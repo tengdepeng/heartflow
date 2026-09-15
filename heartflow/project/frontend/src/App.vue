@@ -1,6 +1,6 @@
 <template>
   <UnlockGate v-if="showUnlock" />
-  <div v-else-if="!isAuraWindow" class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed, 'chrome-hidden': chromeHidden, 'is-mobile': isMobile, 'docked-mode': navMode === 'docked', 'surface-3d': is3dShell }" :style="shellStyle">
+  <div v-else-if="!isAuraWindow" class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed, 'chrome-hidden': chromeHidden, 'is-mobile': isMobile, 'docked-mode': navMode === 'docked', 'surface-3d': is3dShell, 'sidebar-glass': sidebarBgMode === 'glass' }" :style="shellStyle">
     <!-- 全局自定义背景层：垫在画布之下，跨路由持久化 -->
     <!-- effectiveBackground 已注入单房间覆盖的背景场景（否则跟随全局） -->
     <div class="app-base-bg" aria-hidden="true">
@@ -10,10 +10,10 @@
     <!-- 路由顶部加载条（接线孤儿 RouteProgress：跨路由常驻的细进度条） -->
     <RouteProgress ref="routeProgressRef" />
 
-    <!-- 夜静调暗遮罩（宪法第49条：22:00–05:00 自动调暗；pointer-events:none 不拦截交互） -->
+    <!-- 夜静调暗遮罩（宪法第53条：22:00–05:00 自动调暗；pointer-events:none 不拦截交互） -->
     <div class="night-dim-overlay" :class="{ active: isNight }" aria-hidden="true"></div>
 
-    <!-- 数字安息日叠层（宪法第50条：每周日全面断联；pointer-events:none 不拦截交互） -->
+    <!-- 数字安息日叠层（宪法第54条：每周日全面断联；pointer-events:none 不拦截交互） -->
     <div class="sabbath-overlay" :class="{ active: isSabbath }" aria-hidden="true">
       <span class="sabbath-label">数字安息日 · 今日不扰</span>
     </div>
@@ -71,6 +71,13 @@
           <strong>心流工坊</strong>
           <span class="brand-note">深夜食堂 · 灯一直亮着</span>
         </div>
+      </div>
+
+      <div class="sidebar-pos" v-if="!isMobileOrTablet" role="group" aria-label="侧边栏位置">
+        <button type="button" class="pos-btn" :class="{ active: sidebarEdgeActive('left') }" title="贴左" aria-label="贴左" @click="setSidebarEdge('left')">◧</button>
+        <button type="button" class="pos-btn" :class="{ active: sidebarEdgeActive('right') }" title="贴右" aria-label="贴右" @click="setSidebarEdge('right')">◨</button>
+        <button type="button" class="pos-btn" :class="{ active: sidebarEdgeActive('free') }" title="自由摆放" aria-label="自由摆放" @click="setSidebarFree()">⤢</button>
+        <button type="button" class="pos-btn" title="复位" aria-label="复位" @click="resetSidebarPos()">⟲</button>
       </div>
 
       <div class="style-row">
@@ -141,12 +148,18 @@
         <div class="nav-footer-light"></div>
       </div>
 
-      <!-- 2D/3D 切换入口已隐藏（浮钮/侧栏/玉珠点击均移除），改由全局 V 键触发 -->
+      <!-- 2D/3D 切换：floating 模式有 FloatingNavBar 常驻三态循环键(bar-mode)；
+           另 SwitchPanel(全局常驻) + 命令面板「切换2D/3D视图」动作 + 反引号/长按空白手势。
+           下方补「反引号」快捷键提示，提升可发现性（评估 P1-2）。 -->
 
       <!-- 快捷键提示 -->
       <div class="nav-shortcut-hint">
         <span class="hint-key">Ctrl+K</span>
-        <span class="hint-label">星盘导航</span>
+        <span class="hint-label">命令面板</span>
+      </div>
+      <div v-if="switchTriggerKeyLabel" class="nav-shortcut-hint">
+        <span class="hint-key">{{ switchTriggerKeyLabel }}</span>
+        <span class="hint-label">切换 2D / 3D 视图</span>
       </div>
     </nav>
 
@@ -194,16 +207,32 @@
          单击唤对话 / 按住拖动重定位 / hover 看今日状态与切房间 / 四幕入口，均在 MirrorSelf 内。
          形态（玉珠/晶簇/焰/种）实时反映「幕僚设置」里主陪伴幕僚的载体几何；位置与隐藏本地持久化。
          门厅态时通过 hallAnchor 把玉珠光球锚定到屏风计时器旁（屏风契约）。
-         宅院壳激活时玉珠居中（中央留白给幕僚）；2D/3D 切换已移至右下浮岛按键，玉珠点击回归「唤对话」。 -->
+         不再随宅院壳全局居中：宅院壳为默认壳，真机遍历 81/83 路由确认所有页面中央均为实内容
+         （空态文案/房间按钮/卡片），居中会遮挡内容（如家·引力场盖住「卧室」按钮）。
+         仅保留首页 homeCentered（计时珠正上方珠列），其余页面回落右下常驻位。 -->
     <MirrorSelf
       :active-room-id="currentRoomId"
       :hall-anchor="hallAnchor"
-      :centered="activeShell === 'courtyard'"
+      :centered="false"
       :home-centered="homeCentered"
     />
 
+    <!-- 全局下拉抽屉（每页常驻）：屏幕左上 / 右上各一个把手，向下拉或点击均可唤出同一面板。
+         内容为通用插槽 —— 留空时走中性占位说明，接业务时替换默认插槽即可。
+         层级消费令牌：遮罩 --z-drawer-backdrop、面板 --z-floating；
+         与幕僚珠的流星径向菜单并存互不干扰（二者不会同时占用同一手势区域）。 -->
+    <GlobalDropDrawer label="快捷面板" />
+
     <!-- 星盘导航 -->
     <Astrolabe :visible="astrolabe.isOpen.value" @close="astrolabe.close()" />
+
+    <!-- 命令面板（Ctrl/Cmd+K 呼出，聚合 房间/页面/动作 检索） -->
+    <CommandPalette
+      :visible="cmdOpen"
+      :items="commandItems"
+      @close="cmdOpen = false"
+      @select="onCommandSelect"
+    />
 
     <!-- 安全岛全局覆盖层（五击触发） -->
     <SanctuaryOverlay
@@ -221,6 +250,7 @@
 import { ref, provide, onMounted, computed, onUnmounted, nextTick, watch, defineAsyncComponent } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useConstitutionStore } from './stores/constitution'
+import { initAutoArchiveScheduler } from './modules/archive/auto-archive'
 import { useAdvisorStore } from './stores/advisor'
 import { useStyleStore } from './stores/style'
 import { useConfigStore } from './stores/config'
@@ -235,16 +265,22 @@ import { useRoomTaxonomy, DOMAIN_LABELS, GROUP_LABELS, SLOT_LABELS, UNGROUPED_KE
 import type { BackgroundMediaConfig } from './types'
 // composable 静态导入（触发逻辑小），重组件懒加载，首屏不打包
 import { useAstrolabe } from './modules/astrolabe'
+import { useLayerSwitch } from './composables/useLayerSwitch'
+import { safePush } from '@/utils/router-safe'
+import CommandPalette from './components/CommandPalette.vue'
+import type { CommandItem } from './modules/command-palette/types'
 import { useSanctuaryTrigger } from './modules/sanctuary'
 import { useAppearance } from './modules/customization/useAppearance'
 import { useChromeAutoHide } from './modules/customization/useChromeAutoHide'
 import { useRoomStyle } from './modules/customization/useRoomStyle'
+import { prefetchRooms } from './modules/perf/routePrefetch'
 import { applyBrandIconToWindow } from './modules/customization/applyWindowIcon'
 import { useRuntimeState } from './resonance/bridges/runtime'
 import CanvasRoom from './modules/canvas/CanvasRoom.vue'
 import SurfaceStage from './modules/canvas/SurfaceStage.vue'
 import NoteLayer from './components/NoteLayer.vue'
 import MirrorSelf from './components/MirrorSelf.vue'
+import GlobalDropDrawer from './components/GlobalDropDrawer.vue'
 import FloatingNavBar from './components/FloatingNavBar.vue'
 // ① 窗口缩放重锚：侧栏自由浮动位置钳回视口（接回 floatReanchor 规划好的重锚逻辑）
 import { clampSidebarFloat } from './modules/customization/floatReanchor'
@@ -308,6 +344,61 @@ useLayerSwitchTrigger()
 const astrolabe = useAstrolabe()
 provide('astrolabe', astrolabe)
 
+// ---- 命令面板（Ctrl/Cmd+K 呼出，聚合 房间/页面/动作 统一检索）----
+const cmdOpen = ref(false)
+const router = useRouter()
+const { open: openLayerSwitch } = useLayerSwitch()
+
+const commandItems = computed<CommandItem[]>(() => {
+  const roomPaths = new Set(getAllRooms().map((r) => r.path))
+  const rooms: CommandItem[] = getAllRooms().map((r) => ({
+    id: 'room:' + r.id,
+    kind: 'room',
+    label: r.name,
+    keywords: r.id + ' ' + r.path,
+    hint: r.path,
+    run: () => safePush(router, r.path),
+  }))
+  const pages: CommandItem[] = router
+    .getRoutes()
+    .filter((r) => {
+      const t = (r.meta as any)?.title as string | undefined
+      return t && !roomPaths.has(r.path)
+    })
+    .map((r) => {
+      const t = (r.meta as any)?.title as string
+      return {
+        id: 'page:' + r.path,
+        kind: 'page',
+        label: t,
+        keywords: r.path,
+        hint: r.path,
+        run: () => safePush(router, r.path),
+      }
+    })
+  const actions: CommandItem[] = [
+    { id: 'act:astrolabe', kind: 'action', label: '星盘导航', keywords: 'astrolabe star map 星盘 导航', run: () => astrolabe.open('keyboard') },
+    { id: 'act:switch-view', kind: 'action', label: '切换 2D/3D 视图', keywords: 'switch 2d 3d view 视图 三维 二维 切换', run: () => openLayerSwitch() },
+    { id: 'act:settings', kind: 'action', label: '打开设置', keywords: 'settings 设置 偏好 配置', hint: '/settings', run: () => safePush(router, '/settings') },
+    { id: 'act:home', kind: 'action', label: '回到首页', keywords: 'home 首页 心流', hint: '/', run: () => safePush(router, '/') },
+  ]
+  return [...actions, ...rooms, ...pages]
+})
+
+function onCommandSelect(item: CommandItem) {
+  cmdOpen.value = false
+  item.run()
+}
+
+function onCommandKeydown(e: KeyboardEvent) {
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+    e.preventDefault()
+    cmdOpen.value = !cmdOpen.value
+  }
+}
+onMounted(() => document.addEventListener('keydown', onCommandKeydown))
+onUnmounted(() => document.removeEventListener('keydown', onCommandKeydown))
+
 // ---- 外观设置（侧栏宽度/玻璃等驱动壳层；画布控制已移交 FloatingNavBar 内部）----
 const {
   sidebarWidth,
@@ -350,16 +441,19 @@ const SIDEBAR_DENSITY: Record<string, { py: string; font: string; gp: string }> 
 const shellStyle = computed<Record<string, string>>(() => {
   const density = SIDEBAR_DENSITY[sidebarDensity.value] ?? SIDEBAR_DENSITY.standard
   const mode = sidebarBgMode.value
-  let bgAlpha = 1
   let blur = 0
+  let mul = 1
   if (mode === 'glass') {
     const g = Math.min(100, Math.max(0, sidebarGlass.value)) / 100
-    bgAlpha = 1 - g * 0.85
+    // 净透琉璃：基底透明度由全局主控 --glass-clear-alpha 决定；
+    // 侧栏自身的「叠加倍率」滑块只在其上做乘法（100 = 完全跟随主控，越低越透）。
+    mul = g
     blur = g * 14
   }
   const style: Record<string, string> = {
-    '--sidebar-bg-alpha': String(bgAlpha),
+    '--sidebar-bg-alpha': '1',
     '--sidebar-blur': `${blur.toFixed(2)}px`,
+    '--glass-mul-sidebar': String(mul),
     '--nav-item-py': density.py,
     '--nav-item-font': density.font,
     '--nav-group-py': density.gp,
@@ -447,7 +541,10 @@ function onNavBarPointerDown(e: PointerEvent): void {
   const t = e.target as HTMLElement
   // 房间列表（.nav-scroll）整体可抓来拖动侧栏；仅链接/按钮/输入/抽屉关闭钮不触发拖动
   // （房间项自身的「长按重排」由 NavTreeNode 接管，重排进行中 onDragMove 会放弃侧栏拖动）
-  if (t.closest('a, button, input, textarea, .nav-drawer-close')) return
+  // 文字容器（品牌标题 .brand-text、分组头标签 .nav-group-head）有自己的点击语义
+  // （跳房 / 展开分组），不可作为侧栏拖柄，否则「点文字就拖整条侧栏」；
+  // 仅品牌图标（.brand-emblem）、列表空白区可拖。
+  if (t.closest('a, button, input, textarea, .nav-drawer-close, .brand-text, .nav-group-head')) return
   // 桌面鼠标：按下即拖（与桌面一致）；触摸：长按 350ms 才进拖动，
   // 先滑动=滚动房间列表，按住再拖=移动侧栏，避免手势冲突抢占列表触摸滑动。
   if (e.pointerType === 'touch') {
@@ -470,6 +567,32 @@ function onNavBarPointerDown(e: PointerEvent): void {
     return
   }
   beginSidebarDrag(e)
+}
+
+// ---- 侧边栏显式位置按键（贴左 / 贴右 / 自由 / 复位）----
+// 盘活已存在但无 UI 入口的 setSidebarFloatEdge：拖拽松手会自动写该状态，
+// 但用户此前只能靠拖，无一键切换。按钮为原生 <button>，已被 onNavBarPointerDown
+// 守卫排除，不会误触发侧栏拖动。
+function sidebarEdgeActive(edge: string): boolean {
+  return sidebarFloatEdge.value === edge
+}
+function setSidebarEdge(edge: string): void {
+  setSidebarFloatEdge(edge)
+  setSidebarFloatPos(null)
+}
+function setSidebarFree(): void {
+  // 进入自由态：把当前屏幕位置固化为自由坐标，侧栏停在原地、随后可拖到任意处
+  const el = navBarEl.value
+  if (el) {
+    const r = el.getBoundingClientRect()
+    setSidebarFloatPos({ x: Math.round(r.left), y: Math.round(r.top) })
+  }
+  setSidebarFloatEdge('free')
+}
+function resetSidebarPos(): void {
+  // 复位：回到默认左侧吸附、清除自由坐标
+  setSidebarFloatEdge('left')
+  setSidebarFloatPos(null)
 }
 
 function cleanupPendingDrag(): void {
@@ -667,11 +790,19 @@ const canvasIntensity = computed(() => {
 const configBridge = useConfig()
 const { config: appConfig } = configBridge
 
-// 宅院壳激活态（供镜我玉珠居中定位判断）
+// 三态表面态：3D 正厅时驱动 .nav-bar 自动降级，避免侧栏顶部吸附态压住镜我顾问球（2026-08-26 补）
 const configStore = useConfigStore()
-const activeShell = computed(() => configStore.config.worldShell.activeShell)
-// 三态表面态：3D 正厅时驱动 .nav-bar 自动降级，避免侧栏顶部吸附态压住 homeCentered 顾问球（2026-08-26 补）
 const is3dShell = computed(() => configStore.config.worldShell.surfaceState === 'hall-3d')
+// ---- 层切换快捷键提示（侧栏提示区；键位用户可在装修工坊自定义，故动态读取而非硬编码 Backquote）----
+const SWITCH_KEY_LABELS: Record<string, string> = {
+  Backquote: '`',
+  Space: 'Space',
+  Enter: 'Enter',
+}
+const switchTriggerKeyLabel = computed(() => {
+  const k = configStore.config.worldShell.switchTrigger?.key
+  return k ? (SWITCH_KEY_LABELS[k] ?? k) : ''
+})
 // 模板 :class 已消费 is3dShell；显式 void 让 vue-tsc 视为「已使用」（避免 TS6133 误报）
 void is3dShell.value
 
@@ -689,7 +820,6 @@ const unlockStore = useUnlockStore()
 const showUnlock = computed(() => unlockStore.needsUnlock())
 // 心流页('/')：幕僚珠珠列顶端居中（与计时珠纵向并存，D4/D5）
 const homeCentered = computed(() => route.path === '/')
-
 const appBackground = computed(() => appConfig.background)
 function handleAppBackgroundError() {
   configBridge.resetBackgroundMedia()
@@ -821,7 +951,16 @@ onMounted(() => {
   onResize()
 
   // 宪法效果引擎初始化（监听规则开关，自动应用产品行为效果）
-  initConstitutionEffect()
+  // 引擎内部已对各 apply 步骤做隔离兜底；此处再包一层防御，确保其异常不波及后续首屏初始化链。
+  try {
+    initConstitutionEffect()
+  } catch (err) {
+    console.error('[宪法引擎] 初始化失败', err)
+  }
+
+  // 自动归档调度器：宪法条款 data:auto-archive 启用后按阈值归档闲置条目
+  // 默认关闭 → 零动作；启用后首屏后 30s 首检 + 每 24h 周期执行
+  initAutoArchiveScheduler()
 
   // 超级自定义 · 视觉强度初始化（粒子画布 / 环境辉光 / 颗粒 / 微尘 / 背景 各项不透明度）
   initAppearance()
@@ -847,6 +986,13 @@ onMounted(() => {
   if (isSanctuaryActive.value) {
     startBreathSim()
   }
+
+  // 路由分片空闲预取：消除「首次进入房间」的一次性卡顿
+  // （真机实测：首次进入某房间须现场 fetch+解析该分片，阻塞主线程约 270ms；
+  //   第二次进入因模块已缓存则平滑，maxGap 由 273ms 降至 7.3ms）。
+  // 模块内部串行 + 每片之间让出主线程（requestIdleCallback），且失败静默，
+  // 仅作优化，绝不阻塞首屏初始化链。
+  void prefetchRooms()
 })
 
 onUnmounted(() => {
@@ -873,9 +1019,10 @@ const mainStyleVars = computed<Record<string, string>>(() => ({
   '--hf-page-td': pageTransitionDuration.value,
 }))
 const effectiveBackground = computed<BackgroundMediaConfig>(() => {
-  const scene = roomStyle.roomBackgroundScene(currentRoomId.value)
+  const roomBg = roomStyle.roomBackground(currentRoomId.value)
   const base = appBackground.value
-  if (scene) return { ...base, type: 'preset', presetScene: scene }
+  // per-room 全量背景（preset / gradient / image / video）优先；null = 跟随全局
+  if (roomBg) return roomBg
   return base
 })
 
@@ -1213,7 +1360,7 @@ watch(() => nav.currentRoomId.value, () => {
   overflow-x: clip;
 }
 
-/* ---- 夜静调暗遮罩（宪法第49条） ---- */
+/* ---- 夜静调暗遮罩（宪法第53条） ---- */
 /* 固定全屏、pointer-events:none 不拦截任何交互；仅视觉调暗。高 z-index 让其覆盖内容层，
    但透传点击。随 isNight 切换 .active 平滑过渡。 */
 .night-dim-overlay {
@@ -1226,10 +1373,11 @@ watch(() => nav.currentRoomId.value, () => {
   transition: opacity 1.2s ease;
 }
 .night-dim-overlay.active {
-  opacity: 1;
+  /* 强度倍率来自宪法 --hf-night-dim（默认 1）；用户可调深/浅，超自定义生效 */
+  opacity: var(--hf-night-dim, 1);
 }
 
-/* ---- 数字安息日叠层（宪法第50条） ---- */
+/* ---- 数字安息日叠层（宪法第54条） ---- */
 /* 冷色静谧叠层 + 底部「数字安息日」标签；与夜静调暗的暗色不同，呈清冷断联感。
    同样 pointer-events:none，不拦截交互；z-index 略高于夜静调暗，二者可叠加。 */
 .sabbath-overlay {
@@ -1242,7 +1390,8 @@ watch(() => nav.currentRoomId.value, () => {
   transition: opacity 1.2s ease;
 }
 .sabbath-overlay.active {
-  opacity: 1;
+  /* 强度倍率来自宪法 --hf-sabbath（默认 1）；用户可调深/浅，超自定义生效 */
+  opacity: var(--hf-sabbath, 1);
 }
 .sabbath-label {
   position: absolute;
@@ -1354,6 +1503,27 @@ watch(() => nav.currentRoomId.value, () => {
   flex-shrink: 0;
   transition: transform var(--transition), width var(--transition), background var(--transition),
     opacity var(--transition), box-shadow var(--transition);
+}
+
+/* ---- 净透琉璃侧栏（sidebar-bg-mode: glass）----
+   与镜我球同一套材质：露底透明 + 上缘环境反射 + 下缘焦散 + 厚边环。
+   基底透明度 = 全局「琉璃通透度」主控(--glass-clear-alpha) × 侧栏叠加倍率(--glass-mul-sidebar)。
+   模糊强度仍由 --sidebar-blur（侧栏滑块派生）驱动，故旧滑块降级为「叠加倍率」后依然可微调质感。 */
+.app-shell.sidebar-glass .nav-bar {
+  background:
+    var(--glass-clear-sheen),
+    radial-gradient(
+      ellipse 70% 26% at 50% 100%,
+      rgba(255, 255, 255, calc(var(--glass-clear-a-caustic) * var(--glass-mul-sidebar, 1))),
+      transparent 72%
+    ),
+    rgba(26, 24, 30, calc(var(--glass-clear-a-surface) * var(--glass-mul-sidebar, 1)));
+  border-right: 1px solid var(--glass-clear-rim);
+  backdrop-filter: blur(var(--sidebar-blur, 0px)) saturate(1.4) brightness(1.05);
+  -webkit-backdrop-filter: blur(var(--sidebar-blur, 0px)) saturate(1.4) brightness(1.05);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-clear-a-sheen) * 0.55)),
+    inset -1px 0 10px rgba(0, 0, 0, var(--glass-clear-a-caustic));
 }
 
 /* 拖动中：禁用过渡防抖、禁止选中、抬升层级抓取手型 */
@@ -2018,7 +2188,7 @@ watch(() => nav.currentRoomId.value, () => {
 }
 
 /* ---- 3D 正厅态：侧栏悬浮窗自动降级（2026-08-26 补） ----
-   3D 世界壳接管屏幕时，2D 侧栏悬浮窗不应抢镜、压住 homeCentered 顾问球与中央内容。
+   3D 世界壳接管屏幕时，2D 侧栏悬浮窗不应抢镜、压住镜我顾问球与中央内容。
    弱化到 0.32 不透明 + 不拦截交互；hover/focus-within 唤回近全不透明、可点。
    与 chrome-hidden 互补：chrome-hidden 是全局沉浸（任意态都淡出），surface-3d 是仅 3D 态降级。
    z 不动（仍为 --z-navbar），靠 opacity/pointer-events 降级——不破坏契约层级、不动优先级，
@@ -2045,7 +2215,7 @@ watch(() => nav.currentRoomId.value, () => {
 }
 
 /* ============================================================
-   响应式布局
+    响应式布局
    ============================================================ */
 
 /* 桌面端：悬浮窗侧栏（超级自定义 · 可拖到任意位置，松手吸附最近边，空闲半透明贴边收缩）
@@ -2221,6 +2391,54 @@ watch(() => nav.currentRoomId.value, () => {
     padding: 8px 10px;
     font-size: 12px;
   }
+}
+
+/* ---- 侧边栏显式位置按键（贴左 / 贴右 / 自由 / 复位）----
+   与拖拽并存：按钮是一键吸附入口，拖拽是自由摆放入口；按钮为原生 <button>，
+   已被 onNavBarPointerDown 守卫排除，不会误触发拖动。全走设计令牌，硬编码灰已去除。 */
+.sidebar-pos {
+  display: flex;
+  gap: 6px;
+  padding: 2px clamp(10px, 1vw, 14px) 10px;
+}
+
+.pos-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.12));
+  border-radius: 8px;
+  background: var(--glass-surface, rgba(255, 255, 255, 0.04));
+  color: var(--text-secondary);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.pos-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border-color: var(--glass-border-strong, rgba(255, 255, 255, 0.28));
+}
+
+.pos-btn:active {
+  transform: translateY(1px);
+}
+
+.pos-btn.active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: var(--accent-glow);
+}
+
+.pos-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ============================================================

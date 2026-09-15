@@ -25,6 +25,20 @@
           <stop offset="0%" stop-color="rgba(255,255,255,0.35)" />
           <stop offset="100%" stop-color="rgba(255,255,255,0)" />
         </radialGradient>
+        <!-- 月白珠体（对调后：计时大珠 = 月华光晕 + 玉白核） -->
+        <radialGradient id="moonDisc" cx="34%" cy="28%" r="76%">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="26%" stop-color="#f7faff" />
+          <stop offset="56%" stop-color="#e9f0fa" />
+          <stop offset="80%" stop-color="#d3dfef" />
+          <stop offset="100%" stop-color="#b9c9e3" />
+        </radialGradient>
+        <!-- 玉白核：柔和发光心 -->
+        <radialGradient id="moonCore" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(255,255,255,1)" />
+          <stop offset="48%" stop-color="rgba(255,255,255,0.45)" />
+          <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+        </radialGradient>
         <!-- 内光晕 -->
         <filter id="innerGlow">
           <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
@@ -44,6 +58,12 @@
         cx="100" cy="100" r="62"
         :fill="`url(#${glossId})`"
         class="bead-gloss"
+      />
+      <!-- 白色实心核（对调后：大珠 = 弥散光晕 + 白核） -->
+      <circle
+        cx="100" cy="100" r="40"
+        fill="url(#moonCore)"
+        class="bead-core"
       />
       <!-- 呼吸环 -->
       <circle
@@ -230,8 +250,8 @@ function particleStyle(i: number) {
 }
 
 @keyframes aura-breathe {
-  0%, 100% { transform: scale(0.95); opacity: 0.5; }
-  50% { transform: scale(1.08); opacity: 0.9; }
+  0%, 100% { transform: scale(0.92); opacity: 0.45; }
+  50% { transform: scale(1.14); opacity: 1; }
 }
 
 /* ---- SVG ---- */
@@ -266,8 +286,8 @@ function particleStyle(i: number) {
 }
 
 @keyframes bead-breathe {
-  0%, 100% { transform: scale(0.97); }
-  50% { transform: scale(1.02); }
+  0%, 100% { transform: scale(0.94); }
+  50% { transform: scale(1.06); }
 }
 
 .bead-ring {
@@ -275,13 +295,18 @@ function particleStyle(i: number) {
 }
 
 @keyframes ring-pulse {
-  0%, 100% { r: 70px; opacity: 0.2; }
-  50% { r: 76px; opacity: 0.45; }
+  0%, 100% { r: 70px; opacity: 0.18; }
+  50% { r: 78px; opacity: 0.6; }
 }
 
 /* 进度弧 */
 .bead-progress {
   transition: stroke-dashoffset 0.3s ease;
+}
+
+/* 玉白核：柔和发光心（对调后：大珠 = 月华光晕 + 玉白核） */
+.bead-core {
+  filter: drop-shadow(0 0 24px rgba(226, 238, 255, 0.9));
 }
 
 /* ---- 计时显示 ---- */

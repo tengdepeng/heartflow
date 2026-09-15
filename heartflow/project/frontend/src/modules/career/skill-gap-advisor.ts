@@ -43,6 +43,30 @@ export interface SkillSummary {
   overallScore: number
 }
 
+/** 技能缺口档案（SkillGapArchivePanel 消费的整体聚合） */
+export interface SkillGapProfile {
+  /** 技能纵览 */
+  summary: SkillSummary
+  /** 优先级缺口列表 */
+  gaps: PrioritizedGap[]
+  /** 缺口数量（徽标用） */
+  gapCount: number
+  /** 里程碑所需技能的覆盖百分比 */
+  coverage: number
+  /** 里程碑关联准备度均值 */
+  overallReadiness: number
+  /** 学习路线图（由 generateRoadmap 生成） */
+  roadmap: {
+    currentLevel: string
+    roadmap: { stage: number; name: string; skills: string[]; estimatedMonths: number; milestone: string }[]
+    totalMonths: number
+  }
+  /** 里程碑-技能关联 */
+  milestoneConnections: MilestoneSkillConnection[]
+  /** 温和洞察 */
+  insights: { title: string; description: string }[]
+}
+
 /** 优先级缺口 */
 export interface PrioritizedGap {
   /** 技能名称 */
@@ -260,11 +284,59 @@ export function useSkillGapAdvisor() {
     }
   }
 
+  /**
+   * 构建技能缺口档案（SkillGapArchivePanel 消费的整体聚合）。
+   * 缺口来源为各里程碑的 relatedSkills：已具备的技能不计缺口，
+   * 缺失的技能列为待补强项；无目标角色时也能给出自我提升视角。
+   */
+  function buildSkillGapProfile(
+    skills: SkillNode[],
+    milestones: CareerMilestone[],
+  ): SkillGapProfile {
+    // 从里程碑所需技能推得去重目标技能（保持出现顺序）
+    const targetNames: string[] = []
+    for (const m of milestones) {
+      for (const s of m.relatedSkills) {
+        if (!targetNames.some(n => n.toLowerCase() === s.toLowerCase())) targetNames.push(s)
+      }
+    }
+    const targetSkills: { name: string; category: SkillCategory; level: ProficiencyLevel }[] =
+      targetNames.map(name => ({ name, category: 'technical', level: 'intermediate' }))
+
+    const analysis = analyzeGaps(skills, targetSkills, milestones)
+
+    // 里程碑覆盖：所需技能中被当前技能覆盖的比例
+    const ownedNames = skills.map(s => s.name.toLowerCase())
+    const requiredAll = milestones.flatMap(m => m.relatedSkills)
+    const covered = requiredAll.filter(s => ownedNames.includes(s.toLowerCase())).length
+    const coverage = requiredAll.length ? Math.round((covered / requiredAll.length) * 100) : 0
+
+    const connections = connectMilestones(milestones, analysis.gaps, skills)
+    const overallReadiness = connections.length
+      ? Math.round(connections.reduce((s, c) => s + c.readiness, 0) / connections.length)
+      : 0
+
+    const roadmap = generateRoadmap(skills, targetNames, milestones)
+    const insights = buildProfileInsights(analysis, coverage, milestones.length)
+
+    return {
+      summary: analysis.currentSkillsSummary,
+      gaps: analysis.gaps,
+      gapCount: analysis.gaps.length,
+      coverage,
+      overallReadiness,
+      roadmap,
+      milestoneConnections: connections,
+      insights,
+    }
+  }
+
   return {
     analyzeGaps,
     getSkillAdvice,
     analyzeForMultipleTargets,
     generateRoadmap,
+    buildSkillGapProfile,
   }
 }
 
@@ -310,6 +382,39 @@ function buildSkillSummary(skills: SkillNode[]): SkillSummary {
     weakestSkills,
     overallScore,
   }
+}
+
+/** 由档案聚合生成不超过 4 条的温和洞察 */
+function buildProfileInsights(
+  analysis: SkillGapAnalysis,
+  coverage: number,
+  milestoneCount: number,
+): { title: string; description: string }[] {
+  const out: { title: string; description: string }[] = []
+  const total = analysis.currentSkillsSummary.totalSkills
+
+  if (!total && !milestoneCount) {
+    out.push({ title: '尚无数据', description: '还没有技能与里程碑可供分析。' })
+    return out
+  }
+
+  if (analysis.gaps.length > 0) {
+    out.push({
+      title: '最需补强',
+      description: `「${analysis.gaps[0].skillName}」是优先级最高的缺口，建议优先投入。`,
+    })
+  } else if (total > 0) {
+    out.push({ title: '技能齐备', description: '当前技能已覆盖所有里程碑所需，保持即可。' })
+  }
+
+  if (milestoneCount > 0) {
+    out.push({
+      title: '里程碑覆盖',
+      description: `当前技能覆盖 ${coverage}% 的里程碑所需技能。`,
+    })
+  }
+
+  return out.slice(0, 4)
 }
 
 /** 优先级排序缺口 */

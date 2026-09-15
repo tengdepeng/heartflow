@@ -1,0 +1,126 @@
+/* ============================================================
+   心流工坊 · 全站点击弹出层统一玻璃层
+   依赖：design-tokens.css（暖琥珀基调，--accent-rgb / --radius-* / --shadow 等）
+   作用：把散落在 86 个文件里的玻璃拟态值收敛成一组统一令牌，
+        对话框 / 下拉 / 悬浮卡 / 提示框 共用同一套 配色·圆角·阴影·模糊·动画。
+   规则：仅扩展令牌 + 提供 .hf-glass 基类；不覆盖组件自有 scoped 样式，
+        组件通过 var(--glass-*) 引用本层即可统一，避免特异性冲突。
+   ============================================================ */
+:root {
+  /* ---- 玻璃表面（暖琥珀深色，与 --bg-elevated 同构） ---- */
+  --glass-bg: rgba(36, 30, 23, 0.86);            /* 常规弹出层背景（暖琥珀提质） */
+  --glass-bg-strong: rgba(28, 23, 18, 0.93);     /* 对话/命令面板等需要更高不透明 */
+  --glass-surface: rgba(var(--accent-rgb), 0.04); /* 面板内嵌子块（输入框/卡片底）· 暖琥珀微染 */
+
+  /* ---- 边框（统一到 accent 琥珀，取代各自 rgba(255,255,255,*) · 加强可见度 ---- */
+  --glass-border: rgba(var(--accent-rgb), 0.24);       /* 常规描边（明显琥珀） */
+  --glass-border-strong: rgba(var(--accent-rgb), 0.46);/* 强调描边（如激活态外壳） */
+  --glass-border-faint: rgba(var(--accent-rgb), 0.13); /* 分隔线/弱描边（可见琥珀发丝线） */
+
+  /* ---- 圆角（复用 design-tokens 的 --radius-* 契约） ---- */
+  --glass-radius: var(--radius-lg, 16px);   /* 弹出层主圆角 16px */
+  --glass-radius-sm: var(--radius-md, 10px);/* 内部按钮/条目 10px */
+
+  /* ---- 内边距 ---- */
+  --glass-pad: 20px;     /* 面板主内边距 */
+  --glass-pad-sm: 14px;  /* 内部区块内边距 */
+
+  /* ---- 模糊（统一 20px + 轻微饱和，平衡性能与质感） ---- */
+  --glass-blur: 20px;
+  --glass-saturate: 140%;
+
+  /* ---- 阴影（统一抬升投影 + 琥珀暖光晕 + 内描边，取代各组件硬编码） ---- */
+  --glass-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.55),
+    0 0 26px rgba(var(--accent-rgb), 0.16),
+    0 0 0 1px rgba(var(--accent-rgb), 0.16) inset;
+  --glass-shadow-soft:
+    0 10px 30px rgba(0, 0, 0, 0.48),
+    0 0 16px rgba(var(--accent-rgb), 0.12),
+    0 0 0 1px rgba(var(--accent-rgb), 0.12) inset;
+
+  /* ---- 动画（统一弹出层入场/退场：缩放+淡入） ---- */
+  --glass-anim-in: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  --glass-anim-out: 0.2s cubic-bezier(0.4, 0, 1, 1);
+
+  /* ============================================================
+     净透琉璃（clear glass）· 由「琉璃通透度」控件统管
+     ------------------------------------------------------------
+     --glass-clear-alpha 由 useAppearance 的 createAlphaControl 写入 :root（0–1，默认 0.45）。
+     与镜我球同一套材质语言：近无色玻璃壳 = 露底透明 + 上缘环境反射，
+     区别于上方暖琥珀磨砂（--glass-bg*）「实底压暗」的旧范式。
+     各面消费方式：基底 alpha = 上表 base × --glass-clear-alpha × 该面 --glass-mul-* 倍率，
+     故「琉璃通透度」是主控，旧有各面滑块降级为叠加倍率。
+     ============================================================ */
+  --glass-clear-alpha: 0.45;
+
+  /* 三种基底 alpha（命名对应三种用途，随通透度线性收放） */
+  --glass-clear-a-surface: calc(0.60 * var(--glass-clear-alpha)); /* 大面板：镜我对话框 / 状态面板 */
+  --glass-clear-a-chip: calc(0.68 * var(--glass-clear-alpha));    /* 小件：流星标签胶囊 */
+  --glass-clear-a-white: calc(0.30 * var(--glass-clear-alpha));   /* 浮岛：白雾底（液态玻璃） */
+
+  /* 三层玻璃肌理 alpha（与通透度同源，避免各面各写） */
+  --glass-clear-a-sheen: calc(0.34 * var(--glass-clear-alpha));   /* 上缘环境反射（sheen） */
+  --glass-clear-a-rim: calc(0.52 * var(--glass-clear-alpha));     /* 厚边环亮描边 */
+  --glass-clear-a-caustic: calc(0.30 * var(--glass-clear-alpha)); /* 下缘焦散（内暗） */
+
+  /* 组合令牌（无倍率场景可直接引用） */
+  --glass-clear-sheen: linear-gradient(
+    178deg,
+    rgba(255, 255, 255, var(--glass-clear-a-sheen)) 0%,
+    rgba(255, 255, 255, calc(var(--glass-clear-a-sheen) * 0.22)) 22%,
+    transparent 46%
+  );
+  --glass-clear-rim: rgba(255, 255, 255, calc(var(--glass-clear-a-rim) + 0.07));
+}
+
+/* ---- 统一玻璃基类（新组件 / 预览直接挂 class 即可） ---- */
+.hf-glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--glass-radius);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  color: var(--text-primary);
+}
+
+/* ---- 净透琉璃基类（与 .hf-glass 并列：露底透明 + 上缘反射 + 厚边环） ----
+   供新组件直接挂 class；既有组件多用 scoped 自绘（引用 --glass-clear-* 令牌）以免特异性冲突。 */
+.hf-glass-clear {
+  background:
+    var(--glass-clear-sheen),
+    radial-gradient(
+      ellipse 90% 36% at 50% 100%,
+      rgba(255, 255, 255, var(--glass-clear-a-caustic)),
+      transparent 74%
+    ),
+    rgba(26, 24, 30, var(--glass-clear-a-surface));
+  border: 1px solid var(--glass-clear-rim);
+  border-radius: var(--glass-radius);
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-clear-a-sheen) * 0.6)),
+    inset 0 -1px 6px rgba(0, 0, 0, var(--glass-clear-a-caustic));
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
+  color: var(--text-primary);
+}
+
+/* ---- 统一弹出层入场/退场关键帧（替代组件散落的 transition 名） ---- */
+.hf-pop-enter-active {
+  animation: hf-pop-in var(--glass-anim-in);
+}
+.hf-pop-leave-active {
+  animation: hf-pop-in var(--glass-anim-out) reverse;
+}
+@keyframes hf-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

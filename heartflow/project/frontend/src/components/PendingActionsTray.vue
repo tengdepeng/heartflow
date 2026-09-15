@@ -128,7 +128,7 @@ onUnmounted(() => {
 .pat-card {
   pointer-events: auto;
   background: rgba(22, 24, 30, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-border-faint);
   border-left: 3px solid var(--accent, #c9a96a);
   border-radius: 12px;
   padding: 12px 14px;
@@ -185,7 +185,7 @@ onUnmounted(() => {
   font-size: 12px;
   padding: 5px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--glass-border);
   background: transparent;
   color: rgba(255, 255, 255, 0.8);
   cursor: pointer;

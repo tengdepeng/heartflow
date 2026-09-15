@@ -9,6 +9,7 @@ import type { StickyNote, NoteDisplayMode, NoteViewMode } from './types'
 import { STICKY_COLORS } from './types'
 import { storage } from '../../engine/storage'
 import { notes, loadNotesState, persistNotesState } from '../../engine/storage/notes-state'
+import { syncLinksForNote, removeLinksForNote } from '../study/note-links'
 import {
   createKnowledgeRing,
   recordReview,
@@ -225,6 +226,10 @@ export function useNote() {
 
     notes.value.push(note)
     persistNotesState()
+    // 与 study 语义一致：创建即解析 [[双链]]，保证双链面板/归档不断链
+    syncLinksForNote(note.id, note.content, notes.value)
+    // 创建即入复习：自动建立 Ebbinghaus 年轮（幂等），次日自然进入待复习队列
+    initRing(note.id)
 
     stickyNotes.value.push(sticky)
     saveStickyState()
@@ -241,7 +246,18 @@ export function useNote() {
     if (data.archived !== undefined) note.archived = data.archived
     note.updatedAt = new Date().toISOString()
     persistNotesState()
+    if (data.content !== undefined) syncLinksForNote(id, data.content, notes.value)
     syncStickyWithNotes()
+  }
+
+  /** 归档（仅隐藏，保留双链；与 study.archive 语义一致） */
+  function archive(id: string) {
+    update(id, { archived: true })
+  }
+
+  /** 取消归档 */
+  function unarchive(id: string) {
+    update(id, { archived: false })
   }
 
   /** 软删除（移入回收站） */
@@ -251,6 +267,8 @@ export function useNote() {
     note.deletedAt = new Date().toISOString()
     note.updatedAt = note.deletedAt
     persistNotesState()
+    // 与 study 路径行为一致：软删也清链（避免回收站里的笔记残留在反链面板）
+    removeLinksForNote(id)
     // 移除便签显示状态
     stickyNotes.value = stickyNotes.value.filter(s => s.id !== id)
     saveStickyState()
@@ -263,6 +281,8 @@ export function useNote() {
     delete note.deletedAt
     note.updatedAt = new Date().toISOString()
     persistNotesState()
+    // 软删已清链，恢复时按正文重建，保持双链面板自洽
+    syncLinksForNote(id, note.content, notes.value)
   }
 
   /** 永久删除 */
@@ -271,6 +291,8 @@ export function useNote() {
     stickyNotes.value = stickyNotes.value.filter(s => s.id !== id)
     persistNotesState()
     saveStickyState()
+    // 真删才清链：归档只隐藏不断链，永久删除才清理其出入链
+    removeLinksForNote(id)
   }
 
   /** 清空回收站 */
@@ -471,6 +493,8 @@ export function useNote() {
     // CRUD
     create,
     update,
+    archive,
+    unarchive,
     remove: softRemove,
     hardRemove,
     restore,

@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+dist/
+dist-ssr/
+*.local
+.output/
+coverage/
+
+# recovery residue from disk disaster recovery (09-04/09-05)
+.recycled/
+*.recycled/
+_probe_*.png
+screenshot-*.png
+_chk*.txt
+_kill_*.txt
+scan_*.cjs
+chk_*.txt
+
+# logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# tauri
+src-tauri/target/

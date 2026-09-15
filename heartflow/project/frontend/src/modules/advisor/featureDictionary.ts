@@ -226,6 +226,48 @@ export function pickDirectJump(query: string, hits: FeatureHit[]): FeatureHit | 
   return ratio >= DIRECT_JUMP_RATIO ? hit : null
 }
 
+/**
+ * 精确目的地：整串恰为房间名/ID，或恰为词典里的某个说法。
+ * 用于「裸房名直达」（如「家」「心流」「幕僚好感」）——只认完全相等的说法，
+ * 不做模糊推断，避免「书房」「庭院」这类半截词被误判成跳转。
+ * 注：房间名走 getAllRooms 直查而非词典，因 addKey 会丢弃单字说法（如房名「家」）。
+ */
+export function matchExactDestination(query: string): FeatureHit | null {
+  const q = (query || '').trim()
+  if (!q) return null
+
+  // 1) 房间名 / 房间 ID 完全相等（含单字房名，绕过 addKey 的单字过滤）
+  for (const room of getAllRooms()) {
+    if (!room.path || room.path.includes(':')) continue
+    if (room.name === q || room.id === q) {
+      return { route: room.path, name: room.name, score: 1, matched: q }
+    }
+  }
+
+  // 2) 词典里的精确说法（NAV_TARGETS 别名 / 路由标题等）
+  for (const e of getFeatureEntries()) {
+    if (e.name === q || e.keys.includes(q)) {
+      return { route: e.route, name: e.name, score: 1, matched: q }
+    }
+  }
+
+  return null
+}
+
+/**
+ * 目的地解析（多用于「去 X / 打开 X」剥离动词后的残余短语）：
+ * 先精确命中（房间名/别名），否则接受「唯一强命中」。
+ * 精确优先保证「未完成花园」不会被更短的「花园」别名劫持。
+ */
+export function resolveDestination(query: string): FeatureHit | null {
+  const exact = matchExactDestination(query)
+  if (exact) return exact
+  const q = (query || '').trim()
+  if (q.length < 2) return null
+  const hits = searchFeatures(q, 5)
+  return hits.length === 1 ? hits[0] : null
+}
+
 /** 「找不到」时给用户的功能清单提示（取词典前若干项，运行时生成） */
 export function buildFeatureHint(max = 10): string {
   const names = getFeatureEntries()

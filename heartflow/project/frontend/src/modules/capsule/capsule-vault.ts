@@ -99,3 +99,38 @@ export function capsuleVault(capsules: TimeCapsule[], now: Date = new Date()): C
       .slice(0, 5),
   }
 }
+
+// ============================================================
+// 温和洞察（CapsuleVaultPanel）
+// ============================================================
+
+/**
+ * 由整库档案生成不超过 4 条的温和观察：先提示逾期，再提示最近待启，
+ * 最后肯定已开启的回看。空库只给一句守候引导，不催促。
+ */
+export function capsuleVaultInsights(vault: CapsuleVault, now: Date = new Date()): string[] {
+  if (!vault.total) return ['胶囊库还是空的。给未来的自己封一封，时间会替你收好。']
+
+  const out: string[] = []
+
+  if (vault.overdue > 0) {
+    out.push(`有 ${vault.overdue} 封已经到期的胶囊在等你启封，别让它们继续蒙尘。`)
+  }
+
+  if (vault.nextToOpen) {
+    const d = openOffset(vault.nextToOpen, now)
+    const title = vault.nextToOpen.title
+    if (d > 0) out.push(`最近一封《${title}》还有 ${d} 天开启。`)
+    else if (d === 0) out.push(`《${title}》今天就到开启日了。`)
+  }
+
+  if (vault.open > 0) {
+    out.push(`已经开启 ${vault.open} 封，那些回看本身就是一种继续。`)
+  }
+
+  if (!out.length) {
+    out.push(`${vault.total} 封胶囊都在静静等待，时间会给它们排序。`)
+  }
+
+  return out.slice(0, 4)
+}

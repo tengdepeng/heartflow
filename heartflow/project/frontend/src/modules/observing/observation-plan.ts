@@ -58,6 +58,41 @@ export interface PlanConfig {
   hour?: number
 }
 
+/**
+ * 由今夜观测计划生成不超过 4 条的温和观察：
+ * 先复述开场摘要，再点出最值得看的目标、月相影响与可执行时段。
+ * 纯本地计算，不联网、不臆造天象。
+ */
+export function observationPlanInsights(plan: ObservationPlan): string[] {
+  const out: string[] = []
+  if (plan.summary) out.push(plan.summary)
+
+  const best = plan.bestTargets?.[0]
+  if (best) {
+    out.push(
+      `今夜首选 ${best.typeIcon ?? ''}${best.target.name}（${best.typeLabel}），` +
+        `地平高度约 ${Math.round(best.altDeg)}°，${best.vision}。`.replace('  ', ' '),
+    )
+  }
+
+  const moon = plan.moon
+  if (moon) {
+    const pct = Math.round((moon.illumination ?? 0) * 100)
+    out.push(
+      pct >= 70
+        ? `月相${moon.label}，照亮 ${pct}%，月光较亮，适合先看月亮与亮目标。`
+        : `月相${moon.label}，照亮 ${pct}%，暗夜条件不错，深空目标更容易显形。`,
+    )
+  }
+
+  const phase = (plan.phases ?? []).find((p) => p.targets?.length || p.planets?.length)
+  if (phase?.tip) {
+    out.push(`${phase.label}：${phase.tip}`)
+  }
+
+  return out.slice(0, 4)
+}
+
 /** 亮于该星等的深空目标才建议（随光害与月相动态收紧） */
 export function effectiveMagnitudeLimit(illumination: number, lightPollution: number): number {
   const i = Math.min(1, Math.max(0, illumination))

@@ -83,6 +83,45 @@ export function getBacklinks(noteId: string): NoteLink[] {
   return links.value.filter(l => l.targetId === noteId)
 }
 
+/** 连链封藏条目（时光胶囊「连链封藏」消费的稳定连链条目集） */
+export interface LinkedItem {
+  /** 笔记 id */
+  id: string
+  /** 与起点的关系 */
+  relation: 'self' | 'outgoing' | 'backlink'
+  /** 该条目笔记是否已归档（archive 仅隐藏不断链，仍进连链集） */
+  archived: boolean
+}
+
+/**
+ * 由起点笔记聚合连链条目集：顺序固定为 self → outgoing → backlink（开启时）。
+ * 死链（目标/源不在传入笔记集中）自动跳过；多条出链去重且不含起点自引用。
+ */
+export function getLinkedItemsForNote(
+  noteId: string,
+  notes: Note[],
+  options: { includeBacklinks?: boolean } = {},
+): LinkedItem[] {
+  const byId = new Map(notes.map(n => [n.id, n]))
+  const result: LinkedItem[] = []
+  const seen = new Set<string>()
+
+  const push = (id: string, relation: LinkedItem['relation']) => {
+    if (seen.has(id)) return
+    const note = byId.get(id)
+    if (!note) return // 死链跳过
+    seen.add(id)
+    result.push({ id, relation, archived: !!note.archived && !note.deletedAt })
+  }
+
+  push(noteId, 'self')
+  for (const l of getOutgoingLinks(noteId)) push(l.targetId, 'outgoing')
+  if (options.includeBacklinks) {
+    for (const l of getBacklinks(noteId)) push(l.sourceId, 'backlink')
+  }
+  return result
+}
+
 /** 删除某笔记时清理其全部链接（出链 + 反向链接），避免留下死链 */
 export function removeLinksForNote(noteId: string): void {
   const before = links.value.length
@@ -178,6 +217,7 @@ export function useNoteLinks() {
     getOutgoingLinks,
     getBacklinks,
     getBlockContent,
+    getLinkedItemsForNote,
     syncLinksForNote,
     removeLinksForNote,
   }

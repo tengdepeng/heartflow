@@ -442,13 +442,15 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
   gap: 4px;
   padding: 7px 9px;
   border-radius: 20px;
-  /* 纯液态玻璃：半透明白填充（由 --bar-a 驱动，通透度滑块真正接管底栏主体）
-     + 背景模糊 + 发光描边 + 顶部镜面高光。发亮、半透，不挡内容。 */
-  background: rgba(255, 255, 255, calc(0.10 * var(--bar-a, 1)));
-  backdrop-filter: blur(var(--bar-blur, 20px)) saturate(180%);
-  -webkit-backdrop-filter: blur(var(--bar-blur, 20px)) saturate(180%);
-  /* 折射边缘：细亮描边模拟玻璃厚度，而非磨砂毛边；描边/内高光强度亦随通透度收放 */
-  border: 1px solid rgba(255, 255, 255, calc(0.30 * var(--bar-a, 1) + 0.05));
+  /* 净透琉璃：近白露底 + 上缘环境反射（由全局「琉璃通透度」主控 + 本岛 --bar-a 叠加倍率驱动）
+     + 背景模糊 + 厚边环亮描边。发亮、半透，不挡内容，与镜我球同源材质。 */
+  background:
+    var(--glass-clear-sheen),
+    rgba(255, 255, 255, calc(var(--glass-clear-a-white) * var(--bar-a, 1)));
+  backdrop-filter: blur(var(--bar-blur, 20px)) saturate(1.5) brightness(1.06);
+  -webkit-backdrop-filter: blur(var(--bar-blur, 20px)) saturate(1.5) brightness(1.06);
+  /* 折射边缘：细亮描边模拟玻璃厚度，而非磨砂毛边；描边亦随通透度收放 */
+  border: 1px solid var(--glass-clear-rim);
   box-shadow:
     0 14px 46px rgba(0, 0, 0, 0.30),
     0 2px 10px rgba(0, 0, 0, 0.20),

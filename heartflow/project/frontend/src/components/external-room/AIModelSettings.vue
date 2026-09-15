@@ -48,7 +48,7 @@ const testResult = ref<{ id: string; ok: boolean; text: string } | null>(null)
 const notice = ref<{ kind: 'ok' | 'warn' | 'err'; text: string } | null>(null)
 
 const providers = computed<ProviderRow[]>(() =>
-  Object.entries(cfg.value.providers).map(([id, p]) => ({ id, cfg: p })),
+  Object.entries(cfg.value.providers ?? {}).map(([id, p]) => ({ id, cfg: p })),
 )
 
 const externalConsented = computed(() => isExternalAIConsented())
@@ -234,7 +234,7 @@ function patchMemory(patch: { maxRounds?: number; enableSummarization?: boolean 
         <div class="ai-card-meta">
           <span class="ai-mono">{{ row.cfg.baseUrl }}</span>
           <span class="ai-dot">·</span>
-          <span class="ai-mono">{{ row.cfg.model.model || '（未填模型）' }}</span>
+          <span class="ai-mono">{{ row.cfg.model?.model || '（未填模型）' }}</span>
         </div>
 
         <div v-if="isBlocked(row)" class="ai-gated">
