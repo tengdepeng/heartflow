@@ -106,9 +106,9 @@ describe('MirrorDialogue', () => {
     expect(wrapper.find('.mirror-dialogue-panel').exists()).toBe(false)
   })
 
-  it('渲染顶部标题"镜我对话"', async () => {
+  it('渲染顶部标题"镜我"', async () => {
     const wrapper = await getWrapper()
-    expect(wrapper.find('.md-header-title').text()).toBe('镜我对话')
+    expect(wrapper.find('.md-header-title').text()).toBe('镜我')
   })
 
   it('渲染关闭按钮', async () => {

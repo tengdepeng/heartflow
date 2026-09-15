@@ -119,6 +119,10 @@ vi.mock('../../engine/storage', () => ({
       const store: Record<string, any> = {
         'craft:materials': [],
         'craft:usages': [],
+        // CraftAdvancedPanel（INCR-210）直引 @/engine/storage，补 JSON keys 隔离
+        'hf:craft:analytics': '',
+        'hf:craft:inspirations': '[]',
+        'hf:craft:versions': '[]',
       }
       return store[key] ?? fallback
     },
@@ -507,10 +511,10 @@ describe('展品架视觉演化', () => {
 describe('半成品工作台', () => {
   it('显示进化程度低于 50% 的作品', async () => {
     mockWorks.value = [
-      { id: 'w1', name: '成品', evolution: 80, status: 'completed', icon: '🎨', description: '完成作品', color: '#b8a080', type: 'design', date: '2026-07', tags: [] },
-      { id: 'w2', name: '半成品', evolution: 30, status: 'refining', icon: '📝', description: '打磨中', color: '#7c5cfc', type: 'writing', date: '2026-06', tags: [] },
-      { id: 'w3', name: '草稿', evolution: 10, status: 'draft', icon: '💻', description: '草稿', color: '#4f8cff', type: 'code', date: '2026-05', tags: [] },
-      { id: 'w4', name: '归档', evolution: 20, status: 'archived', icon: '📦', description: '已归档', color: '#8a9aa8', type: 'code', date: '2026-04', tags: [] },
+      { id: 'w1', name: '成品', evolution: 80, status: 'completed', icon: '🎨', description: '完成作品', color: '#b8a080', type: 'design', date: '2026-07', tags: [], createdAt: '2026-07-01' },
+      { id: 'w2', name: '半成品', evolution: 30, status: 'refining', icon: '📝', description: '打磨中', color: '#7c5cfc', type: 'writing', date: '2026-06', tags: [], createdAt: '2026-06-15' },
+      { id: 'w3', name: '草稿', evolution: 10, status: 'draft', icon: '💻', description: '草稿', color: '#4f8cff', type: 'code', date: '2026-05', tags: [], createdAt: '2026-05-01' },
+      { id: 'w4', name: '归档', evolution: 20, status: 'archived', icon: '📦', description: '已归档', color: '#8a9aa8', type: 'code', date: '2026-04', tags: [], createdAt: '2026-04-01' },
     ]
     const wrapper = await getWrapper()
     await wrapper.vm.$nextTick()
@@ -524,8 +528,8 @@ describe('半成品工作台', () => {
 
   it('无半成品时显示空状态', async () => {
     mockWorks.value = [
-      { id: 'w1', name: '成品', evolution: 80, status: 'completed', icon: '🎨', description: '完成作品', color: '#b8a080', type: 'design', date: '2026-07', tags: [] },
-      { id: 'w4', name: '归档', evolution: 20, status: 'archived', icon: '📦', description: '已归档', color: '#8a9aa8', type: 'code', date: '2026-04', tags: [] },
+      { id: 'w1', name: '成品', evolution: 80, status: 'completed', icon: '🎨', description: '完成作品', color: '#b8a080', type: 'design', date: '2026-07', tags: [], createdAt: '2026-07-01' },
+      { id: 'w4', name: '归档', evolution: 20, status: 'archived', icon: '📦', description: '已归档', color: '#8a9aa8', type: 'code', date: '2026-04', tags: [], createdAt: '2026-04-01' },
     ]
     const wrapper = await getWrapper()
     await wrapper.vm.$nextTick()
@@ -606,9 +610,47 @@ describe('集成：材料库面板', () => {
     expect(addBtn.attributes('disabled')).toBeUndefined()
     await addBtn.trigger('click')
     await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
     expect(wrapper.find('.mat-grid').exists()).toBe(true)
-    expect(wrapper.find('.craft-empty').exists()).toBe(false)
+    // 材料空态已消失；CraftAdvancedPanel 的灵感空态同样用 .craft-empty，按文案区分（INCR-210）
+    expect(wrapper.text()).not.toContain('材料库空空如也')
     expect(wrapper.text()).toContain('檀香木')
     expect(wrapper.findAll('.mat-card').length).toBe(1)
+  })
+})
+
+// =============================================================
+// 集成：高级工坊面板（INCR-210：补挂载孤儿面板 CraftAdvancedPanel）
+// =============================================================
+
+describe('集成：高级工坊面板', () => {
+  it('渲染创作分析统计与灵感/版本空态', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('高级工坊')
+    // 创作分析 5 格
+    expect(wrapper.text()).toContain('总作品')
+    expect(wrapper.text()).toContain('已完成')
+    expect(wrapper.text()).toContain('创作中')
+    expect(wrapper.text()).toContain('平均进化')
+    expect(wrapper.text()).toContain('本月新作')
+    // 灵感追踪空态
+    expect(wrapper.text()).toContain('灵感追踪')
+    expect(wrapper.find('.adv-inspire-form').exists()).toBe(true)
+    expect(wrapper.text()).toContain('还没有记录灵感')
+    // 版本留档空态
+    expect(wrapper.text()).toContain('版本留档')
+    expect(wrapper.text()).toContain('暂无版本记录')
+  })
+
+  it('记录灵感后出现在列表', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.adv-inspire-form .form-input[placeholder="灵感标题"]').setValue('初代世界观')
+    await wrapper.find('.adv-inspire-form .craft-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.adv-inspire-list').exists()).toBe(true)
+    expect(wrapper.text()).toContain('初代世界观')
+    expect(wrapper.findAll('.adv-inspire-card').length).toBe(1)
   })
 })
