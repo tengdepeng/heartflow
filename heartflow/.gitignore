@@ -115,3 +115,34 @@ test-results/
 
 # Vitest schedule (moved to docs/)
 .vitest-schedule.md
+
+# ---- 2026-09-16 INCR-328: 会话调试产物（留盘不入库） ----
+# 截图目录（任意层级）
+.shots/
+# 清理/探针脚本与记录（heartflow 顶层）
+_*_cleanup.cjs
+_*_cl.txt
+_cleanup_final.txt
+p2.txt
+p3.txt
+# heartflow/scripts 一次性调试/扫描脚本（整目录）
+/scripts/
+# frontend 探针/扫描/校验产物
+.probe-*.mjs
+log_pushchannel*.txt
+recycle_*.json
+refcheck_time.cjs
+scan-*.cjs
+scan-*.ps1
+scan-result.txt
+test-capture.txt
+validate-sfc.mjs
+# frontend scripts 下的一次性诊断/扫描/验证脚本
+project/frontend/scripts/_*.cjs
+project/frontend/scripts/incr*-*.cjs
+project/frontend/scripts/run-targeted-tests.cjs
+project/frontend/scripts/scan-*.cjs
+project/frontend/scripts/tmp-*.cjs
+project/frontend/scripts/triage-orphans.cjs
+project/frontend/scripts/orphan-*.ps1
+project/frontend/scripts/smoke-shots/

@@ -88,3 +88,30 @@ heartflow/_*.png
 heartflow/_vite_dev.log
 # 沙箱临时构建产物（vite 绕过 safe-delete 用的干净 outDir，非真源）
 heartflow/project/frontend/dist-*-test/
+
+# ---- 2026-09-16 INCR-328: 根级调试探针/日志/会话产物（留盘不入库） ----
+.git.bak-*/
+build.out
+dev_out.txt
+cdir.txt
+cidx.txt
+ct.txt
+tc.txt
+ucr.txt
+env_check.out
+health*.out
+preview*.out
+probe_*.cjs
+probe_*.out
+probe_*.txt
+prog*.out
+ps_done*.txt
+tasks_status.out
+tmp-check-tests.cjs
+tsc_*.txt
+tsc_*.out
+vuetsc*.out
+vuetsc_*.txt
+node_*.txt
+hf-audit-*.txt
+记录问题.txt
