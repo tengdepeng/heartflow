@@ -3,6 +3,8 @@
 // 蓝图要求：task parser + 11 intent categories + execution flow
 // ============================================================
 
+import type { KnowledgeCitation } from './knowledge-citation'
+
 // ---- 11 意图分类 ----
 
 /** 镜面对话 · 10 意图分类 */
@@ -160,6 +162,8 @@ export interface DialogueEntry {
   parsedTask?: ParsedTask
   /** 执行结果（仅镜我回应） */
   executionResult?: ExecutionResult
+  /** 知识出处（深度借鉴：作答标注出处；仅镜我回应，兜底/无计划时注入） */
+  sources?: KnowledgeCitation[]
   /** 时间戳 */
   timestamp: number
 }

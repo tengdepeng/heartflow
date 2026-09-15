@@ -311,6 +311,40 @@ describe('MirrorDialogue', () => {
     expect(wrapper.find('.md-exec-result').exists()).toBe(false)
   })
 
+  // ---- 知识出处（深度借鉴：作答标注出处） ----
+
+  it('镜我回应带知识出处时渲染 📎 出处块', async () => {
+    dialogueRef.value = [
+      makeMirrorEntry({
+        executionResult: undefined,
+        sources: [
+          { domain: 'note', id: 'n1', label: '晨间跑步笔记', date: '2026-09-01', domainLabel: '笔记' },
+          { domain: 'anchor', id: 'a1', label: '今天专注学习', date: '2026-09-02', domainLabel: '心锚' },
+        ],
+      }),
+    ]
+    const wrapper = await getWrapper()
+    const block = wrapper.find('.md-sources')
+    expect(block.exists()).toBe(true)
+    expect(block.text()).toContain('📎 作答依据')
+    expect(block.text()).toContain('晨间跑步笔记')
+    expect(wrapper.findAll('.md-source-item')).toHaveLength(2)
+    expect(block.find('.md-source-domain').text()).toBe('笔记')
+    expect(block.find('.md-source-date').text()).toBe('2026-09-01')
+  })
+
+  it('镜我回应无 sources 时不渲染出处块', async () => {
+    dialogueRef.value = [makeMirrorEntry({ executionResult: undefined })]
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.md-sources').exists()).toBe(false)
+  })
+
+  it('用户消息不渲染出处块', async () => {
+    dialogueRef.value = [makeUserEntry()]
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.md-sources').exists()).toBe(false)
+  })
+
   // ---- 歧义候选 ----
 
   it('有歧义且多个候选时显示歧义面板', async () => {

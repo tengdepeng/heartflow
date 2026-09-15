@@ -29,6 +29,7 @@ import { getLocalDateKey } from '../../utils/time'
 import { getAllRooms } from '../../engine/room-graph'
 import { GROUP_LABELS } from '../../modules/room-taxonomy'
 import { INTENT_INFO } from './intents'
+import { collectKnowledgeCitations } from './knowledge-citation'
 
 // ---- 默认 Action Handler 工厂 ----
 
@@ -536,6 +537,8 @@ export function useMirrorDialogue() {
           role: 'mirror',
           text: fallbackResponse,
           timestamp: Date.now(),
+          // 深度借鉴「基于本地资料作答并标注出处」：兜底回应仍检索相关本地条目带给 UI
+          sources: collectKnowledgeCitations(text),
         }
         dialogue.value.push(mirrorEntry)
         lastResponse.value = fallbackResponse
@@ -567,6 +570,8 @@ export function useMirrorDialogue() {
           role: 'mirror',
           text: response,
           timestamp: Date.now(),
+          // 无执行计划时的纯回应同样标注出处：回答基于哪些本地条目
+          sources: collectKnowledgeCitations(text),
         }
         dialogue.value.push(mirrorEntry)
         lastResponse.value = response
