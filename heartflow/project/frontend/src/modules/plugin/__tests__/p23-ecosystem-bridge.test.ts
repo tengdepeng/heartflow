@@ -638,16 +638,16 @@ describe('P23 插件生态视图桥接层', () => {
     // 插件概览
     // ============================================================
     describe('插件概览', () => {
-      it('pluginOverview 反映核心插件数量（5 个核心插件）', () => {
-        expect(bridge.pluginOverview.value.corePlugins).toBe(5)
+      it('pluginOverview 反映核心插件数量（6 个核心插件）', () => {
+        expect(bridge.pluginOverview.value.corePlugins).toBe(6)
       })
 
-      it('pluginOverview 有 totalPlugins 为 5', () => {
-        expect(bridge.pluginOverview.value.totalPlugins).toBe(5)
+      it('pluginOverview 有 totalPlugins 为 6', () => {
+        expect(bridge.pluginOverview.value.totalPlugins).toBe(6)
       })
 
-      it('pluginOverview 有 enabledPlugins 为 5', () => {
-        expect(bridge.pluginOverview.value.enabledPlugins).toBe(5)
+      it('pluginOverview 有 enabledPlugins 为 6', () => {
+        expect(bridge.pluginOverview.value.enabledPlugins).toBe(6)
       })
 
       it('pluginOverview 有 loadedPlugins 为 4', () => {
@@ -680,7 +680,8 @@ describe('P23 插件生态视图桥接层', () => {
         expect(bridge.pluginOverview.value.tierCounts).toBeDefined()
         expect(bridge.pluginOverview.value.tierCounts.official).toBe(5)
         expect(bridge.pluginOverview.value.tierCounts.community).toBe(0)
-        expect(bridge.pluginOverview.value.tierCounts.experimental).toBe(0)
+        // demo-room 示例插件为 experimental 分级
+        expect(bridge.pluginOverview.value.tierCounts.experimental).toBe(1)
       })
     })
 
@@ -1098,7 +1099,7 @@ describe('P23 插件生态视图桥接层', () => {
       it('getCorePlugins 返回核心插件', () => {
         const core = bridge.getCorePlugins()
         expect(Array.isArray(core)).toBe(true)
-        expect(core.length).toBe(5)
+        expect(core.length).toBe(6)
         core.forEach((p: any) => {
           expect(p.isCore).toBe(true)
         })
@@ -1168,7 +1169,7 @@ describe('P23 插件生态视图桥接层', () => {
         expect(visual.length).toBe(3)
 
         const core = bridge.getCorePlugins()
-        expect(core.length).toBe(5)
+        expect(core.length).toBe(6)
       })
 
       it('启用 → 禁用 → 加载 → 卸载 完整流程', () => {

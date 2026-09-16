@@ -1039,6 +1039,26 @@ const ROOM_GRAPH: Record<string, RoomNode> = {
 // ---- 主链路顺序列表 ----
 const MAIN_PATH_ORDER: string[] = ['timeline', 'anchor', 'garden']
 
+// ---- 运行时注册覆盖层（插件贡献房间等）----
+// 静态 ROOM_GRAPH 保持蓝图不可变；运行时扩展（插件房间）写入 EXTRA_ROOMS，
+// 全部查询函数合并读取，覆盖层优先。卸载后即刻从导航/星盘/邻接查询中消失。
+const EXTRA_ROOMS = new Map<string, RoomNode>()
+
+/** 注册一个运行时房间（插件贡献；ID 冲突时覆盖静态同名房间） */
+export function registerRoom(node: RoomNode): void {
+  EXTRA_ROOMS.set(node.id, { ...node })
+}
+
+/** 注销一个运行时房间 */
+export function unregisterRoom(id: string): void {
+  EXTRA_ROOMS.delete(id)
+}
+
+/** 运行时注册的房间节点列表（不含静态蓝图房间） */
+export function getExtraRooms(): RoomNode[] {
+  return [...EXTRA_ROOMS.values()]
+}
+
 // ---- 导出函数 ----
 
 /** 获取所有房间节点 */
@@ -1058,7 +1078,7 @@ for (const id of DEDUPED_ROOM_IDS) {
 }
 
 export function getAllRooms(): RoomNode[] {
-  return Object.values(ROOM_GRAPH)
+  return [...Object.values(ROOM_GRAPH), ...EXTRA_ROOMS.values()]
 }
 
 /** 按组获取房间 */
@@ -1073,7 +1093,7 @@ export function getRoomsByGroup(group: RoomGroup): RoomNode[] {
 
   /** 按 ID 获取单个房间 */
 export function getRoom(id: string): RoomNode | undefined {
-  return ROOM_GRAPH[id]
+  return EXTRA_ROOMS.get(id) ?? ROOM_GRAPH[id]
 }
 
 /** 按路径获取房间 */
@@ -1083,32 +1103,39 @@ export function getRoomByPath(path: string): RoomNode | undefined {
 
 /** 获取与指定房间相邻的房间列表 */
 export function getAdjacentRooms(roomId: string): RoomNode[] {
-  const room = ROOM_GRAPH[roomId]
+  const room = getRoom(roomId)
   if (!room) return []
-  return room.adjacentTo
-    .map(id => ROOM_GRAPH[id])
-    .filter(Boolean)
+  const out = room.adjacentTo
+    .map(id => getRoom(id))
+    .filter(Boolean) as RoomNode[]
+  // 运行时注册的房间单向声明邻接（静态房间侧无法感知）→ 补对称边
+  for (const extra of EXTRA_ROOMS.values()) {
+    if (extra.adjacentTo.includes(roomId) && !out.some(r => r.id === extra.id)) {
+      out.push(extra)
+    }
+  }
+  return out
 }
 
 /** 获取主链路房间列表（按顺序） */
 export function getMainPath(): RoomNode[] {
   return MAIN_PATH_ORDER
-    .map(id => ROOM_GRAPH[id])
-    .filter(Boolean)
+    .map(id => getRoom(id))
+    .filter(Boolean) as RoomNode[]
 }
 
 /** 获取主链路上某个房间的前一个房间 */
 export function getPreviousOnMainPath(roomId: string): RoomNode | undefined {
   const idx = MAIN_PATH_ORDER.indexOf(roomId)
   if (idx <= 0) return undefined
-  return ROOM_GRAPH[MAIN_PATH_ORDER[idx - 1]]
+  return getRoom(MAIN_PATH_ORDER[idx - 1])
 }
 
 /** 获取主链路上某个房间的后一个房间 */
 export function getNextOnMainPath(roomId: string): RoomNode | undefined {
   const idx = MAIN_PATH_ORDER.indexOf(roomId)
   if (idx < 0 || idx >= MAIN_PATH_ORDER.length - 1) return undefined
-  return ROOM_GRAPH[MAIN_PATH_ORDER[idx + 1]]
+  return getRoom(MAIN_PATH_ORDER[idx + 1])
 }
 
 /** 判断房间是否在主链路上 */
@@ -1146,12 +1173,12 @@ export function getReturnPath(fromRoomId: string): string[] {
   const visited = new Set<string>()
   visited.add(fromRoomId)
 
-  let current = ROOM_GRAPH[fromRoomId]
+  let current = getRoom(fromRoomId)
   while (current && current.id !== 'home' && current.id !== 'home-space') {
     if (current.branchFrom && !visited.has(current.branchFrom)) {
       path.push(current.branchFrom)
       visited.add(current.branchFrom)
-      current = ROOM_GRAPH[current.branchFrom]
+      current = getRoom(current.branchFrom)
     } else {
       // 沿主链路往回走
       const prev = getPreviousOnMainPath(current.id)
@@ -1176,14 +1203,14 @@ export function getPathTo(roomId: string): string[] {
     const idx = MAIN_PATH_ORDER.indexOf(roomId)
     return ['home-space', ...MAIN_PATH_ORDER.slice(0, idx + 1)]
   }
-  const room = ROOM_GRAPH[roomId]
+  const room = getRoom(roomId)
   if (!room) return ['home-space', roomId]
   // 沿 branchFrom 回溯到主链路
   const path: string[] = [roomId]
   let current = room
   while (current.branchFrom && current.branchFrom !== 'home' && current.branchFrom !== 'home-space') {
     path.unshift(current.branchFrom)
-    current = ROOM_GRAPH[current.branchFrom]!
+    current = getRoom(current.branchFrom)!
   }
   path.unshift('home-space')
   return path

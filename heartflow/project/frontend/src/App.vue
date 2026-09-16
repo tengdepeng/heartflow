@@ -286,6 +286,8 @@ import { useRoomStyle } from './modules/customization/useRoomStyle'
 import { prefetchRooms } from './modules/perf/routePrefetch'
 import { applyBrandIconToWindow } from './modules/customization/applyWindowIcon'
 import { useRuntimeState } from './resonance/bridges/runtime'
+import { usePlugin } from './resonance/bridges/plugin'
+import { registerCorePluginRooms, syncPluginRooms } from './modules/plugin/room-registrar'
 import CanvasRoom from './modules/canvas/CanvasRoom.vue'
 import SurfaceStage from './modules/canvas/SurfaceStage.vue'
 import NoteLayer from './components/NoteLayer.vue'
@@ -795,6 +797,19 @@ const canvasIntensity = computed(() => {
   if (path === '/sanctuary') return 0
   return 0.35
 })
+
+// ---- 插件化房子：插件贡献房间的引导注册（方案 A MVP） ----
+// boot 时初始化插件清单 → 注册内置插件房间组件加载器 → 把已启用插件的贡献房间
+// 同步进房间图覆盖层与路由表（侧栏/星盘/邻接导航可见、可直达）；
+// 插件启停变化时自动对齐（插件管理器停用 → 房间即刻从导航与路由消失）。
+const pluginBridge = usePlugin()
+pluginBridge.init?.()
+registerCorePluginRooms()
+syncPluginRooms($router)
+watch(
+  () => pluginBridge.plugins.value.map(p => p.manifest.meta.id + ':' + p.enabled).join('|'),
+  () => syncPluginRooms($router),
+)
 
 // ---- 全局自定义背景（画布之下，跨路由持久化） ----
 const configBridge = useConfig()

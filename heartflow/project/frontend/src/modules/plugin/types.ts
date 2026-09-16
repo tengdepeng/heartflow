@@ -2,6 +2,8 @@
 // 插件管理器 · 类型定义
 // ============================================================
 
+import type { RoomDomain, RoomGroup } from '../../engine/room-graph'
+
 /** 插件权限级别 */
 export type PluginPermission =
   | 'read:current'    // L0: 只读当前上下文
@@ -50,6 +52,36 @@ export interface PluginCapability {
   permission: PluginPermission
 }
 
+/** 插件贡献点（可注册进房子的扩展，如 Obsidian manifest 贡献点） */
+export interface PluginContribution {
+  /** 贡献的房间（注册进房间图与路由，出现在侧栏/星盘/邻接导航） */
+  rooms?: PluginRoomContribution[]
+}
+
+/** 插件贡献的房间声明（可序列化数据；组件加载器由插件模块另行注册） */
+export interface PluginRoomContribution {
+  /** 房间 ID（全仓唯一） */
+  id: string
+  /** 路由路径（如 /plugin-demo，全仓唯一） */
+  path: string
+  /** 显示名称 */
+  name: string
+  /** 图标（emoji 或 unicode） */
+  icon: string
+  /** 主题色（CSS 色值） */
+  color: string
+  /** 简述 */
+  description?: string
+  /** 房间组（默认 world；插件房间不进主链路） */
+  group?: RoomGroup
+  /** 房间领域（侧栏聚合维度；缺省落未分组） */
+  domain?: RoomDomain
+  /** 邻接房间 ID（可含静态房间，双向可达） */
+  adjacentTo?: string[]
+  /** 分支来源房间 ID（返回路径回溯用） */
+  branchFrom?: string
+}
+
 /** 插件声明（安装时公开） */
 export interface PluginManifest {
   meta: PluginMeta
@@ -70,6 +102,8 @@ export interface PluginManifest {
   hooks?: string[]
   /** 对外提供的能力清单（供房间经能力注册表调用） */
   capabilities?: PluginCapability[]
+  /** 贡献点：注册进房子的扩展（房间/入口等） */
+  contributes?: PluginContribution
 }
 
 /** 插件运行时状态 */
@@ -209,6 +243,36 @@ export const CORE_PLUGINS: PluginManifest[] = [
         permission: 'read:history',
       },
     ],
+  },
+  {
+    meta: {
+      id: 'demo-room',
+      name: '示例插件房',
+      version: '0.1.0',
+      description: '插件贡献点演示：经 contributes.rooms 在运行时注册进房子',
+      tier: 'experimental',
+      category: 'other',
+      icon: '🧩',
+      author: '心流工坊',
+    },
+    permissions: ['read:current'],
+    sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: false },
+    entry: 'core:demo-room',
+    contributes: {
+      rooms: [
+        {
+          id: 'demo-room',
+          path: '/plugin-demo',
+          name: '示例插件房',
+          icon: '🧩',
+          color: '#8a9ab8',
+          description: '插件贡献点最小可行演示 · 由 demo-room 插件在运行时注册',
+          group: 'world',
+          adjacentTo: ['home-space', 'plugins'],
+          branchFrom: 'home-space',
+        },
+      ],
+    },
   },
 ]
 

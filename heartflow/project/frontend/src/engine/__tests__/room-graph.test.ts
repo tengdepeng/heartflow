@@ -17,6 +17,10 @@ import {
   getAdjacencyPairs,
   getBranchRooms,
   getBranchAncestors,
+  registerRoom,
+  unregisterRoom,
+  getExtraRooms,
+  type RoomNode,
 } from '../room-graph'
 
 describe('room-graph 房间图引擎', () => {
@@ -451,5 +455,50 @@ describe('room-graph 房间图引擎', () => {
       expect(vs?.adjacentTo).toContain('relations')
       expect(vs?.adjacentTo).toContain('garden')
     })
+  })
+})
+
+describe('room-graph 运行时注册覆盖层', () => {
+  function makeNode(id: string, path: string, adjacentTo: string[] = ['home-space']): RoomNode {
+    return {
+      id, path, name: `插件房·${id}`, icon: '🧩', color: '#8a9ab8',
+      group: 'world', description: '运行时注册', adjacentTo,
+      isMainPath: false, mainPathOrder: -1, branchFrom: 'home-space',
+    }
+  }
+
+  it('registerRoom 后各查询可见', () => {
+    registerRoom(makeNode('plug-a', '/plug-a'))
+    expect(getRoom('plug-a')?.name).toBe('插件房·plug-a')
+    expect(getRoomByPath('/plug-a')?.id).toBe('plug-a')
+    expect(getAllRooms().some(r => r.id === 'plug-a')).toBe(true)
+    expect(getRoomsByGroup('world').some(r => r.id === 'plug-a')).toBe(true)
+    expect(getAdjacentRooms('home-space').some(r => r.id === 'plug-a')).toBe(true)
+    expect(getPathTo('plug-a')).toEqual(['home-space', 'plug-a'])
+    unregisterRoom('plug-a')
+  })
+
+  it('unregisterRoom 后从全部查询消失', () => {
+    registerRoom(makeNode('plug-b', '/plug-b'))
+    unregisterRoom('plug-b')
+    expect(getRoom('plug-b')).toBeUndefined()
+    expect(getRoomByPath('/plug-b')).toBeUndefined()
+    expect(getAllRooms().some(r => r.id === 'plug-b')).toBe(false)
+    expect(getAdjacentRooms('home-space').some(r => r.id === 'plug-b')).toBe(false)
+  })
+
+  it('getExtraRooms 仅返回运行时注册的房间', () => {
+    registerRoom(makeNode('plug-c', '/plug-c'))
+    expect(getExtraRooms().map(r => r.id)).toContain('plug-c')
+    expect(getExtraRooms().some(r => r.id === 'home')).toBe(false)
+    unregisterRoom('plug-c')
+    expect(getExtraRooms()).toHaveLength(0)
+  })
+
+  it('分支回溯对运行时房间生效（branchFrom 可跨图解析）', () => {
+    registerRoom(makeNode('plug-d', '/plug-d', ['goals']))
+    const anc = getBranchAncestors('plug-d')
+    expect(anc.some(r => r.id === 'home-space')).toBe(true)
+    unregisterRoom('plug-d')
   })
 })
