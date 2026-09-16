@@ -448,8 +448,8 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .badge-deep { background: rgba(90, 184, 160, 0.18); color: #7fd0bb; opacity: 1; }
 .app-target { font-size: 11px; opacity: 0.65; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-foot { display: flex; gap: 10px; margin-top: 6px; }
-.app-stat { font-size: 10px; opacity: 0.4; }
-.app-stat--muted { opacity: 0.3; }
+.app-stat { font-size: 10px; opacity: 0.55; }
+.app-stat--muted { opacity: 0.4; }
 .app-actions { display: flex; flex-direction: column; gap: 5px; flex: none; }
 .app-actions .ln-btn { padding: 5px 12px; font-size: 12px; }
 

@@ -63,7 +63,15 @@
           </svg>
 
           <!-- 中心：心流（核心） -->
-          <div class="astrolabe-center" @click="astrolabe.goTo('home')">
+          <div
+            class="astrolabe-center"
+            role="button"
+            tabindex="0"
+            :aria-label="'返回心流首页'"
+            @click="astrolabe.goTo('home')"
+            @keydown.enter.prevent="astrolabe.goTo('home')"
+            @keydown.space.prevent="astrolabe.goTo('home')"
+          >
             <div class="center-core">
               <span class="center-icon">⊙</span>
             </div>
@@ -82,7 +90,12 @@
               class="astrolabe-node node-main"
               :class="{ 'node-active': astrolabe.activeRoomId.value === room.id }"
               :style="astrolabe.mainPathStyle(i)"
+              role="button"
+              tabindex="0"
+              :aria-label="'前往 ' + room.name"
               @click="astrolabe.goTo(room.id)"
+              @keydown.enter.prevent="astrolabe.goTo(room.id)"
+              @keydown.space.prevent="astrolabe.goTo(room.id)"
               @mouseenter="astrolabe.setHoveredRoom(room.id)"
               @mouseleave="astrolabe.clearHovered()"
             >
@@ -100,7 +113,12 @@
               class="astrolabe-node node-world"
               :class="{ 'node-active': astrolabe.activeRoomId.value === room.id, 'node-sanctuary': room.id === 'sanctuary' }"
               :style="astrolabe.worldStyle(i)"
+              role="button"
+              tabindex="0"
+              :aria-label="'前往 ' + room.name"
               @click="astrolabe.goTo(room.id)"
+              @keydown.enter.prevent="astrolabe.goTo(room.id)"
+              @keydown.space.prevent="astrolabe.goTo(room.id)"
               @mouseenter="astrolabe.setHoveredRoom(room.id)"
               @mouseleave="astrolabe.clearHovered()"
             >
@@ -117,7 +135,12 @@
               class="astrolabe-node node-home-space"
               :class="{ 'node-active': astrolabe.activeRoomId.value === 'home-space' }"
               :style="astrolabe.homeSpaceStyle()"
+              role="button"
+              tabindex="0"
+              :aria-label="'前往 ' + astrolabe.homeSpaceRoom.value.name"
               @click="astrolabe.goTo('home-space')"
+              @keydown.enter.prevent="astrolabe.goTo('home-space')"
+              @keydown.space.prevent="astrolabe.goTo('home-space')"
               @mouseenter="astrolabe.setHoveredRoom('home-space')"
               @mouseleave="astrolabe.clearHovered()"
             >
@@ -187,7 +210,12 @@
                   v-for="room in astrolabe.recentRooms.value"
                   :key="room.id"
                   class="recent-item"
+                  role="button"
+                  tabindex="0"
+                  :aria-label="'前往 ' + room.name"
                   @click="astrolabe.goTo(room.id)"
+                  @keydown.enter.prevent="astrolabe.goTo(room.id)"
+                  @keydown.space.prevent="astrolabe.goTo(room.id)"
                 >
                   <span class="recent-icon">{{ room.icon }}</span>
                   <span class="recent-name">{{ room.name }}</span>
@@ -669,6 +697,12 @@ watch(() => astrolabe.visibility.value.visible, (visible) => {
   background: rgba(var(--accent-rgb), 0.1);
 }
 
+.recent-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
 .search-result-icon,
 .recent-icon {
   width: 24px;
@@ -808,6 +842,13 @@ watch(() => astrolabe.visibility.value.visible, (visible) => {
   transform: translate(-50%, -50%) scale(1.08);
 }
 
+.astrolabe-center:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
+  border-radius: 16px;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
 .center-core {
   width: 60px;
   height: 60px;
@@ -908,6 +949,15 @@ watch(() => astrolabe.visibility.value.visible, (visible) => {
 
 /* 悬停/选中：放大 3 倍，缩小屏也能一眼看清图标与标签 */
 .astrolabe-node:hover {
+  transform: translate(-50%, -50%) scale(3);
+  z-index: 6;
+}
+
+/* 键盘焦点：可见轮廓提示（与悬停放大同视觉语言） */
+.astrolabe-node:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 12px;
   transform: translate(-50%, -50%) scale(3);
   z-index: 6;
 }
