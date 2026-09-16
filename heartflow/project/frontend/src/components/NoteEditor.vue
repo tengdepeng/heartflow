@@ -24,7 +24,7 @@
                 :style="chipStyle(t)"
               >
                 {{ t }}
-                <button class="tag-remove" @click="removeTag(t)">×</button>
+                <button class="tag-remove" :aria-label="'移除标签 ' + t" @click="removeTag(t)">×</button>
               </span>
             </div>
             <input
@@ -456,6 +456,7 @@ function chipStyle(tag: string) {
 }
 
 .tag-remove:hover { opacity: 1; }
+.tag-remove:focus-visible { opacity: 1; outline: 2px solid var(--accent, currentColor); border-radius: 3px; }
 
 .tag-input {
   padding: 4px 8px;
@@ -855,4 +856,9 @@ function chipStyle(tag: string) {
 .modal-enter-from .editor-card { transform: scale(0.95) translateY(16px); }
 .modal-leave-to { opacity: 0; }
 .modal-leave-to .editor-card { transform: scale(0.95); }
+
+@media (max-width: 600px) {
+  .editor-footer { flex-direction: column; align-items: stretch; gap: 8px; }
+  .word-count { text-align: left; }
+}
 </style>

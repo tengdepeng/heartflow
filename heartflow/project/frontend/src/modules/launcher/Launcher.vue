@@ -446,7 +446,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .app-meta { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
 .badge { font-size: 10px; padding: 1px 7px; border-radius: 7px; background: rgba(255, 255, 255, 0.08); opacity: 0.7; flex: none; }
 .badge-deep { background: rgba(90, 184, 160, 0.18); color: #7fd0bb; opacity: 1; }
-.app-target { font-size: 11px; opacity: 0.45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-target { font-size: 11px; opacity: 0.65; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .app-foot { display: flex; gap: 10px; margin-top: 6px; }
 .app-stat { font-size: 10px; opacity: 0.4; }
 .app-stat--muted { opacity: 0.3; }
@@ -488,4 +488,8 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 
 .ln-fade-enter-active, .ln-fade-leave-active { transition: opacity 0.2s ease; }
 .ln-fade-enter-from, .ln-fade-leave-to { opacity: 0; }
+
+@media (max-width: 600px) {
+  .app-grid { grid-template-columns: 1fr; }
+}
 </style>

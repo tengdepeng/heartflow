@@ -243,7 +243,7 @@ function onSelect(item: CommandItem) {
 }
 
 .cp-input::placeholder {
-  color: var(--text-muted, rgba(232, 224, 216, 0.3));
+  color: var(--text-muted, rgba(232, 224, 216, 0.45));
 }
 
 .cp-kbd {

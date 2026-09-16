@@ -130,6 +130,10 @@ function commit() {
 .qc-btn:hover:not(:disabled) {
   background: rgba(var(--accent-rgb), 0.18);
 }
+.qc-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 .qc-btn:disabled {
   opacity: 0.35;

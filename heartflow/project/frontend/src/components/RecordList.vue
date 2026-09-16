@@ -272,6 +272,10 @@ function tagStyle(tag: string) {
   color: var(--text-secondary);
   border-color: var(--text-secondary);
 }
+.filter-btn:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
 
 .filter-btn.active {
   color: var(--accent-cyan);

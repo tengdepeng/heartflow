@@ -177,7 +177,7 @@ onUnmounted(() => {
 }
 .space-tip-meta {
   font-size: 11px;
-  opacity: 0.55;
+  opacity: 0.72;
   color: var(--text-primary, #e9e0d0);
 }
 
