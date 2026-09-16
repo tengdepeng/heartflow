@@ -1809,7 +1809,7 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
   opacity: 0.4;
 }
 .lod-count {
-  opacity: 0.25;
+  opacity: 0.45;
   font-size: 10px;
 }
 

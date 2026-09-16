@@ -422,6 +422,6 @@ onUnmounted(() => {
 
 .cn-empty-hint {
   font-size: 11px !important;
-  opacity: 0.3 !important;
+  opacity: 0.5 !important;
 }
 </style>

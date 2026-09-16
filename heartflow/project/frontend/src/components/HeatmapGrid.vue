@@ -134,7 +134,7 @@ function getHeatColor(intensity: number, hasData: boolean): string {
 
 .hour-label {
   font-size: 9px;
-  color: rgba(255,255,255,0.2);
+  color: rgba(255, 255, 255, 0.4);
   line-height: 1;
 }
 
@@ -169,7 +169,7 @@ function getHeatColor(intensity: number, hasData: boolean): string {
 
 .legend-label {
   font-size: 10px;
-  color: rgba(255,255,255,0.25);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .legend-swatch {

@@ -1644,7 +1644,7 @@ onUnmounted(() => {
 
 .visit-record-duration {
   font-size: 10px;
-  color: rgba(160, 130, 100, 0.25);
+  color: rgba(160, 130, 100, 0.45);
   flex: 1;
   text-align: right;
 }
@@ -1654,7 +1654,7 @@ onUnmounted(() => {
   height: 14px;
   border: none;
   background: transparent;
-  color: rgba(160, 130, 100, 0.15);
+  color: rgba(160, 130, 100, 0.38);
   font-size: 9px;
   cursor: pointer;
   display: flex;

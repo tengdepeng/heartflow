@@ -775,7 +775,7 @@ const srStats = srCtx.stats
 
 .sr-stat-note {
   font-size: 9px;
-  color: rgba(232, 221, 208, 0.25);
+  color: rgba(232, 221, 208, 0.45);
 }
 
 /* 岁时环 */
@@ -1120,7 +1120,7 @@ const srStats = srCtx.stats
   align-items: center;
   padding: 24px 0;
   gap: 6px;
-  color: rgba(232, 221, 208, 0.25);
+  color: rgba(232, 221, 208, 0.45);
 }
 
 .sr-empty-rituals .sr-empty-icon {

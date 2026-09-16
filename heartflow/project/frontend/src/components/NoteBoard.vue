@@ -358,7 +358,7 @@ function fmtTime(iso: string) {
 
 .item-time {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.45);
   margin-left: auto;
 }
 
@@ -405,7 +405,7 @@ function fmtTime(iso: string) {
 }
 
 .board-empty p {
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.4);
   font-size: 13px;
   text-align: center;
   line-height: 1.6;

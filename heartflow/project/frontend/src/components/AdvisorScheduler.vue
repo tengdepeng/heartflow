@@ -276,7 +276,7 @@ function handleDispatch(taskType: string) {
 
 .as-dispatch-hint {
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.4);
   margin-top: 2px;
 }
 
@@ -306,7 +306,7 @@ function handleDispatch(taskType: string) {
 
 .as-progress-count {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
   font-weight: 500;
 }
 

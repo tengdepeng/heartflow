@@ -139,7 +139,7 @@ onMounted(() => {
 .adp-scene-occ { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 .adp-scene-desc { font-size: 10px; color: rgba(232, 221, 208, 0.45); margin: 4px 0; line-height: 1.4; }
 .adp-scene-acts { display: flex; flex-wrap: wrap; gap: 4px; }
-.adp-scene-empty { font-size: 10px; color: rgba(232, 221, 208, 0.25); }
+.adp-scene-empty { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
 
 .adp-list { display: flex; flex-direction: column; gap: 8px; }
 .adp-item { padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }

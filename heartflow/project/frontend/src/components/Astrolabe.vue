@@ -604,7 +604,7 @@ function close() {
   padding: 1px 6px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
   letter-spacing: 0.5px;
   white-space: nowrap;
   flex-shrink: 0;

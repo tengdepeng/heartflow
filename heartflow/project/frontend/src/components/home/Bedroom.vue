@@ -589,7 +589,7 @@ onMounted(() => {
   left: 14px;
   font-size: 28px;
   line-height: 1;
-  color: rgba(240, 213, 176, 0.25);
+  color: rgba(240, 213, 176, 0.45);
   font-family: var(--font-heading-zh);
 }
 

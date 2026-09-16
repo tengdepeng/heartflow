@@ -409,7 +409,7 @@ watch(() => timer.isCompleted, (done) => {
   font-size: 12px;
   line-height: 1.4;
   color: var(--text-secondary);
-  opacity: 0.2;
+  opacity: 0.45;
   font-style: italic;
   max-width: 240px;
   margin: 4px 0 0;

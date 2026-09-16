@@ -707,7 +707,7 @@ onMounted(() => { loadTalks() })
 
 .asm-mirror-label {
   font-size: 12px;
-  opacity: 0.25;
+  opacity: 0.45;
   z-index: 1;
 }
 

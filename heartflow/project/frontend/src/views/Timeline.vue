@@ -761,7 +761,7 @@ onUnmounted(stopReplay)
 }
 
 .date-separator.dimmed {
-  opacity: 0.3;
+  opacity: 0.5;
 }
 
 /* 条目卡片发光增强 — 从父组件穿透到 TimelineFragment */
