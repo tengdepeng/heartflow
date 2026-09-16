@@ -372,7 +372,7 @@
           class="seed-card"
           :class="'seed-stage--' + getGrowthStage(seed).stage"
         >
-          <div class="seed-card-header" @click="toggleSeed(seed.id)">
+          <div class="seed-card-header" role="button" tabindex="0" :aria-expanded="activeSeedId === seed.id" :aria-label="'展开或收起种子 ' + seed.content" @click="toggleSeed(seed.id)" @keydown.enter.prevent="toggleSeed(seed.id)" @keydown.space.prevent="toggleSeed(seed.id)">
             <!-- 生长阶段 SVG 图标 -->
             <svg class="seed-svg" viewBox="0 0 32 32" width="28" height="28">
               <!-- 种子阶段 -->
@@ -1525,6 +1525,11 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
   padding: 10px;
   cursor: pointer;
   user-select: none;
+}
+.seed-card-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 8px;
 }
 .seed-svg {
   flex-shrink: 0;

@@ -81,7 +81,7 @@
 
     <!-- 分类统计 -->
     <div data-enter class="folder-stats" v-if="viewMode !== 'tagcloud'">
-      <span v-for="(count, folder) in folderStats" :key="folder" class="folder-stat" @click="filterFolder = folder || ''">
+      <span v-for="(count, folder) in folderStats" :key="folder" class="folder-stat" role="button" tabindex="0" :aria-label="'筛选分类 ' + (folder || '未分类')" @click="filterFolder = folder || ''" @keydown.enter.prevent="filterFolder = folder || ''" @keydown.space.prevent="filterFolder = folder || ''">
         <span class="folder-dot" :style="{ background: folderColor(folder) }"></span>
         {{ folder || '未分类' }} ({{ count }})
       </span>
@@ -153,7 +153,7 @@
     <!-- ===== 标签云视图 ===== -->
     <div data-enter v-if="viewMode === 'tagcloud'" class="tag-cloud-view">
       <div class="tag-cloud">
-        <span v-for="tag in tagCloud" :key="tag.name" class="cloud-tag" :class="{ active: filterTag === tag.name }" :style="{ fontSize: tag.size + 'px', opacity: 0.4 + tag.weight * 0.6 }" @click="toggleTagFilter(tag.name)">
+        <span v-for="tag in tagCloud" :key="tag.name" class="cloud-tag" :class="{ active: filterTag === tag.name }" :style="{ fontSize: tag.size + 'px', opacity: 0.4 + tag.weight * 0.6 }" role="button" tabindex="0" :aria-pressed="filterTag === tag.name" :aria-label="'切换标签筛选 ' + tag.name" @click="toggleTagFilter(tag.name)" @keydown.enter.prevent="toggleTagFilter(tag.name)" @keydown.space.prevent="toggleTagFilter(tag.name)">
           {{ tag.name }}
           <span class="cloud-tag-count">{{ tag.count }}</span>
         </span>
@@ -833,6 +833,11 @@ function fmt(iso: string) {
 .folder-stat:hover {
   background: rgba(var(--accent-rgb), 0.06);
 }
+.folder-stat:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: rgba(var(--accent-rgb), 0.08);
+}
 .folder-dot {
   width: 8px;
   height: 8px;
@@ -1152,6 +1157,11 @@ function fmt(iso: string) {
 }
 .cloud-tag:hover {
   background: rgba(var(--accent-rgb), 0.08);
+}
+.cloud-tag:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: rgba(var(--accent-rgb), 0.1);
 }
 .cloud-tag.active {
   background: rgba(var(--accent-rgb), 0.15);

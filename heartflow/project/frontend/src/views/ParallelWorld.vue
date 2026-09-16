@@ -149,7 +149,12 @@
             ready: checkReady(c),
             sealed: !c.opened && !checkReady(c),
           }"
+          role="button"
+          tabindex="0"
+          :aria-label="c.opened ? '查看已开启的时间胶囊 ' + c.message : (checkReady(c) ? '开启时间胶囊' : '查看封存的时间胶囊')"
           @click="tryOpenCapsule(c)"
+          @keydown.enter.prevent="tryOpenCapsule(c)"
+          @keydown.space.prevent="tryOpenCapsule(c)"
         >
           <!-- 密封光球 -->
           <div v-if="!c.opened" class="pw-capsule-orb" :class="{ pulse: checkReady(c) }">
@@ -205,7 +210,13 @@
           :key="alt.id"
           class="pw-self-card"
           :style="{ borderColor: alt.color + '22', background: alt.color + '08' }"
+          role="button"
+          tabindex="0"
+          :aria-expanded="!!alt.expanded"
+          :aria-label="'展开或收起平行自我 ' + alt.title"
           @click="expandAlt(i)"
+          @keydown.enter.prevent="expandAlt(i)"
+          @keydown.space.prevent="expandAlt(i)"
         >
           <span class="pw-self-icon">{{ alt.icon }}</span>
           <div class="pw-self-body">
@@ -338,7 +349,7 @@
       <h2 class="pw-section-title">梦境碎片</h2>
       <p class="pw-hint">你在另一个维度里真实经历过的碎片</p>
       <div class="pw-dream-grid" v-if="dreamFragments.length">
-        <div v-for="d in dreamFragments" :key="d.id" class="pw-dream-card" @click="openDreamSource()" title="点击回到梦乡小筑">
+        <div v-for="d in dreamFragments" :key="d.id" class="pw-dream-card" role="button" tabindex="0" :aria-label="'查看梦境 ' + (d.title || '无标题梦境') + ' 的来源'" @click="openDreamSource()" @keydown.enter.prevent="openDreamSource()" @keydown.space.prevent="openDreamSource()" title="点击回到梦乡小筑">
           <span class="pw-dream-icon">🌙</span>
           <div class="pw-dream-body">
             <strong class="pw-dream-title">{{ d.title || '无标题梦境' }}</strong>
@@ -1148,6 +1159,12 @@ section {
   border-color: rgba(var(--accent-rgb), 0.15);
 }
 
+.pw-capsule-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
 .pw-capsule-card.ready {
   border-color: rgba(var(--accent-rgb), 0.35);
   background: rgba(var(--accent-rgb), 0.05);
@@ -1334,6 +1351,12 @@ section {
   border-color: rgba(var(--accent-rgb), 0.2);
 }
 
+.pw-self-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
+
 .pw-self-icon {
   font-size: 24px;
   flex-shrink: 0;
@@ -1427,6 +1450,12 @@ section {
 
 .pw-dream-card:hover {
   border-color: rgba(var(--accent-rgb), 0.22);
+}
+
+.pw-dream-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: rgba(var(--accent-rgb), 0.3);
 }
 
 .pw-dream-icon {

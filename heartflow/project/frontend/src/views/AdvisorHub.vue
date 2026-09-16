@@ -70,7 +70,7 @@
 
     <!-- 幕僚卡片 -->
     <div data-enter class="ah-advisor-grid" v-if="advisors.length">
-      <div v-for="a in advisors" :key="a.id" class="ah-advisor-card" :class="{ dormant: a.state === 'slumber' }" @click="editAdvisor(a)">
+      <div v-for="a in advisors" :key="a.id" class="ah-advisor-card" :class="{ dormant: a.state === 'slumber' }" role="button" tabindex="0" :aria-label="'编辑幕僚 ' + a.name" @click="editAdvisor(a)" @keydown.enter.prevent="editAdvisor(a)" @keydown.space.prevent="editAdvisor(a)">
         <div class="a-avatar" :style="{ background: (a.customColorScheme?.primary ?? '#a08a7a') + '22', borderColor: (a.customColorScheme?.primary ?? '#a08a7a') + '44' }">
           <img v-if="carrierIsImage(a.carrier, advisorCarrierStageOf(a))" :src="a.carrier?.imageData" class="a-avatar-img" :alt="a.name" />
           <span v-else class="a-icon">{{ glyphOf(a) }}</span>
@@ -672,6 +672,11 @@ function noteFmt(iso: string): string {
 .ah-advisor-card:hover {
   background: rgba(var(--accent-rgb), 0.06);
   border-color: rgba(var(--accent-rgb), 0.15);
+}
+.ah-advisor-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: rgba(var(--accent-rgb), 0.3);
 }
 .ah-advisor-card.dormant {
   opacity: 0.35;

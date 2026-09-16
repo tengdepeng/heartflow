@@ -57,7 +57,7 @@
         >
           <span class="asm-toolcard-icon">{{ card.icon }}</span>
           <span class="asm-toolcard-label">{{ card.label }}</span>
-          <span v-if="editMode" class="asm-toolcard-remove" @click.stop="removeToolCard(card.id)">✕</span>
+          <span v-if="editMode" class="asm-toolcard-remove" role="button" tabindex="0" :aria-label="'移除卡片 ' + card.label" @click.stop="removeToolCard(card.id)" @keydown.enter.prevent.stop="removeToolCard(card.id)" @keydown.space.prevent.stop="removeToolCard(card.id)">✕</span>
         </button>
       </div>
       <div v-if="editMode" class="asm-toolcards-add">
@@ -111,7 +111,7 @@
     <!-- 不同房间的镜像 -->
     <section><h3>不同房间的镜像</h3>
       <div class="asm-rooms">
-        <div v-for="r in roomMirrors" :key="r.room" class="asm-room-card" :class="{ active: activeRoom?.room === r.room }" @click="selectRoom(r)">
+        <div v-for="r in roomMirrors" :key="r.room" class="asm-room-card" :class="{ active: activeRoom?.room === r.room }" role="button" tabindex="0" :aria-label="'查看 ' + r.room + ' 房间的镜像'" @click="selectRoom(r)" @keydown.enter.prevent="selectRoom(r)" @keydown.space.prevent="selectRoom(r)">
           <span class="asm-room-icon">{{ r.icon }}</span>
           <div class="asm-room-body">
             <strong>{{ r.room }}</strong>
@@ -604,6 +604,11 @@ onMounted(() => { loadTalks() })
   background: rgba(var(--accent-rgb), 0.15);
   color: var(--accent);
 }
+.asm-toolcard-remove:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 50%;
+}
 
 .asm-toolcards-add {
   display: flex;
@@ -773,6 +778,11 @@ section h3 {
 .asm-room-card:hover {
   background: var(--bg-card);
   border-color: rgba(var(--accent-rgb), 0.15);
+}
+.asm-room-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: rgba(var(--accent-rgb), 0.3);
 }
 
 .asm-room-card.active {

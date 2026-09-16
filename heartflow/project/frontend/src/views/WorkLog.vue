@@ -271,7 +271,12 @@
           v-for="room in crossRoomStats"
           :key="room.key"
           class="wl-cross-card"
+          role="button"
+          tabindex="0"
+          :aria-label="'前往 ' + room.name"
           @click="navigateToRoom(room.key)"
+          @keydown.enter.prevent="navigateToRoom(room.key)"
+          @keydown.space.prevent="navigateToRoom(room.key)"
         >
           <span class="wl-cross-icon">{{ room.icon }}</span>
           <span class="wl-cross-value">{{ room.value }}</span>
@@ -360,8 +365,8 @@
           </template>
           <!-- 显示模式 -->
           <template v-else>
-            <span class="wl-shift-type" @click="startEdit(s)">{{ typeLabel(s.type) }}</span>
-            <span class="wl-shift-time" @click="startEdit(s)">{{ s.date }} {{ s.start }}-{{ s.end }}</span>
+            <span class="wl-shift-type" role="button" tabindex="0" :aria-label="'编辑班次 ' + typeLabel(s.type)" @click="startEdit(s)" @keydown.enter.prevent="startEdit(s)" @keydown.space.prevent="startEdit(s)">{{ typeLabel(s.type) }}</span>
+            <span class="wl-shift-time" role="button" tabindex="0" :aria-label="'编辑班次 ' + s.date + ' ' + s.start + '-' + s.end" @click="startEdit(s)" @keydown.enter.prevent="startEdit(s)" @keydown.space.prevent="startEdit(s)">{{ s.date }} {{ s.start }}-{{ s.end }}</span>
             <span class="wl-shift-hours">{{ s.hours }}h</span>
             <span v-if="hourlyRate > 0" class="wl-shift-pay">¥{{ (s.hours * hourlyRate * (s.type === 'overtime' ? 1.5 : s.type === 'night' ? 1.3 : 1)).toFixed(0) }}</span>
             <span v-if="s.note" class="wl-shift-note" :title="s.note">📝</span>
@@ -370,8 +375,8 @@
         </div>
       </div>
       <!-- 加载更多 -->
-      <div class="wl-load-more" v-if="hasMore" @click="loadMoreCount += 15">
-        <button class="wl-btn wl-btn-more">显示更多 ({{ filteredShifts.length - paginatedShifts.length }} 条)</button>
+      <div class="wl-load-more" v-if="hasMore">
+        <button class="wl-btn wl-btn-more" @click="loadMoreCount += 15">显示更多 ({{ filteredShifts.length - paginatedShifts.length }} 条)</button>
       </div>
     </section>
 
@@ -1067,6 +1072,12 @@ function navigateToRoom(key: string) {
 .wl-overtime { border-left-color: #e8a040; }
 .wl-shift-type { font-size: 12px; min-width: 70px; cursor: pointer; color: rgba(var(--accent-rgb), 0.8); }
 .wl-shift-time { flex: 1; cursor: pointer; color: rgba(var(--accent-rgb), 0.6); }
+.wl-shift-type:focus-visible,
+.wl-shift-time:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
 .wl-shift-hours { font-weight: 500; color: var(--accent); }
 .wl-shift-pay { font-size: 11px; color: var(--accent); opacity: 0.7; }
 .wl-shift-note { font-size: 12px; cursor: help; }
@@ -1180,6 +1191,11 @@ function navigateToRoom(key: string) {
 }
 .wl-cross-card:hover::before { opacity: 1; }
 .wl-cross-card:active { transform: scale(0.96); }
+.wl-cross-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: rgba(var(--accent-rgb), 0.3);
+}
 .wl-cross-icon { font-size: 18px; line-height: 1; margin-bottom: 4px; }
 .wl-cross-value { font-size: 18px; font-weight: 600; color: var(--accent); }
 .wl-cross-name { font-size: 11px; color: rgba(var(--accent-rgb), 0.7); font-weight: 500; }

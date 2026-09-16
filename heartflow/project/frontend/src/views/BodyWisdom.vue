@@ -149,7 +149,7 @@
         <h3>📿 藏经角落</h3>
         <p class="bw-hint">经文阅读 · 静坐引导 · 能量音乐</p>
         <div class="bw-sutra-list">
-          <div v-for="s in sutras" :key="s" class="bw-sutra-card" :class="{'bw-reading':readingSutra===s}" @click="toggleReading(s)">
+          <div v-for="s in sutras" :key="s" class="bw-sutra-card" :class="{'bw-reading':readingSutra===s}" role="button" tabindex="0" :aria-expanded="readingSutra===s" :aria-label="'展开或收起经文 ' + s" @click="toggleReading(s)" @keydown.enter.prevent="toggleReading(s)" @keydown.space.prevent="toggleReading(s)">
             <span>{{s}}</span>
             <span v-if="readingSutra===s" class="bw-sutra-timer">{{elapsedTime}}</span>
             <span v-else-if="sutraReadCount(s)>0" class="bw-sutra-read-count">已读 {{sutraReadCount(s)}} 次</span>
@@ -707,6 +707,11 @@ section h3 {
 .bw-sutra-card:hover {
   background: var(--bg-card);
   border-left-color: rgba(var(--accent-rgb), 0.3);
+}
+.bw-sutra-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-left-color: rgba(var(--accent-rgb), 0.5);
 }
 .bw-sutra-card.bw-reading {
   background: rgba(var(--accent-rgb), 0.06);
