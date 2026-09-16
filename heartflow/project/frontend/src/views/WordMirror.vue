@@ -82,7 +82,15 @@
 
     <!-- 间隔重复：今日待复习（F9，纯本地调度，可折叠） -->
     <section data-enter class="wm-review-section" v-if="dueList.length">
-      <div class="wm-review-head" @click="reviewOpen = !reviewOpen">
+      <div
+        class="wm-review-head"
+        role="button"
+        tabindex="0"
+        :aria-expanded="reviewOpen"
+        aria-label="今日待复习折叠"
+        @click="reviewOpen = !reviewOpen"
+        @keydown.enter="reviewOpen = !reviewOpen"
+      >
         <span class="wm-review-title">🌱 今日待复习 <b>{{ dueList.length }}</b></span>
         <span class="group-toggle">{{ reviewOpen ? '▾' : '▸' }}</span>
       </div>
@@ -166,7 +174,15 @@
     <!-- 词汇分类分组 -->
     <section data-enter class="wm-word-groups">
       <div v-for="group in displayGroups" :key="group.key" class="wm-word-group">
-        <div class="wm-group-header" @click="toggleGroup(group.key)">
+        <div
+          class="wm-group-header"
+          role="button"
+          tabindex="0"
+          :aria-expanded="group.expanded"
+          aria-label="词汇分组折叠"
+          @click="toggleGroup(group.key)"
+          @keydown.enter="toggleGroup(group.key)"
+        >
           <span class="group-label">{{ group.label }}</span>
           <span class="group-count">{{ group.count }}</span>
           <span class="group-toggle">{{ group.expanded ? '▾' : '▸' }}</span>
@@ -1056,6 +1072,17 @@ section h3 {
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+.wm-review-head:hover,
+.wm-review-head:focus-visible {
+  background: rgba(var(--accent-rgb), 0.06);
+}
+.wm-review-head:focus-visible,
+.wm-group-header:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: 2px;
 }
 .wm-review-title {
   font-size: 13px;
@@ -1335,8 +1362,7 @@ section h3 {
 }
 .card-time {
   font-size: 10px;
-  color: rgba(232, 221, 208, 0.3);
-  opacity: 0.4;
+  color: rgba(232, 221, 208, 0.55);
   white-space: nowrap;
 }
 .wm-del-btn {
@@ -1398,6 +1424,8 @@ section h3 {
 @media (max-width: 640px) {
   .wm { padding: 24px 14px 56px; }
   .wm-stats-section { flex-direction: column; }
+  .wm-add-row { flex-direction: column; }
+  .wm-assoc-input-row { flex-direction: column; }
 }
 
 @media (max-width: 480px) {
@@ -1436,6 +1464,12 @@ section h3 {
   background: rgba(var(--accent-rgb), 0.12);
   color: var(--accent);
   font-weight: 500;
+}
+
+/* 细屏下 Tab 允许换行，避免文字挤压溢出 */
+@media (max-width: 480px) {
+  .wm-tabs { flex-wrap: wrap; }
+  .wm-tab { flex: 1 1 45%; }
 }
 
 /* ============== 联想网络 ============== */

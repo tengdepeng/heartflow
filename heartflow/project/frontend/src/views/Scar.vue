@@ -38,7 +38,12 @@
         <div
           class="sc-anvil-svg"
           :class="{ 'sc-anvil--strike': isStriking }"
+          role="button"
+          tabindex="0"
+          aria-label="锻打砧板"
           @click="strikeAnvil"
+          @keydown.enter="strikeAnvil"
+          @keydown.space.prevent="strikeAnvil"
         >
           <div class="sc-anvil-spark" v-if="showSpark">
             <svg viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -874,6 +879,11 @@ function strikeAnvil() {
 .sc-anvil-svg:active {
   transform: scale(0.95);
 }
+.sc-anvil-svg:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.6);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
 .sc-anvil-svg svg { width: 100%; height: 100%; }
 .sc-anvil--strike {
   animation: anvil-strike 0.5s ease;
@@ -982,7 +992,7 @@ function strikeAnvil() {
   border: 1px solid rgba(196,138,106,0.08);
 }
 .sc-stat-value { display: block; font-size: 22px; font-weight: 600; color: var(--sc-accent); }
-.sc-stat-label { display: block; font-size: 11px; color: rgba(196,138,106,0.5); margin-top: 4px; }
+.sc-stat-label { display: block; font-size: 11px; color: rgba(196,138,106,0.62); margin-top: 4px; }
 
 /* ---- Section label ---- */
 .sc-section-label {
@@ -1013,7 +1023,7 @@ function strikeAnvil() {
   background: linear-gradient(90deg, rgba(196,138,106,0.3), var(--sc-accent));
   transition: width 0.4s ease;
 }
-.sc-body-count { font-size: 11px; color: rgba(196,138,106,0.4); width: 20px; text-align: right; }
+.sc-body-count { font-size: 11px; color: rgba(196,138,106,0.55); width: 20px; text-align: right; }
 
 /* ---- Type distribution ---- */
 .sc-type-section {
@@ -1272,7 +1282,7 @@ function strikeAnvil() {
   background: rgba(196,138,106,0.02);
   position: relative; z-index: 1;
 }
-.sc-empty-hint { font-size: 12px; color: rgba(196,138,106,0.15); margin-top: 4px; }
+.sc-empty-hint { font-size: 12px; color: rgba(196,138,106,0.45); margin-top: 4px; }
 
 /* ---- Healing Journey ---- */
 .sc-journey-section {

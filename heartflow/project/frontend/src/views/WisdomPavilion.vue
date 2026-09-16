@@ -96,7 +96,15 @@
         <p>{{ searchQuery ? '未找到匹配的记录' : '暂无记录，在上面添加一条吧' }}</p>
       </div>
       <div v-for="record in filteredRecords" :key="record.id" class="wp-record-card">
-        <div class="wp-record-header" @click="toggleRecordExpand(record.id)">
+        <div
+          class="wp-record-header"
+          role="button"
+          tabindex="0"
+          :aria-expanded="expandedRecordId === record.id"
+          aria-label="展开或收起记录"
+          @click="toggleRecordExpand(record.id)"
+          @keydown.enter="toggleRecordExpand(record.id)"
+        >
           <span class="record-q">{{ record.question }}</span>
           <span class="record-time">{{ formatTime(record.createdAt) }}</span>
           <span class="expand-icon">{{ expandedRecordId === record.id ? '▲' : '▼' }}</span>
@@ -581,7 +589,7 @@ onMounted(() => {
   border-color: rgba(var(--accent-rgb), 0.3);
 }
 .wp-input::placeholder {
-  color: rgba(var(--accent-rgb), 0.25);
+  color: rgba(var(--accent-rgb), 0.45);
 }
 .wp-btn {
   padding: 8px 18px;
@@ -785,7 +793,7 @@ section h3 {
   padding: 24px 0;
   text-align: center;
   font-size: 13px;
-  color: rgba(var(--accent-rgb), 0.3);
+  color: rgba(var(--accent-rgb), 0.45);
 }
 .wp-record-card {
   border-radius: 10px;
@@ -809,6 +817,10 @@ section h3 {
 }
 .wp-record-header:hover {
   background: rgba(var(--accent-rgb), 0.04);
+}
+.wp-record-header:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: -1px;
 }
 .record-q {
   flex: 1;
