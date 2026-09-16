@@ -1036,7 +1036,11 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
   overflow: hidden;
   background: transparent;
   position: relative;
-  transition: background 30s ease;
+  /* 注意：不可在此写 transition（含 background 30s ease）。
+     根部 transition 会以 scoped 优先级覆盖 animations.css 的 .light-gate-*-leave-active
+     页面过渡规则，导致离开动画不触发 transitionend，路由切换永久卡死在本房间
+     （真机遍历发现：花园 → 任何房间均无法离开）。
+     氛围背景的 30s 慢过渡由 .garden-ambient 固定层承担，根部恒为 transparent。 */
 }
 .emotion-garden.ambient-warm {
   background: transparent;

@@ -117,4 +117,43 @@ describe('AdvisorChat 幕僚对话', () => {
     await backBtn.trigger('click')
     expect(mockPush).toHaveBeenCalled()
   })
+
+  it('无效幕僚 ID 时显示提示并禁用输入', async () => {
+    mockGetAdvisorById.mockReturnValue(undefined)
+    const { default: AdvisorChat } = await import('../AdvisorChat.vue')
+    const wrapper = mount(AdvisorChat, {
+      global: {
+        stubs: { Teleport: true, Transition: true },
+      },
+    })
+
+    const invalid = wrapper.find('.achat-invalid')
+    expect(invalid.exists()).toBe(true)
+    expect(wrapper.text()).toContain('无效的幕僚 ID')
+
+    const textarea = wrapper.find('.achat-input')
+    expect(textarea.attributes('disabled')).toBeDefined()
+    expect(textarea.attributes('placeholder')).toContain('请选择有效幕僚')
+
+    const sendBtn = wrapper.find('.achat-send-btn')
+    expect(sendBtn.attributes('disabled')).toBeDefined()
+
+    // 空态不再显示
+    expect(wrapper.find('.achat-empty').exists()).toBe(false)
+  })
+
+  it('无效 ID 时返回按钮跳转幕僚列表', async () => {
+    mockGetAdvisorById.mockReturnValue(undefined)
+    const { default: AdvisorChat } = await import('../AdvisorChat.vue')
+    const wrapper = mount(AdvisorChat, {
+      global: {
+        stubs: { Teleport: true, Transition: true },
+      },
+    })
+
+    const invalidBack = wrapper.find('.achat-invalid-back')
+    expect(invalidBack.exists()).toBe(true)
+    await invalidBack.trigger('click')
+    expect(mockPush).toHaveBeenCalledWith('/advisors')
+  })
 })

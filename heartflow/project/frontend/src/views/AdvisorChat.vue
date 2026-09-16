@@ -21,7 +21,13 @@
 
     <!-- 对话区域 -->
     <div class="achat-conversation" ref="chatContainerRef">
-      <div v-if="chatMessages.length === 0" class="achat-empty">
+      <div v-if="!advisorProfile" class="achat-invalid">
+        <span class="achat-invalid-icon">⚠️</span>
+        <p class="achat-invalid-title">无效的幕僚 ID</p>
+        <p class="achat-invalid-desc">该幕僚不存在或已被移除，无法开始对话。</p>
+        <button class="achat-invalid-back" @click="goBack">返回幕僚列表</button>
+      </div>
+      <div v-else-if="chatMessages.length === 0" class="achat-empty">
         <span class="achat-empty-icon">💬</span>
         <p class="achat-empty-text">开始与 {{ advisorProfile?.name ?? '幕僚' }} 对话</p>
       </div>
@@ -46,15 +52,15 @@
       <textarea
         v-model="inputText"
         class="achat-input"
-        placeholder="输入消息…"
+        :placeholder="advisorProfile ? '输入消息…' : '请选择有效幕僚后开始对话'"
         rows="2"
         @keydown.enter.exact="handleSend"
-        :disabled="sending"
+        :disabled="sending || !advisorProfile"
       ></textarea>
       <button
         class="achat-send-btn"
         @click="handleSend"
-        :disabled="!inputText.trim() || sending"
+        :disabled="!inputText.trim() || sending || !advisorProfile"
       >
         {{ sending ? '…' : '发送' }}
       </button>
@@ -197,7 +203,7 @@ watch(chatMessages, async () => {
 
 async function handleSend() {
   const text = inputText.value.trim()
-  if (!text || sending.value) return
+  if (!text || sending.value || !advisorProfile.value) return
   sending.value = true
   inputText.value = ''
 
@@ -330,6 +336,47 @@ function goBack() {
   z-index: 1;
   scrollbar-width: thin;
   scrollbar-color: rgba(var(--accent-rgb), 0.1) transparent;
+}
+
+/* ---- Invalid ---- */
+.achat-invalid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 60px 20px;
+  text-align: center;
+}
+.achat-invalid-icon {
+  font-size: 36px;
+  opacity: 0.45;
+}
+.achat-invalid-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(240, 232, 224, 0.85);
+  margin: 0;
+}
+.achat-invalid-desc {
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.4);
+  margin: 0;
+}
+.achat-invalid-back {
+  margin-top: 8px;
+  padding: 8px 22px;
+  border-radius: 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.2);
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent);
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.achat-invalid-back:hover {
+  background: rgba(var(--accent-rgb), 0.22);
 }
 
 /* ---- Empty ---- */

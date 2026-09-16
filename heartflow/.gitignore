@@ -146,3 +146,5 @@ project/frontend/scripts/tmp-*.cjs
 project/frontend/scripts/triage-orphans.cjs
 project/frontend/scripts/orphan-*.ps1
 project/frontend/scripts/smoke-shots/
+project/frontend/scripts/probe-*.cjs
+project/frontend/scripts/route-*.js

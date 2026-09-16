@@ -51,8 +51,8 @@
           {{ canvasCrystals.length }} 颗结晶
         </div>
 
-        <!-- 空状态 -->
-      <div v-if="canvasCrystals.length === 0" class="empty-state">
+        <!-- 空状态（仅全强度下展示引导；环境级画布作为房间氛围背景，不遮挡内容页） -->
+      <div v-if="canvasCrystals.length === 0 && props.intensity >= 0.5" class="empty-state">
         <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
           <polygon points="24,4 44,24 24,44 4,24" />
         </svg>
@@ -157,8 +157,9 @@
 
     <!-- 浮动便签层（INCR-302 补挂载孤儿组件 CanvasNotes：App.vue 注释「浮动便签本身由
          CanvasRoom 内的 CanvasNotes 渲染」为设计宿主，实现遗漏；emit('edit') 由
-         NoteLayer 全局编辑器承接；ambient 模式降透明度不参与交互） -->
-    <CanvasNotes :ambient="renderMode === 'ambient'" />
+         NoteLayer 全局编辑器承接；ambient 模式降透明度不参与交互；
+         环境级强度（非首页/安全岛路由）同样视作 ambient，避免空态提示遮挡内容页） -->
+    <CanvasNotes :ambient="renderMode === 'ambient' || props.intensity < 0.5" />
   </div>
 </template>
 

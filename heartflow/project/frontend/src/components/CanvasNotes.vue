@@ -40,8 +40,8 @@
       </div>
     </div>
 
-    <!-- 空状态 -->
-    <div v-if="floatingNotes.length === 0" class="cn-empty">
+    <!-- 空状态（ambient 环境级时不渲染，避免全屏居中提示遮挡内容页） -->
+    <div v-if="floatingNotes.length === 0 && !ambient" class="cn-empty">
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.15">
         <rect x="4" y="6" width="24" height="22" rx="2" />
         <line x1="8" y1="12" x2="24" y2="12" />
