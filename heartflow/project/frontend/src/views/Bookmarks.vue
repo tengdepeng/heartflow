@@ -90,14 +90,14 @@
     <!-- ===== 抽屉柜视图 ===== -->
     <div data-enter v-if="viewMode === 'drawer'" class="drawer-cabinet">
       <div v-for="folder in folderDrawers" :key="folder.name" class="drawer-group">
-        <div class="drawer-header" @click="toggleDrawer(folder.name)" :style="{ borderLeftColor: folderColor(folder.name) }">
+        <div class="drawer-header" role="button" tabindex="0" :aria-label="'展开或收起文件夹 ' + (folder.name || '未分类')" :aria-expanded="openDrawers.has(folder.name)" @click="toggleDrawer(folder.name)" @keydown.enter.prevent="toggleDrawer(folder.name)" @keydown.space.prevent="toggleDrawer(folder.name)" :style="{ borderLeftColor: folderColor(folder.name) }">
           <span class="drawer-handle" :style="{ background: folderColor(folder.name) }"></span>
           <span class="drawer-name">{{ folder.name || '未分类' }}</span>
           <span class="drawer-count">{{ folder.bookmarks.length }}</span>
           <span class="drawer-arrow" :class="{ open: openDrawers.has(folder.name) }">▼</span>
         </div>
         <div v-if="openDrawers.has(folder.name)" class="drawer-content">
-          <div v-for="b in folder.bookmarks" :key="b.bookmark_id" class="bookmark-card" :class="cardClass(b)" @click="toggleCardFlip(b.bookmark_id)">
+          <div v-for="b in folder.bookmarks" :key="b.bookmark_id" class="bookmark-card" :class="cardClass(b)" role="button" tabindex="0" :aria-label="'翻转书签 ' + b.title" @click="toggleCardFlip(b.bookmark_id)" @keydown.enter.prevent="toggleCardFlip(b.bookmark_id)" @keydown.space.prevent="toggleCardFlip(b.bookmark_id)">
             <div class="card-inner" :class="{ flipped: flippedCards.has(b.bookmark_id) }">
               <!-- 正面 -->
               <div class="card-front">
@@ -138,7 +138,7 @@
 
     <!-- ===== 入口册视图 ===== -->
     <div data-enter v-if="viewMode === 'list'" class="entry-book">
-      <div v-for="b in filteredBookmarks" :key="b.bookmark_id" class="entry-row" :class="{ archived: b.status === 'archived' }" @click="openBookmark(b)">
+      <div v-for="b in filteredBookmarks" :key="b.bookmark_id" class="entry-row" :class="{ archived: b.status === 'archived' }" role="button" tabindex="0" :aria-label="'打开书签 ' + (b.title || b.url)" @click="openBookmark(b)" @keydown.enter.prevent="openBookmark(b)" @keydown.space.prevent="openBookmark(b)">
         <span class="entry-icon">{{ b.favicon || '📎' }}</span>
         <div class="entry-info">
           <span class="entry-title">{{ b.title || b.url }}</span>
@@ -177,7 +177,7 @@
 
     <!-- 归档柜 (抽屉柜视图底部) -->
     <div data-enter v-if="viewMode === 'drawer' && archivedBookmarks.length" class="archive-cabinet">
-      <div class="archive-header" @click="showArchive = !showArchive">
+      <div class="archive-header" role="button" tabindex="0" :aria-label="'展开或收起归档柜'" :aria-expanded="showArchive" @click="showArchive = !showArchive" @keydown.enter.prevent="showArchive = !showArchive" @keydown.space.prevent="showArchive = !showArchive">
         <span class="archive-icon">📦</span>
         <span class="archive-label">归档柜</span>
         <span class="archive-count">{{ archivedBookmarks.length }}</span>
@@ -862,6 +862,11 @@ function fmt(iso: string) {
 .drawer-header:hover {
   background: rgba(var(--accent-rgb), 0.04);
 }
+.drawer-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: rgba(var(--accent-rgb), 0.04);
+}
 .drawer-handle {
   width: 10px;
   height: 10px;
@@ -905,6 +910,11 @@ function fmt(iso: string) {
 .bookmark-card {
   perspective: 800px;
   cursor: pointer;
+}
+.bookmark-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 .card-inner {
   position: relative;
@@ -1067,6 +1077,11 @@ function fmt(iso: string) {
 .entry-row:hover {
   background: rgba(var(--accent-rgb), 0.04);
 }
+.entry-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: rgba(var(--accent-rgb), 0.04);
+}
 .entry-row.archived {
   opacity: 0.5;
 }
@@ -1189,6 +1204,11 @@ function fmt(iso: string) {
   transition: all 0.2s;
 }
 .archive-header:hover {
+  background: rgba(var(--accent-rgb), 0.06);
+}
+.archive-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
   background: rgba(var(--accent-rgb), 0.06);
 }
 .archive-icon {

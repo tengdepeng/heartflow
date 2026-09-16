@@ -133,19 +133,19 @@
 
     <!-- 植物卡片 -->
     <section data-enter class="plant-grid">
-      <div class="plant-card" :style="sleepPlantStyle" @click="showDetail='sleep'">
+      <div class="plant-card" :style="sleepPlantStyle" role="button" tabindex="0" :aria-label="'查看睡眠树详情'" @click="showDetail='sleep'" @keydown.enter.prevent="showDetail='sleep'" @keydown.space.prevent="showDetail='sleep'">
         <div class="plant-visual">{{sleepPlantIcon}}</div><span class="plant-name">睡眠树</span><span class="plant-stat">{{sleepAvg}}h 均值</span>
         <div class="plant-effect" v-if="sleepEffect" :style="{color:sleepEffect.color}">{{sleepEffect.text}}</div>
       </div>
-      <div class="plant-card" :style="exercisePlantStyle" @click="showDetail='exercise'">
+      <div class="plant-card" :style="exercisePlantStyle" role="button" tabindex="0" :aria-label="'查看运动藤详情'" @click="showDetail='exercise'" @keydown.enter.prevent="showDetail='exercise'" @keydown.space.prevent="showDetail='exercise'">
         <div class="plant-visual">{{exercisePlantIcon}}</div><span class="plant-name">运动藤</span><span class="plant-stat">{{exerciseWeek}}分/周</span>
         <div class="plant-effect" v-if="exerciseEffect" :style="{color:exerciseEffect.color}">{{exerciseEffect.text}}</div>
       </div>
-      <div class="plant-card" :style="mealPlantStyle" @click="showDetail='meal'">
+      <div class="plant-card" :style="mealPlantStyle" role="button" tabindex="0" :aria-label="'查看饮食园详情'" @click="showDetail='meal'" @keydown.enter.prevent="showDetail='meal'" @keydown.space.prevent="showDetail='meal'">
         <div class="plant-visual">{{mealPlantIcon}}</div><span class="plant-name">饮食园</span><span class="plant-stat">{{mealCount}} 次记录</span>
         <div class="plant-effect" v-if="mealEffect" :style="{color:mealEffect.color}">{{mealEffect.text}}</div>
       </div>
-      <div class="plant-card" :style="cyclePlantStyle" @click="cycleShowForm=!cycleShowForm">
+      <div class="plant-card" :style="cyclePlantStyle" role="button" tabindex="0" :aria-label="'切换周期花记录表单'" @click="cycleShowForm=!cycleShowForm" @keydown.enter.prevent="cycleShowForm=!cycleShowForm" @keydown.space.prevent="cycleShowForm=!cycleShowForm">
         <div class="plant-visual">{{cyclePlantIcon}}</div><span class="plant-name">周期花</span><span class="plant-stat">{{cyclePhase}}</span>
         <div class="plant-effect" v-if="cycleEffect" :style="{color:cycleEffect.color}">{{cycleEffect.text}}</div>
       </div>
@@ -832,6 +832,11 @@ const recentLogs = computed(() =>
   background: var(--amber-card-hover);
   border-color: rgba(var(--accent-rgb), 0.25);
   box-shadow: 0 2px 16px rgba(var(--accent-rgb), 0.06);
+}
+.plant-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  background: var(--amber-card-hover);
 }
 .plant-visual { font-size: 32px; }
 .plant-name { font-size: 13px; font-weight: 500; color: var(--amber-text); }
