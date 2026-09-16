@@ -74,9 +74,26 @@
           <span>📖</span>
           <div class="item-info">
             <span class="item-text">{{ b.text }}</span>
-            <span class="item-note clickable" @click.stop="editProgress(b)">进度：{{ b.progress || '开头' }}</span>
+            <span
+              class="item-note clickable"
+              role="button"
+              tabindex="0"
+              :aria-label="'更新阅读进度：' + b.text"
+              @click.stop="editProgress(b)"
+              @keydown.enter.prevent="editProgress(b)"
+              @keydown.space.prevent="editProgress(b)"
+            >进度：{{ b.progress || '开头' }}</span>
           </div>
-          <span class="status-tag" :class="b.status || 'active'" @click="cycleBookStatus(b)">{{ statusLabel(b.status) }}</span>
+          <span
+            class="status-tag"
+            :class="b.status || 'active'"
+            role="button"
+            tabindex="0"
+            :aria-label="'切换书籍状态，当前：' + statusLabel(b.status)"
+            @click="cycleBookStatus(b)"
+            @keydown.enter.prevent="cycleBookStatus(b)"
+            @keydown.space.prevent="cycleBookStatus(b)"
+          >{{ statusLabel(b.status) }}</span>
           <button class="uf-del" @click="removeBook(b.id)">×</button>
         </div>
       </div>
@@ -89,7 +106,16 @@
         <div v-for="d in drafts" :key="d.id" class="item-card">
           <span>📝</span>
           <div class="item-info">
-            <span v-if="editingDraftId !== d.id" class="item-text clickable" @click="startInlineEdit(d)">{{ d.text.slice(0, 50) || '还没有内容' }}</span>
+            <span
+              v-if="editingDraftId !== d.id"
+              class="item-text clickable"
+              role="button"
+              tabindex="0"
+              aria-label="编辑笔记内容"
+              @click="startInlineEdit(d)"
+              @keydown.enter.prevent="startInlineEdit(d)"
+              @keydown.space.prevent="startInlineEdit(d)"
+            >{{ d.text.slice(0, 50) || '还没有内容' }}</span>
             <input
               v-else
               v-model="draftEditText"
@@ -575,9 +601,19 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
 .item-text { font-size: 13px; color: var(--amber-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .item-text.clickable { cursor: pointer; }
 .item-text.clickable:hover { color: var(--amber-accent); }
+.item-text.clickable:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.6);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
 .item-note { font-size: 11px; color: var(--amber-text-muted); }
 .item-note.clickable { cursor: pointer; }
 .item-note.clickable:hover { color: var(--amber-accent); opacity: 0.9; }
+.item-note.clickable:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.6);
+  outline-offset: 1px;
+  border-radius: 4px;
+}
 .item-date { font-size: 11px; color: var(--amber-text-muted); margin-left: auto; white-space: nowrap; }
 
 /* ========== 搁置种子 ========== */
@@ -630,6 +666,10 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
   background: rgba(255, 120, 90, 0.08);
   color: #ff785a;
   border: 1px solid rgba(255, 120, 90, 0.15);
+}
+.status-tag:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.6);
+  outline-offset: 1px;
 }
 
 /* ========== 内联编辑 ========== */

@@ -126,8 +126,21 @@
     <!-- 岁时环 -->
     <div data-enter class="sr-ring-container">
       <div class="sr-season-ring">
-        <div v-for="t in SOLAR_TERMS" :key="t.name" class="sr-ring-node" :class="{active:t===termCtx.currentTerm.value,upcoming:t===termCtx.upcomingTerm.value}"
-          :style="termCtx.nodeAngle(t)" @click="selectedTerm=t" :title="t.name">
+        <div
+          v-for="t in SOLAR_TERMS"
+          :key="t.name"
+          class="sr-ring-node"
+          :class="{active:t===termCtx.currentTerm.value,upcoming:t===termCtx.upcomingTerm.value}"
+          :style="termCtx.nodeAngle(t)"
+          role="button"
+          tabindex="0"
+          :aria-pressed="t===termCtx.currentTerm.value"
+          :aria-label="'查看节气 ' + t.name"
+          @click="selectedTerm=t"
+          @keydown.enter.prevent="selectedTerm=t"
+          @keydown.space.prevent="selectedTerm=t"
+          :title="t.name"
+        >
           <span class="sr-rn-dot"/>
           <span class="sr-rn-label" v-if="t===termCtx.currentTerm.value||t===termCtx.upcomingTerm.value">{{t.name}}</span>
         </div>
@@ -799,6 +812,12 @@ const srStats = srCtx.stats
 
 .sr-ring-node:hover {
   transform: scale(1.3);
+}
+
+.sr-ring-node:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 50%;
 }
 
 .sr-ring-node.active .sr-rn-dot {

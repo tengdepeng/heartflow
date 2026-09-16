@@ -237,7 +237,13 @@
           :key="item.id"
           class="shy-item"
           :class="{ 'shy-item--checked': item.checked }"
+          role="checkbox"
+          tabindex="0"
+          :aria-checked="item.checked"
+          :aria-label="'切换睡眠卫生项 ' + item.label"
           @click="sleepQuality.toggleHygieneItem(item.id)"
+          @keydown.enter.prevent="sleepQuality.toggleHygieneItem(item.id)"
+          @keydown.space.prevent="sleepQuality.toggleHygieneItem(item.id)"
         >
           <span class="shy-check">{{ item.checked ? '✓' : '○' }}</span>
           <div class="shy-content">
@@ -758,6 +764,12 @@ onMounted(() => {
 
 .shy-item:hover {
   background: var(--card-hover-bg);
+  border-color: var(--card-hover-border);
+}
+
+.shy-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
   border-color: var(--card-hover-border);
 }
 

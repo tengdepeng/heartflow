@@ -57,7 +57,13 @@
           class="tg-type-chip"
           :class="{ active: selectedType === group.type }"
           :style="selectedType === group.type ? { borderColor: group.color, background: group.color + '18' } : {}"
+          role="button"
+          tabindex="0"
+          :aria-pressed="selectedType === group.type"
+          :aria-label="'筛选变化类型 ' + group.label"
           @click="selectedType = selectedType === group.type ? null : group.type"
+          @keydown.enter.prevent="selectedType = selectedType === group.type ? null : group.type"
+          @keydown.space.prevent="selectedType = selectedType === group.type ? null : group.type"
         >
           <span class="type-icon">{{ group.icon }}</span>
           <span class="type-label">{{ group.label }}</span>
@@ -573,6 +579,10 @@ function remove(id: string) {
 .tg-type-chip:hover {
   background: rgba(var(--bg-card-rgb), 0.5);
   border-color: rgba(var(--accent-rgb), 0.15);
+}
+.tg-type-chip:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.6);
+  outline-offset: 1px;
 }
 .tg-type-chip.active {
   background: rgba(var(--accent-rgb), 0.12);

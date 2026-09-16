@@ -24,7 +24,13 @@
           class="se-scene-card"
           :class="{ active: editingSceneId === scene.id }"
           :style="{ borderLeftColor: scene.atmosphereColor || '#d4a574' }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="editingSceneId === scene.id"
+          :aria-label="'编辑场景 ' + scene.name"
           @click="selectScene(scene.id)"
+          @keydown.enter.prevent="selectScene(scene.id)"
+          @keydown.space.prevent="selectScene(scene.id)"
         >
           <div class="se-scene-header">
             <span class="se-scene-name">{{ scene.name }}</span>
@@ -173,6 +179,7 @@ function removeScene() {
 .se-scene-list { display: flex; flex-direction: column; gap: 8px; }
 .se-scene-card { padding: 12px; border-radius: 10px; background: var(--card-bg); border: 1px solid rgba(var(--accent-rgb), 0.08); border-left: 3px solid rgba(var(--accent-rgb), 0.3); cursor: pointer; transition: all 0.2s; }
 .se-scene-card:hover { background: rgba(55,48,40,0.6); }
+.se-scene-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 .se-scene-card.active { background: rgba(var(--accent-rgb), 0.08); }
 .se-scene-header { display: flex; align-items: center; gap: 8px; }
 .se-scene-name { font-size: 14px; font-weight: 500; color: rgba(var(--text-primary-rgb), 0.8); flex: 1; }

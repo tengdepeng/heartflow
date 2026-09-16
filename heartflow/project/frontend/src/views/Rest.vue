@@ -218,7 +218,12 @@
           :key="practice.id"
           class="rest-practice-card"
           :style="{ '--prac-color': practice.color }"
+          role="button"
+          tabindex="0"
+          :aria-label="'编辑休憩方式 ' + practice.name"
           @click="openEditPractice(practice)"
+          @keydown.enter.prevent="openEditPractice(practice)"
+          @keydown.space.prevent="openEditPractice(practice)"
         >
           <div class="rpc-header">
             <span class="rpc-icon">{{ practice.icon }}</span>
@@ -1284,6 +1289,12 @@ const restTips: RestTip[] = [
   background: var(--card-hover-bg);
   border-color: var(--card-hover-border);
   transform: translateY(-2px);
+}
+
+.rest-practice-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--card-hover-border);
 }
 
 .rpc-header {

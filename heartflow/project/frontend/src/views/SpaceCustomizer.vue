@@ -25,7 +25,13 @@
           :key="preset.id"
           class="sc-preset-card"
           :class="{ active: activeConfig?.presetId === preset.id }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="activeConfig?.presetId === preset.id"
+          :aria-label="'应用模板 ' + preset.name"
           @click="applyPresetTemplate(preset.id)"
+          @keydown.enter.prevent="applyPresetTemplate(preset.id)"
+          @keydown.space.prevent="applyPresetTemplate(preset.id)"
         >
           <span class="sc-preset-icon">{{ presetIcon(preset.icon) }}</span>
           <span class="sc-preset-name">{{ preset.name }}</span>
@@ -72,7 +78,13 @@
                   :key="room.key"
                   class="dim-chip"
                   :class="{ active: getDimOption('structure', 'rooms', []).includes(room.key) }"
+                  role="checkbox"
+                  tabindex="0"
+                  :aria-checked="getDimOption('structure', 'rooms', []).includes(room.key)"
+                  :aria-label="'切换房间 ' + room.label"
                   @click="toggleRoom(room.key)"
+                  @keydown.enter.prevent="toggleRoom(room.key)"
+                  @keydown.space.prevent="toggleRoom(room.key)"
                 >{{ room.label }}</span>
               </div>
             </div>
@@ -93,7 +105,13 @@
                 :key="feat.key"
                 class="dim-chip"
                 :class="{ active: getDimOption('features', 'enabled', []).includes(feat.key) }"
+                role="checkbox"
+                tabindex="0"
+                :aria-checked="getDimOption('features', 'enabled', []).includes(feat.key)"
+                :aria-label="'切换功能 ' + feat.label"
                 @click="toggleFeature(feat.key)"
+                @keydown.enter.prevent="toggleFeature(feat.key)"
+                @keydown.space.prevent="toggleFeature(feat.key)"
               >{{ feat.label }}</span>
             </div>
           </div>
@@ -250,7 +268,13 @@
                 :key="sc.key"
                 class="dim-chip"
                 :class="{ active: getDimOption('scene', 'presets', []).includes(sc.key) }"
+                role="checkbox"
+                tabindex="0"
+                :aria-checked="getDimOption('scene', 'presets', []).includes(sc.key)"
+                :aria-label="'切换场景 ' + sc.label"
                 @click="toggleScene(sc.key)"
+                @keydown.enter.prevent="toggleScene(sc.key)"
+                @keydown.space.prevent="toggleScene(sc.key)"
               >{{ sc.icon }} {{ sc.label }}</span>
             </div>
           </div>

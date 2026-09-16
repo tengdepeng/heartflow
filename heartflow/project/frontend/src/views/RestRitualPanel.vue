@@ -25,7 +25,13 @@
           :key="ritual.id"
           class="ritual-card"
           :class="{ 'ritual-card--active': activeRitual?.id === ritual.id }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="activeRitual?.id === ritual.id"
+          :aria-label="'选择仪式 ' + ritual.name"
           @click="selectRitual(ritual)"
+          @keydown.enter.prevent="selectRitual(ritual)"
+          @keydown.space.prevent="selectRitual(ritual)"
         >
           <div class="rc-header">
             <span class="rc-name">{{ ritual.name }}</span>
@@ -366,6 +372,12 @@ function soundscapeLabel(soundscape: string): string {
 
 .ritual-card:hover {
   background: var(--card-hover-bg);
+  border-color: var(--card-hover-border);
+}
+
+.ritual-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
   border-color: var(--card-hover-border);
 }
 

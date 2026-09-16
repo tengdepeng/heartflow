@@ -171,8 +171,18 @@
 
     <!-- 人物卡片列表 -->
     <div class="person-grid" v-if="rel.persons.value.length > 0">
-      <div v-for="p in filteredPersons" :key="p.id" class="person-card"
-        :style="{ borderColor: p.color + '33' }" @click="editPerson(p)">
+      <div
+        v-for="p in filteredPersons"
+        :key="p.id"
+        class="person-card"
+        :style="{ borderColor: p.color + '33' }"
+        role="button"
+        tabindex="0"
+        :aria-label="'编辑羁绊 ' + p.name"
+        @click="editPerson(p)"
+        @keydown.enter.prevent="editPerson(p)"
+        @keydown.space.prevent="editPerson(p)"
+      >
         <div class="card-top">
           <span class="card-avatar" :style="{ background: p.color + '22', color: p.color }">
             {{ p.name[0] }}
@@ -820,6 +830,12 @@ function savePerson() {
   background: rgba(55, 48, 40, 0.45);
   transform: translateY(-1px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+}
+
+.person-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: var(--accent);
 }
 
 .card-top {

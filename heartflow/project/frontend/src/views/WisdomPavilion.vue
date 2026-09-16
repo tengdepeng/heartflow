@@ -45,7 +45,18 @@
 
     <!-- 回答：光点卡片并置，无连接词 -->
     <div data-enter v-if="answerCards.length" class="wp-answer-area">
-      <div v-for="(card, i) in answerCards" :key="i" class="wp-answer-card" :style="{ animationDelay: `${i * 0.08}s` }" @click="navigateToRoom(card)">
+      <div
+        v-for="(card, i) in answerCards"
+        :key="i"
+        class="wp-answer-card"
+        :style="{ animationDelay: `${i * 0.08}s` }"
+        role="button"
+        tabindex="0"
+        :aria-label="card.room ? '前往 ' + card.room : '查看光点记录'"
+        @click="navigateToRoom(card)"
+        @keydown.enter.prevent="navigateToRoom(card)"
+        @keydown.space.prevent="navigateToRoom(card)"
+      >
         <span class="answer-domain">{{ card.domain }}</span>
         <p class="answer-text">{{ card.content }}</p>
         <span v-if="card.room" class="answer-nav-hint">→ {{ card.room }}</span>
@@ -57,7 +68,18 @@
       <p class="hint">当你想回看近况时，这里会并置几段已经留下的记录。</p>
       <button class="wp-btn" @click="hammer" :disabled="hammering">{{ hammering ? '整理中…' : '查看片段' }}</button>
       <div v-if="hammerActs.length" class="wp-hammer-acts">
-        <div v-for="(act,i) in hammerActs" :key="i" class="wp-hammer-act" :style="{ animationDelay: `${i*0.3}s` }" @click="navigateToRoom(act)">
+        <div
+          v-for="(act,i) in hammerActs"
+          :key="i"
+          class="wp-hammer-act"
+          :style="{ animationDelay: `${i*0.3}s` }"
+          role="button"
+          tabindex="0"
+          :aria-label="act.room ? '前往 ' + act.room : '查看回看片段'"
+          @click="navigateToRoom(act)"
+          @keydown.enter.prevent="navigateToRoom(act)"
+          @keydown.space.prevent="navigateToRoom(act)"
+        >
           <h4>{{ act.title }}</h4><p>{{ act.content }}</p>
           <span v-if="act.room" class="answer-nav-hint">→ {{ act.room }}</span>
         </div>
@@ -101,9 +123,10 @@
           role="button"
           tabindex="0"
           :aria-expanded="expandedRecordId === record.id"
-          aria-label="展开或收起记录"
+          :aria-label="(expandedRecordId === record.id ? '收起' : '展开') + '记录：' + record.question"
           @click="toggleRecordExpand(record.id)"
-          @keydown.enter="toggleRecordExpand(record.id)"
+          @keydown.enter.prevent="toggleRecordExpand(record.id)"
+          @keydown.space.prevent="toggleRecordExpand(record.id)"
         >
           <span class="record-q">{{ record.question }}</span>
           <span class="record-time">{{ formatTime(record.createdAt) }}</span>
@@ -640,6 +663,10 @@ onMounted(() => {
   border-color: rgba(var(--accent-rgb), 0.2);
   background: rgba(55, 48, 40, 0.7);
 }
+.wp-answer-card:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: 1px;
+}
 @keyframes cardFadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -701,6 +728,10 @@ section h3 {
 }
 .wp-hammer-act:hover {
   border-color: rgba(var(--accent-rgb), 0.2);
+}
+.wp-hammer-act:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: 1px;
 }
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(10px); }
