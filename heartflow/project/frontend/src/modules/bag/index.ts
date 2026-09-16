@@ -187,6 +187,14 @@ export const useBagStore = defineStore('bag', () => {
     }
   }
 
+  /** 键盘步进熟练度（Enter/方向键），与点击定位共用持久化逻辑 */
+  function setProficiencyByStep(cat: CategoryItem, delta: number) {
+    const target = savedCategories.find((c: any) => c.id === cat.id)
+    if (!target) return
+    target.proficiency = Math.max(0, Math.min(100, target.proficiency + delta))
+    setKV(CATEGORIES_KEY, savedCategories)
+  }
+
   function syncLevelClass() {
     const map: Record<string, string> = {
       '精通': 'master',
@@ -237,6 +245,7 @@ export const useBagStore = defineStore('bag', () => {
     removeItemFromEdit,
     saveCategoryItems,
     handleProficiencyClick,
+    setProficiencyByStep,
     syncLevelClass,
     resetEvoForm,
     addEvolution,

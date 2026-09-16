@@ -99,7 +99,7 @@
         <input v-model="searchQ" placeholder="搜索地点…" class="mr-input" />
       </div>
       <div class="place-list" v-if="filteredPlaces.length">
-        <div v-for="p in filteredPlaces" :key="p.id" class="place-card" :class="{ expanded: p._expanded, focused: p.id === focusedId }" @click="p._expanded = !p._expanded">
+        <div v-for="p in filteredPlaces" :key="p.id" class="place-card" :class="{ expanded: p._expanded, focused: p.id === focusedId }" role="button" tabindex="0" :aria-expanded="!!p._expanded" :aria-label="'展开或收起地点 ' + p.name" @click="p._expanded = !p._expanded" @keydown.enter.prevent="p._expanded = !p._expanded" @keydown.space.prevent="p._expanded = !p._expanded">
           <div class="place-card-header">
             <span class="place-icon">{{ typeIcon(p.type) }}</span>
             <div class="place-info">

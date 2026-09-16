@@ -91,7 +91,12 @@
           v-for="entry in quickSuggestions"
           :key="entry.id"
           class="as-quick-card"
+          role="button"
+          tabindex="0"
+          :aria-label="'前往 ' + entry.name"
           @click="navigateToEntry(entry)"
+          @keydown.enter.prevent="navigateToEntry(entry)"
+          @keydown.space.prevent="navigateToEntry(entry)"
         >
           <span class="as-quick-icon">{{ entry.icon }}</span>
           <div class="as-quick-info">
@@ -116,7 +121,12 @@
           :key="entry.id"
           class="as-entry-card"
           :class="`as-entry--${entry.status}`"
+          role="button"
+          tabindex="0"
+          :aria-label="'前往 ' + entry.name"
           @click="navigateToEntry(entry)"
+          @keydown.enter.prevent="navigateToEntry(entry)"
+          @keydown.space.prevent="navigateToEntry(entry)"
         >
           <div class="as-entry-header">
             <span class="as-entry-icon">{{ entry.icon }}</span>

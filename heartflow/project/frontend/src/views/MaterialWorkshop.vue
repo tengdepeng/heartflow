@@ -115,7 +115,13 @@
           :key="pack.id"
           class="pack-card"
           :class="{ 'pack-card--active': pack.id === activeId }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="pack.id === activeId"
+          :aria-label="'切换风格包 ' + pack.name"
           @click="handleActivatePack(pack.id)"
+          @keydown.enter.prevent="handleActivatePack(pack.id)"
+          @keydown.space.prevent="handleActivatePack(pack.id)"
         >
           <div class="pack-card-accent" :style="{ background: pack.theme.colors.accent }"></div>
           <div class="pack-card-body">
@@ -244,7 +250,13 @@
           class="metaphor-card"
           :class="{ 'metaphor-card--active': metaphor.type === activeMetaphorType }"
           :style="{ '--metaphor-primary': metaphor.palette.primary }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="metaphor.type === activeMetaphorType"
+          :aria-label="'切换视觉隐喻 ' + metaphor.name"
           @click="handleSelectMetaphor(metaphor.type)"
+          @keydown.enter.prevent="handleSelectMetaphor(metaphor.type)"
+          @keydown.space.prevent="handleSelectMetaphor(metaphor.type)"
         >
           <div class="metaphor-visual">
             <!-- 光 -->
@@ -1095,6 +1107,12 @@ function handleSelectMetaphor(type: MetaphorType) {
   transform: translateY(-3px);
 }
 
+.pack-card:focus-visible {
+  outline: 2px solid rgba(184, 160, 128, 0.6);
+  outline-offset: 1px;
+  border-color: var(--mw-border-hover);
+}
+
 .pack-card--active {
   border-color: rgba(184, 160, 128, 0.3);
   background: rgba(184, 160, 128, 0.06);
@@ -1395,6 +1413,12 @@ function handleSelectMetaphor(type: MetaphorType) {
   background: var(--mw-surface-hover);
   border-color: var(--mw-border-hover);
   transform: translateY(-3px);
+}
+
+.metaphor-card:focus-visible {
+  outline: 2px solid rgba(184, 160, 128, 0.6);
+  outline-offset: 1px;
+  border-color: var(--metaphor-primary, #b8a080);
 }
 
 .metaphor-card--active {

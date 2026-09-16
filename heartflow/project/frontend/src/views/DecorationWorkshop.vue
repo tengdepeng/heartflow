@@ -46,7 +46,12 @@
           v-for="tool in tools"
           :key="tool.id"
           class="tool-card"
+          role="button"
+          tabindex="0"
+          :aria-label="'打开工具 ' + tool.name"
           @click="navTo(tool.route)"
+          @keydown.enter.prevent="navTo(tool.route)"
+          @keydown.space.prevent="navTo(tool.route)"
         >
           <div class="tool-icon-wrap">
             <span class="tool-icon">{{ tool.icon }}</span>

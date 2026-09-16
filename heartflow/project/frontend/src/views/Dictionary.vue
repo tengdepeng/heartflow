@@ -54,7 +54,12 @@
           :key="e.id"
           class="entry-card"
           :class="entryCardClass(e)"
+          role="button"
+          tabindex="0"
+          :aria-label="'编辑词条 ' + e.word"
           @click="editEntry(e)"
+          @keydown.enter.prevent="editEntry(e)"
+          @keydown.space.prevent="editEntry(e)"
         >
           <div class="entry-head">
             <span v-if="e.category" class="entry-cat-dot" :style="{ background: catColor(e.category) }"></span>

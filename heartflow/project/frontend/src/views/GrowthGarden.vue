@@ -109,7 +109,7 @@
         <button @click="plantSeed" class="gw-btn">种下</button>
       </div>
       <div class="gw-seed-grid" v-if="flourish.seeds.value.length">
-        <div v-for="s in flourish.seeds.value" :key="s.id" class="gw-seed-card" :class="{ sprouted: s.sprouted }" @click="toggleSprout(s.id)">
+        <div v-for="s in flourish.seeds.value" :key="s.id" class="gw-seed-card" :class="{ sprouted: s.sprouted }" role="button" tabindex="0" :aria-pressed="s.sprouted" :aria-label="'切换种子 ' + s.text + ' 的发芽状态'" @click="toggleSprout(s.id)" @keydown.enter.prevent="toggleSprout(s.id)" @keydown.space.prevent="toggleSprout(s.id)">
           <span>{{ s.sprouted ? '🌿' : '🌰' }}</span>
           <span>{{ s.text }}</span>
           <span class="gw-seed-date">{{ fmt(s.at) }}</span>
@@ -128,7 +128,7 @@
       </div>
       <div v-if="flourish.habits.value.length" class="gw-habit-list">
         <div v-for="h in flourish.habits.value" :key="h.id" class="gw-habit-row">
-          <div class="gw-habit-bar-wrap" @click="tickHabit(h.id)">
+          <div class="gw-habit-bar-wrap" role="button" tabindex="0" :aria-label="'打卡习惯 ' + h.text" @click="tickHabit(h.id)" @keydown.enter.prevent="tickHabit(h.id)" @keydown.space.prevent="tickHabit(h.id)">
             <div class="gw-habit-bar" :style="{ width: h.streakPct + '%' }" />
           </div>
           <span class="gw-habit-name">{{ h.text }}</span>
@@ -144,7 +144,7 @@
       <h3>🧭 人生罗盘</h3>
       <p class="gw-empty">你真正在乎什么？在这里标注你的方向。</p>
       <div class="gw-compass-values" v-if="flourish.compass.value.length">
-        <span v-for="c in flourish.compass.value" :key="c" class="gw-compass-chip" @click="removeCompass(c)">{{ c }} ×</span>
+        <span v-for="c in flourish.compass.value" :key="c" class="gw-compass-chip" role="button" tabindex="0" :aria-label="'移除罗盘方向 ' + c" @click="removeCompass(c)" @keydown.enter.prevent="removeCompass(c)" @keydown.space.prevent="removeCompass(c)">{{ c }} ×</span>
       </div>
       <div class="gw-seed-row">
         <input v-model="compassText" placeholder="例如：自由、创造、家庭…" @keyup.enter="addCompass" class="gw-input" />

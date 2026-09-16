@@ -133,7 +133,13 @@
         v-for="record in paginatedRecords"
         :key="record.id"
         :class="['record-card', { selected: selectedIds.includes(record.id) }]"
+        role="checkbox"
+        tabindex="0"
+        :aria-checked="selectedIds.includes(record.id)"
+        :aria-label="(selectedIds.includes(record.id) ? '取消选择' : '选择') + '记录：' + (record.content ? truncateContent(record.content, 30) : '无内容')"
         @click="toggleSelect(record.id)"
+        @keydown.enter.prevent="toggleSelect(record.id)"
+        @keydown.space.prevent="toggleSelect(record.id)"
       >
         <div class="card-check">
           <span class="check-box" :class="{ checked: selectedIds.includes(record.id) }"></span>
@@ -717,6 +723,11 @@ function truncateContent(text: string, maxLen: number): string {
 
 .record-card:hover {
   border-color: var(--accent, #d4a574);
+}
+
+.record-card:focus-visible {
+  outline: 2px solid var(--accent, #d4a574);
+  outline-offset: 1px;
 }
 
 .record-card.selected {

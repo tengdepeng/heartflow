@@ -49,7 +49,13 @@
           :key="act.id"
           class="dingyin-act-card"
           :class="{ expanded: expandedIndex === index }"
+          role="button"
+          tabindex="0"
+          :aria-expanded="expandedIndex === index"
+          :aria-label="'展开或收起 ' + act.title"
           @click="toggleExpand(index)"
+          @keydown.enter.prevent="toggleExpand(index)"
+          @keydown.space.prevent="toggleExpand(index)"
         >
           <div class="dingyin-act-card-inner">
             <!-- 左侧：进度环 + 图标 -->

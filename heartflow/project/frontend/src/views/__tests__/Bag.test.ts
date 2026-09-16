@@ -49,6 +49,7 @@ const mockRemoveItemFromEdit = vi.fn((idx: number) => {
 })
 const mockSaveCategoryItems = vi.fn()
 const mockHandleProficiencyClick = vi.fn()
+const mockSetProficiencyByStep = vi.fn()
 const mockSyncLevelClass = vi.fn()
 const mockAddEvolution = vi.fn()
 
@@ -123,6 +124,7 @@ vi.mock('../../modules/bag', () => ({
     removeItemFromEdit: mockRemoveItemFromEdit,
     saveCategoryItems: mockSaveCategoryItems,
     handleProficiencyClick: mockHandleProficiencyClick,
+    setProficiencyByStep: mockSetProficiencyByStep,
     syncLevelClass: mockSyncLevelClass,
     addEvolution: mockAddEvolution,
   }),

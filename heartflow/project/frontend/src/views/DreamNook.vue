@@ -43,7 +43,13 @@
           :key="t"
           class="tag-cloud-item"
           :style="{ fontSize: tagCloudSize(tagCount(t)) + 'px', opacity: tagCloudOpacity(tagCount(t)) }"
+          role="button"
+          tabindex="0"
+          :aria-pressed="tagFilter === t"
+          :aria-label="'切换标签筛选 ' + t"
           @click="tagFilter = tagFilter === t ? '' : t"
+          @keydown.enter.prevent="tagFilter = tagFilter === t ? '' : t"
+          @keydown.space.prevent="tagFilter = tagFilter === t ? '' : t"
           :class="{ active: tagFilter === t }"
         >{{ t }}</span>
       </div>
@@ -111,7 +117,7 @@
     <!-- 梦境列表 -->
     <section data-enter><h3>{{ showArchived ? '📦 归档梦境' : '📜 梦境记录' }}</h3>
       <div v-if="displayDreams.length" class="dream-list">
-        <div v-for="d in displayDreams" :key="d.id" class="dream-card" @click="toggleExpand(d.id)">
+        <div v-for="d in displayDreams" :key="d.id" class="dream-card" role="button" tabindex="0" :aria-expanded="expandedId === d.id" :aria-label="'展开或收起梦境 ' + (d.title || '无标题梦境')" @click="toggleExpand(d.id)" @keydown.enter.prevent="toggleExpand(d.id)" @keydown.space.prevent="toggleExpand(d.id)">
           <div class="dream-header">
             <strong>{{ d.title || '无标题梦境' }}</strong>
             <span class="dream-mood">{{ moodLabel(d.mood) }}</span>

@@ -114,7 +114,20 @@
             <span class="bcc-icon">{{ cat.icon }}</span>
             <span class="bcc-name">{{ cat.name }}</span>
           </div>
-          <div class="bcc-proficiency" @click="handleProficiencyClick($event, cat)">
+          <div
+            class="bcc-proficiency"
+            role="slider"
+            tabindex="0"
+            :aria-label="'调整' + cat.name + '熟练度'"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            :aria-valuenow="cat.proficiency"
+            @click="handleProficiencyClick($event, cat)"
+            @keydown.enter.prevent="setProficiencyByStep(cat, cat.proficiency >= 100 ? -100 : 25)"
+            @keydown.space.prevent="setProficiencyByStep(cat, cat.proficiency >= 100 ? -100 : 25)"
+            @keydown.left.prevent="setProficiencyByStep(cat, -5)"
+            @keydown.right.prevent="setProficiencyByStep(cat, 5)"
+          >
             <div class="bcc-progress-track" title="点击调整熟练度">
               <div
                 class="bcc-progress-fill"
@@ -273,7 +286,13 @@
                   :key="n"
                   class="bmir-star"
                   :class="{ 'bmir-star--active': n <= item.proficiency }"
+                  role="button"
+                  tabindex="0"
+                  :aria-pressed="n <= item.proficiency"
+                  :aria-label="'设置熟练度为 ' + n + '/5'"
                   @click="item.proficiency = n"
+                  @keydown.enter.prevent="item.proficiency = n"
+                  @keydown.space.prevent="item.proficiency = n"
                 >★</span>
                 <span class="bmir-star-label">{{ item.proficiency }}/5</span>
               </div>
@@ -378,6 +397,7 @@ const {
   removeItemFromEdit,
   saveCategoryItems,
   handleProficiencyClick,
+  setProficiencyByStep,
   syncLevelClass,
   addEvolution,
 } = store
@@ -808,6 +828,12 @@ const {
   align-items: center;
   gap: 10px;
   cursor: pointer;
+}
+
+.bcc-proficiency:focus-visible {
+  outline: 2px solid rgba(160, 124, 140, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .bcc-progress-track {
@@ -1257,6 +1283,12 @@ const {
 
 .bmir-star:hover {
   transform: scale(1.2);
+}
+
+.bmir-star:focus-visible {
+  outline: 2px solid rgba(160, 124, 140, 0.6);
+  outline-offset: 1px;
+  border-radius: 2px;
 }
 
 .bmir-star--active {
