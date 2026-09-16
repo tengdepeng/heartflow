@@ -62,7 +62,7 @@
         :class="['config-card', { active: config.active }]"
       >
         <!-- 配置头部 -->
-        <div class="config-header" @click="toggleExpand(config.id)">
+        <div class="config-header" role="button" tabindex="0" :aria-expanded="expandedConfigs.has(config.id)" :aria-label="'展开或收起配置 ' + config.name" @click="toggleExpand(config.id)" @keydown.enter.prevent="toggleExpand(config.id)" @keydown.space.prevent="toggleExpand(config.id)">
           <div class="config-info">
             <h3 class="config-name">{{ config.name }}</h3>
             <p class="config-desc" v-if="config.description">{{ config.description }}</p>
@@ -607,6 +607,12 @@ function saveRule() {
 }
 
 .config-header:hover { background: rgba(var(--accent-rgb), 0.03); }
+.config-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), 0.03);
+}
 
 .config-info { flex: 1; min-width: 0; }
 

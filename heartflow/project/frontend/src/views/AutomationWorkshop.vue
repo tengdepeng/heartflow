@@ -77,7 +77,7 @@
     <!-- 流程模板 -->
     <section data-enter><h3>📦 模板</h3>
       <div class="aw-template-grid">
-        <div v-for="t in templates" :key="t.id" class="aw-template-card" @click="loadTemplate(t)">
+        <div v-for="t in templates" :key="t.id" class="aw-template-card" role="button" tabindex="0" :aria-label="'应用模板 ' + t.name" @click="loadTemplate(t)" @keydown.enter.prevent="loadTemplate(t)" @keydown.space.prevent="loadTemplate(t)">
           <span class="tpl-icon">{{t.icon}}</span>
           <div class="tpl-info">
             <span class="aw-template-name">{{t.name}}</span>
@@ -91,7 +91,7 @@
     <!-- 演员系统 -->
     <section data-enter><h3>🎭 演员</h3>
       <div class="actor-row">
-        <span v-for="a in actors" :key="a.key" class="actor-chip" :class="{active:selectedActor===a.key}" @click="selectedActor=a.key">{{a.icon}}</span>
+        <span v-for="a in actors" :key="a.key" class="actor-chip" :class="{active:selectedActor===a.key}" role="radio" tabindex="0" :aria-checked="selectedActor===a.key" :aria-label="'选择演员 ' + a.icon" @click="selectedActor=a.key" @keydown.enter.prevent="selectedActor=a.key" @keydown.space.prevent="selectedActor=a.key">{{a.icon}}</span>
       </div>
       <div v-if="runningFlows.length" class="running-flows">
         <div v-for="rf in runningFlows" :key="rf.id" class="running-flow">
@@ -106,7 +106,7 @@
     <!-- 已保存流程 -->
     <section data-enter><h3>📜 已保存流程</h3>
       <div v-if="savedFlows.length" class="aw-flow-list">
-        <div v-for="f in savedFlows" :key="f.id" class="aw-flow-card" @click="loadFlow(f)">
+        <div v-for="f in savedFlows" :key="f.id" class="aw-flow-card" role="button" tabindex="0" :aria-label="'载入流程 ' + f.name" @click="loadFlow(f)" @keydown.enter.prevent="loadFlow(f)" @keydown.space.prevent="loadFlow(f)">
           <span class="sf-icon">{{f.actor}}</span>
           <div class="sf-info"><span class="aw-flow-name">{{f.name}}</span><span class="aw-flow-meta">{{f.steps.length}} 步 · {{f.description || ''}}</span></div>
           <button class="aw-del" @click.stop="deleteFlow(f.id)">×</button>
@@ -118,7 +118,7 @@
     <!-- 执行历史 -->
     <section data-enter><h3>📋 执行历史</h3>
       <div v-if="history.length" class="aw-history-list">
-        <div v-for="h in history.slice(0,8)" :key="h.id" class="aw-history-item" :class="{ 'hist-row--expandable': h.details?.length }" @click="toggleDetail(h.id)">
+        <div v-for="h in history.slice(0,8)" :key="h.id" class="aw-history-item" :class="{ 'hist-row--expandable': h.details?.length }" role="button" tabindex="0" :aria-expanded="expandedDetail === h.id" :aria-label="'展开或收起执行记录 ' + h.flowName" @click="toggleDetail(h.id)" @keydown.enter.prevent="toggleDetail(h.id)" @keydown.space.prevent="toggleDetail(h.id)">
           <span>{{h.flowName}}</span>
           <span class="aw-history-time">{{fmt(h.at)}}</span>
           <span :class="`aw-flow-status ${h.status}`">{{h.status==='ok'?'✅':h.status==='warn'?'⚠️':'✕'}}</span>
@@ -356,6 +356,11 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .aw-template-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
 .aw-template-card { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(var(--accent-rgb), 0.06); background: rgba(var(--accent-rgb), 0.02); cursor: pointer; transition: all 0.2s; }
 .aw-template-card:hover { border-color: rgba(var(--accent-rgb), 0.2); background: rgba(var(--accent-rgb), 0.06); }
+.aw-template-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: rgba(var(--accent-rgb), 0.2);
+}
 .tpl-icon { font-size: 20px; }
 .tpl-info { flex: 1; min-width: 0; }
 .aw-template-name { font-size: 13px; display: block; }
@@ -366,6 +371,11 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .actor-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .actor-chip { font-size: 20px; padding: 6px 10px; border-radius: 10px; border: 1px solid rgba(var(--accent-rgb), 0.06); background: rgba(var(--accent-rgb), 0.02); cursor: pointer; transition: all 0.2s; }
 .actor-chip:hover { background: rgba(var(--accent-rgb), 0.08); }
+.actor-chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: rgba(var(--accent-rgb), 0.08);
+}
 .actor-chip.active { border-color: rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.12); }
 .running-flows { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
 .running-flow { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; background: rgba(52,211,153,0.05); border: 1px solid rgba(52,211,153,0.1); font-size: 12px; }
@@ -380,6 +390,11 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .aw-flow-list { display: flex; flex-direction: column; gap: 6px; }
 .aw-flow-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; background: rgba(var(--accent-rgb), 0.02); border: 1px solid rgba(var(--accent-rgb), 0.04); cursor: pointer; transition: all 0.2s; }
 .aw-flow-card:hover { background: rgba(var(--accent-rgb), 0.06); }
+.aw-flow-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: rgba(var(--accent-rgb), 0.06);
+}
 .sf-icon { font-size: 20px; }
 .sf-info { flex: 1; }
 .aw-flow-name { font-size: 13px; display: block; }
@@ -389,6 +404,11 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .aw-history-list { display: flex; flex-direction: column; gap: 4px; }
 .aw-history-item { display: flex; gap: 12px; padding: 6px 8px; border-radius: 4px; font-size: 13px; cursor: default; flex-wrap: wrap; }
 .aw-history-item.hist-row--expandable { cursor: pointer; }
+.aw-history-item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-radius: 6px;
+}
 .aw-history-time { opacity: 0.4; flex: 1; text-align: right; }
 .aw-flow-status { width: 24px; text-align: center; }
 .aw-flow-status.ok { color: var(--success); }

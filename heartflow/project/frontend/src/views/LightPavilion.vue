@@ -149,7 +149,7 @@
       <div class="goal-cards target-cards" v-if="filteredTargets.length">
         <div v-for="t in filteredTargets" :key="t.id" class="goal-card target-card" :class="`status-${t.status}`"
           :style="{borderColor:domainColor(t.domain)+'44'}">
-          <div class="card-body" @click="goal.promoteStatus(t.id)">
+          <div class="card-body" role="button" tabindex="0" :aria-label="'推进目标 ' + t.title + ' 的进展'" @click="goal.promoteStatus(t.id)" @keydown.enter.prevent="goal.promoteStatus(t.id)" @keydown.space.prevent="goal.promoteStatus(t.id)">
             <span class="card-icon">{{statusIcon(t.status)}}</span>
             <div class="card-info">
               <span class="card-title">{{t.title}}</span>
@@ -186,7 +186,7 @@
     <section data-enter class="goal-tier"><div class="tier-header plan-header"><span>📋 计划</span><button class="btn-add-sm" @click="openCreate('plan')">+</button></div>
       <div class="goal-cards plan-list" v-if="goal.plans.value.length">
         <div v-for="p in goal.plans.value" :key="p.id" class="goal-card plan-card" :class="{done:p.status==='bloom'}">
-          <span class="plan-check" @click="goal.markPlanDone(p.id)">{{p.status==='bloom'?'⚓':'○'}}</span>
+          <span class="plan-check" role="checkbox" tabindex="0" :aria-checked="p.status==='bloom'" :aria-label="'标记计划 ' + p.title + (p.status==='bloom' ? ' 为未完成' : ' 完成')" @click="goal.markPlanDone(p.id)" @keydown.enter.prevent="goal.markPlanDone(p.id)" @keydown.space.prevent="goal.markPlanDone(p.id)">{{p.status==='bloom'?'⚓':'○'}}</span>
           <span class="card-title" :class="{'line-through':p.status==='bloom'}">{{p.title}}</span>
           <span class="plan-progress">{{p.anchorDone}}/{{p.anchorCount||'?'}}</span>
           <button class="lp-del" @click="goal.remove(p.id)">×</button>
@@ -268,7 +268,7 @@
       </div>
       <div v-else class="special-plan-list">
         <div v-for="plan in specialPlans" :key="plan.id" class="special-plan-card">
-          <div class="plan-card-header" @click="toggleExpandPlan(plan.id)">
+          <div class="plan-card-header" role="button" tabindex="0" :aria-expanded="expandedPlanId === plan.id" :aria-label="'展开或收起专项计划 ' + plan.title" @click="toggleExpandPlan(plan.id)" @keydown.enter.prevent="toggleExpandPlan(plan.id)" @keydown.space.prevent="toggleExpandPlan(plan.id)">
             <div class="plan-card-title-row">
               <span class="plan-card-title">{{ plan.title }}</span>
               <span class="plan-card-progress">{{ specialPlanProgress(plan) }}%</span>
@@ -284,7 +284,7 @@
           <div v-if="expandedPlanId === plan.id" class="plan-card-body">
             <div class="milestone-list">
               <div v-for="(ms, i) in plan.milestones" :key="i" class="milestone-row" :class="{ done: ms.done }">
-                <span class="ms-check" @click="toggleMilestone(plan.id, i)">{{ ms.done ? '✓' : '○' }}</span>
+                <span class="ms-check" role="checkbox" tabindex="0" :aria-checked="ms.done" :aria-label="'切换里程碑 ' + ms.label + ' 完成状态'" @click="toggleMilestone(plan.id, i)" @keydown.enter.prevent="toggleMilestone(plan.id, i)" @keydown.space.prevent="toggleMilestone(plan.id, i)">{{ ms.done ? '✓' : '○' }}</span>
                 <span class="ms-label">{{ ms.label }}</span>
               </div>
               <div class="milestone-add-row">
@@ -1067,6 +1067,11 @@ function toggleExpandPlan(planId: string) {
   flex: 1;
   cursor: pointer;
 }
+.card-body:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
 .card-icon { font-size: 18px; flex-shrink: 0; }
 .card-info { flex: 1; min-width: 0; }
 .card-title {
@@ -1135,6 +1140,11 @@ function toggleExpandPlan(planId: string) {
 
 /* ---- 计划层 ---- */
 .plan-check { font-size: 16px; cursor: pointer; flex-shrink: 0; }
+.plan-check:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 .plan-progress { font-size: 11px; color: var(--text-dim); }
 .plan-card.done { opacity: 0.55; }
 
@@ -1623,6 +1633,11 @@ function toggleExpandPlan(planId: string) {
   padding: 10px 12px;
   cursor: pointer;
 }
+.plan-card-header:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
 .plan-card-title-row {
   display: flex;
   align-items: center;
@@ -1705,6 +1720,12 @@ function toggleExpandPlan(planId: string) {
   transition: color 0.15s;
 }
 .ms-check:hover {
+  color: var(--accent);
+}
+.ms-check:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
   color: var(--accent);
 }
 .milestone-row.done .ms-check {
