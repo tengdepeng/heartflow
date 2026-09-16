@@ -139,4 +139,17 @@ onMounted(load)
   line-height: 1.7;
   opacity: 0.6;
 }
+
+/* 窄屏：详情列改为整行堆叠，避免 260px 固定列挤占星图场景 */
+@media (max-width: 640px) {
+  .smv-body {
+    flex-direction: column;
+  }
+
+  .smv-detail {
+    flex: 0 0 auto;
+    width: 100%;
+    order: 2;
+  }
+}
 </style>

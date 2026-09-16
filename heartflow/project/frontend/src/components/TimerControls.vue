@@ -206,7 +206,7 @@ const statusTone = computed(() => {
 const modeMeta = computed(() =>
   props.currentMode === 'countup'
     ? `已计时 ${props.displayTime}`
-    : `剩余 ${Math.max(0, props.remainingSeconds)} 秒`,
+    : `剩余 ${formatMMSS(props.remainingSeconds)}`,
 )
 
 const progressPercent = computed(() => {

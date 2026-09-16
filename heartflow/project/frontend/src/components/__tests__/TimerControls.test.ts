@@ -114,11 +114,11 @@ describe('TimerControls', () => {
     expect(activeTab.text()).toContain('小憩')
   })
 
-  it('显示剩余秒数', () => {
+  it('显示剩余格式化时间（mm:ss）', () => {
     const wrapper = mount(TimerControls, {
       props: { ...baseProps, remainingSeconds: 1200 },
     })
-    expect(wrapper.text()).toContain('剩余 1200 秒')
+    expect(wrapper.text()).toContain('剩余 20:00')
   })
 
   it('显示已流动百分比', () => {

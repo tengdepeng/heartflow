@@ -109,7 +109,7 @@
             <!-- 底部操作 -->
             <div class="pw-fork-branch-footer">
               <button class="pw-fork-gen-btn" @click="generateAltFromFork(f)" title="基于这个分叉生成平行自我">映照平行自我</button>
-              <button class="pw-del pw-fork-del" @click="removeFork(f.id)">×</button>
+              <button class="pw-del pw-fork-del" aria-label="删除该抉择分叉" @click="removeFork(f.id)">×</button>
             </div>
           </div>
         </div>
@@ -153,13 +153,13 @@
         >
           <!-- 密封光球 -->
           <div v-if="!c.opened" class="pw-capsule-orb" :class="{ pulse: checkReady(c) }">
-            <span class="pw-capsule-orb-icon">{{ checkReady(c) ? '🔮' : '🔒' }}</span>
+            <span class="pw-capsule-orb-icon" role="img" :aria-label="checkReady(c) ? '可开启的时间胶囊' : '已封存的时间胶囊'">{{ checkReady(c) ? '🔮' : '🔒' }}</span>
             <span v-if="checkReady(c)" class="pw-capsule-orb-glow"></span>
           </div>
 
           <!-- 已开启光球 -->
           <div v-else class="pw-capsule-orb opened">
-            <span class="pw-capsule-orb-icon">📭</span>
+            <span class="pw-capsule-orb-icon" role="img" aria-label="已开启的时间胶囊">📭</span>
           </div>
 
           <div class="pw-capsule-body">
@@ -177,7 +177,7 @@
           <div class="pw-capsule-right">
             <span v-if="!c.opened && checkReady(c)" class="pw-capsule-ready-badge">可开启</span>
             <span v-else-if="!c.opened" class="pw-capsule-countdown">{{ daysUntil(c.openDate) }}天</span>
-            <button v-if="c.opened" class="pw-del" @click.stop="removeCapsule(c.id)">×</button>
+            <button v-if="c.opened" class="pw-del" aria-label="删除该时间胶囊" @click.stop="removeCapsule(c.id)">×</button>
           </div>
         </div>
       </div>
@@ -218,7 +218,7 @@
               {{ getOriginForkLabel(alt.originForkId) }}
             </span>
           </div>
-          <button class="pw-del" @click.stop="removeAlt(alt.id)">×</button>
+          <button class="pw-del" aria-label="删除该平行自我" @click.stop="removeAlt(alt.id)">×</button>
         </div>
       </div>
       <div class="pw-self-actions">
@@ -1558,12 +1558,20 @@ section {
 }
 
 .pw-self-card:hover .pw-del,
-.pw-fork-branch-card:hover .pw-del {
+.pw-fork-branch-card:hover .pw-del,
+.pw-capsule-card:hover .pw-del,
+.pw-self-card:focus-within .pw-del,
+.pw-fork-branch-card:focus-within .pw-del,
+.pw-capsule-card:focus-within .pw-del {
   opacity: 1;
 }
 
 .pw-del:hover {
   color: #e85a5a;
+}
+
+.pw-del:focus-visible {
+  opacity: 1;
 }
 
 .pw-add-row {

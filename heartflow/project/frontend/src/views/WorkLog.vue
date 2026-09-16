@@ -833,6 +833,7 @@ function navigateToRoom(key: string) {
 .wl-record-row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   font-size: 13px;
   color: rgba(var(--accent-rgb), 0.7);

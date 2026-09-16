@@ -947,7 +947,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.62);
   user-select: none;
 }
 .empty-state p {
@@ -956,7 +956,7 @@ onUnmounted(() => {
 }
 .empty-hint {
   font-size: 12px;
-  opacity: 0.6;
+  color: rgba(255,255,255,0.45);
 }
 
 /* 结晶节点 */
