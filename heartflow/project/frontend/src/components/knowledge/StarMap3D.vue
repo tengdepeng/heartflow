@@ -382,8 +382,8 @@ function handleNodeClick(nodeId: string): void {
 
 /* ---- 3D 场景容器 ---- */
 .sm3d-scene {
-  width: 360px;
-  height: 360px;
+  width: min(360px, 82vw);
+  height: min(360px, 82vw);
   position: relative;
   cursor: grab;
   user-select: none;

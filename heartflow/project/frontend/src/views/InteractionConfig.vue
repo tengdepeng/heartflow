@@ -687,8 +687,8 @@ function saveRule() {
   overflow-y: auto;
 }
 
-.modal-wide { width: 560px; }
-.modal-sm { width: 340px; }
+.modal-wide { width: min(560px, 92vw); }
+.modal-sm { width: min(340px, 92vw); }
 
 .modal-title {
   font-size: 16px; font-weight: 500;

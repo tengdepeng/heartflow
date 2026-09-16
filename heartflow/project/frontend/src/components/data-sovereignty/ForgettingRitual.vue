@@ -395,7 +395,7 @@ onUnmounted(() => {
 
 .ritual-canvas {
   position: relative;
-  width: 300px;
+  width: min(300px, 80vw);
   height: 200px;
   border-radius: 12px;
   background: rgba(var(--accent-rgb), 0.04);

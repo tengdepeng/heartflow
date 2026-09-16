@@ -285,7 +285,7 @@ const quote = computed(() => {
 .wb-item { position: absolute; width: 240px; min-height: 120px; background: rgba(30, 38, 58, 0.92); border: 1px solid rgba(150, 170, 210, 0.16); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32); cursor: grab; transition: box-shadow .15s, border-color .15s; display: flex; flex-direction: column; touch-action: none; }
 .wb-item:hover { border-color: rgba(130, 160, 235, 0.45); }
 .wb-item.wb-selected { border-color: #6b86d8; box-shadow: 0 0 0 2px rgba(107, 134, 216, 0.35), 0 10px 28px rgba(0, 0, 0, 0.4); }
-.wb-size-large { width: 300px; min-height: 200px; }
+.wb-size-large { width: min(300px, 78vw); min-height: 200px; }
 .wb-size-medium { width: 260px; min-height: 150px; }
 
 .wb-item-head { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border-bottom: 1px solid rgba(150, 170, 210, 0.1); user-select: none; }

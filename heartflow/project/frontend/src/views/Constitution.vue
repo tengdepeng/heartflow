@@ -1807,7 +1807,7 @@ function onThresholdChange(e: Event): void {
 }
 
 .modal-confirm {
-  width: 380px;
+  width: min(380px, 92vw);
 }
 
 .modal-title {
