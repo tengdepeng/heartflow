@@ -125,7 +125,17 @@
       </div>
 
       <!-- 幕僚任务：侧栏常驻显示调令任务（与幕僚阁调令系统联动） -->
-      <div class="nav-tasks" v-if="taskRecent.length" @click="goAdvisors" title="查看幕僚任务">
+      <div
+        class="nav-tasks"
+        v-if="taskRecent.length"
+        role="button"
+        tabindex="0"
+        :aria-label="'查看幕僚任务' + (taskRunning ? '，' + taskRunning + '项进行中' : '')"
+        title="查看幕僚任务"
+        @click="goAdvisors"
+        @keydown.enter.prevent="goAdvisors"
+        @keydown.space.prevent="goAdvisors"
+      >
         <div class="nav-tasks-head">
           <span class="nav-tasks-title">幕僚任务</span>
           <span v-if="taskRunning" class="nav-tasks-badge">{{ taskRunning }} 进行中</span>
@@ -1741,7 +1751,7 @@ watch(() => nav.currentRoomId.value, () => {
 .breadcrumb-arrow {
   color: var(--text-secondary);
   font-size: 11px;
-  opacity: 0.5;
+  opacity: 0.65;
 }
 
 .breadcrumb-current {
@@ -1850,7 +1860,7 @@ watch(() => nav.currentRoomId.value, () => {
   font-size: 10px;
   color: var(--text-secondary);
   padding: 6px 12px 2px;
-  opacity: 0.5;
+  opacity: 0.65;
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
@@ -1993,8 +2003,13 @@ watch(() => nav.currentRoomId.value, () => {
   flex-shrink: 0;
   transition: background 0.2s ease;
 }
-.nav-tasks:hover {
+.nav-tasks:hover,
+.nav-tasks:focus-visible {
   background: rgba(var(--accent-rgb), 0.1);
+}
+.nav-tasks:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
 }
 .nav-tasks-head {
   display: flex;
