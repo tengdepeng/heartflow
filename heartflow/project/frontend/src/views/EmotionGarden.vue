@@ -1952,7 +1952,7 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
   text-align: center;
   padding: 6px 16px;
   font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.25);
+  color: rgba(var(--accent-rgb), 0.5);
   margin-bottom: 6px;
   display: flex;
   align-items: center;

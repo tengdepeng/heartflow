@@ -79,7 +79,14 @@
         </div>
       </div>
 
-      <p class="dock-mantra__text" @click="refreshMantra">{{ mantra.text }}</p>
+      <p
+        class="dock-mantra__text"
+        role="button"
+        tabindex="0"
+        aria-label="替换今日箴言"
+        @click="refreshMantra"
+        @keydown.enter="refreshMantra"
+      >{{ mantra.text }}</p>
 
       <!-- 专注小结胶囊：今日沉淀 / 本轮流动 / 脉动进度（INCR-233 补挂载孤儿组件 FocusStats） -->
       <div class="home-focus-stats">
@@ -412,6 +419,11 @@ watch(() => timer.isCompleted, (done) => {
 
 .dock-mantra__text:hover {
   opacity: 0.55;
+}
+.dock-mantra__text:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 /* ---- 专注核心：透明，玉盘为绝对主角 ---- */

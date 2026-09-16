@@ -128,7 +128,11 @@
               v-for="item in cat.items"
               :key="item.name"
               class="bcc-tag"
+              role="button"
+              tabindex="0"
+              :aria-label="'编辑物品 ' + item.name"
               @click="openEditModal(cat)"
+              @keydown.enter="openEditModal(cat)"
             >
               {{ item.name }}
               <span class="bcc-tag-proficiency">·{{ item.proficiency }}</span>
@@ -863,6 +867,10 @@ const {
   color: var(--text-primary);
   background: rgba(160, 124, 140, 0.15);
   border-color: rgba(160, 124, 140, 0.2);
+}
+.bcc-tag:focus-visible {
+  outline: 2px solid rgba(160, 124, 140, 0.6);
+  outline-offset: 1px;
 }
 
 .bcc-tag-proficiency {

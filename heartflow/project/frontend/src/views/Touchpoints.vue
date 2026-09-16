@@ -804,6 +804,11 @@ onMounted(() => {
   width: 0;
   height: 0;
 }
+.tp-toggle input:focus-visible + .toggle-track {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 999px;
+}
 
 .toggle-track {
   position: absolute;

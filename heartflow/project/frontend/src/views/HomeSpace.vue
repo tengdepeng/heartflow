@@ -210,7 +210,15 @@
     </section>
 
     <!-- 宪法箴言 -->
-    <footer data-enter class="home-mantra" @click="refreshMantra">
+    <footer
+      data-enter
+      class="home-mantra"
+      role="button"
+      tabindex="0"
+      aria-label="替换宪法箴言"
+      @click="refreshMantra"
+      @keydown.enter="refreshMantra"
+    >
       <span class="mantra-icon">⚜</span>
       <blockquote class="mantra-text">{{ mantra.text }}</blockquote>
       <cite class="mantra-source">{{ mantra.source }}</cite>
@@ -1064,6 +1072,10 @@ onUnmounted(() => disable3D())
 .home-mantra:hover {
   background: var(--bg-card);
   border-color: rgba(var(--accent-rgb), 0.2);
+}
+.home-mantra:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: -2px;
 }
 
 .mantra-icon {

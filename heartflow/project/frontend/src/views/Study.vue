@@ -145,8 +145,12 @@
           v-for="note in filteredNotes"
           :key="note.id"
           class="book-card"
+          role="button"
+          tabindex="0"
+          :aria-label="'编辑笔记 ' + note.title"
           :style="{ '--spine-color': getSpineColor(note.tags) }"
           @click="openEdit(note)"
+          @keydown.enter="openEdit(note)"
         >
           <!-- 书脊 -->
           <div class="book-spine" />
@@ -777,6 +781,10 @@ function toggleArchive(note: Note) {
   border-color: rgba(var(--accent-rgb), 0.12);
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
 }
+.book-card:focus-visible {
+  outline: 2px solid rgba(var(--accent-rgb), 0.5);
+  outline-offset: 2px;
+}
 
 .book-title {
   font-size: 15px;
@@ -807,8 +815,7 @@ function toggleArchive(note: Note) {
   justify-content: space-between;
   align-items: center;
   font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.3);
-  opacity: 0.6;
+  color: rgba(var(--accent-rgb), 0.55);
 }
 
 .book-tags {
@@ -841,7 +848,12 @@ function toggleArchive(note: Note) {
   transition: all 0.2s;
 }
 
-.book-card:hover .book-delete {
+.book-card:hover .book-delete,
+.book-card:focus-within .book-delete {
+  opacity: 1;
+}
+.book-delete:focus-visible,
+.book-archive:focus-visible {
   opacity: 1;
 }
 
@@ -869,7 +881,8 @@ function toggleArchive(note: Note) {
   transition: all 0.2s;
 }
 
-.book-card:hover .book-archive {
+.book-card:hover .book-archive,
+.book-card:focus-within .book-archive {
   opacity: 1;
 }
 
@@ -896,7 +909,7 @@ function toggleArchive(note: Note) {
 
 .empty-icon { font-size: 48px; opacity: 0.4; }
 .empty-text { font-size: 15px; color: rgba(var(--accent-rgb), 0.3); }
-.empty-hint { font-size: 12px; color: rgba(var(--accent-rgb), 0.18); }
+.empty-hint { font-size: 12px; color: rgba(var(--accent-rgb), 0.45); }
 
 /* ---- 删除确认弹窗 ---- */
 .confirm-overlay {
@@ -1495,6 +1508,10 @@ function toggleArchive(note: Note) {
   .book-grid {
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 10px;
+  }
+
+  .serendipity-cards {
+    grid-template-columns: 1fr;
   }
 
   .book-card {
