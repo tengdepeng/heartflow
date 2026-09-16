@@ -89,4 +89,8 @@ function clear() {
 .hf-search__clear:hover {
   color: var(--text-primary);
 }
+.hf-search__clear:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 </style>

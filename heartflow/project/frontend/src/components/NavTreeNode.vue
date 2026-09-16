@@ -407,7 +407,7 @@ function toggle() {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.5);
   letter-spacing: 0.5px;
   white-space: nowrap;
 }
@@ -419,8 +419,8 @@ function toggle() {
 }
 
 .pill-silent {
-  border-color: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.38);
 }
 
 .nav-item-constitution {
@@ -485,7 +485,7 @@ function toggle() {
 .nav-child-count {
   margin-left: auto;
   font-size: 9px;
-  opacity: 0.45;
+  opacity: 0.6;
   color: var(--text-secondary);
   padding: 1px 6px;
   border-radius: 999px;
