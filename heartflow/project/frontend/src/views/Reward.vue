@@ -1092,7 +1092,7 @@ function fmt(iso: string) {
   display: block; font-size: 20px; font-weight: 600; color: var(--rw-accent);
 }
 .rw-balance--right .rw-balance-value { color: rgba(232,192,96,0.6); }
-.rw-balance-label { display: block; font-size: 11px; color: rgba(232,192,96,0.4); margin-top: 2px; }
+.rw-balance-label { display: block; font-size: 11px; color: rgba(232, 192, 96, 0.55); margin-top: 2px; }
 .rw-balance-divider {
   display: flex; align-items: center; justify-content: center;
 }
@@ -1139,7 +1139,7 @@ function fmt(iso: string) {
   height: 4px; border-radius: 2px; background: rgba(232,192,96,0.06); overflow: hidden;
 }
 .rw-cat-bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
-.rw-cat-count { font-size: 10px; color: rgba(232,192,96,0.3); }
+.rw-cat-count { font-size: 10px; color: rgba(232, 192, 96, 0.5); }
 
 /* ---- Form ---- */
 .rw-form-section {
@@ -1162,7 +1162,7 @@ function fmt(iso: string) {
 .rw-input::placeholder { color: rgba(232,192,96,0.2); }
 .rw-input--num { width: 80px; flex: none; text-align: center; }
 .rw-input--date { flex: none; width: 150px; color-scheme: dark; }
-.rw-date-hint { font-size: 11px; color: rgba(232,192,96,0.3); white-space: nowrap; }
+.rw-date-hint { font-size: 11px; color: rgba(232, 192, 96, 0.5); white-space: nowrap; }
 .rw-select { appearance: none; cursor: pointer; }
 .rw-select option { background: #0a0906; color: rgba(var(--text-primary-rgb), 0.85); }
 
@@ -1198,7 +1198,7 @@ function fmt(iso: string) {
 .rw-timeline-section {
   margin-bottom: 28px; position: relative; z-index: 1;
 }
-.rw-timeline-count { font-size: 11px; color: rgba(232,192,96,0.3); font-weight: 400; }
+.rw-timeline-count { font-size: 11px; color: rgba(232, 192, 96, 0.5); font-weight: 400; }
 .rw-timeline {
   display: flex; flex-direction: column; gap: 10px;
 }
@@ -1225,7 +1225,7 @@ function fmt(iso: string) {
 .rw-tl-amt--income { color: #80c080; }
 .rw-tl-amt--expense { color: #c08080; }
 .rw-timeline-date {
-  margin-left: auto; font-size: 11px; color: rgba(232,192,96,0.3);
+  margin-left: auto; font-size: 11px; color: rgba(232, 192, 96, 0.5);
 }
 .rw-timeline-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin: 4px 0 0; }
 .rw-timeline-actions {
@@ -1233,7 +1233,7 @@ function fmt(iso: string) {
 }
 .rw-timeline-btn {
   width: 24px; height: 24px; border-radius: 6px; border: 1px solid rgba(232,192,96,0.08);
-  background: transparent; color: rgba(232,192,96,0.3); font-size: 11px; cursor: pointer;
+  background: transparent; color: rgba(232, 192, 96, 0.5); font-size: 11px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; transition: all 0.2s;
 }
 .rw-timeline-btn:hover { border-color: rgba(232,192,96,0.25); color: var(--rw-accent); }
@@ -1268,7 +1268,7 @@ function fmt(iso: string) {
 .rw-trend-bar {
   width: 100%; max-width: 40px; border-radius: 4px 4px 0 0; transition: height 0.4s ease; min-height: 4px;
 }
-.rw-trend-label { font-size: 10px; color: rgba(232,192,96,0.3); }
+.rw-trend-label { font-size: 10px; color: rgba(232, 192, 96, 0.5); }
 .rw-trend-value { font-size: 10px; color: rgba(232,192,96,0.5); }
 
 /* ---- Filter bar ---- */
@@ -1435,13 +1435,13 @@ function fmt(iso: string) {
 .rw-empty {
   text-align: center; padding: 60px 20px;
   font-size: 14px; line-height: 1.8;
-  color: rgba(232,192,96,0.3);
+  color: rgba(232, 192, 96, 0.5);
   border: 1px solid rgba(232,192,96,0.06);
   border-radius: 16px;
   background: rgba(232,192,96,0.02);
   position: relative; z-index: 1;
 }
-.rw-empty-hint { font-size: 12px; color: rgba(232,192,96,0.15); margin-top: 4px; }
+.rw-empty-hint { font-size: 12px; color: rgba(232, 192, 96, 0.38); margin-top: 4px; }
 
 /* ---- Balance SVG ---- */
 .rw-balance-anvil {

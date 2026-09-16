@@ -411,7 +411,7 @@ onMounted(() => {
 
 .bathroom-subtitle {
   font-size: 13px;
-  color: rgba(224, 224, 224, 0.35);
+  color: rgba(224, 224, 224, 0.52);
   margin: 0;
   letter-spacing: 1px;
 }
@@ -420,7 +420,7 @@ onMounted(() => {
 .panel-title {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(224, 224, 224, 0.4);
+  color: rgba(224, 224, 224, 0.55);
   margin: 0 0 14px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -547,7 +547,7 @@ onMounted(() => {
 
 .mirror-notes-hint {
   font-size: 10px;
-  color: rgba(200, 232, 240, 0.2);
+  color: rgba(200, 232, 240, 0.4);
   letter-spacing: 1px;
   margin-top: 6px;
 }
@@ -604,7 +604,7 @@ onMounted(() => {
 
 .relax-time {
   font-size: 11px;
-  color: rgba(224, 224, 224, 0.3);
+  color: rgba(224, 224, 224, 0.5);
   letter-spacing: 0.3px;
 }
 
@@ -620,7 +620,7 @@ onMounted(() => {
   padding: 24px 0;
   text-align: center;
   font-size: 12px;
-  color: rgba(224, 224, 224, 0.2);
+  color: rgba(224, 224, 224, 0.4);
   letter-spacing: 0.5px;
 }
 
@@ -701,7 +701,7 @@ onMounted(() => {
 
 .relax-add-label {
   font-size: 12px;
-  color: rgba(224, 224, 224, 0.4);
+  color: rgba(224, 224, 224, 0.55);
   letter-spacing: 0.5px;
 }
 
@@ -725,7 +725,7 @@ onMounted(() => {
 
 .relax-add-unit {
   font-size: 12px;
-  color: rgba(224, 224, 224, 0.4);
+  color: rgba(224, 224, 224, 0.55);
 }
 
 .relax-add-btn {
@@ -757,7 +757,7 @@ onMounted(() => {
   text-align: center;
   font-size: 12px;
   letter-spacing: 0.5px;
-  color: rgba(224, 224, 224, 0.3);
+  color: rgba(224, 224, 224, 0.5);
 }
 
 .relax-total b {
@@ -862,7 +862,7 @@ onMounted(() => {
 
 .care-progress-text {
   font-size: 11px;
-  color: rgba(200, 232, 240, 0.4);
+  color: rgba(200, 232, 240, 0.55);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }

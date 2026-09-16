@@ -322,7 +322,7 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .aw-canvas-area { border-radius: 14px; border: 1px solid rgba(var(--accent-rgb), 0.08); overflow: hidden; margin-bottom: 12px; background: rgba(0,0,0,0.15); }
 .canvas-toolbar { padding: 10px 14px; background: rgba(var(--accent-rgb), 0.02); border-bottom: 1px solid rgba(var(--accent-rgb), 0.04); display: flex; align-items: center; gap: 10px; }
 .canvas-toolbar:last-child { border-bottom: none; border-top: 1px solid rgba(var(--accent-rgb), 0.04); }
-.canvas-label { font-size: 11px; opacity: 0.35; white-space: nowrap; }
+.canvas-label { font-size: 11px; opacity: 0.52; white-space: nowrap; }
 .trigger-pool, .action-pool, .cond-pool { display: flex; gap: 4px; flex-wrap: wrap; }
 .chip { padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: grab; border: 1px solid; transition: all 0.2s; user-select: none; }
 .trig-chip { border-color: rgba(240,192,64,0.25); background: rgba(240,192,64,0.06); color: var(--warning); }
@@ -333,7 +333,7 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .action-chip:hover { background: rgba(var(--accent-rgb), 0.12); }
 
 .canvas-stage { min-height: 80px; padding: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.stage-hint { font-size: 12px; color: rgba(255,255,255,0.12); font-style: italic; width: 100%; text-align: center; }
+.stage-hint { font-size: 12px; color: rgba(255, 255, 255, 0.35); font-style: italic; width: 100%; text-align: center; }
 .flow-step { display: flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 10px; border: 1px solid; font-size: 12px; animation: pulseIn 0.3s ease-out; }
 @keyframes pulseIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .step-trigger { border-color: rgba(240,192,64,0.3); background: rgba(240,192,64,0.08); color: var(--warning); }
@@ -364,7 +364,7 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .tpl-icon { font-size: 20px; }
 .tpl-info { flex: 1; min-width: 0; }
 .aw-template-name { font-size: 13px; display: block; }
-.aw-template-desc { font-size: 11px; opacity: 0.4; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aw-template-desc { font-size: 11px; opacity: 0.55; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tpl-apply { font-size: 11px; padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(var(--accent-rgb), 0.2); color: var(--accent); opacity: 0.7; }
 
 /* ===== Actors ===== */
@@ -398,7 +398,7 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .sf-icon { font-size: 20px; }
 .sf-info { flex: 1; }
 .aw-flow-name { font-size: 13px; display: block; }
-.aw-flow-meta { font-size: 11px; opacity: 0.4; display: block; }
+.aw-flow-meta { font-size: 11px; opacity: 0.55; display: block; }
 
 /* ===== History List ===== */
 .aw-history-list { display: flex; flex-direction: column; gap: 4px; }
@@ -409,12 +409,12 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
   outline-offset: 1px;
   border-radius: 6px;
 }
-.aw-history-time { opacity: 0.4; flex: 1; text-align: right; }
+.aw-history-time { opacity: 0.55; flex: 1; text-align: right; }
 .aw-flow-status { width: 24px; text-align: center; }
 .aw-flow-status.ok { color: var(--success); }
 .aw-flow-status.warn { color: var(--warning); }
 .aw-flow-status.error { color: var(--danger); }
-.hist-msg { cursor: help; opacity: 0.4; font-size: 11px; }
+.hist-msg { cursor: help; opacity: 0.55; font-size: 11px; }
 .hist-detail { width: 100%; padding: 6px 8px; margin-top: 4px; background: rgba(var(--accent-rgb), 0.02); border-radius: 6px; font-size: 11px; }
 .detail-row { display: flex; gap: 8px; padding: 2px 0; }
 .detail-step { flex: 1; opacity: 0.6; }
@@ -422,7 +422,7 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .detail-status.ok { color: var(--success); }
 .detail-status.error { color: var(--danger); }
 .detail-status.skipped { color: var(--warning); }
-.detail-msg { opacity: 0.4; }
+.detail-msg { opacity: 0.55; }
 
 /* ===== Timer ===== */
 .timer-label { display: flex; align-items: center; gap: 4px; margin-left: auto; font-size: 12px; opacity: 0.6; }
@@ -435,7 +435,7 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .rules p { font-size: 12px; opacity: 0.4; padding: 2px 0; }
 
 /* ===== Empty hint ===== */
-.aw-empty-hint { font-size: 13px; color: rgba(255,255,255,0.15); padding: 8px 0; }
+.aw-empty-hint { font-size: 13px; color: rgba(255, 255, 255, 0.38); padding: 8px 0; }
 
 /* === Entrance Animation === */
 @keyframes fade-slide-up {

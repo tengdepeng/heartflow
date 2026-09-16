@@ -539,7 +539,7 @@ function formatTime(iso:string):string {
 }
 .bw-overview-label {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.52);
 }
 
 /* 标签页 */
@@ -591,7 +591,7 @@ section h3 {
 .bw-mer-row.active {
   background: rgba(var(--accent-rgb), 0.08);
 }
-.bw-mer-time { opacity: 0.4; width: 40px; flex-shrink: 0; color: var(--text-secondary); }
+.bw-mer-time { opacity: 0.55; width: 40px; flex-shrink: 0; color: var(--text-secondary); }
 .bw-mer-organ { font-weight: 600; width: 40px; flex-shrink: 0; color: var(--text-primary); }
 .bw-mer-name { opacity: 0.5; flex-shrink: 0; color: var(--text-secondary); }
 .bw-mer-feelings { display: flex; gap: 2px; margin-left: auto; }
@@ -621,7 +621,7 @@ section h3 {
   border: 1px solid var(--card-border);
 }
 .bw-summary-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.bw-summary-label { font-size: 11px; opacity: 0.4; color: var(--text-secondary); }
+.bw-summary-label { font-size: 11px; opacity: 0.55; color: var(--text-secondary); }
 .bw-summary-val { font-size: 14px; font-weight: 500; color: rgba(255, 255, 255, 0.55); }
 .bw-summary-val.good { color: #7ecf7e; }
 .bw-summary-val.ok { color: #d4b872; }
@@ -689,7 +689,7 @@ section h3 {
 }
 .bw-history-header { display: flex; align-items: center; gap: 8px; margin-bottom: 2px; }
 .bw-history-mood { font-size: 18px; }
-.bw-history-time { font-size: 11px; opacity: 0.35; color: var(--text-secondary); }
+.bw-history-time { font-size: 11px; opacity: 0.52; color: var(--text-secondary); }
 .bw-history-sutra { font-size: 13px; font-weight: 500; color: rgba(255, 255, 255, 0.55); }
 .bw-history-insight { font-size: 12px; color: rgba(255, 255, 255, 0.4); line-height: 1.5; margin: 4px 0 0; }
 
@@ -722,7 +722,7 @@ section h3 {
   font-size: 12px; color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
-.bw-sutra-read-count { font-size: 11px; opacity: 0.3; color: var(--text-secondary); }
+.bw-sutra-read-count { font-size: 11px; opacity: 0.5; color: var(--text-secondary); }
 .bw-sutra-text { font-style: italic; line-height: 1.8 !important; color: var(--text-primary); }
 .bw-excerpt-area { margin-top: 8px; }
 
@@ -731,7 +731,7 @@ section h3 {
   display: block; width: 100%; padding: 8px; border-radius: 8px;
   border: 1px dashed rgba(255, 255, 255, 0.06);
   background: transparent;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.4);
   font-size: 12px; cursor: pointer; font-family: inherit;
   transition: all 0.2s; margin-top: 4px;
 }
@@ -739,7 +739,7 @@ section h3 {
 
 /* 笔记列表项 */
 .bw-note-item {
-  font-size: 12px; color: rgba(255, 255, 255, 0.3);
+  font-size: 12px; color: rgba(255, 255, 255, 0.5);
   padding: 6px 0; border-bottom: 1px solid var(--bg-surface);
   line-height: 1.5;
 }
@@ -780,7 +780,7 @@ section h3 {
   margin-top: 10px; white-space: pre-line;
 }
 .bw-answer-card p { font-size: 13px; line-height: 1.7; margin: 0; color: var(--text-primary); }
-.bw-empty { font-size: 13px; color: rgba(255, 255, 255, 0.12); padding: 8px 0; }
+.bw-empty { font-size: 13px; color: rgba(255, 255, 255, 0.35); padding: 8px 0; }
 
 /* 被动意象（#86） */
 .bw-imagery-list { display: flex; flex-direction: column; gap: 8px; }

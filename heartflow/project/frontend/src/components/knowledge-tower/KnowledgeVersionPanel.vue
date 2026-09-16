@@ -287,7 +287,7 @@ function fmtDate(iso: string): string {
 
 .kvp-sub {
   font-size: 10px;
-  color: rgba(232, 221, 208, 0.4);
+  color: rgba(232, 221, 208, 0.55);
 }
 
 .kvp-stats {
@@ -315,7 +315,7 @@ function fmtDate(iso: string): string {
 
 .kvp-stat span {
   font-size: 10px;
-  color: rgba(232, 221, 208, 0.4);
+  color: rgba(232, 221, 208, 0.55);
 }
 
 .kvp-block {
@@ -347,7 +347,7 @@ function fmtDate(iso: string): string {
 .kvp-empty p,
 .kvp-sub-empty {
   font-size: 12px;
-  color: rgba(232, 221, 208, 0.4);
+  color: rgba(232, 221, 208, 0.55);
   margin: 0;
   line-height: 1.6;
 }
@@ -363,7 +363,7 @@ function fmtDate(iso: string): string {
 .kvp-group-label {
   font-size: 10px;
   letter-spacing: 1px;
-  color: rgba(232, 221, 208, 0.35);
+  color: rgba(232, 221, 208, 0.52);
 }
 
 .kvp-chips {
@@ -494,7 +494,7 @@ function fmtDate(iso: string): string {
 
 .kvp-version-date {
   font-size: 10px;
-  color: rgba(232, 221, 208, 0.35);
+  color: rgba(232, 221, 208, 0.52);
   flex: 0 0 auto;
 }
 
@@ -550,7 +550,7 @@ function fmtDate(iso: string): string {
 .kvp-diff-label {
   font-size: 10px;
   letter-spacing: 1px;
-  color: rgba(232, 221, 208, 0.4);
+  color: rgba(232, 221, 208, 0.55);
 }
 
 .kvp-diff-fields {

@@ -503,7 +503,7 @@ function uninstall(id: string) {
 
 .plugin-author {
   font-size: 11px;
-  color: rgba(232, 221, 208, 0.3);
+  color: rgba(232, 221, 208, 0.5);
   margin-bottom: 4px;
 }
 
@@ -583,7 +583,7 @@ function uninstall(id: string) {
   margin-left: auto;
   font-size: 10px;
   letter-spacing: 0.5px;
-  color: rgba(232, 221, 208, 0.4);
+  color: rgba(232, 221, 208, 0.55);
 }
 
 .cap-state.ready {
@@ -595,7 +595,7 @@ function uninstall(id: string) {
 }
 
 .cap-state.disabled {
-  color: rgba(232, 221, 208, 0.3);
+  color: rgba(232, 221, 208, 0.5);
 }
 
 .perm-head {
@@ -699,7 +699,7 @@ function uninstall(id: string) {
   padding: 1px 6px;
   border-radius: 4px;
   background: rgba(var(--accent-rgb), 0.06);
-  color: rgba(232, 221, 208, 0.4);
+  color: rgba(232, 221, 208, 0.55);
   font-family: var(--font-mono, monospace);
 }
 
@@ -716,7 +716,7 @@ function uninstall(id: string) {
 
 .status-off {
   font-size: 12px;
-  color: rgba(232, 221, 208, 0.3);
+  color: rgba(232, 221, 208, 0.5);
 }
 
 /* ===== Actions ===== */
@@ -777,7 +777,7 @@ function uninstall(id: string) {
 .pl-empty-hint {
   text-align: center;
   padding: 60px 20px;
-  color: rgba(232, 221, 208, 0.35);
+  color: rgba(232, 221, 208, 0.52);
 }
 
 .empty-icon {

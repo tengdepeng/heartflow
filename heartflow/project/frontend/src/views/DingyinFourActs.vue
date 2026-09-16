@@ -282,7 +282,7 @@ onMounted(() => {
 .dfa-subtitle {
   font-size: 12px;
   letter-spacing: 3px;
-  color: rgba(200, 180, 160, 0.35);
+  color: rgba(200, 180, 160, 0.52);
   margin: 0;
 }
 
@@ -305,7 +305,7 @@ onMounted(() => {
 .dfa-summary-label {
   font-size: 11px;
   letter-spacing: 2px;
-  color: rgba(200, 180, 160, 0.4);
+  color: rgba(200, 180, 160, 0.55);
 }
 .dfa-summary-value {
   font-size: 16px;
@@ -359,7 +359,7 @@ onMounted(() => {
 }
 .dfa-knock-time {
   font-size: 11px;
-  color: rgba(200, 180, 160, 0.3);
+  color: rgba(200, 180, 160, 0.5);
   letter-spacing: 0.5px;
 }
 
@@ -585,7 +585,7 @@ onMounted(() => {
 }
 .dfa-empty-hint {
   font-size: 12px;
-  color: rgba(200, 180, 160, 0.25);
+  color: rgba(200, 180, 160, 0.45);
   margin: 0;
   line-height: 1.6;
   max-width: 260px;
@@ -641,7 +641,7 @@ onMounted(() => {
 }
 .dfa-iron-law-text {
   font-size: 13px;
-  color: rgba(200, 180, 160, 0.35);
+  color: rgba(200, 180, 160, 0.52);
   letter-spacing: 2px;
   margin: 0;
   text-align: center;

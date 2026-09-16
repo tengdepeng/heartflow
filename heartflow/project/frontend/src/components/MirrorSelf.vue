@@ -1187,7 +1187,7 @@ onUnmounted(() => {
 
 .ms-progress-text {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.52);
   min-width: 32px;
   text-align: right;
 }
@@ -1198,7 +1198,7 @@ onUnmounted(() => {
 }
 .ms-timeline-title {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.55);
   letter-spacing: 1px;
   margin-bottom: 6px;
 }
@@ -1238,7 +1238,7 @@ onUnmounted(() => {
   flex: 1;
   text-align: center;
   font-size: 8px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
   letter-spacing: 0.5px;
 }
 
@@ -1323,7 +1323,7 @@ onUnmounted(() => {
 .ms-swipe-hint {
   margin: 8px 0 0;
   font-size: 9px;
-  color: rgba(255, 255, 255, 0.32);
+  color: rgba(255, 255, 255, 0.5);
   text-align: center;
   letter-spacing: 0.5px;
 }

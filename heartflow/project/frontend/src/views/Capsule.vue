@@ -216,7 +216,7 @@ function formatDate(iso: string | null): string {
 .header-kicker {
   text-align: center;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.52);
   letter-spacing: 2px;
   margin-bottom: 28px;
 }
@@ -283,7 +283,7 @@ function formatDate(iso: string | null): string {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.cap-empty-hint { font-size: 12px; color: rgba(255, 255, 255, 0.35); margin: 0; }
+.cap-empty-hint { font-size: 12px; color: rgba(255, 255, 255, 0.52); margin: 0; }
 
 .cap-form-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .cap-btn-cancel, .cap-btn-save {
@@ -307,7 +307,7 @@ function formatDate(iso: string | null): string {
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-.cap-empty { font-size: 13px; color: rgba(255, 255, 255, 0.3); padding: 12px 0; }
+.cap-empty { font-size: 13px; color: rgba(255, 255, 255, 0.5); padding: 12px 0; }
 
 .cap-card {
   padding: 14px 16px;
@@ -335,7 +335,7 @@ function formatDate(iso: string | null): string {
   justify-content: space-between;
   margin-top: 10px;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.55);
 }
 .cap-countdown { color: rgba(255, 255, 255, 0.55); }
 .cap-countdown.ready { color: #34d399; }
@@ -372,7 +372,7 @@ function formatDate(iso: string | null): string {
 .cap-btn-remove:hover { color: #f87171; }
 
 .cap-items { margin-top: 10px; }
-.cap-items-label { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
+.cap-items-label { font-size: 12px; color: rgba(255, 255, 255, 0.55); }
 .cap-item-list { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .cap-item {
   display: flex;
@@ -385,11 +385,11 @@ function formatDate(iso: string | null): string {
   background: rgba(255, 255, 255, 0.03);
 }
 .cap-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cap-item-empty { font-size: 12px; color: rgba(255, 255, 255, 0.3); }
+.cap-item-empty { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
 .cap-item-remove {
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
   cursor: pointer;
   font-size: 14px;
 }
