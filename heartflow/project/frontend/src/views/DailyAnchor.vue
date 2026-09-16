@@ -331,7 +331,7 @@
                 <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
               </span>
               <span class="anchor-priority-dot" :style="{ background: PRIORITY_COLORS[a.priority] }" />
-              <div class="anchor-main" @click.stop="toggleRelated(a.id)">
+              <div class="anchor-main" role="button" tabindex="0" :aria-label="'展开或收起 ' + a.text + ' 的关联事项'" :aria-expanded="anchorRelatedOpen(a.id)" @click.stop="toggleRelated(a.id)" @keydown.enter.prevent="toggleRelated(a.id)" @keydown.space.prevent="toggleRelated(a.id)">
                 <span class="anchor-text">{{ a.text }}</span>
                 <div class="anchor-meta-row">
                   <span class="anchor-priority-label">{{ priorityLabel(a.priority) }}</span>
@@ -357,7 +357,7 @@
                   <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
                 </span>
                 <span class="anchor-priority-dot" :style="{ background: PRIORITY_COLORS[a.priority] }" />
-              <div class="anchor-main" @click.stop="toggleRelated(a.id)">
+              <div class="anchor-main" role="button" tabindex="0" :aria-label="'展开或收起 ' + a.text + ' 的关联事项'" :aria-expanded="anchorRelatedOpen(a.id)" @click.stop="toggleRelated(a.id)" @keydown.enter.prevent="toggleRelated(a.id)" @keydown.space.prevent="toggleRelated(a.id)">
                 <span class="anchor-text">{{ a.text }}</span>
                 <div class="anchor-meta-row">
                   <span class="anchor-priority-label">{{ priorityLabel(a.priority) }}</span>
@@ -389,7 +389,7 @@
               <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
             </span>
             <span class="anchor-done-mark">⚓</span>
-            <div class="anchor-main" @click.stop="toggleRelated(a.id)">
+            <div class="anchor-main" role="button" tabindex="0" :aria-label="'展开或收起 ' + a.text + ' 的关联事项'" :aria-expanded="anchorRelatedOpen(a.id)" @click.stop="toggleRelated(a.id)" @keydown.enter.prevent="toggleRelated(a.id)" @keydown.space.prevent="toggleRelated(a.id)">
               <span class="anchor-text done-text">{{ a.text }}</span>
               <div class="anchor-meta-row">
                 <span class="anchor-done-time">{{ doneTime(a.doneAt) }} 已锚定</span>
@@ -411,7 +411,7 @@
                 <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
               </span>
               <span class="anchor-done-mark">⚓</span>
-            <div class="anchor-main" @click.stop="toggleRelated(a.id)">
+            <div class="anchor-main" role="button" tabindex="0" :aria-label="'展开或收起 ' + a.text + ' 的关联事项'" :aria-expanded="anchorRelatedOpen(a.id)" @click.stop="toggleRelated(a.id)" @keydown.enter.prevent="toggleRelated(a.id)" @keydown.space.prevent="toggleRelated(a.id)">
               <span class="anchor-text done-text">{{ a.text }}</span>
               <div class="anchor-meta-row">
                 <span class="anchor-done-time">{{ groupedDoneTimeLabel(a.doneAt) }}</span>
@@ -547,6 +547,9 @@ const relatedAnchors = computed<{ anchor: Anchor; reason: string }[]>(() => {
 })
 function toggleRelated(id: string) {
   relatedAnchorId.value = relatedAnchorId.value === id ? null : id
+}
+function anchorRelatedOpen(id: string): boolean {
+  return relatedAnchorId.value === id
 }
 
 // ---- 跨房间共鸣联动：逐日心锚发射「焦点」信号 ----
@@ -1617,6 +1620,11 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   flex-direction: column;
   gap: 6px;
   min-width: 0;
+}
+.anchor-main:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 .anchor-text {

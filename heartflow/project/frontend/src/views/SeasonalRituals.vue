@@ -243,7 +243,7 @@
     <!-- 最近节日 -->
     <section data-enter><h3>🎋 最近节日</h3>
       <div class="sr-festival-list" v-if="termCtx.upcomingFestivals.value.length">
-        <div v-for="f in termCtx.upcomingFestivals.value" :key="f.name" class="sr-festival-card" @click="selectedFestival=f">
+        <div v-for="f in termCtx.upcomingFestivals.value" :key="f.name" class="sr-festival-card" role="button" tabindex="0" :aria-label="'查看节日 ' + f.name + ' 详情'" @click="selectedFestival=f" @keydown.enter.prevent="selectedFestival=f" @keydown.space.prevent="selectedFestival=f">
           <span>{{f.icon}}</span>
           <div><strong>{{f.name}}</strong> · {{f.date}}</div>
         </div>
@@ -349,7 +349,7 @@
     <!-- 私人仪式 -->
     <section data-enter><h3>🕯 私人仪式</h3>
       <div v-if="prCtx.rituals.value.length" class="sr-ritual-list">
-        <div v-for="r in prCtx.rituals.value" :key="r.id" class="sr-ritual-card" @click="handleEditRitual(r)">
+        <div v-for="r in prCtx.rituals.value" :key="r.id" class="sr-ritual-card" role="button" tabindex="0" :aria-label="'编辑仪式 ' + r.name" @click="handleEditRitual(r)" @keydown.enter.prevent="handleEditRitual(r)" @keydown.space.prevent="handleEditRitual(r)">
           <span>{{r.icon||'🕯'}}</span>
           <div class="sr-ritual-info"><span class="sr-ritual-name">{{r.name}}</span><span class="sr-ritual-date">{{r.date}} · {{r.note||'待记录'}}</span></div>
           <button class="sr-del" @click.stop="prCtx.removeRitual(r.id)">×</button>
@@ -955,6 +955,11 @@ const srStats = srCtx.stats
   border-color: rgba(var(--accent-rgb), 0.15);
   border-left-color: rgba(var(--accent-rgb), 0.3);
 }
+.sr-ritual-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: var(--bg-card);
+}
 
 .sr-ritual-card-del {
   position: absolute;
@@ -1204,6 +1209,11 @@ section h3 {
 .sr-festival-card:hover {
   background: var(--bg-card);
   border-color: rgba(var(--accent-rgb), 0.15);
+}
+.sr-festival-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: var(--bg-card);
 }
 
 /* 仪式列表 */

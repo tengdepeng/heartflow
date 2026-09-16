@@ -168,7 +168,7 @@
       <h3>🌳 根系 · 原生土壤</h3>
       <p class="hint">家庭、故乡、童年——那些你最初生长的土壤</p>
       <div class="root-list">
-        <div v-for="r in byLayer('soil')" :key="r.id" class="root-card" :class="{ expanded: r._expanded }" @click="toggleExpand(r)">
+        <div v-for="r in byLayer('soil')" :key="r.id" class="root-card" :class="{ expanded: r._expanded }" role="button" tabindex="0" :aria-label="'展开或收起根系 ' + r.text" :aria-expanded="!!r._expanded" @click="toggleExpand(r)" @keydown.enter.prevent="toggleExpand(r)" @keydown.space.prevent="toggleExpand(r)">
           <div class="root-card-header">
             <span class="root-icon">{{ r.icon }}</span>
             <div class="root-info">
@@ -189,7 +189,7 @@
       <h3>🪵 树干 · 时代与成长</h3>
       <p class="hint">时代背景、成长环境、迁移与变动</p>
       <div class="root-list">
-        <div v-for="r in byLayer('era')" :key="r.id" class="root-card" :class="{ expanded: r._expanded }" @click="toggleExpand(r)">
+        <div v-for="r in byLayer('era')" :key="r.id" class="root-card" :class="{ expanded: r._expanded }" role="button" tabindex="0" :aria-label="'展开或收起根系 ' + r.text" :aria-expanded="!!r._expanded" @click="toggleExpand(r)" @keydown.enter.prevent="toggleExpand(r)" @keydown.space.prevent="toggleExpand(r)">
           <div class="root-card-header">
             <span class="root-icon">{{ r.icon }}</span>
             <div class="root-info">
@@ -210,7 +210,7 @@
       <h3>🌿 枝桠 · 分化与选择</h3>
       <p class="hint">信念锚点、三观形成、对你影响深远的人和书</p>
       <div class="root-list">
-        <div v-for="r in byLayer('branch')" :key="r.id" class="root-card" :class="{ expanded: r._expanded }" @click="toggleExpand(r)">
+        <div v-for="r in byLayer('branch')" :key="r.id" class="root-card" :class="{ expanded: r._expanded }" role="button" tabindex="0" :aria-label="'展开或收起根系 ' + r.text" :aria-expanded="!!r._expanded" @click="toggleExpand(r)" @keydown.enter.prevent="toggleExpand(r)" @keydown.space.prevent="toggleExpand(r)">
           <div class="root-card-header">
             <span class="root-icon">{{ r.icon }}</span>
             <div class="root-info">
@@ -637,6 +637,11 @@ header {
   overflow: hidden;
 }
 .root-card:hover {
+  background: rgba(55, 48, 40, 0.7);
+}
+.root-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
   background: rgba(55, 48, 40, 0.7);
 }
 .root-card.expanded {
