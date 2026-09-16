@@ -272,12 +272,18 @@ function fmtTime(iso: string): string {
   margin-top: 2px;
 }
 .cga-text-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 2px 6px;
   border: none;
   background: none;
   color: #c8aa5a;
   font-size: 12px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .cga-text-btn:hover {
   color: #e2cc8f;

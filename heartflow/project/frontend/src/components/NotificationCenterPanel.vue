@@ -326,6 +326,10 @@ function handleMaxNotifications(e: Event): void {
   gap: 8px;
 }
 .ncp-btn--small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 12px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
@@ -334,6 +338,8 @@ function handleMaxNotifications(e: Event): void {
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .ncp-btn--small:hover {
   border-color: rgba(240, 192, 64, 0.4);

@@ -448,6 +448,10 @@ onUnmounted(() => {
 }
 
 .moment-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 22px;
   height: 22px;
   border: none;
@@ -458,6 +462,9 @@ onUnmounted(() => {
   line-height: 1;
   cursor: pointer;
   transition: all 0.2s ease;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .moment-del:hover {

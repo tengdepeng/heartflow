@@ -218,7 +218,13 @@ function generate() {
 .hcarch-title-wrap { display: flex; flex-direction: column; gap: 3px; }
 .hcarch-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d6caf0); }
 .hcarch-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
-.hcarch-gen { font-size: 11px; padding: 4px 12px; border-radius: 999px; background: rgba(var(--accent-rgb), 0.12); color: #b9d8b0; border: 1px solid rgba(var(--accent-rgb), 0.2); cursor: pointer; white-space: nowrap; }
+.hcarch-gen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   font-size: 11px; padding: 4px 12px; border-radius: 999px; background: rgba(var(--accent-rgb), 0.12); color: #b9d8b0; border: 1px solid rgba(var(--accent-rgb), 0.2); cursor: pointer; white-space: nowrap; 
+  min-height: 26px;
+}
 .hcarch-gen:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .hcarch-report { margin-bottom: 12px; }

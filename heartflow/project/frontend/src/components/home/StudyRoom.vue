@@ -617,6 +617,10 @@ onMounted(() => {
 }
 
 .view-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 10px;
   padding: 4px 9px;
   border: none;
@@ -627,6 +631,8 @@ onMounted(() => {
   font-family: inherit;
   letter-spacing: 0.5px;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .view-toggle__btn.on {

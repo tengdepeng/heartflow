@@ -930,6 +930,10 @@ function toggleExpandPlan(planId: string) {
   flex-wrap: wrap;
 }
 .domain-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.08);
@@ -939,6 +943,8 @@ function toggleExpandPlan(planId: string) {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .domain-btn-sm:hover { color: rgba(var(--text-primary-rgb), 0.6); }
 .domain-btn-sm.active { color: var(--text-high); border-color: currentColor; }
@@ -1528,6 +1534,10 @@ function toggleExpandPlan(planId: string) {
 
 /* ---- 复苏按钮 ---- */
 .revive-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(52, 211, 153, 0.2);
@@ -1539,6 +1549,8 @@ function toggleExpandPlan(planId: string) {
   white-space: nowrap;
   flex-shrink: 0;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .revive-btn:hover {
   background: rgba(52, 211, 153, 0.15);

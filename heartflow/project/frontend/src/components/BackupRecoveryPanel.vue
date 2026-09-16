@@ -248,8 +248,14 @@ function scoreLevel(level: SafetyScore['level']) {
   color: #b8c4a0;
 }
 .br-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 .br-danger {
   color: #e07a6a;

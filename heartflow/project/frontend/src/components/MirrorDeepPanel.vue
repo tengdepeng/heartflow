@@ -390,6 +390,10 @@ function intentLabel(i: TaskIntent): string {
 .mdp-dispatch-form { display: flex; flex-direction: column; gap: 10px; }
 .mdp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .mdp-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: transparent;
   color: rgba(255, 255, 255, 0.6);
@@ -399,6 +403,8 @@ function intentLabel(i: TaskIntent): string {
   border-radius: 14px;
   cursor: pointer;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .mdp-chip.is-on { background: rgba(var(--accent-rgb), 0.14); border-color: rgba(var(--accent-rgb), 0.4); color: var(--accent); }
 .mdp-dispatch-actions { display: flex; align-items: center; gap: 12px; }
@@ -425,7 +431,8 @@ function intentLabel(i: TaskIntent): string {
 
 /* ---- 任务拆解 ---- */
 .mdp-decompose-form { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
-.mdp-decompose-form .mdp-input { flex: 1; min-width: 160px; }
+.mdp-decompose-form .mdp-input { flex: 1; min-width: 160px;
+}
 .mdp-plan-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .mdp-plan-item { border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 12px; background: rgba(255, 255, 255, 0.03); }
 .mdp-plan-top { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
@@ -442,6 +449,9 @@ function intentLabel(i: TaskIntent): string {
   font-size: 11px; line-height: 1; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .mdp-plan-step.st-done .mdp-step-title { opacity: 0.5; text-decoration: line-through; }
 .mdp-plan-step.st-done .mdp-step-check { background: rgba(120, 200, 150, 0.16); border-color: rgba(120, 200, 150, 0.5); }

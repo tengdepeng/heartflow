@@ -133,7 +133,10 @@ function removeRelation(id: string) {
 .re-rel-arrow { color: var(--text-secondary); margin: 0 4px; }
 .re-rel-target { flex: 1; }
 .re-rel-desc { font-size: 11px; color: rgba(var(--accent-rgb), 0.35); }
-.re-del-btn { width: 20px; height: 20px; border-radius: 50%; border: none; background: transparent; color: rgba(var(--text-primary-rgb), 0.15); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+.re-del-btn { width: 20px; height: 20px; border-radius: 50%; border: none; background: transparent; color: rgba(var(--text-primary-rgb), 0.15); cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; 
+  min-height: 24px;
+  min-width: 24px;
+}
 .re-del-btn:hover { color: rgba(224,112,80,0.7); }
 .re-form { display: flex; flex-direction: column; gap: 10px; }
 .re-select, .re-input {

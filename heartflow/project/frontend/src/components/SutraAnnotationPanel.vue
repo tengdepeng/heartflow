@@ -393,6 +393,10 @@ onMounted(() => {
 }
 
 .sap-digest {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 999px;
@@ -400,6 +404,8 @@ onMounted(() => {
   background: rgba(138, 154, 122, 0.1);
   color: #c8ccb8;
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .sap-digested {

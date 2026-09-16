@@ -222,7 +222,13 @@ function priorityLabel(p: string) {
   border-color: rgba(138, 154, 122, 0.35);
   color: #b8c4a0;
 }
-.rhp-btn-sm { padding: 4px 10px; font-size: 11px; }
+.rhp-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 4px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .rhp-btn-del:hover { border-color: rgba(196, 106, 90, 0.35); color: #e0a090; }
 .rhp-list {
   list-style: none;

@@ -91,7 +91,13 @@ function toggle(e: HanziEntry) { openChar.value = openChar.value === e.char ? ''
 .hz-count { font-size: 11px; opacity: 0.45; }
 
 .hz-modes { display: flex; gap: 6px; margin-bottom: 12px; }
-.hz-mode { padding: 2px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: inherit; font-size: 12px; cursor: pointer; }
+.hz-mode {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 2px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: inherit; font-size: 12px; cursor: pointer; 
+  min-height: 26px;
+}
 .hz-mode.on { background: rgba(var(--accent-rgb), 0.22); border-color: rgba(var(--accent-rgb), 0.5); }
 
 .hz-inputbox { margin-bottom: 12px; }

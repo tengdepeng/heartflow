@@ -132,7 +132,13 @@ function distHeight(count: number, which: 'recite'): number {
 .march-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .march-title { font-size: 14px; letter-spacing: 2px; color: rgba(var(--accent-rgb), 0.75); }
 .march-tabs { display: flex; gap: 6px; }
-.march-tab { padding: 2px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: inherit; font-size: 12px; cursor: pointer; }
+.march-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 2px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: inherit; font-size: 12px; cursor: pointer; 
+  min-height: 26px;
+}
 .march-tab.on { background: rgba(var(--accent-rgb), 0.22); border-color: rgba(var(--accent-rgb), 0.5); }
 
 .march-empty { font-size: 12px; opacity: 0.55; padding: 4px 0; }

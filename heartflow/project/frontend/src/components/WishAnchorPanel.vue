@@ -213,6 +213,10 @@ function fmtDate(d: string): string {
   opacity: 0.55;
 }
 .wa-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -223,6 +227,9 @@ function fmtDate(d: string): string {
   line-height: 1;
   cursor: pointer;
   flex-shrink: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .wa-toggle.checked {
   background: rgba(138, 154, 122, 0.25);
@@ -251,6 +258,10 @@ function fmtDate(d: string): string {
   white-space: nowrap;
 }
 .wa-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -260,6 +271,9 @@ function fmtDate(d: string): string {
   cursor: pointer;
   font-size: 13px;
   flex-shrink: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .wa-del:hover {
   color: #c46a5a;

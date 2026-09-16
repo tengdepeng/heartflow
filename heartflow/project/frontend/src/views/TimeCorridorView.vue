@@ -408,6 +408,10 @@ function navTo(path: string) {
 }
 
 .tcv-capsule-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   margin-left: auto;
   font-size: 11px;
   color: rgba(var(--accent-rgb), 0.55);
@@ -417,6 +421,8 @@ function navTo(path: string) {
   padding: 3px 10px;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .tcv-capsule-go:hover {
@@ -454,6 +460,10 @@ function navTo(path: string) {
 }
 
 .tcv-capsule-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   margin-left: auto;
   font-size: 11px;
   color: var(--accent);
@@ -462,6 +472,8 @@ function navTo(path: string) {
   border-radius: 6px;
   padding: 3px 10px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .tcv-capsule-empty {

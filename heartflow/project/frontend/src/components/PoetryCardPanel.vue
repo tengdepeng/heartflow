@@ -298,8 +298,14 @@ function isFav(id: string): boolean {
 }
 
 .pcp-btn-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 
 .pcp-detail-toggle {

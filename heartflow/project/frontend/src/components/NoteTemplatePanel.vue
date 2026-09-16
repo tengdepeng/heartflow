@@ -321,6 +321,10 @@ function doDelete(id: string) {
 }
 
 .ntp-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   color: rgba(var(--accent-rgb), 0.55);
   background: transparent;
@@ -329,6 +333,8 @@ function doDelete(id: string) {
   padding: 3px 10px;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .ntp-chip:hover {
@@ -510,9 +516,15 @@ function doDelete(id: string) {
 }
 
 .ntp-btn--sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 3px 10px;
   flex-shrink: 0;
+
+  min-height: 26px;
 }
 
 .ntp-btn--danger {

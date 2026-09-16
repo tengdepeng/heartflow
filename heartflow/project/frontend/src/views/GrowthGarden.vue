@@ -629,6 +629,10 @@ function importAll(e: Event) {
 
 .gw-plant-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .gw-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.18);
@@ -638,6 +642,8 @@ function importAll(e: Event) {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .gw-mini-btn:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.16); color: var(--accent); }
 .gw-mini-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -651,7 +657,8 @@ function importAll(e: Event) {
 }
 .gw-cocoon-hint { font-size: 12px; color: #f9a8d4; margin-bottom: 6px; }
 .gw-cocoon-form { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
-.gw-cocoon-form .gw-input { flex: 1; min-width: 120px; }
+.gw-cocoon-form .gw-input { flex: 1; min-width: 120px;
+}
 .gw-cocoon-linked { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .gw-cocoon-linked span {
   font-size: 11px;
@@ -692,14 +699,20 @@ function importAll(e: Event) {
 .gw-habit-bar-wrap {
   flex: 1;
   height: 8px;
+  padding: 8px 0;
+  margin: -8px 0;
+  box-sizing: content-box;
+  background-clip: content-box;
   border-radius: 4px;
   background: var(--bg-card);
   cursor: pointer;
   overflow: hidden;
 }
 .gw-habit-bar { height: 100%; border-radius: 4px; background: var(--accent); transition: width 0.3s; }
-.gw-habit-name { font-size: 13px; color: var(--text-high); min-width: 80px; }
-.gw-habit-streak { font-size: 12px; font-weight: 600; color: var(--accent); min-width: 30px; }
+.gw-habit-name { font-size: 13px; color: var(--text-high); min-width: 80px;
+}
+.gw-habit-streak { font-size: 12px; font-weight: 600; color: var(--accent); min-width: 30px;
+}
 
 /* ---- 罗盘 ---- */
 .gw-compass-values { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }

@@ -363,6 +363,10 @@ onMounted(() => {
 }
 
 .rrp-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 10px;
@@ -373,6 +377,8 @@ onMounted(() => {
   border: 1px solid rgba(216, 232, 216, 0.15);
   color: rgba(216, 232, 216, 0.5);
   transition: all 0.25s ease;
+
+  min-height: 26px;
 }
 
 .rrp-toggle--on {

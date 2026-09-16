@@ -212,7 +212,13 @@ function cancelEdit(): void {
 }
 .ccp-empty { font-size: 12px; color: #8a9a7a; }
 
-.ccp-btn { background: #8a9a7a; color: #171a15; border: none; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 11px; }
+.ccp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   background: #8a9a7a; color: #171a15; border: none; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 11px; 
+  min-height: 26px;
+}
 .ccp-btn--ghost { background: transparent; border: 1px solid #374136; color: #b7c0a8; margin-left: auto; }
 .ccp-btn--primary { padding: 6px 14px; font-size: 12px; }
 .ccp-btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -235,6 +241,13 @@ function cancelEdit(): void {
 .ccp-input-icon { text-align: center; }
 
 .ccp-swatches { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
-.ccp-swatch-btn { width: 20px; height: 20px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; }
+.ccp-swatch-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   width: 20px; height: 20px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; 
+  min-height: 24px;
+  min-width: 24px;
+}
 .ccp-swatch-btn.on { border-color: #f0c040; box-shadow: 0 0 0 1px #f0c040; }
 </style>

@@ -183,6 +183,10 @@ function toggleFav(id: string) {
 .poetry-card-title { display: block; font-size: 20px; color: var(--text-high); margin-bottom: 4px; }
 .poetry-card-author { font-size: 11px; color: var(--text-faint); }
 .poetry-fav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   padding: 4px 10px;
   border-radius: 999px;
@@ -192,6 +196,8 @@ function toggleFav(id: string) {
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .poetry-fav.on { background: rgba(var(--accent-rgb), 0.15); color: var(--accent); border-color: rgba(var(--accent-rgb), 0.4); }
 
@@ -281,6 +287,10 @@ function toggleFav(id: string) {
 .poetry-subtitle { margin: 0 0 8px; font-size: 12px; color: var(--text-high); font-weight: 500; }
 .poetry-fav-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .poetry-fav-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid rgba(var(--accent-rgb), 0.2);
@@ -289,6 +299,8 @@ function toggleFav(id: string) {
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .poetry-fav-chip:hover { background: rgba(var(--accent-rgb), 0.16); }
 

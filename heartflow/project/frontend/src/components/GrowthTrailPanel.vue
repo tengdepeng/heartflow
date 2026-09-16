@@ -252,10 +252,16 @@ onMounted(() => {
 .gtp-ms-date { font-size: 10px; color: var(--text-dim); font-variant-numeric: tabular-nums; }
 .gtp-ms-actions { display: flex; gap: 4px; }
 .gtp-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px; border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.15);
   background: transparent; color: var(--text-secondary);
   font-size: 10px; font-family: inherit; cursor: pointer;
+
+  min-height: 26px;
 }
 .gtp-mini--ok:hover { color: #8a9a7a; border-color: rgba(138, 154, 122, 0.4); }
 .gtp-mini--miss:hover { color: #c46a5a; border-color: rgba(196, 106, 90, 0.4); }

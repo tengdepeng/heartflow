@@ -707,6 +707,10 @@ function toggleArchive(note: Note) {
 }
 
 .filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 12px;
   border: 1px solid rgba(var(--accent-rgb), 0.1);
@@ -716,6 +720,8 @@ function toggleArchive(note: Note) {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .filter-chip:hover {
@@ -995,6 +1001,10 @@ function toggleArchive(note: Note) {
 }
 
 .tag-cloud-hide {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   border: 1px solid rgba(var(--accent-rgb), 0.1);
   background: transparent;
   color: rgba(var(--accent-rgb), 0.35);
@@ -1004,6 +1014,8 @@ function toggleArchive(note: Note) {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .tag-cloud-hide:hover {
@@ -1517,7 +1529,7 @@ function toggleArchive(note: Note) {
   .book-card {
     padding: 12px;
     min-height: 120px;
-  }
+}
 
   .book-title {
     font-size: 14px;
@@ -1599,7 +1611,7 @@ function toggleArchive(note: Note) {
   .overview-card {
     padding: 6px 10px;
     min-width: 48px;
-  }
+}
 
   .overview-num {
     font-size: 14px;
@@ -1636,7 +1648,7 @@ function toggleArchive(note: Note) {
   .book-card {
     padding: 10px;
     min-height: 100px;
-  }
+}
 }
 
 /* 375px: 小微屏收紧内距 + 触控靶 ≥40px + 防横向滚动（任务④ ≤375px 打磨） */
@@ -1673,7 +1685,7 @@ function toggleArchive(note: Note) {
     padding: 6px 8px;
     min-width: 0;
     min-height: 44px;
-  }
+}
 
   .overview-num {
     font-size: 13px;
@@ -1696,13 +1708,13 @@ function toggleArchive(note: Note) {
     padding: 7px 10px;
     font-size: 11px;
     min-height: 32px;
-  }
+}
 
   .st-btn-new {
     padding: 9px 12px;
     font-size: 12px;
     min-height: 40px;
-  }
+}
 
   .bookshelf {
     padding: 6px 10px 40px;
@@ -1711,7 +1723,7 @@ function toggleArchive(note: Note) {
   .book-card {
     padding: 10px;
     min-height: 92px;
-  }
+}
 
   .book-title {
     font-size: 13px;
@@ -1741,6 +1753,6 @@ function toggleArchive(note: Note) {
     padding: 9px 12px;
     font-size: 12px;
     min-height: 40px;
-  }
+}
 }
 </style>

@@ -472,6 +472,10 @@ onMounted(() => {
 }
 
 .unsorted-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   width: 22px;
   height: 22px;
@@ -483,6 +487,9 @@ onMounted(() => {
   line-height: 1;
   cursor: pointer;
   transition: all 0.2s ease;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .unsorted-del:hover {

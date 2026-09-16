@@ -808,6 +808,9 @@ const srStats = srCtx.stats
   display: flex;
   align-items: center;
   justify-content: center;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .sr-ring-node:hover {

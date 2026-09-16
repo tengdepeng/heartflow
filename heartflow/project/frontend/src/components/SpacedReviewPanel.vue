@@ -395,9 +395,15 @@ onMounted(() => {
   color: var(--accent);
 }
 .srp-btn--sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex: 0 0 auto;
   padding: 4px 12px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 
 /* ---- 到期卡片 ---- */

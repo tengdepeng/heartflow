@@ -156,6 +156,10 @@ onBeforeUnmount(() => {
 }
 
 .ttp-rate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 8px;
   border: 1px solid rgba(var(--accent-rgb), 0.12);
   border-radius: 6px;
@@ -165,6 +169,8 @@ onBeforeUnmount(() => {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .ttp-rate-btn:hover {

@@ -628,6 +628,10 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
   opacity: 0.7;
 }
 .item-revive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.2);
@@ -638,12 +642,18 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .item-revive:hover { background: rgba(var(--accent-rgb), 0.15); }
 
 /* ========== 书籍状态标签 ========== */
 
 .status-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 10px;
   padding: 2px 7px;
   border-radius: 4px;
@@ -651,6 +661,8 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
   white-space: nowrap;
   transition: all 0.2s;
   user-select: none;
+
+  min-height: 26px;
 }
 .status-tag.active {
   background: rgba(var(--accent-rgb), 0.08);
@@ -706,6 +718,9 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
   justify-content: center;
   transition: all 0.2s;
   flex-shrink: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .status-toggle:hover { border-color: var(--amber-accent); color: var(--amber-accent); }
 .status-toggle.done {
@@ -828,6 +843,13 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
 .dot-actions { display: flex; gap: 6px; }
 .dot-adopt,
 .dot-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 9px;
   border-radius: 6px;
   border: 1px solid rgba(232, 211, 162, 0.22);
@@ -837,6 +859,9 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
+  min-height: 26px;
 }
 .dot-adopt:hover { background: rgba(232, 211, 162, 0.18); color: var(--amber-accent); }
 .dot-act:hover { background: rgba(var(--accent-rgb), 0.18); color: var(--amber-accent); border-color: rgba(var(--accent-rgb), 0.35); }

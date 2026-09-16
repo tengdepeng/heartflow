@@ -180,8 +180,14 @@ function submit(id: string) {
   color: #8a9a7a;
 }
 .rc-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 .rc-btn:disabled {
   opacity: 0.35;
@@ -225,6 +231,10 @@ function submit(id: string) {
   color: var(--text-medium);
 }
 .rc-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -234,6 +244,9 @@ function submit(id: string) {
   cursor: pointer;
   font-size: 13px;
   flex-shrink: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .rc-del:hover {
   color: #c46a5a;

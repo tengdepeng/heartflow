@@ -254,6 +254,13 @@ function mark(item: ChecklistItem, passed: boolean) {
 }
 .crv-btn-pass,
 .crv-btn-fail {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   font-size: 12px;
   border-radius: 4px;
@@ -261,6 +268,9 @@ function mark(item: ChecklistItem, passed: boolean) {
   background: var(--bg-surface);
   color: var(--text-primary);
   cursor: pointer;
+
+  min-height: 26px;
+  min-height: 26px;
 }
 .crv-btn-pass:hover {
   border-color: var(--accent);

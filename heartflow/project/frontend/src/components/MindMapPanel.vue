@@ -295,6 +295,10 @@ function removeNode(node: MindNode) {
   gap: 6px;
 }
 .mm-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -304,6 +308,8 @@ function removeNode(node: MindNode) {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .mm-chip.active {
   background: rgba(240, 192, 64, 0.12);
@@ -346,6 +352,9 @@ function removeNode(node: MindNode) {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .mm-node-toggle.leaf {
   cursor: default;
@@ -390,6 +399,11 @@ function removeNode(node: MindNode) {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  min-height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  min-width: 24px;
 }
 .mm-node-add:hover {
   color: #f0c040;

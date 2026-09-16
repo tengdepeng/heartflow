@@ -388,8 +388,14 @@ function sizeLabel(bytes: number): string {
   color: #e8e4d8;
 }
 .oa-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 2px 8px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 .oa-presets {
   display: flex;
@@ -407,6 +413,8 @@ function sizeLabel(bytes: number): string {
   border: 1px solid rgba(139, 155, 122, 0.2);
   color: rgba(232, 228, 216, 0.7);
   cursor: pointer;
+
+  min-height: 26px;
 }
 .oa-preset.active {
   background: rgba(138, 154, 122, 0.25);

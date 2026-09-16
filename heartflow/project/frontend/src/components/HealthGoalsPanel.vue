@@ -302,6 +302,10 @@ function fmt(iso: string): string {
   letter-spacing: 0.5px;
 }
 .hgp-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 2px 10px;
   border-radius: 8px;
@@ -311,6 +315,8 @@ function fmt(iso: string): string {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .hgp-toggle:hover {
   color: var(--accent);

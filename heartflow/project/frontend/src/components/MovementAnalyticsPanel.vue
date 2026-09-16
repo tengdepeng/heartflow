@@ -296,7 +296,13 @@ function intensityLabel(i: MovementIntensity) { return MOVEMENT_INTENSITY_META[i
   transition: background 0.2s ease;
 }
 .ma-btn:hover { background: rgba(255, 255, 255, 0.09); }
-.ma-btn-sm { padding: 4px 10px; font-size: 11px; }
+.ma-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 4px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .ma-list {
   list-style: none;
   margin: 0;

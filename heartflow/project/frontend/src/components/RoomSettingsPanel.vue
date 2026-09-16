@@ -360,6 +360,10 @@ function onPinSlotChange(roomId: string, value: string) {
 }
 
 .rm-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   background: none;
   border: none;
   color: var(--text-dim);
@@ -368,6 +372,8 @@ function onPinSlotChange(roomId: string, value: string) {
   padding: 2px 6px;
   border-radius: 6px;
   transition: color 0.2s, background 0.2s;
+
+  min-height: 26px;
 }
 
 .rm-search-clear:hover {
@@ -568,6 +574,9 @@ function onPinSlotChange(roomId: string, value: string) {
   line-height: 1;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .rm-order-btn:hover {
@@ -589,6 +598,9 @@ function onPinSlotChange(roomId: string, value: string) {
   height: 22px;
   flex-shrink: 0;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .rm-toggle input {

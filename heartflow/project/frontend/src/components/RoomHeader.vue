@@ -95,6 +95,8 @@ defineEmits<{ (e: 'navigate', item: BreadcrumbItem): void }>()
   font: inherit;
   color: var(--text-secondary);
   cursor: pointer;
+
+  min-height: 26px;
 }
 .rh-crumb:hover {
   color: var(--accent);

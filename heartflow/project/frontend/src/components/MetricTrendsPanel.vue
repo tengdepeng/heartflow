@@ -163,7 +163,8 @@ function acknowledge(id: string) { acknowledgeAlert(id) }
 .mtp-empty span { display: block; font-size: 28px; margin-bottom: 6px; }
 .mtp-empty p { margin: 0; line-height: 1.6; }
 .mtp-overall { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.mtp-assessment { margin: 0; font-size: 13px; color: #1a1a2e; flex: 1; min-width: 200px; }
+.mtp-assessment { margin: 0; font-size: 13px; color: #1a1a2e; flex: 1; min-width: 200px;
+}
 .mtp-trend-badge { font-size: 11px; padding: 3px 10px; border-radius: 999px; background: rgba(107, 159, 196, 0.12); color: #3d7ea6; }
 .mtp-trend-badge.dir-up { background: rgba(90, 184, 160, 0.15); color: #2e8b6a; }
 .mtp-trend-badge.dir-down { background: rgba(196, 106, 90, 0.15); color: #b04a3a; }
@@ -200,8 +201,14 @@ function acknowledge(id: string) { acknowledgeAlert(id) }
 .mtp-alert-sev { font-size: 11px; }
 .mtp-alert-title { font-size: 12px; font-weight: 600; color: #1a1a2e; flex: 1; }
 .mtp-alert-ack {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 2px 10px; font-size: 11px; border: 1px solid rgba(107, 159, 196, 0.4);
   border-radius: 999px; background: transparent; color: #3d7ea6; cursor: pointer;
+
+  min-height: 26px;
 }
 .mtp-alert-ack:hover { background: rgba(107, 159, 196, 0.1); }
 .mtp-alert-desc { margin: 4px 0 0; font-size: 12px; color: #4a5a6a; }

@@ -442,6 +442,10 @@ onMounted(() => { loadTalks() })
   margin-bottom: 20px;
 }
 .tr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 12px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.12);
@@ -451,6 +455,8 @@ onMounted(() => { loadTalks() })
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .tr-btn:hover {
   border-color: rgba(var(--accent-rgb), 0.2);
@@ -521,6 +527,10 @@ onMounted(() => { loadTalks() })
 }
 
 .asm-edit-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 12px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.15);
@@ -530,6 +540,8 @@ onMounted(() => { loadTalks() })
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .asm-edit-toggle:hover {
   border-color: rgba(var(--accent-rgb), 0.25);
@@ -599,6 +611,9 @@ onMounted(() => { loadTalks() })
   font-size: 10px;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .asm-toolcard-remove:hover {
   background: rgba(var(--accent-rgb), 0.15);

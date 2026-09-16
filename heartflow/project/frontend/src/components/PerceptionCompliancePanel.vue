@@ -301,6 +301,10 @@ function alwaysOnLabel(item: string): string {
 
 /* 开关 */
 .pcm-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   width: 36px;
   height: 20px;
@@ -311,6 +315,9 @@ function alwaysOnLabel(item: string): string {
   position: relative;
   transition: background 0.2s;
   padding: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .pcm-switch.is-on {

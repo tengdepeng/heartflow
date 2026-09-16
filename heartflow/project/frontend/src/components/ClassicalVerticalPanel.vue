@@ -213,6 +213,10 @@ function removeAnnotation(id: string) {
   color: #8a97ad;
 }
 .cv-book-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -221,6 +225,9 @@ function removeAnnotation(id: string) {
   color: #c46a5a;
   font-size: 13px;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .cv-add-row {
   display: flex;
@@ -283,6 +290,10 @@ function removeAnnotation(id: string) {
   gap: 4px;
 }
 .cv-mode-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(140, 160, 190, 0.2);
@@ -290,6 +301,8 @@ function removeAnnotation(id: string) {
   color: #8a97ad;
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .cv-mode-tab.active {
   background: rgba(120, 150, 200, 0.2);
@@ -364,6 +377,10 @@ function removeAnnotation(id: string) {
   color: #aab6c9;
 }
 .cv-ann-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 18px;
   height: 18px;
   border-radius: 50%;
@@ -372,6 +389,9 @@ function removeAnnotation(id: string) {
   color: #c46a5a;
   font-size: 12px;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .cv-ann-add {
   display: flex;

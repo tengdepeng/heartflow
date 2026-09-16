@@ -241,6 +241,10 @@ function removeImage(d: string, index: number) {
   display: block;
 }
 .pd-img-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   position: absolute;
   top: 4px;
   right: 4px;
@@ -253,6 +257,9 @@ function removeImage(d: string, index: number) {
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .pd-hint {
   font-size: 12px;

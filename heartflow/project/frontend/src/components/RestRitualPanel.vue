@@ -435,6 +435,10 @@ function soundscapeLabel(soundscape: string): string {
 
 /* ---- 仪式步骤可视化 ---- */
 .ritual-execute-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   margin-left: 12px;
   padding: 4px 14px;
   background: rgba(122, 184, 122, 0.15);
@@ -446,6 +450,8 @@ function soundscapeLabel(soundscape: string): string {
   cursor: pointer;
   transition: all var(--transition);
   letter-spacing: 0.5px;
+
+  min-height: 26px;
 }
 
 .ritual-execute-btn:hover {
@@ -898,6 +904,6 @@ function soundscapeLabel(soundscape: string): string {
   .rf-level-btn {
     flex: 0 0 auto;
     min-width: 60px;
-  }
+}
 }
 </style>

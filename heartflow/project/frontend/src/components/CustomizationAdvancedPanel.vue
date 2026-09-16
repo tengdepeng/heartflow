@@ -279,6 +279,10 @@ function restoreSnapshot(id: string) {
   color: var(--text-low);
 }
 .ca-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -287,6 +291,8 @@ function restoreSnapshot(id: string) {
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .ca-mini:hover {
   color: #c46a5a;
@@ -297,6 +303,10 @@ function restoreSnapshot(id: string) {
   gap: 6px;
 }
 .ca-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -306,6 +316,8 @@ function restoreSnapshot(id: string) {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .ca-chip.active {
   background: rgba(107, 159, 196, 0.12);

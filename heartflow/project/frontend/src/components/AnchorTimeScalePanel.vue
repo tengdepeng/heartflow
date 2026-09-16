@@ -125,7 +125,13 @@ function prioLabel(a: Anchor) {
 .ats-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .ats-title { font-size: 14px; letter-spacing: 2px; color: rgba(var(--accent-rgb), 0.75); }
 .ats-scales { display: flex; gap: 6px; }
-.ats-scale { padding: 2px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: inherit; font-size: 12px; cursor: pointer; }
+.ats-scale {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 2px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14); background: transparent; color: inherit; font-size: 12px; cursor: pointer; 
+  min-height: 26px;
+}
 .ats-scale.on { background: rgba(var(--accent-rgb), 0.22); border-color: rgba(var(--accent-rgb), 0.5); }
 
 .ats-nav { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }

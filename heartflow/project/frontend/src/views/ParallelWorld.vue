@@ -1078,6 +1078,10 @@ section {
 }
 
 .pw-fork-gen-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 4px 12px;
   border-radius: 6px;
@@ -1088,6 +1092,8 @@ section {
   font-family: inherit;
   letter-spacing: 0.5px;
   transition: all 0.2s ease;
+
+  min-height: 26px;
 }
 
 .pw-fork-gen-btn:hover {

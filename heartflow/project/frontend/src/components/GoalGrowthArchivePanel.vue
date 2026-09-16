@@ -375,6 +375,10 @@ function shortDate(iso: string): string {
 .ggap-detail-status { font-size: 12px; color: #d98c7a; }
 .ggap-detail-steps { font-size: 12px; opacity: 0.72; }
 .ggap-snap-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   margin-left: auto;
   padding: 3px 10px;
   font-size: 11px;
@@ -383,6 +387,8 @@ function shortDate(iso: string): string {
   background: rgba(196, 106, 90, 0.12);
   color: #d98c7a;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .ggap-progress-track { height: 9px; border-radius: 999px; background: rgba(148, 145, 138, 0.16); overflow: hidden; }
 .ggap-progress-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #c3b06a, #8a9a7a); transition: width 0.3s; }

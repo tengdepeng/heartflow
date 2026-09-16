@@ -107,8 +107,14 @@ onMounted(refresh)
 .opp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #e8ddc8); }
 .opp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .opp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0; padding: 4px 12px; border-radius: 10px; border: 1px solid rgba(240, 192, 64, 0.3);
   background: rgba(240, 192, 64, 0.08); color: #f0c040; font-size: 11px; font-family: inherit; cursor: pointer;
+
+  min-height: 26px;
 }
 .opp-summary { margin: 0 0 12px; font-size: 12px; line-height: 1.7; color: rgba(232, 221, 200, 0.65); }
 

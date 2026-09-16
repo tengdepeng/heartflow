@@ -132,6 +132,9 @@ const iconMap: Record<string, string> = {
   transition:
     background-color calc(0.18s / var(--hf-animate-speed, 1)) ease,
     color calc(0.18s / var(--hf-animate-speed, 1)) ease;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .toast-close::after {
   content: '';

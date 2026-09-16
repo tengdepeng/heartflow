@@ -340,7 +340,10 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .step-action { border-color: rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.08); color: var(--accent); }
 .step-condition { border-color: rgba(129,199,132,0.3); background: rgba(129,199,132,0.08); color: #81c784; }
 .step-connector { opacity: 0.3; font-size: 14px; }
-.step-del { width: 16px; height: 16px; border-radius: 50%; border: none; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+.step-del { width: 16px; height: 16px; border-radius: 50%; border: none; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; 
+  min-height: 24px;
+  min-width: 24px;
+}
 .step-del:hover { color: var(--danger); }
 .cond-badge { font-size: 9px; padding: 1px 5px; border-radius: 4px; background: rgba(129,199,132,0.2); color: #81c784; }
 
@@ -383,7 +386,10 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 .rf-name { flex: 1; }
 .rf-status { color: var(--success); animation: pulse 1s infinite; }
 @keyframes pulse { 50% { opacity: 0.5; } }
-.aw-del { width: 18px; height: 18px; border-radius: 50%; border: none; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+.aw-del { width: 18px; height: 18px; border-radius: 50%; border: none; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.3); cursor: pointer; font-size: 10px; display: flex; align-items: center; justify-content: center; 
+  min-height: 24px;
+  min-width: 24px;
+}
 .aw-del:hover { color: var(--danger); }
 
 /* ===== Flow List ===== */

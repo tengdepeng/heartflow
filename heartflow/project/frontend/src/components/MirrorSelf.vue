@@ -1307,6 +1307,9 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .ms-room-switch-btn:hover:not(:disabled) {
   background: rgba(var(--accent-rgb), 0.16);

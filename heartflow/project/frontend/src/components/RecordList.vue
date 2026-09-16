@@ -245,6 +245,9 @@ function tagStyle(tag: string) {
   border: none;
   cursor: pointer;
   transition: all var(--transition);
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .clear-btn:hover {

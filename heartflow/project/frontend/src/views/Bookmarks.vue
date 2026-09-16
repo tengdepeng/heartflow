@@ -743,8 +743,14 @@ function fmt(iso: string) {
   color: var(--text-high);
 }
 .bm-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 .del-btn-text {
   border-color: rgba(239, 68, 68, 0.15);
@@ -829,6 +835,8 @@ function fmt(iso: string) {
   padding: 2px 6px;
   border-radius: 4px;
   transition: background 0.2s;
+
+  min-height: 26px;
 }
 .folder-stat:hover {
   background: rgba(var(--accent-rgb), 0.06);
@@ -1148,12 +1156,18 @@ function fmt(iso: string) {
   align-items: center;
 }
 .cloud-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   cursor: pointer;
   color: var(--accent);
   transition: all 0.2s;
   user-select: none;
   padding: 2px 4px;
   border-radius: 4px;
+
+  min-height: 26px;
 }
 .cloud-tag:hover {
   background: rgba(var(--accent-rgb), 0.08);

@@ -413,6 +413,9 @@ onMounted(() => {
   transition: all 0.25s ease;
   padding: 0;
   font-family: inherit;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .lpp-node.done .lpp-node-check { background: var(--path-accent, #8a9a7a); border-color: var(--path-accent, #8a9a7a); color: #0e110e; }
 .lpp-node-body { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }

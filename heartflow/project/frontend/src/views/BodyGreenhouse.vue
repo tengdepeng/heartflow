@@ -782,7 +782,8 @@ const recentLogs = computed(() =>
   font-size: 13px;
   color: var(--amber-text-secondary);
 }
-.log-row span { min-width: 60px; }
+.log-row span { min-width: 60px;
+}
 .bh-input {
   width: 70px;
   padding: 6px 8px;
@@ -945,7 +946,8 @@ const recentLogs = computed(() =>
   font-size: 12px;
 }
 .cycle-history-item:last-child { border-bottom: none; }
-.cycle-h-date { color: var(--amber-text-secondary); min-width: 80px; }
+.cycle-h-date { color: var(--amber-text-secondary); min-width: 80px;
+}
 .cycle-h-duration { color: var(--amber-text-muted); }
 .cycle-h-interval { margin-left: auto; font-size: 11px; color: rgba(var(--accent-rgb), 0.5); }
 .cycle-insight { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(var(--accent-rgb), 0.06); font-size: 11px; color: rgba(52,211,153,0.6); }
@@ -1055,7 +1057,7 @@ const recentLogs = computed(() =>
     gap: 10px;
     text-align: left;
     min-height: 48px;
-  }
+}
 
   .plant-visual {
     font-size: 24px;
@@ -1129,7 +1131,7 @@ const recentLogs = computed(() =>
 
   .cycle-h-date {
     min-width: 64px;
-  }
+}
 
   .cycle-h-interval {
     display: none;
@@ -1165,7 +1167,7 @@ const recentLogs = computed(() =>
   .overview-card {
     padding: 8px 6px;
     min-height: 56px;
-  }
+}
 
   .ov-value {
     font-size: 16px;
@@ -1193,7 +1195,7 @@ const recentLogs = computed(() =>
   .plant-card {
     padding: 10px;
     min-height: 40px;
-  }
+}
 
   .plant-visual {
     font-size: 20px;
@@ -1240,6 +1242,10 @@ const recentLogs = computed(() =>
   color: var(--amber-text-secondary);
 }
 .bg-hide {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 3px 10px;
   border-radius: 8px;
@@ -1249,6 +1255,8 @@ const recentLogs = computed(() =>
   font-family: inherit;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
+
+  min-height: 26px;
 }
 .bg-hide:hover {
   color: var(--accent);

@@ -861,6 +861,9 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .provision-item__remove:hover {

@@ -231,6 +231,10 @@ function toggleFav(id: string): void {
   letter-spacing: 1px;
 }
 .md-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 10px;
   font-family: inherit;
@@ -239,6 +243,8 @@ function toggleFav(id: string): void {
   background: rgba(var(--accent-rgb), 0.1);
   color: var(--accent);
   cursor: pointer;
+
+  min-height: 26px;
 }
 .md-mini-btn:hover {
   background: rgba(var(--accent-rgb), 0.2);

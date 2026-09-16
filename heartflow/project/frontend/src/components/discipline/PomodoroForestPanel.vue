@@ -393,6 +393,10 @@ onMounted(() => {
   flex-shrink: 0;
 }
 .pfp-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 18px;
   height: 18px;
   border: none;
@@ -402,6 +406,9 @@ onMounted(() => {
   cursor: pointer;
   font-size: 12px;
   flex-shrink: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .pfp-del:hover {
   color: var(--accent, #d4a574);

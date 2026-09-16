@@ -258,11 +258,16 @@ function shortTime(iso: string): string {
   color: var(--text-primary, #e8e6e1);
   font-size: 12px;
 }
-.lcp-input--name { flex: 2; min-width: 140px; }
-.lcp-input--icon { flex: 1; min-width: 90px; }
-.lcp-input--cat { flex: 1; min-width: 90px; }
-.lcp-input--launch { flex: 2; min-width: 200px; }
-.lcp-input--deeplink { flex: 1; min-width: 140px; }
+.lcp-input--name { flex: 2; min-width: 140px;
+}
+.lcp-input--icon { flex: 1; min-width: 90px;
+}
+.lcp-input--cat { flex: 1; min-width: 90px;
+}
+.lcp-input--launch { flex: 2; min-width: 200px;
+}
+.lcp-input--deeplink { flex: 1; min-width: 140px;
+}
 .lcp-input--rename { width: 160px; }
 .lcp-check {
   display: flex;
@@ -308,8 +313,14 @@ function shortTime(iso: string): string {
   color: #8a9a7a;
 }
 .lcp-btn--sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 .lcp-btn--ghost {
   border-color: transparent;

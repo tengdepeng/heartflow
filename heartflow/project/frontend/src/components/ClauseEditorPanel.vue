@@ -483,8 +483,10 @@ function conflictSeverityLabel(s: string): string {
   border-color: var(--accent);
 }
 
-.cep-input { flex: 1; min-width: 120px; }
-.cep-input-sm { flex: 0 1 auto; min-width: 90px; }
+.cep-input { flex: 1; min-width: 120px;
+}
+.cep-input-sm { flex: 0 1 auto; min-width: 90px;
+}
 .cep-textarea { width: 100%; resize: vertical; }
 
 /* ---- 按钮 ---- */
@@ -536,8 +538,14 @@ function conflictSeverityLabel(s: string): string {
 }
 
 .cep-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 
 /* ---- 章节 ---- */
@@ -781,6 +789,6 @@ function conflictSeverityLabel(s: string): string {
   }
   .cep-stat {
     min-width: 70px;
-  }
+}
 }
 </style>

@@ -427,6 +427,10 @@ onMounted(() => {
 }
 
 .ahp-ann-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 22px;
   height: 22px;
   border-radius: 6px;
@@ -435,6 +439,9 @@ onMounted(() => {
   color: #c46a5a;
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .ahp-empty {

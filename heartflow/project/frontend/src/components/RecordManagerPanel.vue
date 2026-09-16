@@ -246,6 +246,10 @@ function dateLabel(iso: string): string {
 .rmp-amount.expense { color: #c46a5a; }
 .rmp-date { color: #6b7563; font-size: 11px; white-space: nowrap; }
 .rmp-archive-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   background: none;
   border: 1px solid #374136;
   border-radius: 6px;
@@ -254,6 +258,8 @@ function dateLabel(iso: string): string {
   padding: 2px 6px;
   cursor: pointer;
   white-space: nowrap;
+
+  min-height: 26px;
 }
 .rmp-archive-btn:hover { border-color: #8a9a7a; color: #d9decf; }
 

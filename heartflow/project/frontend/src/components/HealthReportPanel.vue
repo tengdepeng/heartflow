@@ -279,8 +279,14 @@ function formatRange(range: { start: string; end: string }): string {
 .hrp-rec-outcome { margin: 3px 0 0; font-size: 11px; color: #8a9a7a; }
 .hrp-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .hrp-act {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px; font-size: 11px; border: 1px solid rgba(107, 159, 196, 0.4);
   border-radius: 999px; background: transparent; color: #3d7ea6; cursor: pointer;
+
+  min-height: 26px;
 }
 .hrp-act.danger { border-color: rgba(196, 106, 90, 0.4); color: #b04a3a; }
 .hrp-act:hover { background: rgba(107, 159, 196, 0.1); }

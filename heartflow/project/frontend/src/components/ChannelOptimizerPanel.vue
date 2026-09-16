@@ -344,6 +344,10 @@ function formatTime(ts: string): string {
   color: var(--text-primary, #e8e6e1);
 }
 .cop-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
@@ -351,6 +355,8 @@ function formatTime(ts: string): string {
   color: var(--text-secondary, rgba(232, 230, 225, 0.55));
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .cop-toggle.on {
   border-color: #8a9a7a;

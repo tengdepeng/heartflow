@@ -298,7 +298,8 @@ function bestOf(analysisId: string) {
   border: 1px solid rgba(195, 159, 106, 0.22); background: rgba(20, 24, 20, 0.45);
   color: #e8ddc8; font-size: 12px;
 }
-.ssp-narrow { flex: 0.5; min-width: 80px; }
+.ssp-narrow { flex: 0.5; min-width: 80px;
+}
 .ssp-btn {
   padding: 6px 14px; border-radius: 8px;
   border: 1px solid rgba(195, 159, 106, 0.4); background: rgba(195, 159, 106, 0.14);
@@ -307,7 +308,13 @@ function bestOf(analysisId: string) {
 .ssp-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .ssp-add { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
 .ssp-run { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
-.ssp-mini { padding: 2px 10px; font-size: 11px; }
+.ssp-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 2px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .ssp-del { background: rgba(196, 106, 90, 0.16); border-color: rgba(196, 106, 90, 0.4); color: #e0a08a; }
 
 .ssp-card {
@@ -331,7 +338,8 @@ function bestOf(analysisId: string) {
 .ssp-outcome-prob { font-size: 11px; color: #8a8a80; white-space: nowrap; }
 
 .ssp-sim-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; flex-wrap: wrap; }
-.ssp-sim-result { font-size: 12px; color: #cfe0b0; line-height: 1.6; flex: 1; min-width: 160px; }
+.ssp-sim-result { font-size: 12px; color: #cfe0b0; line-height: 1.6; flex: 1; min-width: 160px;
+}
 
 .ssp-tree { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
 .ssp-tree-node { display: flex; align-items: center; gap: 8px; padding: 5px 10px; border-radius: 8px; font-size: 12px; }

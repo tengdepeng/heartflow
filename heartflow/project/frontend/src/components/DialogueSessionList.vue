@@ -120,6 +120,10 @@ function fmtDate(iso: string): string {
   margin: 4px 0 0;
 }
 .dsl-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   align-self: center;
   padding: 4px 12px;
@@ -131,6 +135,8 @@ function fmtDate(iso: string): string {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .dsl-btn:hover { background: rgba(var(--accent-rgb), 0.18); }
 .dsl-btn-restore {

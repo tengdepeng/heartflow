@@ -356,8 +356,14 @@ function fmtTime(iso: string): string {
   color: #f0c040;
 }
 .sip-btn-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 2px 8px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 .sip-input {
   padding: 5px 8px;

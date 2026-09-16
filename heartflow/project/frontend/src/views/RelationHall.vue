@@ -1559,7 +1559,13 @@ function savePerson() {
 .rh-sort-select { padding: 8px 12px; border: 1px solid rgba(var(--accent-rgb), 0.1); border-radius: 8px; background: var(--card-bg); color: var(--text-secondary); font-size: 12px; font-family: inherit; outline: none; cursor: pointer; }
 .rh-sort-select:focus { border-color: rgba(var(--accent-rgb), 0.25); }
 .rh-rel-filters { display: flex; flex-wrap: wrap; gap: 4px; }
-.rh-rel-filter { padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(var(--accent-rgb), 0.08); background: transparent; color: var(--text-dim); font-size: 11px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+.rh-rel-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(var(--accent-rgb), 0.08); background: transparent; color: var(--text-dim); font-size: 11px; font-family: inherit; cursor: pointer; transition: all 0.2s; 
+  min-height: 26px;
+}
 .rh-rel-filter:hover { border-color: rgba(var(--accent-rgb), 0.2); color: rgba(var(--text-primary-rgb), 0.6); }
 .rh-rel-filter.active { background: rgba(var(--accent-rgb), 0.1); border-color: rgba(var(--accent-rgb), 0.3); color: var(--accent); }
 
@@ -1580,7 +1586,7 @@ function savePerson() {
   .overview-card .ov-label {
     font-size: 11px;
     min-width: 60px;
-  }
+}
 
   .overview-card .ov-value {
     font-size: 18px;

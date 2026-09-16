@@ -214,7 +214,13 @@ onMounted(() => {
 
 .acp-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d8c3a5); font-size: 11px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .acp-btn:hover { background: rgba(var(--accent-rgb), 0.18); }
-.acp-btn--small { padding: 3px 10px; font-size: 10px; }
+.acp-btn--small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 3px 10px; font-size: 10px; 
+  min-height: 26px;
+}
 .acp-btn--ghost { background: transparent; border-color: rgba(255,255,255,0.15); color: rgba(232, 221, 208, 0.6); }
 .acp-btn--ghost:hover { border-color: rgba(196,106,90,0.4); color: #c46a5a; background: rgba(196,106,90,0.08); }
 

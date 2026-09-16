@@ -193,7 +193,13 @@ watch(() => reward.records.value, () => {
 }
 .wrp-btn:hover:not(:disabled) { background: rgba(232, 192, 96, 0.18); border-color: rgba(232, 192, 96, 0.45); }
 .wrp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.wrp-btn--sm { padding: 4px 10px; font-size: 11px; }
+.wrp-btn--sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 4px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .wrp-btn--ghost { background: transparent; border-color: rgba(232, 192, 96, 0.15); }
 
 .wrp-config { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(232, 192, 96, 0.08); margin-bottom: 12px; }

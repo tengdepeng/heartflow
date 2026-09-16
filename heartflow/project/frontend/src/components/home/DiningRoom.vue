@@ -727,6 +727,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .meal-chip__remove:hover {

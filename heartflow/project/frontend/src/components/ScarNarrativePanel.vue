@@ -466,8 +466,14 @@ function radarPercent(r: SeverityRadarData): number {
 }
 
 .snp-btn--sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 
 .snp-draft-item {

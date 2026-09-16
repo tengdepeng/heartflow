@@ -966,7 +966,8 @@ function navigateToRoom(key: string) {
   gap: 10px;
 }
 .wl-filter-group { display: flex; align-items: center; gap: 8px; }
-.wl-filter-label { font-size: 11px; color: rgba(var(--accent-rgb), 0.5); min-width: 56px; }
+.wl-filter-label { font-size: 11px; color: rgba(var(--accent-rgb), 0.5); min-width: 56px;
+}
 .wl-filter-date-range { display: flex; align-items: center; gap: 6px; }
 .wl-filter-date {
   padding: 4px 8px;
@@ -982,6 +983,10 @@ function navigateToRoom(key: string) {
 .wl-filter-date-range span { font-size: 11px; color: rgba(var(--accent-rgb), 0.3); }
 .wl-filter-types { display: flex; gap: 4px; flex-wrap: wrap; }
 .wl-filter-type-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border-radius: 10px;
   border: 1px solid rgba(var(--accent-rgb), 0.1);
@@ -991,9 +996,15 @@ function navigateToRoom(key: string) {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .wl-filter-type-btn.active { background: rgba(var(--accent-rgb), 0.15); border-color: rgba(var(--accent-rgb), 0.3); color: var(--accent); }
 .wl-filter-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   align-self: flex-end;
   padding: 3px 10px;
   border-radius: 6px;
@@ -1003,6 +1014,8 @@ function navigateToRoom(key: string) {
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .wl-filter-clear:hover { color: var(--accent); }
 .wl-filter-summary { font-size: 11px; color: rgba(var(--accent-rgb), 0.4); margin-top: 6px; }
@@ -1095,9 +1108,21 @@ function navigateToRoom(key: string) {
 .wl-edit-time { padding: 2px 6px; font-size: 11px; width: 72px; }
 .wl-edit-sep { font-size: 11px; color: rgba(var(--accent-rgb), 0.5); }
 .wl-edit-hours { font-size: 11px; color: var(--accent); font-weight: 500; min-width: 30px; text-align: right; }
-.wl-btn-save { padding: 2px 10px; border-radius: 4px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent); font-size: 11px; font-family: inherit; cursor: pointer; }
+.wl-btn-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px; border-radius: 4px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent); font-size: 11px; font-family: inherit; cursor: pointer;
+  min-height: 26px;
+}
 .wl-btn-save:hover { background: rgba(var(--accent-rgb), 0.2); }
-.wl-btn-cancel { padding: 2px 10px; border-radius: 4px; border: 1px solid rgba(var(--accent-rgb), 0.1); background: transparent; color: rgba(var(--accent-rgb), 0.5); font-size: 11px; font-family: inherit; cursor: pointer; }
+.wl-btn-cancel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 10px; border-radius: 4px; border: 1px solid rgba(var(--accent-rgb), 0.1); background: transparent; color: rgba(var(--accent-rgb), 0.5); font-size: 11px; font-family: inherit; cursor: pointer;
+  min-height: 26px;
+}
 .wl-btn-cancel:hover { color: rgba(var(--accent-rgb), 0.8); }
 
 /* ===== 加载更多 ===== */

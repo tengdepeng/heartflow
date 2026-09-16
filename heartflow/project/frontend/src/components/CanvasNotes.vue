@@ -317,6 +317,9 @@ onUnmounted(() => {
   transition: background 0.15s, color 0.15s;
   line-height: 1;
   padding: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .cn-btn:hover {

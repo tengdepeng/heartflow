@@ -430,6 +430,10 @@ function formatTime(ts: string): string {
   flex-wrap: wrap;
 }
 .abp-btn--small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 12px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
@@ -437,6 +441,8 @@ function formatTime(ts: string): string {
   color: var(--text-secondary, rgba(232, 230, 225, 0.7));
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .abp-btn--small:hover {
   border-color: rgba(240, 192, 64, 0.4);

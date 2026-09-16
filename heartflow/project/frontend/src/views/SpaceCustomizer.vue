@@ -722,6 +722,10 @@ function sceneLabel(v: string): string {
   gap: 6px;
 }
 .dim-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.1);
@@ -731,6 +735,8 @@ function sceneLabel(v: string): string {
   cursor: pointer;
   transition: all 0.15s;
   user-select: none;
+
+  min-height: 26px;
 }
 .dim-chip:hover {
   border-color: rgba(var(--accent-rgb), 0.2);

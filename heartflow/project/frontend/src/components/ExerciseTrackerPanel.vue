@@ -172,7 +172,8 @@ function remove(id: string) {
   font-family: inherit;
   outline: none;
 }
-.ex-name { flex: 1; min-width: 150px; }
+.ex-name { flex: 1; min-width: 150px;
+}
 .ex-min { width: 72px; }
 .ex-select { width: auto; }
 .ex-submit {
@@ -215,10 +216,17 @@ function remove(id: string) {
 .ex-item-name { font-size: 12px; color: var(--text-high); }
 .ex-item-meta { font-size: 10px; color: var(--text-secondary); }
 .ex-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 20px; height: 20px;
   border: none; border-radius: 50%;
   background: transparent; color: var(--text-faint);
   cursor: pointer; font-size: 13px;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .ex-del:hover { color: var(--danger); background: rgba(255, 107, 107, 0.1); }
 </style>

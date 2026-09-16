@@ -524,6 +524,10 @@ function trendArrow(t: string): string {
   flex-wrap: wrap;
 }
 .mvp-trend-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -533,6 +537,8 @@ function trendArrow(t: string): string {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .mvp-trend-chip:hover {
   color: var(--text, #e8ece4);

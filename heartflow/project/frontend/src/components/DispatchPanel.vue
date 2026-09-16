@@ -372,12 +372,18 @@ function removeRecord(id: string) {
 }
 
 .dsp-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   background: none;
   border: none;
   color: #c46a5a;
   font-size: 12px;
   cursor: pointer;
   padding: 2px 4px;
+
+  min-height: 26px;
 }
 
 .dsp-card-progress {

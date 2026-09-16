@@ -154,7 +154,8 @@ function branchName(id: string): string {
   color: #e8ddc8; font-size: 12px;
 }
 .ktp-wide { flex-basis: 100%; }
-.ktp-narrow { flex: 0.6; min-width: 90px; }
+.ktp-narrow { flex: 0.6; min-width: 90px;
+}
 .ktp-arrow { color: #8a9a7a; }
 .ktp-btn {
   padding: 6px 14px; border-radius: 8px;
@@ -163,7 +164,13 @@ function branchName(id: string): string {
 }
 .ktp-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .ktp-add { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
-.ktp-mini { padding: 2px 10px; font-size: 11px; }
+.ktp-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 2px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .ktp-apply { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
 .ktp-reject { background: rgba(196, 106, 90, 0.16); border-color: rgba(196, 106, 90, 0.4); color: #e0a08a; }
 .ktp-adapt { background: rgba(107, 159, 196, 0.16); border-color: rgba(107, 159, 196, 0.4); color: #a8c8e0; }

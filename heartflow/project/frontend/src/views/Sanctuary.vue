@@ -1470,6 +1470,10 @@ onUnmounted(() => {
 }
 
 .clear-notes-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 12px;
   border: 0.5px solid var(--border-subtle);
   border-radius: 12px;
@@ -1480,6 +1484,8 @@ onUnmounted(() => {
   transition: all 0.3s;
   letter-spacing: 1px;
   font-family: inherit;
+
+  min-height: 26px;
 }
 
 .clear-notes-btn:hover {
@@ -1663,6 +1669,9 @@ onUnmounted(() => {
   transition: color 0.3s;
   padding: 0;
   flex-shrink: 0;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .visit-record-delete:not(:disabled):hover {

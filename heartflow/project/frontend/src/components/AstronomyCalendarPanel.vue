@@ -196,9 +196,15 @@ function gotoToday() {
 .acld-nav-btn:hover { background: rgba(var(--accent-rgb), 0.15); }
 .acld-nav-value { font-size: 13px; color: #e8dcc8; letter-spacing: 1px; }
 .acld-nav-today {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   margin-left: auto; padding: 3px 10px; font-size: 11px; border-radius: 999px; cursor: pointer;
   border: 1px solid rgba(var(--accent-rgb), 0.3); color: rgba(var(--accent-rgb), 0.85);
   background: rgba(var(--accent-rgb), 0.08);
+
+  min-height: 26px;
 }
 
 .acld-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 4px; }
@@ -231,7 +237,9 @@ function gotoToday() {
 .acld-showers-note { font-size: 11px; opacity: 0.4; max-width: 45%; text-align: right; }
 
 .acld-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.07); }
-.acld-legend-item { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.7; }
+.acld-legend-item {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.7; }
 .acld-legend-icon { font-style: normal; }
-.acld-legend-peak { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.7; margin-left: auto; }
+.acld-legend-peak {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; opacity: 0.7; margin-left: auto; }
 </style>

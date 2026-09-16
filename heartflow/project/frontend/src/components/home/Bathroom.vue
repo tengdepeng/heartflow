@@ -639,6 +639,9 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .relax-remove:hover {

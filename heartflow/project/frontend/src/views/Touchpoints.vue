@@ -842,6 +842,10 @@ onMounted(() => {
 /* ---- 测试按钮 ---- */
 
 .test-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 12px;
   font-size: 11px;
   font-family: inherit;
@@ -851,6 +855,8 @@ onMounted(() => {
   color: rgba(var(--accent-rgb), 0.6);
   cursor: pointer;
   transition: all 0.25s ease;
+
+  min-height: 26px;
 }
 
 .test-btn:hover {

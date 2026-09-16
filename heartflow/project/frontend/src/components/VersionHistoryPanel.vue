@@ -441,6 +441,10 @@ function diffText(d: VersionDiff): string {
 }
 
 .vhp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border: 1px solid rgba(var(--accent-rgb), 0.18);
   border-radius: 999px;
@@ -450,6 +454,8 @@ function diffText(d: VersionDiff): string {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .vhp-btn:hover {

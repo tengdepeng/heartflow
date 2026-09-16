@@ -747,6 +747,10 @@ section h3 {
   flex-wrap: wrap;
 }
 .filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.10);
@@ -756,6 +760,8 @@ section h3 {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .filter-btn:hover {
   color: rgba(var(--text-primary-rgb), 0.65);

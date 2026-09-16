@@ -532,6 +532,10 @@ function importDict(e: Event) {
   overflow: hidden;
 }
 .sort-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px;
   border: none;
   background: transparent;
@@ -540,6 +544,8 @@ function importDict(e: Event) {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .sort-btn.active {
   background: rgba(var(--accent-rgb), 0.12);
@@ -643,6 +649,9 @@ function importDict(e: Event) {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .del-btn:hover {
   color: var(--danger);
@@ -821,6 +830,10 @@ function importDict(e: Event) {
   justify-content: flex-end;
 }
 .archive-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 2px 8px;
   border-radius: 4px;
   border: 1px solid rgba(var(--text-primary-rgb), 0.08);
@@ -830,6 +843,8 @@ function importDict(e: Event) {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .archive-btn:hover {
   border-color: rgba(var(--accent-rgb), 0.2);

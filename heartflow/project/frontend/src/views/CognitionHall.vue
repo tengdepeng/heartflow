@@ -874,6 +874,9 @@ section h3 {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .cog-tiny-btn:hover {
   background: rgba(var(--accent-rgb), 0.15);
@@ -1143,6 +1146,10 @@ section h3 {
 .cog-reasoning-chain { margin-bottom: 28px; }
 .crc-controls { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 .crc-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 4px 12px;
   border-radius: 8px;
@@ -1152,6 +1159,8 @@ section h3 {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .crc-toggle:hover { color: var(--cog-accent); border-color: rgba(var(--accent-rgb), 0.4); }
 .crc-list { display: flex; flex-direction: column; gap: 8px; }

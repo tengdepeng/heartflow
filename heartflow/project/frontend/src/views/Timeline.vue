@@ -527,6 +527,10 @@ onUnmounted(stopReplay)
 }
 
 .river-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 12px;
   border: 1px solid var(--border-color, rgba(var(--accent-rgb), 0.12));
@@ -536,6 +540,8 @@ onUnmounted(stopReplay)
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 
 .river-filter-btn:hover {
@@ -893,7 +899,7 @@ onUnmounted(stopReplay)
   .stat-card {
     padding: 10px 16px;
     min-width: 80px;
-  }
+}
 
   .stat-value {
     font-size: 18px;
@@ -1028,7 +1034,7 @@ onUnmounted(stopReplay)
   .replay-date {
     font-size: 10px;
     min-width: 60px;
-  }
+}
 
   .date-separator {
     padding: 10px 0 6px;

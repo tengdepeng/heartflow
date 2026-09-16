@@ -313,8 +313,14 @@ function doDownload(): void {
 }
 
 .mdx-btn--small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 2px 10px;
+
+  min-height: 26px;
 }
 
 /* ---- 结果 ---- */

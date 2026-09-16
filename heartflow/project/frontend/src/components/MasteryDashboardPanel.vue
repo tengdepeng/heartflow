@@ -219,6 +219,10 @@ function distPct(count: number): string {
   gap: 3px;
 }
 .mdp-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px;
   border-radius: 5px;
   border: 1px solid rgba(var(--accent-rgb), 0.15);
@@ -227,6 +231,8 @@ function distPct(count: number): string {
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .mdp-mini-del {
   color: rgba(224, 112, 80, 0.5);

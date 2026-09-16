@@ -235,7 +235,13 @@ function doSettle(id: string): void {
 .lnp-badge--settled { color: #8a9a7a; border: 1px solid #374136; }
 
 .lnp-row-ops { display: flex; align-items: center; gap: 6px; }
-.lnp-btn { background: #8a9a7a; color: #171a15; border: none; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 11px; }
+.lnp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   background: #8a9a7a; color: #171a15; border: none; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 11px; 
+  min-height: 26px;
+}
 .lnp-btn--ghost { background: transparent; border: 1px solid #374136; color: #b7c0a8; }
 .lnp-btn--primary { padding: 6px 14px; font-size: 12px; }
 .lnp-btn:disabled { opacity: 0.4; cursor: not-allowed; }

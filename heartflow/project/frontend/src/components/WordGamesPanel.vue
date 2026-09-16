@@ -240,6 +240,10 @@ function remove(id: string) {
   align-items: center;
 }
 .wgp-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
@@ -248,6 +252,8 @@ function remove(id: string) {
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .wgp-chip.on {
   border-color: #f0c040;
@@ -277,8 +283,14 @@ function remove(id: string) {
   color: #f0c040;
 }
 .wgp-btn--small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   font-size: 11px;
+
+  min-height: 26px;
 }
 .wgp-play-head,
 .wgp-done-head {

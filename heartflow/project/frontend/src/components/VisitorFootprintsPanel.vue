@@ -227,6 +227,10 @@ function shortTime(iso: string): string {
   color: var(--text-secondary, rgba(232, 230, 225, 0.4));
 }
 .vfp-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
@@ -235,6 +239,8 @@ function shortTime(iso: string): string {
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .vfp-chip.on {
   border-color: #f0c040;

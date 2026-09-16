@@ -417,6 +417,10 @@ function onRemove(id: string): void {
 }
 
 .rcp-inc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border-radius: 8px;
   border: 1px solid rgba(125, 211, 252, 0.3);
@@ -424,9 +428,15 @@ function onRemove(id: string): void {
   color: #7dd3fc;
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .rcp-finish {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border-radius: 8px;
   border: 1px solid rgba(138, 154, 122, 0.3);
@@ -434,9 +444,15 @@ function onRemove(id: string): void {
   color: #8a9a7a;
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .rcp-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   position: absolute;
   top: 8px;
   right: 8px;
@@ -448,6 +464,9 @@ function onRemove(id: string): void {
   color: #c46a5a;
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .rcp-empty {

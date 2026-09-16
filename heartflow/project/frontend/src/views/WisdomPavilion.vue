@@ -635,9 +635,15 @@ onMounted(() => {
   cursor: not-allowed;
 }
 .wp-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   font-size: 11px;
   align-self: auto;
+
+  min-height: 26px;
 }
 
 /* ========== 回答区域：光点卡片并置 ========== */

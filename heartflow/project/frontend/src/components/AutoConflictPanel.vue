@@ -312,7 +312,8 @@ function branchName(id: string): string {
   color: #e8ddc8; font-size: 12px;
 }
 .acp-strategy { flex: 1.2; }
-.acp-priority { flex: 0.5; min-width: 80px; }
+.acp-priority { flex: 0.5; min-width: 80px;
+}
 .acp-arrow { color: #8a9a7a; }
 .acp-btn {
   padding: 6px 14px; border-radius: 8px;
@@ -323,7 +324,13 @@ function branchName(id: string): string {
 .acp-detect { background: rgba(195, 159, 106, 0.2); }
 .acp-run { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
 .acp-add { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
-.acp-mini { padding: 2px 10px; font-size: 11px; }
+.acp-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 2px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .acp-mini.on { background: rgba(138, 154, 122, 0.22); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
 .acp-del { background: rgba(196, 106, 90, 0.16); border-color: rgba(196, 106, 90, 0.4); color: #e0a08a; }
 

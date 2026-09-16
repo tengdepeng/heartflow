@@ -355,6 +355,10 @@ onMounted(nextCard)
   color: rgba(var(--accent-rgb), 0.3);
 }
 .fc-del {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   width: 20px;
   height: 20px;
@@ -365,6 +369,9 @@ onMounted(nextCard)
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .fc-del:hover {
   background: rgba(239, 68, 68, 0.15);

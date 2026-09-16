@@ -151,6 +151,10 @@ const { activeMeditations, archivedMeditations, activeReleases, archivedReleases
   margin: 4px 0 0;
 }
 .lr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   align-self: center;
   padding: 4px 12px;
@@ -162,6 +166,8 @@ const { activeMeditations, archivedMeditations, activeReleases, archivedReleases
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .lr-btn:hover { background: rgba(var(--accent-rgb), 0.18); }
 .lr-btn-restore {

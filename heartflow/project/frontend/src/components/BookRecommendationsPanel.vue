@@ -274,7 +274,13 @@ onMounted(() => {
 .brp-rec-tags { display: flex; gap: 4px; flex-wrap: wrap; }
 .brp-rec-tag { font-size: 9px; padding: 2px 8px; border-radius: 6px; background: rgba(138, 122, 106, 0.1); color: rgba(255, 246, 230, 0.6); }
 .brp-rec-meta { font-size: 10px; color: rgba(255, 246, 230, 0.4); margin-left: auto; }
-.brp-rec-dismiss { border: none; background: transparent; color: rgba(255, 246, 230, 0.35); cursor: pointer; font-size: 12px; padding: 2px 6px; }
+.brp-rec-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   border: none; background: transparent; color: rgba(255, 246, 230, 0.35); cursor: pointer; font-size: 12px; padding: 2px 6px; 
+  min-height: 26px;
+}
 .brp-rec-dismiss:hover { color: #c46a5a; }
 
 .brp-pref-block { display: flex; flex-direction: column; gap: 8px; }
@@ -289,7 +295,8 @@ onMounted(() => {
 .brp-pref-fact-label { font-size: 10px; color: rgba(255, 246, 230, 0.4); }
 .brp-pref-fact-val { font-size: 13px; color: #b8a088; }
 .brp-exclusions { display: flex; flex-wrap: wrap; gap: 6px; }
-.brp-exclusion { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 8px; border-radius: 8px; background: rgba(196, 106, 90, 0.1); border: 1px solid rgba(196, 106, 90, 0.2); color: rgba(255, 246, 230, 0.7); }
+.brp-exclusion {
+  display: inline-flex; align-items: center; gap: 4px; font-size: 11px; padding: 4px 8px; border-radius: 8px; background: rgba(196, 106, 90, 0.1); border: 1px solid rgba(196, 106, 90, 0.2); color: rgba(255, 246, 230, 0.7); }
 .brp-exclusion-x { border: none; background: transparent; color: rgba(255, 246, 230, 0.4); cursor: pointer; font-size: 10px; padding: 0; }
 .brp-exclusion-x:hover { color: #c46a5a; }
 </style>

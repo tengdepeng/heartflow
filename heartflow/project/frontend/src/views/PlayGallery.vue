@@ -1176,6 +1176,10 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
   flex-wrap: wrap;
 }
 .filter-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.12);
@@ -1185,6 +1189,8 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .filter-chip:hover { color: var(--text-high); }
 .filter-chip.active {
@@ -1360,6 +1366,10 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
   gap: 4px;
 }
 .sort-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.12);
@@ -1369,6 +1379,8 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s;
+
+  min-height: 26px;
 }
 .sort-btn:hover { color: var(--text-high); }
 .sort-btn.active {

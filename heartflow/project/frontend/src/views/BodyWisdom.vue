@@ -603,6 +603,9 @@ section h3 {
   font-size: 10px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s; font-family: inherit; padding: 0; line-height: 1;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .bw-feeling-btn:hover { color: rgba(255, 255, 255, 0.5); background: rgba(255, 255, 255, 0.05); }
 .bw-feeling-btn.selected {

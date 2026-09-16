@@ -240,6 +240,10 @@ onMounted(load)
 }
 
 .cry-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   font-size: 11px;
   padding: 4px 10px;
@@ -248,6 +252,8 @@ onMounted(load)
   background: rgba(var(--accent-rgb), 0.12);
   color: rgba(var(--accent-rgb), 0.9);
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .cry-btn.danger {

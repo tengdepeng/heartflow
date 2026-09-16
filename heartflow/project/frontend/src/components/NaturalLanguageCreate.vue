@@ -470,6 +470,10 @@ function clear() {
 }
 
 .nl-create__override-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -479,6 +483,8 @@ function clear() {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s ease;
+
+  min-height: 26px;
 }
 
 .nl-create__override-btn:hover {

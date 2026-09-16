@@ -205,6 +205,10 @@ function snapGrowth() {
 }
 
 .bap-snap-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 10px;
   padding: 2px 10px;
   border-radius: 10px;
@@ -212,6 +216,8 @@ function snapGrowth() {
   background: rgba(var(--accent-rgb), 0.06);
   color: rgba(var(--accent-rgb), 0.6);
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .bap-snap-btn:hover { background: rgba(var(--accent-rgb), 0.12); }

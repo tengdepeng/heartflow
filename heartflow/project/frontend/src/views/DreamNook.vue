@@ -579,6 +579,10 @@ section h3 {
   color: var(--text-secondary);
 }
 .tiny-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(239, 68, 68, 0.2);
@@ -587,6 +591,8 @@ section h3 {
   font-size: 11px;
   cursor: pointer;
   transition: background 0.15s;
+
+  min-height: 26px;
 }
 .tiny-btn:hover {
   background: rgba(239, 68, 68, 0.1);

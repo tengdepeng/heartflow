@@ -194,6 +194,10 @@ function fmtTime(iso: string) {
 .sr-rule-prio.prio-medium { color: #e0a96d; }
 .sr-rule-prio.prio-low { color: #8a9a7a; }
 .sr-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   width: 34px;
   height: 22px;
   border-radius: 11px;
@@ -202,6 +206,9 @@ function fmtTime(iso: string) {
   color: #7a879c;
   font-size: 11px;
   cursor: pointer;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 .sr-toggle.on {
   background: rgba(120, 150, 200, 0.3);

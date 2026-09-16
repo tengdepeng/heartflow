@@ -299,6 +299,10 @@ function compare() {
   font-variant-numeric: tabular-nums;
 }
 .wa-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 8px;
   border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -307,6 +311,8 @@ function compare() {
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .wa-mini:hover {
   color: #c46a5a;

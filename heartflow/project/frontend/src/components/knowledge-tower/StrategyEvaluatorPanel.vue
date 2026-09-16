@@ -429,6 +429,10 @@ onMounted(() => {
   gap: 6px;
 }
 .sep-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -437,6 +441,8 @@ onMounted(() => {
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .sep-chip.active {
   border-color: rgba(240, 192, 64, 0.4);

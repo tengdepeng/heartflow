@@ -154,8 +154,14 @@ function shortTime(iso: string): string {
   padding: 1px 8px; border-radius: 999px;
 }
 .hmr-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px; font-size: 11px; border: 1px solid rgba(196, 106, 90, 0.4);
   border-radius: 999px; background: transparent; color: #b04a3a; cursor: pointer;
+
+  min-height: 26px;
 }
 .hmr-toggle.on { border-color: rgba(90, 184, 160, 0.4); color: #2e8b6a; }
 .hmr-item-msg { margin: 6px 0 0; font-size: 12px; color: #4a5a6a; }
@@ -163,8 +169,14 @@ function shortTime(iso: string): string {
 .hmr-item-foot { display: flex; align-items: center; gap: 12px; margin-top: 8px; font-size: 11px; color: #8a9a7a; }
 .hmr-item-count b { color: #b08a2a; }
 .hmr-fire {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   margin-left: auto; padding: 3px 10px; font-size: 11px; border: 1px solid rgba(107, 159, 196, 0.4);
   border-radius: 999px; background: transparent; color: #3d7ea6; cursor: pointer;
+
+  min-height: 26px;
 }
 .hmr-fire:hover { background: rgba(107, 159, 196, 0.1); }
 </style>

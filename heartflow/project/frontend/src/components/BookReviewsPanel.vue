@@ -346,10 +346,17 @@ onMounted(() => {
 /* 表单 */
 .brv-form { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: rgba(138, 122, 106, 0.04); border: 1px solid rgba(138, 122, 106, 0.1); }
 .brv-form-head { display: flex; align-items: center; justify-content: space-between; }
-.brv-toggle { border: none; background: transparent; color: rgba(138, 122, 106, 0.7); font-size: 11px; font-family: inherit; cursor: pointer; padding: 2px 6px; }
+.brv-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   border: none; background: transparent; color: rgba(138, 122, 106, 0.7); font-size: 11px; font-family: inherit; cursor: pointer; padding: 2px 6px; 
+  min-height: 26px;
+}
 .brv-toggle:hover { color: #b8a088; }
 .brv-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.brv-form-row > .brv-input:not(.brv-input--num) { flex: 1; min-width: 100px; }
+.brv-form-row > .brv-input:not(.brv-input--num) { flex: 1; min-width: 100px;
+}
 .brv-input {
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(138, 122, 106, 0.15);
@@ -388,8 +395,10 @@ onMounted(() => {
 }
 .brv-textarea:focus { outline: none; border-color: rgba(138, 122, 106, 0.4); }
 .brv-textarea::placeholder { color: rgba(255, 246, 230, 0.3); }
-.brv-check { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255, 246, 230, 0.6); cursor: pointer; }
-.brv-field { display: inline-flex; align-items: center; gap: 6px; }
+.brv-check {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: rgba(255, 246, 230, 0.6); cursor: pointer; }
+.brv-field {
+  display: inline-flex; align-items: center; gap: 6px; }
 .brv-field-label { font-size: 11px; color: rgba(255, 246, 230, 0.5); }
 .brv-btn {
   border: 1px solid rgba(138, 122, 106, 0.3);

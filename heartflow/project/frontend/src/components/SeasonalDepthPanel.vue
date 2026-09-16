@@ -223,6 +223,10 @@ function onRemove(id: string) { emit('remove', id) }
 .sdp-drive { font-size: 10px; }
 .sdp-cocoon-actions { display: flex; gap: 6px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
 .sdp-advance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   border: 1px solid rgba(var(--accent-rgb), 0.18);
   background: transparent;
   color: var(--accent);
@@ -231,6 +235,8 @@ function onRemove(id: string) { emit('remove', id) }
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .sdp-advance:hover { background: rgba(var(--accent-rgb), 0.06); }
 .sdp-regress { border: none; background: transparent; color: var(--text-low); font-size: 11px; cursor: pointer; font-family: inherit; }
@@ -249,7 +255,8 @@ function onRemove(id: string) { emit('remove', id) }
   outline: none;
 }
 .sdp-input { flex: 1; }
-.sdp-select { min-width: 120px; }
+.sdp-select { min-width: 120px;
+}
 .sdp-textarea { resize: vertical; font-family: inherit; }
 .sdp-submit {
   border: none;

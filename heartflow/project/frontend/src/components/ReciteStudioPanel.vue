@@ -318,6 +318,10 @@ function stepPct(count: number): string {
   gap: 4px;
 }
 .rsp-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 9px;
   border-radius: 5px;
   border: 1px solid rgba(var(--accent-rgb), 0.15);
@@ -326,6 +330,8 @@ function stepPct(count: number): string {
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
+
+  min-height: 26px;
 }
 .rsp-mini-del {
   color: rgba(224, 112, 80, 0.5);

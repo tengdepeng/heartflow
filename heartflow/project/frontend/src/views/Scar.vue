@@ -1243,7 +1243,8 @@ function strikeAnvil() {
 .sc-filter-bar {
   display: flex; gap: 8px; align-items: center; margin-bottom: 16px; position: relative; z-index: 1; flex-wrap: wrap;
 }
-.sc-search-box { flex: 1; min-width: 140px; }
+.sc-search-box { flex: 1; min-width: 140px;
+}
 .sc-search-input {
   width: 100%; padding: 6px 12px; border: 1px solid rgba(196,138,106,0.1);
   border-radius: 8px; background: rgba(196,138,106,0.03); color: rgba(var(--text-primary-rgb), 0.85);
@@ -1263,9 +1264,15 @@ function strikeAnvil() {
 }
 .sc-sev-filter-label { font-size: 11px; color: rgba(196, 138, 106, 0.55); margin-right: 2px; }
 .sc-sev-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(196,138,106,0.1);
   background: transparent; color: rgba(196,138,106,0.3); font-size: 11px; cursor: pointer;
   transition: all 0.2s; font-family: inherit;
+
+  min-height: 26px;
 }
 .sc-sev-btn.active {
   background: rgba(196,138,106,0.15); color: var(--sc-accent); border-color: rgba(196,138,106,0.3);

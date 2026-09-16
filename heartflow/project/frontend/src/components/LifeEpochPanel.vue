@@ -378,6 +378,10 @@ function handleAddMilestone(): void {
 }
 
 .lep-btn--small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   color: rgba(var(--accent-rgb), 0.6);
   background: transparent;
@@ -385,6 +389,8 @@ function handleAddMilestone(): void {
   border-radius: 6px;
   padding: 2px 8px;
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .lep-btn--small:hover {

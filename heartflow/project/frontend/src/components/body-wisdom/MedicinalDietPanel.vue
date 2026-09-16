@@ -194,12 +194,18 @@ function toggleExpand(id: string) {
   white-space: nowrap;
 }
 .mdp-fav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   border: none;
   background: transparent;
   color: var(--accent, #8a9a7a);
   font-size: 12px;
   cursor: pointer;
   padding: 2px 6px;
+
+  min-height: 26px;
 }
 .mdp-search-row {
   display: flex;

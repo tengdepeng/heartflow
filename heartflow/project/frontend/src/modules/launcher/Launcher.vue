@@ -422,9 +422,15 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .cat-edit { background: none; border: none; color: var(--accent, #d4a574); opacity: 0.45; cursor: pointer; font-size: 13px; padding: 0 4px; transition: opacity 0.2s ease; }
 .cat-edit:hover { opacity: 1; }
 .cat-rename {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(212, 165, 116, 0.4);
   border-radius: 6px; color: var(--text-primary, #e9e0d0); font-size: 13px;
   padding: 1px 8px; letter-spacing: 2px; width: 130px;
+
+  min-height: 26px;
 }
 .cat-rename:focus { outline: none; border-color: var(--accent, #d4a574); }
 

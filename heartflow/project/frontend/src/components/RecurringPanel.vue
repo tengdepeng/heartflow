@@ -195,7 +195,13 @@ function accountName(id: string): string {
 .rcp-type.income { background: rgba(138, 154, 122, 0.2); color: #8a9a7a; }
 .rcp-type.expense { background: rgba(196, 106, 90, 0.2); color: #c46a5a; }
 
-.rcp-btn { background: #8a9a7a; color: #171a15; border: none; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 11px; }
+.rcp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   background: #8a9a7a; color: #171a15; border: none; border-radius: 8px; padding: 4px 10px; cursor: pointer; font-weight: 600; font-size: 11px; 
+  min-height: 26px;
+}
 .rcp-btn--ghost { background: transparent; border: 1px solid #374136; color: #b7c0a8; }
 .rcp-btn--primary { padding: 6px 14px; font-size: 12px; }
 .rcp-btn--icon { background: transparent; border: 1px solid #374136; color: #b7c0a8; }

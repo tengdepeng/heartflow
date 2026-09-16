@@ -446,7 +446,8 @@ watch(adaptedRecords, () => {
 }
 .fap-select:focus { outline: none; border-color: rgba(232, 192, 96, 0.35); }
 .fap-select option { background: #0a0906; color: rgba(255, 246, 224, 0.85); }
-.fap-select--multi { min-height: 64px; }
+.fap-select--multi { min-height: 64px;
+}
 
 .fap-btn {
   border: 1px solid rgba(232, 192, 96, 0.3);
@@ -462,7 +463,13 @@ watch(adaptedRecords, () => {
 }
 .fap-btn:hover:not(:disabled) { background: rgba(232, 192, 96, 0.18); border-color: rgba(232, 192, 96, 0.45); }
 .fap-btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.fap-btn--sm { padding: 4px 10px; font-size: 11px; }
+.fap-btn--sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 4px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .fap-btn--ghost { background: transparent; border-color: rgba(232, 192, 96, 0.15); }
 
 .fap-empty { margin: 8px 0; font-size: 12px; color: rgba(255, 246, 224, 0.45); text-align: center; padding: 18px 0; }
@@ -470,10 +477,12 @@ watch(adaptedRecords, () => {
 /* 筛选 */
 .fap-filter-form { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: rgba(232, 192, 96, 0.04); border: 1px solid rgba(232, 192, 96, 0.08); }
 .fap-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
-.fap-form-row > * { flex: 1; min-width: 90px; }
+.fap-form-row > * { flex: 1; min-width: 90px;
+}
 .fap-form-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .fap-preset-save { display: flex; gap: 6px; margin-left: auto; }
-.fap-preset-save .fap-input { flex: 1; min-width: 110px; }
+.fap-preset-save .fap-input { flex: 1; min-width: 110px;
+}
 
 .fap-presets { display: flex; flex-direction: column; gap: 6px; }
 .fap-preset { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(232, 192, 96, 0.08); }

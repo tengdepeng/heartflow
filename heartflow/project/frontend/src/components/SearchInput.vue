@@ -78,6 +78,10 @@ function clear() {
   color: var(--text-muted);
 }
 .hf-search__clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   border: none;
   background: transparent;
   color: var(--text-muted);
@@ -85,6 +89,8 @@ function clear() {
   font-size: 13px;
   padding: 2px 4px;
   border-radius: var(--radius-sm);
+
+  min-height: 26px;
 }
 .hf-search__clear:hover {
   color: var(--text-primary);

@@ -224,7 +224,13 @@ function strategyLabel(s: MergeStrategy): string {
 }
 .wmp-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .wmp-run { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; }
-.wmp-mini { padding: 2px 10px; font-size: 11px; }
+.wmp-mini {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   padding: 2px 10px; font-size: 11px; 
+  min-height: 26px;
+}
 .wmp-merge { background: rgba(107, 159, 196, 0.16); border-color: rgba(107, 159, 196, 0.4); color: #a8c8e0; }
 .wmp-auto { background: rgba(138, 154, 122, 0.2); border-color: rgba(138, 154, 122, 0.5); color: #cfe0b0; margin-top: 6px; }
 
@@ -246,7 +252,8 @@ function strategyLabel(s: MergeStrategy): string {
 .wmp-conflict-sev.sev-critical { background: rgba(196, 106, 90, 0.2); color: #e0a08a; }
 .wmp-conflict-sev.sev-warning { background: rgba(195, 159, 106, 0.16); color: #d9c390; }
 .wmp-conflict-sev.sev-info { background: rgba(138, 154, 122, 0.18); color: #a9c08a; }
-.wmp-conflict-desc { flex: 1; color: #e0d4ba; min-width: 140px; }
+.wmp-conflict-desc { flex: 1; color: #e0d4ba; min-width: 140px;
+}
 .wmp-conflict-done { color: #a9c08a; font-size: 11px; }
 
 .wmp-result { border-color: rgba(138, 154, 122, 0.3); }

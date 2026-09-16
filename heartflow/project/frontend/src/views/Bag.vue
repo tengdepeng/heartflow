@@ -745,6 +745,10 @@ const {
 }
 
 .bag-search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   flex-shrink: 0;
   background: none;
   border: none;
@@ -754,6 +758,8 @@ const {
   padding: 2px 6px;
   border-radius: 4px;
   transition: all var(--transition);
+
+  min-height: 26px;
 }
 
 .bag-search-clear:hover {
@@ -887,6 +893,8 @@ const {
   line-height: 1.4;
   transition: all var(--transition);
   cursor: pointer;
+
+  min-height: 26px;
 }
 
 .bcc-tag:hover {

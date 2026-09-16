@@ -766,6 +766,10 @@ section h3 {
 .mv-search-input:focus { border-color: rgba(var(--accent-rgb), 0.3); }
 .mv-type-filters { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
 .mv-type-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 4px 10px;
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.08);
@@ -775,6 +779,8 @@ section h3 {
   font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
+
+  min-height: 26px;
 }
 .mv-type-filter:hover { border-color: rgba(var(--accent-rgb), 0.2); color: var(--accent); }
 .mv-type-filter.active { background: rgba(var(--accent-rgb), 0.1); border-color: rgba(var(--accent-rgb), 0.3); color: var(--accent); }
@@ -796,6 +802,7 @@ section h3 {
 .mv-weekly-chart { display: flex; align-items: flex-end; gap: 8px; height: 100px; padding: 10px; border-radius: 10px; background: var(--card-bg); border: 1px solid rgba(var(--accent-rgb), 0.08); }
 .mv-weekly-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
 .mv-weekly-bar-wrapper { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
-.mv-weekly-bar-fill { width: 60%; max-width: 24px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.7), rgba(var(--accent-rgb), 0.3)); transition: height 0.3s; min-height: 2px; }
+.mv-weekly-bar-fill { width: 60%; max-width: 24px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.7), rgba(var(--accent-rgb), 0.3)); transition: height 0.3s; min-height: 2px;
+}
 .mv-weekly-bar-label { font-size: 10px; color: rgba(var(--accent-rgb), 0.35); margin-top: 4px; }
 </style>

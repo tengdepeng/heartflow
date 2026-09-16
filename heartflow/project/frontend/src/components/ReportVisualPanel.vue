@@ -302,8 +302,14 @@ const view = ref('compare')
 
 .rv-tabs { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
 .rv-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   background: #161a15; color: #b7c0a8; border: 1px solid #2f352d; border-radius: 6px;
   padding: 3px 12px; font-size: 12px; cursor: pointer;
+
+  min-height: 26px;
 }
 .rv-tab.on { background: #8a9a7a; color: #161a15; border-color: #8a9a7a; font-weight: 600; }
 
@@ -324,8 +330,14 @@ const view = ref('compare')
 
 .rv-kind-switch { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
 .rv-kind-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   background: #161a15; color: #b7c0a8; border: 1px solid #2f352d; border-radius: 6px;
   padding: 3px 10px; font-size: 12px; cursor: pointer;
+
+  min-height: 26px;
 }
 .rv-kind-btn.on { background: #8a9a7a; color: #161a15; border-color: #8a9a7a; font-weight: 600; }
 .rv-kind-total { margin-left: auto; font-size: 12px; color: #8a9a7a; }
@@ -347,7 +359,8 @@ const view = ref('compare')
 .rv-xlabels span { flex: 1; text-align: center; }
 .rv-xlabels span.skip { visibility: hidden; }
 .rv-trend-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; align-items: center; }
-.rv-trend-cat { display: inline-flex; align-items: center; gap: 5px; }
+.rv-trend-cat {
+  display: inline-flex; align-items: center; gap: 5px; }
 
 .rv-rank { display: flex; flex-direction: column; gap: 4px; }
 .rv-rank-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 4px 6px; border-bottom: 1px dashed #2c312b; }
@@ -360,7 +373,13 @@ const view = ref('compare')
 
 .rv-heat-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .rv-year-nav { display: flex; align-items: center; gap: 8px; }
-.rv-year-btn { background: #161a15; color: #b7c0a8; border: 1px solid #2f352d; border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+.rv-year-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   background: #161a15; color: #b7c0a8; border: 1px solid #2f352d; border-radius: 6px; padding: 2px 10px; cursor: pointer; 
+  min-height: 26px;
+}
 .rv-year-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .rv-year-val { font-size: 13px; font-weight: 600; min-width: 64px; text-align: center; }
 .rv-heat { display: flex; gap: 8px; }
@@ -370,7 +389,8 @@ const view = ref('compare')
 .rv-heat-cell { width: 12px; height: 12px; border-radius: 2px; flex: 0 0 auto; }
 .rv-heat-cell.empty { background: transparent; }
 .rv-heat-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #8a9a7a; }
-.rv-heat-legend { display: inline-flex; align-items: center; gap: 3px; }
+.rv-heat-legend {
+  display: inline-flex; align-items: center; gap: 3px; }
 .rv-heat-legend-cell { display: inline-block; margin: 0 1px; }
 .rv-empty { font-size: 12px; color: #8a9a7a; }
 </style>

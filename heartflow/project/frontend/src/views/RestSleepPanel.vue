@@ -647,6 +647,10 @@ onMounted(() => {
 }
 
 .sac-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   padding: 3px 10px;
   border-radius: 4px;
   font-size: 10px;
@@ -657,6 +661,8 @@ onMounted(() => {
   border: 1px solid var(--card-border);
   color: var(--text-secondary);
   transition: all var(--transition);
+
+  min-height: 26px;
 }
 
 .sac-toggle--on {

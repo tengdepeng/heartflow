@@ -233,7 +233,8 @@ watch(
 .pfp-trend-bars { display: flex; gap: 8px; align-items: flex-end; height: 64px; }
 .pfp-trend-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; }
 .pfp-trend-bar-wrap { flex: 1; width: 100%; display: flex; align-items: flex-end; justify-content: center; }
-.pfp-trend-bar { display: block; width: 60%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, hsl(150 55% 55%), hsl(96 50% 40%)); min-height: 3px; }
+.pfp-trend-bar { display: block; width: 60%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, hsl(150 55% 55%), hsl(96 50% 40%)); min-height: 3px;
+}
 .pfp-trend-day { font-size: 9px; color: rgba(232, 221, 208, 0.4); }
 
 .pfp-tasks { margin-bottom: 14px; }
@@ -248,12 +249,24 @@ watch(
 .pfp-interrupt { border-top: 1px dashed rgba(var(--accent-rgb), 0.14); padding-top: 12px; }
 .pfp-interrupt-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .pfp-interrupt-head .pfp-block-label { margin-bottom: 0; }
-.pfp-add-btn { font-size: 10px; padding: 3px 10px; border-radius: 10px; border: 1px solid rgba(var(--accent-rgb), 0.25); background: transparent; color: rgba(232, 221, 208, 0.6); cursor: pointer; }
+.pfp-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   font-size: 10px; padding: 3px 10px; border-radius: 10px; border: 1px solid rgba(var(--accent-rgb), 0.25); background: transparent; color: rgba(232, 221, 208, 0.6); cursor: pointer; 
+  min-height: 26px;
+}
 .pfp-add-btn:hover { color: #e3c08a; border-color: rgba(var(--accent-rgb), 0.5); }
 
 .pfp-intr-form { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
 .pfp-intr-cats { display: flex; gap: 6px; flex-wrap: wrap; }
-.pfp-intr-cat { font-size: 10px; padding: 3px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(232, 221, 208, 0.55); cursor: pointer; }
+.pfp-intr-cat {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+   font-size: 10px; padding: 3px 8px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: transparent; color: rgba(232, 221, 208, 0.55); cursor: pointer; 
+  min-height: 26px;
+}
 .pfp-intr-cat.active { background: rgba(var(--accent-rgb), 0.14); color: #e3c08a; border-color: rgba(var(--accent-rgb), 0.4); }
 .pfp-intr-reason { flex: 1; font-size: 11px; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: rgba(232, 221, 208, 0.8); outline: none; }
 .pfp-intr-reason:focus { border-color: rgba(var(--accent-rgb), 0.4); }

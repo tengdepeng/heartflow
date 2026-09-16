@@ -611,6 +611,10 @@ function uninstall(id: string) {
 }
 
 .perm-revoke-all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   font-size: 11px;
   padding: 3px 10px;
   border-radius: 6px;
@@ -620,6 +624,8 @@ function uninstall(id: string) {
   cursor: pointer;
   font-family: inherit;
   transition: all 0.25s;
+
+  min-height: 26px;
 }
 
 .perm-revoke-all:hover:not(:disabled) {
@@ -655,6 +661,10 @@ function uninstall(id: string) {
 
 /* 权限开关 */
 .perm-switch {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  
   position: relative;
   width: 38px;
   height: 20px;
@@ -665,6 +675,9 @@ function uninstall(id: string) {
   padding: 0;
   flex-shrink: 0;
   transition: all 0.25s;
+
+  min-height: 24px;
+  min-width: 24px;
 }
 
 .perm-switch .perm-knob {
