@@ -2,6 +2,7 @@
 // 心流工坊 · 房间图引擎测试
 // ============================================================
 import { describe, expect, it } from 'vitest'
+import { effect } from 'vue'
 import {
   getAllRooms,
   getRoomsByGroup,
@@ -500,5 +501,35 @@ describe('room-graph 运行时注册覆盖层', () => {
     const anc = getBranchAncestors('plug-d')
     expect(anc.some(r => r.id === 'home-space')).toBe(true)
     unregisterRoom('plug-d')
+  })
+
+  it('registerRoom/unregisterRoom 触发响应式失效（侧栏 computed 能感知增删）', () => {
+    // 回归：覆盖层此前为普通 Map，非响应式 → 插件房禁用后侧栏 computed 不失效、残留导航
+    const lengths: number[] = []
+    const stop = effect(() => { lengths.push(getAllRooms().length) })
+    try {
+      const base = lengths[lengths.length - 1]
+      registerRoom(makeNode('plug-react', '/plug-react'))
+      expect(lengths[lengths.length - 1]).toBe(base + 1)
+      unregisterRoom('plug-react')
+      expect(lengths[lengths.length - 1]).toBe(base)
+    } finally {
+      stop()
+    }
+  })
+
+  it('getAdjacentRooms 对运行时房间的增删同样响应式（邻接导航可感知）', () => {
+    const seen: string[][] = []
+    const stop = effect(() => {
+      seen.push(getAdjacentRooms('home-space').map(r => r.id))
+    })
+    try {
+      registerRoom(makeNode('plug-adj', '/plug-adj'))
+      expect(seen[seen.length - 1]).toContain('plug-adj')
+      unregisterRoom('plug-adj')
+      expect(seen[seen.length - 1]).not.toContain('plug-adj')
+    } finally {
+      stop()
+    }
   })
 })

@@ -3,6 +3,8 @@
 // 定义房间邻接关系、主链路序列、导航函数
 // ============================================================
 
+import { shallowReactive } from 'vue'
+
 export type RoomGroup = 'gravity' | 'main-path' | 'world' | 'system'
 /** 宅院空间分区（世界壳 · 宅院地图的物理 zone；非院中房间无此字段） */
 // 宅院六位置（与 world-shell 私有 ShellSlot 对齐，见 modules/world-shell/types.ts）。
@@ -1042,7 +1044,10 @@ const MAIN_PATH_ORDER: string[] = ['timeline', 'anchor', 'garden']
 // ---- 运行时注册覆盖层（插件贡献房间等）----
 // 静态 ROOM_GRAPH 保持蓝图不可变；运行时扩展（插件房间）写入 EXTRA_ROOMS，
 // 全部查询函数合并读取，覆盖层优先。卸载后即刻从导航/星盘/邻接查询中消失。
-const EXTRA_ROOMS = new Map<string, RoomNode>()
+// 注意：必须为响应式 Map（shallowReactive）——侧栏/星盘等组件以 computed(() => getAllRooms())
+// 消费房间图，若覆盖层不可响应，register/unregister 不会使这些 computed 失效，导致
+// 插件房禁用后仍残留导航（INCR-347 真机验证发现，2026-09-17 修复）。
+const EXTRA_ROOMS = shallowReactive(new Map<string, RoomNode>())
 
 /** 注册一个运行时房间（插件贡献；ID 冲突时覆盖静态同名房间） */
 export function registerRoom(node: RoomNode): void {
