@@ -155,3 +155,10 @@ if (typeof window !== 'undefined' && typeof window.matchMedia === 'undefined') {
     dispatchEvent: () => false,
   })) as unknown as typeof window.matchMedia
 }
+
+// 测试环境禁止真实网络请求：happy-dom 会把相对 URL 解析成 localhost:3000 并发起真实
+// TCP 连接（如 HomeReplicaView 的 GLTFLoader/TextureLoader 加载 /home-replica/*.glb），
+// 在无服务器的测试环境产生 ECONNREFUSED 噪声。统一 stub 为立即失败，让生产代码的
+// try/catch 回退路径（回退程序化家具等）走真实逻辑；各测试文件自有的 fetch mock 优先级更高。
+const networkError = new DOMException('NetworkError', 'NetworkError')
+vi.stubGlobal('fetch', vi.fn((_input: unknown, _init?: unknown) => Promise.reject(networkError)))
