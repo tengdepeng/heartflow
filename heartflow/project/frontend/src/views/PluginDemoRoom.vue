@@ -1,5 +1,5 @@
 <template>
-  <div class="view-entrance plugin-demo-room">
+  <div :class="entranceClass" ref="entranceRef" class="view-entrance plugin-demo-room">
     <!-- 装饰性顶部 -->
     <div class="header-ornament" data-enter>
       <span class="orn-line"></span>
@@ -40,7 +40,11 @@
 </template>
 
 <script setup lang="ts">
+import { useViewEntrance } from '../composables/useViewEntrance'
+
 defineOptions({ name: 'PluginDemoRoom' })
+
+const { entranceRef, entranceClass } = useViewEntrance()
 </script>
 
 <style scoped>

@@ -112,4 +112,61 @@ describe('plugin store', () => {
     store.init()
     expect(store.plugins.length).toBe(first)
   })
+
+  it('第三方插件安装后持久化，重启（新 store init）后恢复', () => {
+    const store = usePluginStore()
+    store.init()
+    store.installPlugin({
+      meta: { id: 'persist-plugin', name: '持久化', version: '1.0.0', description: '', tier: 'community', category: 'note', icon: '💾' },
+      permissions: ['read:current'],
+      sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: true },
+      entry: 'persist:plugin',
+      contributes: {
+        rooms: [{ id: 'persist-room', path: '/persist-room', name: '持久化房', icon: '💾', color: '#8fa3bf' }],
+      },
+    })
+    // 模拟应用重启：新 pinia + 新 store 实例，从同一 localStorage 重建
+    setActivePinia(createPinia())
+    const store2 = usePluginStore()
+    store2.init()
+    const restored = store2.plugins.find(p => p.id === 'persist-plugin')
+    expect(restored).toBeDefined()
+    expect(restored!.enabled).toBe(true)
+    expect(restored!.manifest.contributes?.rooms?.[0].id).toBe('persist-room')
+    expect(store2.enabledPlugins.some(p => p.id === 'persist-plugin')).toBe(true)
+  })
+
+  it('第三方插件禁用状态在重启后保留', () => {
+    const store = usePluginStore()
+    store.init()
+    store.installPlugin({
+      meta: { id: 'keep-off-plugin', name: '保持关闭', version: '1.0.0', description: '', tier: 'community', category: 'other', icon: '🔕' },
+      permissions: ['read:current'],
+      sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: true },
+      entry: 'keep-off:plugin',
+    })
+    store.disable('keep-off-plugin')
+    setActivePinia(createPinia())
+    const store2 = usePluginStore()
+    store2.init()
+    const restored = store2.plugins.find(p => p.id === 'keep-off-plugin')
+    expect(restored).toBeDefined()
+    expect(restored!.enabled).toBe(false)
+  })
+
+  it('卸载后注册表条目清理，重启后不复活', () => {
+    const store = usePluginStore()
+    store.init()
+    store.installPlugin({
+      meta: { id: 'ghost-plugin', name: '幽灵', version: '1.0.0', description: '', tier: 'community', category: 'other', icon: '👻' },
+      permissions: ['read:current'],
+      sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: true },
+      entry: 'ghost:plugin',
+    })
+    store.uninstallPlugin('ghost-plugin')
+    setActivePinia(createPinia())
+    const store2 = usePluginStore()
+    store2.init()
+    expect(store2.plugins.find(p => p.id === 'ghost-plugin')).toBeUndefined()
+  })
 })

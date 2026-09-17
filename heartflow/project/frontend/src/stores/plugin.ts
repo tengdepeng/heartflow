@@ -9,6 +9,7 @@ import { ref, computed } from 'vue'
 import type { PluginManifest, PluginRuntime, PluginPermission } from '../modules/plugin/types'
 import { CORE_PLUGINS } from '../modules/plugin/types'
 import { storage } from '../engine/storage'
+import type { PluginRegistryEntry } from '../engine/storage/plugin'
 
 export { CORE_PLUGINS }
 export type { PluginManifest, PluginRuntime, PluginPermission }
@@ -29,6 +30,7 @@ export const usePluginStore = defineStore('plugin', () => {
   function init() {
     if (initialized.value) return
     const registry = storage.getPluginRegistry()
+    const coreIds = new Set(CORE_PLUGINS.map(m => m.meta.id))
 
     plugins.value = CORE_PLUGINS.map(manifest => {
       const saved = registry[manifest.meta.id]
@@ -45,6 +47,27 @@ export const usePluginStore = defineStore('plugin', () => {
         granted: (saved?.granted ?? saved?.permissions ?? manifest.permissions) as PluginPermission[],
       }
     })
+
+    // 恢复已安装的第三方插件：manifest 随注册表持久化，应用重启后重建运行时，
+    // 其贡献房间经 App.vue syncPluginRooms 重新注册（卸载时删除注册表条目，不会复活）
+    for (const id of Object.keys(registry)) {
+      if (coreIds.has(id)) continue
+      const entry = registry[id]
+      if (!entry?.manifest) continue
+      const m = entry.manifest
+      plugins.value.push({
+        id: m.meta.id,
+        name: m.meta.name,
+        version: m.meta.version,
+        manifest: m,
+        enabled: entry.enabled ?? true,
+        loaded: false,
+        installedAt: new Date().toISOString(),
+        hooks: new Map(),
+        sandbox: { ...m.sandbox },
+        granted: (entry.granted ?? entry.permissions ?? m.permissions) as PluginPermission[],
+      })
+    }
 
     initialized.value = true
   }
@@ -109,6 +132,10 @@ export const usePluginStore = defineStore('plugin', () => {
       return false
     }
     plugins.value = plugins.value.filter(p => p.manifest.meta.id !== id)
+    // 从注册表彻底删除（否则 manifest 残留会令重启后重新恢复）
+    const registry = storage.getPluginRegistry?.() ?? {}
+    delete registry[id]
+    storage.setPluginRegistry?.(registry)
     persist()
     return true
   }
@@ -137,14 +164,19 @@ export const usePluginStore = defineStore('plugin', () => {
 
   // ---- 持久化 ----
   function persist() {
-    const registry: Record<string, { enabled: boolean; permissions: string[]; granted?: string[] }> =
-      storage.getPluginRegistry?.() ?? {}
+    const registry = storage.getPluginRegistry?.() ?? {}
+    const coreIds = new Set(CORE_PLUGINS.map(m => m.meta.id))
     for (const p of plugins.value) {
-      registry[p.manifest.meta.id] = {
+      const entry: PluginRegistryEntry = {
         enabled: p.enabled,
         permissions: p.manifest.permissions,
         granted: (p.granted ?? p.manifest.permissions) as PluginPermission[],
       }
+      // 第三方插件附带 manifest，供重启后重建运行时（核心插件由 CORE_PLUGINS 重建）
+      if (!coreIds.has(p.manifest.meta.id)) {
+        entry.manifest = p.manifest
+      }
+      registry[p.manifest.meta.id] = entry
     }
     storage.setPluginRegistry(registry)
   }

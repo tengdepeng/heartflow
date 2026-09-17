@@ -67,6 +67,10 @@ beforeEach(() => {
     value: { matchMedia: () => ({ matches: false }) },
     writable: true, configurable: true,
   })
+  // 外壳兜底使 demo-room 在未注册自定义加载器时也会全局注册；
+  // 默认禁用，避免污染全局计数基线（内置演示测试内自行启用）。
+  usePluginStore().init()
+  usePluginStore().disable('demo-room')
 })
 
 afterEach(() => {
@@ -97,14 +101,15 @@ describe('registerPluginRooms', () => {
     expect(routes).toContainEqual({ path: '/t-room-a', name: 'plugin-room:t-room-a' })
   })
 
-  it('无组件加载器时跳过房间注册', () => {
+  it('无自定义加载器时回退默认插件房外壳注册', () => {
     const { router } = makeRouter()
     const store = usePluginStore()
     store.init()
     store.installPlugin(makeManifest('t-load-b', { id: 't-room-b', path: '/t-room-b' }))
 
-    expect(registerPluginRooms(router, 't-load-b')).toBe(0)
-    expect(getRoom('t-room-b')).toBeUndefined()
+    expect(registerPluginRooms(router, 't-load-b')).toBe(1)
+    expect(getRoom('t-room-b')).toBeDefined()
+    expect(getRoom('t-room-b')?.name).toBe('测试房·t-room-b')
   })
 
   it('重复注册幂等（ACTIVE_ROUTES 防重）', () => {
@@ -148,14 +153,14 @@ describe('unregisterPluginRooms', () => {
     expect(removed).toContain('plugin-room:t-room-a')
   })
 
-  it('对未激活的插件房间也执行注销清理', () => {
+  it('对未激活的插件房间无待清理项（返回 0）', () => {
     const { router } = makeRouter()
     const store = usePluginStore()
     store.init()
     const pid = 't-unreg-b'
     store.installPlugin(makeManifest(pid, { id: 't-room-b', path: '/t-room-b' }))
 
-    expect(unregisterPluginRooms(router, pid)).toBe(1)
+    expect(unregisterPluginRooms(router, pid)).toBe(0)
     expect(getRoom('t-room-b')).toBeUndefined()
   })
 })
@@ -241,6 +246,35 @@ describe('syncPluginRooms', () => {
     expect(syncPluginRooms(router).added).toBe(0)
     expect(getRoom('t-sync-room-c')).toBeDefined()
   })
+
+  it('卸载插件后同步注销其房间（状态对账）', () => {
+    const { router, removed } = makeRouter()
+    const store = usePluginStore()
+    store.init()
+    const pid = 't-sync-d'
+    store.installPlugin(makeManifest(pid, { id: 't-sync-room-d', path: '/t-sync-room-d' }))
+    expect(syncPluginRooms(router).added).toBe(1)
+    expect(getRoom('t-sync-room-d')).toBeDefined()
+
+    store.uninstallPlugin(pid)
+    const res = syncPluginRooms(router)
+    expect(res.removed).toBe(1)
+    expect(getRoom('t-sync-room-d')).toBeUndefined()
+    expect(removed).toContain('plugin-room:t-sync-room-d')
+  })
+
+  it('卸载不依赖 store 查询：插件移除后仍能清理激活房间', () => {
+    const { router } = makeRouter()
+    const store = usePluginStore()
+    store.init()
+    const pid = 't-sync-e'
+    store.installPlugin(makeManifest(pid, { id: 't-sync-room-e', path: '/t-sync-room-e' }))
+    expect(syncPluginRooms(router).added).toBe(1)
+
+    store.uninstallPlugin(pid)
+    expect(unregisterPluginRooms(router, pid)).toBe(1)
+    expect(getRoom('t-sync-room-e')).toBeUndefined()
+  })
 })
 
 // ============================================================
@@ -250,7 +284,7 @@ describe('registerCorePluginRooms', () => {
   it('注册内置演示插件 demo-room 的组件加载器并登记房间', () => {
     const { router } = makeRouter()
     const store = usePluginStore()
-    store.init()
+    store.enable('demo-room')
     registerCorePluginRooms()
 
     expect(registerAllPluginRooms(router)).toBe(1)
@@ -260,5 +294,15 @@ describe('registerCorePluginRooms', () => {
     expect(room?.path).toBe('/plugin-demo')
     expect(room?.icon).toBe('🧩')
     expect(room?.adjacentTo).toContain('plugins')
+  })
+
+  it('未注册自定义加载器时 demo-room 回退外壳注册', () => {
+    const { router } = makeRouter()
+    const store = usePluginStore()
+    store.enable('demo-room')
+
+    expect(registerAllPluginRooms(router)).toBe(1)
+    expect(getRoom('demo-room')).toBeDefined()
+    expect(getRoom('demo-room')?.name).toBe('示例插件房')
   })
 })

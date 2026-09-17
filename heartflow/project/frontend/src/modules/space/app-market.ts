@@ -6,6 +6,8 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { usePluginStore } from '../../stores/plugin'
+import type { PluginManifest } from '../plugin/types'
 
 // ============================================================
 // 类型定义
@@ -47,6 +49,8 @@ export interface MarketItem {
   isFree: boolean
   /** 兼容性 */
   compatibility: string[]
+  /** 插件类条目的插件清单（type='plugin' 时随安装/卸载联动插件存储与插件房间） */
+  pluginManifest?: PluginManifest
 }
 
 /** 市场筛选条件 */
@@ -302,6 +306,36 @@ export const MARKET_ITEMS: MarketItem[] = [
     updatedAt: '2026-05-15T10:00:00Z',
     isFree: true,
     compatibility: ['>=1.0.0'],
+    pluginManifest: {
+      meta: {
+        id: 'plg-quote-daily',
+        name: '每日一言',
+        version: '1.0.0',
+        description: '每天展示一句精选名言，支持分类和收藏',
+        tier: 'community',
+        category: 'knowledge',
+        icon: '💬',
+        author: '社区开发者',
+      },
+      permissions: ['read:current'],
+      sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: false },
+      entry: 'plg:quote-daily',
+      contributes: {
+        rooms: [
+          {
+            id: 'quote-daily-room',
+            path: '/quote-daily',
+            name: '每日一言房',
+            icon: '💬',
+            color: '#8fbf9f',
+            description: '社区插件「每日一言」贡献的房间 · 每日一句精选名言',
+            group: 'world',
+            adjacentTo: ['home-space', 'plugins'],
+            branchFrom: 'home-space',
+          },
+        ],
+      },
+    },
   },
 
   // ---- 布局 ----
@@ -372,6 +406,11 @@ export const MARKET_ITEMS: MarketItem[] = [
 // ============================================================
 // 可组合函数
 // ============================================================
+
+/** 插件类条目：从静态目录取清单（持久化快照可能缺字段，以静态为准） */
+function manifestOf(itemId: string): PluginManifest | undefined {
+  return MARKET_ITEMS.find(i => i.id === itemId)?.pluginManifest
+}
 
 export function useAppMarket() {
   // ---- 状态 ----
@@ -529,6 +568,14 @@ export function useAppMarket() {
         installHistory.value = installHistory.value.slice(-100)
       }
 
+      // 插件类条目：同步安装进插件存储（App.vue watch 触发 syncPluginRooms → 房间注册）
+      const manifest = manifestOf(itemId)
+      if (manifest) {
+        const store = usePluginStore()
+        store.init()
+        store.installPlugin(manifest)
+      }
+
       persist()
     }, 500)
 
@@ -554,6 +601,12 @@ export function useAppMarket() {
     installHistory.value.push(record)
     if (installHistory.value.length > 100) {
       installHistory.value = installHistory.value.slice(-100)
+    }
+
+    // 插件类条目：同步从插件存储卸载（watch 触发 syncPluginRooms → 房间注销）
+    const manifest = manifestOf(itemId)
+    if (manifest) {
+      usePluginStore().uninstallPlugin(manifest.meta.id)
     }
 
     persist()

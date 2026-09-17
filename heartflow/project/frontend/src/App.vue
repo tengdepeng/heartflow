@@ -810,6 +810,14 @@ watch(
   () => pluginBridge.plugins.value.map(p => p.manifest.meta.id + ':' + p.enabled).join('|'),
   () => syncPluginRooms($router),
 )
+// 深链直达修正：插件房路由在挂载后注册，而初始导航早于注册完成——
+// 直接以插件房 URL 打开/刷新会匹配为空（导航停留在 START_LOCATION）。
+// 注册完成后用地址栏 hash 重解析一次，恢复对插件房的直达渲染。
+const bootRoute = $router.currentRoute.value
+if (bootRoute.matched.length === 0) {
+  const target = window.location.hash.replace(/^#/, '') || '/'
+  void $router.replace(target)
+}
 
 // ---- 全局自定义背景（画布之下，跨路由持久化） ----
 const configBridge = useConfig()

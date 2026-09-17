@@ -238,6 +238,21 @@ const availablePlugins = ref<PluginManifest[]>([
     sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: false },
     entry: 'community:daily-review',
     hooks: [],
+    contributes: {
+      rooms: [
+        {
+          id: 'daily-review-room',
+          path: '/daily-review',
+          name: '每日回顾房',
+          icon: '📋',
+          color: '#a3b8cc',
+          description: '社区插件「每日回顾」贡献的房间 · 汇总当日专注与情绪',
+          group: 'world',
+          adjacentTo: ['home-space', 'plugins'],
+          branchFrom: 'home-space',
+        },
+      ],
+    },
   },
   {
     meta: {
