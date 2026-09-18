@@ -47,12 +47,17 @@ const mockPopularTemplates = computed(() =>
   [...mockTemplates.value].sort((a, b) => b.usageCount - a.usageCount),
 )
 
+const mockLearningStats = ref({ totalFeedback: 0, correctionRate: 0, intentCount: 0, lastTrainedAt: '' })
+
 vi.mock('../../modules/mirror/dialogue-persistence', () => ({
   useDialogueTemplates: () => ({
     templates: mockTemplates,
     getRecommendedTemplates: mockGetRecommendedTemplates,
     recordUsage: mockRecordUsage,
     popularTemplates: mockPopularTemplates,
+  }),
+  useIntentFeedbackLearning: () => ({
+    learningStats: mockLearningStats,
   }),
 }))
 
@@ -101,6 +106,7 @@ describe('DialogueTemplatesPanel 对话模板', () => {
         usageCount: 3,
       },
     ]
+    mockLearningStats.value = { totalFeedback: 0, correctionRate: 0, intentCount: 0, lastTrainedAt: '' }
   })
 
   it('渲染标题与模板列表', async () => {
@@ -156,5 +162,27 @@ describe('DialogueTemplatesPanel 对话模板', () => {
     const wrapper = await mountPanel()
     expect(wrapper.find('.dtp-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('暂无模板')
+  })
+
+  it('渲染意图学习统计（回收自 mirror/ 影子版）', async () => {
+    mockLearningStats.value = { totalFeedback: 12, correctionRate: 0.5, intentCount: 3, lastTrainedAt: '2026-09-18' }
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.dtp-learn').exists()).toBe(true)
+    expect(wrapper.text()).toContain('已学习 12 条反馈')
+    expect(wrapper.text()).toContain('修正率 50%')
+    expect(wrapper.text()).toContain('覆盖 3 类意图')
+  })
+
+  it('点击卡片展开详情并使用模板（回收自 mirror/ 影子版）', async () => {
+    const wrapper = await mountPanel()
+    const head = wrapper.find('.dtp-tpl-head')
+    await head.trigger('click')
+    await nextTick()
+    expect(wrapper.find('.dtp-detail').exists()).toBe(true)
+    expect(wrapper.find('.dtp-use').exists()).toBe(true)
+    await wrapper.find('.dtp-use').trigger('click')
+    await nextTick()
+    expect(mockRecordUsage).toHaveBeenCalledWith('morning_checkin')
+    expect(wrapper.find('.dtp-detail').exists()).toBe(false)
   })
 })

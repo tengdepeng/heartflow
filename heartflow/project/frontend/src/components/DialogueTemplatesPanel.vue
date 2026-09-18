@@ -5,6 +5,13 @@
       <span class="dtp-sub">模板 · 推荐 · 使用</span>
     </div>
 
+    <!-- 意图学习统计（回收自 mirror/ 陈旧副本：useIntentFeedbackLearning 学习进度） -->
+    <div v-if="learningStats.totalFeedback > 0" class="dtp-learn">
+      <span class="dtp-learn-item">已学习 {{ learningStats.totalFeedback }} 条反馈</span>
+      <span class="dtp-learn-item">修正率 {{ Math.round(learningStats.correctionRate * 100) }}%</span>
+      <span class="dtp-learn-item">覆盖 {{ learningStats.intentCount }} 类意图</span>
+    </div>
+
     <!-- 推荐模板（基于时段/星期） -->
     <div v-if="recommended.length" class="dtp-block">
       <div class="dtp-block-title">此刻推荐</div>
@@ -22,12 +29,12 @@
       </div>
     </div>
 
-    <!-- 模板列表 -->
+    <!-- 模板列表（点击卡片展开详情，回收自 mirror/ 陈旧副本的 .dtp-detail） -->
     <div class="dtp-block">
       <div class="dtp-block-title">全部模板</div>
       <div v-if="templates.length" class="dtp-list">
         <div v-for="t in templates" :key="t.id" class="dtp-tpl">
-          <div class="dtp-tpl-head">
+          <div class="dtp-tpl-head" @click="openTemplate(t)">
             <span class="dtp-tpl-icon">{{ t.icon }}</span>
             <span class="dtp-tpl-name">{{ t.name }}</span>
             <span class="dtp-tpl-count">使用 {{ t.usageCount }} 次</span>
@@ -38,15 +45,35 @@
               {{ intentLabel(intent) }}
             </span>
           </div>
-          <div class="dtp-tpl-prompts">
-            <p v-for="(p, i) in t.prompts" :key="i" class="dtp-prompt">{{ i + 1 }}. {{ p }}</p>
-          </div>
           <div class="dtp-tpl-actions">
-            <button class="dtp-btn" @click="useTemplate(t.type)">使用此模板</button>
+            <button class="dtp-btn" @click.stop="useTemplate(t.type)">使用此模板</button>
           </div>
         </div>
       </div>
       <p v-else class="dtp-empty">暂无模板。</p>
+    </div>
+
+    <!-- 模板详情（点击卡片展开：展示提示词 + 意图 + ✓使用，回收自 mirror/ 影子版） -->
+    <div v-if="active" class="dtp-detail">
+      <div class="dtp-detail-head">
+        <span class="dtp-detail-icon">{{ active.icon }}</span>
+        <div class="dtp-detail-info">
+          <span class="dtp-detail-name">{{ active.name }}</span>
+          <span class="dtp-detail-desc">{{ active.description }}</span>
+        </div>
+        <button class="dtp-close" @click="active = null" title="收起">×</button>
+      </div>
+      <div class="dtp-prompts">
+        <p v-for="(p, i) in active.prompts" :key="i" class="dtp-prompt">
+          <span class="dtp-prompt-idx">{{ i + 1 }}</span>{{ p }}
+        </p>
+      </div>
+      <div class="dtp-detail-foot">
+        <span v-if="active.expectedIntents.length" class="dtp-intents">
+          <span v-for="it in active.expectedIntents" :key="it" class="dtp-intent">{{ intentLabel(it) }}</span>
+        </span>
+        <button class="dtp-use" @click="useTemplate(active.type)">✓ 使用此模板</button>
+      </div>
     </div>
 
     <!-- 热门模板 -->
@@ -65,22 +92,31 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useDialogueTemplates } from '../modules/mirror/dialogue-persistence'
+import { computed, ref } from 'vue'
+import { useDialogueTemplates, useIntentFeedbackLearning } from '../modules/mirror/dialogue-persistence'
 import { INTENT_INFO } from '../modules/mirror/intents'
-import type { DialogueTemplateType } from '../modules/mirror/dialogue-persistence'
+import type { DialogueTemplate, DialogueTemplateType } from '../modules/mirror/dialogue-persistence'
 
 const { templates, getRecommendedTemplates, recordUsage, popularTemplates } = useDialogueTemplates()
+const learn = useIntentFeedbackLearning()
 
 const recommended = computed(() => getRecommendedTemplates())
 const popular = computed(() => popularTemplates.value)
+const learningStats = computed(() => learn.learningStats.value)
+
+const active = ref<DialogueTemplate | null>(null)
 
 function intentLabel(intent: string): string {
   return INTENT_INFO[intent as keyof typeof INTENT_INFO]?.label ?? intent
 }
 
+function openTemplate(t: DialogueTemplate): void {
+  active.value = t
+}
+
 function useTemplate(type: DialogueTemplateType): void {
   recordUsage(type)
+  active.value = null
 }
 </script>
 
@@ -183,6 +219,7 @@ function useTemplate(type: DialogueTemplateType): void {
   display: flex;
   align-items: center;
   gap: 8px;
+  cursor: pointer;
 }
 .dtp-tpl-icon {
   font-size: 16px;
@@ -215,16 +252,104 @@ function useTemplate(type: DialogueTemplateType): void {
   color: rgba(var(--accent-rgb), 0.75);
   background: rgba(var(--accent-rgb), 0.1);
 }
-.dtp-tpl-prompts {
+/* 模板详情（回收自 mirror/ 影子版） */
+.dtp-detail {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(196, 160, 184, 0.06);
+  border: 1px solid rgba(196, 160, 184, 0.18);
+}
+.dtp-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.dtp-detail-icon {
+  font-size: 22px;
+}
+.dtp-detail-info {
+  flex: 1;
+  min-width: 0;
+}
+.dtp-detail-name {
+  display: block;
+  font-size: 14px;
+  color: rgba(240, 242, 255, 0.92);
+}
+.dtp-detail-desc {
+  display: block;
+  font-size: 11px;
+  color: var(--text-medium);
+}
+.dtp-close {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: rgba(232, 236, 246, 0.6);
+  font-size: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.dtp-close:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.dtp-prompts {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 .dtp-prompt {
   margin: 0;
-  font-size: 11px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
   line-height: 1.6;
-  color: rgba(240, 242, 255, 0.72);
+  color: rgba(240, 242, 255, 0.8);
+}
+.dtp-prompt-idx {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(196, 160, 184, 0.14);
+  color: rgba(196, 160, 184, 0.9);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dtp-detail-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.dtp-intents {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.dtp-use {
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(196, 160, 184, 0.3);
+  background: rgba(196, 160, 184, 0.14);
+  color: rgba(240, 242, 255, 0.9);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.dtp-use:hover {
+  background: rgba(196, 160, 184, 0.22);
+  border-color: rgba(196, 160, 184, 0.45);
 }
 .dtp-tpl-actions {
   display: flex;

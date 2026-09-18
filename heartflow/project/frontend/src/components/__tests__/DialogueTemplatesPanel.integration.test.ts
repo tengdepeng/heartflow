@@ -1,7 +1,11 @@
+// ============================================================
+// DialogueTemplatesPanel 集成测试（真实 storage，INCR-352 合并自 mirror/ 影子版）
+// 与 DialogueTemplatesPanel.test.ts（mock 单测）互补：本文件验证真实持久化路径。
+// ============================================================
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createMockStorage } from '../../../engine/storage/__tests__/test-utils'
-import { invalidateCache } from '../../../engine/storage/core'
+import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
+import { invalidateCache } from '../../engine/storage/core'
 
 const TEMPLATES_KEY = 'hf:mirror_templates'
 const FEEDBACK_KEY = 'hf:mirror_intent_feedback'
@@ -18,7 +22,7 @@ async function mountPanel(kv: Record<string, any> = {}) {
   }))
   ;(globalThis as any).localStorage = storageMock
   invalidateCache()
-  const mod = await import('../DialogueTemplatePanel.vue')
+  const mod = await import('../DialogueTemplatesPanel.vue')
   const wrapper = mount(mod.default)
   return wrapper
 }
@@ -37,7 +41,7 @@ function makeTemplate(overrides: Record<string, any> = {}) {
   }
 }
 
-describe('DialogueTemplatePanel 对话模板', () => {
+describe('DialogueTemplatesPanel 对话模板（真实 storage 集成）', () => {
   it('默认展示全部内置模板', async () => {
     const wrapper = await mountPanel()
     expect(wrapper.text()).toContain('晨间签到')
@@ -69,7 +73,7 @@ describe('DialogueTemplatePanel 对话模板', () => {
     const wrapper = await mountPanel({
       [TEMPLATES_KEY]: [makeTemplate()],
     })
-    await wrapper.find('.dtp-card').trigger('click')
+    await wrapper.find('.dtp-tpl-head').trigger('click')
     expect(wrapper.find('.dtp-detail').exists()).toBe(true)
     expect(wrapper.text()).toContain('问题一')
     expect(wrapper.text()).toContain('问题二')
@@ -79,7 +83,7 @@ describe('DialogueTemplatePanel 对话模板', () => {
     const wrapper = await mountPanel({
       [TEMPLATES_KEY]: [makeTemplate()],
     })
-    await wrapper.find('.dtp-card').trigger('click')
+    await wrapper.find('.dtp-tpl-head').trigger('click')
     await wrapper.find('.dtp-use').trigger('click')
     expect(wrapper.find('.dtp-detail').exists()).toBe(false)
     const raw = (globalThis as any).localStorage.getItem('heartflow:storage')
