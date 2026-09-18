@@ -455,7 +455,7 @@ function tierLabel(t: PluginTier): string {
 
 .pm-overview-label {
   font-size: 11px;
-  color: rgba(237,224,212,0.45);
+  color: rgba(237,224,212,0.68);
   font-weight: 400;
   position: relative;
 }
@@ -482,7 +482,7 @@ function tierLabel(t: PluginTier): string {
 .pm-section-count {
   font-size: 10px;
   font-weight: 500;
-  color: rgba(237,224,212,0.4);
+  color: rgba(237,224,212,0.68);
   background: rgba(var(--accent-rgb), 0.08);
   padding: 1px 8px;
   border-radius: 10px;
@@ -562,7 +562,7 @@ function tierLabel(t: PluginTier): string {
 
 .pm-plugin-version {
   font-size: 11px;
-  color: rgba(237,224,212,0.35);
+  color: rgba(237,224,212,0.6);
   font-weight: 400;
 }
 
@@ -585,14 +585,14 @@ function tierLabel(t: PluginTier): string {
 
 .pm-plugin-desc {
   font-size: 12px;
-  color: rgba(237,224,212,0.45);
+  color: rgba(237,224,212,0.7);
   margin-bottom: 4px;
   line-height: 1.4;
 }
 
 .pm-plugin-author {
   font-size: 11px;
-  color: rgba(237,224,212,0.35);
+  color: rgba(237,224,212,0.6);
   margin-bottom: 4px;
 }
 
@@ -607,7 +607,7 @@ function tierLabel(t: PluginTier): string {
   padding: 1px 6px;
   border-radius: 4px;
   background: rgba(var(--accent-rgb), 0.06);
-  color: rgba(237,224,212,0.45);
+  color: rgba(237,224,212,0.68);
   font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
 }
 
@@ -625,7 +625,7 @@ function tierLabel(t: PluginTier): string {
   border-radius: 6px;
   border: 1px solid rgba(var(--accent-rgb), 0.12);
   background: transparent;
-  color: rgba(237,224,212,0.55);
+  color: rgba(237,224,212,0.7);
   cursor: pointer;
   font-family: inherit;
   transition: all 0.2s ease;
@@ -666,7 +666,7 @@ function tierLabel(t: PluginTier): string {
   border-radius: 6px;
   border: 1px solid transparent;
   background: transparent;
-  color: rgba(237,224,212,0.35);
+  color: rgba(237,224,212,0.6);
   cursor: pointer;
   font-size: 12px;
   display: flex;
@@ -692,7 +692,7 @@ function tierLabel(t: PluginTier): string {
 .pm-empty-hint {
   text-align: center;
   padding: 40px 20px;
-  color: rgba(237,224,212,0.35);
+  color: rgba(237,224,212,0.6);
 }
 
 .pm-empty-icon {
@@ -749,7 +749,7 @@ function tierLabel(t: PluginTier): string {
 
 .pm-guide-desc {
   font-size: 12px;
-  color: rgba(237,224,212,0.45);
+  color: rgba(237,224,212,0.68);
   line-height: 1.7;
   margin-bottom: 14px;
 }
@@ -779,12 +779,12 @@ function tierLabel(t: PluginTier): string {
 }
 
 .pm-api-desc {
-  color: rgba(237,224,212,0.45);
+  color: rgba(237,224,212,0.68);
 }
 
 .pm-guide-tip {
   font-size: 12px;
-  color: rgba(237,224,212,0.5);
+  color: rgba(237,224,212,0.72);
   background: rgba(var(--accent-rgb), 0.04);
   padding: 10px 14px;
   border-radius: 6px;

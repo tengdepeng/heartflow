@@ -360,7 +360,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .orn-diamond {
   font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.4);
+  color: rgba(var(--accent-rgb), 0.55);
 }
 
 .header-kicker {
@@ -368,7 +368,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
   z-index: 1;
   text-align: center;
   font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
+  color: rgba(var(--accent-rgb), 0.7);
   letter-spacing: 4px;
   margin-top: 10px;
 }
@@ -444,7 +444,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .section-label-count {
   font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.3);
+  color: rgba(var(--accent-rgb), 0.7);
   margin-left: auto;
   background: rgba(var(--accent-rgb), 0.06);
   padding: 1px 8px;
@@ -496,7 +496,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 .as-quick-desc {
   display: block;
   font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.3);
+  color: rgba(var(--accent-rgb), 0.7);
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
@@ -577,7 +577,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .as-entry-desc {
   font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.3);
+  color: rgba(var(--accent-rgb), 0.7);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -602,12 +602,12 @@ function navigateToEntry(entry: AppSpaceEntry): void {
   padding: 1px 6px;
   border-radius: 4px;
   background: rgba(var(--accent-rgb), 0.06);
-  color: rgba(var(--accent-rgb), 0.35);
+  color: rgba(var(--accent-rgb), 0.7);
 }
 
 .as-entry-count {
   font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.25);
+  color: rgba(var(--accent-rgb), 0.68);
 }
 
 /* ---- 活动列表 ---- */
@@ -634,12 +634,12 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 .as-activity-desc {
   flex: 1;
   font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.5);
+  color: rgba(var(--accent-rgb), 0.7);
 }
 
 .as-activity-time {
   font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.25);
+  color: rgba(var(--accent-rgb), 0.5);
   flex-shrink: 0;
 }
 
@@ -693,7 +693,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .as-attn-off-desc {
   font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.45);
+  color: rgba(var(--accent-rgb), 0.68);
   line-height: 1.6;
   margin: 0 0 12px;
 }
@@ -714,7 +714,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .as-attn-level {
   font-size: 13px;
-  color: rgba(var(--accent-rgb), 0.55);
+  color: rgba(var(--accent-rgb), 0.72);
   letter-spacing: 2px;
 }
 
@@ -727,7 +727,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .as-attn-metrics span {
   font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.4);
+  color: rgba(var(--accent-rgb), 0.68);
 }
 
 .as-attn-signals {
@@ -741,13 +741,13 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .as-attn-signals li {
   font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.55);
+  color: rgba(var(--accent-rgb), 0.72);
   line-height: 1.5;
 }
 
 .as-attn-note {
   font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.3);
+  color: rgba(var(--accent-rgb), 0.68);
   margin: 0 0 10px;
 }
 
@@ -764,7 +764,7 @@ function navigateToEntry(entry: AppSpaceEntry): void {
 
 .as-attn-bw-title {
   font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.45);
+  color: rgba(var(--accent-rgb), 0.7);
 }
 
 .as-attn-bw-chip {

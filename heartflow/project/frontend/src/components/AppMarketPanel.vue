@@ -324,7 +324,7 @@ function formatTime(ts: string): string {
 }
 .amp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.68));
 }
 .amp-filters {
   display: flex;
@@ -346,7 +346,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.68));
   font-size: 11px;
   cursor: pointer;
 
@@ -380,7 +380,7 @@ function formatTime(ts: string): string {
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.72));
   cursor: pointer;
 }
 .amp-list {
@@ -416,12 +416,12 @@ function formatTime(ts: string): string {
 .amp-item-meta {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.62));
   margin-top: 2px;
 }
 .amp-item-desc {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
   line-height: 1.5;
   margin: 8px 0;
 }
@@ -446,7 +446,7 @@ function formatTime(ts: string): string {
 }
 .amp-item-installs {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.68));
   margin-right: auto;
 }
 .amp-btn--small {
@@ -476,7 +476,7 @@ function formatTime(ts: string): string {
 }
 .amp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.68));
   padding: 16px 0;
   text-align: center;
 }
@@ -518,11 +518,11 @@ function formatTime(ts: string): string {
 }
 .amp-history-version {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.68));
 }
 .amp-history-time {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.35));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
   flex-shrink: 0;
 }
 </style>
