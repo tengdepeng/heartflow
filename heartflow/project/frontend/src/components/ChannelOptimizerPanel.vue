@@ -372,7 +372,7 @@ function formatTime(ts: string): string {
 }
 .cop-last {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .cop-list {
   display: flex;
@@ -439,7 +439,7 @@ function formatTime(ts: string): string {
   margin-bottom: 8px;
 }
 .cop-sug-arrow {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .cop-sug-improve {
   color: #8a9a7a;
@@ -451,7 +451,7 @@ function formatTime(ts: string): string {
 }
 .cop-sug-conf {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-right: auto;
 }
 .cop-btn--small {
@@ -486,7 +486,7 @@ function formatTime(ts: string): string {
   flex-direction: column;
   gap: 2px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .cop-block {
   display: flex;
@@ -564,7 +564,7 @@ function formatTime(ts: string): string {
   color: #8a9a7a;
 }
 .eff-no_change {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .eff-degraded {
   color: #c46a5a;
@@ -574,12 +574,12 @@ function formatTime(ts: string): string {
   justify-content: space-between;
   gap: 8px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-top: 6px;
 }
 .cop-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   padding: 16px 0;
   text-align: center;
 }

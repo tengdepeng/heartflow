@@ -436,13 +436,13 @@ const ambientLightText = computed(() => {
 
 const sessionStatus = computed(() => {
   const recent = sessionActivity.value.slice(0, 5)
-  if (recent.length === 0) return { label: '无活动记录', level: 'idle', color: 'rgba(232,224,216,0.35)' }
+  if (recent.length === 0) return { label: '无活动记录', level: 'idle', color: 'rgba(232,224,216,0.53)' }
   const last = new Date(recent[0].at)
   const now = Date.now()
   const diff = now - last.getTime()
   if (diff < 60000) return { label: '活跃', level: 'active', color: '#34d399' }
   if (diff < 300000) return { label: '近期活跃', level: 'recent', color: '#f0c040' }
-  return { label: '空闲', level: 'idle', color: 'rgba(232,224,216,0.35)' }
+  return { label: '空闲', level: 'idle', color: 'rgba(232,224,216,0.53)' }
 })
 
 const securityScore = computed(() => {

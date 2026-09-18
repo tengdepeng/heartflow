@@ -171,7 +171,7 @@ function toggleAutoCollect(e: Event): void {
 }
 .zgp-hint {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin: 0;
 }
 .zgp-ring {
@@ -261,7 +261,7 @@ function toggleAutoCollect(e: Event): void {
 }
 .zgp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin: 0;
 }
 .zgp-pref {

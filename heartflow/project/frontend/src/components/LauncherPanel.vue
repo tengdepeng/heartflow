@@ -355,7 +355,7 @@ function shortTime(iso: string): string {
 }
 .lcp-group-count {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   flex: 1;
 }
 .lcp-list {
@@ -389,12 +389,12 @@ function shortTime(iso: string): string {
 .lcp-item-meta {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-top: 1px;
 }
 .lcp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   padding: 16px 0;
   text-align: center;
 }

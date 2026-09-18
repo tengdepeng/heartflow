@@ -332,7 +332,7 @@ function formatTimeShort(iso?: string | null): string {
 
 .frag-meta {
   font-size: 11px;
-  color: rgba(255,255,255,0.35);
+  color: var(--text-muted, rgba(255,255,255,0.44));
   display: flex;
   align-items: center;
   gap: 6px;

@@ -189,7 +189,7 @@ function shortTime(iso: string): string {
 }
 .cbp-climate-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .cbp-climate-chips {
   display: flex;
@@ -265,7 +265,7 @@ function shortTime(iso: string): string {
 .cbp-result-meta {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-top: 2px;
 }
 .cbp-recipes {
@@ -299,7 +299,7 @@ function shortTime(iso: string): string {
 .cbp-recipe-desc {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-top: 2px;
 }
 .cbp-recipe-meta {
@@ -307,7 +307,7 @@ function shortTime(iso: string): string {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-top: 4px;
   flex-wrap: wrap;
 }
@@ -339,7 +339,7 @@ function shortTime(iso: string): string {
 }
 .cbp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   padding: 16px 0;
   text-align: center;
 }

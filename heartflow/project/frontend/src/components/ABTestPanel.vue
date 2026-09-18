@@ -413,7 +413,7 @@ function formatTime(ts: string): string {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .abp-exp-result {
   margin-top: 8px;
@@ -486,7 +486,7 @@ function formatTime(ts: string): string {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-top: 6px;
 }
 .abp-result-box {
@@ -510,7 +510,7 @@ function formatTime(ts: string): string {
 }
 .abp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   padding: 16px 0;
   text-align: center;
 }

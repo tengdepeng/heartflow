@@ -265,7 +265,7 @@ function removeJournal(j: { id: string }) {
 }
 .ajp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .ajp-form {
   display: flex;
@@ -282,7 +282,7 @@ function removeJournal(j: { id: string }) {
   outline: none;
 }
 .ajp-input::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .ajp-select {
   appearance: none;
@@ -299,7 +299,7 @@ function removeJournal(j: { id: string }) {
   font-family: inherit;
 }
 .ajp-textarea::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .ajp-type-row {
   display: flex;
@@ -398,7 +398,7 @@ function removeJournal(j: { id: string }) {
 }
 .ajp-item-meta {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .ajp-item-head .ajp-btn {
   margin-left: auto;
@@ -413,7 +413,7 @@ function removeJournal(j: { id: string }) {
 }
 .ajp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .ajp-thread-list {
   display: flex;
@@ -454,7 +454,7 @@ function removeJournal(j: { id: string }) {
 }
 .ajp-thread-reason {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .ajp-year {
   display: flex;
@@ -483,7 +483,7 @@ function removeJournal(j: { id: string }) {
 }
 .ajp-year-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .ajp-tag {
   padding: 2px 8px;

@@ -403,7 +403,7 @@ function resetWidgets() {
 }
 .gwp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .gwp-widget-list {
   display: flex;
@@ -435,7 +435,7 @@ function resetWidgets() {
 }
 .gwp-widget-meta {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .gwp-widget-controls {
   display: flex;
@@ -503,6 +503,6 @@ function resetWidgets() {
 }
 .gwp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 </style>

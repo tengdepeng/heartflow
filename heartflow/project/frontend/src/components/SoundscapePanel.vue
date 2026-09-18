@@ -151,11 +151,11 @@ const SEASON_LABELS: Record<Season, string> = {
 }
 .scp-item-ambient {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .scp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .scp-detail {
   display: flex;
@@ -178,7 +178,7 @@ const SEASON_LABELS: Record<Season, string> = {
 }
 .scp-section-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .scp-tags {
   display: flex;

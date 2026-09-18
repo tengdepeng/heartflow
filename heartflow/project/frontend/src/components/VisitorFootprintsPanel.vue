@@ -197,7 +197,7 @@ function shortTime(iso: string): string {
 }
 .vfp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .vfp-add {
   display: flex;
@@ -224,7 +224,7 @@ function shortTime(iso: string): string {
   outline: none;
 }
 .vfp-input::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .vfp-chip {
   display: inline-flex;
@@ -307,7 +307,7 @@ function shortTime(iso: string): string {
 .vfp-item-time {
   margin-left: auto;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .vfp-item-msg,
 .vfp-item-flower,
@@ -322,6 +322,6 @@ function shortTime(iso: string): string {
 }
 .vfp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 </style>

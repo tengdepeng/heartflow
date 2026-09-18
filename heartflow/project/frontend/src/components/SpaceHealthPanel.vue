@@ -364,7 +364,7 @@ function handleResolveAlert(id: string): void {
 }
 .shp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin: 0;
 }
 .shp-btn {
@@ -419,7 +419,7 @@ function handleResolveAlert(id: string): void {
   display: flex;
   gap: 10px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .shp-delta--up {
   color: #8a9a7a;

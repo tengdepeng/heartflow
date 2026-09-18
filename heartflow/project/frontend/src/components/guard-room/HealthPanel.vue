@@ -257,7 +257,7 @@ const heartRatePercent = computed(() => {
   return Math.min((heartRate.value / 100) * 100, 100)
 })
 const heartRateColor = computed(() => {
-  if (typeof heartRate.value !== 'number') return 'rgba(232,224,216,0.35)'
+  if (typeof heartRate.value !== 'number') return 'rgba(232,224,216,0.53)'
   if (heartRate.value >= 60 && heartRate.value <= 80) return '#34d399'
   if (heartRate.value >= 50 && heartRate.value <= 100) return '#f0c040'
   return '#ef4444'
@@ -288,7 +288,7 @@ const sleepColor = computed(() => {
   if (sleepAvgNum.value >= 7) return '#34d399'
   if (sleepAvgNum.value >= 6) return '#f0c040'
   if (sleepAvgNum.value > 0) return '#ef4444'
-  return 'rgba(232,224,216,0.35)'
+  return 'rgba(232,224,216,0.53)'
 })
 const sleepNote = computed(() => {
   if (!recentSleep.value.length) return '暂无数据'
@@ -313,7 +313,7 @@ const exerciseColor = computed(() => {
   if (exerciseWeek.value >= 150) return '#34d399'
   if (exerciseWeek.value >= 75) return '#f0c040'
   if (exerciseWeek.value > 0) return '#ef4444'
-  return 'rgba(232,224,216,0.35)'
+  return 'rgba(232,224,216,0.53)'
 })
 const exerciseNote = computed(() => {
   if (!recentExercise.value.length) return '暂无数据'

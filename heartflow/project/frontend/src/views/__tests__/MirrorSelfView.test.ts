@@ -196,9 +196,12 @@ describe('集成：对话模板面板', () => {
     expect(names).toContain('晚间反思')
     expect(names).toContain('周回顾')
     expect(names).toContain('决策辅助')
-    // 每条模板都带描述与引导问题
+    // 每条模板都带描述；引导语在展开的详情视图里（INCR-352 合并后 prompts 收进 .dtp-detail）
     expect(cards[0].find('.dtp-tpl-desc').text()).not.toBe('')
-    expect(cards[0].findAll('.dtp-prompt').length).toBeGreaterThan(0)
+    await cards[0].find('.dtp-tpl-head').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.dtp-detail').exists()).toBe(true)
+    expect(wrapper.findAll('.dtp-prompt').length).toBeGreaterThan(0)
     // 空态不存在
     expect(wrapper.find('.dtp-empty').exists()).toBe(false)
   })

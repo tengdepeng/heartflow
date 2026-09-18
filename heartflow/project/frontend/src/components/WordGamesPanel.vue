@@ -216,7 +216,7 @@ function remove(id: string) {
 }
 .wgp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .wgp-start,
 .wgp-play,
@@ -346,7 +346,7 @@ function remove(id: string) {
 }
 .wgp-play-hint {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .wgp-play-feedback {
   display: flex;
@@ -406,6 +406,6 @@ function remove(id: string) {
 }
 .wgp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 </style>

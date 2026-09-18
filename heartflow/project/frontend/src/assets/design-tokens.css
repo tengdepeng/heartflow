@@ -13,17 +13,20 @@
   --bg-surface: rgba(255, 255, 255, 0.03);
   --bg-elevated: rgba(35, 30, 24, 0.8);
 
-  /* 文字色 — 温暖白 */
+  /* 文字色 — 温暖白
+     WCAG AA 对比度基线（卡片底 #1e1a16 上）：
+     primary 13.2 / high 10.5 / bright 7.1 / secondary 4.9 / medium 4.6
+     / dim 4.0 / low 4.0 / muted 3.6 / faint 2.7（装饰层豁免） */
   --text-primary: #e8e0d8;
   --text-primary-rgb: 232, 224, 216;
   --text-secondary: rgba(232, 224, 216, 0.55);
-  --text-muted: rgba(232, 224, 216, 0.3);
+  --text-muted: rgba(232, 224, 216, 0.44);
   --text-high: rgba(232, 224, 216, 0.88);
-  --text-medium: rgba(232, 224, 216, 0.5);
-  --text-dim: rgba(232, 224, 216, 0.4);
+  --text-medium: rgba(232, 224, 216, 0.53);
+  --text-dim: rgba(232, 224, 216, 0.48);
   --text-bright: rgba(232, 224, 216, 0.7);
-  --text-faint: rgba(232, 224, 216, 0.2);
-  --text-low: rgba(232, 224, 216, 0.35);
+  --text-faint: rgba(232, 224, 216, 0.34);
+  --text-low: rgba(232, 224, 216, 0.48);
   --text-disabled: #e0e0e0;
   --text-muted-alt: #8a8a8a;
 
@@ -187,11 +190,12 @@ button {
    置于 :root 之后，同特异性后定义胜；移除 data-bg 即回退深色默认。 */
 [data-bg="light"] {
   --text-high: rgba(31, 27, 22, 0.92);
-  --text-medium: rgba(31, 27, 22, 0.62);
-  --text-dim: rgba(31, 27, 22, 0.5);
-  --text-bright: rgba(31, 27, 22, 0.72);
-  --text-faint: rgba(31, 27, 22, 0.25);
-  --text-low: rgba(31, 27, 22, 0.4);
+  --text-medium: rgba(31, 27, 22, 0.75);
+  --text-dim: rgba(31, 27, 22, 0.7);
+  --text-bright: rgba(31, 27, 22, 0.82);
+  --text-faint: rgba(31, 27, 22, 0.55);
+  --text-low: rgba(31, 27, 22, 0.7);
+  --text-muted: rgba(31, 27, 22, 0.6);
   --text-disabled: #8a8a8a;
   --text-muted-alt: #6a6a6a;
 

@@ -396,7 +396,7 @@ function chipStyle(tag: string) {
 }
 
 .title-input::placeholder {
-  color: rgba(255,255,255,0.25);
+  color: var(--text-muted, rgba(255,255,255,0.44));
 }
 
 .close-btn {
@@ -799,7 +799,7 @@ function chipStyle(tag: string) {
 
 .word-count {
   font-size: 11px;
-  color: rgba(255,255,255,0.25);
+  color: var(--text-muted, rgba(255,255,255,0.44));
 }
 
 .editor-actions {

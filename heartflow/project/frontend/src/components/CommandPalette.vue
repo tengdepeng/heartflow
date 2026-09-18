@@ -247,7 +247,7 @@ function onSelect(item: CommandItem) {
 }
 
 .cp-input::placeholder {
-  color: var(--text-muted, rgba(232, 224, 216, 0.45));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .cp-kbd {
@@ -304,14 +304,14 @@ function onSelect(item: CommandItem) {
 }
 
 .cp-hint {
-  color: var(--text-muted, rgba(232, 224, 216, 0.3));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
 }
 
 .cp-empty {
   padding: 24px;
   text-align: center;
-  color: var(--text-muted, rgba(232, 224, 216, 0.3));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .cp-footer {
@@ -320,7 +320,7 @@ function onSelect(item: CommandItem) {
   padding: 8px 16px;
   border-top: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.12);
   font-size: 11px;
-  color: var(--text-muted, rgba(232, 224, 216, 0.3));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .cp-fade-enter-active,

@@ -282,7 +282,7 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .wnp-block {
   display: flex;
@@ -316,7 +316,7 @@ function relationLabel(r: SemanticRelation): string {
   outline: none;
 }
 .wnp-input::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .wnp-btn {
   padding: 6px 14px;
@@ -435,7 +435,7 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-suggest-reason {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .wnp-network {
   display: flex;
@@ -485,6 +485,6 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 </style>

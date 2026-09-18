@@ -294,7 +294,7 @@ function handleMaxNotifications(e: Event): void {
 .ncp-rule-meta {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   margin-top: 2px;
 }
 .ncp-item-priority {
@@ -474,7 +474,7 @@ function handleMaxNotifications(e: Event): void {
 }
 .ncp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.45));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
   padding: 16px 0;
   text-align: center;
 }

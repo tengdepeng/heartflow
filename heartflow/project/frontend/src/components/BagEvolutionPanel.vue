@@ -272,7 +272,7 @@ function evolve(p: EvolutionPath) {
   outline: none;
 }
 .bep-input::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.4));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .bep-btn {
   padding: 6px 14px;
@@ -326,7 +326,7 @@ function evolve(p: EvolutionPath) {
 }
 .bep-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .bep-dist {
   display: flex;
@@ -423,7 +423,7 @@ function evolve(p: EvolutionPath) {
 }
 .bep-path-meta {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .bep-path-head .bep-btn {
   margin-left: auto;
@@ -508,10 +508,10 @@ function evolve(p: EvolutionPath) {
 }
 .bep-cannot-evolve {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 .bep-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.5));
+  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
 }
 </style>

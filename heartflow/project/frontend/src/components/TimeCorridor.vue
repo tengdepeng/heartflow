@@ -224,7 +224,7 @@ onMounted(() => {
 
 .corridor-scale {
   font-size: 11px;
-  color: var(--text-muted, rgba(255,255,255,0.3));
+  color: var(--text-muted, rgba(255,255,255,0.44));
   cursor: default;
   user-select: none;
 }
