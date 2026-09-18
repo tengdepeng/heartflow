@@ -103,18 +103,17 @@ const sidebarFloatEdgeCtrl = createSimple<string>('ui:sidebar-float-edge', 'left
 // 悬浮液态栏自由坐标（px 中心；floating 模式拖动后落盘；null=贴底 docked）
 const navFloatPosCtrl = createSimple<{ x: number; y: number } | null>('ui:nav-float-pos', null)
 
-// ---- 顶栏 / 底栏（移动/平板端）不透明度（超级自定义 · 与侧边栏同级） ----
-// 仅移动/平板端显示的 .mobile-top-bar / .mobile-bottom-nav 背景不透明度（0–100），
-// 语义为「不透明度」：0 = 全透（看不见栏）、100 = 全实底。默认 95（对应原 rgba(...,0.95)）。
+// ---- 悬浮浮岛（底栏）玻璃通透度（超级自定义 · 与全局「琉璃通透度」同源） ----
+// 接管 FloatingNavBar 双浮岛玻璃：1 = 完全跟随全局主控，越低越透（0.95 = 接近原磨砂观感）。
+// 原「上下边栏」死控件改造而来：.mobile-top-bar/.mobile-bottom-nav 从未实装，故改接真实存在的底栏浮岛。
 const edgeBarAlphaCtrl = createSimple<number>('ui:edge-bar-alpha', 95)
 
 // ---- 背景视频播放速度（超级自定义 · 背景介质） ----
 // 应用到全局背景视频与设置页预览：0.5 / 0.75 / 1 / 1.25 / 1.5 / 2，默认 1。
 const bgVideoRateCtrl = createSimple<number>('ui:bg-video-rate', 1)
 
-// ---- 悬浮液态栏 · 玻璃通透度与呼吸动画（超级自定义 · 液态玻璃 sheen） ----
-// 玻璃通透度（0–100）：越高越透、模糊越强
-const barGlassAlphaCtrl = createAlphaControl('ui:bar-glass-alpha', '--bar-glass-alpha', 100)
+// ---- 悬浮液态栏 · 呼吸动画（超级自定义 · 液态玻璃 sheen） ----
+// 玻璃通透度改由「悬浮浮岛通透度」(edgeBarAlpha) 统管，与全局「琉璃通透度」同源。
 // 呼吸动画开关（默认开启）
 const barBreathEnabledCtrl = createSimple<boolean>('ui:bar-breath-enabled', true)
 // 呼吸速度（0.5–2，默认 1）
@@ -153,7 +152,6 @@ export function useAppearance() {
     navFloatPos: navFloatPosCtrl.state,
     edgeBarAlpha: edgeBarAlphaCtrl.state,
     bgVideoRate: bgVideoRateCtrl.state,
-    barGlassAlpha: barGlassAlphaCtrl.state,
     barBreathEnabled: barBreathEnabledCtrl.state,
     barBreathSpeed: barBreathSpeedCtrl.state,
     navMode: navModeCtrl.state,
@@ -179,7 +177,6 @@ export function useAppearance() {
     setNavFloatPos: navFloatPosCtrl.set,
     setEdgeBarAlpha: edgeBarAlphaCtrl.set,
     setBgVideoRate: bgVideoRateCtrl.set,
-    setBarGlassAlpha: barGlassAlphaCtrl.set,
     setBarBreathEnabled: barBreathEnabledCtrl.set,
     setBarBreathSpeed: barBreathSpeedCtrl.set,
     setNavMode: navModeCtrl.set,

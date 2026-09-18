@@ -211,13 +211,15 @@ function onSelect(item: CommandItem) {
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: var(--glass-bg-strong, rgba(26, 22, 17, 0.92));
-  border: 1px solid var(--glass-border, rgba(var(--accent-rgb, 212, 165, 116), 0.18));
+  background:
+    var(--glass-clear-sheen),
+    rgba(26, 24, 30, var(--glass-clear-a-surface));
+  border: 1px solid var(--glass-clear-rim);
   border-radius: var(--glass-radius, 16px);
   box-shadow: var(--glass-shadow);
   overflow: hidden;
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
 }
 
 .cp-search {

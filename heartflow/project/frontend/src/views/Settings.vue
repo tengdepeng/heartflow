@@ -723,13 +723,13 @@
         <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('edgebar')" @keydown.enter="toggleSection('edgebar')" @keydown.space.prevent="toggleSection('edgebar')">
           <span class="sub-group__chevron">{{ openSections.edgebar ? '▾' : '▸' }}</span>
           <div class="sub-group__heading">
-            <h3 class="sub-title">上下边栏</h3>
-            <p class="sub-desc">移动端顶栏与底栏的不透明度，与侧边栏同级的超级自定义。</p>
+            <h3 class="sub-title">悬浮浮岛通透度</h3>
+            <p class="sub-desc">底部悬浮双浮岛的玻璃通透度，受全局「琉璃通透度」统管。</p>
           </div>
         </div>
         <div class="slider-group">
           <label class="slider-label">
-            <span>上下边栏不透明度</span>
+            <span>浮岛不透明度</span>
             <span class="slider-value">{{ edgeBarAlpha }}%</span>
           </label>
           <input
@@ -753,7 +753,7 @@
               class="edge-bar-preview__bar edge-bar-preview__bar--top"
               :style="{ background: 'rgba(var(--bg-primary-rgb), ' + (edgeBarAlpha / 100) + ')' }"
             >
-              <span class="edge-bar-preview__tag">顶栏预览</span>
+              <span class="edge-bar-preview__tag">左浮岛</span>
             </div>
             <div class="edge-bar-preview__content">
               <span>示例内容 · 背景从这里透出</span>
@@ -762,7 +762,7 @@
               class="edge-bar-preview__bar edge-bar-preview__bar--bottom"
               :style="{ background: 'rgba(var(--bg-primary-rgb), ' + (edgeBarAlpha / 100) + ')' }"
             >
-              <span class="edge-bar-preview__tag">底栏预览</span>
+              <span class="edge-bar-preview__tag">右浮岛</span>
             </div>
           </div>
         </div>

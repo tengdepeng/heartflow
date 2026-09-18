@@ -171,7 +171,7 @@ const router = useRouter()
 const route = useRoute()
 const nav = useRoomNavigation()
 const { state: canvasState, canvasCrystals, toggleLayout: toggleCanvasLayout } = useCanvasRoom()
-const { canvasAlpha, setCanvasAlpha, barGlassAlpha, barBreathEnabled, barBreathSpeed, navFloatPos, setNavFloatPos } = useAppearance()
+const { canvasAlpha, setCanvasAlpha, edgeBarAlpha, barBreathEnabled, barBreathSpeed, navFloatPos, setNavFloatPos } = useAppearance()
 
 // ---- 悬浮液态栏 · docked/floating 自由定位（拖拽手柄） ----
 // navFloatPos 为 null = 贴底 docked；{x,y} = 自由悬浮中心（px）。状态持久化。
@@ -320,7 +320,7 @@ const showCanvasControls = computed(() => isFocus.value || canvasCrystalsCount.v
 // --bar-a：背景不透明度倍率（0–1，100 对应现状磨砂）；--bar-blur：模糊 px（8–20）；
 // --bar-breath-dur：呼吸周期（基准 7s / 节奏倍率）。
 const barStyle = computed<Record<string, string | number>>(() => {
-  const g = Math.min(100, Math.max(0, barGlassAlpha.value))
+  const g = Math.min(100, Math.max(0, edgeBarAlpha.value))
   const a = g / 100
   const blur = 8 + (g / 100) * 12
   const speed = Math.min(2, Math.max(0.5, barBreathSpeed.value))

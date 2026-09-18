@@ -58,10 +58,11 @@ const iconMap: Record<string, string> = {
   border-radius: var(--glass-radius-sm, 10px);
   font-size: 13px;
   line-height: 1.4;
-  background: var(--glass-bg, rgba(33, 28, 22, 0.85));
-  border: 1px solid var(--glass-border, rgba(212, 165, 116, 0.16));
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background-color: rgba(26, 24, 30, var(--glass-clear-a-chip));
+  background-image: var(--glass-clear-sheen);
+  border: 1px solid var(--glass-clear-rim);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
   cursor: pointer;
   pointer-events: auto;
   min-width: 200px;
@@ -85,17 +86,17 @@ const iconMap: Record<string, string> = {
    --success/--danger 语义体系。此处统一接到语义令牌，透明档位压低以延续暖色主题的克制观感。
    不支持 color-mix 时 background 声明失效，自动回退到 .toast-item 的中性玻璃底，无硬编码兜底。 */
 .toast--success {
-  background: color-mix(in srgb, var(--success) 12%, transparent);
+  background-color: color-mix(in srgb, var(--success) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--success) 26%, transparent);
   color: var(--success);
 }
 .toast--error {
-  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  background-color: color-mix(in srgb, var(--danger) 12%, transparent);
   border: 1px solid color-mix(in srgb, var(--danger) 26%, transparent);
   color: var(--danger);
 }
 .toast--info {
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  background-color: color-mix(in srgb, var(--accent) 15%, transparent);
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   color: var(--accent);
 }

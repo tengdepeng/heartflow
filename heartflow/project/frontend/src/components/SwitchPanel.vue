@@ -107,10 +107,12 @@ function pickSurface(v: SurfaceState) {
 .switch-panel {
   width: min(440px, calc(100vw - 32px));
   padding: var(--glass-pad-sm) 20px calc(var(--glass-pad-sm) + 8px);
-  background: var(--glass-bg-strong);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  border: 1px solid var(--glass-border-strong);
+  background:
+    var(--glass-clear-sheen),
+    rgba(26, 24, 30, var(--glass-clear-a-surface));
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.5) brightness(1.06);
+  border: 1px solid var(--glass-clear-rim);
   border-radius: var(--glass-radius);
   box-shadow: var(--glass-shadow);
   color: var(--text-primary);
