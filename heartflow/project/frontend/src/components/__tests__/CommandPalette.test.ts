@@ -11,6 +11,22 @@ function items(): CommandItem[] {
   ]
 }
 
+// 房间数超过 16 截断上限时（插件房贡献追加注册），空查询也应展示未截断的房间
+function manyRooms(): CommandItem[] {
+  const rooms: CommandItem[] = Array.from({ length: 20 }, (_, i) => ({
+    id: `room:r${i}`,
+    kind: 'room',
+    label: `房间${i}`,
+    keywords: `r${i}`,
+    hint: `/r${i}`,
+    run: vi.fn(),
+  }))
+  return [
+    ...rooms,
+    { id: 'room:plugin-demo', kind: 'room', label: '示例插件房', keywords: 'plugin-demo', hint: '/plugin-demo', run: vi.fn() },
+  ]
+}
+
 function mountPalette(visible = true) {
   return mount(CommandPalette, {
     props: { visible, items: items() },
@@ -31,6 +47,15 @@ describe('CommandPalette 命令面板', () => {
     expect(wrapper.text()).toContain('结晶阁')
     expect(wrapper.text()).toContain('设置')
     expect(wrapper.find('.cp-item').text()).toContain('动作')
+  })
+
+  it('房间超 16 截断时空查询仍展示插件房（追加注册房间不被截断隐藏）', () => {
+    const wrapper = mount(CommandPalette, {
+      props: { visible: true, items: manyRooms() },
+      global: { stubs: { teleport: true } },
+    })
+    expect(wrapper.text()).toContain('房间0')
+    expect(wrapper.text()).toContain('示例插件房')
   })
 
   it('输入过滤并高亮命中', async () => {

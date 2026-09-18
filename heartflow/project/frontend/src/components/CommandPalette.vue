@@ -49,9 +49,11 @@ function score(item: CommandItem, q: string): number {
 const results = computed<CommandItem[]>(() => {
   const q = query.value.trim().toLowerCase()
   if (!q) {
-    // 空查询：动作优先 + 房间/页面各取前若干，作为推荐入口
+    // 空查询：动作优先 + 全部房间 + 页面前若干，作为推荐入口。
+    // 房间不加截断上限——插件房等运行时追加注册的房间排在静态之后，
+    // 若按固定数量截断会恰被隐藏；面板可滚动，全量展示成本可忽略。
     const actions = props.items.filter((i) => i.kind === 'action')
-    const rooms = props.items.filter((i) => i.kind === 'room').slice(0, 16)
+    const rooms = props.items.filter((i) => i.kind === 'room')
     const pages = props.items.filter((i) => i.kind === 'page').slice(0, 8)
     return [...actions, ...rooms, ...pages]
   }
