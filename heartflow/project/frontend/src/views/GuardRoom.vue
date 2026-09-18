@@ -120,6 +120,14 @@
     <!-- 隐私仪表盘（INCR-284 补挂载孤儿组件 PrivacyDashboardPanel：隐私评分/数据暴露面/权限审计/泄露预警/一键锁定，经 usePrivacyDashboard 桥自持读取存储） -->
     <PrivacyDashboardPanel />
 
+    <!-- 安全监护簇（INCR-351：6 个安全/守护面板整簇挂载，零 props 直驱） -->
+    <SecurityDashboardPanel />
+    <SecurityIncidentPanel />
+    <CryptoGuardPanel />
+    <DataSecurityPanel />
+    <PropertySecurityPanel />
+    <PsychologicalSafetyPanel />
+
     <!-- 护眼盾 -->
     <EyeShieldPanel />
 
@@ -151,6 +159,14 @@ import GuardArchivePanel from '../components/GuardArchivePanel.vue'
 import AuditTimelinePanel from '../components/AuditTimelinePanel.vue'
 import ComplianceReviewPanel from '../components/ComplianceReviewPanel.vue'
 import PrivacyDashboardPanel from '../components/PrivacyDashboardPanel.vue'
+
+// 安全/守护面板簇（INCR-351：整簇挂载孤儿组件，零 props 直驱，引擎应用库内唯一）
+import SecurityDashboardPanel from '../components/safety/SecurityDashboardPanel.vue'
+import CryptoGuardPanel from '../components/safety/CryptoGuardPanel.vue'
+import DataSecurityPanel from '../components/safety/DataSecurityPanel.vue'
+import PropertySecurityPanel from '../components/safety/PropertySecurityPanel.vue'
+import PsychologicalSafetyPanel from '../components/safety/PsychologicalSafetyPanel.vue'
+import SecurityIncidentPanel from '../components/SecurityIncidentPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

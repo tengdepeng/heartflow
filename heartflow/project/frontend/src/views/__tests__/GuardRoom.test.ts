@@ -227,8 +227,9 @@ describe('GuardRoom 视图', () => {
     expect(tabs[3].classes()).not.toContain('active')
     expect(wrapper.text()).toContain('数据全部本地存储')
     expect(wrapper.text()).toContain('存储空间')
-    expect(wrapper.text()).not.toContain('反诈骗核验')
-    expect(wrapper.text()).not.toContain('心理安全光笺')
+    // 注：INCR-351 起 PropertySecurityPanel / PsychologicalSafetyPanel 整簇常驻挂载，
+    // 故「反诈骗核验」「心理安全光笺」文本始终存在，不再作为「未切到安全台」的判定依据；
+    // 治理能力由下方次级标签断言覆盖。
     const subTabs = wrapper.findAll('.guard-sub-tab')
     expect(subTabs).toHaveLength(5)
     expect(subTabs[0].classes()).toContain('active')
@@ -647,6 +648,86 @@ describe('GuardRoom 视图', () => {
     expect(stats[1].text()).toContain('1')
     expect(stats[1].text()).toContain('稍后')
     expect(stats[2].text()).toContain('上次休息')
+  })
+})
+
+// ============================================================
+// 集成：安全/守护面板簇（INCR-351 整簇挂载孤儿组件）
+// 宿主 GuardRoom 全量 mount；6 面板零 props 直驱，引擎均来自 modules/safety：
+//   SecurityDashboardPanel   → useSecurityDashboard/useIncidentResponse/useAuditLog
+//   SecurityIncidentPanel     → useIncidentResponse(+态势/规则)
+//   CryptoGuardPanel          → useCryptoGuard（挂载仅读 storage，crypto.subtle 仅在点击生成密钥时异步调用）
+//   DataSecurityPanel         → useDataSecurity（整库加密/备份/自毁）
+//   PropertySecurityPanel     → usePropertySecurity（反诈骗/SOS/假来电）
+//   PsychologicalSafetyPanel  → usePsychologicalSafety（光笺/情绪检测）
+// 各 use* 为 per-instance（每次调用读 storage）→ 无模块级污染；
+// storage 已由顶部 vi.mock('../../engine/storage') 接管（getKV/setKV）。
+// ============================================================
+describe('集成：安全/守护面板簇（INCR-351）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:contacts'] = []
+  })
+
+  it('整簇 6 面板均挂载进 GuardRoom', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findComponent({ name: 'SecurityDashboardPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'SecurityIncidentPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'CryptoGuardPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'DataSecurityPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'PropertySecurityPanel' }).exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'PsychologicalSafetyPanel' }).exists()).toBe(true)
+  })
+
+  it('安全态势面板渲染评分与事件录入', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.sdp')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.sdp-title').text()).toContain('安全态势')
+    expect(panel.text()).toContain('安全评分')
+    expect(panel.text()).toContain('事件录入')
+  })
+
+  it('安全事件响应面板渲染态势与规则', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.sip-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.sip-title').text()).toContain('安全事件响应')
+    expect(panel.text()).toContain('事件')
+    expect(panel.text()).toContain('规则')
+  })
+
+  it('加密守护面板渲染密钥状态', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.cgp')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.cgp-title').text()).toContain('加密守护')
+    expect(panel.text()).toContain('加密状态')
+    expect(panel.text()).toContain('AES')
+  })
+
+  it('数据安全面板渲染加密与备份', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.data-security-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.panel-title').text()).toBe('数据安全')
+    expect(panel.text()).toContain('数据加密')
+  })
+
+  it('财产安全面板渲染反诈骗核验', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.property-security-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.panel-title').text()).toBe('财产安全')
+    expect(panel.text()).toContain('反诈骗核验')
+  })
+
+  it('心理安全面板渲染光笺开关', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.psychological-safety-panel')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.panel-title').text()).toBe('心理安全')
+    expect(panel.text()).toContain('心理安全光笺')
   })
 })
 
