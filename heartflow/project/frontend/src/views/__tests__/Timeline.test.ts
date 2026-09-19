@@ -68,6 +68,9 @@ vi.mock('../../components/TimelineFragment.vue', () => ({
 vi.mock('../../components/TimeCorridor.vue', () => ({
   default: { name: 'TimeCorridor', template: '<div class="corridor-stub">Corridor</div>' },
 }))
+vi.mock('../../components/TimelineRadarPanel.vue', () => ({
+  default: { name: 'TimelineRadarPanel', template: '<div class="timeline-radar-stub" data-test="timeline-radar">数据雷达</div>' },
+}))
 
 async function getWrapper() {
   const { default: Timeline } = await import('../Timeline.vue')
@@ -121,6 +124,21 @@ describe('Timeline 时间长廊', () => {
     const lensPanel = wrapper.find('[data-test="time-lens"]')
     expect(lensPanel.exists()).toBe(true)
     expect(lensPanel.text()).toContain('时间透视')
+  })
+
+  it('切换至数据雷达子标签时挂载雷达面板（INCR-365）', async () => {
+    const wrapper = await getWrapper()
+    // 初始处于时间之河子标签，雷达面板不应渲染
+    expect(wrapper.find('[data-test="timeline-radar"]').exists()).toBe(false)
+    // 点击数据雷达子标签
+    const radarBtn = wrapper.findAll('.sub-tab').find(b => b.text().includes('数据雷达'))
+    expect(radarBtn).toBeTruthy()
+    await radarBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 雷达面板已挂载
+    const radarPanel = wrapper.find('[data-test="timeline-radar"]')
+    expect(radarPanel.exists()).toBe(true)
+    expect(radarPanel.text()).toContain('数据雷达')
   })
 
   it('渲染标签导航 - 记录', async () => {
