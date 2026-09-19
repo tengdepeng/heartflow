@@ -171,6 +171,9 @@
       <!-- 花园叙事（INCR-368 补挂载孤儿引擎 garden-narrative：花语故事/成长日记/季节相册/分享留言） -->
       <GardenNarrativePanel />
 
+      <!-- 花园社交（INCR-370 补挂载孤儿引擎 garden-social：好友/访园/礼物/动态） -->
+      <GardenSocialPanel />
+
       <!-- 筛选 -->
       <section class="filter-section">
         <div class="filter-group">
@@ -538,6 +541,7 @@ import VisitorFootprintsPanel from '../components/VisitorFootprintsPanel.vue'
 import FlowerHybridPanel from '../components/FlowerHybridPanel.vue'
 import FlowerClusterArchivePanel from '../components/FlowerClusterArchivePanel.vue'
 import GardenNarrativePanel from '../components/GardenNarrativePanel.vue'
+import GardenSocialPanel from '../components/GardenSocialPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'

@@ -788,3 +788,32 @@ describe('集成：花园叙事面板', () => {
     expect(gnp.text()).toContain('季节相册')
   })
 })
+
+// ============================================================
+// 集成：花园社交面板 GardenSocialPanel（INCR-370 补挂载孤儿引擎 garden-social）
+// 引擎 useGardenSocial 为纯内存 composable，面板经用户交互添加好友/访园/送礼；
+// 断言用 .gsp- 类选择器避开整页文本干扰。
+// ============================================================
+describe('集成：花园社交面板', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRecords.value = []
+  })
+
+  it('挂载并渲染花园社交面板空态', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.gsp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('花园社交')
+    expect(wrapper.find('.gsp-empty').exists()).toBe(true)
+  })
+
+  it('面板提供添加好友入口', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    const gsp = wrapper.find('.gsp')
+    expect(gsp.find('[data-test="gsp-add-btn"]').exists()).toBe(true)
+    expect(gsp.find('[data-test="gsp-name"]').exists()).toBe(true)
+    expect(gsp.find('[data-test="gsp-garden"]').exists()).toBe(true)
+  })
+})
