@@ -202,6 +202,22 @@ describe('AdvisorHub 视图（真实档案层）', () => {
     expect(wrapper.text()).toContain('幕僚大厅等待第一位居民')
   })
 
+  // ---- 跨域任务拆解面板（INCR-372 补挂载孤儿引擎 advisor/task-decompose） ----
+  it('集成渲染跨域任务拆解面板空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('[data-test="command-decompose"]').exists()).toBe(true)
+    expect(wrapper.text()).toContain('跨域任务拆解')
+    expect(wrapper.find('[data-test="cdp-empty"]').exists()).toBe(true)
+  })
+
+  it('跨域任务拆解面板提供示例按钮与拆解入口', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('[data-test="cdp-sample"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-test="cdp-preview"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="cdp-cross"]').text()).toContain('可拆解')
+  })
+
   // ---- 幕僚列表（读取真实 advisor.advisors） ----
   it('渲染幕僚卡片', async () => {
     mockAdvisors.push(sampleProfile({ id: 'a1', name: '墨染' }))

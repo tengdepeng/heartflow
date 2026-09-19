@@ -68,6 +68,11 @@
       <p v-else class="ah-command-empty">还没有调令。试着下达第一条，让管家动起来。</p>
     </section>
 
+    <!-- 跨域任务拆解（INCR-372 补挂载孤儿引擎 advisor/task-decompose：跨域调令识别→分头收集真实统计→汇总） -->
+    <section data-enter class="ah-command-section">
+      <CommandDecomposePanel />
+    </section>
+
     <!-- 功能直达（INCR-312 补挂载孤儿组件 FeatureSearchPanel：关键词搜索/直达跳转/推荐快捷入口，featureDictionary 引擎应用内唯一） -->
     <section data-enter class="ah-scheduler-section">
       <h3 class="ah-scheduler-heading">🧭 功能直达</h3>
@@ -264,6 +269,7 @@ import AdvisorCelebrationPanel from '../components/AdvisorCelebrationPanel.vue'
 import AdvisorDailyLifePanel from '../components/AdvisorDailyLifePanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import FeatureSearchPanel from '../components/FeatureSearchPanel.vue'
+import CommandDecomposePanel from '../components/CommandDecomposePanel.vue'
 import SearchInput from '../components/SearchInput.vue'
 import NoteSticky from '../components/NoteSticky.vue'
 import FabButton from '../components/FabButton.vue'

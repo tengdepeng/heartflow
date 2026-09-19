@@ -9,6 +9,17 @@ export { useAdvisorCelebration } from './celebration'
 export { useAdvisorWitness } from './witness'
 
 export {
+  isCrossDomainQuery,
+  detectDomains,
+  decomposeCommand,
+  runSubTask,
+  summarizeSubTasks,
+  DOMAIN_TASK_TYPE,
+  DOMAIN_ROOM_LABEL,
+} from './task-decompose'
+export type { CommandSubTask } from './task-decompose'
+
+export {
   INTERACTION_TYPE_META,
   TIME_SLOT_META,
   ACTIVITY_META,
