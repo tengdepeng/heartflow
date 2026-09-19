@@ -71,6 +71,9 @@
     <!-- 书房气象档案（study/study-analytics 引擎：藏书概览/落字节奏/温故建议/书房健康/洞察，INCR-198） -->
     <StudyWeatherPanel />
 
+    <!-- 就地写作助手（study/ai-assist 引擎：本地续写/扩写/总结/改语气，INCR-366 补挂载孤儿引擎） -->
+    <StudyAiAssistPanel />
+
     <!-- 标签云（可隐藏） -->
     <section class="tag-cloud-section" v-if="tagCloudVisible">
       <div class="tag-cloud-head">
@@ -295,6 +298,7 @@ import BacklinksPanel from '../components/BacklinksPanel.vue'
 import VersionHistoryPanel from '../components/VersionHistoryPanel.vue'
 import MarkdownExportPanel from '../components/MarkdownExportPanel.vue'
 import NoteTemplatePanel from '../components/NoteTemplatePanel.vue'
+import StudyAiAssistPanel from '../components/StudyAiAssistPanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'

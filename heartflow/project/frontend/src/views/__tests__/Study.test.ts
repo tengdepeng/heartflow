@@ -117,6 +117,14 @@ vi.mock('../../components/BacklinksPanel.vue', () => ({
   },
 }))
 
+// 就地写作助手（INCR-366）：视图级用 stub 断言挂载；面板逻辑由组件专项测试 + 引擎单测背书
+vi.mock('../../components/StudyAiAssistPanel.vue', () => ({
+  default: {
+    name: 'StudyAiAssistPanel',
+    template: '<div class="saa-stub" data-test="ai-assist">就地写作助手</div>',
+  },
+}))
+
 async function getWrapper() {
   const { default: Study } = await import('../Study.vue')
   return mount(Study)
@@ -298,6 +306,13 @@ describe('Study 视图', () => {
     expect(wrapper.text()).toContain('书房未启')
     expect(wrapper.find('.swp-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('书房还空着')
+  })
+
+  it('渲染就地写作助手面板（INCR-366）', async () => {
+    const wrapper = await getWrapper()
+    const assist = wrapper.find('[data-test="ai-assist"]')
+    expect(assist.exists()).toBe(true)
+    expect(wrapper.text()).toContain('就地写作助手')
   })
 
   it('书房气象注入笔记后展示概览/节奏/温故建议/健康/洞察', async () => {

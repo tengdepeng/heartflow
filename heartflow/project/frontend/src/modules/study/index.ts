@@ -9,6 +9,10 @@ import { syncLinksForNote, removeLinksForNote } from './note-links'
 import { tagFrequencies, pickRandom } from './explore'
 import { useNote } from '../note'
 
+// ---- 就地写作助手（INCR-366：本地规则式 续写/扩写/总结/改语气） ----
+export { aiAssist } from './ai-assist'
+export type { AiAssistAction, AiAssistResult, RewriteTone } from './ai-assist'
+
 export type { Note }
 export { tagFrequencies, pickRandom }
 
