@@ -47,6 +47,9 @@
     <!-- 纪念日与羁绊健康（INCR-277 补挂载孤儿组件 AnniversaryHealthPanel，relation/interaction-journal 引擎完备） -->
     <AnniversaryHealthPanel :persons="rel.persons.value" />
 
+    <!-- 关系可视化洞察（INCR-367 补挂载孤儿引擎 relation-visualization.ts，薄委托直引） -->
+    <RelationInsightPanel v-if="rel.persons.value.length > 0" :persons="rel.persons.value" />
+
     <!-- 选项卡导航 -->
     <nav class="rh-tabs">
       <button
@@ -340,6 +343,7 @@ import { RELATION_LABELS } from '../modules/relation/types'
 import type { Person } from '../modules/relation/types'
 import BondArchivePanel from '../components/BondArchivePanel.vue'
 import AnniversaryHealthPanel from '../components/AnniversaryHealthPanel.vue'
+import RelationInsightPanel from '../components/RelationInsightPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 // ============================================================

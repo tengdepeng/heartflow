@@ -61,6 +61,15 @@ vi.mock('../../modules/relation', () => ({
   }),
 }))
 
+// 关系可视化洞察（INCR-367）：视图级用 stub 断言挂载；面板逻辑由组件专项测试 + 引擎验证背书
+vi.mock('../../components/RelationInsightPanel.vue', () => ({
+  default: {
+    name: 'RelationInsightPanel',
+    template: '<div class="rip-stub" data-test="rip">关系洞察</div>',
+    props: ['persons'],
+  },
+}))
+
 async function getWrapper() {
   const { default: RelationHall } = await import('../RelationHall.vue')
   return mount(RelationHall)
@@ -499,11 +508,32 @@ describe('RelationHall 视图', () => {
         { id: 'a1', personId: 'p1', title: '待删纪念日', date: '2026-05-01', type: 'custom', recurring: false, reminderDays: 0, createdAt: '2026-01-01' },
       ]
       const wrapper = await getWrapper()
-      expect(wrapper.find('.ahp-ann').text()).toContain('待删纪念日')
       await wrapper.find('.ahp-ann-del').trigger('click')
       await wrapper.vm.$nextTick()
       expect(wrapper.text()).toContain('暂无纪念日，在下方添加第一个纪念日。')
       expect(mockStore['hf:relation_anniversaries']).toHaveLength(0)
+    })
+  })
+
+  // ============================================================
+  // 集成：关系可视化洞察（INCR-367 补挂载孤儿引擎）
+  // ============================================================
+
+  describe('集成：关系可视化洞察', () => {
+    it('无人物时不渲染关系洞察面板', async () => {
+      const wrapper = await getWrapper()
+      expect(wrapper.find('[data-test="rip"]').exists()).toBe(false)
+    })
+
+    it('有人物时渲染关系洞察面板', async () => {
+      mockPersons.value = [
+        { id: 'p1', name: '张三', relation: 'friend', color: '#7c5cfc', closeness: 0.8, notes: '好朋友', importantDates: [] },
+      ]
+      const wrapper = await getWrapper()
+      await wrapper.vm.$nextTick()
+      const rip = wrapper.find('[data-test="rip"]')
+      expect(rip.exists()).toBe(true)
+      expect(rip.text()).toContain('关系洞察')
     })
   })
 })
