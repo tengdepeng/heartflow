@@ -314,3 +314,11 @@ export type {
   SeasonTransition,
   YearReview,
 } from './seasonal-journal'
+
+// ---- 视图桥接层（INCR-374）----
+export { useSeasonalBridge } from './seasonal-bridge'
+export type {
+  RitualStats,
+  SeasonalRecommendation,
+  SeasonalOverview as SeasonalBridgeOverview,
+} from './seasonal-bridge'

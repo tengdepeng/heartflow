@@ -123,6 +123,11 @@
     <!-- 岁时档案（INCR-15）档案概览/季节分布/岁时健康/温和洞察 -->
     <SeasonalArchivePanel :rituals="srCtx.rituals.value" />
 
+    <!-- 岁时桥（INCR-374 补挂载孤儿引擎 seasonal/seasonal-bridge：季节进度/仪式节律/光茧蜕变/季节情绪/转换仪式/时节建议/年度回顾） -->
+    <section data-enter class="sr-bridge-section">
+      <SeasonalBridgePanel />
+    </section>
+
     <!-- 岁时环 -->
     <div data-enter class="sr-ring-container">
       <div class="sr-season-ring">
@@ -403,6 +408,7 @@ import DiaryAutoMeta from '../components/DiaryAutoMeta.vue'
 import SeasonalArchivePanel from '../components/SeasonalArchivePanel.vue'
 import SeasonalYearOverviewPanel from '../components/SeasonalYearOverviewPanel.vue'
 import SeasonalHealthPanel from '../components/SeasonalHealthPanel.vue'
+import SeasonalBridgePanel from '../components/SeasonalBridgePanel.vue'
 
 // ---- 模块化 composables ----
 const { entranceRef, entranceClass } = useViewEntrance()
