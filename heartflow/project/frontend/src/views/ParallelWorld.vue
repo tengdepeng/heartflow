@@ -239,6 +239,13 @@
     </section>
 
     <!-- ============================================================ -->
+    <!-- 桥接总览（INCR-376 补挂载孤儿引擎 parallel-world/parallel-world-bridge：世界摘要/分支全景/合并机会/时间线/世界对照） -->
+    <!-- ============================================================ -->
+    <section data-enter class="pw-branch-panels">
+      <ParallelWorldBridgePanel />
+    </section>
+
+    <!-- ============================================================ -->
     <!-- 平行世界档案（INCR-290 补挂载孤儿组件 ParallelWorldArchivePanel：概览/平行自我来源/胶囊状态/抉择节奏/分支绽开/健康维度/温和回看，消费 parallel-analytics 纯函数，引擎应用库内唯一，薄委托化） -->
     <!-- ============================================================ -->
     <section data-enter class="pw-branch-panels">
@@ -373,6 +380,7 @@ import { useParallelWorld, useTimeCapsule, useParallelSelves } from '../modules/
 import type { Fork } from '../modules/parallel-world'
 import { DREAM_REALM_ID } from '../stores/dreamNook'
 import BranchManagementPanel from '../components/BranchManagementPanel.vue'
+import ParallelWorldBridgePanel from '../components/ParallelWorldBridgePanel.vue'
 import ParallelWorldArchivePanel from '../components/ParallelWorldArchivePanel.vue'
 import AutoConflictPanel from '../components/AutoConflictPanel.vue'
 import BranchReplayPanel from '../components/BranchReplayPanel.vue'

@@ -476,6 +476,8 @@ export type { LogEntryType, MoodTone, LogEntry, WorklogDailySummary, WeeklySumma
 
 // ---- parallel-world ----
 export { useParallelWorld, useBranchTimeline, useBranchComparison, useMergeSuggestions, useEvolutionGraph } from './parallel-world'
+export { useParallelWorldBridge } from './parallel-world'
+export type { ParallelWorldSummary, BranchDetail } from './parallel-world'
 export { useParallelSelves } from './parallel-world'
 export type { BranchTreeNode, TimelineNode, TimelineConfig, DiffDimension, BranchDiffEntry, BranchComparison, MergeSuggestion, EvolutionNode, EvolutionGraph, Fork, AltSelf } from './parallel-world'
 export { BRANCH_COLORS, PARALLEL_WORLD_STORAGE_KEYS } from './parallel-world'

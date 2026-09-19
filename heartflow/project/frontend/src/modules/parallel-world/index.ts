@@ -2,6 +2,13 @@
 // 平行世界 · 模块导出
 // ============================================================
 
+// ---- 桥接层（视图桥接总览，INCR-376） ----
+export { useParallelWorldBridge } from './parallel-world-bridge'
+export type {
+  ParallelWorldSummary,
+  BranchDetail,
+} from './parallel-world-bridge'
+
 export { useParallelWorld } from './worlds'
 export type { BranchTreeNode } from './worlds'
 
