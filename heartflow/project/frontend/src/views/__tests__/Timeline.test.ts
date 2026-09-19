@@ -71,6 +71,9 @@ vi.mock('../../components/TimeCorridor.vue', () => ({
 vi.mock('../../components/TimelineRadarPanel.vue', () => ({
   default: { name: 'TimelineRadarPanel', template: '<div class="timeline-radar-stub" data-test="timeline-radar">数据雷达</div>' },
 }))
+vi.mock('../../components/TimelineExportPanel.vue', () => ({
+  default: { name: 'TimelineExportPanel', template: '<div class="timeline-export-stub" data-test="timeline-export-stub">时光导出</div>' },
+}))
 
 async function getWrapper() {
   const { default: Timeline } = await import('../Timeline.vue')
@@ -139,6 +142,18 @@ describe('Timeline 时间长廊', () => {
     const radarPanel = wrapper.find('[data-test="timeline-radar"]')
     expect(radarPanel.exists()).toBe(true)
     expect(radarPanel.text()).toContain('数据雷达')
+  })
+
+  it('切换至导出子标签时挂载导出面板（INCR-369）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('[data-test="timeline-export-stub"]').exists()).toBe(false)
+    const exportBtn = wrapper.findAll('.sub-tab').find(b => b.text().includes('导出'))
+    expect(exportBtn).toBeTruthy()
+    await exportBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    const exportPanel = wrapper.find('[data-test="timeline-export-stub"]')
+    expect(exportPanel.exists()).toBe(true)
+    expect(exportPanel.text()).toContain('时光导出')
   })
 
   it('渲染标签导航 - 记录', async () => {
