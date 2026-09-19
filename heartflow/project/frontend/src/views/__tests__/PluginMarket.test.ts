@@ -91,6 +91,11 @@ vi.mock('../../modules/plugin/plugin-registry', () => ({
     },
     find: (id: string) => mockCatalog.find(e => e.manifest.meta.id === id)?.manifest,
     isMarketPlugin: (id: string) => mockCatalog.some(e => e.manifest.meta.id === id),
+    getDependencyGraph: () => mockCatalog.map((e: any) => ({
+      id: e.manifest.meta.id,
+      version: e.manifest.meta.version,
+      dependencies: e.dependencies ?? [],
+    })),
   },
 }))
 
@@ -202,5 +207,11 @@ describe('PluginMarket 插件市场', () => {
     await input.setValue('不存在的插件')
     expect(wrapper.findAll('.pm-community-card').length).toBe(0)
     expect(wrapper.text()).toContain('没有匹配的市场插件')
+  })
+
+  it('渲染更新管理区块（无市场插件已安装时显示最新提示）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('更新管理')
+    expect(wrapper.text()).toContain('所有插件均已是最新版本')
   })
 })

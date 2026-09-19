@@ -156,89 +156,7 @@ export function usePluginMarketplace() {
     storage.setKV(PLUGIN_POLICY_KEY, JSON.stringify(updatePolicy.value))
   }
 
-  // ---- 依赖解析 ----
-
-  /** 解析依赖图 */
-  function resolveDependencies(
-    plugins: { id: string; version: string; dependencies: PluginDependency[] }[],
-    targetPluginId: string,
-  ): DependencyResolution {
-    const pluginMap = new Map(plugins.map(p => [p.id, p]))
-    const resolved = new Set<string>()
-    const missing: PluginDependency[] = []
-    const conflicts: VersionConflict[] = []
-    const cycles: string[][] = []
-    const visiting = new Set<string>()
-    const installOrder: string[] = []
-
-    function resolve(id: string, path: string[]): boolean {
-      if (visiting.has(id)) {
-        cycles.push([...path, id])
-        return false
-      }
-
-      const plugin = pluginMap.get(id)
-      if (!plugin) {
-        missing.push({ pluginId: id, minVersion: '0.0.0', optional: false, description: '未找到插件' })
-        return false
-      }
-
-      if (resolved.has(id)) return true
-
-      visiting.add(id)
-      const newPath = [...path, id]
-
-      for (const dep of plugin.dependencies) {
-        if (resolved.has(dep.pluginId)) continue
-        const depPlugin = pluginMap.get(dep.pluginId)
-        if (!depPlugin) {
-          if (!dep.optional) {
-            missing.push(dep)
-          }
-          continue
-        }
-        // 检查版本
-        if (!isVersionSatisfied(depPlugin.version, dep.minVersion)) {
-          conflicts.push({
-            pluginId: dep.pluginId,
-            requiredBy: id,
-            requiredVersion: dep.minVersion,
-            actualVersion: depPlugin.version,
-          })
-        }
-        resolve(dep.pluginId, newPath)
-      }
-
-      visiting.delete(id)
-      resolved.add(id)
-      installOrder.push(id)
-      return true
-    }
-
-    resolve(targetPluginId, [])
-
-    return {
-      resolved: missing.length === 0 && conflicts.length === 0 && cycles.length === 0,
-      installOrder,
-      missing,
-      conflicts,
-      cycles,
-    }
-  }
-
-  /** 获取依赖树 */
-  function getDependencyTree(
-    plugins: { id: string; version: string; dependencies: PluginDependency[] }[],
-    pluginId: string,
-  ): { id: string; version: string; dependencies: ReturnType<typeof getDependencyTree>[] } {
-    const plugin = plugins.find(p => p.id === pluginId)
-    if (!plugin) return { id: pluginId, version: '0.0.0', dependencies: [] }
-    return {
-      id: plugin.id,
-      version: plugin.version,
-      dependencies: plugin.dependencies.map(dep => getDependencyTree(plugins, dep.pluginId)),
-    }
-  }
+  // ---- 依赖解析（实现见模块级 resolveDependencies/getDependencyTree） ----
 
   // ---- 更新管理 ----
 
@@ -377,4 +295,90 @@ function isVersionSatisfied(actual: string, required: string): boolean {
     if (a < r) return false
   }
   return true
+}
+
+// ============================================================
+// 模块级依赖解析（纯函数，供桥接层 / 视图 / 测试直接消费）
+// ============================================================
+
+/** 依赖图节点 */
+export type DependencyNode = { id: string; version: string; dependencies: PluginDependency[] }
+
+/** 解析依赖图：返回安装顺序、缺失依赖、版本冲突与循环依赖 */
+export function resolveDependencies(
+  plugins: DependencyNode[],
+  targetPluginId: string,
+): DependencyResolution {
+  const pluginMap = new Map(plugins.map(p => [p.id, p]))
+  const resolved = new Set<string>()
+  const missing: PluginDependency[] = []
+  const conflicts: VersionConflict[] = []
+  const cycles: string[][] = []
+  const visiting = new Set<string>()
+  const installOrder: string[] = []
+
+  function resolve(id: string, path: string[]): boolean {
+    if (visiting.has(id)) {
+      cycles.push([...path, id])
+      return false
+    }
+
+    const plugin = pluginMap.get(id)
+    if (!plugin) {
+      missing.push({ pluginId: id, minVersion: '0.0.0', optional: false, description: '未找到插件' })
+      return false
+    }
+
+    if (resolved.has(id)) return true
+
+    visiting.add(id)
+    const newPath = [...path, id]
+
+    for (const dep of plugin.dependencies) {
+      if (resolved.has(dep.pluginId)) continue
+      const depPlugin = pluginMap.get(dep.pluginId)
+      if (!depPlugin) {
+        if (!dep.optional) missing.push(dep)
+        continue
+      }
+      if (!isVersionSatisfied(depPlugin.version, dep.minVersion)) {
+        conflicts.push({
+          pluginId: dep.pluginId,
+          requiredBy: id,
+          requiredVersion: dep.minVersion,
+          actualVersion: depPlugin.version,
+        })
+      }
+      resolve(dep.pluginId, newPath)
+    }
+
+    visiting.delete(id)
+    resolved.add(id)
+    installOrder.push(id)
+    return true
+  }
+
+  resolve(targetPluginId, [])
+
+  return {
+    resolved: missing.length === 0 && conflicts.length === 0 && cycles.length === 0,
+    installOrder,
+    missing,
+    conflicts,
+    cycles,
+  }
+}
+
+/** 获取依赖树（嵌套结构，供依赖关系可视化） */
+export function getDependencyTree(
+  plugins: DependencyNode[],
+  pluginId: string,
+): { id: string; version: string; dependencies: ReturnType<typeof getDependencyTree>[] } {
+  const plugin = plugins.find(p => p.id === pluginId)
+  if (!plugin) return { id: pluginId, version: '0.0.0', dependencies: [] }
+  return {
+    id: plugin.id,
+    version: plugin.version,
+    dependencies: plugin.dependencies.map(dep => getDependencyTree(plugins, dep.pluginId)),
+  }
 }

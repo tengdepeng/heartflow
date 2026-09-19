@@ -5,6 +5,12 @@
 // ============================================================
 
 import type { PluginMeta, PluginManifest } from './types'
+import type { PluginDependency } from './plugin-marketplace'
+
+/** 依赖声明的快捷构造（可选演化为具名常量） */
+function dep(pluginId: string, minVersion: string, optional = false, description = ''): PluginDependency {
+  return { pluginId, minVersion, optional, description }
+}
 
 /** 插件分类 ID（与 PluginMeta.category 对齐） */
 export type PluginCategoryId = PluginMeta['category']
@@ -29,6 +35,8 @@ export interface MarketplaceEntry {
   rating: number
   /** 检索标签（搜索命中用） */
   tags: string[]
+  /** 依赖声明（依赖解析引擎消费；缺省为无依赖） */
+  dependencies?: PluginDependency[]
 }
 
 /** 分类中文标签（市场源单一真相） */
@@ -107,6 +115,7 @@ const MARKETPLACE_SOURCE: MarketplaceEntry[] = [
         ],
       },
     },
+    dependencies: [dep('community-pomodoro-stats', '1.0.0', false, '汇总专注时长与番茄统计')],
     downloads: 9560,
     rating: 4.6,
     tags: ['回顾', '日记', '情绪', '每日'],
@@ -170,6 +179,7 @@ const MARKETPLACE_SOURCE: MarketplaceEntry[] = [
       entry: 'community:emotion-journal',
       hooks: [],
     },
+    dependencies: [dep('community-pomodoro-stats', '1.0.0', false, '关联专注数据以识别情绪波动')],
     downloads: 11800,
     rating: 4.5,
     tags: ['情绪', '日记', '趋势', '记录'],
@@ -212,6 +222,10 @@ const MARKETPLACE_SOURCE: MarketplaceEntry[] = [
       entry: 'community:knowledge-cards',
       hooks: [],
     },
+    dependencies: [
+      dep('community-daily-review', '0.8.0', false, '提取每日回顾作为知识素材'),
+      dep('community-emotion-journal', '1.0.0', true, '可选：关联情绪上下文'),
+    ],
     downloads: 6390,
     rating: 4.3,
     tags: ['知识', '卡片', '复习', '笔记'],
@@ -326,5 +340,14 @@ export const pluginMarketplaceRegistry = {
   /** 是否已在注册表（用于区分市场插件与本地手工 manifest） */
   isMarketPlugin(id: string): boolean {
     return MARKETPLACE_SOURCE.some(e => e.manifest.meta.id === id)
+  },
+
+  /** 依赖图（供依赖解析引擎消费：id → 版本 + 依赖声明） */
+  getDependencyGraph(): { id: string; version: string; dependencies: PluginDependency[] }[] {
+    return MARKETPLACE_SOURCE.map(e => ({
+      id: e.manifest.meta.id,
+      version: e.manifest.meta.version,
+      dependencies: e.dependencies ?? [],
+    }))
   },
 }

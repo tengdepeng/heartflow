@@ -26,6 +26,10 @@
           <span class="pm-overview-number">{{ categories.length }}</span>
           <span class="pm-overview-label">插件分类</span>
         </div>
+        <div class="pm-overview-card">
+          <span class="pm-overview-number">{{ updateCount }}</span>
+          <span class="pm-overview-label">可用更新</span>
+        </div>
       </div>
     </section>
 
@@ -74,6 +78,44 @@
               @click="uninstall(p.manifest.meta.id)"
               title="卸载"
             >✕</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 更新管理 -->
+    <section data-enter class="pm-section pm-updates-section">
+      <h2 class="pm-section-title">
+        更新管理
+        <span class="pm-section-count">{{ updateCount }} 项待更</span>
+      </h2>
+      <div v-if="updates.length === 0" class="pm-empty-hint pm-updates-empty">
+        <span class="pm-empty-icon">✅</span>
+        <p>所有插件均已是最新版本</p>
+      </div>
+      <div v-else>
+        <button class="pm-btn-update-all" @click="updateAll">全部更新</button>
+        <div class="pm-update-list">
+          <div
+            v-for="u in updates"
+            :key="u.pluginId"
+            class="pm-update-item"
+            :data-plugin-id="u.pluginId"
+          >
+            <div class="pm-plugin-icon pm-update-icon">{{ u.icon }}</div>
+            <div class="pm-plugin-info">
+              <div class="pm-plugin-name">
+                {{ u.name }}
+                <span class="pm-update-version">
+                  v{{ u.fromVersion }} <span class="pm-update-arrow">→</span> v{{ u.toVersion }}
+                </span>
+                <span v-if="u.breaking" class="pm-update-breaking" title="破坏性更新">破坏性</span>
+              </div>
+              <div class="pm-plugin-desc">{{ u.description }}</div>
+            </div>
+            <div class="pm-plugin-actions">
+              <button class="pm-btn-install" @click="updatePlugin(u)">更新</button>
+            </div>
           </div>
         </div>
       </div>
@@ -146,6 +188,17 @@
                 :key="perm"
                 class="pm-perm-badge"
               >{{ perm }}</span>
+            </div>
+            <div v-if="depsOf(plugin).length" class="pm-plugin-deps">
+              <span
+                v-for="d in depsOf(plugin)"
+                :key="d.pluginId"
+                class="pm-dep-badge"
+                :class="{ 'pm-dep-missing': !isInstalled(d.pluginId) && !d.optional }"
+                :title="d.description || depName(d.pluginId)"
+              >
+                ⛓ {{ depName(d.pluginId) }}<template v-if="d.optional">（可选）</template>
+              </span>
             </div>
           </div>
           <div class="pm-plugin-actions">
@@ -237,6 +290,8 @@ import { computed, onMounted, ref } from 'vue'
 import { usePlugin } from '../resonance/bridges/plugin'
 import type { PluginTier } from '../modules/plugin/types'
 import type { MarketplaceEntry, PluginCategoryId } from '../modules/plugin/plugin-registry'
+import type { MarketplaceUpdate } from '../resonance/bridges/plugin'
+import type { PluginDependency } from '../modules/plugin/plugin-marketplace'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -285,15 +340,96 @@ function isInstalled(id: string): boolean {
   return plugins.value.some(p => p.manifest.meta.id === id)
 }
 
+/** 可用更新（已安装但版本落后于市场目录） */
+const updates = computed(() => marketplace.listUpdates())
+
+/** 可用更新数 */
+const updateCount = computed(() => updates.value.length)
+
+/** 插件声明的依赖列表 */
+function depsOf(entry: MarketplaceEntry): PluginDependency[] {
+  return entry.dependencies ?? []
+}
+
+/** 尚未安装的必选依赖（可选依赖不阻断安装） */
+function missingDeps(entry: MarketplaceEntry): PluginDependency[] {
+  return depsOf(entry).filter(d => !isInstalled(d.pluginId) && !d.optional)
+}
+
+/** 依赖中文名（市场注册表查名） */
+function depName(id: string): string {
+  const entry = marketplace.getAll().find(e => e.manifest.meta.id === id)
+  return entry?.manifest.meta.name ?? id
+}
+
+/** 安装反馈动画 */
+function animateInstalled(pluginId: string) {
+  const card = document.querySelector(`[data-plugin-id="${pluginId}"]`)
+  if (card) {
+    card.classList.add('installed-anim')
+    setTimeout(() => card.classList.remove('installed-anim'), 600)
+  }
+}
+
+/** 安装插件：先按依赖解析安装未安装的依赖，存在缺失/冲突/循环时中止 */
 function install(entry: MarketplaceEntry) {
-  const success = pluginBridge.installPlugin(entry.manifest)
-  if (success) {
-    // 模拟安装成功效果
-    const card = document.querySelector(`[data-plugin-id="${entry.manifest.meta.id}"]`)
-    if (card) {
-      card.classList.add('installed-anim')
-      setTimeout(() => card.classList.remove('installed-anim'), 600)
+  const id = entry.manifest.meta.id
+  const resolution = marketplace.resolveDependencies(id)
+  const missing = missingDeps(entry)
+
+  if (!resolution.resolved || missing.length > 0) {
+    const reasons: string[] = []
+    if (missing.length) {
+      reasons.push(`缺失依赖：${missing.map(d => `${depName(d.pluginId)} ${d.minVersion}`).join('、')}`)
     }
+    if (resolution.conflicts.length) reasons.push('存在依赖版本冲突')
+    if (resolution.cycles.length) reasons.push('存在循环依赖')
+    alert(`无法安装「${entry.manifest.meta.name}」：\n` + (reasons.join('\n') || '依赖解析失败'))
+    return
+  }
+
+  // 待安装项 = 解析出的安装顺序中尚未安装者（依赖优先）
+  const toInstall = resolution.installOrder.filter(p => !isInstalled(p))
+  if (toInstall.length > 1) {
+    const plan = toInstall.map(p => {
+      const isSelf = p === id
+      return ` · ${depName(p)}${isSelf ? '（本次安装）' : ''}`
+    }).join('\n')
+    if (!confirm(`将按顺序安装依赖并安装「${entry.manifest.meta.name}」：\n${plan}\n\n是否继续？`)) return
+  }
+
+  for (const pid of toInstall) {
+    const e = marketplace.getAll().find(item => item.manifest.meta.id === pid)
+    if (!e) continue
+    if (!pluginBridge.installPlugin(e.manifest)) {
+      alert(`安装失败：${depName(pid)}`)
+      return
+    }
+  }
+  animateInstalled(id)
+}
+
+/** 安装单个更新 */
+function updatePlugin(u: MarketplaceUpdate) {
+  const entry = marketplace.getAll().find(e => e.manifest.meta.id === u.pluginId)
+  if (!entry) return
+  if (pluginBridge.installPlugin(entry.manifest)) {
+    animateInstalled(u.pluginId)
+  }
+}
+
+/** 全部更新 */
+function updateAll() {
+  const n = updates.value.length
+  if (n === 0) return
+  if (!confirm(`将安装 ${n} 个可用更新，是否继续？`)) return
+  let ok = 0
+  for (const u of updates.value) {
+    const entry = marketplace.getAll().find(e => e.manifest.meta.id === u.pluginId)
+    if (entry && pluginBridge.installPlugin(entry.manifest)) ok++
+  }
+  if (ok > 0) {
+    alert(`已更新 ${ok} 个插件`)
   }
 }
 
@@ -697,6 +833,106 @@ function tierLabel(t: PluginTier): string {
   background: rgba(var(--accent-rgb), 0.06);
   color: rgba(237,224,212,0.68);
   font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+}
+
+/* ---- 依赖徽标 ---- */
+.pm-plugin-deps {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(var(--accent-rgb), 0.12);
+}
+
+.pm-dep-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(var(--accent-rgb), 0.05);
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+  color: rgba(237,224,212,0.62);
+}
+
+.pm-dep-badge.pm-dep-missing {
+  background: rgba(232,115,115,0.08);
+  border-color: rgba(232,115,115,0.28);
+  color: #e87373;
+}
+
+/* ---- 更新管理 ---- */
+.pm-updates-section {
+  position: relative;
+}
+
+.pm-updates-empty {
+  padding: 28px 20px;
+}
+
+.pm-btn-update-all {
+  font-size: 12px;
+  padding: 7px 18px;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+}
+
+.pm-btn-update-all:hover {
+  background: rgba(var(--accent-rgb), 0.2);
+}
+
+.pm-update-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pm-update-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(var(--accent-rgb), 0.1);
+  border-radius: 10px;
+  transition: all 0.25s ease;
+}
+
+.pm-update-item:hover {
+  border-color: rgba(var(--accent-rgb), 0.22);
+  background: rgba(255,255,255,0.05);
+}
+
+.pm-update-icon {
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+}
+
+.pm-update-version {
+  font-size: 11px;
+  color: var(--accent);
+  font-weight: 400;
+  font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+}
+
+.pm-update-arrow {
+  color: rgba(237,224,212,0.5);
+  padding: 0 2px;
+}
+
+.pm-update-breaking {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(232,115,115,0.14);
+  color: #e87373;
+  font-weight: 500;
 }
 
 /* ---- Actions ---- */

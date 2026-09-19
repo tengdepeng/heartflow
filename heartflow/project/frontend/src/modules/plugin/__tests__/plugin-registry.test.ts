@@ -14,7 +14,9 @@ describe('pluginMarketplaceRegistry 市场源注册表', () => {
     const catalog = pluginMarketplaceRegistry.getCatalog()
     expect(catalog.length).toBeGreaterThan(0)
     const downloads = catalog.map(m => {
-      return pluginMarketplaceRegistry.find(m.meta.id)?.downloads ?? 0
+      return pluginMarketplaceRegistry
+        .getAll()
+        .find(e => e.manifest.meta.id === m.meta.id)?.downloads ?? 0
     })
     expect(downloads).toEqual([...downloads].sort((a, b) => b - a))
   })
@@ -92,5 +94,21 @@ describe('pluginMarketplaceRegistry 市场源注册表', () => {
       expect(manifest.meta.id).toBeTruthy()
       expect(manifest.entry).toBeTruthy()
     }
+  })
+
+  it('getDependencyGraph 暴露每个条目的 id/版本/依赖声明', () => {
+    const graph = pluginMarketplaceRegistry.getDependencyGraph()
+    expect(graph.length).toBe(pluginMarketplaceRegistry.count())
+    for (const node of graph) {
+      expect(node.id.startsWith('community-')).toBe(true)
+      expect(typeof node.version).toBe('string')
+      expect(Array.isArray(node.dependencies)).toBe(true)
+    }
+    // 有实际依赖声明的条目
+    const withDeps = graph.filter(n => n.dependencies.length > 0)
+    expect(withDeps.length).toBeGreaterThan(0)
+    // 每日回顾声明依赖番茄钟统计
+    const daily = graph.find(n => n.id === 'community-daily-review')
+    expect(daily?.dependencies.some(d => d.pluginId === 'community-pomodoro-stats')).toBe(true)
   })
 })
