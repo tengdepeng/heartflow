@@ -170,6 +170,23 @@
         :challenges="activeChallenges"
         @adopt="createChallengeFromRecommendation"
       />
+
+      <!-- 自适应挑战（generateAdaptiveChallenge 独有维度，INCR-360） -->
+      <div v-if="adaptiveChallenge" class="dw-adaptive">
+        <div class="dw-adaptive-head">
+          <span class="dw-adaptive-label">🃏 自适应挑战</span>
+          <button class="dw-adaptive-refresh" type="button" @click="refreshAdaptiveChallenge">换一个</button>
+        </div>
+        <p class="dw-adaptive-desc">{{ adaptiveChallenge.description }}</p>
+        <div class="dw-adaptive-meta">
+          <span class="dw-adaptive-chip">{{ diffLabel(adaptiveChallenge.difficulty) }}</span>
+          <span class="dw-adaptive-chip">{{ adaptiveChallenge.duration }} 天</span>
+          <span class="dw-adaptive-chip">{{ adaptiveChallenge.score }} 分</span>
+        </div>
+        <button class="dw-adaptive-adopt" type="button" @click="createChallengeFromRecommendation(adaptiveChallenge)">
+          采纳自适应挑战
+        </button>
+      </div>
     </section>
 
     <!-- 徽章墙 -->
@@ -282,13 +299,15 @@ import HabitFailurePanel from '../components/HabitFailurePanel.vue'
 import HabitSuggestionPanel from '../components/HabitSuggestionPanel.vue'
 import HabitBundlePanel from '../components/HabitBundlePanel.vue'
 import HabitPredictorPanel from '../components/HabitPredictorPanel.vue'
-import type { Habit, DisciplineChallenge } from '../modules/discipline/types'
+import type { Habit, DisciplineChallenge, HabitDifficulty } from '../modules/discipline/types'
 import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
 import PomodoroForestPanel from '../components/discipline/PomodoroForestPanel.vue'
 import MeditationStudio from '../components/MeditationStudio.vue'
 import ChallengeAdvisorPanel from '../components/ChallengeAdvisorPanel.vue'
 import type { ChallengeRecommendation } from '../modules/discipline/challenge-recommender'
+import { useChallengeRecommender } from '../modules/discipline/challenge-recommender'
+import { HABIT_DIFFICULTY_META } from '../modules/discipline/types'
 import QuadrantBoardPanel from '../components/QuadrantBoardPanel.vue'
 import { useTaskManager } from '../modules/tasks'
 
@@ -455,6 +474,27 @@ function loadData() {
   todayHabits.value = bridge.getTodayHabits()
   activeChallenges.value = bridge.getActiveChallenges()
   allBadges.value = bridge.badges.value
+  refreshAdaptiveChallenge()
+}
+
+// 自适应挑战（discipline/challenge-recommender · generateAdaptiveChallenge 独有维度）
+const adaptiveRecEngine = useChallengeRecommender()
+const adaptiveChallenge = ref<ChallengeRecommendation | null>(null)
+function refreshAdaptiveChallenge() {
+  if (bridge.habits.value.length === 0) {
+    adaptiveChallenge.value = null
+    return
+  }
+  const profile = adaptiveRecEngine.buildProfile(bridge.habits.value, activeChallenges.value)
+  adaptiveChallenge.value = adaptiveRecEngine.generateAdaptiveChallenge(
+    bridge.habits.value,
+    activeChallenges.value,
+    profile,
+  )
+}
+
+function diffLabel(d: HabitDifficulty): string {
+  return HABIT_DIFFICULTY_META[d]?.label ?? d
 }
 
 function toggleHabit(habit: Habit) {
@@ -697,6 +737,35 @@ onMounted(() => {
 .completion-rate { margin: 0.5rem 0; }
 .rate-number { font-size: 2.5rem; font-weight: 700; color: var(--color-text, #e2e8f0); display: block; }
 .rate-label { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); }
+
+/* 自适应挑战（generateAdaptiveChallenge 独有维度，INCR-360） */
+.dw-adaptive {
+  margin-top: 1.4rem; padding: 1rem 1.25rem; border-radius: 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(160, 124, 140, 0.1));
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.dw-adaptive-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;
+}
+.dw-adaptive-label { font-weight: 600; color: var(--color-accent, #f59e0b); font-size: 0.9rem; }
+.dw-adaptive-refresh {
+  border: none; background: transparent; cursor: pointer;
+  font-size: 0.75rem; color: var(--color-text-muted, #94a3b8);
+  padding: 0.15rem 0.4rem; border-radius: 6px; transition: all 0.2s;
+}
+.dw-adaptive-refresh:hover { color: var(--color-accent, #f59e0b); background: rgba(245, 158, 11, 0.1); }
+.dw-adaptive-desc { font-size: 0.9rem; color: var(--color-text, #e2e8f0); line-height: 1.5; margin: 0 0 0.6rem; }
+.dw-adaptive-meta { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+.dw-adaptive-chip {
+  font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 999px;
+  background: rgba(100, 116, 139, 0.25); color: var(--color-text-muted, #94a3b8);
+}
+.dw-adaptive-adopt {
+  padding: 0.5rem 1.1rem; border-radius: 8px; border: 1px solid var(--color-accent, #f59e0b);
+  background: rgba(245, 158, 11, 0.15); cursor: pointer; color: var(--color-accent, #f59e0b);
+  font-size: 0.82rem; font-weight: 600; transition: all 0.2s;
+}
+.dw-adaptive-adopt:hover { background: rgba(245, 158, 11, 0.25); }
 
 /* 响应式 */
 @media (max-width: 640px) {

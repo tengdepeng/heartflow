@@ -856,3 +856,58 @@ describe('集成：协调权设置面板', () => {
     expect(csp.find('.csp-current-value').text()).toContain('镜我')
   })
 })
+
+// ============================================================
+// 集成：执行策略判定（dispatch·detectStrategy 独有维度，INCR-360）
+// 调令输入时实时预览单一/并行/串行决策；未输入时不展示
+// ============================================================
+describe('集成：执行策略判定', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAdvisors.length = 0
+    mockStore['hf:advisors'] = []
+  })
+
+  afterEach(() => {
+    if (activeWrapper) {
+      activeWrapper.unmount()
+      activeWrapper = null
+    }
+    document.querySelectorAll('.ah-dialog-overlay').forEach(el => el.remove())
+  })
+
+  it('未输入调令时不展示策略预览', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.ah-cmd-strategy').exists()).toBe(false)
+  })
+
+  it('多幕僚且无先后依赖词 → 判定并行', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_s1', name: '墨染', state: 'awake' }))
+    mockAdvisors.push(sampleProfile({ id: 'a_s2', name: '青鸟', state: 'awake' }))
+    const wrapper = await getWrapper()
+    await wrapper.find('.ah-command-input').setValue('整理素材，撰写初稿')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.ah-cmd-strategy').exists()).toBe(true)
+    expect(wrapper.find('.ah-cmd-strategy-chip').text()).toBe('并行')
+    expect(wrapper.text()).toContain('协同收集')
+  })
+
+  it('含先后依赖词（先/再/然后）→ 判定串行', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_s1', name: '墨染', state: 'awake' }))
+    mockAdvisors.push(sampleProfile({ id: 'a_s2', name: '青鸟', state: 'awake' }))
+    const wrapper = await getWrapper()
+    await wrapper.find('.ah-command-input').setValue('先整理素材，再撰写初稿')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.ah-cmd-strategy-chip').text()).toBe('串行')
+    expect(wrapper.text()).toContain('先后依赖词')
+  })
+
+  it('单幕僚 → 判定单一', async () => {
+    mockAdvisors.push(sampleProfile({ id: 'a_s1', name: '墨染', state: 'awake' }))
+    const wrapper = await getWrapper()
+    await wrapper.find('.ah-command-input').setValue('整理素材')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.ah-cmd-strategy-chip').text()).toBe('单一')
+    expect(wrapper.text()).toContain('单幕僚直接执行')
+  })
+})

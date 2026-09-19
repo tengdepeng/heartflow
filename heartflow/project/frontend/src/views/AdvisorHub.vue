@@ -40,6 +40,12 @@
         />
         <button class="ah-command-send" :disabled="!commandText.trim()" @click="sendCommand">下达</button>
       </div>
+      <!-- 执行策略判定（dispatch·detectStrategy 独有维度，INCR-360：实时预览单幕僚/并行/串行决策） -->
+      <div class="ah-cmd-strategy" v-if="commandText.trim()">
+        <span class="ah-cmd-strategy-label">⚙ 执行策略判定</span>
+        <span class="ah-cmd-strategy-chip" :class="'st-' + strategyPreview">{{ strategyName(strategyPreview) }}</span>
+        <span class="ah-cmd-strategy-reason">{{ strategyReason }}</span>
+      </div>
       <div class="ah-command-list" v-if="commandTasksReversed.length">
         <div
           v-for="t in commandTasksReversed"
@@ -229,6 +235,8 @@ import AdvisorDailyLifePanel from '../components/AdvisorDailyLifePanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import FeatureSearchPanel from '../components/FeatureSearchPanel.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
+import { detectStrategy } from '../modules/dispatch'
+import type { DispatchStrategy } from '../modules/dispatch'
 import { getNoteStore } from '../modules/note'
 import { useNoteEditor } from '../modules/note/useNoteEditor'
 import type { StickyNote } from '../modules/note/types'
@@ -256,6 +264,29 @@ function sendCommand() {
   // action 类：真正触发对应能力（开启专注 / 写笔记 / 跳锚点庭院 / 跳情绪花房）
   executor.runAction(task)
 }
+
+// ---- 执行策略判定（dispatch·detectStrategy 独有维度，INCR-360） ----
+const activeAdvisorIds = computed(() =>
+  advisors.value.filter(a => a.state !== 'slumber').map(a => a.id),
+)
+const strategyPreview = computed<DispatchStrategy>(() =>
+  detectStrategy(commandText.value, activeAdvisorIds.value),
+)
+const STRATEGY_NAME: Record<DispatchStrategy, string> = {
+  single: '单一',
+  parallel: '并行',
+  serial: '串行',
+}
+function strategyName(s: DispatchStrategy): string {
+  return STRATEGY_NAME[s] ?? s
+}
+const strategyReason = computed(() => {
+  const s = strategyPreview.value
+  const count = activeAdvisorIds.value.length
+  if (s === 'serial') return '检测到先后依赖词（先/再/然后/随后/接着），按序推进'
+  if (s === 'single') return count <= 1 ? '单幕僚直接执行' : '调令整体交予单一幕僚'
+  return `多幕僚并行，${count} 位在位幕僚协同收集`
+})
 
 // ---- 统一到真实 advisor 档案层（含 6 固定预设）；与幕僚坞共享同一批幕僚 ----
 const advisor = useAdvisor()
@@ -1285,6 +1316,47 @@ function noteFmt(iso: string): string {
   font-size: 12px;
   text-align: center;
   padding: 16px 0;
+}
+
+/* ---- 执行策略判定（dispatch·detectStrategy 独有维度，INCR-360） ---- */
+.ah-cmd-strategy {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.03);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+}
+.ah-cmd-strategy-label {
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.5);
+  letter-spacing: 1px;
+}
+.ah-cmd-strategy-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(138, 154, 122, 0.18);
+  color: #8a9a7a;
+}
+.ah-cmd-strategy-chip.st-parallel {
+  background: rgba(91, 184, 160, 0.18);
+  color: #5ab8a0;
+}
+.ah-cmd-strategy-chip.st-serial {
+  background: rgba(240, 192, 64, 0.18);
+  color: #d8b04a;
+}
+.ah-cmd-strategy-reason {
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.42);
+  flex: 1 1 100%;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(var(--accent-rgb), 0.08);
 }
 
 @media (max-width: 860px) {
