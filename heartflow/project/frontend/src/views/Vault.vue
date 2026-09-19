@@ -153,6 +153,9 @@
 
     <!-- 密码生成器（INCR-364）本地强密码 / 口令短语 -->
     <VaultPasswordPanel />
+
+    <!-- 凭证保险箱（INCR-371 补挂载孤儿引擎 vault-entries/vault-analytics：密码条目/弱密审计/重复口令） -->
+    <VaultCredentialPanel />
     </template>
   </div>
 </template>
@@ -171,6 +174,7 @@ import VaultAutoLockPanel from '../components/VaultAutoLockPanel.vue'
 import BackupRecoveryPanel from '../components/BackupRecoveryPanel.vue'
 import VaultAuditPanel from '../components/VaultAuditPanel.vue'
 import VaultPasswordPanel from '../components/VaultPasswordPanel.vue'
+import VaultCredentialPanel from '../components/VaultCredentialPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
