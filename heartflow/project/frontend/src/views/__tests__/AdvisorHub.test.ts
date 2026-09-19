@@ -14,6 +14,7 @@ vi.mock('vue-router', () => ({
 
 // ---- 模拟 storage（迁移读取旧 hf:advisors 用） ----
 const mockStore: Record<string, any> = {}
+const notesArray: any[] = []
 const mockGetKV = vi.fn((_key: string, def: any) => mockStore[_key] ?? def)
 const mockSetKV = vi.fn((key: string, val: any) => { mockStore[key] = val })
 const mockGetAdvisors = vi.fn<() => ProfileType[]>(() => [])
@@ -23,6 +24,8 @@ vi.mock('../../engine/storage', () => ({
     getKV: (...args: any[]) => (mockGetKV as any)(...args),
     setKV: (...args: any[]) => (mockSetKV as any)(...args),
     getAdvisors: () => mockGetAdvisors(),
+    getNotes: () => notesArray,
+    setNotes: () => {},
   },
 }))
 
@@ -102,6 +105,20 @@ vi.mock('pinia', () => ({
   defineStore: () => () => ({}),
   setActivePinia: () => {},
   createPinia: () => ({}),
+}))
+
+// ---- 模拟 useNoteEditor（控制 openCreate/openEdit，便于断言统一新建/浮层编辑接线） ----
+const mockNoteOpenCreate = vi.fn()
+const mockNoteOpenEdit = vi.fn()
+vi.mock('../../modules/note/useNoteEditor', () => ({
+  useNoteEditor: () => ({
+    editorVisible: { value: false },
+    editingNote: { value: null },
+    openCreate: (...a: any[]) => mockNoteOpenCreate(...a),
+    openEdit: (...a: any[]) => mockNoteOpenEdit(...a),
+    close: () => {},
+    save: () => {},
+  }),
 }))
 
 // ---- 辅助函数 ----
@@ -909,5 +926,153 @@ describe('集成：执行策略判定', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.ah-cmd-strategy-chip').text()).toBe('单一')
     expect(wrapper.text()).toContain('单幕僚直接执行')
+  })
+})
+
+// ============================================================
+// 集成：笔记浮层与统一新建（INCR-363）
+// SearchInput 真接入笔记搜索（防抖+清除）、NoteSticky 真接入浮层便签
+// （拖动/置顶/编辑/关闭，事件回写 note 引擎）、FabButton 真接入统一新建。
+// 使用真实 note store（getNoteStore）+ 种子数据：基础笔记走共享 notesArray，
+// 便签扩展态走 mockStore['hf:note_sticky_state']；每用例 resetModules + 重种，隔离单例。
+// ============================================================
+describe('集成：笔记浮层与统一新建（INCR-363）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockAdvisors.length = 0
+    mockStore['hf:advisors'] = []
+    notesArray.length = 0
+    delete mockStore['hf:note_sticky_state']
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    if (activeWrapper) {
+      activeWrapper.unmount()
+      activeWrapper = null
+    }
+    document.querySelectorAll('.ah-dialog-overlay, .ah-sticky-layer, .note-sticky, .hf-fab')
+      .forEach(el => el.remove())
+  })
+
+  function baseNote(over: Record<string, any> = {}) {
+    return {
+      id: 'n1',
+      title: '灵感',
+      content: '关于时间管理的想法',
+      tags: [],
+      createdAt: '2026-09-01T10:00:00.000Z',
+      updatedAt: '2026-09-01T10:00:00.000Z',
+      ...over,
+    }
+  }
+  function stickyState(over: Record<string, any> = {}) {
+    return {
+      id: 'n1',
+      stickyX: 20,
+      stickyY: 30,
+      displayMode: 'sticky',
+      color: 'ffd666',
+      pinned: false,
+      ...over,
+    }
+  }
+  function seedOne() {
+    notesArray.push(baseNote())
+    mockStore['hf:note_sticky_state'] = [stickyState()]
+  }
+
+  it('有便签时默认渲染浮层便签（NoteSticky 接入）与统一新建 FAB', async () => {
+    seedOne()
+    const wrapper = await getWrapper()
+    // 浮层开关显示计数
+    expect(wrapper.find('.ah-sticky-toggle').text()).toContain('🧲 浮层 (1)')
+    // 浮层容器 + 便签 Teleport 到 body（stickyLayer 默认开启）
+    const layer = document.querySelector('.ah-sticky-layer')
+    expect(layer).not.toBeNull()
+    const stickies = document.querySelectorAll('.note-sticky')
+    expect(stickies.length).toBe(1)
+    expect(stickies[0].textContent).toContain('灵感')
+    expect(stickies[0].classList.contains('minimized')).toBe(false)
+    // FAB 统一新建（bl 停靠、标签新建便签）
+    const fab = document.querySelector('.hf-fab') as HTMLElement
+    expect(fab).not.toBeNull()
+    expect(fab.classList.contains('hf-fab--bl')).toBe(true)
+    expect(fab.querySelector('.hf-fab__label')?.textContent).toBe('新建便签')
+  })
+
+  it('切换浮层开关挂起/恢复便签层与 FAB', async () => {
+    seedOne()
+    const wrapper = await getWrapper()
+    expect(document.querySelector('.ah-sticky-layer')).not.toBeNull()
+    expect(document.querySelector('.hf-fab')).not.toBeNull()
+    await wrapper.find('.ah-sticky-toggle').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(document.querySelector('.ah-sticky-layer')).toBeNull()
+    expect(document.querySelector('.hf-fab')).toBeNull()
+    await wrapper.find('.ah-sticky-toggle').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(document.querySelector('.ah-sticky-layer')).not.toBeNull()
+    expect(document.querySelector('.hf-fab')).not.toBeNull()
+  })
+
+  it('点击便签置顶切换 pinned 并写回存储', async () => {
+    seedOne()
+    const wrapper = await getWrapper()
+    const pinBtn = document.querySelector('.note-sticky .pin-btn') as HTMLElement
+    pinBtn.click()
+    await wrapper.vm.$nextTick()
+    const saved = mockStore['hf:note_sticky_state']
+    expect(saved[0].pinned).toBe(true)
+  })
+
+  it('点击便签内容触发编辑（openEdit）', async () => {
+    seedOne()
+    await getWrapper()
+    const body = document.querySelector('.note-sticky .sticky-body') as HTMLElement
+    body.click()
+    expect(mockNoteOpenEdit).toHaveBeenCalled()
+    const note = mockNoteOpenEdit.mock.calls[0][0]
+    expect(note.id).toBe('n1')
+  })
+
+  it('点击便签关闭（✕）触发删除，便签层消失且存储清空', async () => {
+    seedOne()
+    const wrapper = await getWrapper()
+    expect(document.querySelector('.note-sticky')).not.toBeNull()
+    const closeBtn = document.querySelector('.note-sticky .close-btn') as HTMLElement
+    closeBtn.click()
+    await wrapper.vm.$nextTick()
+    expect(document.querySelector('.note-sticky')).toBeNull()
+    expect(document.querySelector('.ah-sticky-layer')).toBeNull()
+    expect(mockStore['hf:note_sticky_state'].length).toBe(0)
+  })
+
+  it('SearchInput 输入防抖过滤笔记列表并可清除还原', async () => {
+    notesArray.push(baseNote({ id: 'n_a', title: '时间管理' }))
+    notesArray.push(baseNote({ id: 'n_b', title: '情绪日记', content: '记录每日心情变化' }))
+    mockStore['hf:note_sticky_state'] = []
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.ah-note-item').length).toBe(2)
+    await wrapper.find('.hf-search__input').setValue('时间')
+    await new Promise(r => setTimeout(r, 180)) // debounce 150ms
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.ah-note-item').length).toBe(1)
+    expect(wrapper.text()).toContain('时间管理')
+    expect(wrapper.text()).not.toContain('情绪日记')
+    // 清除按钮还原全部
+    await wrapper.find('.hf-search__clear').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findAll('.ah-note-item').length).toBe(2)
+  })
+
+  it('统一新建（FAB 与项内「+ 新建笔记」按钮）均触发 openCreate', async () => {
+    const wrapper = await getWrapper()
+    const fab = document.querySelector('.hf-fab') as HTMLButtonElement
+    fab.click()
+    expect(mockNoteOpenCreate).toHaveBeenCalled()
+    mockNoteOpenCreate.mockClear()
+    await wrapper.find('.ah-notes-new').trigger('click')
+    expect(mockNoteOpenCreate).toHaveBeenCalled()
   })
 })

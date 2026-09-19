@@ -129,14 +129,22 @@
       <AuraThemePicker />
     </section>
 
-    <!-- 笔记（原独立浮动 FAB / 笔记板已并入此处，消除接线孤儿） -->
-    <section data-enter class="ah-notes-section">
-      <h3 class="ah-scheduler-heading">📝 笔记</h3>
-      <p class="ah-aura-desc">思绪沉淀都在这里。新建即可记录，或贴为浮窗便签。</p>
-      <div class="ah-notes-bar">
-        <input v-model="noteQuery" class="ah-notes-search" placeholder="搜索笔记标题或内容…" />
-        <button class="ah-btn-affinity ah-notes-new" @click="noteEditor.openCreate()">+ 新建笔记</button>
-      </div>
+    <!-- 笔记（原独立浮动 FAB / 笔记板已并入此处，消除接线孤儿；
+            INCR-363：SearchInput 真接入笔记搜索，NoteSticky/FabButton 以浮层便签与统一新建按钮复活） -->
+      <section data-enter class="ah-notes-section">
+        <h3 class="ah-scheduler-heading">📝 笔记</h3>
+        <p class="ah-aura-desc">思绪沉淀都在这里。新建即可记录，或贴为浮窗便签。</p>
+        <div class="ah-notes-bar">
+          <SearchInput v-model="noteQuery" placeholder="搜索笔记标题或内容…" :debounce="150" />
+          <button class="ah-btn-affinity ah-notes-new" @click="noteEditor.openCreate()">+ 新建笔记</button>
+          <button
+            class="ah-btn-affinity ah-sticky-toggle"
+            :class="{ active: stickyLayer }"
+            @click="stickyLayer = !stickyLayer"
+            :title="stickyLayer ? '隐藏浮层便签' : '显示浮层便签'"
+            :aria-pressed="stickyLayer"
+          >🧲 浮层 ({{ stickyCount }})</button>
+        </div>
       <div class="ah-notes-list" v-if="noteList.length">
         <div
           v-for="n in noteList"
@@ -160,7 +168,29 @@
         </div>
       </div>
       <p v-else class="ah-notes-empty">还没有笔记，点「+ 新建笔记」记录第一条。</p>
-    </section>
+      </section>
+
+      <!-- 浮层便签（NoteSticky 真接入：📌 标记的便签以浮动便签显示，可拖动/置顶/编辑/关闭，事件回写 note 引擎） -->
+      <Teleport to="body">
+        <div v-if="stickyLayer && stickyCount" class="ah-sticky-layer" aria-label="浮层便签">
+          <NoteSticky
+            v-for="s in floatingStickyNotes"
+            :key="s.id"
+            :note="s"
+            :visible="true"
+            @update:position="onStickyPosition"
+            @update:mode="onStickyMode"
+            @edit="onStickyEdit"
+            @delete="noteDelete"
+            @pin="onStickyPin"
+          />
+        </div>
+      </Teleport>
+
+      <!-- 统一新建便签（FabButton 真接入：右下角浮动「新建」，开启笔记编辑器） -->
+      <Teleport to="body">
+        <FabButton v-if="stickyLayer" label="新建便签" icon="＋" position="bl" @click="noteEditor.openCreate()" />
+      </Teleport>
 
     <!-- 幕僚互动（INCR-246 补挂载孤儿组件 AdvisorInteractionPanel：幕僚↔幕僚关系/协作/互学/共处，引擎 useAdvisorInteraction 唯一、advisors props 薄委托注入） -->
     <section data-enter class="ah-section">
@@ -234,6 +264,9 @@ import AdvisorCelebrationPanel from '../components/AdvisorCelebrationPanel.vue'
 import AdvisorDailyLifePanel from '../components/AdvisorDailyLifePanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import FeatureSearchPanel from '../components/FeatureSearchPanel.vue'
+import SearchInput from '../components/SearchInput.vue'
+import NoteSticky from '../components/NoteSticky.vue'
+import FabButton from '../components/FabButton.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
 import { detectStrategy } from '../modules/dispatch'
 import type { DispatchStrategy } from '../modules/dispatch'
@@ -546,6 +579,24 @@ function noteDelete(id: string) {
 function noteFmt(iso: string): string {
   const d = new Date(iso)
   return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+// ---- 浮层便签（NoteSticky 真接入）：allStickyNotes 由 note 引擎维护，事件在此回写 store ----
+const stickyLayer = ref(true)
+const floatingStickyNotes = computed(() => noteStore.allStickyNotes.value)
+const stickyCount = computed(() => floatingStickyNotes.value.length)
+
+function onStickyPosition(id: string, x: number, y: number) {
+  noteStore.updateStickyPosition(id, x, y)
+}
+function onStickyMode(id: string, mode: 'sticky' | 'minimized') {
+  noteStore.updateStickyMode(id, mode)
+}
+function onStickyEdit(note: StickyNote) {
+  noteEditor.openEdit(note)
+}
+function onStickyPin(id: string) {
+  noteStore.togglePin(id)
 }
 </script>
 
@@ -1068,21 +1119,6 @@ function noteFmt(iso: string): string {
   gap: 8px;
   margin-bottom: 12px;
 }
-.ah-notes-search {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid rgba(var(--accent-rgb), 0.1);
-  border-radius: 10px;
-  background: rgba(var(--accent-rgb), 0.03);
-  color: rgba(255, 240, 224, 0.8);
-  font-size: 13px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.ah-notes-search:focus {
-  border-color: rgba(var(--accent-rgb), 0.3);
-}
 .ah-notes-new {
   width: auto;
   flex: 0 0 auto;
@@ -1183,6 +1219,24 @@ function noteFmt(iso: string): string {
   font-size: 12px;
   text-align: center;
   padding: 20px 0;
+}
+.ah-notes-bar :deep(.hf-search) {
+  flex: 1;
+  min-width: 0;
+}
+.ah-sticky-toggle.active {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: rgba(var(--accent-rgb), 0.32);
+  color: var(--accent);
+}
+.ah-sticky-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+}
+.ah-sticky-layer > * {
+  pointer-events: auto;
 }
 
 /* ---- 调令 section（幕僚管家闭环） ---- */
