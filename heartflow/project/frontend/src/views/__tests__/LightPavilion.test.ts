@@ -89,7 +89,7 @@ describe('LightPavilion 旧梦潭', () => {
     expect(wrapper.text()).toContain('已完成')
     expect(wrapper.text()).toContain('2')
     // 月份分组展示
-    const monthGroups = wrapper.findAll('.old-month-group')
+    const monthGroups = wrapper.findAll('[data-test="odp-month-group"]')
     expect(monthGroups.length).toBeGreaterThanOrEqual(2)
   })
 
@@ -111,7 +111,7 @@ describe('LightPavilion 旧梦潭', () => {
       },
     ]
     const wrapper = await getWrapper()
-    const reviveBtn = wrapper.find('.revive-btn')
+    const reviveBtn = wrapper.find('[data-test="odp-revive-g1"]')
     expect(reviveBtn.exists()).toBe(true)
     await reviveBtn.trigger('click')
     // 验证 setGoals 被调用

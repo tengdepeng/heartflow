@@ -216,44 +216,9 @@
       </div>
     </section>
 
-    <!-- 旧梦潭：已完成的目标 -->
+    <!-- 旧梦潭：已完成的目标（INCR-373 补挂载孤儿引擎 goal/old-dream：检索/统计/分组陈列/复苏，替换视图自实现） -->
     <section data-enter class="old-dreams">
-      <!-- 水纹装饰 -->
-      <div class="old-dreams-water" aria-hidden="true">
-        <svg viewBox="0 0 400 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="waterFade" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stop-color="var(--accent)" stop-opacity="0"/>
-              <stop offset="50%" stop-color="var(--accent)" stop-opacity="0.08"/>
-              <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path d="M0,30 Q50,15 100,30 Q150,45 200,30 Q250,15 300,30 Q350,45 400,30"
-            stroke="url(#waterFade)" stroke-width="1" fill="none" class="dream-ripple dream-ripple--1"/>
-          <path d="M0,38 Q50,25 100,38 Q150,51 200,38 Q250,25 300,38 Q350,51 400,38"
-            stroke="url(#waterFade)" stroke-width="0.7" fill="none" class="dream-ripple dream-ripple--2"/>
-          <path d="M0,46 Q50,35 100,46 Q150,57 200,46 Q250,35 300,46 Q350,57 400,46"
-            stroke="url(#waterFade)" stroke-width="0.5" fill="none" class="dream-ripple dream-ripple--3"/>
-        </svg>
-      </div>
-      <div class="old-dreams-header">
-        <span class="old-dreams-title">🌊 旧梦潭</span>
-        <span class="old-dreams-count">{{ oldDreams.length }}</span>
-      </div>
-      <template v-if="oldDreams.length">
-        <div v-for="group in oldDreamsByMonth" :key="group.month" class="old-month-group">
-          <div class="old-month-label">{{ formatMonth(group.month) }}</div>
-          <div v-for="d in group.items" :key="d.id" class="old-dream-card">
-            <span class="card-icon">{{ statusIcon(d.status) }}</span>
-            <div class="card-info">
-              <span class="card-title">{{ d.title }}</span>
-              <span class="card-meta">已完成 · {{ formatDate(d.completedAt || d.updatedAt) }}</span>
-            </div>
-            <button class="revive-btn" @click="reviveGoal(d.id)">复苏</button>
-          </div>
-        </div>
-      </template>
-      <p v-else class="old-dreams-empty">暂无已完成的目标</p>
+      <OldDreamPanel :goals="oldDreams" @revive="reviveGoal" />
     </section>
 
     <!-- 专项规划区 -->
@@ -378,6 +343,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useLightPavilionData } from '../modules/light/pavilion-data'
 import GoalGrowthArchivePanel from '../components/GoalGrowthArchivePanel.vue'
 import SpecialPlanArchivePanel from '../components/SpecialPlanArchivePanel.vue'
+import OldDreamPanel from '../components/OldDreamPanel.vue'
 import { useRoomResonance } from '../modules/room-resonance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -535,27 +501,6 @@ const oldDreams = computed(() =>
   goal.targets.value.filter(t => t.status === 'bloom' || t.completedAt)
 )
 
-/** 按完成月份分组，降序排列 */
-const oldDreamsByMonth = computed(() => {
-  const groups: Record<string, typeof goal.targets.value> = {}
-  for (const d of oldDreams.value) {
-    const date = d.completedAt || d.updatedAt
-    const month = date.slice(0, 7) // YYYY-MM
-    if (!groups[month]) groups[month] = []
-    groups[month].push(d)
-  }
-  return Object.entries(groups)
-    .sort(([a], [b]) => b.localeCompare(a))
-    .map(([month, items]) => ({
-      month,
-      items: [...items].sort((a, b) => {
-        const da = a.completedAt || a.updatedAt
-        const db = b.completedAt || b.updatedAt
-        return db.localeCompare(da)
-      }),
-    }))
-})
-
 /** 将已完成目标恢复为生长中状态 */
 function reviveGoal(id: string) {
   const g = goal.goals.value.find(g => g.id === id)
@@ -563,12 +508,6 @@ function reviveGoal(id: string) {
   g.status = 'growing'
   g.completedAt = undefined
   goal.update(id, { status: 'growing' })
-}
-
-/** 格式化月份，例如 "2026-01" → "2026年1月" */
-function formatMonth(ym: string): string {
-  const [y, m] = ym.split('-')
-  return `${y}年${parseInt(m)}月`
 }
 
 /** 格式化日期，例如 "2026-06-15T00:00:00Z" → "6月15日" */

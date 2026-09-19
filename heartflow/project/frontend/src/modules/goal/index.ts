@@ -36,6 +36,14 @@ export {
   groupOldDreamsByMonth,
 } from './goal-state-machine'
 
+export {
+  filterCompletedGoals,
+  groupCompletedByMonth,
+  oldDreamOverview,
+  toSunkenRecord,
+} from './old-dream'
+export type { OldDreamGroup, OldDreamOverview } from './old-dream'
+
 const OLD_DREAMS_KEY = 'goal_old_dreams'
 
 function loadAll(): Goal[] {
