@@ -455,3 +455,12 @@ export type {
   CollectionHeatmap,
   PreferenceProfile,
 } from './play-advanced'
+
+// ---- 逸趣桥（视图桥接层，INCR-375）----
+export { usePlayBridge } from './play-bridge'
+export type {
+  PlayOverview,
+  GalleryStats,
+  SeedOverview,
+  PlayRecommendation,
+} from './play-bridge'

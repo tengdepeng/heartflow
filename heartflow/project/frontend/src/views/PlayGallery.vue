@@ -109,6 +109,11 @@
       </div>
     </section>
 
+    <!-- 逸趣桥（INCR-375 补挂载孤儿引擎 play/play-bridge：游玩摘要/里程碑/时间投资回报/收藏热度/偏好画像/种子概览/建议） -->
+    <section data-enter class="pbp-section">
+      <PlayBridgePanel />
+    </section>
+
     <!-- 逸趣档案（play-analytics：概览/品类/种子/节律/健康/洞察） -->
     <PlayArchivePanel />
 
@@ -514,6 +519,7 @@ import {
 import SeedInheritancePanel from '../components/SeedInheritancePanel.vue'
 import ReceivedSeedsInbox from '../components/ReceivedSeedsInbox.vue'
 import PlayArchivePanel from '../components/PlayArchivePanel.vue'
+import PlayBridgePanel from '../components/PlayBridgePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 // ===== 时间种子（生长阶段系统） =====
