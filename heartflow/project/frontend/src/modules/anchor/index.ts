@@ -89,6 +89,21 @@ export type {
 //       anchor-journal.ts 中同名但结构不同的 AnchorJournal 接口。
 export { useAnchorJournals } from './anchor-journals'
 
+// ---- 手札回溯查询（INCR-378 补孤儿引擎导出：纯函数零消费） ----
+export {
+  journalDateKey,
+  filterJournals,
+  journalsOnThisDay,
+  journalMoodStats,
+} from './anchor-journals'
+export {
+  JOURNAL_TEMPLATES,
+  journalTemplateById,
+  journalTemplateName,
+} from './anchor-journal-templates'
+export type { JournalFilter } from './anchor-journals'
+export type { JournalTemplate, JournalTemplateId } from './anchor-journal-templates'
+
 function loadAll(): Anchor[] {
   return storage.getAnchors()
 }

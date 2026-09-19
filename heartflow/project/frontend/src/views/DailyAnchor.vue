@@ -484,6 +484,11 @@
     <!-- 手札档案 · 日记/复盘/洞见/感恩 + 光丝连接 + 年尺度摘要（anchor/anchor-journal 引擎，INCR-273 补挂载孤儿组件，薄委托化：宿主注入锚点） -->
     <AnchorJournalPanel :anchors="anchor.allAnchors.value" />
 
+    <!-- ============================================================ -->
+    <!-- 手札回溯（INCR-378 补挂载孤儿引擎 anchor-journals 查询纯函数 + anchor-journal-templates：那年今日/心情分布/组合检索/书写脚手架，薄委托） -->
+    <!-- ============================================================ -->
+    <AnchorJournalRetroPanel :journals="journals" />
+
     <!-- 时令元数据（INCR-256 补挂载孤儿组件：时辰·节气·季节·天气采集） -->
     <ZeitgeistPanel />
   </div>
@@ -509,6 +514,7 @@ import SmartReminderPanel from '../components/SmartReminderPanel.vue'
 import CalendarExportPanel from '../components/CalendarExportPanel.vue'
 import AnchorTimeScalePanel from '../components/AnchorTimeScalePanel.vue'
 import AnchorJournalPanel from '../components/AnchorJournalPanel.vue'
+import AnchorJournalRetroPanel from '../components/AnchorJournalRetroPanel.vue'
 import ZeitgeistPanel from '../components/ZeitgeistPanel.vue'
 
 const { entranceClass } = useViewEntrance()
