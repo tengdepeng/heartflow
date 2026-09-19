@@ -746,3 +746,45 @@ describe('集成：花丛分布面板', () => {
     expect(tag.text()).toBe('高精度')
   })
 })
+
+// ============================================================
+// 集成：花园叙事面板 GardenNarrativePanel（INCR-368 补挂载孤儿引擎 garden-narrative）
+// 引擎 useGardenNarrative 为纯内存 composable，onMounted 经 useEmotionGarden.load() 读取
+// mockRecords 并自动生成花语故事/成长日记/季节相册；断言用 .gnp- 类选择器避开整页文本干扰。
+// ============================================================
+describe('集成：花园叙事面板', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+    mockRecords.value = []
+  })
+
+  it('无记录时渲染空态引导', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.gnp').exists()).toBe(true)
+    expect(wrapper.find('.gnp-empty-hero').exists()).toBe(true)
+    expect(wrapper.text()).toContain('花园叙事')
+  })
+
+  it('有记录时挂载面板并生成花语故事/成长日记', async () => {
+    mockRecords.value = [{ id: 'n1', type: 'happy', note: '在花园里晒太阳', createdAt: new Date().toISOString() }]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    const gnp = wrapper.find('.gnp')
+    expect(gnp.exists()).toBe(true)
+    expect(gnp.find('.gnp-story').exists()).toBe(true)
+    expect(gnp.find('.gnp-badge').text()).toContain('轻快')
+    expect(gnp.text()).toContain('在花园里晒太阳')
+    expect(gnp.find('.gnp-diary-item').exists()).toBe(true)
+  })
+
+  it('有记录时生成季节相册卡片', async () => {
+    mockRecords.value = [{ id: 'n2', type: 'calm', note: '', createdAt: new Date().toISOString() }]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    const gnp = wrapper.find('.gnp')
+    expect(gnp.find('.gnp-album').exists()).toBe(true)
+    expect(gnp.find('.gnp-album-season').exists()).toBe(true)
+    expect(gnp.text()).toContain('季节相册')
+  })
+})

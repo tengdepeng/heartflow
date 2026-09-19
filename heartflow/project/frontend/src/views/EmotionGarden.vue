@@ -168,6 +168,9 @@
       <!-- 花丛分布（INCR-283 补挂载孤儿组件 FlowerClusterArchivePanel：按情绪品种统计花丛/健康分，经 useEmotionGarden 桥只读聚合记录，引擎与宿主同源但无归档等价物） -->
       <FlowerClusterArchivePanel />
 
+      <!-- 花园叙事（INCR-368 补挂载孤儿引擎 garden-narrative：花语故事/成长日记/季节相册/分享留言） -->
+      <GardenNarrativePanel />
+
       <!-- 筛选 -->
       <section class="filter-section">
         <div class="filter-group">
@@ -534,6 +537,7 @@ import EmotionTrendsPanel from '../components/EmotionTrendsPanel.vue'
 import VisitorFootprintsPanel from '../components/VisitorFootprintsPanel.vue'
 import FlowerHybridPanel from '../components/FlowerHybridPanel.vue'
 import FlowerClusterArchivePanel from '../components/FlowerClusterArchivePanel.vue'
+import GardenNarrativePanel from '../components/GardenNarrativePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'
