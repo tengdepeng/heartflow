@@ -68,7 +68,7 @@
             <button
               class="pm-btn-toggle"
               :class="{ active: p.enabled }"
-              @click="pluginBridge.toggle(p.manifest.meta.id)"
+              @click="togglePlugin(p)"
             >
               {{ p.enabled ? '禁用' : '启用' }}
             </button>
@@ -78,6 +78,99 @@
               @click="uninstall(p.manifest.meta.id)"
               title="卸载"
             >✕</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 沙箱运行状态 -->
+    <section data-enter class="pm-section pm-sandbox-section" data-testid="sandbox-runtime">
+      <h2 class="pm-section-title">
+        沙箱运行状态
+        <span class="pm-section-count">{{ sandboxSnapshot.guardRunning ? '守卫运行中' : '守卫未启动' }}</span>
+      </h2>
+
+      <!-- 守卫与整体概览 -->
+      <div class="pm-sandbox-overview">
+        <div class="pm-sandbox-stat" :class="{ warn: !sandboxSnapshot.guardRunning }">
+          <span class="pm-sandbox-stat-num">{{ sandboxSnapshot.guardedCount }}</span>
+          <span class="pm-sandbox-stat-label">被守卫沙箱</span>
+          <span class="pm-sandbox-dot" :class="{ on: sandboxSnapshot.guardRunning }"></span>
+        </div>
+        <div class="pm-sandbox-stat">
+          <span class="pm-sandbox-stat-num">{{ sandboxSnapshot.activeSandboxes }}<em>/{{ sandboxSnapshot.totalSandboxes }}</em></span>
+          <span class="pm-sandbox-stat-label">活跃 / 总数</span>
+        </div>
+        <div class="pm-sandbox-stat">
+          <span class="pm-sandbox-stat-num">{{ sandboxSnapshot.violationCount }}</span>
+          <span class="pm-sandbox-stat-label">累计违规</span>
+        </div>
+        <div class="pm-sandbox-stat">
+          <span class="pm-sandbox-stat-num">{{ sandboxSnapshot.downgradeCount }}</span>
+          <span class="pm-sandbox-stat-label">降级次数</span>
+        </div>
+      </div>
+
+      <!-- 等级分布 -->
+      <div class="pm-sandbox-tiers" role="group" aria-label="沙箱等级分布">
+        <div
+          v-for="t in ['L2', 'L1', 'L0'] as SandboxTier[]"
+          :key="t"
+          class="pm-sandbox-tier"
+        >
+          <span class="pm-sandbox-tier-name">{{ tierLabelMX(t) }}</span>
+          <span class="pm-sandbox-tier-bar">
+            <span
+              class="pm-sandbox-tier-fill"
+              :class="`tier-${t}`"
+              :style="{ width: sandboxRatio(t) + '%' }"
+            ></span>
+          </span>
+          <span class="pm-sandbox-tier-count">{{ sandboxSnapshot.tierDistribution[t] }}</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="pm-btn-update-all pm-btn-guard"
+        :disabled="sandboxSnapshot.guardRunning"
+        @click="startGuard"
+      >
+        {{ sandboxSnapshot.guardRunning ? '守卫已启动' : '启动守卫' }}
+      </button>
+
+      <!-- 每插件沙箱明细 -->
+      <div v-if="sandboxSnapshot.rows.length === 0" class="pm-empty-hint pm-sandbox-empty">
+        <span class="pm-empty-icon">🛡️</span>
+        <p>尚无可用沙箱环境</p>
+      </div>
+      <div v-else class="pm-sandbox-grid">
+        <div
+          v-for="row in sandboxSnapshot.rows"
+          :key="row.pluginId"
+          class="pm-sandbox-row"
+          :class="{ active: row.active }"
+          :data-plugin-id="row.pluginId"
+        >
+          <div class="pm-sandbox-icon">{{ row.icon }}</div>
+          <div class="pm-sandbox-info">
+            <div class="pm-sandbox-name">
+              {{ row.name }}
+              <span
+                v-if="row.sandboxTier"
+                class="pm-sandbox-tier-badge"
+                :class="`tier-${row.sandboxTier}`"
+                :title="row.tierDescription"
+              >{{ row.sandboxTier }}</span>
+              <span v-else class="pm-sandbox-tier-badge pending" title="尚未创建">未创建</span>
+            </div>
+            <div class="pm-sandbox-desc">
+              等级建议 {{ row.recommendedTier }} · 权限 {{ row.grantedPermissions }} 项
+              · API {{ row.apiCallCount }} 次
+            </div>
+          </div>
+          <div class="pm-sandbox-state" :class="{ on: row.active }">
+            {{ row.active ? '活跃' : '休眠' }}
           </div>
         </div>
       </div>
@@ -286,9 +379,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { usePlugin } from '../resonance/bridges/plugin'
 import type { PluginTier } from '../modules/plugin/types'
+import type { SandboxTier } from '../modules/plugin/sandbox/types'
 import type { MarketplaceEntry, PluginCategoryId } from '../modules/plugin/plugin-registry'
 import type { MarketplaceUpdate } from '../resonance/bridges/plugin'
 import type { PluginDependency } from '../modules/plugin/plugin-marketplace'
@@ -300,7 +394,57 @@ const { plugins } = pluginBridge
 
 onMounted(() => {
   pluginBridge.init()
+  startGuard()
 })
+
+// ---- 沙箱运行状态 ----
+
+/** 沙箱运行时快照（ref，随守卫轮询刷新；读 bridge 暴露的实时状态） */
+const sandboxSnapshot = ref(pluginBridge.sandboxRuntime.snapshot())
+
+/** 守卫与刷新轮询 */
+let sandboxTimer: ReturnType<typeof setInterval> | null = null
+
+function refreshSandbox() {
+  sandboxSnapshot.value = pluginBridge.sandboxRuntime.snapshot()
+}
+
+function startGuard() {
+  pluginBridge.sandboxRuntime.startGuard()
+
+  // 同步已启用插件 → 沙箱（核心插件默认启用，立即纳入守卫）
+  for (const p of plugins.value) {
+    if (p.enabled) {
+      pluginBridge.sandboxRuntime.enable(p.id)
+    }
+  }
+
+  // 定时刷新快照，感知守卫检查/资源计数/挂钩变化
+  if (!sandboxTimer) {
+    sandboxTimer = setInterval(refreshSandbox, 3000)
+  }
+  refreshSandbox()
+}
+
+onUnmounted(() => {
+  if (sandboxTimer) {
+    clearInterval(sandboxTimer)
+    sandboxTimer = null
+  }
+})
+
+/** 沙箱等级中文名 */
+const SANDBOX_TIER_LABEL: Record<SandboxTier, string> = { L2: '完全沙箱', L1: '受限沙箱', L0: '只读沙箱' }
+function tierLabelMX(t: SandboxTier): string {
+  return SANDBOX_TIER_LABEL[t] ?? t
+}
+
+/** 某等级沙箱占比（0-100） */
+function sandboxRatio(t: SandboxTier): number {
+  const total = sandboxSnapshot.value.totalSandboxes
+  if (total === 0) return 0
+  return Math.round((sandboxSnapshot.value.tierDistribution[t] / total) * 100)
+}
 
 // ---- 市场源注册表 ----
 const marketplace = pluginBridge.marketplace
@@ -405,8 +549,22 @@ function install(entry: MarketplaceEntry) {
       alert(`安装失败：${depName(pid)}`)
       return
     }
+    // 接线：为新增插件创建沙箱环境
+    pluginBridge.sandboxRuntime.install(e.manifest)
   }
+  refreshSandbox()
   animateInstalled(id)
+}
+
+/** 启用/禁用插件，并同步沙箱环境 */
+function togglePlugin(p: { manifest: { meta: { id: string } }; enabled: boolean }) {
+  pluginBridge.toggle(p.manifest.meta.id)
+  if (p.enabled) {
+    pluginBridge.sandboxRuntime.disable(p.manifest.meta.id)
+  } else {
+    pluginBridge.sandboxRuntime.enable(p.manifest.meta.id)
+  }
+  refreshSandbox()
 }
 
 /** 安装单个更新 */
@@ -414,6 +572,8 @@ function updatePlugin(u: MarketplaceUpdate) {
   const entry = marketplace.getAll().find(e => e.manifest.meta.id === u.pluginId)
   if (!entry) return
   if (pluginBridge.installPlugin(entry.manifest)) {
+    pluginBridge.sandboxRuntime.enable(u.pluginId)
+    refreshSandbox()
     animateInstalled(u.pluginId)
   }
 }
@@ -426,8 +586,12 @@ function updateAll() {
   let ok = 0
   for (const u of updates.value) {
     const entry = marketplace.getAll().find(e => e.manifest.meta.id === u.pluginId)
-    if (entry && pluginBridge.installPlugin(entry.manifest)) ok++
+    if (entry && pluginBridge.installPlugin(entry.manifest)) {
+      pluginBridge.sandboxRuntime.enable(u.pluginId)
+      ok++
+    }
   }
+  refreshSandbox()
   if (ok > 0) {
     alert(`已更新 ${ok} 个插件`)
   }
@@ -436,6 +600,8 @@ function updateAll() {
 function uninstall(id: string) {
   if (confirm('确定要卸载此插件吗？卸载后数据不受影响。')) {
     pluginBridge.uninstallPlugin(id)
+    pluginBridge.sandboxRuntime.uninstall(id)
+    refreshSandbox()
   }
 }
 
@@ -1135,6 +1301,221 @@ function tierLabel(t: PluginTier): string {
   30%  { transform: scale(1.03); }
   60%  { transform: scale(0.97); }
   100% { transform: scale(1); }
+}
+
+/* ---- Sandbox Runtime（沙箱运行状态） ---- */
+.pm-sandbox-section {
+  position: relative;
+}
+
+.pm-sandbox-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.pm-sandbox-stat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.pm-sandbox-stat.warn {
+  border-color: rgba(232,115,115,0.3);
+}
+
+.pm-sandbox-stat-num {
+  font-size: 20px;
+  font-weight: 600;
+  color: #ede0d4;
+  line-height: 1.1;
+}
+
+.pm-sandbox-stat-num em {
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(237,224,212,0.5);
+  font-style: normal;
+}
+
+.pm-sandbox-stat-label {
+  font-size: 10px;
+  color: rgba(237,224,212,0.6);
+}
+
+.pm-sandbox-dot {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(237,224,212,0.25);
+}
+
+.pm-sandbox-dot.on {
+  background: #7fd1a7;
+  box-shadow: 0 0 0 3px rgba(127,209,167,0.18);
+}
+
+/* ---- 等级分布 ---- */
+.pm-sandbox-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 14px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(var(--accent-rgb), 0.1);
+  border-radius: 10px;
+}
+
+.pm-sandbox-tier {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pm-sandbox-tier-name {
+  width: 64px;
+  flex-shrink: 0;
+  font-size: 11px;
+  color: rgba(237,224,212,0.7);
+}
+
+.pm-sandbox-tier-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.06);
+  overflow: hidden;
+}
+
+.pm-sandbox-tier-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  background: rgba(237,224,212,0.3);
+}
+
+.pm-sandbox-tier-fill.tier-L2 { background: #7fd1a7; }
+.pm-sandbox-tier-fill.tier-L1 { background: #e8b87a; }
+.pm-sandbox-tier-fill.tier-L0 { background: #8a9ab8; }
+
+.pm-sandbox-tier-count {
+  width: 24px;
+  flex-shrink: 0;
+  text-align: right;
+  font-size: 12px;
+  color: #ede0d4;
+  font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+}
+
+.pm-btn-guard {
+  margin-top: 2px;
+  width: 100%;
+}
+
+.pm-btn-guard:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---- 每插件沙箱 ---- */
+.pm-sandbox-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.pm-sandbox-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(var(--accent-rgb), 0.1);
+  border-radius: 10px;
+  opacity: 0.7;
+  transition: all 0.25s ease;
+}
+
+.pm-sandbox-row.active {
+  opacity: 1;
+  border-color: rgba(var(--accent-rgb), 0.22);
+}
+
+.pm-sandbox-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  border-radius: 8px;
+  background: rgba(var(--accent-rgb), 0.06);
+}
+
+.pm-sandbox-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pm-sandbox-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #ede0d4;
+  font-weight: 500;
+}
+
+.pm-sandbox-tier-badge {
+  font-size: 9px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.pm-sandbox-tier-badge.tier-L2 { background: rgba(127,209,167,0.16); color: #7fd1a7; }
+.pm-sandbox-tier-badge.tier-L1 { background: rgba(232,184,122,0.16); color: #e8b87a; }
+.pm-sandbox-tier-badge.tier-L0 { background: rgba(138,154,184,0.16); color: #aeb9d4; }
+.pm-sandbox-tier-badge.pending { background: rgba(237,224,212,0.08); color: rgba(237,224,212,0.55); }
+
+.pm-sandbox-desc {
+  margin-top: 3px;
+  font-size: 11px;
+  color: rgba(237,224,212,0.62);
+}
+
+.pm-sandbox-state {
+  flex-shrink: 0;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(237,224,212,0.06);
+  color: rgba(237,224,212,0.5);
+}
+
+.pm-sandbox-state.on {
+  background: rgba(127,209,167,0.14);
+  color: #7fd1a7;
+}
+
+.pm-sandbox-empty {
+  padding: 22px 16px;
 }
 
 /* ---- 响应式 ---- */

@@ -18,6 +18,13 @@ import {
   getDependencyTree,
 } from '../../modules/plugin/plugin-marketplace'
 import type { DependencyResolution } from '../../modules/plugin/plugin-marketplace'
+import {
+  PluginSandboxRuntime,
+} from '../../modules/plugin/sandbox/runtime-wiring'
+import type {
+  SandboxRuntimeSnapshot,
+  GuardedCallResult,
+} from '../../modules/plugin/sandbox/runtime-wiring'
 
 export function usePlugin() {
   const store = usePluginStore()
@@ -25,6 +32,9 @@ export function usePlugin() {
     plugins, initialized, installIssues, enabledPlugins, disabledPlugins,
     officialPlugins, communityPlugins, experimentalPlugins,
   } = storeToRefs(store)
+
+  // 沙箱运行时接线：复用 store.plugins 作为插件读取源
+  const pluginSandboxRuntime = new PluginSandboxRuntime(() => plugins.value)
 
   return {
     // 响应式状态
@@ -51,6 +61,26 @@ export function usePlugin() {
     listCapabilities: listAvailableCapabilities,
     findCapability: findCapabilityByKeyword,
     invokeCapability: invokePluginCapability,
+
+    // 沙箱运行时（插件运行时 ↔ 沙箱环境接线与状态可视化）
+    sandboxRuntime: {
+      /** 启动守卫（随插件初始化后调用） */
+      startGuard: () => pluginSandboxRuntime.startGuard(),
+      /** 启用插件 → 激活沙箱 */
+      enable: (id: string) => pluginSandboxRuntime.enable(id),
+      /** 禁用插件 → 停用沙箱 */
+      disable: (id: string) => pluginSandboxRuntime.disable(id),
+      /** 安装插件 → 创建沙箱 */
+      install: (manifest: Parameters<PluginSandboxRuntime['install']>[0]) =>
+        pluginSandboxRuntime.install(manifest),
+      /** 卸载插件 → 销毁沙箱 */
+      uninstall: (id: string) => pluginSandboxRuntime.uninstall(id),
+      /** 守卫式能力调用（记录 API 调用 + 活跃度检查） */
+      runGuarded: (pluginId: string, apiName: string, fn?: () => void): GuardedCallResult =>
+        pluginSandboxRuntime.runGuarded(pluginId, apiName, fn),
+      /** 运行时快照（供 UI 可视化） */
+      snapshot: (): SandboxRuntimeSnapshot => pluginSandboxRuntime.getSnapshot(),
+    },
 
     // 市场源注册表（市场源单一数据源）
     marketplace: {

@@ -214,4 +214,29 @@ describe('PluginMarket 插件市场', () => {
     expect(wrapper.text()).toContain('更新管理')
     expect(wrapper.text()).toContain('所有插件均已是最新版本')
   })
+
+  it('渲染沙箱运行状态区块', async () => {
+    const wrapper = await getWrapper()
+    const section = wrapper.find('[data-testid="sandbox-runtime"]')
+    expect(section.exists()).toBe(true)
+    expect(wrapper.text()).toContain('沙箱运行状态')
+  })
+
+  it('沙箱区块展示等级分布与守卫状态', async () => {
+    const wrapper = await getWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('完全沙箱')
+    expect(text).toContain('受限沙箱')
+    expect(text).toContain('只读沙箱')
+    // 守卫在 onMounted 启动
+    expect(text).toContain('守卫已启动')
+  })
+
+  it('沙箱区块展示已启用插件的沙箱行（推荐等级/API 计数）', async () => {
+    const wrapper = await getWrapper()
+    const rows = wrapper.findAll('.pm-sandbox-row')
+    expect(rows.length).toBeGreaterThan(0)
+    // 已启用插件（test-plugin）被同步为活跃沙箱
+    expect(wrapper.text()).toContain('测试插件')
+  })
 })

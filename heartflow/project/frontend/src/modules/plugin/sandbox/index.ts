@@ -49,3 +49,17 @@ export type {
   ViolationRecord,
   DowngradeRecord,
 } from './guard'
+
+// 运行时接线层（插件运行时 ↔ 沙箱环境）
+export {
+  PluginSandboxRuntime,
+  TIER_TO_SANDBOX,
+  recommendSandboxTier,
+  pluginPermissionsToSandbox,
+} from './runtime-wiring'
+
+export type {
+  SandboxRuntimeSnapshot,
+  SandboxRuntimeRow,
+  GuardedCallResult,
+} from './runtime-wiring'
