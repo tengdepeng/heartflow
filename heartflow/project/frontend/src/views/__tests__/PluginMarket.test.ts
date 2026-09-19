@@ -99,12 +99,11 @@ vi.mock('../../modules/plugin/plugin-registry', () => ({
   },
 }))
 
-// ---- 模拟 types ----
-vi.mock('../../modules/plugin/types', () => ({
-  PluginManifest: {},
-  PluginTier: {},
-  CORE_PLUGINS: [],
-}))
+// ---- 模拟 types（保留真实导出：能力 API 文档数据源依赖 PERMISSION_LABELS / CORE_PLUGINS） ----
+vi.mock('../../modules/plugin/types', async () => {
+  const actual = await vi.importActual<any>('../../modules/plugin/types')
+  return actual
+})
 
 // ---- 模拟 pinia ----
 vi.mock('pinia', () => ({
@@ -153,9 +152,60 @@ describe('PluginMarket 插件市场', () => {
     expect(wrapper.text()).toContain('可安装插件')
   })
 
-  it('显示开发指南区域', async () => {
+  it('渲染能力 API 文档区块', async () => {
     const wrapper = await getWrapper()
-    expect(wrapper.text()).toContain('开发指南')
+    const section = wrapper.find('[data-testid="capability-docs"]')
+    expect(section.exists()).toBe(true)
+    expect(wrapper.text()).toContain('能力 API 文档')
+  })
+
+  it('能力文档展示权限模型表（含派生沙箱权限）', async () => {
+    const wrapper = await getWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('权限模型')
+    expect(text).toContain('read:current')
+    expect(text).toContain('context:read')
+    expect(text).toContain('session:read')
+    expect(text).toContain('write:data')
+  })
+
+  it('能力文档展示沙箱三级模型与分级映射', async () => {
+    const wrapper = await getWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('沙箱三级模型')
+    expect(text).toContain('完全沙箱')
+    expect(text).toContain('受限沙箱')
+    expect(text).toContain('只读沙箱')
+    expect(text).toContain('官方')
+    expect(text).toContain('社区')
+    expect(text).toContain('实验')
+  })
+
+  it('能力文档列举可折叠能力 API 引用与门控流程', async () => {
+    const wrapper = await getWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('能力 API 引用')
+    expect(text).toContain('invokePluginCapability')
+    expect(text).toContain('registerPluginCapability')
+    expect(text).toContain('runGuarded')
+    expect(text).toContain('调用门控流程')
+    expect(text).toContain('权限已授予')
+  })
+
+  it('能力文档实时展示当前可用能力', async () => {
+    const wrapper = await getWrapper()
+    const items = wrapper.findAll('.pm-doc-live-item')
+    expect(items.length).toBeGreaterThan(0)
+    expect(wrapper.text()).toContain('启动专注')
+    expect(wrapper.text()).toContain('结晶统计')
+  })
+
+  it('能力文档区块可折叠切换', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.pm-doc-block').length).toBeGreaterThan(0)
+    const header = wrapper.find('.pm-docs-header')
+    await header.trigger('click')
+    expect(wrapper.findAll('.pm-doc-block').length).toBe(0)
   })
 
   it('概览显示真实市场统计（可安装数/分类数）', async () => {

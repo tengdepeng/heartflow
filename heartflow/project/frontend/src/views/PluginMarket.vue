@@ -306,71 +306,130 @@
       </div>
     </section>
 
-    <!-- 开发指南 -->
-    <section class="pm-section pm-guide-section">
-      <h2 class="pm-section-title">开发指南</h2>
-      <div class="pm-guide-card">
-        <div class="pm-guide-icon">📘</div>
-        <div class="pm-guide-content">
-          <h3 class="pm-guide-title">插件开发入门</h3>
-          <p class="pm-guide-desc">
-            插件是基于 PluginManifest 声明的功能模块，支持从社区动态安装。
-            每个插件运行在独立的沙箱环境中，通过注册的 API 端点与系统交互。
-          </p>
-          <div class="pm-guide-api-list">
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">data:read</code>
-              <span class="pm-api-desc">读取会话、结晶、笔记、情绪等数据</span>
-            </div>
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">data:write</code>
-              <span class="pm-api-desc">写入笔记和情绪记录（受限）</span>
-            </div>
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">navigation</code>
-              <span class="pm-api-desc">导航到指定路由路径</span>
-            </div>
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">notification</code>
-              <span class="pm-api-desc">发送系统通知</span>
-            </div>
-          </div>
-          <div class="pm-guide-tip">
-            <strong>提示：</strong>插件 manifest 通过 <code>createExternalManifest(id, name, version, description, author)</code> 创建，然后使用 <code>pluginStore.installPlugin(manifest)</code> 安装。
-          </div>
-        </div>
+    <!-- 能力 API 文档 -->
+    <section class="pm-section pm-docs-section" data-testid="capability-docs">
+      <div
+        class="pm-docs-header"
+        role="button"
+        tabindex="0"
+        :aria-expanded="docsCollapsed ? 'false' : 'true'"
+        @click="docsCollapsed = !docsCollapsed"
+        @keydown.enter="docsCollapsed = !docsCollapsed"
+      >
+        <h2 class="pm-section-title pm-docs-title">
+          能力 API 文档
+          <span class="pm-section-count">{{ capabilityDocs.liveCapabilities.length }} 项可用能力</span>
+        </h2>
+        <span class="pm-docs-toggle" :class="{ open: !docsCollapsed }">▾</span>
       </div>
 
-      <!-- 数据引渡插件开发说明 -->
-      <div class="pm-guide-card" style="margin-top: 14px;">
-        <div class="pm-guide-icon">🔌</div>
-        <div class="pm-guide-content">
-          <h3 class="pm-guide-title">数据引渡插件开发</h3>
-          <p class="pm-guide-desc">
-            数据引渡插件通过实现 <code>DataConverter</code> 接口，注册自定义的导入/导出格式转换器，
-            扩展数据档案馆的导入导出能力。每个转换器可独立声明支持的输入/输出格式。
-          </p>
-          <div class="pm-guide-api-list">
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">registerConverter</code>
-              <span class="pm-api-desc">注册转换器到全局注册表</span>
+      <div v-if="!docsCollapsed" class="pm-docs-body">
+        <!-- 权限模型 -->
+        <div class="pm-doc-block">
+          <h3 class="pm-doc-subtitle">权限模型</h3>
+          <p class="pm-doc-lead">插件声明的权限经门控后映射到沙箱底层权限，可逐项开启形成 granted 子集。</p>
+          <div class="pm-doc-table" role="table" aria-label="权限模型">
+            <div class="pm-doc-row pm-doc-head">
+              <span class="pm-doc-cell pm-doc-perm">权限</span>
+              <span class="pm-doc-cell">含义</span>
+              <span class="pm-doc-cell">最低沙箱等级</span>
+              <span class="pm-doc-cell pm-doc-wide">派生沙箱权限</span>
             </div>
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">unregisterConverter</code>
-              <span class="pm-api-desc">从注册表移除指定转换器</span>
-            </div>
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">toPayload(data, format)</code>
-              <span class="pm-api-desc">将外部格式解析为标准 DataPortPayload</span>
-            </div>
-            <div class="pm-guide-api-item">
-              <code class="pm-api-name">fromPayload(payload, format)</code>
-              <span class="pm-api-desc">将标准 DataPortPayload 序列化为外部格式</span>
+            <div v-for="p in capabilityDocs.permissionModel" :key="p.permission" class="pm-doc-row">
+              <code class="pm-doc-cell pm-doc-perm">{{ p.permission }}</code>
+              <span class="pm-doc-cell">{{ p.label }}</span>
+              <span class="pm-doc-cell"><em class="pm-doc-tier">{{ sandboxTierLabel(p.requiredTier) }}</em></span>
+              <span class="pm-doc-cell pm-doc-wide pm-doc-code-wrap">{{ p.sandboxPermissions.join(' · ') }}</span>
             </div>
           </div>
-          <div class="pm-guide-tip">
-            <strong>示例：</strong>自定义转换器通过 <code>import { registerConverter } from '../engine/data-port-converter'</code>
-            注册，实现 <code>DataConverter</code> 接口即可。内置转换器包括 JSON、Markdown 和 CSV 格式。
+        </div>
+
+        <!-- 沙箱模型 -->
+        <div class="pm-doc-block">
+          <h3 class="pm-doc-subtitle">沙箱三级模型</h3>
+          <div class="pm-doc-tiers">
+            <div
+              v-for="s in capabilityDocs.sandboxModel"
+              :key="s.tier"
+              class="pm-doc-tier-card"
+              :class="`tier-bg-${s.tier}`"
+            >
+              <div class="pm-doc-tier-title">{{ sandboxTierLabel(s.tier) }}沙箱 <em>{{ s.tier }}</em></div>
+              <p class="pm-doc-tier-desc">{{ s.description }}</p>
+              <div class="pm-doc-tier-meta">{{ s.permissions.length }} 项权限 · {{ limitText(s.limits) }}</div>
+            </div>
+          </div>
+          <div class="pm-doc-mapping">
+            <span
+              v-for="t in capabilityDocs.tierMapping"
+              :key="t.pluginTier"
+              class="pm-doc-map-chip"
+            >{{ t.label }} → {{ sandboxTierLabel(t.sandboxTier) }}沙箱</span>
+          </div>
+        </div>
+
+        <!-- 能力 API 引用 -->
+        <div class="pm-doc-block">
+          <h3 class="pm-doc-subtitle">能力 API 引用</h3>
+          <div class="pm-doc-api-list">
+            <div v-for="api in capabilityDocs.capabilityApis" :key="api.name" class="pm-doc-api-item">
+              <code class="pm-doc-api-name">{{ api.signature }}</code>
+              <span class="pm-doc-api-desc">{{ api.description }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 门控流程 -->
+        <div class="pm-doc-block">
+          <h3 class="pm-doc-subtitle">调用门控流程</h3>
+          <ol class="pm-doc-gates">
+            <li v-for="g in capabilityDocs.runtimeGates" :key="g.order" class="pm-doc-gate">
+              <span class="pm-doc-gate-no">{{ g.order }}</span>
+              <div class="pm-doc-gate-text"><strong>{{ g.name }}</strong> —— {{ g.description }}</div>
+            </li>
+          </ol>
+        </div>
+
+        <!-- Manifest 规范 -->
+        <div class="pm-doc-block">
+          <h3 class="pm-doc-subtitle">Manifest 规范</h3>
+          <div class="pm-doc-table" role="table" aria-label="Manifest 字段规范">
+            <div class="pm-doc-row pm-doc-head">
+              <span class="pm-doc-cell pm-doc-perm">字段</span>
+              <span class="pm-doc-cell">类型</span>
+              <span class="pm-doc-cell">必填</span>
+              <span class="pm-doc-cell pm-doc-wide">说明</span>
+            </div>
+            <div v-for="f in capabilityDocs.manifestSpec" :key="f.field" class="pm-doc-row">
+              <code class="pm-doc-cell pm-doc-perm">{{ f.field }}</code>
+              <span class="pm-doc-cell pm-doc-code-wrap">{{ f.type }}</span>
+              <span class="pm-doc-cell">{{ f.required ? '✔' : '—' }}</span>
+              <span class="pm-doc-cell pm-doc-wide">{{ f.description }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 实时可用能力 -->
+        <div class="pm-doc-block">
+          <h3 class="pm-doc-subtitle">当前可用能力</h3>
+          <p class="pm-doc-lead">仅插件已启用且权限已授予的能力出现在这里，随启停与授权实时更新。</p>
+          <div v-if="capabilityDocs.liveCapabilities.length === 0" class="pm-doc-empty">当前没有可用能力</div>
+          <div v-else class="pm-doc-live">
+            <div
+              v-for="(c, i) in capabilityDocs.liveCapabilities"
+              :key="`${c.pluginId}:${c.capability.id}`"
+              class="pm-doc-live-item"
+            >
+              <span class="pm-doc-live-no">{{ i + 1 }}</span>
+              <div class="pm-doc-live-main">
+                <div class="pm-doc-live-name">{{ c.capability.label }} <code>{{ c.capability.id }}</code></div>
+                <div class="pm-doc-live-desc">{{ c.capability.description }}</div>
+              </div>
+              <div class="pm-doc-live-meta">
+                <span class="pm-doc-live-chip">{{ c.pluginName }}</span>
+                <span class="pm-doc-live-chip">{{ permissionLabel(c.capability.permission) }}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -386,6 +445,7 @@ import type { SandboxTier } from '../modules/plugin/sandbox/types'
 import type { MarketplaceEntry, PluginCategoryId } from '../modules/plugin/plugin-registry'
 import type { MarketplaceUpdate } from '../resonance/bridges/plugin'
 import type { PluginDependency } from '../modules/plugin/plugin-marketplace'
+import type { CapabilityApiDocs } from '../modules/plugin/capability-docs'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -396,6 +456,43 @@ onMounted(() => {
   pluginBridge.init()
   startGuard()
 })
+
+// ---- 能力 API 文档（从真实常量派生的开发指南数据源） ----
+const capabilityDocs = ref<CapabilityApiDocs>(pluginBridge.capabilityDocs())
+
+/** 文档区块折叠开关 */
+const docsCollapsed = ref(false)
+
+/** 刷新文档（能力启用/授权状态变化后实时更新「可用能力」） */
+function refreshDocs() {
+  capabilityDocs.value = pluginBridge.capabilityDocs()
+}
+
+/** 沙箱等级中文名 */
+function sandboxTierLabel(tier: string): string {
+  const map: Record<string, string> = { L0: '只读', L1: '受限', L2: '完全' }
+  return map[tier] ?? tier
+}
+
+/** 资源限制可读化（取内存上限） */
+function limitText(limit: { maxMemoryMB: number; maxAPICallsPerMinute: number }): string {
+  return `${limit.maxMemoryMB} MB · ${limit.maxAPICallsPerMinute} 次/分`
+}
+
+/** 能力所需权限的权限中文名 */
+function permissionLabel(perm: string): string {
+  const m: Record<string, string> = {
+    'read:current': '读当前上下文',
+    'read:history': '读历史',
+    'write:data': '写数据',
+    'export:data': '导出',
+    network: '网络',
+    filesystem: '文件系统',
+    read_sessions: '读会话',
+    read_notes: '读笔记',
+  }
+  return m[perm] ?? perm
+}
 
 // ---- 沙箱运行状态 ----
 
@@ -424,6 +521,7 @@ function startGuard() {
     sandboxTimer = setInterval(refreshSandbox, 3000)
   }
   refreshSandbox()
+  refreshDocs()
 }
 
 onUnmounted(() => {
@@ -565,6 +663,7 @@ function togglePlugin(p: { manifest: { meta: { id: string } }; enabled: boolean 
     pluginBridge.sandboxRuntime.enable(p.manifest.meta.id)
   }
   refreshSandbox()
+  refreshDocs()
 }
 
 /** 安装单个更新 */
@@ -1191,106 +1290,6 @@ function tierLabel(t: PluginTier): string {
   margin-bottom: 10px;
 }
 
-/* ---- Guide ---- */
-.pm-guide-card {
-  display: flex;
-  gap: 16px;
-  padding: 20px;
-  background: var(--bg-surface);
-  border: 1px solid rgba(var(--accent-rgb), 0.08);
-  border-radius: 10px;
-  position: relative;
-}
-
-.pm-guide-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.15), transparent);
-  pointer-events: none;
-}
-
-.pm-guide-icon {
-  font-size: 30px;
-  flex-shrink: 0;
-  width: 46px;
-  height: 46px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: rgba(var(--accent-rgb), 0.06);
-}
-
-.pm-guide-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.pm-guide-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #ede0d4;
-  margin-bottom: 6px;
-}
-
-.pm-guide-desc {
-  font-size: 12px;
-  color: rgba(237,224,212,0.68);
-  line-height: 1.7;
-  margin-bottom: 14px;
-}
-
-.pm-guide-api-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
-}
-
-.pm-guide-api-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 12px;
-}
-
-.pm-api-name {
-  font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
-  font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: rgba(var(--accent-rgb), 0.08);
-  color: var(--accent);
-  white-space: nowrap;
-}
-
-.pm-api-desc {
-  color: rgba(237,224,212,0.68);
-}
-
-.pm-guide-tip {
-  font-size: 12px;
-  color: rgba(237,224,212,0.72);
-  background: rgba(var(--accent-rgb), 0.04);
-  padding: 10px 14px;
-  border-radius: 6px;
-  line-height: 1.7;
-  border: 1px solid rgba(var(--accent-rgb), 0.06);
-}
-
-.pm-guide-tip code {
-  font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
-  font-size: 11px;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgba(var(--accent-rgb), 0.08);
-  color: var(--accent);
-}
-
 /* ---- Install Animation (kept for script compat) ---- */
 .installed-anim {
   animation: pm-install-pop 0.6s ease;
@@ -1633,39 +1632,6 @@ function tierLabel(t: PluginTier): string {
   .pm-installed-label {
     font-size: 9px;
   }
-
-  .pm-guide-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 16px;
-  }
-
-  .pm-guide-icon {
-    font-size: 28px;
-  }
-
-  .pm-guide-title {
-    font-size: 15px;
-  }
-
-  .pm-guide-desc {
-    font-size: 12px;
-  }
-
-  .pm-guide-api-list {
-    gap: 2px;
-  }
-
-  .pm-guide-api-item {
-    font-size: 11px;
-    padding: 4px 8px;
-  }
-
-  .pm-guide-tip {
-    font-size: 11px;
-    padding: 8px 12px;
-  }
 }
 
 @media (max-width: 640px) {
@@ -1782,24 +1748,364 @@ function tierLabel(t: PluginTier): string {
   .pm-empty-hint .pm-empty-hint {
     font-size: 11px;
   }
+}
 
-  .pm-guide-card {
-    padding: 14px;
+/* ============================================================
+   能力 API 文档区块
+   ============================================================ */
+.pm-docs-section {
+  margin-top: 20px;
+}
+
+.pm-docs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.pm-docs-toggle {
+  color: rgba(237, 224, 212, 0.48);
+  font-size: 18px;
+  transition: transform 0.25s ease;
+  display: inline-block;
+}
+
+.pm-docs-toggle.open {
+  transform: rotate(180deg);
+}
+
+.pm-docs-body {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pm-doc-block {
+  border: 1px solid rgba(237, 224, 212, 0.1);
+  background: rgba(237, 224, 212, 0.03);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.pm-doc-subtitle {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(237, 224, 212, 0.92);
+  letter-spacing: 0.03em;
+}
+
+.pm-doc-lead {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(237, 224, 212, 0.6);
+}
+
+/* 文档表格 */
+.pm-doc-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pm-doc-row {
+  display: grid;
+  grid-template-columns: 120px 96px 100px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(237, 224, 212, 0.72);
+}
+
+.pm-doc-row.pm-doc-head {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(200, 180, 150, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(237, 224, 212, 0.04);
+}
+
+.pm-doc-cell {
+  min-width: 0;
+}
+
+.pm-doc-perm {
+  font-size: 12px;
+}
+
+.pm-doc-wide {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.pm-doc-code-wrap {
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.pm-doc-tier {
+  font-style: normal;
+  color: var(--accent, #d8b98a);
+  font-weight: 600;
+}
+
+/* 沙箱三级卡片 */
+.pm-doc-tiers {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.pm-doc-tier-card {
+  border: 1px solid rgba(237, 224, 212, 0.1);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.pm-doc-tier-card.tier-bg-L2 {
+  border-color: rgba(127, 209, 167, 0.34);
+  background: rgba(127, 209, 167, 0.06);
+}
+
+.pm-doc-tier-card.tier-bg-L1 {
+  border-color: rgba(232, 184, 122, 0.34);
+  background: rgba(232, 184, 122, 0.06);
+}
+
+.pm-doc-tier-card.tier-bg-L0 {
+  border-color: rgba(138, 154, 184, 0.34);
+  background: rgba(138, 154, 184, 0.06);
+}
+
+.pm-doc-tier-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(237, 224, 212, 0.92);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pm-doc-tier-title em {
+  font-style: normal;
+  font-size: 10px;
+  color: rgba(237, 224, 212, 0.5);
+  border: 1px solid rgba(237, 224, 212, 0.16);
+  border-radius: 999px;
+  padding: 0 6px;
+}
+
+.pm-doc-tier-desc {
+  margin: 6px 0;
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(237, 224, 212, 0.62);
+}
+
+.pm-doc-tier-meta {
+  font-size: 11px;
+  color: rgba(237, 224, 212, 0.48);
+}
+
+.pm-doc-mapping {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pm-doc-map-chip {
+  font-size: 11px;
+  color: rgba(237, 224, 212, 0.78);
+  background: rgba(237, 224, 212, 0.07);
+  border: 1px solid rgba(237, 224, 212, 0.12);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+/* API 引用 */
+.pm-doc-api-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pm-doc-api-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(237, 224, 212, 0.03);
+  border-left: 2px solid rgba(216, 185, 138, 0.4);
+}
+
+.pm-doc-api-name {
+  font-size: 12px;
+  color: var(--accent, #d8b98a);
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.pm-doc-api-desc {
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(237, 224, 212, 0.6);
+}
+
+/* 门控流程 */
+.pm-doc-gates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pm-doc-gate {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.pm-doc-gate-no {
+  flex: 0 0 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(216, 185, 138, 0.16);
+  color: var(--accent, #d8b98a);
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pm-doc-gate-text {
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(237, 224, 212, 0.72);
+}
+
+.pm-doc-gate-text strong {
+  color: rgba(237, 224, 212, 0.92);
+}
+
+/* 实时可用能力 */
+.pm-doc-live {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pm-doc-live-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(237, 224, 212, 0.03);
+  border: 1px solid rgba(237, 224, 212, 0.08);
+}
+
+.pm-doc-live-no {
+  flex: 0 0 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(237, 224, 212, 0.08);
+  color: rgba(237, 224, 212, 0.55);
+  font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pm-doc-live-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pm-doc-live-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(237, 224, 212, 0.92);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pm-doc-live-name code {
+  font-size: 11px;
+  color: rgba(237, 224, 212, 0.5);
+  background: rgba(237, 224, 212, 0.06);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.pm-doc-live-desc {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(237, 224, 212, 0.6);
+}
+
+.pm-doc-live-meta {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 6px;
+}
+
+.pm-doc-live-chip {
+  font-size: 11px;
+  color: rgba(237, 224, 212, 0.72);
+  border: 1px solid rgba(237, 224, 212, 0.12);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.pm-doc-empty {
+  font-size: 12px;
+  color: rgba(237, 224, 212, 0.48);
+  padding: 8px;
+}
+
+@media (max-width: 760px) {
+  .pm-doc-tiers {
+    grid-template-columns: 1fr;
   }
 
-  .pm-guide-title {
-    font-size: 14px;
+  .pm-doc-row {
+    grid-template-columns: 96px 84px 76px minmax(0, 1fr);
+    gap: 6px;
   }
 
-  .pm-guide-api-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  .pm-doc-live-item {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 520px) {
+  .pm-doc-row {
+    grid-template-columns: 84px 1fr;
   }
 
-  .pm-guide-api-item {
-    width: 100%;
-    box-sizing: border-box;
+  .pm-doc-row .pm-doc-cell:nth-child(3),
+  .pm-doc-row .pm-doc-cell:nth-child(4) {
+    grid-column: 2;
+  }
+
+  .pm-doc-live-meta {
+    flex-wrap: wrap;
   }
 }
 </style>

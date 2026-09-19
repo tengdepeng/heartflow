@@ -13,6 +13,8 @@ import {
 import {
   pluginMarketplaceRegistry,
 } from '../../modules/plugin/plugin-registry'
+import { getCapabilityApiDocs } from '../../modules/plugin/capability-docs'
+import type { CapabilityApiDocs } from '../../modules/plugin/capability-docs'
 import {
   resolveDependencies as resolveGraph,
   getDependencyTree,
@@ -61,6 +63,9 @@ export function usePlugin() {
     listCapabilities: listAvailableCapabilities,
     findCapability: findCapabilityByKeyword,
     invokeCapability: invokePluginCapability,
+
+    // 能力 API 文档（开发指南结构化数据源，含实时可用能力）
+    capabilityDocs: (): CapabilityApiDocs => getCapabilityApiDocs(),
 
     // 沙箱运行时（插件运行时 ↔ 沙箱环境接线与状态可视化）
     sandboxRuntime: {

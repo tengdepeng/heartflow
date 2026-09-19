@@ -23,6 +23,18 @@ export type {
   ManifestIssueSeverity,
 } from './manifest-validator'
 
+// ---- 能力 API 文档（开发指南结构化数据源，从真实常量派生） ----
+export { getCapabilityApiDocs } from './capability-docs'
+export type {
+  CapabilityApiDocs,
+  PermissionDocRow,
+  SandboxTierDocRow,
+  TierMappingRow,
+  CapabilityApiDoc,
+  RuntimeGateDoc,
+  ManifestFieldDoc,
+} from './capability-docs'
+
 // ---- 插件调度器 ----
 export { usePluginScheduler, DEFAULT_SCHEDULER_CONFIG, PRIORITY_META, PRIORITY_WEIGHT } from './plugin-scheduler'
 export type {
