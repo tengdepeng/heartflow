@@ -115,3 +115,7 @@ vuetsc_*.txt
 node_*.txt
 hf-audit-*.txt
 记录问题.txt
+
+# ---- 2026-09-19 收拢: 根级一次性审计/清理临时件（留盘不入库） ----
+_numstat_check.cjs
+deleted_files.txt

@@ -148,3 +148,24 @@ project/frontend/scripts/orphan-*.ps1
 project/frontend/scripts/smoke-shots/
 project/frontend/scripts/probe-*.cjs
 project/frontend/scripts/route-*.js
+
+# ---- 2026-09-19 收拢: 任一分析/QA 扫描临时件与构建/截图产物（留盘不入库） ----
+# 扫描/审计脚本(.js 变体)与结果文本
+scan-*.js
+scan-*.txt
+scan-*.vue
+apply-*.js
+check-*.js
+filter-*.js
+fix-*.js
+*_numstat_check.cjs
+.git-commit-cp.txt
+deleted_files.txt
+# 房间打磨(room polish)QA 截图（扁平化命名产物）
+Heartflowheartflow*.png
+roompolish*.png
+# 一键房间头部评审概览（scratch）
+P1-3-roomheader-overview.md
+# 构建/QA 截图产物目录(任意层级) 与 .pm-verify 校验状态
+artifacts/
+.pm-verify/
