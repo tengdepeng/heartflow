@@ -36,8 +36,8 @@ export type { EmotionRecord, EmotionType } from './emotion'
 export { useGesture } from './gesture'
 export type { GestureType, GestureEvent, GestureConfig } from './gesture'
 
-export { useGoal } from './goal'
-export type { Goal, GoalTier, GoalStatus } from './goal'
+export { useGoal, useGoalBridge } from './goal'
+export type { Goal, GoalTier, GoalStatus, GoalSummary } from './goal'
 
 export { usePluginManager } from './plugin'
 export type { PluginManifest, PluginRuntime, PluginPermission } from './plugin'

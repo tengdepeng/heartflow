@@ -161,6 +161,9 @@
     <!-- 进度统计 -->
     <GoalProgressPanel :goals="goal.goals.value" />
 
+    <!-- 留光阁桥接总览（goal-bridge 聚合驾驶舱：总览/梯度/状态/健康关注/旧梦潭，INCR-380） -->
+    <GoalBridgePanel />
+
     <!-- 心愿清单（garden/wish-list 引擎，习惯联动解锁，INCR-182） -->
     <WishListPanel />
 
@@ -204,6 +207,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import type { GoalStatus } from '../modules/goal'
 import GoalVisualizationPanel from '../components/GoalVisualizationPanel.vue'
 import GoalProgressPanel from '../components/GoalProgressPanel.vue'
+import GoalBridgePanel from '../components/GoalBridgePanel.vue'
 import HabitReviewPanel from '../components/HabitReviewPanel.vue'
 import WishListPanel from '../components/WishListPanel.vue'
 import GrowthMeteorPanel from '../components/GrowthMeteorPanel.vue'

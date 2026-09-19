@@ -44,6 +44,10 @@ export {
 } from './old-dream'
 export type { OldDreamGroup, OldDreamOverview } from './old-dream'
 
+// ---- 留光阁桥接层（INCR-380 补孤儿桥接导出：目标内聚驾驶舱零消费） ----
+export { useGoalBridge } from './goal-bridge'
+export type { GoalSummary } from './goal-bridge'
+
 const OLD_DREAMS_KEY = 'goal_old_dreams'
 
 function loadAll(): Goal[] {
