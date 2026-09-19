@@ -45,17 +45,47 @@
       </ul>
       <p v-else class="rc-empty">暂无背诵卡。添加一段想背的文本开始。</p>
     </div>
+
+    <!-- 背诵档案 -->
+    <div class="rc-block" v-if="cards.length">
+      <span class="rc-block-label">背诵档案</span>
+      <div class="rc-arc-metrics">
+        <div class="rc-arc-metric"><b>{{ ov.total }}</b><span>卡片</span></div>
+        <div class="rc-arc-metric"><b>{{ ov.mastered }}</b><span>已背熟</span></div>
+        <div class="rc-arc-metric"><b>{{ ov.avgBestAccuracy }}%</b><span>均最佳</span></div>
+        <div class="rc-arc-metric"><b>{{ rhythm.passRate }}%</b><span>达标率</span></div>
+      </div>
+      <div v-if="rcSteps.length" class="rc-arc-steps">
+        <div v-for="row in rcSteps" :key="row.stepIndex" class="rc-arc-step">
+          <span class="rc-arc-step-label">{{ row.label }}</span>
+          <span class="rc-arc-step-bar"><i :style="{ width: stepPct(row.count) }"></i></span>
+          <span class="rc-arc-step-n">{{ row.count }}</span>
+        </div>
+      </div>
+      <div v-if="rhythm.weakTokens.length" class="rc-arc-weak">
+        <span class="rc-arc-weak-label">薄弱字：</span>
+        <span v-for="w in rhythm.weakTokens" :key="w.token" class="rc-arc-weak-tok">「{{ w.token }}」×{{ w.count }}</span>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { useRecite } from '../modules/recite'
+import { useRecite, reciteOverview, reciteStepDistribution, reciteRhythm } from '../modules/recite'
 import type { ReciteCard, ReciteResult, TextLang } from '../modules/recite'
 
 const recite = useRecite()
 const cards = computed(() => recite.cards.value)
 const steps = computed(() => recite.steps)
+// 背诵档案（并入自 ReciteStudioPanel）：概览指标 + 分档分布 + 薄弱字
+const ov = computed(() => reciteOverview(cards.value))
+const rcSteps = computed(() => reciteStepDistribution(cards.value))
+const rhythm = computed(() => reciteRhythm(cards.value))
+function stepPct(count: number): string {
+  const max = Math.max(...rcSteps.value.map((s) => s.count), 1)
+  return `${Math.round((count / max) * 100)}%`
+}
 
 const form = reactive({ title: '', text: '', lang: 'cjk' as TextLang })
 const practiceId = ref<string | null>(null)
@@ -278,6 +308,77 @@ function submit(id: string) {
 }
 .rc-wrong {
   color: var(--text-low);
+}
+.rc-arc-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.rc-arc-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.rc-arc-metric b {
+  font-size: 16px;
+  color: rgba(240, 242, 255, 0.9);
+  font-variant-numeric: tabular-nums;
+}
+.rc-arc-metric span {
+  font-size: 10px;
+  color: var(--text-low);
+}
+.rc-arc-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+.rc-arc-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+.rc-arc-step-label {
+  width: 44px;
+  color: var(--text-medium);
+}
+.rc-arc-step-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.rc-arc-step-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(138, 154, 122, 0.5), #8a9a7a);
+}
+.rc-arc-step-n {
+  width: 20px;
+  text-align: right;
+  color: var(--text-low);
+  font-variant-numeric: tabular-nums;
+}
+.rc-arc-weak {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 11px;
+}
+.rc-arc-weak-label {
+  color: var(--text-medium);
+}
+.rc-arc-weak-tok {
+  color: #e0988a;
 }
 .rc-empty {
   margin: 0;

@@ -14,6 +14,12 @@
       <!-- 花园气象 -->
       <div class="ufw-card">
         <span class="ufw-card-t">🌤 花园气象</span>
+        <div class="ufw-gauge-wrap">
+          <div class="ufw-gauge" :style="{ background: progressRing }">
+            <span class="ufw-gauge-num">{{ stats.completionRate }}<i>%</i></span>
+          </div>
+          <span class="ufw-gauge-label">收束率</span>
+        </div>
         <div class="ufw-facts">
           <span>共 {{ stats.total }} 件</span>
           <span>已完成 {{ stats.completed }}</span>
@@ -98,6 +104,12 @@ import {
 const props = defineProps<{ items: UItem[] }>()
 
 const stats = computed(() => gardenStats(props.items))
+// 收束率圆环色：从尘青到成熟金（并入自 GardenMomentumPanel）
+const progressRing = computed(() => {
+  const r = stats.value.completionRate
+  const hue = r >= 60 ? 38 : r >= 30 ? 48 : 168
+  return `conic-gradient(hsl(${hue} 60% 55%) ${r * 3.6}deg, rgba(var(--accent-rgb), 0.1) ${r * 3.6}deg)`
+})
 const ranked = computed(() => rankForPickup(props.items))
 const todayPick = computed(() => pickUpSuggestion(props.items))
 const insights = computed(() => gardenInsights(props.items))
@@ -200,6 +212,46 @@ function bucketMeta(k: BucketKey) {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 14px;
+}
+.ufw-gauge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ufw-gauge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.ufw-gauge::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--bg-card);
+}
+.ufw-gauge-num {
+  position: relative;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-high);
+}
+.ufw-gauge-num i {
+  font-style: normal;
+  font-size: 9px;
+  opacity: 0.55;
+  margin-left: 1px;
+}
+.ufw-gauge-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  letter-spacing: 0.5px;
 }
 .ufw-facts span {
   font-size: 11px;

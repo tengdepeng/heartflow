@@ -27,7 +27,9 @@
     <!-- 羁绊健康 -->
     <div class="bap-health">
       <div class="bap-health-main">
-        <span class="bap-health-score">{{ health.score }}</span>
+        <div class="bap-health-ring" :style="healthRing">
+          <span class="bap-health-score">{{ health.score }}</span>
+        </div>
         <span class="bap-health-label">{{ health.label }}</span>
       </div>
       <div class="bap-health-metrics">
@@ -117,6 +119,10 @@ const insights = computed(() => relationInsights(props.persons, interactions.val
 const healthColor = computed(() =>
   health.value.score >= 70 ? '#8aca70' : health.value.score >= 45 ? '#e8c060' : health.value.score >= 20 ? '#e0a96d' : '#c46a5a',
 )
+// 羁绊健康弧线环（并入自 RelationArchivePanel）：score 0~100 映射为弧线
+const healthRing = computed(() =>
+  `conic-gradient(${healthColor.value} ${health.value.score * 3.6}deg, rgba(255,255,255,0.06) ${health.value.score * 3.6}deg)`,
+)
 </script>
 
 <style scoped>
@@ -137,8 +143,10 @@ const healthColor = computed(() =>
 .bap-closest-sep { color: #4a4f44; }
 
 .bap-health { background: #161a15; border-radius: 10px; padding: 11px; margin-bottom: 8px; display: flex; gap: 16px; align-items: center; }
-.bap-health-main { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 64px; }
-.bap-health-score { font-size: 28px; font-weight: 600; color: #e8c060; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.bap-health-main { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 64px; }
+.bap-health-ring { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+.bap-health-ring::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: #161a15; }
+.bap-health-score { position: relative; font-size: 20px; font-weight: 600; color: #e8c060; font-variant-numeric: tabular-nums; line-height: 1; }
 .bap-health-label { font-size: 12px; color: #8a9a7a; }
 .bap-health-metrics { flex: 1; display: flex; flex-direction: column; gap: 7px; }
 .bap-hm-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }

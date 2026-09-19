@@ -9,7 +9,7 @@
     <div class="ta-block">
       <span class="ta-block-label">探索势能</span>
       <div class="ta-momentum">
-        <div class="ta-score-ring" :style="{ borderColor: momentum.color }">
+        <div class="ta-score-ring" :style="ringStyle">
           <span class="ta-score-num" :style="{ color: momentum.color }">{{ momentum.score }}</span>
         </div>
         <span class="ta-score-label" :style="{ color: momentum.color }">{{ momentum.label }}</span>
@@ -78,6 +78,11 @@ const types = computed(() => typeDistribution(props.places))
 const cities = computed(() => topTravelCities(props.places, 5))
 const momentum = computed(() => exploreMomentum(props.places))
 const insights = computed(() => travelInsights(props.places, 4))
+
+// 探索势能弧线环（并入自 MapTravelPanel）：score 0~100 映射为 0~360° 弧线
+const ringStyle = computed(() => ({
+  background: `conic-gradient(${momentum.value.color} ${momentum.value.score * 3.6}deg, rgba(var(--accent-rgb), 0.08) 0deg)`,
+}))
 </script>
 
 <style scoped>
@@ -135,14 +140,22 @@ const insights = computed(() => travelInsights(props.places, 4))
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  border: 3px solid;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
+}
+.ta-score-ring::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: rgba(14, 16, 24, 0.72);
 }
 .ta-score-num {
-  font-size: 18px;
+  position: relative;
+  font-size: 15px;
   font-weight: 600;
 }
 .ta-score-label {

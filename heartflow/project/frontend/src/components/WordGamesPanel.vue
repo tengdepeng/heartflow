@@ -24,9 +24,13 @@
     <!-- 进行中的游戏 -->
     <div v-if="activeSession && activeSession.completedAt" class="wgp-done">
       <div class="wgp-done-head">
-        <span class="wgp-done-icon">🏆</span>
-        <span class="wgp-done-title">本局完成</span>
-        <span class="wgp-done-score">{{ activeSession.correctCount }}/{{ activeSession.totalCount }}</span>
+        <div class="wgp-result-ring" :style="resultRing">
+          <span class="wgp-result-pct">{{ resultPct }}<i>%</i></span>
+        </div>
+        <div class="wgp-done-meta">
+          <span class="wgp-done-title">🏆 本局完成</span>
+          <span class="wgp-done-score">{{ activeSession.correctCount }}/{{ activeSession.totalCount }}</span>
+        </div>
       </div>
       <div class="wgp-add-row">
         <button class="wgp-btn wgp-btn--primary" @click="startGame">再来一局</button>
@@ -168,6 +172,17 @@ function remove(id: string) {
   }
   removeSession(id)
 }
+
+// 结算进度弧线环（并入自 WordGamePanel）：正确率 0~100 映射为弧线
+const resultPct = computed(() => {
+  const s = activeSession.value
+  return s && s.totalCount ? Math.round((s.correctCount / s.totalCount) * 100) : 0
+})
+const resultRing = computed(() => {
+  const p = resultPct.value
+  const hue = p >= 80 ? 150 : p >= 60 ? 130 : p >= 40 ? 38 : 22
+  return `conic-gradient(hsl(${hue} 50% 55%) ${p * 3.6}deg, rgba(255,255,255,0.06) ${p * 3.6}deg)`
+})
 </script>
 
 <style scoped>
@@ -363,6 +378,41 @@ function remove(id: string) {
 }
 .wgp-done-icon {
   font-size: 16px;
+}
+.wgp-done-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.wgp-result-ring {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+.wgp-result-ring::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: rgba(22, 26, 21, 0.92);
+}
+.wgp-result-pct {
+  position: relative;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f0c040;
+  font-variant-numeric: tabular-nums;
+}
+.wgp-result-pct i {
+  font-style: normal;
+  font-size: 9px;
+  opacity: 0.6;
+  margin-left: 1px;
 }
 .wgp-list {
   display: flex;

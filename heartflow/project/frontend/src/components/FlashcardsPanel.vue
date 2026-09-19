@@ -53,12 +53,32 @@
       <span class="fc-block-label">待复习</span>
       <p class="fc-empty">🎉 当前没有到期的卡片</p>
     </div>
-    <!-- 牌组 -->
+    <!-- 牌组与卡片管理 -->
     <div v-if="deckList.length" class="fc-block">
-      <span class="fc-block-label">牌组</span>
+      <span class="fc-block-label">牌组与卡片</span>
       <div class="fc-decks">
-        <span v-for="d in deckList" :key="d" class="fc-deck">{{ d }}</span>
+        <button
+          v-for="d in deckList"
+          :key="d"
+          class="fc-deck-chip"
+          :class="{ active: deckFilter === d }"
+          @click="deckFilter = d"
+        >{{ d }}<span class="fc-deck-count">{{ cardsInDeck(d).length }}</span></button>
       </div>
+      <div v-if="visibleCards.length" class="fc-manage-list">
+        <div v-for="c in visibleCards" :key="c.id" class="fc-manage-item">
+          <div class="fc-manage-text">
+            <span class="fc-manage-front">{{ c.front }}</span>
+            <span class="fc-manage-back">{{ c.back }}</span>
+          </div>
+          <span class="fc-manage-meta">
+            <span class="fc-manage-deck">{{ c.deck }}</span>
+            <span class="fc-manage-interval">{{ c.sm2.interval }}天</span>
+          </span>
+          <button class="fc-del-btn" @click="removeCard(c.id)" title="删除">×</button>
+        </div>
+      </div>
+      <p v-else class="fc-empty">还没有卡片，添加一张吧。</p>
     </div>
   </section>
 </template>
@@ -66,7 +86,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
 import { useFlashcards } from '../modules/knowledge/spaced-repetition'
-import type { Sm2Quality } from '../modules/knowledge/spaced-repetition'
+import type { Flashcard, Sm2Quality } from '../modules/knowledge/spaced-repetition'
 
 const flashcards = useFlashcards()
 
@@ -86,8 +106,26 @@ const due = computed(() => {
 })
 const deckList = computed(() => {
   void version.value
-  return flashcards.decks()
+  return ['全部', ...flashcards.decks()]
 })
+// 卡片管理（并入自 FlashcardPanel）：牌组筛选 + 卡片列表删除
+const deckFilter = ref('全部')
+const allCards = computed<Flashcard[]>(() => {
+  void version.value
+  return flashcards.load()
+})
+const visibleCards = computed<Flashcard[]>(() =>
+  deckFilter.value === '全部'
+    ? allCards.value
+    : allCards.value.filter(c => c.deck === deckFilter.value),
+)
+function cardsInDeck(deck: string) {
+  return deck === '全部' ? allCards.value : allCards.value.filter(c => c.deck === deck)
+}
+function removeCard(id: string) {
+  flashcards.remove(id)
+  bump()
+}
 
 const form = reactive({ front: '', back: '', deck: '默认', tags: '' })
 const revealed = ref('')
@@ -249,12 +287,104 @@ function review(cardId: string, q: Sm2Quality) {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-bottom: 10px;
 }
-.fc-deck {
+.fc-deck-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-size: 12px;
   padding: 3px 10px;
   border-radius: 10px;
   background: rgba(139, 155, 122, 0.15);
   color: rgba(232, 228, 216, 0.7);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.fc-deck-chip:hover {
+  background: rgba(139, 155, 122, 0.22);
+}
+.fc-deck-chip.active {
+  background: rgba(139, 155, 122, 0.3);
+  color: #e8e4d8;
+  border-color: rgba(139, 155, 122, 0.5);
+}
+.fc-deck-count {
+  font-size: 10px;
+  opacity: 0.6;
+}
+.fc-manage-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.fc-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 155, 122, 0.14);
+  background: rgba(10, 12, 10, 0.35);
+}
+.fc-manage-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.fc-manage-front {
+  font-size: 13px;
+  color: #e8e4d8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fc-manage-back {
+  font-size: 11px;
+  color: rgba(232, 228, 216, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fc-manage-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.fc-manage-deck {
+  font-size: 10px;
+  color: rgba(232, 228, 216, 0.55);
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(139, 155, 122, 0.15);
+}
+.fc-manage-interval {
+  font-size: 10px;
+  color: rgba(232, 228, 216, 0.4);
+}
+.fc-del-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: rgba(232, 228, 216, 0.4);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.fc-del-btn:hover {
+  background: rgba(196, 106, 90, 0.18);
+  color: #e0a096;
 }
 </style>
