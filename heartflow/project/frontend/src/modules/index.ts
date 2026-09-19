@@ -61,9 +61,9 @@ export { usePlayGallery } from './play'
 export { usePlaySeeds } from './play'
 export type { Game, Toy, Model, Other, PlayData, MonthlyStat, DistBuckets, ModelGroup, RecentItem, PlayTab, FilterOption, PlatformDistItem } from './play'
 
-export { useBagStore, useBagEvolution } from './bag'
+export { useBagStore, useBagEvolution, useBagBridge } from './bag'
 export { EVOLUTION_STAGE_META, STAGE_THRESHOLDS, BAG_STORAGE_KEYS } from './bag'
-export type { BagItem, CategoryItem, EvolutionEntry, BagOverview, EvolutionStage, EvolutionRequirement, EvolutionStageEntry, EvolutionPath, EvolutionStats, EvolutionProgress } from './bag'
+export type { BagItem, CategoryItem, EvolutionEntry, BagOverview, EvolutionStage, EvolutionRequirement, EvolutionStageEntry, EvolutionPath, EvolutionStats, EvolutionProgress, SkillOverview, BagHealth, BagRecommendation } from './bag'
 
 export {
   useSeasonalRituals,

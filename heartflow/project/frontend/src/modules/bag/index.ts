@@ -38,6 +38,14 @@ export type {
   SkillHealth,
 } from './bag-analytics'
 
+// ---- 行囊视图桥接层（INCR-379 补孤儿桥接导出：聚合驾驶舱零消费） ----
+export { useBagBridge } from './bag-bridge'
+export type {
+  SkillOverview,
+  BagHealth,
+  BagRecommendation,
+} from './bag-bridge'
+
 // ---- 背包整理系统 ----
 export { useBagOrganize } from './organize'
 export type {

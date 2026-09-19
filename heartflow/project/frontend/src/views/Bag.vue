@@ -192,6 +192,11 @@
       <BagAnalyticsPanel />
     </section>
 
+    <!-- ===== 行囊桥 · 总览（INCR-379 补挂载孤儿桥接 useBagBridge：技能概览/行囊健康度/技能雷达/成长趋势/熟练度预测/学习路径/技能推荐 聚合驾驶舱，薄委托只读呈现） ===== -->
+    <section class="bag-section">
+      <BagBridgePanel />
+    </section>
+
     <!-- ===== 背包整理 ===== -->
     <section class="bag-section">
       <BagOrganizePanel />
@@ -359,6 +364,7 @@
 import { useBagStore } from '../modules/bag'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import BagAnalyticsPanel from '../components/BagAnalyticsPanel.vue'
+import BagBridgePanel from '../components/BagBridgePanel.vue'
 import BagOrganizePanel from '../components/bag/BagOrganizePanel.vue'
 import BagEvolutionPanel from '../components/BagEvolutionPanel.vue'
 import LauncherPanel from '../components/LauncherPanel.vue'
