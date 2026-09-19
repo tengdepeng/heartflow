@@ -131,4 +131,42 @@ describe('Vault 口令锁', () => {
     expect(wrapper.text()).not.toContain('口令错误')
     expect(wrapper.find('.vt-lock-btn--ghost').exists()).toBe(true)
   })
+
+  it('解锁后渲染密码生成器(INCR-364): 默认密码+强度+口令短语切换', async () => {
+    const wrapper = await getWrapper()
+    const inputs = wrapper.findAll('.vt-lock-input')
+    await inputs[0].setValue('secret123')
+    await inputs[1].setValue('secret123')
+    await wrapper.find('.vt-lock-btn').trigger('click')
+    await settle()
+
+    // 面板已渲染(标题 + 模式切换 + 生成按钮)
+    expect(wrapper.text()).toContain('密码生成器')
+    const pwdInput = wrapper.find('input[data-test="password"]')
+    expect(pwdInput.exists()).toBe(true)
+
+    // 触发生成: 生成结果非空且长度符合默认 16(滑杆初始 DEFAULT)
+    await wrapper.find('.vpp-gen').trigger('click')
+    await settle()
+    const v1 = (pwdInput.element as HTMLInputElement).value
+    expect(v1.length).toBe(16)
+
+    // 强度仪表已渲染(分数在 0-100 内)
+    const strengthText = wrapper.text()
+    expect(strengthText).toMatch(/强度/)
+
+    // 预设可套用(强度预设 chip 存在并能点选)
+    expect(wrapper.findAll('.vpp-chip').length).toBeGreaterThan(0)
+
+    // 切到口令短语模式: 生成词-分隔词格式
+    const modeBtns = wrapper.findAll('.vpp-mode-btn')
+    await modeBtns[1].trigger('click')
+    await settle()
+    const phraseInput = wrapper.find('input[data-test="phrase"]')
+    expect(phraseInput.exists()).toBe(true)
+    await wrapper.find('.vpp-gen').trigger('click')
+    await settle()
+    const phrase = (phraseInput.element as HTMLInputElement).value
+    expect(phrase.split('-')).toHaveLength(4) // 默认词数 4
+  })
 })

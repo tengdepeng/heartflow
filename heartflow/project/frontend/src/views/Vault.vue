@@ -150,6 +150,9 @@
         </div>
       </div>
     </section>
+
+    <!-- 密码生成器（INCR-364）本地强密码 / 口令短语 -->
+    <VaultPasswordPanel />
     </template>
   </div>
 </template>
@@ -167,6 +170,7 @@ import { useVaultAutoLock, type AutoLockSettings } from '../modules/vault/auto-l
 import VaultAutoLockPanel from '../components/VaultAutoLockPanel.vue'
 import BackupRecoveryPanel from '../components/BackupRecoveryPanel.vue'
 import VaultAuditPanel from '../components/VaultAuditPanel.vue'
+import VaultPasswordPanel from '../components/VaultPasswordPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
