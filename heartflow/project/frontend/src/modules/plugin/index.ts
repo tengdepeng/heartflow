@@ -13,6 +13,16 @@ export type { PluginManifest, PluginRuntime, PluginPermission } from './types'
 export { CORE_PLUGINS, PERMISSION_LABELS } from './types'
 export { loadPlugin, unloadPlugin, getLoadedPlugins, registerPluginAPI, getPluginAPI, getRegisteredAPIs, hasPluginPermission as hasPermission, createExternalManifest } from './loader'
 
+// ---- Manifest 校验 ----
+export {
+  validatePluginManifest,
+  isValidPluginManifest,
+} from './manifest-validator'
+export type {
+  ManifestValidationIssue,
+  ManifestIssueSeverity,
+} from './manifest-validator'
+
 // ---- 插件调度器 ----
 export { usePluginScheduler, DEFAULT_SCHEDULER_CONFIG, PRIORITY_META, PRIORITY_WEIGHT } from './plugin-scheduler'
 export type {

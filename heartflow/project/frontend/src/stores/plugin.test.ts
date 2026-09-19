@@ -43,6 +43,35 @@ describe('plugin store', () => {
     expect(p!.enabled).toBe(true)
   })
 
+  it('非法 manifest 被安装门控拒绝并记录问题', () => {
+    const store = usePluginStore()
+    store.init()
+    const before = store.plugins.length
+    const result = store.installPlugin({
+      meta: { id: 'Bad_ID', name: '坏插件', version: '1.0', description: '', tier: 'experimental', category: 'other', icon: '💥' },
+      permissions: ['evil:all' as never],
+      sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: true },
+      entry: 'bad:plugin',
+    })
+    expect(result).toBe(false)
+    expect(store.plugins.length).toBe(before)
+    expect(store.installIssues.some(i => i.severity === 'error')).toBe(true)
+    expect(store.plugins.find(p => p.id === 'Bad_ID')).toBeUndefined()
+  })
+
+  it('合法 manifest 安装后清空校验问题', () => {
+    const store = usePluginStore()
+    store.init()
+    const ok = store.installPlugin({
+      meta: { id: 'good-plugin', name: '好插件', version: '1.0.0', description: '描述', tier: 'community', category: 'other', icon: '✅' },
+      permissions: ['read:current'],
+      sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: true },
+      entry: 'good:plugin',
+    })
+    expect(ok).toBe(true)
+    expect(store.installIssues).toEqual([])
+  })
+
   it('卸载插件后移除', () => {
     const store = usePluginStore()
     store.init()

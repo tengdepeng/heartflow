@@ -14,7 +14,7 @@ import {
 export function usePlugin() {
   const store = usePluginStore()
   const {
-    plugins, initialized, enabledPlugins, disabledPlugins,
+    plugins, initialized, installIssues, enabledPlugins, disabledPlugins,
     officialPlugins, communityPlugins, experimentalPlugins,
   } = storeToRefs(store)
 
@@ -22,6 +22,7 @@ export function usePlugin() {
     // 响应式状态
     plugins,
     initialized,
+    installIssues,
     enabledPlugins,
     disabledPlugins,
     officialPlugins,

@@ -8,6 +8,8 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { PluginManifest, PluginRuntime, PluginPermission } from '../modules/plugin/types'
 import { CORE_PLUGINS } from '../modules/plugin/types'
+import { validatePluginManifest } from '../modules/plugin/manifest-validator'
+import type { ManifestValidationIssue } from '../modules/plugin/manifest-validator'
 import { storage } from '../engine/storage'
 import type { PluginRegistryEntry } from '../engine/storage/plugin'
 
@@ -18,6 +20,8 @@ export const usePluginStore = defineStore('plugin', () => {
   // ---- 状态 ----
   const plugins = ref<PluginRuntime[]>([])
   const initialized = ref(false)
+  /** 最近一次安装尝试的 manifest 校验问题（error 阻断 / warning 提示） */
+  const installIssues = ref<ManifestValidationIssue[]>([])
 
   // ---- 计算 ----
   const enabledPlugins = computed(() => plugins.value.filter(p => p.enabled))
@@ -105,6 +109,11 @@ export const usePluginStore = defineStore('plugin', () => {
 
   // ---- 安装/卸载（外部插件） ----
   function installPlugin(manifest: PluginManifest) {
+    const issues = validatePluginManifest(manifest)
+    installIssues.value = issues
+    if (issues.some(i => i.severity === 'error')) {
+      return false
+    }
     if (plugins.value.some(p => p.manifest.meta.id === manifest.meta.id)) {
       return false
     }
@@ -184,6 +193,7 @@ export const usePluginStore = defineStore('plugin', () => {
   return {
     plugins,
     initialized,
+    installIssues,
     enabledPlugins,
     disabledPlugins,
     officialPlugins,
