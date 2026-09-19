@@ -19,12 +19,12 @@
           <span class="pm-overview-label">已安装插件</span>
         </div>
         <div class="pm-overview-card">
-          <span class="pm-overview-number">{{ availablePlugins.length }}</span>
+          <span class="pm-overview-number">{{ catalogTotal }}</span>
           <span class="pm-overview-label">可安装插件</span>
         </div>
         <div class="pm-overview-card">
-          <span class="pm-overview-number">2</span>
-          <span class="pm-overview-label">开发指南</span>
+          <span class="pm-overview-number">{{ categories.length }}</span>
+          <span class="pm-overview-label">插件分类</span>
         </div>
       </div>
     </section>
@@ -82,26 +82,67 @@
     <!-- 可安装插件 -->
     <section class="pm-section pm-community-section">
       <h2 class="pm-section-title">可安装插件</h2>
-      <div class="pm-plugin-grid hf-room-grid--wide">
+
+      <!-- 市场工具栏：搜索 + 分类筛选 -->
+      <div class="pm-market-toolbar">
+        <input
+          v-model="searchQuery"
+          type="search"
+          class="pm-search"
+          placeholder="搜索市场插件…"
+          aria-label="搜索市场插件"
+        />
+        <div class="pm-category-chips" role="group" aria-label="按分类筛选">
+          <button
+            type="button"
+            class="pm-chip"
+            :class="{ active: selectedCategory === null }"
+            @click="selectedCategory = null"
+          >
+            全部<span class="pm-chip-count">{{ catalogTotal }}</span>
+          </button>
+          <button
+            v-for="cat in categories"
+            :key="cat.id"
+            type="button"
+            class="pm-chip"
+            :class="{ active: selectedCategory === cat.id }"
+            @click="selectedCategory = cat.id"
+          >
+            {{ cat.label }}<span class="pm-chip-count">{{ cat.count }}</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-if="availablePlugins.length === 0" class="pm-empty-hint pm-filter-empty">
+        <span class="pm-empty-icon">🔍</span>
+        <p>没有匹配的市场插件</p>
+        <p class="pm-empty-hint-sub">试试更换关键词或切换分类</p>
+      </div>
+      <div v-else class="pm-plugin-grid hf-room-grid--wide">
         <div
           v-for="plugin in availablePlugins"
-          :key="plugin.meta.id"
+          :key="plugin.manifest.meta.id"
           class="pm-plugin-card pm-community-card"
-          :class="{ 'pm-installed': isInstalled(plugin.meta.id) }"
-          :data-plugin-id="plugin.meta.id"
+          :class="{ 'pm-installed': isInstalled(plugin.manifest.meta.id) }"
+          :data-plugin-id="plugin.manifest.meta.id"
         >
-          <div class="pm-plugin-icon">{{ plugin.meta.icon }}</div>
+          <div class="pm-plugin-icon">{{ plugin.manifest.meta.icon }}</div>
           <div class="pm-plugin-info">
             <div class="pm-plugin-name">
-              {{ plugin.meta.name }}
-              <span class="pm-plugin-version">v{{ plugin.meta.version }}</span>
+              {{ plugin.manifest.meta.name }}
+              <span class="pm-plugin-version">v{{ plugin.manifest.meta.version }}</span>
               <span class="pm-tier-badge pm-tier-community">社区</span>
             </div>
-            <div class="pm-plugin-desc">{{ plugin.meta.description }}</div>
-            <div class="pm-plugin-author">by {{ plugin.meta.author }}</div>
+            <div class="pm-plugin-desc">{{ plugin.manifest.meta.description }}</div>
+            <div class="pm-plugin-author">by {{ plugin.manifest.meta.author }}</div>
+            <div class="pm-market-meta">
+              <span class="pm-market-stat" title="下载量">⬇ {{ formatDownload(plugin.downloads) }}</span>
+              <span class="pm-market-stat" title="社区评分">★ {{ plugin.rating.toFixed(1) }}</span>
+            </div>
             <div class="pm-plugin-perms">
               <span
-                v-for="perm in plugin.permissions"
+                v-for="perm in plugin.manifest.permissions"
                 :key="perm"
                 class="pm-perm-badge"
               >{{ perm }}</span>
@@ -109,7 +150,7 @@
           </div>
           <div class="pm-plugin-actions">
             <button
-              v-if="!isInstalled(plugin.meta.id)"
+              v-if="!isInstalled(plugin.manifest.meta.id)"
               class="pm-btn-install"
               @click="install(plugin)"
             >安装</button>
@@ -192,9 +233,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { usePlugin } from '../resonance/bridges/plugin'
-import type { PluginManifest, PluginTier } from '../modules/plugin/types'
+import type { PluginTier } from '../modules/plugin/types'
+import type { MarketplaceEntry, PluginCategoryId } from '../modules/plugin/plugin-registry'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -205,98 +247,49 @@ onMounted(() => {
   pluginBridge.init()
 })
 
-/** 模拟社区插件列表 */
-const availablePlugins = ref<PluginManifest[]>([
-  {
-    meta: {
-      id: 'community-pomodoro-stats',
-      name: '番茄钟统计',
-      version: '1.2.0',
-      description: '高级番茄钟数据统计，包含周报、月报和趋势图表',
-      author: '社区',
-      tier: 'community',
-      category: 'timer',
-      icon: '🍅',
-    },
-    permissions: ['read:history', 'read:current'],
-    sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: false },
-    entry: 'community:pomodoro-stats',
-    hooks: [],
-  },
-  {
-    meta: {
-      id: 'community-daily-review',
-      name: '每日回顾',
-      version: '0.8.0',
-      description: '每日结束时自动生成回顾卡片，汇总当日专注与情绪',
-      author: '社区',
-      tier: 'community',
-      category: 'note',
-      icon: '📋',
-    },
-    permissions: ['read:history', 'read:current', 'write:data'],
-    sandbox: { isolateFS: true, isolateNetwork: true, isolateDOM: false },
-    entry: 'community:daily-review',
-    hooks: [],
-    contributes: {
-      rooms: [
-        {
-          id: 'daily-review-room',
-          path: '/daily-review',
-          name: '每日回顾房',
-          icon: '📋',
-          color: '#a3b8cc',
-          description: '社区插件「每日回顾」贡献的房间 · 汇总当日专注与情绪',
-          group: 'world',
-          adjacentTo: ['home-space', 'plugins'],
-          branchFrom: 'home-space',
-        },
-      ],
-    },
-  },
-  {
-    meta: {
-      id: 'community-white-noise',
-      name: '白噪音播放器',
-      version: '1.0.0',
-      description: '专注时播放白噪音/自然音效，支持多种声景',
-      author: '社区',
-      tier: 'community',
-      category: 'other',
-      icon: '🎧',
-    },
-    permissions: ['read:current'],
-    sandbox: { isolateFS: true, isolateNetwork: false, isolateDOM: false },
-    entry: 'community:white-noise',
-    hooks: [],
-  },
-  {
-    meta: {
-      id: 'community-diary-export',
-      name: '日记导出',
-      version: '1.1.0',
-      description: '将笔记和结晶数据导出为 Markdown 或 PDF 格式',
-      author: '社区',
-      tier: 'community',
-      category: 'note',
-      icon: '📤',
-    },
-    permissions: ['read:history', 'export:data'],
-    sandbox: { isolateFS: false, isolateNetwork: true, isolateDOM: false },
-    entry: 'community:diary-export',
-    hooks: [],
-  },
-])
+// ---- 市场源注册表 ----
+const marketplace = pluginBridge.marketplace
+
+/** 市场可选插件总数（真实统计） */
+const catalogTotal = computed(() => marketplace.count())
+
+/** 市场分类（含计数，真实统计） */
+const categories = computed(() => marketplace.getCategories())
+
+/** 搜索关键词 */
+const searchQuery = ref('')
+
+/** 当前选中分类（null = 全部） */
+const selectedCategory = ref<PluginCategoryId | null>(null)
+
+/** 可安装插件（经关键词搜索 + 分类筛选后的市场条目） */
+const availablePlugins = computed<MarketplaceEntry[]>(() => {
+  const kw = searchQuery.value.trim().toLowerCase()
+  const matchIds = kw ? new Set(marketplace.search(searchQuery.value).map(m => m.meta.id)) : null
+  return marketplace.getAll().filter(e => {
+    const m = e.manifest
+    if (selectedCategory.value && m.meta.category !== selectedCategory.value) return false
+    if (matchIds && !matchIds.has(m.meta.id)) return false
+    return true
+  })
+})
+
+/** 下载量格式化（千/万可读化） */
+function formatDownload(n: number): string {
+  if (n >= 10000) return `${(n / 10000).toFixed(1)}w`
+  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`
+  return String(n)
+}
 
 function isInstalled(id: string): boolean {
   return plugins.value.some(p => p.manifest.meta.id === id)
 }
 
-function install(manifest: PluginManifest) {
-  const success = pluginBridge.installPlugin(manifest)
+function install(entry: MarketplaceEntry) {
+  const success = pluginBridge.installPlugin(entry.manifest)
   if (success) {
     // 模拟安装成功效果
-    const card = document.querySelector(`[data-plugin-id="${manifest.meta.id}"]`)
+    const card = document.querySelector(`[data-plugin-id="${entry.manifest.meta.id}"]`)
     if (card) {
       card.classList.add('installed-anim')
       setTimeout(() => card.classList.remove('installed-anim'), 600)
@@ -486,6 +479,101 @@ function tierLabel(t: PluginTier): string {
   background: rgba(var(--accent-rgb), 0.08);
   padding: 1px 8px;
   border-radius: 10px;
+}
+
+/* ---- 市场工具栏：搜索 + 分类筛选 ---- */
+.pm-market-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.pm-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #ede0d4;
+  background: rgba(var(--accent-rgb), 0.05);
+  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.pm-search::placeholder {
+  color: rgba(237,224,212,0.44);
+}
+
+.pm-search:focus {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.08);
+}
+
+.pm-category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pm-chip {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  background: transparent;
+  color: rgba(237,224,212,0.7);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pm-chip:hover {
+  border-color: rgba(var(--accent-rgb), 0.3);
+  color: #ede0d4;
+}
+
+.pm-chip.active {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pm-chip-count {
+  font-size: 10px;
+  padding: 0 5px;
+  border-radius: 8px;
+  background: rgba(237,224,212,0.08);
+  color: rgba(237,224,212,0.55);
+}
+
+.pm-chip.active .pm-chip-count {
+  background: rgba(var(--accent-rgb), 0.18);
+  color: var(--accent);
+}
+
+/* ---- 市场条目附加元信息（下载量 / 评分） ---- */
+.pm-market-meta {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.pm-market-stat {
+  font-size: 11px;
+  color: rgba(237,224,212,0.6);
+  font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
+}
+
+.pm-filter-empty .pm-empty-hint-sub {
+  font-size: 11px;
+  color: rgba(237,224,212,0.5);
+  margin-top: 2px;
 }
 
 /* ---- Plugin Grid ---- */
@@ -861,6 +949,20 @@ function tierLabel(t: PluginTier): string {
     font-size: 15px;
   }
 
+  .pm-search {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .pm-chip {
+    font-size: 11px;
+    padding: 3px 9px;
+  }
+
+  .pm-market-stat {
+    font-size: 10px;
+  }
+
   .pm-plugin-card {
     padding: 12px 14px;
     gap: 10px;
@@ -989,6 +1091,17 @@ function tierLabel(t: PluginTier): string {
 
   .pm-overview-label {
     font-size: 9px;
+  }
+
+  .pm-search {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .pm-chip {
+    font-size: 11px;
+    padding: 3px 8px;
+    gap: 4px;
   }
 
   .pm-plugin-card {

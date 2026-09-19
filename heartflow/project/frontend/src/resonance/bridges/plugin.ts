@@ -10,6 +10,9 @@ import {
   listAvailableCapabilities,
   findCapabilityByKeyword,
 } from '../../modules/plugin/capability-registry'
+import {
+  pluginMarketplaceRegistry,
+} from '../../modules/plugin/plugin-registry'
 
 export function usePlugin() {
   const store = usePluginStore()
@@ -43,5 +46,17 @@ export function usePlugin() {
     listCapabilities: listAvailableCapabilities,
     findCapability: findCapabilityByKeyword,
     invokeCapability: invokePluginCapability,
+
+    // 市场源注册表（市场源单一数据源）
+    marketplace: {
+      getAll: pluginMarketplaceRegistry.getAll.bind(pluginMarketplaceRegistry),
+      getCatalog: pluginMarketplaceRegistry.getCatalog.bind(pluginMarketplaceRegistry),
+      getCategories: pluginMarketplaceRegistry.getCategories.bind(pluginMarketplaceRegistry),
+      count: pluginMarketplaceRegistry.count.bind(pluginMarketplaceRegistry),
+      byCategory: pluginMarketplaceRegistry.byCategory.bind(pluginMarketplaceRegistry),
+      search: pluginMarketplaceRegistry.search.bind(pluginMarketplaceRegistry),
+      find: pluginMarketplaceRegistry.find.bind(pluginMarketplaceRegistry),
+      isMarketPlugin: pluginMarketplaceRegistry.isMarketPlugin.bind(pluginMarketplaceRegistry),
+    },
   }
 }

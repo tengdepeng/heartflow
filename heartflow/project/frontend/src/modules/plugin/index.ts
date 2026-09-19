@@ -66,6 +66,10 @@ export type {
 // ---- 插件市场与依赖管理 ----
 export { usePluginMarketplace } from './plugin-marketplace'
 
+// ---- 插件市场源注册表（市场源单一数据源） ----
+export { pluginMarketplaceRegistry, CATEGORY_LABELS, CATEGORY_ORDER } from './plugin-registry'
+export type { PluginCategoryId, MarketplaceCategory, MarketplaceEntry } from './plugin-registry'
+
 // ---- 插件能力通道（蓝图 L10612：经能力扩展对话分身） ----
 export {
   registerPluginCapability,
