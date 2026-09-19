@@ -119,6 +119,11 @@
     <!-- 文明档案（INCR-16）档案概览/技艺/仪式/来源/地域/实践/文明健康/标签/洞察 -->
     <TraditionsArchivePanel :entries="entries" />
 
+    <!-- ============================================================ -->
+    <!-- 根系生命力（INCR-377 补挂载孤儿引擎 traditions/root-vitality：培育总览/枝繁/凋零/此刻浇灌/岁时关联，纯函数薄委托） -->
+    <!-- ============================================================ -->
+    <RootVitalityPanel :entries="entries" />
+
     <!-- 个人文明收藏 -->
     <section class="trad-block">
       <header class="trad-head">
@@ -188,6 +193,7 @@ import { useTraditionsBridge } from '../modules/traditions/traditions-bridge'
 import { CRAFT_CATEGORY_LABELS, RITUAL_TYPE_LABELS } from '../modules/traditions'
 import type { CraftCategory, RitualType, FolkloreEntry } from '../modules/traditions'
 import TraditionsArchivePanel from '../components/TraditionsArchivePanel.vue'
+import RootVitalityPanel from '../components/RootVitalityPanel.vue'
 
 const {
   entries,

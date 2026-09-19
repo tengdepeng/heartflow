@@ -60,6 +60,18 @@ export type {
   TraditionsTag,
 } from './traditions-analytics'
 
+// ---- 根系生命力（INCR-377 补孤儿引擎导出）----
+export {
+  vitalityScore,
+  growthStage,
+  cultivate,
+  syntaxTermLink,
+  GROWTH_STAGE_META,
+  GROWTH_STAGE_ORDER,
+  NURTURE_WINDOW_DAYS,
+} from './root-vitality'
+export type { GrowthStage, CultivationBoard } from './root-vitality'
+
 // ---- 存储键 ----
 
 const ENTRIES_KEY = 'hf:folklore_entries'
