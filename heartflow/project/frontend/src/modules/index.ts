@@ -178,8 +178,9 @@ export { getDimensionMappings, getMappingByDimension, applyDimensionMapping, app
 export type { MetaphorType, MetaphorConfig, MetaphorPalette, VisualizationStylePack, DataDimension, VisualDimension } from './visualization'
 
 // ---- visitor ----
-export { useVisitor, VISITOR_ROLE_PERMISSIONS, VISITOR_ROLE_LABELS } from './visitor'
+export { useVisitor, useVisitorBridge, VISITOR_ROLE_PERMISSIONS, VISITOR_ROLE_LABELS } from './visitor'
 export type { VisitorSession, VisitorFootprint, VisitorInvitation, AccessRule, VisitorRole, VisitorPermission, VisitorStats } from './visitor'
+export type { VisitorSummary, SessionInfo } from './visitor'
 
 // ---- traditions ----
 export { useTraditions, CRAFT_CATEGORY_LABELS, RITUAL_TYPE_LABELS } from './traditions'

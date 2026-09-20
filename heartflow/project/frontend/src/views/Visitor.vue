@@ -63,6 +63,9 @@
       </div>
     </section>
 
+    <!-- 访客·桥接总览（INCR-387 补挂载孤儿桥接面板 VisitorBridgePanel：useVisitorBridge 聚合 summary 门禁概览 活跃会话/会话累计/待办邀请/活跃规则/足迹总数/最活跃房间/最近访问 + sessionInfos 活跃会话剩余时间/过期/足迹数, Visitor.vue 原仅直引 useVisitor 引擎+原始列表+4 项基础计数, 桥接层驾驶舱聚合面零呈现, 真缺口） -->
+    <VisitorBridgePanel />
+
     <!-- 访客会话 -->
     <section data-enter class="vs-section">
       <h3 class="vs-section-title">🪪 访客会话</h3>
@@ -181,6 +184,7 @@ import { useRoomNavigation } from '../composables/useRoomNavigation'
 import { useVisitor } from '../modules/visitor'
 import { VISITOR_ROLE_LABELS } from '../modules/visitor'
 import type { VisitorRole } from '../modules/visitor'
+import VisitorBridgePanel from '../components/VisitorBridgePanel.vue'
 import { getAllRooms, getRoom } from '../engine/room-graph'
 
 const { entranceClass, entranceRef } = useViewEntrance()

@@ -26,6 +26,8 @@ export type {
   VisitorStats,
 } from './types'
 export { VISITOR_ROLE_PERMISSIONS, VISITOR_ROLE_LABELS } from './types'
+export { useVisitorBridge } from './visitor-bridge'
+export type { VisitorSummary, SessionInfo } from './visitor-bridge'
 
 // ---- 存储键 ----
 
