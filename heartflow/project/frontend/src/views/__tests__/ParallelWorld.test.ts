@@ -964,8 +964,9 @@ describe('集成：平行世界档案面板', () => {
 // 引擎消费方核验: 排除 __tests__ 后生产消费方仅 AutoConflictPanel 与
 // ConflictResolutionPanel 两个**孤儿**组件（均未挂载任何视图）；本 INCR
 // 挂载 AutoConflictPanel 后引擎生产消费方唯一。ConflictResolutionPanel
-// 同为孤儿且功能重复（直接内联 useParallelWorld 自载数据，非薄委托），
-// 记录为**重复孤儿**，后续扫描排除。薄委托化：宿主注入 branches /
+// 同为冗余孤儿（直接内联 useParallelWorld 自载数据，非薄委托），独有能力
+// （默认策略/解决历史/规则描述/字段规则/多冲突类型）已于 INCR-400 并入
+// AutoConflictPanel 并删除该孤儿，引擎生产消费方保持唯一。薄委托化：宿主注入 branches /
 // checkpoints 两数组 props（hf:parallel-world:branches / checkpoints），
 // 挂载于世界对照之后、情景推演之前（与合并/对照/仲裁语义聚类）。
 // 注：引擎初始化读不到规则键时自动落默认 5 规则并回写 storage；

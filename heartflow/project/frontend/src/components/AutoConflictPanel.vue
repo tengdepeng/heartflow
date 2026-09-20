@@ -67,6 +67,35 @@
             <span class="acp-result-summary">{{ lastResult.summary }}</span>
           </div>
         </div>
+
+        <!-- 默认策略（并入 ConflictResolutionPanel 独有能力 INCR-400） -->
+        <div class="acp-block">
+          <div class="acp-block-title">默认策略</div>
+          <div class="acp-form">
+            <select v-model="defaultStrategy" class="acp-input acp-strategy" aria-label="默认策略">
+              <option v-for="s in strategies" :key="s.value" :value="s.value">{{ s.label }}</option>
+            </select>
+            <span class="acp-default-hint">未命中规则时的兜底策略</span>
+          </div>
+        </div>
+
+        <!-- 解决历史（并入 ConflictResolutionPanel 独有能力 INCR-400） -->
+        <div class="acp-block">
+          <div class="acp-block-title">解决历史（{{ historyRecords.length }}）</div>
+          <p v-if="!historyRecords.length" class="acp-empty">还没有解决记录。检测并解决冲突后会记录在这里。</p>
+          <div v-else class="acp-history">
+            <div
+              v-for="h in historyRecords"
+              :key="h.id"
+              class="acp-history-item"
+              :class="{ active: h.id === selectedHistoryId }"
+              @click="selectedHistoryId = h.id"
+            >
+              <span class="acp-history-summary">{{ h.summary }}</span>
+              <span class="acp-history-meta">{{ fmtTime(h.resolvedAt) }} · {{ h.allResolved ? '全部解决' : '部分解决' }}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- 规则页 -->
@@ -77,28 +106,48 @@
         </div>
         <p v-if="!rules.length" class="acp-empty">还没有规则。添加一条规则，让冲突自动裁决。</p>
         <div v-else class="acp-rules">
-          <div v-for="r in rules" :key="r.id" class="acp-rule">
-            <span class="acp-rule-name">{{ r.name }}</span>
-            <span class="acp-rule-strategy">{{ RULE_STRATEGY_LABELS[r.strategy] }}</span>
-            <span class="acp-rule-hit">{{ r.hitCount }} 次命中</span>
-            <button class="acp-btn acp-mini" :class="{ on: r.enabled }" @click="toggleRule(r.id)">{{ r.enabled ? '启用' : '停用' }}</button>
-            <button class="acp-btn acp-mini acp-del" @click="deleteRule(r.id)">删除</button>
+          <div v-for="r in rules" :key="r.id" class="acp-rule" :class="{ disabled: !r.enabled }">
+            <div class="acp-rule-body">
+              <div class="acp-rule-top">
+                <span class="acp-rule-name">{{ r.name }}</span>
+                <span class="acp-rule-priority">P{{ r.priority }}</span>
+                <span class="acp-rule-strategy">{{ RULE_STRATEGY_LABELS[r.strategy] }}</span>
+                <span class="acp-rule-hit">{{ r.hitCount }} 次命中</span>
+              </div>
+              <p v-if="r.description" class="acp-rule-desc">{{ r.description }}</p>
+              <div v-if="r.conflictTypes.length" class="acp-rule-types">
+                <span v-for="ct in r.conflictTypes" :key="ct" class="acp-rule-type-tag">{{ TYPE_LABELS[ct] }}</span>
+              </div>
+            </div>
+            <div class="acp-rule-ops">
+              <button class="acp-btn acp-mini" :class="{ on: r.enabled }" @click="toggleRule(r.id)">{{ r.enabled ? '启用' : '停用' }}</button>
+              <button class="acp-btn acp-mini acp-del" @click="deleteRule(r.id)">删除</button>
+            </div>
           </div>
         </div>
 
         <!-- 新增规则 -->
         <div class="acp-block">
           <div class="acp-block-title">新增规则</div>
-          <div class="acp-form">
-            <input v-model="ruleForm.name" class="acp-input" placeholder="规则名称" />
-            <select v-model="ruleForm.type" class="acp-input acp-strategy" aria-label="冲突类型">
-              <option v-for="t in typeOptions" :key="t.value" :value="t.value">{{ t.label }}</option>
-            </select>
-            <select v-model="ruleForm.strategy" class="acp-input acp-strategy" aria-label="规则策略">
-              <option v-for="s in ruleStrategies" :key="s.value" :value="s.value">{{ s.label }}</option>
-            </select>
-            <input v-model.number="ruleForm.priority" type="number" min="1" max="10" class="acp-input acp-priority" placeholder="优先级 1-10" />
-            <button class="acp-btn acp-add" :disabled="!ruleForm.name" @click="addRule">添加</button>
+          <div class="acp-form acp-form--col">
+            <input v-model="ruleForm.name" class="acp-input" placeholder="规则名称（必填）" />
+            <input v-model="ruleForm.description" class="acp-input" placeholder="规则描述（可选）" />
+            <div class="acp-form-row">
+              <select v-model="ruleForm.strategy" class="acp-input acp-strategy" aria-label="规则策略">
+                <option v-for="s in ruleStrategies" :key="s.value" :value="s.value">{{ s.label }}</option>
+              </select>
+              <input v-model.number="ruleForm.priority" type="number" min="1" max="10" class="acp-input acp-priority" placeholder="优先级 1-10" />
+            </div>
+            <input v-model="ruleForm.fieldPatterns" class="acp-input" placeholder="字段模式，逗号分隔（可空），如：tags,label" />
+            <div class="acp-block-label acp-types-title">冲突类型</div>
+            <div class="acp-type-grid">
+              <label v-for="t in typeOptions" :key="t.value" class="acp-type-cell" :class="{ on: ruleForm.conflictTypes.includes(t.value) }">
+                <input v-model="ruleForm.conflictTypes" type="checkbox" :value="t.value" class="acp-type-check" />
+                <span>{{ t.label }}</span>
+              </label>
+            </div>
+            <p v-if="!ruleForm.conflictTypes.length" class="acp-empty acp-hint">至少选择一种冲突类型</p>
+            <button class="acp-btn acp-add acp-rule-save" :disabled="!ruleForm.name.trim() || ruleForm.conflictTypes.length === 0" @click="addRule">添加规则</button>
           </div>
         </div>
       </div>
@@ -176,15 +225,23 @@ const conflicts = ref<ConflictResolution[]>([])
 
 const ruleForm = reactive({
   name: '',
-  type: 'data' as AutoConflictType,
+  description: '',
+  conflictTypes: [] as AutoConflictType[],
   strategy: 'merge' as ResolutionStrategy,
   priority: 5,
+  fieldPatterns: '',
 })
 
 const rules = computed(() => engine.rules.value)
 const resolutionCount = computed(() => engine.resolutionHistory.value.length)
 const lastResult = computed<ResolutionResult | null>(() => engine.latestResolution.value)
 const analysis = computed(() => engine.analyzeConflictPatterns())
+const defaultStrategy = computed({
+  get: () => engine.defaultStrategy.value,
+  set: (v: ConflictStrategy) => engine.setDefaultStrategy(v),
+})
+const historyRecords = computed(() => engine.resolutionHistory.value)
+const selectedHistoryId = ref('')
 
 const allCheckpoints = computed(() => props.checkpoints)
 const canDetect = computed(() => {
@@ -266,10 +323,25 @@ function resetRules() {
 }
 
 function addRule() {
-  engine.addResolutionRule(ruleForm.name, '', [ruleForm.type], ruleForm.strategy, {
+  if (!ruleForm.name.trim() || ruleForm.conflictTypes.length === 0) return
+  engine.addResolutionRule(ruleForm.name.trim(), ruleForm.description.trim(), [...ruleForm.conflictTypes], ruleForm.strategy, {
+    fieldPatterns: ruleForm.fieldPatterns.split(',').map(s => s.trim()).filter(Boolean),
     priority: ruleForm.priority,
   })
   ruleForm.name = ''
+  ruleForm.description = ''
+  ruleForm.conflictTypes = []
+  ruleForm.priority = 5
+  ruleForm.fieldPatterns = ''
+}
+
+function fmtTime(iso: string): string {
+  const d = new Date(iso)
+  const now = new Date()
+  const diff = now.getTime() - d.getTime()
+  if (diff < 60000) return '刚刚'
+  if (diff < 3600000) return `${Math.floor(diff / 60000)} 分钟前`
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
 function branchName(id: string): string {
@@ -359,10 +431,18 @@ function branchName(id: string): string {
 
 .acp-rules-head { display: flex; align-items: center; justify-content: space-between; }
 .acp-rules { display: flex; flex-direction: column; gap: 4px; }
-.acp-rule { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; border-bottom: 1px dashed rgba(195, 159, 106, 0.12); }
-.acp-rule-name { flex: 1; color: #e8ddc8; }
+.acp-rule { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; font-size: 12px; border-bottom: 1px dashed rgba(195, 159, 106, 0.12); }
+.acp-rule.disabled { opacity: 0.55; }
+.acp-rule-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.acp-rule-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.acp-rule-name { color: #e8ddc8; }
+.acp-rule-priority { padding: 1px 8px; border-radius: 999px; background: rgba(224, 169, 109, 0.14); color: #e0a96d; font-size: 11px; white-space: nowrap; }
 .acp-rule-strategy { padding: 1px 8px; border-radius: 999px; background: rgba(138, 154, 122, 0.2); color: #a9c08a; font-size: 11px; white-space: nowrap; }
 .acp-rule-hit { font-size: 11px; color: #8a8a80; white-space: nowrap; }
+.acp-rule-desc { margin: 0; font-size: 11px; color: #c4b89e; line-height: 1.5; }
+.acp-rule-types { display: flex; gap: 4px; flex-wrap: wrap; }
+.acp-rule-type-tag { padding: 1px 7px; border-radius: 6px; background: rgba(195, 159, 106, 0.12); color: #c9bea6; font-size: 10px; }
+.acp-rule-ops { display: flex; gap: 6px; flex-shrink: 0; }
 
 .acp-stats { display: flex; gap: 10px; }
 .acp-stat {
@@ -375,4 +455,24 @@ function branchName(id: string): string {
 .acp-analysis-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 12px; border-bottom: 1px dashed rgba(195, 159, 106, 0.12); }
 .acp-analysis-key { color: #d9c390; white-space: nowrap; }
 .acp-analysis-count { flex: 1; color: #e0d4ba; }
+
+/* INCR-400 并入 ConflictResolutionPanel 独有能力样式 */
+.acp-default-hint { font-size: 11px; color: #8a8a80; }
+.acp-history { display: flex; flex-direction: column; gap: 4px; }
+.acp-history-item { display: flex; flex-direction: column; gap: 2px; padding: 7px 10px; border-radius: 8px; border: 1px solid transparent; background: rgba(195, 159, 106, 0.05); cursor: pointer; }
+.acp-history-item:hover { background: rgba(195, 159, 106, 0.1); }
+.acp-history-item.active { border-color: rgba(195, 159, 106, 0.35); background: rgba(195, 159, 106, 0.12); }
+.acp-history-summary { font-size: 12px; color: #e0d4ba; line-height: 1.5; }
+.acp-history-meta { font-size: 11px; color: #8a8a80; }
+.acp-form--col { flex-direction: column; align-items: stretch; }
+.acp-form--col .acp-input { flex: none; width: 100%; }
+.acp-form-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.acp-form-row .acp-input { flex: 1; min-width: 120px; }
+.acp-types-title { margin-top: 2px; }
+.acp-type-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.acp-type-cell { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(195, 159, 106, 0.22); background: rgba(195, 159, 106, 0.06); font-size: 12px; cursor: pointer; }
+.acp-type-cell.on { border-color: rgba(138, 154, 122, 0.5); background: rgba(138, 154, 122, 0.14); }
+.acp-type-check { accent-color: #8a9a7a; }
+.acp-hint { margin: 0; font-size: 11px; }
+.acp-rule-save { align-self: flex-start; }
 </style>
