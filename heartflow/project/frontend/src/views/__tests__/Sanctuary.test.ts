@@ -96,4 +96,14 @@ describe('Sanctuary 安全岛', () => {
     const noteTrigger = wrapper.find('.note-trigger')
     expect(noteTrigger.exists()).toBe(true)
   })
+
+  it('中枢总览面板：真实桥渲染 + 待触发空态（INCR-389）', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('[data-test="sanctuary-bridge-panel"]')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.snb-title').text()).toContain('安全岛·中枢总览')
+    expect(panel.find('[data-test="snb-status"]').classes()).toContain('idle')
+    expect(panel.text()).toContain('待触发')
+    expect(panel.find('[data-test="snb-empty"]').text()).toContain('中枢尚在待命')
+  })
 })

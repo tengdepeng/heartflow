@@ -33,3 +33,13 @@ export {
   OVERLAY_FORMS,
 } from './useDesktopSilentOverlay'
 export type { OverlayForm, OverlayFormDef, OverlayContentPref } from './useDesktopSilentOverlay'
+
+// ---- 视图桥接层（INCR-389 接线：安全岛·中枢总览） ----
+export { useSanctuaryBridge } from './sanctuary-bridge'
+export type {
+  SanctuaryState,
+  TriggerConfig,
+  SanctuarySession,
+  SanctuaryStats,
+  SanctuaryRecommendation,
+} from './sanctuary-bridge'

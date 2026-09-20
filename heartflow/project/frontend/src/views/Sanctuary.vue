@@ -165,6 +165,9 @@
       </div>
     </div>
 
+    <!-- ============ 2.5 安全岛·中枢总览（INCR-389 补挂载孤儿桥接面板 SanctuaryBridgePanel：useSanctuaryBridge 聚合 激活态 sanctuaryState/触发配置 triggerConfig/会话统计 sessionStats/使用建议 recommendations/激活历史 activationHistory 的 安全岛激活中枢态, Sanctuary.vue 原仅直引 useSanctuary+useDesktopSilentOverlay 专项引擎+SanctuaryArchivePanel 档案面板, 桥接层中枢聚合面零呈现, 真缺口） ============ -->
+    <SanctuaryBridgePanel />
+
     <!-- ============ 3. 呼吸练习统计 ============ -->
     <section class="breath-stats" aria-label="呼吸练习统计" v-if="sessionBreathCount > 0">
       <span class="breath-stats-text">呼吸练习 &#183; {{ sessionBreathCount }} 次</span>
@@ -280,6 +283,7 @@ import { useRuntimeState } from '../resonance/bridges/runtime'
 import { useSanctuary } from '../modules/sanctuary'
 import { useDesktopSilentOverlay } from '../modules/sanctuary'
 import SanctuaryArchivePanel from '../components/SanctuaryArchivePanel.vue'
+import SanctuaryBridgePanel from '../components/SanctuaryBridgePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceClass } = useViewEntrance()
