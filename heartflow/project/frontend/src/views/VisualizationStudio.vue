@@ -13,6 +13,7 @@ import TransformPipelinePanel from '../components/TransformPipelinePanel.vue'
 import VisualizationInteractionPanel from '../components/VisualizationInteractionPanel.vue'
 import VisualizationCockpitPanel from '../components/VisualizationCockpitPanel.vue'
 import DimensionMappingPanel from '../components/DimensionMappingPanel.vue'
+import DataSourceConnectorPanel from '../components/DataSourceConnectorPanel.vue'
 
 useViewEntrance()
 
@@ -155,6 +156,9 @@ onMounted(renderToCanvas)
 
     <!-- 维度映射（INCR-403 补挂载零消费引擎 DimensionMappingPanel：dimension-mapping 7 维映射定义 DIMENSION_MAPPINGS + applyDimensionMapping 执行 整体零 UI 消费, 可视化主题内真缺口） -->
     <DimensionMappingPanel />
+
+    <!-- 数据源连接器（INCR-404 补挂载零 UI 引擎 DataSourceConnectorPanel：datasource-connector 的 useDataSourceConnector 数据源注册/连接生命周期/订阅/轮询/缓存/错误恢复 整体仅被 visualization-bridge 聚合, 驾驶舱只呈现健康计数, 管理面零 UI 消费, 可视化主题内真缺口） -->
+    <DataSourceConnectorPanel />
 
     <section class="studio-canvas-wrap">
       <canvas ref="canvasRef" class="studio-canvas" data-testid="studio-canvas"></canvas>

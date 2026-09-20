@@ -285,3 +285,16 @@ describe('集成：维度映射面板', () => {
   })
 })
 
+// ============================================================
+describe('集成：数据源连接器面板', () => {
+  it('渲染数据源连接器面板（标题/统计条零值/空态/注册区）', () => {
+    const wrapper = mount(VisualizationStudio)
+    expect(wrapper.find('.dscp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('数据源连接器')
+    expect(wrapper.text()).toContain('0 已连接')
+    expect(wrapper.text()).toContain('0 源总数')
+    expect(wrapper.find('[data-testid="dscp-empty"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="dscp-register"]').exists()).toBe(true)
+  })
+})
+
