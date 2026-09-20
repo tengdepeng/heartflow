@@ -1,5 +1,18 @@
 <template>
   <section class="qbp-archive" aria-label="四象限任务看板">
+    <!-- 新增任务（并入 QuadrantKanban 交互能力 INCR-399） -->
+    <div class="qbp-add">
+      <input
+        v-model="newTitle"
+        class="qbp-add-input"
+        placeholder="输入任务，回车加入"
+        @keydown.enter.prevent="quickAdd"
+      />
+      <label class="qbp-add-check"><input type="checkbox" v-model="newUrgency" /> 紧急</label>
+      <label class="qbp-add-check"><input type="checkbox" v-model="newImportance" /> 重要</label>
+      <button class="qbp-add-btn" :disabled="!newTitle.trim()" @click="quickAdd">添加</button>
+    </div>
+
     <!-- 空态（无任务） -->
     <template v-if="!hasData">
       <div class="qbp-head">
@@ -39,13 +52,21 @@
           </div>
           <p class="qbp-col-desc">{{ col.desc }}</p>
           <div v-if="col.tasks.length" class="qbp-task-list">
-            <div v-for="t in col.tasks" :key="t.id" class="qbp-task">
+            <div
+              v-for="t in col.tasks"
+              :key="t.id"
+              class="qbp-task"
+              :class="{ done: t.status === 'done' }"
+              @click="toggleTask(t.id)"
+              :title="t.status === 'done' ? '点击恢复为待办' : '点击推进状态'"
+            >
               <span class="qbp-task-title">{{ t.title }}</span>
               <div class="qbp-task-meta">
                 <span class="qbp-task-status" :class="`s-${t.status}`">{{ statusLabel(t.status) }}</span>
                 <span v-if="t.focusCount > 0" class="qbp-task-focus">🔥 {{ t.focusCount }}</span>
                 <span v-if="dueMeta(t).status !== 'none'" class="qbp-task-due" :class="dueClass(t)">{{ dueMeta(t).label }}</span>
               </div>
+              <button class="qbp-task-del" @click.stop="deleteTask(t.id)" title="删除">✕</button>
             </div>
           </div>
           <p v-else class="qbp-col-empty">这一格还空着</p>
@@ -64,7 +85,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useTaskManager, buildQuadrantBoard, computeQuadrantStats, dueMeta } from '../modules/tasks'
 import type { Task, TaskStatus } from '../modules/tasks'
 import type { QuadrantBoardColumn } from '../modules/tasks'
@@ -73,6 +94,28 @@ const taskManager = useTaskManager()
 
 const tasks = computed(() => taskManager.tasks.value)
 const hasData = computed(() => tasks.value.length > 0)
+
+// ---- 交互任务管理（并入 QuadrantKanban 独有能力 INCR-399） ----
+const newTitle = ref('')
+const newUrgency = ref(false)
+const newImportance = ref(true)
+
+function quickAdd() {
+  const title = newTitle.value.trim()
+  if (!title) return
+  taskManager.addTask({ title, urgency: newUrgency.value, importance: newImportance.value })
+  newTitle.value = ''
+  newUrgency.value = false
+  newImportance.value = true
+}
+
+function toggleTask(id: string) {
+  taskManager.toggleStatus(id)
+}
+
+function deleteTask(id: string) {
+  taskManager.removeTask(id)
+}
 
 const board = computed(() => buildQuadrantBoard(tasks.value))
 const totalStats = computed(() => computeQuadrantStats(tasks.value))
@@ -154,6 +197,50 @@ function dueClass(t: Task): string {
   line-height: 1.7;
   color: var(--text-secondary, #b5aa98);
 }
+.qbp-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.qbp-add-input {
+  flex: 1;
+  min-width: 200px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light, #3a332a);
+  background: color-mix(in srgb, var(--bg-card, #241f18) 55%, transparent);
+  color: var(--text-primary, #ede5d8);
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+.qbp-add-input:focus {
+  border-color: color-mix(in srgb, #f0c040 45%, transparent);
+}
+.qbp-add-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  opacity: 0.85;
+  cursor: pointer;
+}
+.qbp-add-btn {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, #f0c040 45%, transparent);
+  background: color-mix(in srgb, #f0c040 14%, transparent);
+  color: #f0c040;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.qbp-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
 .qbp-summary {
   display: flex;
   flex-wrap: wrap;
@@ -223,10 +310,17 @@ function dueClass(t: Task): string {
   gap: 6px;
 }
 .qbp-task {
+  display: flex;
+  flex-direction: column;
   padding: 7px 9px;
   border-radius: 8px;
   background: color-mix(in srgb, var(--bg-card, #241f18) 60%, transparent);
   border: 1px solid var(--border-light, #3a332a);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.qbp-task:hover {
+  background: color-mix(in srgb, var(--bg-card, #241f18) 78%, transparent);
 }
 .qbp-task-title {
   display: block;
@@ -235,6 +329,29 @@ function dueClass(t: Task): string {
   color: var(--text-primary, #ede5d8);
   margin-bottom: 4px;
   word-break: break-all;
+}
+.qbp-task.done {
+  opacity: 0.55;
+}
+.qbp-task.done .qbp-task-title {
+  text-decoration: line-through;
+}
+.qbp-task-del {
+  margin-top: 4px;
+  align-self: flex-end;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary, #b5aa98);
+  opacity: 0.45;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  min-height: 24px;
+  min-width: 24px;
+}
+.qbp-task-del:hover {
+  opacity: 1;
+  color: #c46a5a;
 }
 .qbp-task-meta {
   display: flex;

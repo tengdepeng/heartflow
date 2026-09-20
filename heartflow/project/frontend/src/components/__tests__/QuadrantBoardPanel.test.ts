@@ -12,7 +12,31 @@ vi.mock('../../modules/tasks', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../modules/tasks')>()
   return {
     ...actual,
-    useTaskManager: () => ({ tasks: mockTasks }),
+    useTaskManager: () => ({
+      tasks: mockTasks,
+      addTask: (input: { title: string; urgency?: boolean; importance?: boolean }) => {
+        const t: Task = {
+          id: `t_${mockTasks.value.length + 1}`,
+          title: input.title,
+          urgency: input.urgency ?? false,
+          importance: input.importance ?? true,
+          status: 'todo',
+          focusCount: 0,
+          createdAt: new Date().toISOString(),
+        }
+        mockTasks.value.push(t)
+        return t
+      },
+      toggleStatus: (id: string) => {
+        const t = mockTasks.value.find(x => x.id === id)
+        if (!t) return undefined
+        t.status = t.status === 'done' ? 'todo' : t.status === 'doing' ? 'done' : 'doing'
+        return t
+      },
+      removeTask: (id: string) => {
+        mockTasks.value = mockTasks.value.filter(t => t.id !== id)
+      },
+    }),
   }
 })
 
@@ -105,5 +129,30 @@ describe('QuadrantBoardPanel 四象限任务看板', () => {
     const items = wrapper.findAll('.qbp-insight')
     expect(items.length).toBeGreaterThan(0)
     expect(items.length).toBeLessThanOrEqual(4)
+  })
+
+  it('新增任务并分入默认象限（并入 QuadrantKanban 交互能力）', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.qbp-add-input').setValue('深耕要事')
+    await wrapper.find('.qbp-add-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(mockTasks.value).toHaveLength(1)
+    expect(mockTasks.value[0].title).toBe('深耕要事')
+    expect(mockTasks.value[0].importance).toBe(true)
+    expect(wrapper.text()).toContain('1 件任务')
+  })
+
+  it('点击任务卡切换状态，删除按钮移除任务（并入 QuadrantKanban 交互能力）', async () => {
+    mockTasks.value = [task({ id: 't1', title: '任务甲', urgency: true, importance: true })]
+    const wrapper = await getWrapper()
+    const card = wrapper.find('.qbp-task')
+    expect(card.text()).toContain('待办')
+    await card.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(mockTasks.value[0].status).toBe('doing')
+    expect(wrapper.find('.qbp-task').text()).toContain('进行中')
+    await wrapper.find('.qbp-task-del').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(mockTasks.value).toHaveLength(0)
   })
 })
