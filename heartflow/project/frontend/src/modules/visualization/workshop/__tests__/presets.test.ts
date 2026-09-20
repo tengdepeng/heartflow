@@ -3,9 +3,18 @@
 // 验证：起步种子覆盖蓝图声明的材质分类，且不覆盖用户数据
 // ============================================================
 
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { resetMaterialPresets, initMaterialPresets, getPresetMaterialTotal, MATERIAL_GROUPS, MATERIAL_GROUP_TOTALS } from '../presets'
 import { getMaterialLibrary, getMaterialCount, createMaterial, clearMaterialStore } from '../index'
+
+// ---- 模拟 storage（workshop 引擎持久化后，预置注入会触达 storage 读写） ----
+const mockStore: Record<string, any> = {}
+vi.mock('../../../../engine/storage', () => ({
+  storage: {
+    getKV: (_key: string, def: any) => mockStore[_key] ?? def,
+    setKV: (key: string, val: any) => { mockStore[key] = val },
+  },
+}))
 
 describe('预置材质库', () => {
   beforeEach(() => {

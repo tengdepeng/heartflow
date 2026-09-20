@@ -131,6 +131,17 @@ describe('MaterialWorkshop 材质工坊', () => {
     expect(wrapper.text()).toContain('视觉隐喻')
   })
 
+  it('显示材质库区域（真实引擎全链路：挂载即注入出厂预置）', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.text()).toContain('材质库')
+    expect(wrapper.text()).toContain('起点库')
+    expect(wrapper.text()).toContain('发光')
+    expect(wrapper.text()).toContain('纹理基底')
+    // 预置注入真实生效：材质网格出现具体材质卡片
+    expect(wrapper.text()).toContain('暖金光点')
+    expect(wrapper.text()).toContain('浓墨一点')
+  })
+
   it('显示面包屑导航', async () => {
     const wrapper = await getWrapper()
     const breadcrumbLinks = wrapper.findAll('.breadcrumb-link')

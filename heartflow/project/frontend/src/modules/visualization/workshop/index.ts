@@ -3,6 +3,7 @@
 // 视觉材质的管理、编辑与存储
 // ============================================================
 
+import { storage } from '../../../engine/storage'
 import type { MetaphorType, MetaphorPalette, MetaphorConfig } from '../types'
 
 // ============================================================
@@ -42,8 +43,39 @@ export type MaterialUpdates = Partial<Pick<VisualMaterial, 'name' | 'metaphor' |
 // 内部状态
 // ============================================================
 
-/** 材质存储（模拟持久化） */
+/** 材质存储（明文 JSON 落盘于 storage kvStore，无存储环境时降级为内存态） */
 const materialStore = new Map<string, VisualMaterial>()
+
+/** 材质库存储键 */
+export const MATERIALS_STORAGE_KEY = 'hf:visualization:materials'
+
+let loaded = false
+
+/** 首次访问时从 storage 惰性恢复（避免并发写覆盖既有数据） */
+function ensureLoaded(): void {
+  if (loaded) return
+  loaded = true
+  try {
+    const saved = storage.getKV<VisualMaterial[] | null>(MATERIALS_STORAGE_KEY, null)
+    if (Array.isArray(saved)) {
+      materialStore.clear()
+      for (const m of saved) {
+        if (m && typeof m.id === 'string') materialStore.set(m.id, m)
+      }
+    }
+  } catch {
+    /* 无存储环境（测试/降级）保持内存态 */
+  }
+}
+
+/** 全量写回 storage（明文 JSON） */
+function persistStore(): void {
+  try {
+    storage.setKV(MATERIALS_STORAGE_KEY, [...materialStore.values()])
+  } catch {
+    /* 无存储环境静默降级为内存态 */
+  }
+}
 
 // ============================================================
 // 公共 API
@@ -72,6 +104,7 @@ export function createMaterial(
   name: string,
   config: MaterialCreateConfig,
 ): VisualMaterial {
+  ensureLoaded()
   const now = Date.now()
   const material: VisualMaterial = {
     id: generateMaterialId(),
@@ -85,6 +118,7 @@ export function createMaterial(
   }
 
   materialStore.set(material.id, material)
+  persistStore()
   return material
 }
 
@@ -111,6 +145,7 @@ export function editMaterial(
   materialId: string,
   updates: MaterialUpdates,
 ): VisualMaterial {
+  ensureLoaded()
   const existing = materialStore.get(materialId)
   if (!existing) {
     throw new Error(`材质不存在：${materialId}`)
@@ -138,6 +173,7 @@ export function editMaterial(
   }
 
   materialStore.set(materialId, updated)
+  persistStore()
   return updated
 }
 
@@ -151,6 +187,7 @@ export function editMaterial(
  * @returns 保存后的 VisualMaterial
  */
 export function saveMaterial(material: VisualMaterial): VisualMaterial {
+  ensureLoaded()
   const now = Date.now()
   const existing = materialStore.get(material.id)
 
@@ -163,6 +200,7 @@ export function saveMaterial(material: VisualMaterial): VisualMaterial {
   }
 
   materialStore.set(material.id, saved)
+  persistStore()
   return saved
 }
 
@@ -180,6 +218,7 @@ export function saveMaterial(material: VisualMaterial): VisualMaterial {
  * ```
  */
 export function getMaterialLibrary(): VisualMaterial[] {
+  ensureLoaded()
   return [...materialStore.values()].sort((a, b) => b.updatedAt - a.updatedAt)
 }
 
@@ -190,6 +229,7 @@ export function getMaterialLibrary(): VisualMaterial[] {
  * @returns 对应的材质，未找到时返回 undefined
  */
 export function getMaterial(materialId: string): VisualMaterial | undefined {
+  ensureLoaded()
   return materialStore.get(materialId)
 }
 
@@ -209,14 +249,19 @@ export function getMaterial(materialId: string): VisualMaterial | undefined {
  * ```
  */
 export function deleteMaterial(materialId: string): boolean {
-  return materialStore.delete(materialId)
+  ensureLoaded()
+  const removed = materialStore.delete(materialId)
+  if (removed) persistStore()
+  return removed
 }
 
 /**
  * 清空所有材质（主要用于测试）
  */
 export function clearMaterialStore(): void {
+  ensureLoaded()
   materialStore.clear()
+  persistStore()
 }
 
 /**
@@ -225,6 +270,7 @@ export function clearMaterialStore(): void {
  * @returns 材质数量
  */
 export function getMaterialCount(): number {
+  ensureLoaded()
   return materialStore.size
 }
 
