@@ -267,3 +267,21 @@ describe('集成：可视化·驾驶舱总览面板', () => {
     expect(wrapper.text()).toContain('面板')
   })
 })
+
+// ============================================================
+// INCR-403：补挂载零消费引擎面板 DimensionMappingPanel
+// dimension-mapping（7 维映射定义 DIMENSION_MAPPINGS + applyDimensionMapping 执行）
+// 整体零 UI 消费（仅 studio-data 引 seven-dimensions 类型）→ 可视化主题内真缺口。
+// 面板为无 props 无 storage 纯引擎薄委托，真实挂载即可验证。
+// ============================================================
+describe('集成：维度映射面板', () => {
+  it('渲染维度映射面板（标题/7 条定义/默认数值演示）', () => {
+    const wrapper = mount(VisualizationStudio)
+    expect(wrapper.find('.dmp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('维度映射')
+    expect(wrapper.findAll('.dmp-item')).toHaveLength(7)
+    expect(wrapper.find('.dmp-demo-dim').text()).toBe('数值')
+    expect(wrapper.find('.dmp-swatch').exists()).toBe(true)
+  })
+})
+
