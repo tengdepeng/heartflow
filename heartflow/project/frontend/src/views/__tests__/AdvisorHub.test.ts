@@ -163,6 +163,7 @@ describe('AdvisorHub 视图（真实档案层）', () => {
     vi.clearAllMocks()
     mockAdvisors.length = 0
     mockStore['hf:advisors'] = []
+    mockStore['mirror.dispatch.records'] = undefined
   })
 
   afterEach(() => {
@@ -216,6 +217,43 @@ describe('AdvisorHub 视图（真实档案层）', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('[data-test="cdp-preview"]').exists()).toBe(true)
     expect(wrapper.find('[data-test="cdp-cross"]').text()).toContain('可拆解')
+  })
+
+  // ---- 手动幕僚调度面板 DispatchPanel（INCR-393 补挂载孤儿组件；useDispatch 经 mock storage 读 mirror.dispatch.records 空态默认 []） ----
+  it('集成渲染手动幕僚调度面板空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.dsp-panel').exists()).toBe(true)
+    expect(wrapper.find('.dsp-panel').text()).toContain('幕僚调度')
+    expect(wrapper.find('.dsp-panel').text()).toContain('还没有调令')
+    expect(wrapper.find('.dsp-panel').text()).toContain('下达调令')
+  })
+
+  it('下达手动调令：选择幕僚后创建记录并判定策略', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.dsp-panel')
+    await panel.find('input.dsp-input').setValue('先整理素材，再撰写初稿')
+    const chips = panel.findAll('button.dsp-advisor-chip')
+    await chips[0].trigger('click')
+    await chips[1].trigger('click')
+    await panel.find('button.dsp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(panel.text()).toContain('已下达')
+    expect(panel.text()).toContain('串行')
+    expect(panel.text()).toContain('0/2 步完成')
+  })
+
+  it('预置调令记录时展示记录卡片与进度', async () => {
+    mockStore['mirror.dispatch.records'] = JSON.stringify([{
+      id: 'dr1', order: '整理素材', strategy: 'single', advisorIds: ['preset-jingwo'],
+      steps: [{ advisorId: 'preset-jingwo', detail: '', status: 'pending' }],
+      stepIndex: 0, status: 'queued', result: {}, createdAt: new Date().toISOString(),
+    }])
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.dsp-panel')
+    expect(panel.text()).toContain('1 次调令')
+    expect(panel.text()).toContain('整理素材')
+    expect(panel.text()).toContain('单一')
+    expect(panel.text()).toContain('0/1 步完成')
   })
 
   // ---- 幕僚列表（读取真实 advisor.advisors） ----
@@ -430,6 +468,7 @@ describe('集成：幕僚互动面板', () => {
     vi.clearAllMocks()
     mockAdvisors.length = 0
     mockStore['hf:advisors'] = []
+    mockStore['mirror.dispatch.records'] = undefined
   })
 
   it('无幕僚时渲染互动面板骨架与空态', async () => {
@@ -899,6 +938,7 @@ describe('集成：执行策略判定', () => {
     vi.clearAllMocks()
     mockAdvisors.length = 0
     mockStore['hf:advisors'] = []
+    mockStore['mirror.dispatch.records'] = undefined
   })
 
   afterEach(() => {

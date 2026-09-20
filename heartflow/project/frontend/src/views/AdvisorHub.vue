@@ -73,6 +73,11 @@
       <CommandDecomposePanel />
     </section>
 
+    <!-- 手动幕僚调度（INCR-393 补挂载孤儿组件 DispatchPanel：useDispatch 引擎应用内唯一、零 props 自足；下达手动调令→单一/并行/串行判策略→逐步产出录入，与自动调令/任务拆解互补） -->
+    <section data-enter class="ah-command-section">
+      <DispatchPanel />
+    </section>
+
     <!-- 功能直达（INCR-312 补挂载孤儿组件 FeatureSearchPanel：关键词搜索/直达跳转/推荐快捷入口，featureDictionary 引擎应用内唯一） -->
     <section data-enter class="ah-scheduler-section">
       <h3 class="ah-scheduler-heading">🧭 功能直达</h3>
@@ -276,6 +281,7 @@ import AdvisorOverviewPanel from '../components/AdvisorOverviewPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import FeatureSearchPanel from '../components/FeatureSearchPanel.vue'
 import CommandDecomposePanel from '../components/CommandDecomposePanel.vue'
+import DispatchPanel from '../components/DispatchPanel.vue'
 import SearchInput from '../components/SearchInput.vue'
 import NoteSticky from '../components/NoteSticky.vue'
 import FabButton from '../components/FabButton.vue'
