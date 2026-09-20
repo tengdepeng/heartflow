@@ -242,6 +242,7 @@ export type {
 
 // ---- constitution ----
 export { useComplianceBaseline } from './constitution'
+export { useConstitutionBridge } from './constitution'
 
 // ---- body ----
 export { useBodyGreenhouse } from './body'

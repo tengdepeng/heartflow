@@ -4,6 +4,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
+import { ref } from 'vue'
 
 // ============================================================
 // 测试数据工厂
@@ -177,6 +178,8 @@ vi.mock('../../modules/constitution/compliance-baseline', () => ({
     getAuditLog: mockGetAuditLog,
     getAuditStats: mockGetAuditStats,
     detectConflicts: mockDetectConflicts,
+    // 桥接总览面板（INCR-381）依赖 complianceConfig 渲染配置徽标
+    complianceConfig: ref({ autoCheck: true, minScore: 60, checkOnAdd: true, checkOnUpdate: true }),
   }),
 }))
 
@@ -626,6 +629,17 @@ describe('集成：合规守卫 · 宪法体检', () => {
     expect(panel.text()).toContain('rule_added')
     expect(panel.text()).toContain('新增规则：专注')
     expect(panel.text()).toContain('共 1 条')
+  })
+
+  // 桥接总览面板 INCR-381：mock 基线引擎（complianceConfig）+ 真实 review 引擎（initChecklist 注入 20 项默认清单）
+  it('渲染合规桥接总览面板：标题/徽标/默认核查清单', async () => {
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('[data-test="constitution-bridge-panel"]')
+    expect(panel.exists()).toBe(true)
+    expect(panel.text()).toContain('宪法 · 合规桥接总览')
+    expect(panel.find('[data-test="cbp-badge"]').text()).toBe('最低达标 60 分 · 自动检查 开')
+    expect(panel.find('[data-test="cbp-checklist"]').text()).toContain('数据主权')
+    expect(panel.find('[data-test="cbp-checklist"]').text()).toContain('隐私保护')
   })
 })
 

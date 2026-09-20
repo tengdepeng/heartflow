@@ -289,6 +289,9 @@
     <!-- 宪法透明度账本 · 名实对照 -->
     <ConstitutionStatusPanel />
 
+    <!-- 宪法·合规桥接总览（cbp- 桥接驾驶舱：合规基线/审计账本/核查清单/审查历史，INCR-381） -->
+    <ConstitutionBridgePanel />
+
     <!-- A3-EXT · 系统通知审计 · 零推送合规证明 -->
     <OsNotificationAuditPanel />
 
@@ -622,6 +625,7 @@ import { useConstitutionEffect, useRuleEffectPreview } from '@/composables/useCo
 import { ruleHasRuntimeEffect } from '@/engine/constitution-effects'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import ConstitutionStatusPanel from '@/components/ConstitutionStatusPanel.vue'
+import ConstitutionBridgePanel from '@/components/ConstitutionBridgePanel.vue'
 import OsNotificationAuditPanel from '@/components/OsNotificationAuditPanel.vue'
 import ConstitutionGuardianPanel from '@/components/ConstitutionGuardianPanel.vue'
 import ConstitutionLiveVars from '@/components/ConstitutionLiveVars.vue'

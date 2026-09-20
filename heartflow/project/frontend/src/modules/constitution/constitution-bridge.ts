@@ -3,7 +3,8 @@
 // 简化透传：直接暴露 useComplianceBaseline 和 useComplianceReview 的原始 API
 // ============================================================
 
-import { useComplianceBaseline, useComplianceReview } from './index'
+import { useComplianceBaseline } from './compliance-baseline'
+import { useComplianceReview } from './compliance-review'
 
 export function useConstitutionBridge() {
   const baseline = useComplianceBaseline()

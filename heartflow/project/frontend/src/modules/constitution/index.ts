@@ -5,6 +5,7 @@
 
 export { useComplianceBaseline } from './compliance-baseline'
 export { useComplianceReview } from './compliance-review'
+export { useConstitutionBridge } from './constitution-bridge'
 
 export {
   DEFAULT_COMPLIANCE_CONFIG,
