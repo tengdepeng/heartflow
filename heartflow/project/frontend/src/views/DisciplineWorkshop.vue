@@ -1,5 +1,5 @@
 <template>
-  <div class="view-entrance dw" ref="entranceRef">
+  <div :class="entranceClass" ref="entranceRef" class="view-entrance dw">
     <!-- 装饰性头部 -->
     <div data-enter class="dw-header">
       <div class="header-ornament">
@@ -293,6 +293,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useViewEntrance } from '../composables/useViewEntrance'
 import { useDisciplineBridge } from '../modules/discipline/workshop-bridge'
 import HabitPredictArchivePanel from '../components/HabitPredictArchivePanel.vue'
 import HabitFailurePanel from '../components/HabitFailurePanel.vue'
@@ -310,6 +311,8 @@ import { useChallengeRecommender } from '../modules/discipline/challenge-recomme
 import { HABIT_DIFFICULTY_META } from '../modules/discipline/types'
 import QuadrantBoardPanel from '../components/QuadrantBoardPanel.vue'
 import { useTaskManager } from '../modules/tasks'
+
+const { entranceRef, entranceClass } = useViewEntrance()
 
 const bridge = useDisciplineBridge()
 
