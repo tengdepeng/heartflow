@@ -34,7 +34,7 @@
           </ul>
         </div>
       </div>
-      <p v-if="health.totalSessions === 0" class="chp-empty" data-test="chp-empty">还没有冥想记录，健康数据将在首次冥落后显影。</p>
+      <p v-if="health.totalSessions === 0" class="chp-empty" data-test="chp-empty">还没有冥想记录，健康数据将在首次冥想后显影。</p>
     </div>
 
     <!-- 连续追踪 -->
