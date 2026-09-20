@@ -11,6 +11,7 @@ import { useAdaptiveQuality } from '../modules/adaptive'
 import type { SevenDimensionOutput, VizSubject } from '../modules/visualization'
 import TransformPipelinePanel from '../components/TransformPipelinePanel.vue'
 import VisualizationInteractionPanel from '../components/VisualizationInteractionPanel.vue'
+import VisualizationCockpitPanel from '../components/VisualizationCockpitPanel.vue'
 
 useViewEntrance()
 
@@ -147,6 +148,9 @@ onMounted(renderToCanvas)
 
     <!-- 可视化交互（INCR-252 补挂载孤儿组件：图表缩放/标注/断点 + 仪表盘布局控制） -->
     <VisualizationInteractionPanel />
+
+    <!-- 可视化·驾驶舱总览（INCR-388 补挂载孤儿桥接面板 VisualizationCockpitPanel：useVisualizationBridge 聚合 chart-interaction/canvas-renderer/datasource-connector/dashboard-layout 四引擎的驾驶舱态 渲染性能 fps/图层/绘制命令/脏区域 + 数据源健康 已连接/源总数/错误源 + 图表交互 标注/缩放/交互态 + 仪表盘布局 面板/最大行/断点, VisualizationStudio.vue 原仅直引 useVisualizationStudio+useCanvasRenderer 专项引擎+两个专项面板 Interaction(chart-interaction/dashboard-layout)/Transform(datasource 变换), 车接层驾驶舱聚合面零呈现, 真缺口） -->
+    <VisualizationCockpitPanel />
 
     <section class="studio-canvas-wrap">
       <canvas ref="canvasRef" class="studio-canvas" data-testid="studio-canvas"></canvas>

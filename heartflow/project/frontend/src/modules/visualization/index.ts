@@ -372,3 +372,7 @@ export type {
   ResizeState,
   DashboardLayoutState,
 } from './dashboard-layout'
+
+// ---- 视图桥接层（INCR-388 接线） ----
+export { useVisualizationBridge } from './visualization-bridge'
+export type { VisualizationState } from './visualization-bridge'

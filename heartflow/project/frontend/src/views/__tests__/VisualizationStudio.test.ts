@@ -234,3 +234,36 @@ describe('集成：可视化交互面板', () => {
     expect(wrapper.find('.vip-panel').exists()).toBe(true)
   })
 })
+
+// ============================================================
+// 集成：可视化·驾驶舱总览面板 VisualizationCockpitPanel（INCR-388 补挂载孤儿桥接面板）
+// useVisualizationBridge 聚合 chart-interaction/canvas-renderer/datasource-connector/
+// dashboard-layout 四引擎（均为工厂函数，纯内存、不读 storage）→ 无跨用例污染；
+// 空态（源总数 0 且面板 0）下徽标待命、四区块指标归零并渲染空态引导。
+// ============================================================
+describe('集成：可视化·驾驶舱总览面板', () => {
+  it('渲染驾驶舱面板（标题/副题/徽标待命/四区块与空态引导）', () => {
+    const wrapper = mount(VisualizationStudio)
+    expect(wrapper.find('.vzp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('可视化·驾驶舱总览')
+    expect(wrapper.text()).toContain('渲染性能')
+    expect(wrapper.text()).toContain('数据源健康')
+    expect(wrapper.text()).toContain('图表交互')
+    expect(wrapper.text()).toContain('仪表盘布局')
+    // 空态徽标
+    expect(wrapper.find('.vzp-badge').text()).toContain('待命')
+    expect(wrapper.find('.vzp-badge-dot').classes()).toContain('idle')
+    // 空态引导
+    expect(wrapper.find('.vzp-empty').text()).toContain('驾驶舱尚在待命')
+    // 指标全 0
+    expect(wrapper.text()).toContain('FPS')
+    expect(wrapper.text()).toContain('图层')
+    expect(wrapper.text()).toContain('绘制命令')
+    expect(wrapper.text()).toContain('脏区域')
+    expect(wrapper.text()).toContain('已连接')
+    expect(wrapper.text()).toContain('源总数')
+    expect(wrapper.text()).toContain('错误源')
+    expect(wrapper.text()).toContain('标注')
+    expect(wrapper.text()).toContain('面板')
+  })
+})

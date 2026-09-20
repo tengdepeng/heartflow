@@ -176,6 +176,8 @@ export { getEffectiveMetaphor, getBuiltinPaletteIds, getBuiltinPalette } from '.
 export { PRESET_STYLE_PACKS, getPresetPack } from './visualization'
 export { getDimensionMappings, getMappingByDimension, applyDimensionMapping, applyAllMappings } from './visualization'
 export type { MetaphorType, MetaphorConfig, MetaphorPalette, VisualizationStylePack, DataDimension, VisualDimension } from './visualization'
+export { useVisualizationBridge } from './visualization'
+export type { VisualizationState } from './visualization'
 
 // ---- visitor ----
 export { useVisitor, useVisitorBridge, VISITOR_ROLE_PERMISSIONS, VISITOR_ROLE_LABELS } from './visitor'
