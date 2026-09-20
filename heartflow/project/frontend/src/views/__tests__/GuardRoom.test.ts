@@ -635,11 +635,14 @@ describe('GuardRoom 视图', () => {
 
   it('今日节律统计显示休息与稍后计数', async () => {
     mockStore['hf:eye_shield_config'] = { eyeBreakMinutes: 20 }
-    const now = Date.now()
+    // 三类事件均落在「今日」内并钳制在当前时刻之后，避免凌晨跨午夜导致持续天数越界
+    const dayBase = new Date(); dayBase.setHours(0, 0, 0, 0)
+    const t0 = dayBase.getTime()
+    const cap = Date.now()
     mockStore['hf:eye_break_logs'] = [
-      { id: 'eb1', at: now - 3_600_000, kind: 'rest' },
-      { id: 'eb2', at: now - 1_800_000, kind: 'defer' },
-      { id: 'eb3', at: now - 600_000, kind: 'rest' },
+      { id: 'eb1', at: Math.min(t0 + 3_600_000, cap), kind: 'rest' },
+      { id: 'eb2', at: Math.min(t0 + 7_200_000, cap), kind: 'defer' },
+      { id: 'eb3', at: Math.min(t0 + 10_800_000, cap), kind: 'rest' },
     ]
     const wrapper = await getWrapper()
     const stats = wrapper.findAll('.gsp-stat')
