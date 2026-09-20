@@ -236,6 +236,9 @@
     <!-- 周期性收支分析（INCR：日/周/月/季/年收支节奏 + 收支对比） -->
     <PeriodicRewardPanel :records="adaptedRecords" />
 
+    <!-- 财务分析（INCR-394 补挂载孤儿组件 FinanceAnalysisPanel：useFinanceFilter 筛选+预设 / usePeriodicAnalysis 周期 / useChartData 图表双 tab，收支记录 筛选·周期·图表看透每一笔） -->
+    <FinanceAnalysisPanel :records="records" />
+
     <!-- 多账户与转账（记账 v2） -->
     <AccountManagerPanel :records="records" @change="accounts.load()" />
 
@@ -538,6 +541,7 @@ import { useAccounts } from '../modules/reward/accounts'
 import FinanceGoalsPanel from '../components/FinanceGoalsPanel.vue'
 import RewardMilestonePanel from '../components/RewardMilestonePanel.vue'
 import PeriodicRewardPanel from '../components/PeriodicRewardPanel.vue'
+import FinanceAnalysisPanel from '../components/FinanceAnalysisPanel.vue'
 import AccountManagerPanel from '../components/AccountManagerPanel.vue'
 import BudgetAlertPanel from '../components/BudgetAlertPanel.vue'
 import BudgetPanel from '../components/BudgetPanel.vue'

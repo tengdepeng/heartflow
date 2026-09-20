@@ -233,6 +233,62 @@ describe('Reward 视图', () => {
 })
 
 // ============================================================
+// 集成：财务分析面板（INCR-394 补挂载孤儿组件 FinanceAnalysisPanel）
+// useFinanceFilter 筛选+预设 / usePeriodicAnalysis 周期 / useChartData 图表三 tab。
+// 经 mock storage 的 rewards 键驱动；预设键 hf:reward_filter_presets 空默认。
+// ============================================================
+describe('集成：财务分析面板', () => {
+  beforeEach(() => {
+    mockKV.delete('hf:reward_filter_presets')
+    // 前面的「劳酬」describe 末用例会把 rewards 置空且不还原；此处重播种保持独立
+    mockKV.set('rewards', [...mockRecords])
+  })
+
+  it('挂载财务分析面板，默认筛选 tab 展示收支记录与条数', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.fap')
+    expect(panel.exists()).toBe(true)
+    expect(panel.text()).toContain('财务分析')
+    expect(panel.text()).toContain('筛选')
+    expect(panel.text()).toContain('5 条')
+    expect(panel.text()).toContain('月度薪资')
+    expect(panel.text()).toContain('¥15,000')
+  })
+
+  it('筛选 tab 关键词检索过滤结果', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.fap')
+    await panel.find('input.fap-input').setValue('薪资')
+    await panel.find('button.fap-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(panel.text()).toContain('1 条')
+    expect(panel.text()).toContain('月度薪资')
+  })
+
+  it('周期 tab 展示周期统计与最佳周期', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.fap')
+    await panel.findAll('.fap-tab')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(panel.text()).toContain('总收入')
+    expect(panel.text()).toContain('总支出')
+    expect(panel.text()).toContain('净结余')
+    expect(panel.text()).toContain('最佳周期')
+  })
+
+  it('图表 tab 展示类别分布与月度趋势与预算执行', async () => {
+    const wrapper = await getWrapper()
+    const panel = wrapper.find('.fap')
+    await panel.findAll('.fap-tab')[2].trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(panel.text()).toContain('收入类别分布')
+    expect(panel.text()).toContain('支出类别分布')
+    expect(panel.text()).toContain('月度收支趋势')
+    expect(panel.text()).toContain('本月预算执行')
+  })
+})
+
+// ============================================================
 // 集成：里程碑面板（INCR-166：补挂载 claim-but-orphan 面板）
 // ============================================================
 describe('集成：里程碑面板（劳酬）', () => {
