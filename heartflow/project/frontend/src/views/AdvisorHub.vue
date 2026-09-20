@@ -197,6 +197,11 @@
         <FabButton v-if="stickyLayer" label="新建便签" icon="＋" position="bl" @click="noteEditor.openCreate()" />
       </Teleport>
 
+    <!-- 幕僚总览（INCR-383 补挂载孤儿桥接面板 AdvisorOverviewPanel：useAdvisorBridge 聚合关系网络分级分布/场景统计/仪式摘要/见证日志摘要四面, Advisor 各视图原走 resonance store+专项面板, 桥层计算面零呈现, 真缺口） -->
+    <section data-enter class="ah-section">
+      <AdvisorOverviewPanel />
+    </section>
+
     <!-- 幕僚互动（INCR-246 补挂载孤儿组件 AdvisorInteractionPanel：幕僚↔幕僚关系/协作/互学/共处，引擎 useAdvisorInteraction 唯一、advisors props 薄委托注入） -->
     <section data-enter class="ah-section">
       <AdvisorInteractionPanel :advisors="advisors" />
@@ -267,6 +272,7 @@ import AdvisorInteractionPanel from '../components/AdvisorInteractionPanel.vue'
 import AdvisorWitnessPanel from '../components/AdvisorWitnessPanel.vue'
 import AdvisorCelebrationPanel from '../components/AdvisorCelebrationPanel.vue'
 import AdvisorDailyLifePanel from '../components/AdvisorDailyLifePanel.vue'
+import AdvisorOverviewPanel from '../components/AdvisorOverviewPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import FeatureSearchPanel from '../components/FeatureSearchPanel.vue'
 import CommandDecomposePanel from '../components/CommandDecomposePanel.vue'

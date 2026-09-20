@@ -210,6 +210,8 @@ export type { EntityType, EntityMeta, RecognizedEntity, ClipItem } from './text-
 
 // ---- advisor ----
 export { useAdvisorInteraction, useAdvisorDailyLife, useAdvisorCelebration, useAdvisorWitness } from './advisor'
+export { useAdvisorBridge } from './advisor'
+export type { AdvisorSummary, RelationNetworkOverview, RitualSummary, WitnessLogSummary } from './advisor'
 export {
   INTERACTION_TYPE_META,
   TIME_SLOT_META,

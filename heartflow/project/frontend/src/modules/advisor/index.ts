@@ -8,6 +8,15 @@ export { useAdvisorDailyLife } from './daily-life'
 export { useAdvisorCelebration } from './celebration'
 export { useAdvisorWitness } from './witness'
 
+// ---- 视图桥接层（INCR-383）----
+export { useAdvisorBridge } from './advisor-bridge'
+export type {
+  AdvisorSummary,
+  RelationNetworkOverview,
+  RitualSummary,
+  WitnessLogSummary,
+} from './advisor-bridge'
+
 export {
   isCrossDomainQuery,
   detectDomains,
