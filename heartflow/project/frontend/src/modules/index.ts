@@ -40,6 +40,8 @@ export { useGoal, useGoalBridge } from './goal'
 export type { Goal, GoalTier, GoalStatus, GoalSummary } from './goal'
 
 export { usePluginManager } from './plugin'
+export { usePluginEcosystemBridge } from './plugin'
+export type { PluginEcosystemOverview, PluginBridgeItem, SandboxBridgeStatus, PluginRecommendation } from './plugin'
 export type { PluginManifest, PluginRuntime, PluginPermission } from './plugin'
 
 export { useRelation, useMemorialSeats } from './relation'

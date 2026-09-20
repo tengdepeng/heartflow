@@ -27,6 +27,9 @@
       </div>
     </div>
 
+    <!-- 插件生态总览（INCR-384 补挂载孤儿桥接面板 PluginEcosystemPanel：usePluginEcosystemBridge 聚合生态概览/分类/沙箱守卫/调度器/市场健康/权限风险/建议七面, Plugins.vue 原走 resonance usePlugin store+网格, 桥接层聚合 computed 面零呈现, 真缺口） -->
+    <PluginEcosystemPanel />
+
     <!-- 核心插件 -->
     <section data-enter class="pl-core-section">
       <h2 class="pl-section-title">核心插件（内置）</h2>
@@ -192,6 +195,7 @@ import type {
 } from '../modules/plugin/types'
 import { PERMISSION_LABELS } from '../modules/plugin/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import PluginEcosystemPanel from '../components/PluginEcosystemPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const pluginBridge = usePlugin()

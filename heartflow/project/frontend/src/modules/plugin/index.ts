@@ -82,6 +82,15 @@ export { usePluginMarketplace } from './plugin-marketplace'
 export { pluginMarketplaceRegistry, CATEGORY_LABELS, CATEGORY_ORDER } from './plugin-registry'
 export type { PluginCategoryId, MarketplaceCategory, MarketplaceEntry } from './plugin-registry'
 
+// ---- 视图桥接层（INCR-384）----
+export { usePluginEcosystemBridge } from './plugin-ecosystem-bridge'
+export type {
+  PluginEcosystemOverview,
+  PluginBridgeItem,
+  SandboxBridgeStatus,
+  PluginRecommendation,
+} from './plugin-ecosystem-bridge'
+
 // ---- 插件能力通道（蓝图 L10612：经能力扩展对话分身） ----
 export {
   registerPluginCapability,
