@@ -62,3 +62,7 @@ export type {
 // ---- 视图数据层 · 班次 / 时薪（替代 WorkLog.vue 的裸 storage 调用） ----
 export { useWorkLog } from './worklog-shifts'
 export type { WorkShift } from './worklog-shifts'
+
+// ---- 视图桥接层（INCR-390 接线：更漏·桥接总览） ----
+export { useWorklogModuleBridge } from './worklog-module-bridge'
+export type { WorklogSummary } from './worklog-module-bridge'

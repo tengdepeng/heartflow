@@ -309,6 +309,9 @@
       </div>
     </section>
 
+    <!-- ============ 桥接总览（INCR-390 补挂载孤儿桥接面板 WorklogBridgePanel：useWorklogModuleBridge 聚合 useWorklog+useWorklogAnalytics+useWorklogHabits+useProductivityPrediction+useWorklogExport 五引擎为 summary 驱动驾驶舱态(totalEntries/todayEntries/weekEntries/streakDays/mostProductiveDay/mostProductiveHour), 只读 computed 无存储写；WorkLog.vue 原仅 useWorklogAnalytics.analytics 呈现 总/本周/连续/最长连续 四卡, 桥接层"今日条目/本周条目/最有效率日/最有效率时"聚合面零呈现, 真缺口） ============ -->
+    <WorklogBridgePanel />
+
     <!-- 导出留档（worklog-export 模块） -->
     <WorklogExportPanel />
 
@@ -401,6 +404,7 @@ import WorklogRewardPanel from '../components/WorklogRewardPanel.vue'
 import ProductivityPanel from '../components/ProductivityPanel.vue'
 import WorkRhythmPanel from '../components/WorkRhythmPanel.vue'
 import TaskDecomposerPanel from '../components/TaskDecomposerPanel.vue'
+import WorklogBridgePanel from '../components/WorklogBridgePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

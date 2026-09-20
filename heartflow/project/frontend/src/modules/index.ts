@@ -481,10 +481,10 @@ export type {
 } from './career'
 
 // ---- worklog ----
-export { useWorklog } from './worklog'
+export { useWorklog, useWorklogModuleBridge } from './worklog'
 export { useWorkLog } from './worklog'
 export { LOG_TYPE_META, MOOD_TONE_META, WORKLOG_STORAGE_KEYS } from './worklog'
-export type { LogEntryType, MoodTone, LogEntry, WorklogDailySummary, WeeklySummary, WorklogStats, WorkShift } from './worklog'
+export type { LogEntryType, MoodTone, LogEntry, WorklogDailySummary, WeeklySummary, WorklogStats, WorkShift, WorklogSummary } from './worklog'
 
 // ---- parallel-world ----
 export { useParallelWorld, useBranchTimeline, useBranchComparison, useMergeSuggestions, useEvolutionGraph } from './parallel-world'
