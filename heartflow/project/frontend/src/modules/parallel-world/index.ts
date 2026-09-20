@@ -146,7 +146,7 @@ export type {
   ResolutionStrategy,
 } from './auto-conflict-resolution'
 
-// ---- 平行档案分析引擎（ParallelArchivePanel） ----
+// ---- 平行档案分析引擎（ParallelWorldArchivePanel） ----
 export {
   parallelOverview,
   altSelfSourceRows,

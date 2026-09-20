@@ -65,7 +65,7 @@ export interface EffectConsumer {
 
 export const EFFECT_CONSUMER_MAP: EffectConsumer[] = [
   // ===== 视觉 / 氛围（css-var / composable）=====
-  { target: 'ui:particle-density', label: getTargetLabel('ui:particle-density'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'components/CanvasParticles.vue + modules/canvas/CanvasRoom.vue', note: 'A2.3 批1 已接线' },
+  { target: 'ui:particle-density', label: getTargetLabel('ui:particle-density'), form: 'visual', consumed: true, mechanism: 'composable', consumer: 'components/CanvasParticles.vue（--hf-particle-density css-var）+ modules/canvas/CanvasRoom.vue（getEffectMultiplier composable）', note: 'A2.3 批1 已接线' },
   { target: 'ui:animate-speed', label: getTargetLabel('ui:animate-speed'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'assets/animations.css', note: 'A2.3 批1 已接线' },
   { target: 'ui:breathing-speed', label: getTargetLabel('ui:breathing-speed'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'views/HomeSpace.vue + modules/breathing/breathing-core.ts', note: 'A2.3 批1 已接线' },
   { target: 'ui:silence', label: getTargetLabel('ui:silence'), form: 'visual', consumed: true, mechanism: 'css-var', consumer: 'components/CanvasParticles.vue', note: 'A2.3 批1 已接线' },

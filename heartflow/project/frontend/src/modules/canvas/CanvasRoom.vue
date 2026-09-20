@@ -36,7 +36,7 @@
 
     <!-- 2D/3D 形态切换入口：已移至悬浮液态栏「右下浮岛」的 2D/3D 按键（FloatingNavBar），此处不再渲染 -->
 
-    <!-- 粒子背景 — 整合自 CanvasParticles（宅院壳激活时降级为关闭，介质呼吸由壳描边承担） -->
+    <!-- 粒子背景 — 粒子系统内联重写（原型启发自 CanvasParticles 的 CSS 变量接线模式；宅院壳激活时降级为关闭，介质呼吸由壳描边承担） -->
     <canvas
       v-if="particlesEnabled"
       ref="particleCanvasRef"
@@ -480,7 +480,7 @@ onUnmounted(() => {
 })
 
 // ============================================================
-// 粒子系统 — 整合自 CanvasParticles
+// 粒子系统 — 内联重写（原型启发自 CanvasParticles 的 CSS 变量接线模式，含 ui:particle-density 密度倍率）
 // ============================================================
 
 interface Particle {

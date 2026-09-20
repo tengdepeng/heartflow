@@ -643,7 +643,7 @@ describe('集成：休憩档案面板', () => {
 })
 
 // ============================================================
-// 集成：休憩成就与趋势面板（INCR-200：补挂载孤儿面板 RestAchievementTrendPanel，弃用精简版 RestTrendPanel）
+// 集成：休憩成就与趋势面板（INCR-200：补挂载孤儿面板 RestAchievementTrendPanel；精简版 RestTrendPanel 已 INCR-401 归档删除）
 // ============================================================
 describe('集成：休憩成就与趋势面板', () => {
   beforeEach(() => {
