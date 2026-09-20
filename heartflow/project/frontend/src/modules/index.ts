@@ -96,6 +96,8 @@ export type { SafetyScore, SafetyConfig, DataSecurityConfig, PropertySecurityCon
 export { useCraftStore, useCraftMaterials } from './craft'
 export { MATERIAL_RARITY_META, CRAFT_STORAGE_KEYS, DEFAULT_MATERIALS } from './craft'
 export type { MaterialRarity, Material, MaterialUsage, MaterialStats } from './craft'
+export { useCraftBridge } from './craft'
+export type { CraftHealth, CraftDashboard, SynthesisEfficiency, WorkRecommendation } from './craft'
 
 export { getNodes, createNode, updateNode, deleteNode, getRelations, createRelation, deleteRelation, getNodeRelations, RELATION_TYPE_META, suggestConnections, generateQuestions, detectBlindSpots, calculateHealthScore, createImportSource, IMPORT_SOURCE_TYPES, IMPORT_SOURCE_ICONS, IMPORT_SOURCE_LABELS } from './knowledge'
 export { useKnowledgeTower, KNOWLEDGE_NODES_KEY, KNOWLEDGE_IMPORT_SOURCES_KEY, KNOWLEDGE_STAR_POSITIONS_KEY } from './knowledge'

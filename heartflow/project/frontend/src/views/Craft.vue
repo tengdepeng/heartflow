@@ -63,6 +63,8 @@
     </header>
 
     <CraftStatsOverview />
+    <!-- 匠庐·桥接驾驶舱（INCR-386 补挂载孤儿桥接面板 CraftBridgePanel：useCraftBridge 聚合 craftHealth 匠庐健康度/dashboard 工坊仪表/synthesisEfficiencies 合成效率/workRecommendations 作品指引, Craft.vue 原仅 CraftStatsOverview 4 项基础统计+专项子面板, 桥接层驾驶舱聚合面零呈现, 真缺口） -->
+    <CraftBridgePanel />
     <!-- 匠庐档案（craft-analytics：概览/状态/类型/进化/节律/健康/洞察/标签） -->
     <CraftArchivePanel />
     <CraftWorkbench />
@@ -92,6 +94,7 @@
 import { provide } from 'vue'
 import { useCraftUi, CRAFT_UI_KEY } from '../modules/craft/useCraftUi'
 import CraftStatsOverview from '../components/craft/CraftStatsOverview.vue'
+import CraftBridgePanel from '../components/CraftBridgePanel.vue'
 import CraftArchivePanel from '../components/CraftArchivePanel.vue'
 import CraftWorkbench from '../components/craft/CraftWorkbench.vue'
 import CraftWipBench from '../components/craft/CraftWipBench.vue'

@@ -72,7 +72,29 @@ vi.mock('../../modules/craft', () => ({
   }),
 }))
 
-// 2. Mock useConfigStore
+// 2. Mock useCraftBridge（CraftBridgePanel 直引 modules/craft/craft-bridge，非桶 mock 覆盖，补空态隔离 INCR-386）
+const bridgeHealth = ref<any>({
+  score: 0, workProductivity: 0, completionRate: 0, evolutionEfficiency: 0,
+  materialAbundance: 0, synthesisSuccessRate: 0, badgeCollectionRate: 0,
+  habitStability: 0, suggestions: [],
+})
+const bridgeDashboard = ref<any>({
+  activeWorks: 0, newThisMonth: 0, completedThisMonth: 0, totalEvolution: 0,
+  materialTypes: 0, totalMaterials: 0, unlockedBadges: 0, availableRecipes: 0,
+  activeSynthesis: 0, pendingInspirations: 0, currentStreak: 0,
+})
+const bridgeSynth = ref<any[]>([])
+const bridgeRecs = ref<any[]>([])
+vi.mock('../../modules/craft/craft-bridge', () => ({
+  useCraftBridge: () => ({
+    craftHealth: bridgeHealth,
+    dashboard: bridgeDashboard,
+    synthesisEfficiencies: bridgeSynth,
+    workRecommendations: bridgeRecs,
+  }),
+}))
+
+// 3. Mock useConfigStore
 const mockConfig = ref<any>({
   craft: { tagDisplayCount: 2, messageTimeout: 3000 },
   background: { type: 'default', presetScene: 'none', dataUrl: null },
