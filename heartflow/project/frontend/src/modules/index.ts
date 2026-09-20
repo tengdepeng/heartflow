@@ -498,6 +498,7 @@ export type { DomainKey, LinkType, NormalizedItem, CrossDomainLink, AssociationG
 // ---- cognition（释光阁）----
 export { useMeditationAnalytics, evaluateFourLights, LIGHT_META, LIGHT_ORDER } from './cognition'
 export { useCognitionReflections, COGNITION_REFLECTIONS_KEY } from './cognition'
+export { useCognitionBridge } from './cognition'
 export type { FourLightsInput, LightKey } from './cognition'
 export type { Reflection } from './cognition'
 

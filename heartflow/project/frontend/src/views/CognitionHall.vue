@@ -333,6 +333,9 @@
       </div>
     </section>
 
+    <!-- 冥想健康驾驶舱（chp- 桥接驾驶舱：健康度/连续追踪/洞察/情绪关联，INCR-382） -->
+    <CognitionHealthPanel />
+
     <!-- 留光阁 · 冥想与释怀记录（归档） -->
     <section data-enter class="cog-light-records">
       <h3>🏮 留光阁记录</h3>
@@ -355,6 +358,7 @@ import { useMeditationAnalytics, evaluateFourLights, LIGHT_META, LIGHT_ORDER, ty
 import LightRecordsPanel from '../components/LightRecordsPanel.vue'
 import ClarionStatsPanel from '../components/ClarionStatsPanel.vue'
 import PerceptionCompliancePanel from '../components/PerceptionCompliancePanel.vue'
+import CognitionHealthPanel from '../components/CognitionHealthPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

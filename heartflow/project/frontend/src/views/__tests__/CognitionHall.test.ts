@@ -229,11 +229,69 @@ describe('CognitionHall 释光阁 · 素镜视图', () => {
 })
 
 // ============================================================
-// 集成：感知采集合规面板 PerceptionCompliancePanel（INCR-254 补挂载孤儿组件）
-// 消费 modules/perception/compliance 纯函数（getAllPerceptionPermissions/setPerceptionAllowed/
-// resetPerceptionPermissions），直接经 localStorage（hf:permission:perception:*）读写，
-// 非 storage 模块 mock、无模块级 ref → 无跨用例污染。默认全关（宪法第52条沉默默认）。
+// 集成：冥想健康驾驶舱 CognitionHealthPanel（INCR-382 挂载）
+// 真实引擎 useCognitionBridge→useMeditationAnalytics 全链路，自 mockStore
+// 预置 hf:cognition:stats / hf:cognition:streak 种子（schema 缓存无感，因
+// useMeditationAnalytics 于 mount 时初始化），验证面板在释光阁渲染健康度/连续。
 // ============================================================
+describe('集成：冥想健康驾驶舱（INCR-382）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['sessions'] = []
+    mockStore['hf:cognition_reflections'] = []
+  })
+
+  it('渲染健康驾驶舱：标题 + 健康等级徽标 + 连续追踪（种子 stats/streak）', async () => {
+    mockStore['hf:cognition:stats'] = JSON.stringify({
+      totalSessions: 2,
+      totalDuration: 60,
+      averageDuration: 30,
+      longestSession: 40,
+      shortestSession: 20,
+      sessionFrequency: 2,
+      completionRate: 100,
+      interruptionRate: 0,
+      moodShiftDistribution: {},
+      timeOfDayDistribution: {},
+      dailyDurationTrend: [],
+      weeklyDurationTrend: [],
+      monthlyDurationTrend: [],
+      preferredTypes: [],
+      bestTimeOfDay: '',
+      averageMoodImprovement: 1,
+      moodImprovementRate: 100,
+    })
+    mockStore['hf:cognition:streak'] = JSON.stringify({
+      currentStreak: 2,
+      longestStreak: 3,
+      streakHistory: [],
+      streakStartDate: null,
+      lastMeditationDate: null,
+      isStreakActive: true,
+      streaksThisYear: 1,
+      averageStreakLength: 2.5,
+    })
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('[data-test="cognition-health-panel"]')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('.chp-title').text()).toContain('冥想健康驾驶舱')
+    // 健康等级徽标非空（总次数>0 → level 起步/良好 任一）
+    expect(panel.find('[data-test="chp-level"]').text().length).toBeGreaterThan(0)
+    // 有总次数时连续追踪区块渲染
+    expect(panel.find('[data-test="chp-streak"]').exists()).toBe(true)
+    expect(panel.find('[data-test="chp-streak"]').text()).toContain('当前连续')
+  })
+
+  it('无冥想数据时驾驶舱呈现空态引导', async () => {
+    delete mockStore['hf:cognition:stats']
+    delete mockStore['hf:cognition:streak']
+    const wrapper = await createWrapper()
+    const panel = wrapper.find('[data-test="cognition-health-panel"]')
+    expect(panel.exists()).toBe(true)
+    expect(panel.find('[data-test="chp-empty"]').text()).toContain('还没有冥想记录')
+    expect(panel.find('[data-test="chp-streak"]').exists()).toBe(false)
+  })
+})
 describe('集成：感知采集合规面板', () => {
   const K_BATTERY = 'hf:permission:perception:battery'
 

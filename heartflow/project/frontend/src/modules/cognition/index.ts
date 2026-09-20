@@ -24,6 +24,16 @@ export type {
 // ---- 冥想分析引擎 ----
 export { useMeditationAnalytics } from './meditation-analytics'
 
+// ---- 视图桥接层（INCR-382）----
+export { useCognitionBridge } from './cognition-bridge'
+export type {
+  MeditationHealth,
+  StreakSummary,
+  InsightSummary,
+  AmbientSoundRecommendation,
+  MoodMeditationCorrelation,
+} from './cognition-bridge'
+
 // ---- 反思笔记（视图数据层下沉）----
 export { useCognitionReflections, COGNITION_REFLECTIONS_KEY } from './reflections'
 export type { Reflection } from './reflections'
