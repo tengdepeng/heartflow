@@ -58,6 +58,11 @@
       <h1 class="wl-title">更漏</h1>
     </header>
 
+    <!-- ===== 工作光仪（ClepsydraPanel 补挂载孤儿组件：useClepsydra 手动计时 + useClepsydraCountdown 时间哨塔，此前全校唯一零消费、亦是更漏"手动静默计时"真缺面，INCR-392） ===== -->
+    <section data-enter class="wl-clepsydra-section">
+      <ClepsydraPanel />
+    </section>
+
     <!-- 快速记录 -->
     <section data-enter class="wl-quick-section">
       <div class="wl-quick-record">
@@ -405,6 +410,7 @@ import ProductivityPanel from '../components/ProductivityPanel.vue'
 import WorkRhythmPanel from '../components/WorkRhythmPanel.vue'
 import TaskDecomposerPanel from '../components/TaskDecomposerPanel.vue'
 import WorklogBridgePanel from '../components/WorklogBridgePanel.vue'
+import ClepsydraPanel from '../components/ClepsydraPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -1237,6 +1243,9 @@ function navigateToRoom(key: string) {
 @media (max-width: 860px) { .wl { padding: 32px 20px 64px; } .wl-stats-section { gap: 8px; } .wl-stat-card { padding: 12px 8px; } }
 @media (max-width: 640px) { .wl { padding: 24px 14px 56px; } .wl-stats-section { grid-template-columns: 1fr; } }
 @media (max-width: 480px) { .wl-stats-section { grid-template-columns: repeat(2, 1fr); gap: 6px; } .wl-stat-card { padding: 8px; } .wl-summary-header, .wl-summary-row { font-size: 10px; } }
+/* ===== 工作光仪（ClepsydraPanel） ===== */
+.wl-clepsydra-section { margin-bottom: 24px; position: relative; z-index: 1; }
+
 /* ===== 工作日志分析（模块集成） ===== */
 .wl-analytics-section { margin-bottom: 24px; position: relative; z-index: 1; }
 .wl-analytics-section h3 { font-size: 14px; font-weight: 400; margin-bottom: 10px; color: rgba(var(--accent-rgb), 0.6); letter-spacing: 1px; }

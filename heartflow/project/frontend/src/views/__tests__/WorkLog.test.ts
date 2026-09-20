@@ -806,3 +806,47 @@ describe('集成：任务拆解面板', () => {
     expect(wrapper.find('.tdp-empty').text()).toContain('还没有拆解计划')
   })
 })
+
+// ============================================================
+// 集成：工作光仪面板 ClepsydraPanel（INCR-392 补挂载孤儿组件）
+// useClepsydra 手动计时 + useClepsydraCountdown 时间哨塔，补齐更漏"手动静默计时"缺面。
+// ClepsydraPanel 经 mocked storage 读 hf:clepsydra_records / hf:clepsydra_countdowns（空默认）。
+// ============================================================
+describe('集成：工作光仪面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['heartflow:shifts'] = []
+    mockStore['heartflow:hourly_rate'] = 0
+  })
+
+  it('空态挂载工作光仪面板并渲染标题、计时与空态提示', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.clp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('⏳ 工作光仪')
+    expect(wrapper.text()).toContain('工作计时')
+    expect(wrapper.text()).toContain('还没有倒计时')
+    expect(wrapper.text()).toContain('暂无工作记录')
+  })
+
+  it('预置计时记录时，工作光仪展示记录与今日汇总', async () => {
+    const now = new Date()
+    const iso = (offsetMin: number) => new Date(now.getTime() + offsetMin * 60000).toISOString()
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'r1', startedAt: iso(-120), endedAt: iso(-60), durationSeconds: 3600, category: 'project', sourceType: 'manual', intensity: 0.7, note: '写周报', createdAt: iso(-120) },
+    ]
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('写周报')
+    expect(wrapper.text()).toContain('总时长')
+  })
+
+  it('预置倒计时哨塔时，时间哨塔展示数量与名称', async () => {
+    mockStore['hf:clepsydra_countdowns'] = [
+      { id: 'c1', label: '番茄专注', category: 'project', totalSeconds: 1500, repeat: 'once', status: 'idle' },
+    ]
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.clp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('番茄专注')
+    expect(wrapper.text()).toContain('待开始')
+  })
+})
