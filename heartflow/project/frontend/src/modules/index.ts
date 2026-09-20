@@ -137,7 +137,9 @@ export { setLocale, getLocale, getSupportedLanguages, t, tPlural, useI18nStore }
 // ---- home ----
 export { HomeRoomPanel, HomeRoomAtmosphere, HOME_ROOMS, DEFAULT_HOME_ROOM, getHomeRoom } from './home'
 export { aggregateTodayRoomStats, getUtcDateKey } from './home'
+export { useHomeBridge } from './home'
 export type { HomeRoom, TodayRoomStats } from './home'
+export type { HomeHealth, RoomOverview, RoomHeatmapEntry, ActivityTimelineEntry, RoomRecommendation } from './home'
 
 // ---- background（背景音频路由 / 互斥出声 / 预览全局同步）----
 export { useBackgroundPreviewAudio, useBackgroundVideoSync } from './background'

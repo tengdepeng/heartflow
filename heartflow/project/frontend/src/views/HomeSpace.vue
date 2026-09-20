@@ -162,6 +162,9 @@
       </div>
     </section>
 
+    <!-- 家·桥接总览（INCR-385 补挂载孤儿桥接面板 HomeBridgePanel：useHomeBridge 聚合 homeHealth 家健康度/roomHeatmap 房间热力/activityTimeline 活动节律/decorationUsageRanking 装饰排行/roomRecommendations 归家指引, HomeSpace.vue 原只直引 useRoomAtmosphere/useHomeAtmosphereEngine/aggregateTodayRoomStats, 桥接层驾驶舱概览面零呈现, 真缺口） -->
+    <HomeBridgePanel />
+
     <!-- 今日 · 跨房间聚合 -->
     <section data-enter class="spatial-section">
       <h3 class="section-label">今日</h3>
@@ -256,6 +259,7 @@ import { useLightPavilion } from '../modules/light/pavilion'
 import { useMovementRhythm } from '../modules/movement/rhythm'
 import { aggregateTodayRoomStats } from '../modules/home/today-room-stats'
 import type { TodayRoomStats } from '../modules/home/today-room-stats'
+import HomeBridgePanel from '../components/HomeBridgePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
