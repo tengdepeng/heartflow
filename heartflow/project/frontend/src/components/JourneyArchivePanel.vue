@@ -8,6 +8,14 @@
       <span v-if="stats.total" class="jap-tag" :style="tagStyle">{{ stats.total }} 段旅程</span>
     </div>
 
+    <!-- 旅程分界间隔调参（并入 JourneyPanel 独有能力 INCR-395） -->
+    <label class="jap-config">
+      <span class="jap-config-label">旅程分界间隔</span>
+      <input v-model.number="gapInput" type="range" min="1" max="120" @input="applyGap" class="jap-config-range" />
+      <span class="jap-config-val"><b>{{ gapInput }}</b> 天</span>
+    </label>
+    <p class="jap-config-hint">相邻两次足迹相隔超过该天数，视为一段新旅程。</p>
+
     <!-- 空态引导 -->
     <div v-if="!stats.total" class="jap-empty">
       <p class="jap-empty-title">旅程未启</p>
@@ -49,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useJourneyEngine, journeySpanScore, journeyInsights } from '../modules/journey'
 import type { Journey } from '../modules/journey'
 import type { FootprintRecord } from '../modules/footprint'
@@ -57,6 +65,11 @@ import type { FootprintRecord } from '../modules/footprint'
 const props = defineProps<{ records: FootprintRecord[] }>()
 
 const engine = useJourneyEngine()
+
+const gapInput = ref(engine.config.value.maxGapDays)
+function applyGap(): void {
+  engine.setMaxGapDays(gapInput.value)
+}
 
 const journeys = computed(() => engine.journeysFrom(props.records))
 const stats = computed(() => engine.computeJourneyStats(journeys.value))
@@ -89,6 +102,12 @@ function spanColor(j: Journey): string {
 .jap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #e8ddc8); }
 .jap-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .jap-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; white-space: nowrap; }
+
+.jap-config { display: flex; align-items: center; gap: 10px; font-size: 11px; color: rgba(232, 221, 200, 0.5); margin: 0 4px 4px; }
+.jap-config-range { flex: 1; accent-color: #f0c040; }
+.jap-config-val { color: rgba(232, 221, 200, 0.7); white-space: nowrap; }
+.jap-config-val b { color: #f0c040; font-weight: 500; }
+.jap-config-hint { margin: 0 4px 12px; font-size: 10px; color: rgba(232, 221, 200, 0.35); }
 
 .jap-empty { padding: 10px 0 4px; }
 .jap-empty-title { font-size: 13px; color: rgba(232, 221, 200, 0.7); margin: 0 0 6px; }

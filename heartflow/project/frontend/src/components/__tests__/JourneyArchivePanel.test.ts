@@ -77,4 +77,20 @@ describe('JourneyArchivePanel 旅程档案面板', () => {
     expect(insights.length).toBeGreaterThan(0)
     expect(insights.length).toBeLessThanOrEqual(4)
   })
+
+  it('旅程分界间隔滑块存在，调大可合并旅程（并入 JourneyPanel 独有能力）', async () => {
+    const wrapper = await mountPanel([
+      rec({ date: '2024-04-01' }),
+      rec({ date: '2024-05-30' }),
+      rec({ date: '2024-08-30' }),
+    ])
+    expect(wrapper.find('.jap-config-range').exists()).toBe(true)
+    // 默认间隔 45：59/92 天均 >45 → 3 段
+    expect(wrapper.find('.jap-config-val').text()).toContain('45')
+    expect(wrapper.text()).toContain('3 段旅程')
+    // 调大至 120：59/92 天均 <120 → 合并为 1 段
+    await wrapper.find('input.jap-config-range').setValue(120)
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('1 段旅程')
+  })
 })
