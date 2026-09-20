@@ -39,13 +39,28 @@
     <div v-if="activeBook" class="cv-block">
       <div class="cv-read-head">
         <span class="cv-read-title">{{ activeBook.title }}</span>
-        <div class="cv-mode-tabs">
-          <button
-            v-for="m in PUNCTUATION_MODES"
-            :key="m"
-            :class="['cv-mode-tab', { active: mode === m }]"
-            @click="mode = m"
-          >{{ PUNCTUATION_MODE_META[m].label }}</button>
+        <div class="cv-read-controls">
+          <div class="cv-mode-tabs">
+            <button
+              v-for="m in PUNCTUATION_MODES"
+              :key="m"
+              :class="['cv-mode-tab', { active: mode === m }]"
+              @click="mode = m"
+            >{{ PUNCTUATION_MODE_META[m].label }}</button>
+          </div>
+          <!-- 影印对照（并入 ClassicalVerticalReader 独有能力，纯文本 / 注疏增强 INCR-398） -->
+          <div class="cv-view-tabs" role="group" aria-label="影印对照">
+            <button
+              class="cv-view-tab"
+              :class="{ active: view === 'plain' }"
+              @click="view = 'plain'"
+            >纯文本</button>
+            <button
+              class="cv-view-tab"
+              :class="{ active: view === 'annotated' }"
+              @click="view = 'annotated'"
+            >注疏增强</button>
+          </div>
         </div>
       </div>
       <p class="cv-mode-hint">{{ PUNCTUATION_MODE_META[mode].hint }}</p>
@@ -59,8 +74,8 @@
         </div>
       </div>
 
-      <!-- 注疏 -->
-      <div class="cv-annotations">
+      <!-- 注疏（影印对照：注疏增强时显示） -->
+      <div v-show="view === 'annotated'" class="cv-annotations">
         <span class="cv-block-label">注疏 · {{ activeBook.annotations.length }}</span>
         <div v-for="g in annotationGroups" :key="g.dynasty" class="cv-ann-group">
           <span class="cv-ann-dynasty">{{ g.dynasty }}</span>
@@ -97,6 +112,7 @@ onMounted(() => cv.load())
 
 const selectedId = ref<string | null>(null)
 const mode = ref<PunctuationMode>('original')
+const view = ref<'plain' | 'annotated'>('annotated')
 const linesPerColumn = ref(16)
 
 const form = ref({ title: '', author: '', dynasty: '', originalText: '' })
@@ -278,12 +294,44 @@ function removeAnnotation(id: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
   margin-bottom: 6px;
 }
 .cv-read-title {
   font-size: 14px;
   font-weight: 600;
   color: #e8d9a8;
+}
+.cv-read-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cv-view-tabs {
+  display: flex;
+  gap: 4px;
+  border-left: 1px solid rgba(140, 160, 190, 0.25);
+  padding-left: 8px;
+}
+.cv-view-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(140, 160, 190, 0.2);
+  background: transparent;
+  color: #8a97ad;
+  font-size: 11px;
+  cursor: pointer;
+  min-height: 26px;
+}
+.cv-view-tab.active {
+  background: rgba(224, 169, 109, 0.2);
+  border-color: rgba(224, 169, 109, 0.5);
+  color: #e0a96d;
 }
 .cv-mode-tabs {
   display: flex;

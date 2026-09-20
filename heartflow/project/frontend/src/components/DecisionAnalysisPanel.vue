@@ -42,6 +42,19 @@
           <span class="da-score-num">{{ form.scores[d.key] ?? 5 }}</span>
         </div>
       </div>
+      <!-- 关联知识节点（并入 StrategyEvaluatorPanel 独有能力，SWOT 知识支撑 INCR-397） -->
+      <div v-if="nodes.length" class="da-node-pick">
+        <span class="da-node-label">关联知识节点（用于 SWOT 分析）</span>
+        <div class="da-chips">
+          <button
+            v-for="n in nodes"
+            :key="n.id"
+            :class="['da-chip', { active: pickedNodes.includes(n.id) }]"
+            type="button"
+            @click="togglePick(n.id)"
+          >{{ n.title }}</button>
+        </div>
+      </div>
       <button class="da-btn da-btn-primary" :disabled="!form.name.trim()" @click="doCreate">创建策略</button>
     </div>
     <!-- 策略列表 -->
@@ -102,14 +115,37 @@
         <span class="da-rec-score">{{ r.totalScore }}</span>
       </div>
     </div>
+    <!-- 对比全部策略（并入 StrategyEvaluatorPanel 独有能力，排行+优势矩阵 INCR-397） -->
+    <div v-if="strategies.length >= 2" class="da-block">
+      <span class="da-block-label">对比推荐</span>
+      <button class="da-btn da-btn-primary da-compare-btn" @click="runCompare">📊 对比全部策略</button>
+      <div v-if="comparison" class="da-compare">
+        <div class="da-rank">
+          <div v-for="(id, idx) in comparison.overallRanking" :key="id" class="da-rank-row">
+            <span class="da-rank-no">{{ idx + 1 }}</span>
+            <span class="da-rank-name">{{ nameById(id) }}</span>
+            <span class="da-rank-score">{{ scoreById(id) }} 分</span>
+          </div>
+        </div>
+        <div v-if="comparison.advantageMatrix.length" class="da-adv">
+          <span class="da-adv-label">优势矩阵</span>
+          <div v-for="a in comparison.advantageMatrix" :key="a.strategyName" class="da-adv-row">
+            <span class="da-adv-name">{{ a.strategyName }}</span>
+            <span class="da-adv-best">最优 {{ a.bestFor }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, onMounted } from 'vue'
 import { getDecisionAnalysisStore } from '../modules/knowledge/decision-analysis-store'
 import { useStrategyEvaluator } from '../modules/knowledge/strategy-evaluator'
-import type { EvalDimension, EvalGrade, StrategyOption } from '../modules/knowledge/strategy-evaluator'
+import { getNodes } from '../modules/knowledge/relation'
+import type { EvalDimension, EvalGrade, StrategyOption, StrategyComparison } from '../modules/knowledge/strategy-evaluator'
+import type { KnowledgeNode } from '../modules/knowledge/types'
 
 const store = getDecisionAnalysisStore()
 const evaluator = useStrategyEvaluator()
@@ -127,12 +163,18 @@ const form = reactive({
   scores: {} as Partial<Record<EvalDimension, number>>,
 })
 
+const nodes = ref<KnowledgeNode[]>([])
+const pickedNodes = ref<string[]>([])
+const comparison = ref<StrategyComparison | null>(null)
+
 const swotFor = ref('')
 const sensitivityFor = ref('')
 
 const swot = computed(() => {
   const s = strategies.value.find(x => x.id === swotFor.value)
-  return s ? evaluator.swotAnalyze(s, []) : null
+  if (!s) return null
+  const linked = nodes.value.filter(n => s.knowledgeNodeIds.includes(n.id))
+  return evaluator.swotAnalyze(s, linked)
 })
 
 const recommendations = computed(() => evaluator.recommend(strategies.value, undefined, 5))
@@ -147,12 +189,13 @@ function sensitivity(s: StrategyOption) {
 }
 
 function doCreate() {
-  const s = evaluator.createStrategy(form.name, form.description, [], { ...form.scores })
+  const s = evaluator.createStrategy(form.name, form.description, [...pickedNodes.value], { ...form.scores })
   store.strategies.value.push(s)
   store.saveStrategies()
   form.name = ''
   form.description = ''
   form.scores = {}
+  pickedNodes.value = []
 }
 
 function removeStrategy(id: string) {
@@ -174,6 +217,26 @@ function gradeClass(g: EvalGrade) {
   const map: Record<EvalGrade, string> = { A: 'g-a', B: 'g-b', C: 'g-c', D: 'g-d', F: 'g-f' }
   return map[g]
 }
+
+function togglePick(id: string) {
+  const i = pickedNodes.value.indexOf(id)
+  if (i >= 0) pickedNodes.value.splice(i, 1)
+  else pickedNodes.value.push(id)
+}
+
+function runCompare() {
+  comparison.value = evaluator.compare(strategies.value)
+}
+function nameById(id: string): string {
+  return strategies.value.find(s => s.id === id)?.name ?? id
+}
+function scoreById(id: string): number {
+  return comparison.value?.strategies.find(r => r.strategyId === id)?.totalScore ?? 0
+}
+
+onMounted(() => {
+  nodes.value = getNodes()
+})
 </script>
 
 <style scoped>
@@ -430,5 +493,104 @@ function gradeClass(g: EvalGrade) {
   font-size: 13px;
   font-weight: 600;
   color: #c9d6b8;
+}
+.da-node-pick {
+  margin-top: 10px;
+}
+.da-node-label {
+  display: block;
+  font-size: 11px;
+  color: rgba(232, 228, 216, 0.45);
+  margin-bottom: 6px;
+}
+.da-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.da-chip {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 155, 122, 0.25);
+  background: transparent;
+  color: rgba(232, 228, 216, 0.6);
+  font-family: inherit;
+  cursor: pointer;
+}
+.da-chip.active {
+  border-color: rgba(240, 192, 64, 0.45);
+  color: #f0c040;
+  background: rgba(240, 192, 64, 0.1);
+}
+.da-compare-btn {
+  margin-bottom: 8px;
+}
+.da-compare {
+  margin-top: 8px;
+}
+.da-rank {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.da-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.da-rank-no {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(240, 192, 64, 0.15);
+  color: #f0c040;
+}
+.da-rank-name {
+  flex: 1;
+  font-size: 13px;
+  color: #e8e4d8;
+}
+.da-rank-score {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9d6b8;
+}
+.da-adv {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.da-adv-label {
+  font-size: 11px;
+  color: rgba(232, 228, 216, 0.45);
+  margin-bottom: 2px;
+}
+.da-adv-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+.da-adv-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #e8e4d8;
+  min-width: 90px;
+}
+.da-adv-best {
+  font-size: 12px;
+  color: rgba(232, 228, 216, 0.55);
 }
 </style>

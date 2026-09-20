@@ -7,6 +7,20 @@ import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
 import { invalidateCache } from '../../engine/storage/core'
 
 const STRATEGIES_KEY = 'hf:knowledge:strategies'
+const NODES_KEY = 'hf:knowledge_nodes'
+
+function node(overrides: Record<string, any> = {}) {
+  return {
+    id: `nd_${Math.random().toString(36).slice(2, 8)}`,
+    title: '复利思维',
+    desc: '长期积累的指数增长',
+    cat: 'insight',
+    tags: [],
+    createdAt: '2026-08-20T08:00:00.000Z',
+    updatedAt: '2026-08-20T08:00:00.000Z',
+    ...overrides,
+  }
+}
 
 function strategy(overrides: Record<string, any> = {}) {
   return {
@@ -111,5 +125,33 @@ describe('DecisionAnalysisPanel 决策分析', () => {
     expect(wrapper.text()).toContain('推荐排序')
     expect(wrapper.text()).toContain('A')
     expect(wrapper.text()).toContain('高评分策略')
+  })
+
+  it('对比推荐展示排行与优势矩阵（并入 StrategyEvaluatorPanel 能力）', async () => {
+    const wrapper = await mountPanel({
+      [STRATEGIES_KEY]: [
+        strategy({ name: '方案甲', scores: { feasibility: 9, impact: 9, cost: 9, risk: 9, timeline: 9, sustainability: 9, alignment: 9 } }),
+        strategy({ name: '方案乙', scores: { feasibility: 3, impact: 3, cost: 3, risk: 3, timeline: 3, sustainability: 3, alignment: 3 } }),
+      ],
+    })
+    expect(wrapper.text()).toContain('对比推荐')
+    await wrapper.find('button.da-compare-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    const rows = wrapper.findAll('.da-rank-row')
+    expect(rows.length).toBe(2)
+    expect(wrapper.find('.da-rank-row').text()).toContain('方案甲')
+    expect(wrapper.text()).toContain('优势矩阵')
+  })
+
+  it('SWOT 关联知识节点补充洞察（并入 StrategyEvaluatorPanel 能力）', async () => {
+    const nd = node()
+    const wrapper = await mountPanel({
+      [NODES_KEY]: [nd],
+      [STRATEGIES_KEY]: [strategy({ knowledgeNodeIds: [nd.id] })],
+    })
+    await wrapper.find('button.da-btn-sm').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('优势')
+    expect(wrapper.text()).toContain(`洞察: ${nd.title}`)
   })
 })

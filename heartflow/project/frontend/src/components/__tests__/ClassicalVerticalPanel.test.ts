@@ -100,4 +100,33 @@ describe('ClassicalVerticalPanel 古籍竖排', () => {
     const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
     expect(saved.kvStore['hf:reading:classical_books'].length).toBe(0)
   })
+
+  it('影印对照切换注疏增强/纯文本（并入 ClassicalVerticalReader 能力）', async () => {
+    const wrapper = await mountPanel({
+      'hf:reading:classical_books': [
+        {
+          id: 'book_1',
+          title: '论语·学而',
+          author: '孔子弟子',
+          dynasty: '春秋',
+          originalText: '学而时习之，不亦说乎。',
+          annotations: [
+            { id: 'a1', annotator: '朱熹', dynasty: '宋', content: '既学而又时时习之。' },
+          ],
+        },
+      ],
+    })
+    const annEl = () => wrapper.find('.cv-annotations').element as HTMLElement
+    await wrapper.find('.cv-book').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(annEl().style.display).toBe('')
+    // 切纯文本 → 隐藏注疏分层
+    await wrapper.findAll('.cv-view-tab')[0].trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(annEl().style.display).toBe('none')
+    // 切回注疏增强 → 恢复
+    await wrapper.findAll('.cv-view-tab')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(annEl().style.display).toBe('')
+  })
 })
