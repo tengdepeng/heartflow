@@ -81,6 +81,15 @@
       </div>
     </section>
 
+    <!-- 载体动画与材质混合（customization·carrier-advanced，INCR-407 面板集成） -->
+    <section data-enter class="dw-section">
+      <h2 class="section-label">
+        <span class="section-label-icon">🎭</span>
+        载体动画与材质混合
+      </h2>
+      <CarrierAnimationPanel />
+    </section>
+
     <!-- 装修历史 -->
     <section data-enter class="dw-section" v-if="recentHistory.length > 0">
       <h2 class="section-label">
@@ -149,6 +158,7 @@ import { useInteractionConfigs } from '../modules/interaction'
 import { useDecorationHistory } from '../modules/decoration-history'
 import SceneSequencePanel from '../components/SceneSequencePanel.vue'
 import EnvironmentTemplatePanel from '../components/EnvironmentTemplatePanel.vue'
+import CarrierAnimationPanel from '../components/CarrierAnimationPanel.vue'
 import { formatDateTime as formatTime } from '../utils/time'
 
 const { entranceRef, entranceClass } = useViewEntrance()
