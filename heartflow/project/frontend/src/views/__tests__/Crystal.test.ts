@@ -203,3 +203,67 @@ describe('集成：星盘档案', () => {
     expect(el.text()).toContain('c_b')
   })
 })
+
+// ============================================================
+// 集成：基因育种工坊（INCR-408）
+// GeneBreedingPanel 直引 gene-seed 纯函数；育种档案经 storage 'hf:crystal_breeding' 持久化。
+// 空态断言 + 交互：培育初始种子 → 育种子代 → 校验持久化。
+// ============================================================
+describe('集成：基因育种工坊', () => {
+  const BREED = 'hf:crystal_breeding'
+
+  async function mountBreed(kv: Record<string, any> = {}) {
+    vi.resetModules()
+    const storageMock = createMockStorage()
+    storageMock.setItem('heartflow:storage', JSON.stringify({
+      version: 10,
+      kvStore: kv,
+      sessions: [],
+      crystals: [],
+    }))
+    ;(globalThis as any).localStorage = storageMock
+    invalidateCache()
+    const mod = await import('../Crystal.vue')
+    const wrapper = mount(mod.default)
+    await wrapper.vm.$nextTick()
+    return { wrapper, storageMock }
+  }
+
+  function readKv(storageMock: any): Record<string, any> {
+    return JSON.parse(storageMock.getItem('heartflow:storage')).kvStore
+  }
+
+  it('空态：标题/统计/空态文案渲染', async () => {
+    const { wrapper } = await mountBreed()
+    expect(wrapper.text()).toContain('基因育种工坊')
+    expect(wrapper.text()).toContain('0 株')
+    expect(wrapper.text()).toContain('尚无种苗')
+  })
+
+  it('培育初始种子生成并持久化；育种出子代（第 1 代）', async () => {
+    const { wrapper, storageMock } = await mountBreed()
+    await wrapper.find('[data-testid="cgb-create-initial"]').trigger('click')
+    // 初始种子第 0 代（培育后自动选中为亲本）
+    expect(wrapper.findAll('[data-testid^="cgb-select-"]').length).toBe(1)
+    expect(wrapper.text()).toContain('第 0 代')
+    // 已自动选中，直接育种生成子代
+    await wrapper.find('[data-testid="cgb-breed"]').trigger('click')
+    expect(wrapper.findAll('[data-testid^="cgb-select-"]').length).toBe(2)
+    expect(wrapper.text()).toContain('第 1 代')
+    // 育种档案以原始数组落库（GeneBreedingPanel 直存数组，非 JSON 字符串）
+    const saved = readKv(storageMock)[BREED]
+    expect(saved.length).toBe(2)
+    expect(saved[1].seed.generation).toBe(1)
+  })
+
+  it('从既有基因档案加载并渲染 1 株', async () => {
+    const { wrapper } = await mountBreed({
+      [BREED]: [
+        { seed: { version: 1, parentId: null, generation: 0, genes: { color: '#a07c8c', shape: 'round', intensity: 0.5, luminescence: 0.5, complexity: 0.3, resilience: 0.5 }, dominance: 1, mutationRate: 0.15 }, parentId: null, createdAt: 1 },
+      ],
+    })
+    expect(wrapper.findAll('[data-testid^="cgb-select-"]').length).toBe(1)
+    expect(wrapper.text()).toContain('1 株')
+    expect(wrapper.text()).toContain('显性 100%')
+  })
+})

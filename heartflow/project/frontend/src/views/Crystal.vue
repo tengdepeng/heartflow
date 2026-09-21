@@ -41,6 +41,9 @@
     <!-- 结晶相性图鉴 -->
     <CrystalArchivePanel />
 
+    <!-- 基因育种工坊 · 基因可杂交繁衍变异（crystal/gene-seed 育种接口，INCR-408 面板集成） -->
+    <GeneBreedingPanel />
+
     <!-- 星盘档案 · 星座/落点/引力（canvas/canvas-gravity 引擎，INCR-271 补挂载孤儿组件，薄委托化：组件自包含） -->
     <section data-enter class="cga-section">
       <CanvasGravityArchivePanel />
@@ -63,6 +66,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import CrystalGalleryPanel from '../components/crystal/CrystalGalleryPanel.vue'
 import CrystalGenePanel from '../components/crystal/CrystalGenePanel.vue'
 import CrystalArchivePanel from '../components/crystal/CrystalArchivePanel.vue'
+import GeneBreedingPanel from '../components/crystal/GeneBreedingPanel.vue'
 import CanvasGravityArchivePanel from '../components/CanvasGravityArchivePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
