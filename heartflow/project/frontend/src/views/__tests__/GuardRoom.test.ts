@@ -367,6 +367,25 @@ describe('GuardRoom 视图', () => {
     localStorage.removeItem('hf:mood_test')
   })
 
+  it('数据主权子标签渲染数据引渡仪式面板（INCR-406 真实引擎全链路）', async () => {
+    const wrapper = await getWrapper()
+    // useDataExtradition 扫描 localStorage 中以 hf:<module> 为前缀的键，种子情绪/时计模块
+    localStorage.setItem('hf:emotion:seed', JSON.stringify({ mood: 'calm' }))
+    localStorage.setItem('hf:timer:seed', JSON.stringify({ secs: 300 }))
+    const subTabs = wrapper.findAll('.guard-sub-tab')
+    await subTabs[4].trigger('click')
+    await wrapper.vm.$nextTick()
+    // 引渡仪式面板挂载于数据主权子标签
+    expect(wrapper.text()).toContain('数据引渡仪式')
+    expect(wrapper.text()).toContain('准备')
+    expect(wrapper.text()).toContain('完成')
+    // 引擎扫描识别出种子模块
+    expect(wrapper.text()).toContain('情绪花房')
+    expect(wrapper.text()).toContain('更漏·专注计时')
+    localStorage.removeItem('hf:emotion:seed')
+    localStorage.removeItem('hf:timer:seed')
+  })
+
   it('安全评分显示', async () => {
     const wrapper = await getWrapper()
     await clickTab(wrapper, 1)

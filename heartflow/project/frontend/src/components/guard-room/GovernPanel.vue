@@ -252,6 +252,10 @@
             <h5 class="sub-card-section-title">跨端接续</h5>
             <CrossDevicePanel />
           </div>
+          <!-- 数据引渡仪式（INCR-406：useDataExtradition 零 UI 缺口收口） -->
+          <div class="sub-card-section">
+            <ExtraditionPanel />
+          </div>
           <!-- 大厅退出状态 -->
           <div class="sub-card-section">
             <h5 class="sub-card-section-title">大厅退出状态</h5>
@@ -321,6 +325,7 @@ import { FORGET_METHODS } from '../../modules/data-sovereignty'
 import ForgettingRitual from '../../components/data-sovereignty/ForgettingRitual.vue'
 import HallExitTransition from '../../components/data-sovereignty/HallExitTransition.vue'
 import CrossDevicePanel from '../../components/data-sovereignty/CrossDevicePanel.vue'
+import ExtraditionPanel from '../../components/data-sovereignty/ExtraditionPanel.vue'
 
 const guard = useGuard()
 const { dataReflux, visitLogs, anonymousMode } = guard
