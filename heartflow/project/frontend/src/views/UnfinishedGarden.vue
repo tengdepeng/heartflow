@@ -1,34 +1,29 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance unfinished">
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="kicker">它们没有结束，只是暂时在这里停一停</p>
-    <h1 class="title">未完成花园</h1>
-    <p class="uf-summary" data-enter>🌫 {{ lightDots.length }} 枚光点漂浮 · 共 {{ items.length }} 件未完成 · ✅ {{ completedItems.length }} 件已完成</p>
+    <RoomLayout title="未完成花园" kicker="它们没有结束，只是暂时在这里停一停" data-enter>
+      <template #meta>
+        <p class="uf-summary">🌫 {{ lightDots.length }} 枚光点漂浮 · 共 {{ items.length }} 件未完成 · ✅ {{ completedItems.length }} 件已完成</p>
 
-    <!-- 统计概览 -->
-    <div data-enter class="stats-row">
-      <div class="stat-card">
-        <span class="stat-num">{{ dormantSeeds.length }}</span>
-        <span class="stat-label">搁置种子</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-num">{{ books.length }}</span>
-        <span class="stat-label">未读完的书</span>
-      </div>
-      <div class="stat-card">
-        <span class="stat-num">{{ drafts.length }}</span>
-        <span class="stat-label">半截笔记</span>
-      </div>
-      <div class="stat-card accent">
-        <span class="stat-num">{{ longestDormantDays }}<span class="stat-unit">天</span></span>
-        <span class="stat-label">最久未完成</span>
-      </div>
-    </div>
+        <!-- 统计概览 -->
+        <div class="stats-row">
+          <div class="stat-card">
+            <span class="stat-num">{{ dormantSeeds.length }}</span>
+            <span class="stat-label">搁置种子</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ books.length }}</span>
+            <span class="stat-label">未读完的书</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-num">{{ drafts.length }}</span>
+            <span class="stat-label">半截笔记</span>
+          </div>
+          <div class="stat-card accent">
+            <span class="stat-num">{{ longestDormantDays }}<span class="stat-unit">天</span></span>
+            <span class="stat-label">最久未完成</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 自动浮现的光点（蓝图附录E 自动流转） -->
     <section data-enter><h3>🌫 自动浮现的光点</h3>
@@ -170,12 +165,14 @@
       <input v-model="placeText" class="uf-place-input" placeholder="写下一件未完成的事…" @keyup.enter="placeItem" />
       <button class="uf-place-btn" @click="placeItem">放入</button>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, nextTick, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useGoal } from '../modules/goal'
 import ReclamationWeatherPanel from '../components/ReclamationWeatherPanel.vue'
 import {
@@ -468,7 +465,6 @@ function confirmCleanup() {
   z-index: 1;
   max-width: 500px;
   margin: 0 auto;
-  padding: 48px 32px 80px;
   min-height: 100%;
   overflow-y: auto;
   background: transparent;
@@ -495,44 +491,6 @@ function confirmCleanup() {
   background: radial-gradient(ellipse 320px 100% at 100% 50%, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%);
 }
 
-/* ========== 装饰性头部 ========== */
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.orn-line {
-  display: block;
-  width: 50px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
-}
-.orn-diamond {
-  font-size: 8px;
-  color: var(--accent);
-  opacity: 0.35;
-}
-
-.kicker {
-  text-align: center;
-  font-size: 12px;
-  color: var(--amber-text-muted);
-  letter-spacing: 3px;
-  margin-bottom: 8px;
-}
-
-.title {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 500;
-  font-family: var(--font-heading-zh);
-  letter-spacing: 4px;
-  color: var(--amber-text);
-  margin-bottom: 24px;
-}
 
 .uf-summary {
   text-align: center;
@@ -931,16 +889,15 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
 }
 
 @media (max-width: 860px) {
-  .unfinished { padding: 32px 20px 64px; }
   .stats-row { grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .stat-card { padding: 10px 4px; }
 }
 
 @media (max-width: 640px) {
-  .unfinished { padding: 24px 14px 56px; }
   .stats-row { grid-template-columns: 1fr; gap: 6px; }
   .stat-card { flex-direction: row; justify-content: space-between; padding: 10px 14px; }
   .stat-card .stat-num { font-size: 16px; }
   .stat-card .stat-label { font-size: 11px; }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

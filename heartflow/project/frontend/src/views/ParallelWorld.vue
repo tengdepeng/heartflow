@@ -1,31 +1,22 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance pw">
-    <!-- Header -->
-    <div data-enter class="pw-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">平行世界中的你，也在闪闪发光</p>
-      <h1 class="pw-title">平行世界</h1>
-    </div>
-
-    <!-- Overview Cards -->
-    <div data-enter class="pw-overview">
-      <div class="pw-overview-card">
-        <span class="pw-overview-num">{{ altSelves.length }}</span>
-        <span class="pw-overview-label">平行自我</span>
-      </div>
-      <div class="pw-overview-card">
-        <span class="pw-overview-num">{{ capsules.length }}</span>
-        <span class="pw-overview-label">时间胶囊</span>
-      </div>
-      <div class="pw-overview-card">
-        <span class="pw-overview-num">{{ forks.length }}</span>
-        <span class="pw-overview-label">抉择分叉</span>
-      </div>
-    </div>
+    <RoomLayout title="平行世界" kicker="平行世界中的你，也在闪闪发光" data-enter>
+      <template #meta>
+        <div class="pw-overview">
+          <div class="pw-overview-card">
+            <span class="pw-overview-num">{{ altSelves.length }}</span>
+            <span class="pw-overview-label">平行自我</span>
+          </div>
+          <div class="pw-overview-card">
+            <span class="pw-overview-num">{{ capsules.length }}</span>
+            <span class="pw-overview-label">时间胶囊</span>
+          </div>
+          <div class="pw-overview-card">
+            <span class="pw-overview-num">{{ forks.length }}</span>
+            <span class="pw-overview-label">抉择分叉</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 分支星图（来自 parallel-world 模块） -->
     <section data-enter class="pw-branch-stats" v-if="branchStats.branchCount > 0">
@@ -368,6 +359,7 @@
       </div>
       <div v-else class="pw-empty-hint">还没有梦境被映照到这里。去「梦乡小筑」点 → 梦境区，把梦境投影到平行世界·梦境区。</div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -376,6 +368,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useParallelWorld, useTimeCapsule, useParallelSelves } from '../modules/parallel-world'
 import type { Fork } from '../modules/parallel-world'
 import { DREAM_REALM_ID } from '../stores/dreamNook'
@@ -619,8 +612,7 @@ onMounted(() => { pw.load(); loadCapsules(); loadDreams(); parallelWorld.load() 
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 48px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   overflow-y: auto;
   background: transparent;
   color: var(--text-primary);
@@ -638,53 +630,6 @@ onMounted(() => { pw.load(); loadCapsules(); loadDreams(); parallelWorld.load() 
     radial-gradient(ellipse 300px 300px at 50% 50%, rgba(var(--accent-rgb), 0.02) 0%, transparent 100%);
   pointer-events: none;
   z-index: 0;
-}
-
-/* ---- Header ---- */
-.pw-header {
-  text-align: center;
-  margin-bottom: 36px;
-  position: relative;
-  z-index: 1;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.orn-line {
-  display: block;
-  width: 56px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-}
-
-.orn-diamond {
-  color: var(--accent);
-  font-size: 10px;
-  opacity: 0.6;
-  letter-spacing: 0;
-}
-
-.header-kicker {
-  font-size: 13px;
-  color: var(--accent);
-  opacity: 0.65;
-  margin: 0 0 10px;
-  letter-spacing: 3px;
-  font-weight: 300;
-}
-
-.pw-title {
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: 6px;
-  color: var(--text-primary);
-  margin: 0;
 }
 
 /* ---- Overview Cards ---- */
@@ -1630,14 +1575,12 @@ section {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .pw { padding: 32px 20px 64px; }
   .pw-overview { gap: 8px; }
   .pw-fork-tree { padding-left: 24px; }
   .pw-fork-branch-card { margin-left: 24px; }
 }
 
 @media (max-width: 640px) {
-  .pw { padding: 24px 14px 56px; }
   .pw-overview { flex-direction: column; }
   .pw-fork-form-grid { grid-template-columns: 1fr; }
   .pw-fork-tree { padding-left: 20px; }
@@ -1645,10 +1588,10 @@ section {
 }
 
 @media (max-width: 480px) {
-  .pw { padding: 12px; }
   .pw-overview { flex-direction: column; gap: 6px; }
   .pw-self-list { gap: 4px; }
   .pw-fork-tree { padding-left: 16px; }
   .pw-fork-branch-card { margin-left: 16px; }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

@@ -6,40 +6,26 @@
       <div class="rh-glow-right" />
     </div>
 
-    <!-- 装饰头部 -->
-    <header data-enter class="rh-header">
-      <div class="header-ornament">
-        <span class="orn-line" />
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line" />
-      </div>
-      <h1 class="rh-title">羁绊之厅</h1>
-      <p class="rh-subtitle">记录你生命中重要的人</p>
-      <div class="header-ornament">
-        <span class="orn-line" />
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line" />
-      </div>
-
-      <!-- 概览卡片 -->
-      <div class="overview-row" v-if="rel.persons.value.length > 0">
-        <div class="overview-card">
-          <span class="ov-label">总人数</span>
-          <strong class="ov-value">{{ rel.persons.value.length }}</strong>
-          <span class="ov-note">已记录的重要的人</span>
+    <RoomLayout title="羁绊之厅" subtitle="记录你生命中重要的人" data-enter>
+      <template #meta>
+        <div class="overview-row" v-if="rel.persons.value.length > 0">
+          <div class="overview-card">
+            <span class="ov-label">总人数</span>
+            <strong class="ov-value">{{ rel.persons.value.length }}</strong>
+            <span class="ov-note">已记录的重要的人</span>
+          </div>
+          <div class="overview-card">
+            <span class="ov-label">最高亲密度</span>
+            <strong class="ov-value">{{ rel.persons.value.length ? Math.round(Math.max(...rel.persons.value.map(p => p.closeness || 0)) * 100) + '%%' : '—' }}</strong>
+            <span class="ov-note">最亲近的关系</span>
+          </div>
+          <div class="overview-card">
+            <span class="ov-label">最近联系</span>
+            <strong class="ov-value">{{ rel.persons.value.length ? (rel.persons.value.reduce((a,b) => (a.lastContact||'') > (b.lastContact||'') ? a : b).name || '—') : '—' }}</strong>
+            <span class="ov-note">最近活跃的关系</span>
+          </div>
         </div>
-        <div class="overview-card">
-          <span class="ov-label">最高亲密度</span>
-          <strong class="ov-value">{{ rel.persons.value.length ? Math.round(Math.max(...rel.persons.value.map(p => p.closeness || 0)) * 100) + '%' : '—' }}</strong>
-          <span class="ov-note">最亲近的关系</span>
-        </div>
-        <div class="overview-card">
-          <span class="ov-label">最近联系</span>
-          <strong class="ov-value">{{ rel.persons.value.length ? (rel.persons.value.reduce((a,b) => (a.lastContact||'') > (b.lastContact||'') ? a : b).name || '—') : '—' }}</strong>
-          <span class="ov-note">最近活跃的关系</span>
-        </div>
-      </div>
-    </header>
+      </template>
 
     <!-- 羁绊档案（INCR-13）档案概览/健康/类型/节律/洞察 -->
     <BondArchivePanel :persons="rel.persons.value" />
@@ -332,6 +318,7 @@
         </div>
       </div>
     </Transition></Teleport>
+    </RoomLayout>
   </div>
 </template>
 
@@ -345,6 +332,7 @@ import BondArchivePanel from '../components/BondArchivePanel.vue'
 import AnniversaryHealthPanel from '../components/AnniversaryHealthPanel.vue'
 import RelationInsightPanel from '../components/RelationInsightPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 
 // ============================================================
 // Tab 切换
@@ -547,8 +535,7 @@ function savePerson() {
   position: relative;
   max-width: 640px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
 }
 
 .rh-ambient {
@@ -575,55 +562,6 @@ function savePerson() {
   width: 40%;
   height: 45%;
   background: radial-gradient(ellipse at 70% 80%, rgba(var(--accent-rgb), 0.03), transparent 60%);
-}
-
-/* ============================================================
-   头部
-   ============================================================ */
-.rh-header {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-.orn-line {
-  display: block;
-  width: 50px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
-}
-
-.orn-diamond {
-  font-size: 8px;
-  color: var(--accent);
-  opacity: 0.35;
-}
-
-.rh-title {
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: 4px;
-  color: var(--text-high);
-  font-family: var(--font-heading-zh);
-  margin: 0;
-}
-
-.rh-subtitle {
-  font-size: 12px;
-  color: var(--text-low);
-  margin: 0;
 }
 
 /* ---- 概览卡片 ---- */
@@ -1517,16 +1455,8 @@ function savePerson() {
 
 /* 860px: 平板过渡 — 紧凑重排 */
 @media (max-width: 860px) {
-  .relation-hall {
-    padding: 32px 20px 72px;
-  }
-
   .overview-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .rh-title {
-    font-size: 26px;
   }
 
   .rh-network {
@@ -1535,16 +1465,8 @@ function savePerson() {
 }
 
 @media (max-width: 680px) {
-  .relation-hall {
-    padding: 24px 16px 72px;
-  }
-
   .overview-row {
     grid-template-columns: 1fr;
-  }
-
-  .rh-title {
-    font-size: 26px;
   }
 
   .rh-network {
@@ -1604,12 +1526,9 @@ function savePerson() {
     display: none;
   }
 
-  .rh-title {
-    font-size: 22px;
-  }
-
   .person-card {
     padding: 12px;
   }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

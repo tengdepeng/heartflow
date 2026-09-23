@@ -5,33 +5,27 @@
       <div class="mr-glow-right" />
     </div>
 
-    <header data-enter class="mr-header">
-      <div class="header-ornament">
-        <span class="orn-line" />
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line" />
-      </div>
-      <p class="mr-kicker">你的足迹 · 所有去过的地方</p>
-      <h1 class="mr-title">地图室</h1>
-      <div class="mr-overview">
-        <article class="ov-card">
-          <span class="ov-label">地点</span>
-          <strong class="ov-value">{{ places.length }}</strong>
-        </article>
-        <article class="ov-card">
-          <span class="ov-label">城市</span>
-          <strong class="ov-value">{{ uniqueCities }}</strong>
-        </article>
-        <article class="ov-card">
-          <span class="ov-label">到访次</span>
-          <strong class="ov-value">{{ totalVisits }}</strong>
-        </article>
-        <article class="ov-card">
-          <span class="ov-label">已定位</span>
-          <strong class="ov-value">{{ locatedCount }}</strong>
-        </article>
-      </div>
-    </header>
+    <RoomLayout title="地图室" kicker="你的足迹 · 所有去过的地方" data-enter>
+      <template #meta>
+        <div class="mr-overview">
+          <article class="ov-card">
+            <span class="ov-label">地点</span>
+            <strong class="ov-value">{{ places.length }}</strong>
+          </article>
+          <article class="ov-card">
+            <span class="ov-label">城市</span>
+            <strong class="ov-value">{{ uniqueCities }}</strong>
+          </article>
+          <article class="ov-card">
+            <span class="ov-label">到访次</span>
+            <strong class="ov-value">{{ totalVisits }}</strong>
+          </article>
+          <article class="ov-card">
+            <span class="ov-label">已定位</span>
+            <strong class="ov-value">{{ locatedCount }}</strong>
+          </article>
+        </div>
+      </template>
 
     <!-- 足迹星图（本地坐标绘制，无外部瓦片） -->
     <section data-enter class="mr-section">
@@ -166,12 +160,14 @@
       <h3 class="section-title">3D 地球 · 环球立体标记</h3>
       <Globe3D :places="globePlaces" />
     </section>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useMap } from '../modules/map'
 import type { Place } from '../modules/map'
 import { useFootprint } from '../modules/footprint'
@@ -351,8 +347,6 @@ onMounted(() => { load(); loadNodes() })
 .mr {
   max-width: 560px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
   position: relative;
   z-index: 1;
 }
@@ -379,51 +373,6 @@ onMounted(() => { load(); loadNodes() })
   background: radial-gradient(ellipse at 70% 80%, rgba(90, 184, 160, 0.03), transparent 60%);
 }
 
-/* ============================================================
-   头部
-   ============================================================ */
-.mr-header {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  margin-bottom: 24px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-.orn-line {
-  display: block;
-  width: 50px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
-}
-.orn-diamond {
-  font-size: 8px;
-  color: var(--accent);
-  opacity: 0.35;
-}
-.mr-kicker {
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-low);
-}
-.mr-title {
-  font-size: 30px;
-  font-weight: 500;
-  letter-spacing: 4px;
-  color: var(--text-high);
-  font-family: var(--font-heading-zh);
-  margin: 0;
-}
 .mr-overview {
   width: 100%;
   display: grid;
@@ -738,8 +687,6 @@ onMounted(() => { load(); loadNodes() })
    响应式
    ============================================================ */
 @media (max-width: 860px) {
-  .mr { padding: 24px 16px 72px; }
-  .mr-title { font-size: 26px; }
   .mr-overview { grid-template-columns: repeat(4, 1fr); }
   .heatmap-grid { grid-template-columns: repeat(4, 1fr); }
 }
@@ -747,4 +694,5 @@ onMounted(() => { load(); loadNodes() })
   .mr-overview { grid-template-columns: repeat(2, 1fr); }
   .heatmap-grid { grid-template-columns: repeat(2, 1fr); }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

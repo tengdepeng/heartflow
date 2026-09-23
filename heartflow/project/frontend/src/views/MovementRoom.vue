@@ -1,14 +1,6 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance mv">
-    <header data-enter>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">动律之间，记录每一次身体的律动</p>
-      <h1 class="mv-title">动律之间</h1>
-    </header>
+    <RoomLayout title="动律之间" kicker="动律之间，记录每一次身体的律动" data-enter>
 
     <!-- 运动轨迹图 -->
     <section data-enter class="mv-trajectory-section">
@@ -148,12 +140,14 @@
 
     <!-- 运动计划管理（movement，INCR-175） -->
     <WorkoutPlansPanel />
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useMovement } from '../modules/movement/movement-log'
 import MovementAchievementsPanel from '../components/movement/MovementAchievementsPanel.vue'
 import MovementAnalyticsPanel from '../components/MovementAnalyticsPanel.vue'
@@ -288,8 +282,6 @@ onMounted(() => { movement.load() })
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
   background: transparent;
   overflow: hidden;
 }
@@ -316,44 +308,6 @@ onMounted(() => { movement.load() })
   z-index: 0;
 }
 
-/* Header ornament */
-header {
-  position: relative;
-  z-index: 1;
-  margin-bottom: 28px;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.orn-line {
-  display: block;
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent);
-}
-.orn-diamond {
-  color: var(--accent);
-  font-size: 10px;
-  opacity: 0.5;
-}
-.header-kicker {
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.45);
-  letter-spacing: 3px;
-  margin-bottom: 4px;
-}
-.mv-title {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 400;
-  letter-spacing: 6px;
-  color: var(--accent);
-}
 
 /* General section */
 section {
@@ -736,13 +690,11 @@ section h3 {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .mv { padding: 32px 20px 64px; }
   .mv-stats-grid { gap: 8px; }
   .mv-stats-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .mv { padding: 24px 14px 56px; }
   .mv-stats-grid { flex-direction: column; }
 }
 
@@ -805,4 +757,5 @@ section h3 {
 .mv-weekly-bar-fill { width: 60%; max-width: 24px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, rgba(var(--accent-rgb), 0.7), rgba(var(--accent-rgb), 0.3)); transition: height 0.3s; min-height: 2px;
 }
 .mv-weekly-bar-label { font-size: 10px; color: rgba(var(--accent-rgb), 0.35); margin-top: 4px; }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

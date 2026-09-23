@@ -1,29 +1,22 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance rh">
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">在书卷中寻找答案</p>
-    <h1 class="rh-title">阅览殿</h1>
-
-    <!-- 概览卡片 -->
-    <div data-enter class="overview-cards">
-      <div class="overview-card">
-        <span class="overview-num">{{ sessions.length }}</span>
-        <span class="overview-label">专注次数</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ totalFocusMinutes }}</span>
-        <span class="overview-label">专注时长(分钟)</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ crystalCount }}</span>
-        <span class="overview-label">结晶数</span>
-      </div>
-    </div>
+    <RoomLayout title="阅览殿" kicker="在书卷中寻找答案" data-enter>
+      <template #meta>
+        <div class="overview-cards">
+          <div class="overview-card">
+            <span class="overview-num">{{ sessions.length }}</span>
+            <span class="overview-label">专注次数</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ totalFocusMinutes }}</span>
+            <span class="overview-label">专注时长(分钟)</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ crystalCount }}</span>
+            <span class="overview-label">结晶数</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 选项卡 -->
     <div data-enter class="rh-tab-bar">
@@ -179,6 +172,7 @@
         </div>
       </div>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -186,6 +180,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useReadingInsights, useReadingSpeed, useReading } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
@@ -369,8 +364,7 @@ onMounted(reading.load)
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   overflow-y: auto;
   background: transparent;
 }
@@ -394,52 +388,6 @@ onMounted(reading.load)
 .rh::after {
   right: 0;
   background: radial-gradient(ellipse at right center, rgba(var(--accent-rgb), 0.05), transparent 70%);
-}
-
-/* ---- 装饰性头部 ---- */
-.header-ornament {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 0;
-  margin-bottom: 10px;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.4);
-}
-
-.header-kicker {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
-  letter-spacing: 4px;
-  margin: 0 0 6px;
-}
-
-.rh-title {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-family: var(--font-heading-en);
-  font-size: 28px;
-  font-weight: 400;
-  color: rgba(var(--accent-rgb), 0.75);
-  letter-spacing: 6px;
-  margin: 0 0 20px;
 }
 
 /* ---- 概览卡片 ---- */
@@ -883,34 +831,6 @@ onMounted(reading.load)
 
 /* ---- 响应式 ---- */
 @media (max-width: 640px) {
-  .rh {
-    padding: 28px 16px 80px;
-  }
-
-  .header-ornament {
-    gap: 8px;
-    margin-bottom: 8px;
-  }
-
-  .orn-line {
-    width: 36px;
-  }
-
-  .orn-diamond {
-    font-size: 8px;
-  }
-
-  .header-kicker {
-    font-size: 10px;
-    letter-spacing: 2px;
-  }
-
-  .rh-title {
-    font-size: 22px;
-    letter-spacing: 4px;
-    margin-bottom: 16px;
-  }
-
   .overview-cards {
     flex-wrap: wrap;
     gap: 8px;
@@ -1021,23 +941,6 @@ onMounted(reading.load)
 }
 
 @media (max-width: 480px) {
-  .rh {
-    padding: 24px 12px 80px;
-  }
-
-  .header-ornament {
-    gap: 6px;
-  }
-
-  .orn-line {
-    width: 24px;
-  }
-
-  .rh-title {
-    font-size: 20px;
-    letter-spacing: 3px;
-  }
-
   .overview-cards {
     flex-direction: column;
     gap: 6px;
@@ -1111,4 +1014,5 @@ onMounted(reading.load)
     padding: 10px;
   }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

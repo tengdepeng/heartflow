@@ -1,34 +1,29 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance gw">
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">播下种子，培育习惯，收获成长</p>
-    <h1 class="gw-title">成长庭院</h1>
-    <p class="gw-tended" data-enter>🌰 {{ seedCount }} 颗种子 · 🔄 {{ habitCount }} 个习惯 · 🌀 {{ cocoonCount }} 枚蜕变光茧</p>
+    <RoomLayout title="成长庭院" kicker="播下种子，培育习惯，收获成长" data-enter>
+      <template #meta>
+        <p class="gw-tended">🌰 {{ seedCount }} 颗种子 · 🔄 {{ habitCount }} 个习惯 · 🌀 {{ cocoonCount }} 枚蜕变光茧</p>
 
-    <!-- 统计概览卡片 -->
-    <section data-enter class="gw-stats-section">
-      <div class="gw-stat-item">
-        <span class="gw-stat-value">{{ targetStats.total }}</span>
-        <span class="gw-stat-label">目标</span>
-      </div>
-      <div class="gw-stat-item">
-        <span class="gw-stat-value gw-stat-bloom">{{ targetStats.blooming }}</span>
-        <span class="gw-stat-label">已开花</span>
-      </div>
-      <div class="gw-stat-item">
-        <span class="gw-stat-value gw-stat-progressing">{{ targetStats.growing }}</span>
-        <span class="gw-stat-label">生长中</span>
-      </div>
-      <div class="gw-stat-item">
-        <span class="gw-stat-value gw-stat-dormant">{{ targetStats.dormant }}</span>
-        <span class="gw-stat-label">休眠</span>
-      </div>
-    </section>
+        <!-- 统计概览卡片 -->
+        <div class="gw-stats-section">
+          <div class="gw-stat-item">
+            <span class="gw-stat-value">{{ targetStats.total }}</span>
+            <span class="gw-stat-label">目标</span>
+          </div>
+          <div class="gw-stat-item">
+            <span class="gw-stat-value gw-stat-bloom">{{ targetStats.blooming }}</span>
+            <span class="gw-stat-label">已开花</span>
+          </div>
+          <div class="gw-stat-item">
+            <span class="gw-stat-value gw-stat-progressing">{{ targetStats.growing }}</span>
+            <span class="gw-stat-label">生长中</span>
+          </div>
+          <div class="gw-stat-item">
+            <span class="gw-stat-value gw-stat-dormant">{{ targetStats.dormant }}</span>
+            <span class="gw-stat-label">休眠</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 导出/导入 -->
     <div data-enter class="gw-io-row">
@@ -191,6 +186,7 @@
 
     <!-- 目标 · 成长状态机（goal/goal-state-machine 引擎：种子→发芽→生长→开花 生命周期/健康度/转换，INCR-212） -->
     <GoalGrowthStateMachinePanel />
+    </RoomLayout>
   </div>
 </template>
 
@@ -204,6 +200,7 @@ import { useJournalStore } from '../modules/seasonal/journal-store'
 import { generateYearReview, type Season, type SeasonalJournalEntry, type CocoonStage } from '../modules/seasonal'
 import { placeInUnfinishedGarden } from '../modules/unfinished'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import type { GoalStatus } from '../modules/goal'
 import GoalVisualizationPanel from '../components/GoalVisualizationPanel.vue'
 import GoalProgressPanel from '../components/GoalProgressPanel.vue'
@@ -382,8 +379,6 @@ function importAll(e: Event) {
 .gw {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
   position: relative;
   z-index: 1;
   background: transparent;
@@ -407,48 +402,6 @@ function importAll(e: Event) {
   background: radial-gradient(ellipse at right center, rgba(var(--accent-rgb), 0.05), transparent 70%);
 }
 
-/* ---- 装饰性头部 ---- */
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  position: relative;
-  z-index: 1;
-}
-.orn-line {
-  display: block;
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.35), transparent);
-}
-.orn-diamond {
-  color: var(--accent);
-  font-size: 10px;
-  opacity: 0.7;
-}
-.header-kicker {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-secondary);
-  letter-spacing: 1.5px;
-  margin: 0 0 12px;
-  font-weight: 300;
-  position: relative;
-  z-index: 1;
-}
-.gw-title {
-  text-align: center;
-  font-family: var(--font-heading-zh);
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: 4px;
-  color: var(--text-high);
-  margin: 0 0 28px;
-  position: relative;
-  z-index: 1;
-}
 
 .gw-tended {
   text-align: center;
@@ -738,8 +691,6 @@ function importAll(e: Event) {
 
 /* ---- 响应式 ---- */
 @media (max-width: 600px) {
-  .gw { padding: 32px 20px 80px; }
-  .gw-title { font-size: 20px; letter-spacing: 3px; }
   .gw-stats-section { flex-wrap: wrap; gap: 6px; }
   .gw-stat-item { min-width: calc(50% - 3px); flex: unset; padding: 10px; }
   .gw-goal-form-row { flex-wrap: wrap; }
@@ -747,10 +698,9 @@ function importAll(e: Event) {
   .gw-btn { width: 100%; text-align: center; }
 }
 @media (max-width: 400px) {
-  .gw { padding: 24px 12px 80px; }
-  .gw-title { font-size: 18px; letter-spacing: 2px; }
   .gw-stats-section { flex-direction: column; gap: 4px; }
   .gw-stat-item { min-width: unset; flex-direction: row; align-items: center; gap: 8px; padding: 8px 12px; }
   .gw-stat-value { margin-left: auto; }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

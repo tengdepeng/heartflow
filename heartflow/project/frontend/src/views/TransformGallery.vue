@@ -1,16 +1,10 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance tg">
-    <header class="tg-header" data-enter>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">记录身体与心灵的每一次蜕变</p>
-      <h1 class="tg-title">蜕变回廊</h1>
-      <button class="tg-btn-new" @click="openCreate">+ 记录蜕变</button>
-      <p class="tg-summary" v-if="stats.totalRecords > 0">🦋 {{ stats.totalRecords }} 次蜕变 · ⏱ {{ stats.totalDurationText }} · 最近 {{ stats.lastChangeText }}</p>
-    </header>
+    <RoomLayout title="蜕变回廊" kicker="记录身体与心灵的每一次蜕变" data-enter>
+      <template #meta>
+        <button class="tg-btn-new" @click="openCreate">+ 记录蜕变</button>
+        <p class="tg-summary" v-if="stats.totalRecords > 0">🦋 {{ stats.totalRecords }} 次蜕变 · ⏱ {{ stats.totalDurationText }} · 最近 {{ stats.lastChangeText }}</p>
+      </template>
 
     <!-- 1. 统计概览 -->
     <section data-enter class="tg-stats-section">
@@ -210,12 +204,14 @@
         </div>
       </Transition>
     </Teleport>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useTransformGallery } from '../modules/transform'
 import { useCocoonStore } from '../modules/seasonal/cocoon-store'
 import TransformMomentumPanel from '../components/TransformMomentumPanel.vue'
@@ -416,8 +412,7 @@ function remove(id: string) {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   background: transparent;
   overflow-y: auto;
 }
@@ -448,45 +443,6 @@ function remove(id: string) {
   z-index: 1;
 }
 
-/* ===== 头部装饰 ===== */
-.tg-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 32px;
-  text-align: center;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.orn-line {
-  display: block;
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.4), transparent);
-}
-.orn-diamond {
-  color: var(--accent);
-  font-size: 10px;
-  opacity: 0.7;
-}
-.header-kicker {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.5);
-  letter-spacing: 3px;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-.tg-title {
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: 4px;
-  color: var(--text-primary);
-  margin-bottom: 20px;
-}
 .tg-btn-new {
   padding: 10px 22px;
   border-radius: 10px;
@@ -925,13 +881,11 @@ input[type="number"].duration-input::-webkit-outer-spin-button {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .tg { padding: 32px 20px 64px; }
   .tg-stats-section { gap: 8px; }
   .tg-type-chips { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .tg { padding: 24px 14px 56px; }
   .tg-stats-section { flex-direction: column; }
 }
 
@@ -953,4 +907,5 @@ input[type="number"].duration-input::-webkit-outer-spin-button {
 .dist-bar-track { flex: 1; height: 8px; border-radius: 4px; background: var(--bg-card); overflow: hidden; }
 .dist-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
 .dist-count { width: 24px; text-align: right; font-size: 12px; font-weight: 600; color: rgba(232, 213, 192, 0.6); }
+:deep(.room-layout){position:relative;z-index:1}
 </style>
