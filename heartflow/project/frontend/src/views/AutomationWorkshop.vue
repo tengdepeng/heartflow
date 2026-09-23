@@ -1,16 +1,12 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance aw">
-    <!-- 装饰性头部 -->
-    <div data-enter class="aw-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">自动化工作流编排</p>
-      <h1 class="aw-title">自动化工坊</h1>
-    </div>
-
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="自动化工坊"
+      kicker="自动化工作流编排"
+      data-enter
+    >
+      <template #meta>
     <!-- 概览卡片 -->
     <div data-enter class="overview-cards">
       <div class="overview-card">
@@ -29,6 +25,7 @@
         <span class="ov-label">预置模板</span>
       </div>
     </div>
+      </template>
 
     <!-- 编排画布 -->
     <section data-enter><h3>🎬 编排画布</h3>
@@ -139,6 +136,7 @@
     <section data-enter><h3>🛡 安全红线</h3>
       <div class="rules"><p>• 全部本地 · 不上传不云端</p><p>• 敏感操作不可编排(发送消息/删除数据/转账)</p><p>• 三指三连点 = 全局紧急终止</p><p>• 所有编排数据本地加密存储</p></div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -147,6 +145,7 @@ import { ref, onMounted } from 'vue'
 import { automationEngine, getFlowTemplates, type SavedFlow, type ExecutionRecord, type FlowStep, type FlowTemplate } from '../engine/automation'
 import { useAutomationFlows } from '../modules/automation'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { flows: savedFlows, load: loadFlows, save: saveFlows } = useAutomationFlows()
@@ -249,13 +248,17 @@ function fmt(iso:string){const d=new Date(iso);return`${d.getMonth()+1}/${d.getD
 .aw {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
   position: relative;
   background: transparent;
   color: var(--text-primary);
   font-family: inherit;
   overflow-y: auto;
+  min-height: 100%;
+}
+
+.aw :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 /* ambient glow */
@@ -285,13 +288,6 @@ function fmt(iso:string){const d=new Date(iso);return`${d.getMonth()+1}/${d.getD
 
 .aw > * { position: relative; z-index: 1; }
 
-/* ===== Header ===== */
-.aw-header { text-align: center; margin-bottom: 32px; }
-.header-ornament { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
-.orn-line { display: block; width: 48px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
-.orn-diamond { font-size: 12px; color: var(--accent); opacity: 0.8; }
-.header-kicker { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: rgba(var(--accent-rgb), 0.5); margin-bottom: 6px; }
-.aw-title { font-size: 26px; font-weight: 500; letter-spacing: 4px; color: var(--accent); margin: 0; }
 
 /* ===== Overview Cards ===== */
 .overview-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 28px; }

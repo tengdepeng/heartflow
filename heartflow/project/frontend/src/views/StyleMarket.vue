@@ -1,18 +1,14 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance sm">
-    <!-- Header -->
-    <div data-enter class="sm-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">&#10022;</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">自定义你的殿堂风格</p>
-      <h1 class="sm-title">风格工坊</h1>
-    </div>
-
-    <!-- Overview cards -->
-    <div data-enter class="sm-overview">
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="风格工坊"
+      kicker="自定义你的殿堂风格"
+      data-enter
+    >
+      <template #meta>
+        <!-- Overview cards -->
+        <div data-enter class="sm-overview">
       <div class="sm-overview-card">
         <div class="sm-overview-value">{{ packs.length }}</div>
         <div class="sm-overview-label">风格包</div>
@@ -26,6 +22,7 @@
         <div class="sm-overview-label">导入区</div>
       </div>
     </div>
+      </template>
 
     <!-- 我的风格包 -->
     <section data-enter class="sm-section">
@@ -138,6 +135,7 @@
         <p v-if="importSuccess" class="sm-empty-hint sm-empty-hint--success">{{ importSuccess }}</p>
       </div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -146,6 +144,7 @@ import { ref } from 'vue'
 import { useStyle } from '../resonance/bridges/style'
 import { importStylePack } from '../modules/style'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { CATEGORY_PALETTE } from '../theme/categoryColors'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -218,11 +217,15 @@ function handleImport(event: Event) {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 48px 24px 64px;
-  min-height: 100vh;
   background: transparent;
   color: var(--text-primary);
   isolation: isolate;
+  min-height: 100%;
+}
+
+.sm :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Ambient glow — top-left aura */
@@ -260,50 +263,6 @@ function handleImport(event: Event) {
   z-index: 0;
 }
 
-/* === Header === */
-.sm-header {
-  text-align: center;
-  margin-bottom: 40px;
-  position: relative;
-  z-index: 1;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.orn-line {
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-}
-
-.orn-diamond {
-  color: var(--accent);
-  font-size: 14px;
-  opacity: 0.7;
-}
-
-.header-kicker {
-  font-size: 12px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(var(--accent-rgb), 0.55);
-  margin: 0 0 10px;
-  font-weight: 400;
-}
-
-.sm-title {
-  font-size: 32px;
-  font-weight: 300;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: 6px;
-}
 
 /* === Overview Cards === */
 .sm-overview {

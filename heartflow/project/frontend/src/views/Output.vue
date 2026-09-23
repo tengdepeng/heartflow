@@ -1,33 +1,31 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance output-vault">
-    <!-- 装饰性顶部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <div data-enter class="header-kicker">所有产出的汇集之地</div>
-    <h1 class="output-title">输出管理</h1>
-
-    <!-- 概览卡片 -->
-    <div class="overview-cards">
-      <div class="overview-card">
-        <span class="overview-num">{{ totalRecords }}</span>
-        <span class="overview-label">总记录</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ typeStats.note }}</span>
-        <span class="overview-label">笔记</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ typeStats.emotion }}</span>
-        <span class="overview-label">情绪</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ typeStats.anchor }}</span>
-        <span class="overview-label">心锚</span>
-      </div>
-    </div>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 眉标） -->
+    <RoomLayout
+      title="输出管理"
+      kicker="所有产出的汇集之地"
+      data-enter
+    >
+      <template #meta>
+        <div class="overview-cards">
+          <div class="overview-card">
+            <span class="overview-num">{{ totalRecords }}</span>
+            <span class="overview-label">总记录</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ typeStats.note }}</span>
+            <span class="overview-label">笔记</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ typeStats.emotion }}</span>
+            <span class="overview-label">情绪</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ typeStats.anchor }}</span>
+            <span class="overview-label">心锚</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 统计面板 -->
     <div data-enter class="stats-panel">
@@ -207,6 +205,7 @@
       :delete-record="deleteRecord"
       @changed="onAdvancedChanged"
     />
+    </RoomLayout>
   </div>
 </template>
 
@@ -217,6 +216,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import type { OutputRecord, OutputRecordType } from '../modules/output'
 import OutputSnapshotsPanel from '../components/OutputSnapshotsPanel.vue'
 import OutputStatsPanel from '../components/OutputStatsPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import OutputAdvancedPanel from '../components/OutputAdvancedPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -469,17 +469,8 @@ function truncateContent(text: string, maxLen: number): string {
 <style scoped>
 /* ===== 输出管理 ===== */
 .output-vault {
-  padding: 0 24px;
   max-width: 960px;
   margin: 0 auto;
-}
-
-.output-title {
-  font-size: 2rem;
-  font-weight: 700;
-  text-align: center;
-  margin: 0 0 24px;
-  color: var(--ink, #e4e6ed);
 }
 
 /* 概览卡片 */

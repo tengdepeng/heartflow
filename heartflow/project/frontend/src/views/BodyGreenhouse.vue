@@ -1,15 +1,12 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance greenhouse">
-    <header data-enter class="gh-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="gh-kicker">身体也是需要被照顾的温室</p>
-      <h1 class="gh-title">身体温室</h1>
-    </header>
-
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="身体温室"
+      kicker="身体也是需要被照顾的温室"
+      data-enter
+    >
+      <template #meta>
     <!-- 统计概览行 -->
     <section data-enter class="overview-section">
       <div class="overview-grid">
@@ -39,6 +36,7 @@
         </article>
       </div>
     </section>
+      </template>
 
     <!-- 健康仪表盘（来自 body 模块） -->
     <section data-enter class="gh-dashboard-section" v-if="dashboardSummary.overallScore > 0">
@@ -313,6 +311,7 @@
       <div v-for="l in recentLogs" :key="l.id" class="log-item"><span>{{l.icon}}</span><span>{{l.text}}</span><span class="log-time">{{l.time}}</span></div>
     </section>
     <div v-if="recentLogs.length===0" class="empty-state"><span>🌱</span><p>温室还是空的</p></div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -322,6 +321,7 @@ import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
 import { useHealth } from '../resonance/bridges/health'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useHealthDashboard } from '../modules/body'
 import BodyRingsPanel from '../components/BodyRingsPanel.vue'
 import NutritionPanel from '../components/NutritionPanel.vue'
@@ -686,51 +686,17 @@ const recentLogs = computed(() =>
 .greenhouse {
   max-width: 500px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
   min-height: 100%;
   overflow-y: auto;
   background: transparent;
   color: var(--amber-text);
 }
 
-/* ===== 装饰性头部 ===== */
-.gh-header {
-  text-align: center;
-  margin-bottom: 28px;
+.greenhouse :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.orn-line {
-  display: block;
-  width: 50px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
-}
-.orn-diamond {
-  font-size: 8px;
-  color: var(--accent);
-  opacity: 0.35;
-}
-.gh-kicker {
-  font-size: 11px;
-  color: var(--amber-text-secondary);
-  letter-spacing: 3px;
-  margin: 0 0 8px 0;
-  font-weight: 400;
-}
-.gh-title {
-  font-size: 26px;
-  font-weight: 600;
-  font-family: var(--font-heading-zh);
-  letter-spacing: 4px;
-  margin: 0;
-  color: var(--amber-text);
-}
+
 
 .section-title {
   font-size: 14px;

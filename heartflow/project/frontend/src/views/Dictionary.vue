@@ -1,29 +1,27 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance dictionary">
-    <!-- 装饰性头部 -->
-    <header data-enter class="dc-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="kicker">记录你的专属词汇</p>
-      <h1 class="dc-title">殿堂辞典</h1>
-      <div class="overview-cards">
-        <div class="overview-card">
-          <span class="ov-label">总词条</span>
-          <span class="ov-value">{{ store.entries.length }}</span>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 眉标） -->
+    <RoomLayout
+      title="殿堂辞典"
+      kicker="记录你的专属词汇"
+      data-enter
+    >
+      <template #meta>
+        <div class="overview-cards">
+          <div class="overview-card">
+            <span class="ov-label">总词条</span>
+            <span class="ov-value">{{ store.entries.length }}</span>
+          </div>
+          <div class="overview-card">
+            <span class="ov-label">分类数</span>
+            <span class="ov-value">{{ store.categories.length }}</span>
+          </div>
+          <div class="overview-card">
+            <span class="ov-label">最新词条</span>
+            <span class="ov-value">{{ store.latestWord }}</span>
+          </div>
         </div>
-        <div class="overview-card">
-          <span class="ov-label">分类数</span>
-          <span class="ov-value">{{ store.categories.length }}</span>
-        </div>
-        <div class="overview-card">
-          <span class="ov-label">最新词条</span>
-          <span class="ov-value">{{ store.latestWord }}</span>
-        </div>
-      </div>
-    </header>
+      </template>
 
     <!-- 搜索 + 分类筛选 + 排序 + 视图切换 -->
     <div data-enter class="toolbar">
@@ -170,12 +168,14 @@
         </div>
       </div>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useDictionaryStore, type DictEntry } from '../stores/dictionary'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import HanziLookupPanel from '../components/HanziLookupPanel.vue'
 import HandwritingPanel from '../components/HandwritingPanel.vue'
@@ -386,7 +386,6 @@ function importDict(e: Event) {
 .dictionary {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
   position: relative;
   z-index: 0;
   color: var(--text-high);
@@ -413,45 +412,7 @@ function importDict(e: Event) {
   background: radial-gradient(circle, rgba(var(--accent-rgb), 0.05) 0%, transparent 70%);
 }
 
-/* ============ 装饰头部 ============ */
-.dc-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.orn-line {
-  display: inline-block;
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.3), transparent);
-}
-.orn-diamond {
-  font-size: 10px;
-  color: var(--accent);
-  opacity: 0.6;
-}
-.kicker {
-  font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.5);
-  letter-spacing: 2px;
-  margin: 0 0 6px;
-  text-transform: uppercase;
-}
-.dc-title {
-  font-family: var(--font-heading-zh);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--text-high);
-  margin: 0 0 20px;
-  letter-spacing: 4px;
-}
-/* 概览卡片 */
+/* ============ 概览卡片（头部已迁移至 RoomLayout，以下样式仍被 #meta 插槽复用） ============ */
 .overview-cards {
   display: flex;
   gap: 10px;
@@ -965,20 +926,16 @@ function importDict(e: Event) {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .dictionary { padding: 32px 20px 64px; }
   .overview-cards { gap: 8px; }
   .overview-card { padding: 12px 8px; }
   .entry-list { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .dictionary { padding: 24px 14px 56px; }
   .overview-cards { flex-direction: column; }
-  .dc-title { font-size: 12px; }
 }
 
 @media (max-width: 480px) {
-  .dictionary { padding: 12px; }
   .overview-cards { flex-direction: column; gap: 6px; }
   .search-input { width: 100%; }
 }

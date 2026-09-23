@@ -1,30 +1,28 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance ce">
-    <header data-enter class="ce-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">设计你的玉珠载体形态</p>
-      <h1 class="ce-title">载体编辑器</h1>
-    </header>
-
-    <!-- Overview cards -->
-    <div data-enter class="ce-overview">
-      <div class="ce-overview-card">
-        <span class="ce-ov-label">已保存载体</span>
-        <span class="ce-ov-value">{{ carriers.length }}</span>
-      </div>
-      <div class="ce-overview-card">
-        <span class="ce-ov-label">可选形态</span>
-        <span class="ce-ov-value">4</span>
-      </div>
-      <div class="ce-overview-card">
-        <span class="ce-ov-label">最大数量</span>
-        <span class="ce-ov-value">6</span>
-      </div>
-    </div>
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="载体编辑器"
+      kicker="设计你的玉珠载体形态"
+      data-enter
+    >
+      <template #meta>
+        <!-- Overview cards -->
+        <div data-enter class="ce-overview">
+          <div class="ce-overview-card">
+            <span class="ce-ov-label">已保存载体</span>
+            <span class="ce-ov-value">{{ carriers.length }}</span>
+          </div>
+          <div class="ce-overview-card">
+            <span class="ce-ov-label">可选形态</span>
+            <span class="ce-ov-value">4</span>
+          </div>
+          <div class="ce-overview-card">
+            <span class="ce-ov-label">最大数量</span>
+            <span class="ce-ov-value">6</span>
+          </div>
+        </div>
+      </template>
 
     <div data-enter class="ce-body">
       <!-- 预览区 -->
@@ -286,6 +284,7 @@
         </div>
       </div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -295,6 +294,7 @@ import { storage } from '../engine/storage'
 import type { JadeBeadCarrier } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { CATEGORY_PALETTE } from '../theme/categoryColors'
+import RoomLayout from '../components/RoomLayout.vue'
 
 // ---- 类型定义 ----
 
@@ -521,8 +521,7 @@ onMounted(() => {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   background: transparent;
   overflow: hidden;
 }
@@ -550,50 +549,6 @@ onMounted(() => {
   background: radial-gradient(ellipse at 50% 80%, rgba(var(--accent-rgb), 0.04) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
-}
-
-/* ---- 头部 ---- */
-.ce-header {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  padding-bottom: 12px;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
-.orn-line {
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.3), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-.ce-title {
-  font-size: 22px;
-  font-weight: 500;
-  letter-spacing: 3px;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.header-kicker {
-  font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.5);
-  letter-spacing: 2px;
-  margin: 0 0 6px;
-  text-transform: uppercase;
 }
 
 /* ---- 概览卡片 ---- */
@@ -1357,10 +1312,6 @@ onMounted(() => {
 
 /* ---- 响应式 ---- */
 @media (max-width: 768px) {
-  .ce {
-    padding: 32px 20px 60px;
-  }
-
   .ce-overview {
     gap: 8px;
   }
@@ -1371,10 +1322,6 @@ onMounted(() => {
 }
 
 @media (max-width: 480px) {
-  .ce {
-    padding: 24px 16px 48px;
-  }
-
   .ce-overview {
     grid-template-columns: 1fr;
   }

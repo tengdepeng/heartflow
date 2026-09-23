@@ -6,17 +6,15 @@
       <div class="as-glow as-glow--bottom"></div>
     </div>
 
-    <!-- 装饰性顶部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <div data-enter class="header-kicker">你的空间，由你定义</div>
-    <h1 class="as-title">应用空间</h1>
-
-    <!-- 使用统计 -->
-    <div data-enter class="as-stats" v-if="usageStats">
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="应用空间"
+      kicker="你的空间，由你定义"
+      data-enter
+    >
+      <template #meta>
+        <!-- 使用统计 -->
+        <div data-enter class="as-stats" v-if="usageStats">
       <div class="as-stat-card">
         <span class="as-stat-value">{{ usageStats.totalConfigs }}</span>
         <span class="as-stat-label">空间配置</span>
@@ -34,6 +32,7 @@
         <span class="as-stat-label">7天活跃</span>
       </div>
     </div>
+      </template>
 
     <!-- 本地注意力 · 数字健康（感知层本地壳） -->
     <section data-enter class="as-section as-attention" v-if="attentionEnabled">
@@ -200,6 +199,7 @@
       </h2>
       <AppMarketPanel />
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -207,6 +207,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import AppMarketPanel from '../components/AppMarketPanel.vue'
 import { useAppSpaceManager } from '../modules/space/app-space-manager'
 import type { AppSpaceEntry } from '../modules/space/app-space-manager'
@@ -311,6 +312,11 @@ function navigateToEntry(entry: AppSpaceEntry): void {
   background: transparent;
 }
 
+.app-space :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
+}
+
 /* ---- 氛围背景 ---- */
 .as-ambient {
   position: absolute;
@@ -340,50 +346,6 @@ function navigateToEntry(entry: AppSpaceEntry): void {
   background: var(--accent);
 }
 
-/* ---- 装饰性顶部 ---- */
-.header-ornament {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px 32px 0;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.55);
-}
-
-.header-kicker {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.7);
-  letter-spacing: 4px;
-  margin-top: 10px;
-}
-
-.as-title {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-family: var(--font-heading-en);
-  font-size: 28px;
-  font-weight: 400;
-  color: rgba(var(--accent-rgb), 0.75);
-  letter-spacing: 6px;
-  margin-top: 6px;
-}
 
 /* ---- 统计卡片 ---- */
 .as-stats {

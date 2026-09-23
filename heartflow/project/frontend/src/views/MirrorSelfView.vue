@@ -5,21 +5,17 @@
       <div class="msr-warm-glow"></div>
     </div>
 
-    <header data-enter class="msr-header">
-      <div class="msr-ornament">
-        <span class="msr-orn-line"></span>
-        <span class="msr-orn-diamond">◉</span>
-        <span class="msr-orn-line"></span>
-      </div>
-      <h1 class="msr-title">镜我</h1>
-      <p class="msr-subtitle">陈列而非叙事 · 你的年度对话面</p>
-    </header>
-
-    <!-- 镜我载体：复用全局组件，内嵌于页面中央作为房间焦点 -->
-    <section data-enter class="msr-stage">
-      <MirrorSelf :embedded="true" />
-      <p class="msr-hint">点玉珠开始对话 · 长按看今日状态 · 左右滑动切换房间</p>
-    </section>
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="镜我"
+      subtitle="陈列而非叙事 · 你的年度对话面"
+      data-enter
+    >
+      <!-- 镜我载体：复用全局组件，内嵌于页面中央作为房间焦点 -->
+      <section data-enter class="msr-stage">
+        <MirrorSelf :embedded="true" />
+        <p class="msr-hint">点玉珠开始对话 · 长按看今日状态 · 左右滑动切换房间</p>
+      </section>
 
     <!-- 跨房间共鸣态势：镜我既消费也参与 6 房联动 -->
     <section data-enter class="msr-climate" aria-label="跨房间共鸣态势">
@@ -82,12 +78,14 @@
       <h2 class="msr-section-title">镜我深处</h2>
       <MirrorDeepPanel />
     </section>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import MirrorSelf from '../components/MirrorSelf.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import FourPillarsPanel from '../components/FourPillarsPanel.vue'
 import SelfMirrorPanel from '../components/SelfMirrorPanel.vue'
 import TwelveHousesGrid from '../components/TwelveHousesGrid.vue'
@@ -170,10 +168,18 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 48px 20px 96px;
   gap: 28px;
   position: relative;
   overflow: hidden;
+}
+
+/* 统一房间壳层置于氛围辉光之上，并居中内容列（维持原 520px 视觉列宽） */
+.mirror-self-room :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
+}
+.mirror-self-room :deep(.room-layout__body) {
+  align-items: center;
 }
 
 /* 氛围辉光（不透明渐变禁止，仅用半透明径向辉光） */
@@ -194,7 +200,6 @@ onMounted(() => {
   filter: blur(8px);
 }
 
-.msr-header,
 .msr-stage,
 .msr-climate,
 .msr-reflections,
@@ -206,39 +211,6 @@ onMounted(() => {
   z-index: 1;
   width: 100%;
   max-width: 520px;
-}
-
-.msr-header {
-  text-align: center;
-}
-.msr-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-.msr-orn-line {
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--text-muted), transparent);
-}
-.msr-orn-diamond {
-  color: rgba(196, 160, 184, 0.7);
-  font-size: 14px;
-}
-.msr-title {
-  margin: 0;
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  color: rgba(240, 242, 255, 0.92);
-}
-.msr-subtitle {
-  margin: 8px 0 0;
-  font-size: 12px;
-  letter-spacing: 1px;
-  color: var(--text-secondary);
 }
 
 .msr-stage {
@@ -380,11 +352,7 @@ onMounted(() => {
 /* 移动端：收窄 padding，避免溢出 */
 @media (max-width: 640px) {
   .mirror-self-room {
-    padding: 32px 14px 88px;
     gap: 20px;
-  }
-  .msr-title {
-    font-size: 22px;
   }
   .msr-climate,
   .msr-reflections {

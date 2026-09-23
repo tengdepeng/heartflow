@@ -1,18 +1,14 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance cm">
-    <!-- Header -->
-    <div data-enter class="cm-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">&#10022;</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">可视化组件 · 发现与配置</p>
-      <h1 class="cm-title">组件市场</h1>
-    </div>
-
-    <!-- Overview cards -->
-    <div data-enter class="cm-overview">
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="组件市场"
+      kicker="可视化组件 · 发现与配置"
+      data-enter
+    >
+      <template #meta>
+        <!-- Overview cards -->
+        <div data-enter class="cm-overview">
       <div class="cm-overview-card">
         <div class="cm-overview-value">{{ components.length }}</div>
         <div class="cm-overview-label">组件总数</div>
@@ -26,6 +22,7 @@
         <div class="cm-overview-label">分类数</div>
       </div>
     </div>
+      </template>
 
     <!-- 分类筛选 -->
     <div data-enter class="cm-filter-bar">
@@ -266,12 +263,14 @@
         </div>
       </Transition>
     </Teleport>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
 
 // ---- 组件类型定义 ----
@@ -466,11 +465,15 @@ function openConfig(id: string) {
   position: relative;
   max-width: 720px;
   margin: 0 auto;
-  padding: 48px 24px 64px;
-  min-height: 100vh;
   background: transparent;
   color: var(--text-primary);
   isolation: isolate;
+  min-height: 100%;
+}
+
+.cm :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Ambient glow */
@@ -498,45 +501,6 @@ function openConfig(id: string) {
   z-index: 0;
 }
 
-/* === Header === */
-.cm-header {
-  text-align: center;
-  margin-bottom: 32px;
-  position: relative;
-  z-index: 1;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-.orn-line {
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent, #d4a574), transparent);
-}
-.orn-diamond {
-  color: var(--accent, #d4a574);
-  font-size: 14px;
-  opacity: 0.7;
-}
-.header-kicker {
-  font-size: 12px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(var(--accent-rgb), 0.55);
-  margin: 0 0 10px;
-  font-weight: 400;
-}
-.cm-title {
-  font-size: 32px;
-  font-weight: 300;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: 6px;
-}
 
 /* === Overview Cards === */
 .cm-overview {

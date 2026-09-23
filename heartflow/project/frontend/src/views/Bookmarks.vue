@@ -1,15 +1,13 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance bookmarks">
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-section">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <span class="header-kicker">收藏网络入口</span>
-      <h1 class="header-title">书签入口架</h1>
-      <div class="overview-cards">
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="书签入口架"
+      kicker="收藏网络入口"
+      data-enter
+    >
+      <template #meta>
+        <div class="overview-cards">
         <div class="overview-card">
           <span class="overview-num">{{ bookmarks.length }}</span>
           <span class="overview-label">总书签</span>
@@ -27,7 +25,7 @@
           <span class="overview-label">分类数</span>
         </div>
       </div>
-    </div>
+      </template>
 
     <!-- 视图切换 -->
     <div data-enter class="view-toggle">
@@ -205,6 +203,7 @@
     <div data-enter class="bm-archive">
       <BookmarkArchivePanel :bookmarks="bookmarks" @open="openBookmark" />
     </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -212,6 +211,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useBookmarks } from '../modules/bookmarks'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import ClipPanel from '../components/ClipPanel.vue'
 import BookmarkArchivePanel from '../components/BookmarkArchivePanel.vue'
 
@@ -556,10 +556,14 @@ function fmt(iso: string) {
 .bookmarks {
   max-width: 720px;
   margin: 0 auto;
-  padding: 48px 32px 80px;
   position: relative;
   background: transparent;
-  min-height: 100vh;
+  min-height: 100%;
+}
+
+.bookmarks :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 .bookmarks::before {
@@ -575,47 +579,6 @@ function fmt(iso: string) {
   z-index: 0;
 }
 
-/* ===== 装饰性头部 ===== */
-.header-section {
-  text-align: center;
-  margin-bottom: 24px;
-  position: relative;
-  z-index: 1;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-.orn-line {
-  display: inline-block;
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.4), transparent);
-}
-.orn-diamond {
-  font-size: 10px;
-  color: var(--accent);
-  opacity: 0.5;
-}
-.header-kicker {
-  display: block;
-  font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.45);
-  letter-spacing: 4px;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-}
-.header-title {
-  font-family: var(--font-heading-zh);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--text-high);
-  margin: 0 0 24px 0;
-  letter-spacing: 3px;
-}
 
 /* ===== 概览卡片 ===== */
 .overview-cards {

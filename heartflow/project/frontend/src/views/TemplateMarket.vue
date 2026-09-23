@@ -1,17 +1,14 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance tm">
-    <div data-enter class="tm-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">&#10022;</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">发现和导入模板</p>
-      <h1 class="tm-title">模板市场</h1>
-    </div>
-
-    <!-- 概览卡片 -->
-    <div data-enter class="tm-overview">
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="模板市场"
+      kicker="发现和导入模板"
+      data-enter
+    >
+      <template #meta>
+        <!-- 概览卡片 -->
+        <div data-enter class="tm-overview">
       <div class="tm-overview-card">
         <div class="tm-template-icon">&#127968;</div>
         <div class="tm-template-info">
@@ -34,6 +31,7 @@
         </div>
       </div>
     </div>
+      </template>
 
     <!-- 房间模板 -->
     <section data-enter class="tm-room-section">
@@ -119,6 +117,7 @@
         <p v-if="importSuccess" class="tm-import-success">{{ importSuccess }}</p>
       </div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -129,6 +128,7 @@ import { exportTemplate as exportTemplateToFile, downloadTemplate, importTemplat
 import type { RoomTemplate } from '../modules/template/types'
 import { useTemplateMarket } from '../modules/template'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useStyle } from '../resonance/bridges/style'
 import { isShareLocalOnly } from '../modules/share/share-local'
 
@@ -482,11 +482,15 @@ function handleImport(event: Event) {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 48px 24px 64px;
   color: var(--text-primary);
-  min-height: 100vh;
   background: transparent;
   isolation: isolate;
+  min-height: 100%;
+}
+
+.tm :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Ambient glow — top-center */
@@ -516,52 +520,6 @@ function handleImport(event: Event) {
   z-index: 0;
 }
 
-/* ---- Header ---- */
-
-.tm-header {
-  text-align: center;
-  margin-bottom: 40px;
-  position: relative;
-  z-index: 1;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.orn-line {
-  display: block;
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-}
-
-.orn-diamond {
-  color: var(--accent);
-  font-size: 14px;
-  line-height: 1;
-  opacity: 0.8;
-}
-
-.header-kicker {
-  margin: 0 0 8px;
-  font-size: 13px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: rgba(var(--accent-rgb), 0.7);
-}
-
-.tm-title {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 500;
-  color: #f0e8de;
-  letter-spacing: 0.02em;
-}
 
 /* ---- Overview Cards ---- */
 

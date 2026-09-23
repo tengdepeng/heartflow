@@ -1,18 +1,14 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance pm">
-    <!-- Header -->
-    <header data-enter class="pm-header">
-      <div class="pm-header-ornament">
-        <span class="pm-orn-line"></span>
-        <span class="pm-orn-diamond">✦</span>
-        <span class="pm-orn-line"></span>
-      </div>
-      <p class="pm-header-kicker">扩展你的殿堂功能</p>
-      <h1 class="pm-title">插件市场</h1>
-    </header>
-
-    <!-- Overview Cards -->
-    <section data-enter class="pm-section pm-overview-section">
+    <!-- 统一房间壳层 -->
+    <RoomLayout
+      title="插件市场"
+      kicker="扩展你的殿堂功能"
+      data-enter
+    >
+      <template #meta>
+        <!-- Overview Cards -->
+        <section data-enter class="pm-section pm-overview-section">
       <div class="pm-overview-cards">
         <div class="pm-overview-card">
           <span class="pm-overview-number">{{ plugins.length }}</span>
@@ -32,6 +28,7 @@
         </div>
       </div>
     </section>
+      </template>
 
     <!-- 已安装插件 -->
     <section data-enter class="pm-section pm-installed-section">
@@ -434,6 +431,7 @@
         </div>
       </div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -447,6 +445,7 @@ import type { MarketplaceUpdate } from '../resonance/bridges/plugin'
 import type { PluginDependency } from '../modules/plugin/plugin-marketplace'
 import type { CapabilityApiDocs } from '../modules/plugin/capability-docs'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const pluginBridge = usePlugin()
@@ -726,10 +725,14 @@ function tierLabel(t: PluginTier): string {
 .pm {
   max-width: 600px;
   margin: 0 auto;
-  padding: 48px 28px 80px;
   position: relative;
   background: transparent;
-  min-height: 100vh;
+  min-height: 100%;
+}
+
+.pm :deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Ambient glow pseudo-elements */
@@ -758,52 +761,6 @@ function tierLabel(t: PluginTier): string {
   z-index: 0;
 }
 
-/* ---- Header ---- */
-.pm-header {
-  text-align: center;
-  margin-bottom: 36px;
-  position: relative;
-  z-index: 1;
-}
-
-.pm-header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.pm-orn-line {
-  display: block;
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-}
-
-.pm-orn-diamond {
-  font-size: 13px;
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-.pm-header-kicker {
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--accent);
-  opacity: 0.6;
-  margin-bottom: 8px;
-  font-weight: 400;
-}
-
-.pm-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: #ede0d4;
-  margin: 0;
-  letter-spacing: 1px;
-}
 
 /* ---- Overview Section ---- */
 .pm-overview-section {
