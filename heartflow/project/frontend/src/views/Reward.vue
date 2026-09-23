@@ -52,16 +52,7 @@
       <div class="rw-coin rw-c-6"></div>
     </div>
 
-    <!-- Header -->
-    <div data-enter class="rw-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">工作的价值回报</p>
-      <h1 class="rw-title">劳酬</h1>
-    </div>
+    <RoomLayout title="劳酬" kicker="工作的价值回报" data-enter>
 
     <!-- 光质天平 SVG（含粒子光效） -->
     <section data-enter class="rw-balance">
@@ -525,6 +516,7 @@
       <p>天平静置，尚无记录。</p>
       <p class="rw-empty-hint">衡量的每一次付出与回报，都在这里沉淀</p>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -532,6 +524,7 @@
 import { ref, computed, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useRewardBridge } from '../modules/reward/reward-bridge'
 import { useBudgetOptimizer } from '../modules/reward/budget-optimizer'
 import { useFinancialForecast } from '../modules/reward/financial-forecast'
@@ -1016,8 +1009,7 @@ function fmt(iso: string) {
 
 /* ---- Root ---- */
 .rw {
-  max-width: 640px; margin: 0 auto; padding: 40px 32px 80px;
-  min-height: 100vh;
+  max-width: 640px; margin: 0 auto;
   background: transparent;
   position: relative; overflow: hidden;
 }
@@ -1063,23 +1055,6 @@ function fmt(iso: string) {
   50% { transform: translateY(-90px) scale(1.2) rotate(180deg); opacity: 0.18; }
   70% { opacity: 0.06; }
 }
-
-/* ---- Header ---- */
-.rw-header {
-  text-align: center; margin-bottom: 24px; position: relative; z-index: 1;
-}
-.header-ornament {
-  display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 16px;
-}
-.orn-line {
-  width: 40px; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(232,192,96,0.4), transparent);
-}
-.orn-diamond { color: var(--rw-accent); font-size: 12px; opacity: 0.7; }
-.header-kicker {
-  font-size: 12px; color: rgba(232,192,96,0.5); letter-spacing: 3px; margin-bottom: 8px; text-transform: uppercase;
-}
-.rw-title { font-size: 24px; font-weight: 600; letter-spacing: 4px; color: var(--rw-accent); }
 
 /* ---- Balance ---- */
 .rw-balance {
@@ -1539,13 +1514,7 @@ function fmt(iso: string) {
 .rw-career-neg { color: #c08080; }
 
 /* ---- Responsive ---- */
-@media (max-width: 860px) {
-  .rw { padding: 32px 20px 64px; }
-}
 @media (max-width: 640px) {
-  .rw { padding: 24px 14px 56px; }
-  .rw-title { font-size: 20px; }
-  .header-kicker { font-size: 11px; }
   .rw-balance { gap: 10px; }
   .rw-balance-side { padding: 12px 16px; }
   .rw-stats { grid-template-columns: repeat(2, 1fr); }
@@ -1556,4 +1525,5 @@ function fmt(iso: string) {
   .rw-filter-select { width: 100%; }
   .rw-trend-bars { height: 100px; }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

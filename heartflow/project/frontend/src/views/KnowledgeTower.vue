@@ -110,49 +110,42 @@
     </div>
 
     <!-- 内容层（位于背景之上，承载入场动画 data-enter） -->
-    <div class="kt-content" data-enter>
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">知识的高塔，由你亲手搭建</p>
-    <h1 class="kt-title">经略阁</h1>
+    <RoomLayout title="经略阁" kicker="知识的高塔，由你亲手搭建" data-enter>
+      <template #meta>
+        <!-- AI管家浮动按钮 -->
+        <button
+          class="kt-steward-btn"
+          :class="{ active: showSteward }"
+          @click="showSteward = !showSteward"
+          title="AI管家"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 16v-4M12 8h.01" />
+          </svg>
+          <span class="steward-label">AI管家</span>
+        </button>
 
-    <!-- AI管家浮动按钮 -->
-    <button
-      class="kt-steward-btn"
-      :class="{ active: showSteward }"
-      @click="showSteward = !showSteward"
-      title="AI管家"
-    >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10" />
-        <path d="M12 16v-4M12 8h.01" />
-      </svg>
-      <span class="steward-label">AI管家</span>
-    </button>
-
-    <!-- 概览卡片 -->
-    <div data-enter class="overview-cards">
-      <div class="overview-card">
-        <span class="overview-num">{{ nodes.length }}</span>
-        <span class="overview-label">知识节点</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ categories.length }}</span>
-        <span class="overview-label">分类数</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ stormItems.length }}</span>
-        <span class="overview-label">灵感碎片</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ importSources.length }}</span>
-        <span class="overview-label">导入来源</span>
-      </div>
-    </div>
+        <!-- 概览卡片 -->
+        <div class="overview-cards">
+          <div class="overview-card">
+            <span class="overview-num">{{ nodes.length }}</span>
+            <span class="overview-label">知识节点</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ categories.length }}</span>
+            <span class="overview-label">分类数</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ stormItems.length }}</span>
+            <span class="overview-label">灵感碎片</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ importSources.length }}</span>
+            <span class="overview-label">导入来源</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 知识档案（INCR-18）档案概览/图谱形状/导入来源/温和洞察 -->
     <KnowledgeArchivePanel :nodes="nodes" :sources="importSources" />
@@ -240,7 +233,7 @@
 
     <!-- 掌握度（INCR-315 补挂载孤儿组件：Khan 式知识掌握追踪 · 待加强优先 · 掌握档案） -->
     <MasteryDashboardPanel />
-    </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -248,6 +241,7 @@
 import { provide } from 'vue'
 import { useKnowledgeTowerUi, KT_UI_KEY } from '../modules/knowledge/useKnowledgeTowerUi'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 
 import ImportSourceModal from '../components/ImportSourceModal.vue'
 import RelationEditor from '../components/RelationEditor.vue'
@@ -409,8 +403,5 @@ const {
   pointer-events: none;
   opacity: 0.5;
 }
-.kt-content {
-  position: relative;
-  z-index: 1;
-}
+:deep(.room-layout){position:relative;z-index:1}
 </style>

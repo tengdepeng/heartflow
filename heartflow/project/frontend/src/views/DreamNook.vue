@@ -1,14 +1,6 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance dn">
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <header data-enter>
-      <p class="kicker">记录、整理、回看你的梦境</p>
-      <h1>梦乡小筑</h1>
-    </header>
+    <RoomLayout title="梦乡小筑" kicker="记录、整理、回看你的梦境" data-enter>
 
     <transition name="dn-flash">
       <div v-if="flash" class="dn-flash">{{ flash }}</div>
@@ -140,6 +132,7 @@
       </div>
       <div v-else class="empty-hint">{{ showArchived ? '没有归档的梦境' : '还没有梦境记录' }}</div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -147,6 +140,7 @@
 import { ref, computed, reactive } from 'vue'
 import { useDreamNookStore, DREAM_REALM_ID } from '../stores/dreamNook'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import DreamArchivePanel from '../components/DreamArchivePanel.vue'
 import DreamOmenPanel from '../components/DreamOmenPanel.vue'
 
@@ -279,8 +273,6 @@ function importDreams(e: Event) {
   position: relative;
   max-width: 520px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
   overflow-y: auto;
   background: transparent;
   color: var(--text-high);
@@ -304,49 +296,6 @@ function importDreams(e: Event) {
 .dn::after {
   right: 0;
   background: radial-gradient(ellipse at right center, rgba(var(--accent-rgb), 0.06) 0%, transparent 70%);
-}
-
-/* 装饰性头部 */
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 1;
-}
-.orn-line {
-  width: 48px;
-  height: 1px;
-  background: rgba(var(--accent-rgb), 0.25);
-}
-.orn-diamond {
-  color: var(--accent);
-  font-size: 14px;
-  opacity: 0.6;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 1;
-}
-header .kicker {
-  font-size: 12px;
-  color: var(--text-secondary);
-  letter-spacing: 3px;
-  margin: 0 0 8px;
-  text-transform: uppercase;
-}
-header h1 {
-  font-size: 24px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  font-family: var(--font-heading-en);
-  color: var(--text-high);
-  margin: 0;
 }
 
 section {
@@ -658,13 +607,11 @@ section h3 {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .dn { padding: 32px 20px 64px; }
   .stats-row { gap: 8px; }
   .stats-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .dn { padding: 24px 14px 56px; }
   .stats-row { flex-direction: column; }
 }
 
@@ -673,4 +620,5 @@ section h3 {
   .stat-item { padding: 8px; }
   .dream-card { padding: 10px; }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>

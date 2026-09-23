@@ -1,29 +1,22 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance study-room">
-    <!-- 装饰性顶部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <div data-enter class="header-kicker">把思绪写成书，排在书架上</div>
-    <h1 class="study-title">思绪书房</h1>
-
-    <!-- 概览卡片 -->
-    <div class="overview-cards">
-      <div class="overview-card">
-        <span class="overview-num">{{ totalNotes }}</span>
-        <span class="overview-label">总笔记</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ totalTags }}</span>
-        <span class="overview-label">标签数</span>
-      </div>
-      <div class="overview-card">
-        <span class="overview-num">{{ latestNoteTitle }}</span>
-        <span class="overview-label">最新笔记</span>
-      </div>
-    </div>
+    <RoomLayout title="思绪书房" kicker="把思绪写成书，排在书架上" data-enter>
+      <template #meta>
+        <div class="overview-cards">
+          <div class="overview-card">
+            <span class="overview-num">{{ totalNotes }}</span>
+            <span class="overview-label">总笔记</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ totalTags }}</span>
+            <span class="overview-label">标签数</span>
+          </div>
+          <div class="overview-card">
+            <span class="overview-num">{{ latestNoteTitle }}</span>
+            <span class="overview-label">最新笔记</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 顶栏 -->
     <header class="study-header">
@@ -276,6 +269,7 @@
 
     <!-- 通话磁带（study tapes 模块） -->
     <TapesPanel />
+    </RoomLayout>
   </div>
 </template>
 
@@ -301,6 +295,7 @@ import NoteTemplatePanel from '../components/NoteTemplatePanel.vue'
 import StudyAiAssistPanel from '../components/StudyAiAssistPanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -602,51 +597,6 @@ function toggleArchive(note: Note) {
 .study-room::after {
   right: 0;
   background: radial-gradient(ellipse 600px 80% at 100% 50%, rgba(var(--accent-rgb), 0.06) 0%, transparent 70%);
-}
-
-/* ---- 装饰性顶部 ---- */
-.header-ornament {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px 32px 0;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.4);
-}
-
-.header-kicker {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
-  letter-spacing: 4px;
-  margin-top: 10px;
-}
-
-.study-title {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-family: var(--font-heading-en);
-  font-size: 28px;
-  font-weight: 400;
-  color: rgba(var(--accent-rgb), 0.75);
-  letter-spacing: 6px;
-  margin-top: 6px;
 }
 
 /* ---- 概览卡片 ---- */
@@ -1759,4 +1709,5 @@ function toggleArchive(note: Note) {
     min-height: 40px;
 }
 }
+:deep(.room-layout){position:relative;z-index:1}
 </style>
