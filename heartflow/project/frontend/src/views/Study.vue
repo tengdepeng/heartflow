@@ -1403,31 +1403,6 @@ function toggleArchive(note: Note) {
     height: 100dvh;
   }
 
-  .header-ornament {
-    padding: 48px 16px 0;
-    gap: 8px;
-  }
-
-  .orn-line {
-    width: 36px;
-  }
-
-  .orn-diamond {
-    font-size: 8px;
-  }
-
-  .header-kicker {
-    font-size: 10px;
-    letter-spacing: 2px;
-    margin-top: 6px;
-  }
-
-  .study-title {
-    font-size: 22px;
-    letter-spacing: 4px;
-    margin-top: 4px;
-  }
-
   .overview-cards {
     gap: 8px;
     padding: 12px 16px 0;
@@ -1544,19 +1519,6 @@ function toggleArchive(note: Note) {
 }
 
 @media (max-width: 480px) {
-  .header-ornament {
-    padding: 40px 12px 0;
-    gap: 6px;
-  }
-
-  .orn-line {
-    width: 24px;
-  }
-
-  .study-title {
-    font-size: 20px;
-  }
-
   .overview-cards {
     gap: 6px;
     padding: 10px 12px 0;
@@ -1609,25 +1571,6 @@ function toggleArchive(note: Note) {
 @media (max-width: 375px) {
   .study-room {
     height: 100dvh;
-  }
-
-  .header-ornament {
-    padding: 36px 10px 0;
-    gap: 4px;
-  }
-
-  .orn-line {
-    width: 18px;
-  }
-
-  .study-title {
-    font-size: 18px;
-    letter-spacing: 2px;
-  }
-
-  .header-kicker {
-    font-size: 9px;
-    letter-spacing: 1px;
   }
 
   .overview-cards {
