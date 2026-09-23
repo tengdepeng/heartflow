@@ -17,6 +17,18 @@ export { useAppearance, initAppearance } from './useAppearance'
 export { useRoomStyle } from './useRoomStyle'
 export type { RoomStyleOverride } from './useRoomStyle'
 
+// ---- 超级自定义 · 统一房间壳层外观（全局优先 + 单房间可覆盖） ----
+export {
+  useRoomShellAppearance,
+  applyRoomShellAppearance,
+  CONTENT_PAD_PX,
+} from './useRoomShellAppearance'
+export type {
+  ContentPadDensity,
+  HeaderAlign,
+  TitleScale,
+} from './useRoomShellAppearance'
+
 // ---- 超级自定义 · 界面自动隐藏（沉浸模式） ----
 export { useChromeAutoHide } from './useChromeAutoHide'
 

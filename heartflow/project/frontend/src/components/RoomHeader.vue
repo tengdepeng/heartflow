@@ -1,5 +1,5 @@
 <template>
-  <header class="room-header" :class="{ 'room-header--bare': !ornament }">
+  <header class="room-header" :class="[{ 'room-header--bare': !ornament }, `room-header--${align}`]">
     <!-- 面包屑（可选）。传入 breadcrumb 数组时渲染，或完全用 #breadcrumb 插槽自定义 -->
     <nav v-if="breadcrumb && breadcrumb.length" class="rh-breadcrumb" aria-label="breadcrumb">
       <template v-for="(b, i) in breadcrumb" :key="i">
@@ -63,8 +63,10 @@ withDefaults(
     subtitle?: string
     breadcrumb?: BreadcrumbItem[]
     ornament?: boolean
+    /** 标题组对齐：left 左对齐（默认）/ center 居中。全局由 useRoomShellAppearance 注入，房间可覆盖 */
+    align?: 'left' | 'center'
   }>(),
-  { title: '', kicker: '', subtitle: '', breadcrumb: undefined, ornament: true },
+  { title: '', kicker: '', subtitle: '', breadcrumb: undefined, ornament: true, align: 'left' },
 )
 
 defineEmits<{ (e: 'navigate', item: BreadcrumbItem): void }>()
@@ -116,6 +118,18 @@ defineEmits<{ (e: 'navigate', item: BreadcrumbItem): void }>()
   display: flex;
   align-items: center;
   gap: 16px;
+}
+/* 居中模式：主行整体居中，标题组与装饰一并居中（全局外观「标题对齐」切换到 center 时） */
+.room-header--center .rh-main {
+  justify-content: center;
+}
+.room-header--center .rh-titles {
+  align-items: center;
+  text-align: center;
+  flex: 0 1 auto;
+}
+.room-header--center .rh-actions {
+  margin-left: 0;
 }
 .rh-ornament {
   display: inline-flex;

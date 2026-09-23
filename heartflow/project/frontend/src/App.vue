@@ -244,6 +244,9 @@
       @select="onCommandSelect"
     />
 
+    <!-- 房间外观 · 统一壳层外观编辑器（悬浮窗，拖动滑块即时改变下方房间） -->
+    <RoomAppearancePopover v-model:open="roomShellOpen" />
+
     <!-- 安全岛全局覆盖层（五击触发） -->
     <SanctuaryOverlay
       :breath-progress="sanctuaryBreathProgress"
@@ -278,11 +281,13 @@ import { useAstrolabe } from './modules/astrolabe'
 import { useLayerSwitch } from './composables/useLayerSwitch'
 import { safePush } from '@/utils/router-safe'
 import CommandPalette from './components/CommandPalette.vue'
+import RoomAppearancePopover from './components/RoomAppearancePopover.vue'
 import type { CommandItem } from './modules/command-palette/types'
 import { useSanctuaryTrigger } from './modules/sanctuary'
 import { useAppearance } from './modules/customization/useAppearance'
 import { useChromeAutoHide } from './modules/customization/useChromeAutoHide'
 import { useRoomStyle } from './modules/customization/useRoomStyle'
+import { applyRoomShellAppearance } from './modules/customization/useRoomShellAppearance'
 import { prefetchRooms } from './modules/perf/routePrefetch'
 import { applyBrandIconToWindow } from './modules/customization/applyWindowIcon'
 import { useRuntimeState } from './resonance/bridges/runtime'
@@ -358,6 +363,8 @@ provide('astrolabe', astrolabe)
 
 // ---- 命令面板（Ctrl/Cmd+K 呼出，聚合 房间/页面/动作 统一检索）----
 const cmdOpen = ref(false)
+// 房间外观悬浮窗（统一壳层外观编辑器）开关
+const roomShellOpen = ref(false)
 const router = useRouter()
 const { open: openLayerSwitch } = useLayerSwitch()
 
@@ -392,6 +399,7 @@ const commandItems = computed<CommandItem[]>(() => {
     { id: 'act:astrolabe', kind: 'action', label: '星盘导航', keywords: 'astrolabe star map 星盘 导航', run: () => astrolabe.open('keyboard') },
     { id: 'act:switch-view', kind: 'action', label: '切换 2D/3D 视图', keywords: 'switch 2d 3d view 视图 三维 二维 切换', run: () => openLayerSwitch() },
     { id: 'act:settings', kind: 'action', label: '打开设置', keywords: 'settings 设置 偏好 配置', hint: '/settings', run: () => safePush(router, '/settings') },
+    { id: 'act:room-shell', kind: 'action', label: '房间外观设置', keywords: 'room shell appearance 房间 外观 统一 壳层 排版 设置', hint: '悬浮窗', run: () => { roomShellOpen.value = true } },
     { id: 'act:home', kind: 'action', label: '回到首页', keywords: 'home 首页 心流', hint: '/', run: () => safePush(router, '/') },
   ]
   return [...actions, ...rooms, ...pages]
@@ -997,6 +1005,9 @@ onMounted(() => {
 
   // 超级自定义 · 视觉强度初始化（粒子画布 / 环境辉光 / 颗粒 / 微尘 / 背景 各项不透明度）
   initAppearance()
+
+  // 超级自定义 · 统一房间壳层外观初始化（内容内边距写入 :root，全局即时生效）
+  applyRoomShellAppearance()
 
   // 超级自定义 · 界面自动隐藏（沉浸模式）全局活动监听
   initChromeAutoHide()
