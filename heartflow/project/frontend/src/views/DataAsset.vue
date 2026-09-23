@@ -25,28 +25,26 @@
       </div>
     </div>
 
-    <!-- Header -->
-    <header data-enter class="da-header">
-      <div class="breadcrumb-row">
-        <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
-          <span class="breadcrumb-home-icon">🏠</span>
-          <span>家</span>
-        </button>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-link current">
-          <span class="breadcrumb-icon">{{ roomData?.icon }}</span>
-          <span>{{ roomData?.name }}</span>
-        </span>
-      </div>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <h1 class="da-title">{{ roomData?.name }}</h1>
-      <p class="da-subtitle">{{ roomData?.description }}</p>
-      <p class="da-kicker">你在这座殿堂里留下的每一粒数据，都是资产</p>
-    </header>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 副标题 / 眉标 / 面包屑） -->
+    <RoomLayout
+      :title="roomData?.name ?? '数据资产'"
+      :subtitle="roomData?.description ?? ''"
+      kicker="你在这座殿堂里留下的每一粒数据，都是资产"
+      data-enter
+    >
+      <template #breadcrumb>
+        <div class="breadcrumb-row">
+          <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
+            <span class="breadcrumb-home-icon">🏠</span>
+            <span>家</span>
+          </button>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-link current">
+            <span class="breadcrumb-icon">{{ roomData?.icon }}</span>
+            <span>{{ roomData?.name }}</span>
+          </span>
+        </div>
+      </template>
 
     <!-- 概览统计 -->
     <section data-enter class="da-section">
@@ -182,6 +180,7 @@
         cta-label=""
       />
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -192,6 +191,7 @@ import { useRoomNavigation } from '../composables/useRoomNavigation'
 import { useDataAssetBridge } from '../modules/data-asset'
 import { getRoom } from '../engine/room-graph'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceClass, entranceRef } = useViewEntrance()
 const nav = useRoomNavigation()
@@ -253,17 +253,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.da { position: relative; max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+.da { position: relative; max-width: 860px; margin: 0 auto; }
 .da-ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .da-glow { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.14; }
 .da-glow--top { width: 420px; height: 420px; top: -120px; right: -80px; background: #6b9fc4; }
 .da-glow--bottom { width: 380px; height: 380px; bottom: -100px; left: -80px; background: #9a7ab8; }
 .da-grid { position: absolute; right: 4%; top: 10%; opacity: 0.5; }
 
-.da-header { position: relative; z-index: 1; text-align: center; margin-bottom: 24px; }
-.da-title { font-size: 26px; letter-spacing: 4px; color: var(--text-high, #d8c3a5); margin: 8px 0 4px; }
-.da-subtitle { font-size: 13px; color: rgba(232, 221, 208, 0.6); margin: 0 0 6px; }
-.da-kicker { font-size: 11px; letter-spacing: 2px; color: rgba(var(--accent-rgb), 0.5); margin: 0; }
+/* 头部（已迁移至 RoomLayout 统一头部，面包屑经 #breadcrumb 插槽保留 nav.enterRoom） */
 
 .da-section { position: relative; z-index: 1; margin-bottom: 20px; padding: 18px 20px; border-radius: 14px; background: var(--card-bg, rgba(18, 14, 11, 0.6)); border: 1px solid var(--border, rgba(255, 255, 255, 0.08)); }
 .da-panel-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); margin: 0 0 12px; }
@@ -323,7 +320,6 @@ onMounted(() => {
 .da-rec-desc { font-size: 11px; color: rgba(232, 221, 208, 0.5); margin: 0; line-height: 1.5; }
 
 @media (max-width: 640px) {
-  .da { padding: 20px 14px 48px; }
   .da-overview { grid-template-columns: repeat(3, 1fr); }
   .da-two-col { grid-template-columns: 1fr; }
   .da-health { grid-template-columns: repeat(2, 1fr); }

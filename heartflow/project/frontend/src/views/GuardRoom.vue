@@ -5,21 +5,12 @@
       <div class="atmos-warm-glow"></div>
     </div>
 
-    <!-- 装饰性头部 -->
-    <header data-enter class="guard-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <h1 class="guard-title">守护室</h1>
-      <p class="guard-subtitle">你的安全与隐私控制中心</p>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-    </header>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 副标题） -->
+    <RoomLayout
+      title="守护室"
+      subtitle="你的安全与隐私控制中心"
+      data-enter
+    >
 
     <!-- 标签导航 -->
     <nav data-enter class="guard-tabs">
@@ -134,6 +125,7 @@
 
     <!-- 用眼休息调度（INCR-261 补挂载孤儿组件：20-20-20 实时倒计时 · 完成/稍后 · 今日节律） -->
     <EyeBreakSchedulerPanel />
+    </RoomLayout>
   </div>
 </template>
 
@@ -169,6 +161,7 @@ import PropertySecurityPanel from '../components/safety/PropertySecurityPanel.vu
 import PersonalSafetyConfigPanel from '../components/safety/PersonalSafetyConfigPanel.vue'
 import PsychologicalSafetyPanel from '../components/safety/PsychologicalSafetyPanel.vue'
 import SecurityIncidentPanel from '../components/SecurityIncidentPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 

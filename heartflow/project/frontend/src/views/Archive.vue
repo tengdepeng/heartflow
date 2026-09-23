@@ -1,21 +1,20 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance archive">
-    <!-- 装饰性头部 -->
-    <header data-enter class="archive-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">这里存放着你在这个世界留下的所有痕迹</p>
-      <h1 class="header-title">数据档案馆</h1>
-      <div class="header-overview">
-        <div v-for="card in overviewCards" :key="card.label" class="overview-card">
-          <span class="overview-count">{{ card.count }}</span>
-          <span class="overview-label">{{ card.label }}</span>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 副标题 / 眉标 / 概述） -->
+    <RoomLayout
+      title="数据档案馆"
+      kicker="ARCHIVE"
+      subtitle="这里存放着你在这个世界留下的所有痕迹"
+      data-enter
+    >
+      <template #meta>
+        <div class="header-overview">
+          <div v-for="card in overviewCards" :key="card.label" class="overview-card">
+            <span class="overview-count">{{ card.count }}</span>
+            <span class="overview-label">{{ card.label }}</span>
+          </div>
         </div>
-      </div>
-    </header>
+      </template>
 
     <!-- 导出区 -->
     <section data-enter class="archive-section">
@@ -87,6 +86,7 @@
       <p class="section-desc">为每篇思绪把脉：健康度、写作、标签、生命周期与内容质量，逐一显影。</p>
       <NoteHealthArchivePanel />
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -101,6 +101,7 @@ import LightRecordsPanel from '../components/LightRecordsPanel.vue'
 import DialogueSessionList from '../components/DialogueSessionList.vue'
 import AutoArchivePanel from '../components/AutoArchivePanel.vue'
 import NoteHealthArchivePanel from '../components/NoteHealthArchivePanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const dataPort = useDataPort()
@@ -190,9 +191,7 @@ async function handleImportFileChange(event: Event) {
 .archive {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
   min-height: 100%;
-  overflow-y: auto;
   position: relative;
   background: transparent;
   color: var(--text-high);
@@ -223,50 +222,7 @@ async function handleImportFileChange(event: Event) {
   z-index: 0;
 }
 
-/* 装饰性头部 */
-.archive-header {
-  text-align: center;
-  margin-bottom: 36px;
-  position: relative;
-  z-index: 1;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.orn-line {
-  display: inline-block;
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.4), transparent);
-}
-
-.orn-diamond {
-  font-size: 12px;
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-.header-kicker {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-  letter-spacing: 1px;
-}
-
-.header-title {
-  font-family: var(--font-heading-zh);
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  color: var(--text-high);
-  margin-bottom: 24px;
-}
+/* 头部概述卡片（通过 RoomLayout #meta 插槽注入统一头部） */
 
 .header-overview {
   display: flex;

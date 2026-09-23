@@ -14,23 +14,13 @@
       </div>
     </div>
 
-    <!-- 顶部标题 · 卷轴样式 -->
-    <header data-enter class="crystal-scroll-header">
-      <div class="crystal-header-ornament">
-        <span class="crystal-orn-line"></span>
-        <span class="crystal-orn-diamond">✦</span>
-        <span class="crystal-orn-line"></span>
-      </div>
-      <div class="crystal-header-icon">💎</div>
-      <h1 class="crystal-title">结晶阁</h1>
-      <p class="crystal-subtitle">时间结晶 · 心流的凝固与珍藏</p>
-      <p class="crystal-kicker">Crystal Pavilion</p>
-      <div class="crystal-header-ornament">
-        <span class="crystal-orn-line"></span>
-        <span class="crystal-orn-diamond">✦</span>
-        <span class="crystal-orn-line"></span>
-      </div>
-    </header>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 副标题 / 眉标） -->
+    <RoomLayout
+      title="结晶阁"
+      kicker="Crystal Pavilion"
+      subtitle="时间结晶 · 心流的凝固与珍藏"
+      data-enter
+    >
 
     <!-- 结晶画廊 -->
     <CrystalGalleryPanel />
@@ -58,6 +48,7 @@
       </div>
       <p class="crystal-colophon-text">聚沙成塔 · 凝时成晶</p>
     </footer>
+    </RoomLayout>
   </div>
 </template>
 
@@ -68,6 +59,7 @@ import CrystalGenePanel from '../components/crystal/CrystalGenePanel.vue'
 import CrystalArchivePanel from '../components/crystal/CrystalArchivePanel.vue'
 import GeneBreedingPanel from '../components/crystal/GeneBreedingPanel.vue'
 import CanvasGravityArchivePanel from '../components/CanvasGravityArchivePanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 </script>
@@ -139,18 +131,9 @@ const { entranceRef, entranceClass } = useViewEntrance()
   transform: rotate(30deg);
 }
 
-/* ---- 标题 ---- */
-.crystal-scroll-header {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: 56px 24px 28px;
-  text-align: center;
-}
+/* ---- 标题（已迁移至 RoomLayout 统一头部，结晶阁视觉由壳层 #ornament/#title 插槽或全局外观接管）---- */
 
+/* 页脚装饰（与统一头部同款菱形，保留房间辨识度） */
 .crystal-header-ornament {
   display: flex;
   align-items: center;
@@ -165,34 +148,6 @@ const { entranceRef, entranceClass } = useViewEntrance()
 }
 
 .crystal-orn-diamond { font-size: 10px; }
-
-.crystal-header-icon {
-  font-size: 40px;
-  filter: drop-shadow(0 0 16px rgba(160, 124, 140, 0.5));
-}
-
-.crystal-title {
-  font-size: 34px;
-  font-weight: 600;
-  letter-spacing: 12px;
-  color: var(--accent);
-  margin: 0;
-}
-
-.crystal-subtitle {
-  font-size: 13px;
-  letter-spacing: 4px;
-  color: rgba(var(--accent-rgb), 0.6);
-  margin: 0;
-}
-
-.crystal-kicker {
-  font-size: 10px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(var(--accent-rgb), 0.35);
-  margin: 0;
-}
 
 /* ---- 页脚 ---- */
 .crystal-colophon {
