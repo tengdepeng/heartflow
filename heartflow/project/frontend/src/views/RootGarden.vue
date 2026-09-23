@@ -1,13 +1,11 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance root">
-    <header data-enter>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="kicker">追溯「我为什么会变成今天这个样子」</p>
-      <h1 class="title">根脉之庭</h1>
+    <RoomLayout
+      title="根脉之庭"
+      kicker="追溯「我为什么会变成今天这个样子」"
+      data-enter
+    >
+      <template #meta>
       <div class="overview-cards">
         <div class="overview-card">
           <span class="overview-num">{{ roots.length }}</span>
@@ -22,7 +20,7 @@
           <span class="overview-label">枝桠</span>
         </div>
       </div>
-    </header>
+      </template>
 
     <!-- 统计概览 -->
     <div data-enter class="stats-row">
@@ -292,10 +290,12 @@
     <!-- 根脉叙事档案（INCR-292 补挂载孤儿组件 RootNarrativeArchivePanel：溯源叙事/时代回顾/支线故事/关键人物/时间脉络/情感曲线/温和洞察，消费 root-narrative 叙事生成函数 + root-tree weaveTraceTree，应用库内唯一，零 props 自持读桥） -->
     <!-- ============================================================ -->
     <RootNarrativeArchivePanel />
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useDecayEngine } from '../modules/roots/decay-engine'
@@ -475,12 +475,12 @@ const decayReport = computed(() => {
 .root {
   max-width: 520px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
   min-height: 100%;
   overflow-y: auto;
   background: transparent;
   position: relative;
 }
+  .root :deep(.room-layout){position:relative;z-index:1}
 .root::before,
 .root::after {
   content: '';

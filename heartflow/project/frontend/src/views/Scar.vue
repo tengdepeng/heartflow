@@ -99,15 +99,12 @@
     </div>
 
     <!-- Header -->
-    <div data-enter class="sc-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">工作的身体印记</p>
-      <h1 class="sc-title">工痕</h1>
-    </div>
+    <RoomLayout
+      title="工痕"
+      kicker="工作的身体印记"
+      data-enter
+    >
+      <template #meta>
 
     <!-- 统计概览 -->
     <section data-enter class="sc-stats">
@@ -128,6 +125,8 @@
         <span class="sc-stat-label">涉及部位</span>
       </div>
     </section>
+
+      </template>
 
     <!-- 铸造档案（scar/scar-analytics 引擎：档案概览/锻造节律/铸造健康/温和洞察，INCR-202） -->
     <section data-enter class="sc-archive-section">
@@ -437,10 +436,12 @@
       <p>锻炉安静，尚无印记。</p>
       <p class="sc-empty-hint">点击右上角砧板，或使用下方表单开始记录</p>
     </div>
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, computed, onMounted } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -827,11 +828,12 @@ function strikeAnvil() {
 
 /* ---- Root ---- */
 .sc {
-  max-width: 640px; margin: 0 auto; padding: 40px 32px 80px;
-  min-height: 100vh;
+  max-width: 640px; margin: 0 auto;
+  min-height: 100%;
   background: transparent;
   position: relative; overflow: hidden;
 }
+  .sc :deep(.room-layout){position:relative;z-index:1}
 
 /* ---- Ambient ---- */
 .sc-ambient {

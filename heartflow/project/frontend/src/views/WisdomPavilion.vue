@@ -1,13 +1,12 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance wp">
     <!-- ========== 头部装饰 ========== -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">知微见著，慧从心生</p>
-    <h1 class="wp-title">知微阁</h1>
+    <RoomLayout
+      title="知微阁"
+      kicker="知微见著，慧从心生"
+      data-enter
+    >
+      <template #meta>
 
     <!-- ========== 统计概览行 ========== -->
     <section data-enter class="wp-stats-section">
@@ -30,6 +29,8 @@
     </section>
 
     <!-- 知微珠 -->
+      </template>
+
     <div data-enter class="wp-pearl-container">
       <div class="wp-pearl" :class="{ spinning: thinking }" :style="pearlGlowStyle">
         <div class="pearl-core"/>
@@ -168,10 +169,12 @@
 
     <!-- 诗词卡片（wisdom/poetry 引擎，INCR-183） -->
     <PoetryCardPanel />
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
@@ -443,12 +446,12 @@ onMounted(() => {
 .wp {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   background: transparent;
   position: relative;
   overflow-y: auto;
 }
+  .wp :deep(.room-layout){position:relative;z-index:1}
 .wp::before {
   content: '';
   position: fixed;

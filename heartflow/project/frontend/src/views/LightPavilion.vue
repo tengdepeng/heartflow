@@ -57,14 +57,12 @@
     </div>
 
     <!-- 装饰性头部 -->
-    <header data-enter class="pavilion-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">把目标放回时间线，让它们慢慢生长</p>
-      <h1 class="header-title">留光阁</h1>
+    <RoomLayout
+      title="留光阁"
+      kicker="把目标放回时间线，让它们慢慢生长"
+      data-enter
+    >
+      <template #meta>
       <!-- 统计概览卡片 -->
       <section class="stats-overview">
         <div class="stat-item">
@@ -84,7 +82,7 @@
           <span class="stat-label">里程碑</span>
         </div>
       </section>
-    </header>
+      </template>
 
     <!-- 搜索与筛选栏（tab-bar） -->
     <section data-enter class="filter-bar">
@@ -329,10 +327,12 @@
         </div>
       </div>
     </Transition></Teleport>
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useGoal } from '../modules/goal'
@@ -616,13 +616,13 @@ function toggleExpandPlan(planId: string) {
 .pavilion {
   max-width: 560px;
   margin: 0 auto;
-  padding: 0 32px 80px;
   min-height: 100%;
   overflow-y: auto;
   position: relative;
   z-index: 1;
   background: transparent;
 }
+  .pavilion :deep(.room-layout){position:relative;z-index:1}
 .pavilion::before,
 .pavilion::after {
   content: '';

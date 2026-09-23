@@ -1,12 +1,11 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance bw">
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">身体是智慧的殿堂</p>
-    <h1 class="bw-title">藏象阁</h1>
+    <RoomLayout
+      title="藏象阁"
+      kicker="身体是智慧的殿堂"
+      data-enter
+    >
+      <template #meta>
 
     <div data-enter class="bw-overview">
       <div class="bw-overview-card">
@@ -22,6 +21,8 @@
         <span class="bw-overview-label">阅读记录</span>
       </div>
     </div>
+
+      </template>
 
     <div data-enter class="bw-tabs">
       <button :class="['bw-tab',{active:tab==='body'}]" @click="tab='body'">身体层</button>
@@ -192,10 +193,12 @@
         </div>
       </div>
     </div>
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, computed, onUnmounted } from 'vue'
 import { useHealth } from '../resonance/bridges/health'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -452,11 +455,11 @@ function formatTime(iso:string):string {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   background: transparent;
   overflow: hidden;
 }
+  .bw :deep(.room-layout){position:relative;z-index:1}
 .bw::before {
   content: '';
   position: absolute;
@@ -807,18 +810,18 @@ section h3 {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .bw { padding: 32px 20px 64px; }
+  .bw { padding: 0; }
   .bw-overview { gap: 8px; }
   .bw-mood-btns { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .bw { padding: 24px 14px 56px; }
+  .bw { padding: 0; }
   .bw-overview { flex-direction: column; }
 }
 
 @media (max-width: 480px) {
-  .bw { padding: 12px; }
+  .bw { padding: 0; }
   .bw-overview { flex-direction: column; gap: 6px; }
   .bw-mood-btns { gap: 4px; }
 }

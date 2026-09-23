@@ -1,12 +1,10 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance capsule-room">
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">⏳</span>
-      <span class="orn-line"></span>
-    </div>
-    <h1 class="capsule-title">时光胶囊</h1>
-    <div data-enter class="header-kicker">把此刻的心流封存，留给未来的自己开启</div>
+    <RoomLayout
+      title="时光胶囊"
+      kicker="把此刻的心流封存，留给未来的自己开启"
+      data-enter
+    >
 
     <!-- 档案陈列 -->
     <CapsuleArchivePanel :capsules="capsule.capsules.value" />
@@ -117,10 +115,12 @@
         </div>
       </div>
     </section>
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useTimeCapsule, type CapsuleItemRef } from '../modules/capsule'
@@ -188,11 +188,11 @@ function formatDate(iso: string | null): string {
 
 <style scoped>
 .capsule-room {
-  min-height: 100vh;
-  padding: 48px 32px 80px;
+  min-height: 100%;
   background: transparent;
   color: rgba(255, 255, 255, 0.85);
 }
+  .capsule-room :deep(.room-layout){position:relative;z-index:1}
 
 .header-ornament {
   display: flex;

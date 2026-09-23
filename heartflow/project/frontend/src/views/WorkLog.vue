@@ -48,15 +48,11 @@
       </div>
     </div>
 
-    <header data-enter class="wl-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">记录工作的时间与价值</p>
-      <h1 class="wl-title">更漏</h1>
-    </header>
+    <RoomLayout
+      title="更漏"
+      kicker="记录工作的时间与价值"
+      data-enter
+    >
 
     <!-- ===== 工作光仪（ClepsydraPanel 补挂载孤儿组件：useClepsydra 手动计时 + useClepsydraCountdown 时间哨塔，此前全校唯一零消费、亦是更漏"手动静默计时"真缺面，INCR-392） ===== -->
     <section data-enter class="wl-clepsydra-section">
@@ -394,10 +390,12 @@
     <div v-else-if="paginatedShifts.length === 0" class="wl-empty">
       <span>🔍</span><p>没有匹配的筛选结果</p>
     </div>
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
@@ -717,12 +715,12 @@ function navigateToRoom(key: string) {
 .wl {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   position: relative;
   background: transparent;
   overflow-y: auto;
 }
+  .wl :deep(.room-layout){position:relative;z-index:1}
 .wl::before {
   content: '';
   position: fixed;

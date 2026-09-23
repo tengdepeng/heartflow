@@ -1,13 +1,11 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance wm">
     <!-- Header pattern -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">字里行间，映照自我</p>
-    <h1 class="wm-title">字镜阁</h1>
+    <RoomLayout
+      title="字镜阁"
+      kicker="字里行间，映照自我"
+      data-enter
+    >
 
     <!-- Tab 导航 -->
     <div data-enter class="wm-tabs">
@@ -402,10 +400,12 @@
 
     <!-- 词源与语义网络（word-mirror/etymology 引擎，INCR-184） -->
     <WordNetworkPanel />
+  </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
+import RoomLayout from '../components/RoomLayout.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -756,12 +756,12 @@ function analyzeWriting() {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   overflow: hidden;
   background: transparent;
   color: var(--text-primary);
 }
+  .wm :deep(.room-layout){position:relative;z-index:1}
 
 /* 环境辉光 */
 .wm::before {
