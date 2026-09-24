@@ -108,28 +108,23 @@
       </div>
     </div>
 
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">释光 · 素镜 · 回看自我</p>
-    <h1 class="cog-title">释光阁</h1>
-
-    <div data-enter class="cog-overview">
-      <div class="cog-overview-card">
-        <span class="cog-overview-num">{{ reflections.length }}</span>
-        <span class="cog-overview-label">反思</span>
-      </div>
-      <div class="cog-overview-card">
-        <span class="cog-overview-num">{{ breadth.toFixed(0) }}%</span>
-        <span class="cog-overview-label">广度</span>
-      </div>
-      <div class="cog-overview-card">
-        <span class="cog-overview-num">{{ depth.toFixed(0) }}%</span>
-        <span class="cog-overview-label">深度</span>
-      </div>
-    </div>
+    <RoomLayout title="释光阁" kicker="释光 · 素镜 · 回看自我" data-enter>
+      <template #meta>
+        <div class="cog-overview">
+          <div class="cog-overview-card">
+            <span class="cog-overview-num">{{ reflections.length }}</span>
+            <span class="cog-overview-label">反思</span>
+          </div>
+          <div class="cog-overview-card">
+            <span class="cog-overview-num">{{ breadth.toFixed(0) }}%</span>
+            <span class="cog-overview-label">广度</span>
+          </div>
+          <div class="cog-overview-card">
+            <span class="cog-overview-num">{{ depth.toFixed(0) }}%</span>
+            <span class="cog-overview-label">深度</span>
+          </div>
+        </div>
+      </template>
 
     <!-- 释光仪 -->
     <section data-enter>
@@ -347,6 +342,7 @@
 
     <!-- 感知采集合规（INCR-254 补挂载孤儿组件：宪法第52条沉默默认 · 可配置采集项授权开关） -->
     <PerceptionCompliancePanel />
+  </RoomLayout>
   </div>
 </template>
 
@@ -359,6 +355,7 @@ import LightRecordsPanel from '../components/LightRecordsPanel.vue'
 import ClarionStatsPanel from '../components/ClarionStatsPanel.vue'
 import PerceptionCompliancePanel from '../components/PerceptionCompliancePanel.vue'
 import CognitionHealthPanel from '../components/CognitionHealthPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -563,11 +560,15 @@ onMounted(() => { reflectionsStore.load(); loadWordMirror(); loadWordHistory() }
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   background: transparent;
   color: var(--cog-text);
   font-family: inherit;
+}
+
+:deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 /* 氛围背景层 */
 .cog-ambient {
@@ -657,40 +658,6 @@ onMounted(() => { reflectionsStore.load(); loadWordMirror(); loadWordHistory() }
 .cog > * {
   position: relative;
   z-index: 1;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.orn-line {
-  display: block;
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--cog-accent), transparent);
-}
-.orn-diamond {
-  font-size: 10px;
-  color: var(--cog-accent);
-  opacity: 0.7;
-}
-.header-kicker {
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 4px;
-  color: var(--cog-text-muted);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-}
-.cog-title {
-  text-align: center;
-  font-size: 26px;
-  font-weight: 400;
-  letter-spacing: 6px;
-  color: var(--cog-accent);
-  margin: 0 0 28px;
 }
 .cog-overview {
   display: flex;
@@ -1215,22 +1182,18 @@ section h3 {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .cog { padding: 32px 20px 64px; }
   .cog-overview { gap: 8px; }
   .cog-overview-card { padding: 12px 8px; }
   .cog-chart-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .cog { padding: 24px 14px 56px; }
   .cog-overview { flex-direction: column; }
   section h3 { font-size: 12px; }
 }
 
 @media (max-width: 480px) {
-  .cog { padding: 12px; }
   .cog-overview { flex-direction: column; gap: 6px; }
-  .cog-title { font-size: 22px; }
 }
 /* ===== 冥想分析（模块集成） ===== */
 .cog-meditation-section { margin-bottom: 24px; position: relative; z-index: 1; }

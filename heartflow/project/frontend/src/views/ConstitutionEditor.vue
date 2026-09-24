@@ -5,21 +5,7 @@
       <div class="atmos-glow"></div>
     </div>
 
-    <!-- 顶部标题 -->
-    <header data-enter class="ce-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">&#10022;</span>
-        <span class="orn-line"></span>
-      </div>
-      <h1 class="ce-title">宪法编辑器</h1>
-      <p class="ce-subtitle">修改弹性宪法（第3-52条）· 默认开启 · 用户可关闭</p>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">&#10022;</span>
-        <span class="orn-line"></span>
-      </div>
-    </header>
+    <RoomLayout title="宪法编辑器" subtitle="修改弹性宪法（第3-52条）· 默认开启 · 用户可关闭" data-enter>
 
     <!-- 序言 / 第1-2条（只读，锁定） -->
     <section data-enter class="ce-preamble-section">
@@ -134,6 +120,7 @@
         <span class="stylus-label">{{ saving ? '保存中...' : '保存全部修改' }}</span>
       </button>
     </footer>
+  </RoomLayout>
   </div>
 </template>
 
@@ -145,6 +132,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useConstitutionStore } from '../stores/constitution'
 import { ruleHasRuntimeEffect } from '../engine/constitution-effects'
 import ClauseEditorPanel from '../components/ClauseEditorPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useConstitutionStore()
@@ -237,9 +225,13 @@ async function handleSave() {
 .constitution-editor-page {
   max-width: 840px;
   margin: 0 auto;
-  padding: 48px 32px 80px;
   position: relative;
-  min-height: 100vh;
+  min-height: 100%;
+}
+
+:deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---- 氛围背景 ---- */
@@ -264,59 +256,6 @@ async function handleSave() {
   animation: breathe 6s ease-in-out infinite;
 }
 
-/* ---- 头部 ---- */
-.ce-header {
-  text-align: center;
-  margin-bottom: 48px;
-  position: relative;
-  z-index: 1;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.header-ornament:last-child {
-  margin-bottom: 0;
-  margin-top: 16px;
-}
-
-.orn-line {
-  display: block;
-  width: 80px;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(var(--accent-rgb), 0.3),
-    transparent
-  );
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: var(--accent);
-  opacity: 0.5;
-}
-
-.ce-title {
-  font-size: 32px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  color: var(--text-primary);
-  font-family: var(--font-heading-zh);
-  margin-bottom: 8px;
-}
-
-.ce-subtitle {
-  font-size: 14px;
-  color: var(--text-secondary);
-  letter-spacing: 1px;
-}
 
 /* ---- 通用 section ---- */
 .section-header {
@@ -694,27 +633,10 @@ async function handleSave() {
 }
 
 /* ---- 响应式 ---- */
-@media (max-width: 860px) {
-  .constitution-editor-page {
-    padding: 40px 28px 72px;
-  }
-
-  .ce-title {
-    font-size: 28px;
-  }
-}
 
 @media (max-width: 640px) {
-  .constitution-editor-page {
-    padding: 32px 16px 60px;
-  }
-
   .locked-articles {
     grid-template-columns: 1fr;
-  }
-
-  .ce-title {
-    font-size: 26px;
   }
 
   .section-header {
@@ -728,10 +650,6 @@ async function handleSave() {
 }
 
 @media (max-width: 480px) {
-  .ce-title {
-    font-size: 22px;
-  }
-
   .locked-articles {
     grid-template-columns: 1fr;
   }

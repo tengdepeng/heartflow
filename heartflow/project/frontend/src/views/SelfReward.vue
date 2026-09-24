@@ -13,37 +13,26 @@
       <div class="atmos-work-light"></div>
     </div>
 
-    <!-- 头部 -->
-    <header data-enter class="sr-header">
-      <div class="sr-header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <nav class="sr-breadcrumb">
-        <router-link to="/home-space" class="bc-link">家</router-link>
-        <span class="bc-sep">→</span>
-        <router-link to="/worklog" class="bc-link">更漏</router-link>
-        <span class="bc-sep">→</span>
-        <router-link to="/reward" class="bc-link">劳酬</router-link>
-        <span class="bc-sep">→</span>
-        <span class="bc-current">自奖</span>
-      </nav>
-      <h1 class="sr-title">
-        <span class="sr-title-icon">🎁</span>
-        <span class="sr-title-text">自我奖励</span>
-      </h1>
-      <p class="sr-subtitle">为自己设一份兑现清单</p>
-      <p class="sr-description">绑定习惯连续或徽章解锁，条件达成自动「可兑现」；亦可纯手动记录每一次对自己的犒赏。</p>
-
-      <!-- 统计条 -->
-      <div class="sr-stats">
-        <div class="sr-stat"><span class="sr-stat-num">{{ stats.total }}</span><span class="sr-stat-label">合计</span></div>
-        <div class="sr-stat"><span class="sr-stat-num sr-stat-num--pending">{{ stats.pending }}</span><span class="sr-stat-label">待触发</span></div>
-        <div class="sr-stat"><span class="sr-stat-num sr-stat-num--ready">{{ stats.redeemable }}</span><span class="sr-stat-label">可兑现</span></div>
-        <div class="sr-stat"><span class="sr-stat-num sr-stat-num--done">{{ stats.redeemed }}</span><span class="sr-stat-label">已兑现</span></div>
-      </div>
-    </header>
+    <RoomLayout title="自我奖励" kicker="为自己设一份兑现清单" data-enter>
+      <template #breadcrumb>
+        <nav class="sr-breadcrumb">
+          <router-link to="/home-space" class="bc-link">家</router-link>
+          <span class="bc-sep">→</span>
+          <router-link to="/worklog" class="bc-link">更漏</router-link>
+          <span class="bc-sep">→</span>
+          <router-link to="/reward" class="bc-link">劳酬</router-link>
+          <span class="bc-sep">→</span>
+          <span class="bc-current">自奖</span>
+        </nav>
+      </template>
+      <template #meta>
+        <div class="sr-stats">
+          <div class="sr-stat"><span class="sr-stat-num">{{ stats.total }}</span><span class="sr-stat-label">合计</span></div>
+          <div class="sr-stat"><span class="sr-stat-num sr-stat-num--pending">{{ stats.pending }}</span><span class="sr-stat-label">待触发</span></div>
+          <div class="sr-stat"><span class="sr-stat-num sr-stat-num--ready">{{ stats.redeemable }}</span><span class="sr-stat-label">可兑现</span></div>
+          <div class="sr-stat"><span class="sr-stat-num sr-stat-num--done">{{ stats.redeemed }}</span><span class="sr-stat-label">已兑现</span></div>
+        </div>
+      </template>
 
     <!-- 新建入口 -->
     <section data-enter class="sr-new-entry">
@@ -184,6 +173,7 @@
     <section data-enter class="sr-ledger">
       <RewardLedgerPanel />
     </section>
+  </RoomLayout>
   </div>
 </template>
 
@@ -194,6 +184,7 @@ import RewardLedgerPanel from '../components/RewardLedgerPanel.vue'
 import { getHabits } from '../modules/discipline/workshop'
 import { useCraftBadges } from '../modules/craft/craft-badges'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import type { SelfReward, SelfRewardTriggerType } from '../modules/self-reward'
 
 const { stats, grouped, add, remove, redeem, unredeem, evaluate } = useSelfReward()
@@ -298,7 +289,12 @@ onMounted(() => { evaluate() })
 </script>
 
 <style scoped>
-.self-reward { position: relative; min-height: 100vh; padding: 2rem 1.5rem 4rem; color: var(--text-primary, #e8e4dc); }
+.self-reward { position: relative; min-height: 100%; color: var(--text-primary, #e8e4dc); }
+
+:deep(.room-layout) {
+  position: relative;
+  z-index: 1;
+}
 
 /* 入场动画 */
 .view-entrance .enter-from [data-enter] { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
@@ -321,14 +317,10 @@ onMounted(() => { evaluate() })
 .atmos-warm-glow { position: absolute; top: 0; left: 0; right: 0; height: 280px; background: linear-gradient(180deg, rgba(224,169,109,0.05), transparent); }
 .atmos-work-light { position: absolute; bottom: 0; left: 0; right: 0; height: 200px; background: linear-gradient(0deg, rgba(160,124,140,0.04), transparent); }
 
-.sr-header, .sr-new-entry, .sr-list-section, .sr-ledger { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; }
+.sr-new-entry, .sr-list-section, .sr-ledger { position: relative; z-index: 1; max-width: 820px; margin: 0 auto; }
 
 .sr-ledger { margin-top: 2.5rem; }
 
-.sr-header { text-align: center; margin-bottom: 2.5rem; }
-.sr-header-ornament { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1rem; color: var(--accent, #e8c060); }
-.orn-line { width: 60px; height: 1px; background: currentColor; opacity: 0.4; }
-.orn-diamond { font-size: 0.75rem; opacity: 0.7; }
 
 .sr-breadcrumb { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.78rem; color: var(--text-muted, #8a857a); margin-bottom: 1.2rem; }
 .bc-link { color: var(--text-muted, #8a857a); text-decoration: none; transition: color 0.2s; }
@@ -336,10 +328,6 @@ onMounted(() => { evaluate() })
 .bc-sep { opacity: 0.5; }
 .bc-current { color: var(--text-primary, #e8e4dc); }
 
-.sr-title { display: flex; align-items: center; justify-content: center; gap: 0.6rem; font-size: 1.9rem; font-weight: 500; margin: 0 0 0.4rem; letter-spacing: 0.05em; }
-.sr-title-icon { font-size: 1.6rem; }
-.sr-subtitle { font-size: 0.95rem; color: var(--text-muted, #8a857a); margin: 0 0 0.3rem; }
-.sr-description { font-size: 0.82rem; color: var(--text-muted, #8a857a); margin: 0 auto; max-width: 540px; line-height: 1.6; opacity: 0.85; }
 
 .sr-stats { display: flex; justify-content: center; gap: 2.2rem; margin-top: 1.6rem; }
 .sr-stat { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
@@ -412,7 +400,6 @@ onMounted(() => { evaluate() })
 .sr-slide-enter-to, .sr-slide-leave-from { opacity: 1; max-height: 600px; margin-top: 1.2rem; }
 
 @media (max-width: 640px) {
-  .self-reward { padding: 1.5rem 1rem 3rem; }
   .sr-stats { gap: 1.4rem; }
   .sr-stat-num { font-size: 1.25rem; }
   .sr-form-row { flex-direction: column; }

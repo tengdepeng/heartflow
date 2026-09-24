@@ -63,6 +63,38 @@ describe('PlayGallery 逸趣阁视图', () => {
     expect(wrapper.text()).toContain('25') // 总时长 20+5
   })
 
+  // ---- 集成：遗传种子图谱（INCR-409）----
+
+  it('有收藏时图谱面板渲染血脉网络与摘要', async () => {
+    mockStore['hf:play_v2'] = {
+      games: [
+        makeGame({ id: 'g1', name: '游戏A', hours: 20, platform: 'PC' }),
+        makeGame({ id: 'g2', name: '游戏B', hours: 5, platform: 'PC' }),
+      ],
+      toys: [],
+      models: [],
+      others: [],
+    }
+    const wrapper = await getWrapper()
+    await vi.waitFor(() => {
+      expect(wrapper.find('[data-testid="slg-panel"]').exists()).toBe(true)
+    })
+    // 图谱节点数与种子数一致
+    expect(wrapper.find('[data-testid="slg-node-count"]').text()).toBe('2')
+    // 血脉网络区块 + 周期节点按钮存在
+    expect(wrapper.text()).toContain('血脉网络')
+    expect(wrapper.findAll('.slg-node').length).toBe(2)
+  })
+
+  it('无收藏时图谱面板显示空态', async () => {
+    const wrapper = await getWrapper()
+    await vi.waitFor(() => {
+      expect(wrapper.find('[data-testid="slg-panel"]').exists()).toBe(true)
+    })
+    expect(wrapper.find('[data-testid="slg-node-count"]').text()).toBe('0')
+    expect(wrapper.text()).toContain('还没有收藏种子')
+  })
+
   it('空状态显示提示', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('还没有记录')

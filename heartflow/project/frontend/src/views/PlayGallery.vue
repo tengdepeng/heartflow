@@ -497,6 +497,9 @@
     <!-- ===== 接收匣（第46条单向赠予落点 · 接收端） ===== -->
     <ReceivedSeedsInbox />
 
+    <!-- ===== 遗传种子图谱（play/seed-share 图谱引擎接线，INCR-409 面板集成） ===== -->
+    <SeedLineageGraphPanel />
+
     <!-- 空状态 -->
     <div v-if="pg.isEmpty" class="empty">
       <span class="empty-icon">🎮</span>
@@ -518,6 +521,7 @@ import {
 } from '../modules/play'
 import SeedInheritancePanel from '../components/SeedInheritancePanel.vue'
 import ReceivedSeedsInbox from '../components/ReceivedSeedsInbox.vue'
+import SeedLineageGraphPanel from '../components/SeedLineageGraphPanel.vue'
 import PlayArchivePanel from '../components/PlayArchivePanel.vue'
 import PlayBridgePanel from '../components/PlayBridgePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'

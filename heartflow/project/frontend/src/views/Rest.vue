@@ -36,35 +36,22 @@
       <div class="atmos-work-light"></div>
     </div>
 
-    <!-- ===== 头部区域 ===== -->
-    <header data-enter class="rest-header">
-      <div class="rest-header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-
-      <!-- 面包屑导航 -->
-      <nav class="rest-breadcrumb">
-        <router-link to="/home-space" class="bc-link">家</router-link>
-        <span class="bc-sep">→</span>
-        <router-link to="/worklog" class="bc-link">更漏</router-link>
-        <span class="bc-sep">→</span>
-        <span class="bc-current">息壤</span>
-      </nav>
-
-      <h1 class="rest-title">
-        <span class="rest-title-icon">🌱</span>
-        <span class="rest-title-text">息壤</span>
-      </h1>
-      <p class="rest-subtitle">工作间歇与休假</p>
-      <p class="rest-description">在奔忙的日常中，留一片滋养身心的休憩之地。</p>
-      <div class="rest-season-indicator">
-        <span class="rest-season-badge">{{ seasonLabel }}季</span>
-      </div>
-    </header>
+    <RoomLayout title="息壤" kicker="工作间歇与休假" data-enter>
+      <template #breadcrumb>
+        <nav class="rest-breadcrumb">
+          <router-link to="/home-space" class="bc-link">家</router-link>
+          <span class="bc-sep">→</span>
+          <router-link to="/worklog" class="bc-link">更漏</router-link>
+          <span class="bc-sep">→</span>
+          <span class="bc-current">息壤</span>
+        </nav>
+      </template>
 
     <!-- ===== 标签导航 ===== -->
+    <div class="rest-season-indicator">
+      <span class="rest-season-badge">{{ seasonLabel }}季</span>
+    </div>
+
     <nav data-enter class="rest-tabs">
       <button
         class="rest-tab-btn"
@@ -407,6 +394,7 @@
         </div>
       </div>
     </Teleport>
+  </RoomLayout>
   </div>
 </template>
 
@@ -423,6 +411,7 @@ import RestFocusLinkPanel from '../components/RestFocusLinkPanel.vue'
 import RestQualityPanel from '../components/RestQualityPanel.vue'
 import RestArchivePanel from '../components/RestArchivePanel.vue'
 import RestAchievementTrendPanel from '../components/RestAchievementTrendPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 // ---- 标签导航 ----
 const activeTab = ref<'rest' | 'sleep' | 'ritual'>('rest')
@@ -703,8 +692,7 @@ const restTips: RestTip[] = [
   position: relative;
   max-width: 860px;
   margin: 0 auto;
-  padding: 48px 32px 100px;
-  min-height: 100vh;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   gap: 36px;
@@ -719,6 +707,11 @@ const restTips: RestTip[] = [
   --card-hover-border: rgba(122, 184, 122, 0.2);
   --transition: 0.25s ease;
   background: v-bind(seasonBackground);
+}
+
+:deep(.room-layout) {
+  position: relative;
+  z-index: 1;
 }
 
 /* ---- 氛围背景层 ---- */
@@ -822,21 +815,7 @@ const restTips: RestTip[] = [
   50% { opacity: 1; }
 }
 
-/* ---- 头部 ---- */
-.rest-header {
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.rest-header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 12px 0;
-}
-
+/* ---- 铭文装饰 ---- */
 .orn-line {
   display: block;
   width: 60px;
@@ -888,40 +867,8 @@ const restTips: RestTip[] = [
 }
 
 /* ---- 标题 ---- */
-.rest-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 0;
-  font-size: 28px;
-  font-weight: 400;
-  letter-spacing: 4px;
-  color: var(--text-primary);
-}
 
-.rest-title-icon {
-  font-size: 30px;
-  opacity: 0.7;
-}
 
-.rest-title-text {
-  opacity: 0.9;
-}
-
-.rest-subtitle {
-  margin: 10px 0 4px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  letter-spacing: 2px;
-}
-
-.rest-description {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
 
 /* ---- 标签导航 ---- */
 .rest-tabs {
@@ -1701,9 +1648,6 @@ const restTips: RestTip[] = [
 }
 
 @media (max-width: 640px) {
-  .rest {
-    padding: 32px 20px 80px;
-  }
   .rest-practices-grid {
     grid-template-columns: 1fr;
   }
@@ -1723,9 +1667,6 @@ const restTips: RestTip[] = [
 }
 
 @media (max-width: 480px) {
-  .rest-title {
-    font-size: 22px;
-  }
   .rest-overview {
     grid-template-columns: 1fr;
     gap: 6px;
