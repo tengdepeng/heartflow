@@ -11,14 +11,17 @@ name = "heartflow_core"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2" }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2" }
+tauri = { version = "2", features = [] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "sync"] }
 axum = { version = "0.7" }
 rand = "0.8"
-tauri-plugin-global-shortcut = "2"
 tauri-plugin-shell = "2"
+
+# 全局热键插件为桌面专用（移动端不支持该 API），仅非移动端拉取，避免 android/ios 编译失败
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+tauri-plugin-global-shortcut = "2"

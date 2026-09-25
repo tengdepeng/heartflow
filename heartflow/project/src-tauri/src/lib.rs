@@ -6,9 +6,9 @@
 // ============================================================
 
 use std::fs;
-use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use tauri::Manager;
+#[cfg(desktop)]
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Modifiers, Shortcut, Code};
 use tauri_plugin_shell;
 
@@ -114,53 +114,69 @@ fn generate_device_secret() -> String {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        // 全局热键插件：用于切换 AuraLayer 透明窗显隐
-        .plugin(tauri_plugin_global_shortcut::Builder::new().build())
+    let mut builder = tauri::Builder::default()
         // shell 插件：Launcher 启动外部应用（open URI / 路径）
-        .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_shell::init());
+
+    // 全局热键插件：桌面专用（切换 AuraLayer 透明窗显隐），移动端不支持该 API
+    #[cfg(desktop)]
+    {
+        builder = builder.plugin(tauri_plugin_global_shortcut::Builder::new().build());
+    }
+        // 主窗关闭即退出整个应用；aura 透明窗一并销毁，避免残留导致 app 不退出。
+    builder.on_window_event(|window, event| {
+        if let tauri::WindowEvent::CloseRequested { .. } = event {
+            if window.label() == "main" {
+                // 主窗关闭即退出整个应用，避免「点关闭却关不掉」。
+                // aura 透明窗一并销毁，否则会残留导致 app 不退出。
+                if let Some(aura) = window.app_handle().get_webview_window("aura") {
+                    let _ = aura.destroy();
+                }
+            }
+        }
+    })
         .setup(|app| {
             touchpoints::init();
+
+            // aura 透明窗改由代码在桌面创建（conf 不再声明，避免移动端创建 transparent 窗报错）
+            #[cfg(desktop)]
+            {
+                if let Err(e) = tauri::WebviewWindowBuilder::new(app, "aura", tauri::WebviewUrl::App("index.html".into()))
+                    .title("Heartflow Aura")
+                    .transparent(true)
+                    .always_on_top(true)
+                    .decorations(false)
+                    .inner_size(1280.0, 800.0)
+                    .build()
+                {
+                    eprintln!("failed to create aura window: {}", e);
+                }
+            }
 
             // 启动即隐藏 aura 透明窗（避免一开机就盖一层）；由全局热键 / 退出保活唤起。
             if let Some(aura) = app.get_webview_window("aura") {
                 let _ = aura.hide();
             }
 
-            // 退出保活：关闭主窗时隐藏而非销毁，保留 aura 透明窗常驻（「缩小为美化层」）。
-            // 仅当配置 exitToAura 时唤起 aura；此处保守默认唤起，前端可关闭 aura 窗。
-            let app_handle = app.handle().clone();
-            app.on_window_event(move |window, event| {
-                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                if window.label() == "main" {
-                    api.prevent_close();
-                    let _ = window.hide();
-                    // 仅在用户开启了「退出缩小为美化层」时唤起 aura 透明窗；
-                    // 否则主窗隐藏后仅后台驻留（托盘/热键可再次唤起主窗）。
-                    if EXIT_TO_AURA.load(Ordering::SeqCst) {
+            #[cfg(desktop)]
+            {
+                // 全局热键 Ctrl/Cmd+Shift+A 切换 aura 透明窗显隐
+                let shortcut = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyA);
+                let _ = app.handle().global_shortcut().on_shortcut(
+                    shortcut,
+                    |app_handle, _s: &Shortcut, _| {
                         if let Some(aura) = app_handle.get_webview_window("aura") {
-                            let _ = aura.show();
-                            let _ = aura.set_focus();
+                            let visible = aura.is_visible().unwrap_or(false);
+                            if visible {
+                                let _ = aura.hide();
+                            } else {
+                                let _ = aura.show();
+                                let _ = aura.set_focus();
+                            }
                         }
-                    }
-                }
-                }
-            });
-
-            // 全局热键 Ctrl/Cmd+Shift+A 切换 aura 透明窗显隐
-            let handle = app.handle().clone();
-            let shortcut = Shortcut::new(Some(Modifiers::SUPER | Modifiers::SHIFT), Code::KeyA);
-            let _ = handle.global_shortcut().register(shortcut, move |_s: Shortcut| {
-                if let Some(aura) = handle.get_webview_window("aura") {
-                    let visible = aura.is_visible().unwrap_or(false);
-                    if visible {
-                        let _ = aura.hide();
-                    } else {
-                        let _ = aura.show();
-                        let _ = aura.set_focus();
-                    }
-                }
-            });
+                    },
+                );
+            }
 
             Ok(())
         })

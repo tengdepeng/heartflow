@@ -1,14 +1,15 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "aura",
-  "description": "AuraLayer 透明美化窗：置顶 / 显隐 / 全局热键注册",
+  "description": "AuraLayer 透明美化窗：置顶 / 显隐 / 全局热键注册（仅桌面端，移动端无 aura 窗与全局热键）",
+  "platforms": ["linux", "macOS", "windows"],
   "windows": ["aura"],
   "permissions": [
     "core:default",
     "core:window:allow-set-always-on-top",
     "core:window:allow-show",
     "core:window:allow-hide",
-    "core:global-shortcut:allow-register",
-    "core:global-shortcut:allow-unregister"
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister"
   ]
 }

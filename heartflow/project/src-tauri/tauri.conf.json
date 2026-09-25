@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.heartflow.app",
   "build": {
-    "beforeDevCommand": "npm run dev --prefix ../frontend -- --port 1001 --strictPort",
+    "beforeDevCommand": "npm run dev -- --port 1001 --strictPort",
     "devUrl": "http://localhost:1001",
-    "beforeBuildCommand": "npm run build --prefix ../frontend",
+    "beforeBuildCommand": "set NODE_OPTIONS=--max-old-space-size=4096 && npm run build",
     "frontendDist": "../frontend/dist"
   },
   "app": {
@@ -17,17 +17,6 @@
         "height": 720,
         "resizable": true,
         "fullscreen": false
-      },
-      {
-        "label": "aura",
-        "title": "Heartflow Aura",
-        "width": 1280,
-        "height": 800,
-        "resizable": false,
-        "fullscreen": false,
-        "transparent": true,
-        "alwaysOnTop": true,
-        "decorations": false
       }
     ],
     "security": {
