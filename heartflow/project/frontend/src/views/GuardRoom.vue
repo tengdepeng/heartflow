@@ -117,6 +117,7 @@
     <CryptoGuardPanel />
     <DataSecurityPanel />
     <PropertySecurityPanel />
+    <PropertySafetyPracticePanel />
     <PersonalSafetyConfigPanel />
     <PsychologicalSafetyPanel />
 
@@ -158,6 +159,7 @@ import SecurityDashboardPanel from '../components/safety/SecurityDashboardPanel.
 import CryptoGuardPanel from '../components/safety/CryptoGuardPanel.vue'
 import DataSecurityPanel from '../components/safety/DataSecurityPanel.vue'
 import PropertySecurityPanel from '../components/safety/PropertySecurityPanel.vue'
+import PropertySafetyPracticePanel from '../components/safety/PropertySafetyPracticePanel.vue'
 import PersonalSafetyConfigPanel from '../components/safety/PersonalSafetyConfigPanel.vue'
 import PsychologicalSafetyPanel from '../components/safety/PsychologicalSafetyPanel.vue'
 import SecurityIncidentPanel from '../components/SecurityIncidentPanel.vue'

@@ -916,3 +916,60 @@ describe('集成：隐私仪表盘', () => {
     expect(mockStore['hf:privacy:lock_state'].locked).toBe(false)
   })
 })
+
+// ============================================================
+// 集成：财产安全实践面板（INCR-410）
+// 真缺口：PropertySecurityPanel 仅消费 getSafetyConfig 配置开关，
+// usePropertySafety 引擎三能力面（诈骗检测/报平安签到/假来电）零 UI 消费。
+// 本面板薄委托直引 modules/safety/composables/usePropertySafety 真实引擎。
+// ============================================================
+describe('集成：财产安全实践面板（INCR-410）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:contacts'] = []
+    mockStore['hf:safety_checkin'] = []
+    delete mockStore['hf:safety_config']
+  })
+
+  it('面板挂载进 GuardRoom 并渲染三能力区块', async () => {
+    const wrapper = await getWrapper()
+    const psp = wrapper.find('[data-testid="psp-panel"]')
+    expect(psp.exists()).toBe(true)
+    expect(psp.text()).toContain('财产安全实践')
+    expect(psp.text()).toContain('反诈核验')
+    expect(psp.text()).toContain('报平安签到')
+    expect(psp.text()).toContain('假来电脱身')
+  })
+
+  it('真实引擎诈骗检测：命中词库渲染风险结果', async () => {
+    const wrapper = await getWrapper()
+    const psp = wrapper.find('[data-testid="psp-panel"]')
+    await psp.find('[data-testid="psp-fraud-input"]').setValue('恭喜您中奖，请先缴纳手续费')
+    await psp.find('[data-testid="psp-fraud-btn"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(psp.find('[data-testid="psp-fraud-result"]').exists()).toBe(true)
+    expect(psp.text()).toMatch(/中奖|借贷|手续费/)
+  })
+
+  it('真实引擎报平安：签到写入 mockStore 并更新统计', async () => {
+    const wrapper = await getWrapper()
+    const psp = wrapper.find('[data-testid="psp-panel"]')
+    await psp.find('[data-testid="psp-checkin-btn"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(psp.find('[data-testid="psp-checkin-total"]').text()).toBe('1')
+    expect(mockStore['hf:safety_checkin']).toHaveLength(1)
+    expect(mockStore['hf:safety_checkin'][0].type).toBe('manual')
+  })
+
+  it('预置签到渲染统计与最近列表', async () => {
+    const now = Date.now()
+    mockStore['hf:safety_checkin'] = [
+      { id: 'c1', timestamp: now, type: 'manual', safe: true, note: '已到家' },
+      { id: 'c2', timestamp: now - 3600000, type: 'emergency', safe: false },
+    ]
+    const wrapper = await getWrapper()
+    const psp = wrapper.find('[data-testid="psp-panel"]')
+    expect(psp.find('[data-testid="psp-checkin-total"]').text()).toBe('2')
+    expect(psp.text()).toContain('已到家')
+  })
+})
