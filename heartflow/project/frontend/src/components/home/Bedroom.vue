@@ -140,7 +140,7 @@
         <div class="nav-buttons">
           <button
             class="nav-btn"
-            @click="emit('navigate', 'bath')"
+            @click="emit('navigate', 'bathroom')"
           >
             <span class="nav-btn-icon">&#x1F6C1;</span>
             <span class="nav-btn-label">走向浴室</span>

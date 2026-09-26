@@ -176,7 +176,7 @@
         <div class="nav-buttons">
           <button
             class="nav-btn"
-            @click="emit('navigate', 'living')"
+            @click="emit('navigate', 'living-room')"
           >
             <span class="nav-btn-icon">&#x1F3E0;</span>
             <span class="nav-btn-label">回到客厅</span>

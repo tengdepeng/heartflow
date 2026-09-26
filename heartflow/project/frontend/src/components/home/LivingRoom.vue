@@ -95,7 +95,7 @@
           <span class="nav-btn__icon">&#x1F4DA;</span>
           <span class="nav-btn__label">走向书房</span>
         </button>
-        <button class="nav-btn" @click="emit('navigate', 'dining')">
+        <button class="nav-btn" @click="emit('navigate', 'dining-room')">
           <span class="nav-btn__icon">&#x1F37D;</span>
           <span class="nav-btn__label">走向餐厅</span>
         </button>

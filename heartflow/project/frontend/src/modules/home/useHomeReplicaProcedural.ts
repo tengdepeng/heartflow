@@ -444,7 +444,6 @@ export function addRoomFurniture(
       makeChair(T, group, c, dark, 0, 0.3)
       makePlant(T, group, 2.6, -2)
       break
-    case 'living':
     case 'living-room':
       makeSofa(T, group, c, 0, -1.4, 3)
       makeTable(T, group, dark, dark, 0, -0.2, 1.5, 0.9, 0.45)
@@ -459,7 +458,6 @@ export function addRoomFurniture(
       makeChair(T, group, c, dark, -1.3, 0.6)
       makeChair(T, group, c, dark, 1.3, 0.6)
       break
-    case 'dining':
     case 'dining-room':
       makeTable(T, group, dark, dark, 0, 0, 2.4, 1.4, 0.9)
       makeChair(T, group, c, dark, 0, -1.2)
@@ -468,7 +466,6 @@ export function addRoomFurniture(
       makeChair(T, group, c, dark, 1.5, 0)
       makePendant(T, group, c, 0, 0)
       break
-    case 'bath':
     case 'bathroom':
       group.add(makeBox(T, 2, 0.7, 1.2, accent, { x: 0, z: -1.5, y: FLOOR_Y + 0.5, roughness: 0.2, metalness: 0.2 }))
       group.add(makeBox(T, 1.7, 0.5, 0.9, accent.clone().multiplyScalar(0.85), { x: 0, z: -1.5, y: FLOOR_Y + 0.95, roughness: 0.2, metalness: 0.2 }))

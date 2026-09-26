@@ -274,7 +274,7 @@
       <!-- ===== 导航按钮 ===== -->
       <button
         class="nav-btn"
-        @click="emit('navigate', 'dining')"
+        @click="emit('navigate', 'dining-room')"
       >
         <span class="nav-btn__icon">&#x27A4;</span>
         <span>走向餐厅</span>
