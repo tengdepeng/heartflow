@@ -95,7 +95,8 @@ describe('ConstitutionEditor 宪法编辑器视图', () => {
   // ------------------------------------------------------------------
   it('渲染标题', async () => {
     const wrapper = await createWrapper()
-    expect(wrapper.find('.ce-title').text()).toBe('宪法编辑器')
+    // ⚠️ 页头已统一到 RoomLayout → RoomHeader，标题类名统一为 .rh-title（旧 .ce-title 已不存在）
+    expect(wrapper.find('.rh-title').text()).toBe('宪法编辑器')
     expect(wrapper.text()).toContain('修改弹性宪法（第3-52条）')
   })
 

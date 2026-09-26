@@ -54,18 +54,20 @@ describe('WorkLog 更漏工时管理', () => {
   it('渲染头部标题和装饰', async () => {
     const wrapper = await getWrapper()
 
-    const title = wrapper.find('.wl-title')
+    // ⚠️ 页头已统一到 RoomLayout → RoomHeader，类名随之前缀为 rh-*；
+    //    旧的 .wl-title / .header-kicker / .header-ornament / .orn-line / .orn-diamond 已不存在。
+    const title = wrapper.find('.rh-title')
     expect(title.exists()).toBe(true)
     expect(title.text()).toBe('更漏')
 
-    const kicker = wrapper.find('.header-kicker')
+    const kicker = wrapper.find('.rh-kicker')
     expect(kicker.exists()).toBe(true)
     expect(kicker.text()).toContain('记录工作的时间与价值')
 
-    const ornament = wrapper.find('.header-ornament')
+    const ornament = wrapper.find('.rh-ornament')
     expect(ornament.exists()).toBe(true)
-    expect(ornament.find('.orn-line').exists()).toBe(true)
-    expect(ornament.find('.orn-diamond').exists()).toBe(true)
+    expect(ornament.find('.rh-orn-line').exists()).toBe(true)
+    expect(ornament.find('.rh-orn-diamond').exists()).toBe(true)
   })
 
   // ============================================================

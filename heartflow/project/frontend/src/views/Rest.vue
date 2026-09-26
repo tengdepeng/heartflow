@@ -36,7 +36,12 @@
       <div class="atmos-work-light"></div>
     </div>
 
-    <RoomLayout title="息壤" kicker="工作间歇与休假" data-enter>
+    <RoomLayout
+      title="息壤"
+      kicker="工作间歇与休假"
+      subtitle="在奔忙的日常中，留一片滋养身心的休憩之地。"
+      data-enter
+    >
       <template #breadcrumb>
         <nav class="rest-breadcrumb">
           <router-link to="/home-space" class="bc-link">家</router-link>
