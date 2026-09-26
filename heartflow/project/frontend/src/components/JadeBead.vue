@@ -1,5 +1,5 @@
 <template>
-  <div class="jade-bead-container" :class="`bead--${beadState}`">
+  <div class="jade-bead-container" :class="[`bead--${beadState}`, { 'bead--translucent': translucent }]">
     <!-- 外层光晕 -->
     <div class="bead-aura" :class="{ 'aura--pulse': pulseActive }" />
 
@@ -122,6 +122,8 @@ const props = defineProps<{
   isFocusing: boolean
   beadCount: number
   progress: number
+  /** 通透玻璃模式：珠体低透明、背景透出，对齐幕僚玻璃球质感 */
+  translucent?: boolean
 }>()
 
 defineEmits<{
@@ -381,4 +383,34 @@ function particleStyle(i: number) {
 .pulse-enter-active { transition: opacity 0.1s; }
 .pulse-leave-active { transition: opacity 0.5s; }
 .pulse-enter-from, .pulse-leave-to { opacity: 0; }
+
+/* ---- 通透玻璃模式（translucent prop）：对齐幕僚玻璃球 ---- */
+/* 置于基础规则之后，等特异性下靠源码顺序胜出，确保必定生效。
+   幕僚球：background = primary+'22'（≈13% 透明）/ border = primary+'44'（≈27% 透明）。
+   此处以心流冷色（#acc8eb 系）等价复刻：珠体 ≈20% 透明填充 + 环 ≈50% 透明亮边 + 柔光。
+   覆盖 bead-body 的棕褐渐变属性（CSS fill 优先于 SVG presentation attribute），杜绝「黑不拉几」。 */
+.bead--translucent .bead-body {
+  fill: rgba(172, 200, 235, 0.20);
+  fill-opacity: 1;
+}
+.bead--translucent .bead-gloss {
+  opacity: 0.5;
+}
+.bead--translucent .bead-ring {
+  stroke: rgba(172, 200, 235, 0.5);
+  opacity: 0.55;
+}
+.bead--translucent .bead-core {
+  opacity: 0.32;
+  filter: drop-shadow(0 0 16px rgba(210, 226, 248, 0.5));
+}
+.bead--translucent .bead-aura {
+  background: radial-gradient(circle at 50% 50%, rgba(165, 195, 235, 0.05) 0%, transparent 70%);
+}
+.bead--translucent .bead-particle {
+  background: rgba(172, 200, 235, 0.55);
+}
+.bead--translucent .bead-svg {
+  filter: drop-shadow(0 0 24px rgba(165, 195, 235, 0.4));
+}
 </style>
