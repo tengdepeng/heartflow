@@ -135,7 +135,22 @@
           <circle :cx="topVertex(cc.crystal.shape).x" :cy="topVertex(cc.crystal.shape).y" r="1.7" fill="#ffffff" :fill-opacity="strong ? 0.9 : 0.45" />
         </g>
 
-        <!-- 真实切面宝石（默认） -->
+        <!-- 通透水晶（透明玻璃质，对齐幕僚玻璃球调性） -->
+        <g v-else-if="crystalStyle === 'translucent'">
+          <polygon
+            :points="shapePoints(cc.crystal.shape)"
+            :fill="cc.crystal.color"
+            :fill-opacity="strong ? 0.26 : 0.15"
+            :stroke="shadeColor(cc.crystal.color, 0.5)"
+            :stroke-width="strong ? 1.4 : 0.9"
+            stroke-linejoin="round"
+            :opacity="strong ? 1 : 0.85"
+          />
+          <polygon :points="shapePoints(cc.crystal.shape)" fill="#ffffff" :fill-opacity="strong ? 0.14 : 0.08" stroke="none" />
+          <circle :cx="topVertex(cc.crystal.shape).x" :cy="topVertex(cc.crystal.shape).y" r="1.8" fill="#ffffff" :fill-opacity="strong ? 0.9 : 0.45" />
+        </g>
+
+        <!-- 真实切面宝石（默认回退） -->
         <g v-else>
           <polygon :points="shapePoints(cc.crystal.shape)" :fill="`url(#${gradId(cc)})`" :stroke="shadeColor(cc.crystal.color, 0.32)" :stroke-width="strong ? 1.3 : 0.7" :opacity="strong ? 0.97 : 0.42" />
           <polygon :points="shapePoints(cc.crystal.shape)" :fill="`url(#${sheenId(cc)})`" :opacity="strong ? 0.9 : 0.38" />

@@ -51,7 +51,7 @@ describe('useAppearance · 视觉强度与界面设置', () => {
     expect(a.glassClearAlpha.value).toBe(45)
     expect(a.navMode.value).toBe('floating')
     expect(a.dialogueShape.value).toBe('bubble')
-    expect(a.crystalStyle.value).toBe('motif')
+    expect(a.crystalStyle.value).toBe('translucent')
   })
 
   it('琉璃通透度 set 写入 --glass-clear-alpha（0-100 钳制）并持久化', async () => {

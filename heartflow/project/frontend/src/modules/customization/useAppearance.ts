@@ -128,8 +128,8 @@ const dialogueShapeCtrl = createSimple<string>('ui:dialogue-shape', 'bubble')
 
 // ---- 结晶渲染风格（宪法第二条超级自定义） ----
 // facet 真实切面宝石 / glass 玻璃光球+辉光 / line 极简线晶 / prism 极光棱镜
-// motif 图标形象(花草星月) / pixel 像素角色
-const crystalStyleCtrl = createSimple<string>('ui:crystal-style', 'motif')
+// motif 图标形象(花草星月) / pixel 像素角色 / translucent 通透水晶(透明玻璃质)
+const crystalStyleCtrl = createSimple<string>('ui:crystal-style', 'translucent')
 
 export function useAppearance() {
   return {
