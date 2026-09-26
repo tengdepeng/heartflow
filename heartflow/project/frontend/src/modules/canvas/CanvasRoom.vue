@@ -87,16 +87,10 @@
             <stop offset="42%" stop-color="#ffffff" stop-opacity="0.08" />
             <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
           </linearGradient>
-          <radialGradient v-if="crystalStyle === 'glass' || crystalStyle === 'translucent'" :id="glassId(cc)" cx="38%" cy="30%" r="78%">
+          <radialGradient v-if="crystalStyle === 'glass'" :id="glassId(cc)" cx="38%" cy="30%" r="78%">
             <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
             <stop offset="46%" :stop-color="shadeColor(cc.crystal.color, 0.28)" />
             <stop offset="100%" :stop-color="shadeColor(cc.crystal.color, -0.32)" />
-          </radialGradient>
-          <!-- 共享 Fresnel 边缘亮环（透明中心→白色边缘，玻璃折射感） -->
-          <radialGradient id="crystalFresnel" cx="50%" cy="50%" r="50%">
-            <stop offset="56%" stop-color="#ffffff" stop-opacity="0" />
-            <stop offset="90%" stop-color="#ffffff" stop-opacity="0.4" />
-            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.14" />
           </radialGradient>
           <linearGradient v-if="crystalStyle === 'prism'" :id="prismId(cc)" x1="6%" y1="4%" x2="94%" y2="96%">
             <stop offset="0%" stop-color="#79f6c8" />
