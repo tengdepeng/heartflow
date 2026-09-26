@@ -311,13 +311,19 @@ function gatherActThree(): EvidenceLine[] {
     })
   }
 
-  // 阅览殿
-  const readingLogs = storage.getKV<any[]>('hf:reading_logs', [])
-  if (readingLogs.length > 0) {
-    const recentReading = readingLogs.filter((r: any) => isRecent(r.at || r.createdAt))
+  // 阅览殿（真实数据源：hf:reading:books / hf:reading:sessions）
+  // ⚠️ 修正错位（2026-09-26）：hf:reading_logs 属于藏象阁（stores/health.ts 的诵经/阅读记录），
+  //    此前误标为阅览殿，导致铭音永远读不到阅览殿真数据。
+  const readingBooks = storage.getKV<any[]>('hf:reading:books', [])
+  const readingSessions = storage.getKV<any[]>('hf:reading:sessions', [])
+  if (readingBooks.length > 0 || readingSessions.length > 0) {
+    const recentReading = readingSessions.filter((s: any) => isRecent(s.timestamp || s.date))
+    const finished = readingBooks.filter((b: any) => b.status === 'finished').length
     lines.push({
-      text: `阅读记录 ${readingLogs.length} 条`,
-      source: 'reading', weight: readingLogs.length, isRecent: recentReading.length > 0,
+      text: `阅览殿 ${readingBooks.length} 本书${finished ? `（读完 ${finished}）` : ''} · 阅读 ${readingSessions.length} 次`,
+      source: 'reading',
+      weight: readingBooks.length + readingSessions.length,
+      isRecent: recentReading.length > 0,
     })
   }
 
