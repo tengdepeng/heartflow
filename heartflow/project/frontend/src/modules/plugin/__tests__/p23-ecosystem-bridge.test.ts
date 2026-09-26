@@ -419,7 +419,9 @@ function createMockScheduler() {
 // Mock 子模块
 // ============================================================
 
-vi.mock('../index', () => ({
+// ⚠️ mock 目标必须是 **真实定义文件**：plugin-ecosystem-bridge.ts 已改为从 './plugin-store'
+//    取 usePluginManager（从 barrel 取会构成 index ↔ bridge 循环依赖），mock '../index' 不再命中。
+vi.mock('../plugin-store', () => ({
   usePluginManager: () => mockModule.getManagerInstance(),
 }))
 

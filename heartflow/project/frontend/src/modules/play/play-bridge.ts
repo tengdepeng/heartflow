@@ -7,7 +7,9 @@
 // ============================================================
 
 import { computed } from 'vue'
-import { usePlayGallery } from './index'
+// ⚠️ 指向真实定义文件，**不要**从 './index' 取符号：
+// index.ts 会 re-export 本文件，barrel 自引用会构成 index ↔ bridge 循环依赖
+import { usePlayGallery } from './play-store'
 import {
   checkMilestones,
   computePlaySummary,

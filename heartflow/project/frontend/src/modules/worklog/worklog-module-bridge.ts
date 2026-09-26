@@ -4,21 +4,16 @@
 // ============================================================
 
 import { computed, ref } from 'vue'
-import {
-  useWorklog,
-  useWorklogAnalytics,
-  useWorklogHabits,
-  useProductivityPrediction,
-  useWorklogExport,
-} from './index'
-import type {
-  LogEntry,
-  LogEntryType,
-  MoodTone,
-  WorklogStats,
-  ExportConfig,
-  ExportResult,
-} from './index'
+// ⚠️ 直接指向真实定义文件，**不要**从 './index' 取符号：
+// index.ts 会 re-export 本文件，barrel 自引用会构成 index ↔ bridge 循环依赖
+// （模块初始化顺序不确定，取值可能拿到 undefined）。
+import { useWorklog } from './entries'
+import { useWorklogAnalytics } from './worklog-analytics'
+import { useWorklogHabits } from './worklog-habits'
+import { useProductivityPrediction } from './productivity-prediction'
+import { useWorklogExport } from './worklog-export'
+import type { ExportConfig, ExportResult } from './worklog-export'
+import type { LogEntry, LogEntryType, MoodTone, WorklogStats } from './types'
 
 export interface WorklogSummary {
   totalEntries: number

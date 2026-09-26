@@ -4,23 +4,17 @@
 // ============================================================
 
 import { computed, ref } from 'vue'
-import {
-  useChartInteraction,
-  useCanvasRenderer,
-  useDataSourceConnector,
-  useDashboardLayout,
-} from './index'
-import type {
-  Annotation,
-  AnnotationType,
-  ViewportTransform,
-  ExportResult,
-  LayerConfig,
-  LayerType,
-  DrawCommandType,
-  DataSourceConfig,
-  DashboardBreakpoint,
-} from './index'
+// ⚠️ 直接指向真实定义文件，**不要**从 './index' 取符号：
+// index.ts 会 re-export 本文件，barrel 自引用会构成 index ↔ bridge 循环依赖
+// （模块初始化顺序不确定，取值可能拿到 undefined）。
+import { useChartInteraction } from './chart-interaction'
+import type { Annotation, AnnotationType, ViewportTransform, ExportResult } from './chart-interaction'
+import { useCanvasRenderer } from './canvas-renderer'
+import type { LayerConfig, LayerType, DrawCommandType } from './canvas-renderer'
+import { useDataSourceConnector } from './datasource-connector'
+import type { DataSourceConfig } from './datasource-connector'
+import { useDashboardLayout } from './dashboard-layout'
+import type { DashboardBreakpoint } from './dashboard-layout'
 
 // ---- 聚合类型 ----
 

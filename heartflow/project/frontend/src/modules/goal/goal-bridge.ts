@@ -4,8 +4,11 @@
 // ============================================================
 
 import { computed, ref } from 'vue'
-import { useGoal } from './index'
-import type { Goal, GoalTier, GoalStatus } from './index'
+// ⚠️ 直接指向真实定义文件，**不要**从 './index' 取符号：
+// index.ts 会 re-export 本文件，barrel 自引用会构成 index ↔ bridge 循环依赖
+// （模块初始化顺序不确定，取值可能拿到 undefined）。
+import { useGoal } from './goal-store'
+import type { Goal, GoalTier, GoalStatus } from './types'
 
 export type { Goal, GoalTier, GoalStatus }
 

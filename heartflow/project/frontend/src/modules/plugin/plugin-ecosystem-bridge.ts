@@ -9,7 +9,9 @@
 // ============================================================
 
 import { computed, ref } from 'vue'
-import { usePluginManager } from './index'
+// ⚠️ 指向真实定义文件，**不要**从 './index' 取符号：
+// index.ts 会 re-export 本文件，barrel 自引用会构成 index ↔ bridge 循环依赖
+import { usePluginManager } from './plugin-store'
 import { usePluginMarketplace } from './plugin-marketplace'
 import { usePluginScheduler } from './plugin-scheduler'
 import {

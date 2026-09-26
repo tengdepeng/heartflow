@@ -104,8 +104,9 @@ const mockCategoryDistribution = computed(() => {
 // 返回 ref 对象而非 getter 返回值，确保组件解构后模板仍能追踪变更
 // =============================================================
 
-vi.mock('../../modules/bag', () => ({
-  useBagStore: () => ({
+/** 假 store 形状（桶 mock 与 bag-store mock 共用，保证两条路径拿到同一份数据） */
+function createMockBagStore() {
+  return {
     searchQuery: searchQueryRef,
     showAddEvolution: showAddEvolutionRef,
     editingCategory: editingCategoryRef,
@@ -127,7 +128,11 @@ vi.mock('../../modules/bag', () => ({
     setProficiencyByStep: mockSetProficiencyByStep,
     syncLevelClass: mockSyncLevelClass,
     addEvolution: mockAddEvolution,
-  }),
+  }
+}
+
+vi.mock('../../modules/bag', () => ({
+  useBagStore: () => createMockBagStore(),
   useBagAnalytics: () => ({
     calculateSkillRadar: () => ({ labels: [], datasets: [] }),
     calculateSkillHealth: () => ({ overall: 0, dimensions: {} }),
@@ -136,6 +141,13 @@ vi.mock('../../modules/bag', () => ({
     predictProficiency: () => [],
   }),
   CATEGORY_TYPES: CATEGORY_TYPES_MOCK,
+}))
+
+// BagBridgePanel 直引 modules/bag/bag-bridge（不受上面桶 mock 覆盖）；而 bag-bridge 已改为
+// 从 './bag-store' 取 useBagStore（打断 index ↔ bag-bridge 循环依赖）→ 必须补 mock 该真实定义文件，
+// 否则会拿到真 Pinia store，在无 active pinia 的测试环境直接抛 getActivePinia 错误。
+vi.mock('../../modules/bag/bag-store', () => ({
+  useBagStore: () => createMockBagStore(),
 }))
 
 // BagEvolutionPanel 依赖 storage（bag:evolution-paths），补 mock 隔离（INCR-207）

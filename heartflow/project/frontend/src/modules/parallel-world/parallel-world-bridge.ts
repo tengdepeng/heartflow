@@ -4,19 +4,17 @@
 // ============================================================
 
 import { computed, ref } from 'vue'
+// ⚠️ 直接指向真实定义文件，**不要**从 './index' 取符号：
+// index.ts 会 re-export 本文件，barrel 自引用会构成 index ↔ bridge 循环依赖
+// （模块初始化顺序不确定，取值可能拿到 undefined）。
+import { useParallelWorld } from './worlds'
 import {
-  useParallelWorld,
   useBranchTimeline,
   useBranchComparison,
   useMergeSuggestions,
   useEvolutionGraph,
-} from './index'
-import type {
-  WorldBranch,
-  Checkpoint,
-  WorldSnapshot,
-  BranchStats,
-} from './index'
+} from './branch-timeline'
+import type { WorldBranch, Checkpoint, WorldSnapshot, BranchStats } from './types'
 
 // ---- 聚合类型 ----
 
