@@ -1,86 +1,87 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance se">
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">调整空间的氛围和场景参数</p>
-    <h1 class="se-title">场景编辑器</h1>
-
-    <!-- 场景列表 -->
-    <section data-enter class="se-section">
-      <div class="se-section-header">
-        <h3 class="se-section-title">场景列表 ({{ scenes.length }})</h3>
-        <button class="se-btn" @click="addScene">+ 新建场景</button>
-      </div>
-      <div v-if="scenes.length === 0" class="se-empty">
-        <p>还没有场景，新建一个来定义空间氛围</p>
-      </div>
-      <div v-else class="se-scene-list">
-        <div
-          v-for="scene in scenes"
-          :key="scene.id"
-          class="se-scene-card"
-          :class="{ active: editingSceneId === scene.id }"
-          :style="{ borderLeftColor: scene.atmosphereColor || '#d4a574' }"
-          role="button"
-          tabindex="0"
-          :aria-pressed="editingSceneId === scene.id"
-          :aria-label="'编辑场景 ' + scene.name"
-          @click="selectScene(scene.id)"
-          @keydown.enter.prevent="selectScene(scene.id)"
-          @keydown.space.prevent="selectScene(scene.id)"
-        >
-          <div class="se-scene-header">
-            <span class="se-scene-name">{{ scene.name }}</span>
-            <span class="se-scene-color" :style="{ background: scene.atmosphereColor || '#d4a574' }"></span>
-          </div>
-          <p class="se-scene-desc" v-if="scene.description">{{ scene.description }}</p>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 副标题 / 眉标） -->
+    <RoomLayout
+      title="场景编辑器"
+      kicker="调整空间的氛围和场景参数"
+      :ornament="true"
+      data-enter
+    >
+      <!-- 场景列表 -->
+      <section data-enter class="se-section">
+        <div class="se-section-header">
+          <h3 class="se-section-title">场景列表 ({{ scenes.length }})</h3>
+          <button class="se-btn" @click="addScene">+ 新建场景</button>
         </div>
-      </div>
-    </section>
-
-    <!-- 编辑面板 -->
-    <section class="se-section" v-if="editingScene">
-      <h3 class="se-section-title">编辑：{{ editingScene.name }}</h3>
-      <div class="se-edit-form">
-        <div class="se-field">
-          <label class="se-label">场景名称</label>
-          <input v-model="editForm.name" class="se-input" />
+        <div v-if="scenes.length === 0" class="se-empty">
+          <p>还没有场景，新建一个来定义空间氛围</p>
         </div>
-        <div class="se-field">
-          <label class="se-label">描述</label>
-          <textarea v-model="editForm.description" class="se-textarea" rows="2"></textarea>
-        </div>
-        <div class="se-field">
-          <label class="se-label">氛围光色</label>
-          <div class="se-color-row">
-            <input v-model="editForm.atmosphereColor" type="color" class="se-color-picker" />
-            <span class="se-color-value">{{ editForm.atmosphereColor }}</span>
+        <div v-else class="se-scene-list">
+          <div
+            v-for="scene in scenes"
+            :key="scene.id"
+            class="se-scene-card"
+            :class="{ active: editingSceneId === scene.id }"
+            :style="{ borderLeftColor: scene.atmosphereColor || '#d4a574' }"
+            role="button"
+            tabindex="0"
+            :aria-pressed="editingSceneId === scene.id"
+            :aria-label="'编辑场景 ' + scene.name"
+            @click="selectScene(scene.id)"
+            @keydown.enter.prevent="selectScene(scene.id)"
+            @keydown.space.prevent="selectScene(scene.id)"
+          >
+            <div class="se-scene-header">
+              <span class="se-scene-name">{{ scene.name }}</span>
+              <span class="se-scene-color" :style="{ background: scene.atmosphereColor || '#d4a574' }"></span>
+            </div>
+            <p class="se-scene-desc" v-if="scene.description">{{ scene.description }}</p>
           </div>
         </div>
-        <div class="se-field">
-          <label class="se-label">过渡动画</label>
-          <select v-model="editForm.transition" class="se-select">
-            <option value="fade">淡入淡出</option>
-            <option value="slide">滑动</option>
-            <option value="dissolve">溶解</option>
-            <option value="none">无</option>
-          </select>
+      </section>
+
+      <!-- 编辑面板 -->
+      <section class="se-section" v-if="editingScene">
+        <h3 class="se-section-title">编辑：{{ editingScene.name }}</h3>
+        <div class="se-edit-form">
+          <div class="se-field">
+            <label class="se-label">场景名称</label>
+            <input v-model="editForm.name" class="se-input" />
+          </div>
+          <div class="se-field">
+            <label class="se-label">描述</label>
+            <textarea v-model="editForm.description" class="se-textarea" rows="2"></textarea>
+          </div>
+          <div class="se-field">
+            <label class="se-label">氛围光色</label>
+            <div class="se-color-row">
+              <input v-model="editForm.atmosphereColor" type="color" class="se-color-picker" />
+              <span class="se-color-value">{{ editForm.atmosphereColor }}</span>
+            </div>
+          </div>
+          <div class="se-field">
+            <label class="se-label">过渡动画</label>
+            <select v-model="editForm.transition" class="se-select">
+              <option value="fade">淡入淡出</option>
+              <option value="slide">滑动</option>
+              <option value="dissolve">溶解</option>
+              <option value="none">无</option>
+            </select>
+          </div>
+          <div class="se-actions">
+            <button class="se-btn primary" @click="saveScene">保存</button>
+            <button class="se-btn danger" @click="removeScene">删除场景</button>
+          </div>
         </div>
-        <div class="se-actions">
-          <button class="se-btn primary" @click="saveScene">保存</button>
-          <button class="se-btn danger" @click="removeScene">删除场景</button>
-        </div>
-      </div>
-    </section>
+      </section>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useScenes } from '../modules/scene'
 import { recordDecorationHistory } from '../modules/decoration-history'
 
@@ -162,16 +163,11 @@ function removeScene() {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  padding: 0;
+  min-height: 100%;
   overflow-y: auto;
   background: transparent;
 }
-.header-ornament { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px; }
-.orn-line { display: block; width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent); }
-.orn-diamond { font-size: 10px; color: rgba(var(--accent-rgb), 0.4); }
-.header-kicker { text-align: center; font-size: 12px; color: rgba(var(--accent-rgb), 0.3); letter-spacing: 4px; margin: 0 0 6px; }
-.se-title { text-align: center; font-family: var(--font-heading-en); font-size: 28px; font-weight: 400; color: rgba(var(--accent-rgb), 0.75); letter-spacing: 6px; margin: 0 0 20px; }
 .se-section { margin-bottom: 24px; }
 .se-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .se-section-title { font-size: 15px; font-weight: 500; color: rgba(var(--text-primary-rgb), 0.8); margin: 0; }

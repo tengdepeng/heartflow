@@ -14,6 +14,7 @@
 import { ref, computed } from 'vue'
 import { storage } from '../engine/storage'
 import { isExternalAIConsented } from '../engine/ai/external-gate'
+import RoomLayout from '../components/RoomLayout.vue'
 import AIModelSettings from '../components/external-room/AIModelSettings.vue'
 import PromptTemplates from '../components/external-room/PromptTemplates.vue'
 import CloudSync from '../components/external-room/CloudSync.vue'
@@ -45,48 +46,47 @@ const externalConsented = computed(() => isExternalAIConsented())
 
 <template>
   <div class="view-entrance external-room">
-    <div data-enter class="header-section">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">⇄</span>
-        <span class="orn-line"></span>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 副标题 / 眉标） -->
+    <RoomLayout
+      title="外链房"
+      kicker="外部链接房 · 能力接入"
+      subtitle="连向外部的一切都收在这里。默认不外发一个字节——需要出网的调用都要你点头。"
+      :ornament="true"
+      data-enter
+    >
+      <!-- 出口闸状态常驻展示（原 header-section 内的 gate-banner 上提到 RoomHeader 的 #meta 子头位） -->
+      <template #meta>
+        <div class="gate-banner" :class="externalConsented ? 'is-open' : 'is-closed'">
+          <span class="gate-dot"></span>
+          <span class="gate-text">
+            出口闸：{{ externalConsented ? '已允许远程 AI 端点' : '仅本地端点放行（默认）' }}
+          </span>
+        </div>
+      </template>
+
+      <div data-enter class="tab-row" role="tablist">
+        <button
+          v-for="s in SECTIONS"
+          :key="s.id"
+          class="tab"
+          :class="{ 'is-on': active === s.id }"
+          role="tab"
+          :aria-selected="active === s.id"
+          @click="select(s.id)"
+        >
+          {{ s.label }}
+          <span v-if="!s.ready" class="tab-dot" title="待建"></span>
+        </button>
       </div>
-      <span class="header-kicker">外部链接房 · 能力接入</span>
-      <h1 class="header-title">外链房</h1>
-      <p class="header-sub">
-        连向外部的一切都收在这里。默认不外发一个字节——需要出网的调用都要你点头。
-      </p>
 
-      <div class="gate-banner" :class="externalConsented ? 'is-open' : 'is-closed'">
-        <span class="gate-dot"></span>
-        <span class="gate-text">
-          出口闸：{{ externalConsented ? '已允许远程 AI 端点' : '仅本地端点放行（默认）' }}
-        </span>
+      <div data-enter class="panel">
+        <AIModelSettings v-if="active === 'ai'" />
+        <SkillChannel v-else-if="active === 'skill'" />
+        <CloudSync v-else-if="active === 'sync'" />
+        <PromptTemplates v-else-if="active === 'prompt'" />
+        <RankChannel v-else-if="active === 'rank'" />
       </div>
-    </div>
-
-    <div data-enter class="tab-row" role="tablist">
-      <button
-        v-for="s in SECTIONS"
-        :key="s.id"
-        class="tab"
-        :class="{ 'is-on': active === s.id }"
-        role="tab"
-        :aria-selected="active === s.id"
-        @click="select(s.id)"
-      >
-        {{ s.label }}
-        <span v-if="!s.ready" class="tab-dot" title="待建"></span>
-      </button>
-    </div>
-
-    <div data-enter class="panel">
-      <AIModelSettings v-if="active === 'ai'" />
-      <SkillChannel v-else-if="active === 'skill'" />
-      <CloudSync v-else-if="active === 'sync'" />
-      <PromptTemplates v-else-if="active === 'prompt'" />
-      <RankChannel v-else-if="active === 'rank'" />
-    </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -94,55 +94,16 @@ const externalConsented = computed(() => isExternalAIConsented())
 .external-room {
   max-width: 900px;
   margin: 0 auto;
-  padding: 28px 24px 140px;
+  min-height: 100%;
+  padding: 0;
   color: var(--text-primary, #e9e0d0);
-}
-
-.header-section {
-  text-align: center;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  opacity: 0.7;
-}
-.orn-line {
-  width: 46px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent, #d4a574), transparent);
-}
-.orn-diamond {
-  color: var(--accent, #d4a574);
-  font-size: 13px;
-}
-.header-kicker {
-  display: block;
-  margin-top: 10px;
-  font-size: 12px;
-  letter-spacing: 3px;
-  opacity: 0.5;
-}
-.header-title {
-  margin: 4px 0 0;
-  font-size: 34px;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-.header-sub {
-  margin: 8px auto 0;
-  max-width: 560px;
-  font-size: 13px;
-  line-height: 1.7;
-  opacity: 0.55;
 }
 
 .gate-banner {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 12px;
   padding: 6px 16px;
   border-radius: 999px;
   font-size: 12px;

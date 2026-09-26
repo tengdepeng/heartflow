@@ -1,77 +1,71 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance ee">
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">调整全局环境参数</p>
-    <h1 class="ee-title">环境编辑器</h1>
+    <RoomLayout title="环境编辑器" kicker="调整全局环境参数" data-enter>
+      <div class="ee-form" data-enter>
+        <!-- 背景氛围 -->
+        <div class="ee-field">
+          <label class="ee-label">背景氛围</label>
+          <select v-model="form.background" class="ee-select">
+            <option value="default">默认暖色</option>
+            <option value="dark">深色静谧</option>
+            <option value="light">明亮清新</option>
+            <option value="nature">自然绿意</option>
+            <option value="ocean">海洋蓝调</option>
+          </select>
+        </div>
 
-    <div data-enter class="ee-form">
-      <!-- 背景氛围 -->
-      <div class="ee-field">
-        <label class="ee-label">背景氛围</label>
-        <select v-model="form.background" class="ee-select">
-          <option value="default">默认暖色</option>
-          <option value="dark">深色静谧</option>
-          <option value="light">明亮清新</option>
-          <option value="nature">自然绿意</option>
-          <option value="ocean">海洋蓝调</option>
-        </select>
-      </div>
+        <!-- 环境光色 -->
+        <div class="ee-field">
+          <label class="ee-label">环境光色</label>
+          <div class="ee-color-row">
+            <input v-model="form.accentColor" type="color" class="ee-color-picker" />
+            <span class="ee-color-value">{{ form.accentColor }}</span>
+          </div>
+        </div>
 
-      <!-- 环境光色 -->
-      <div class="ee-field">
-        <label class="ee-label">环境光色</label>
-        <div class="ee-color-row">
-          <input v-model="form.accentColor" type="color" class="ee-color-picker" />
-          <span class="ee-color-value">{{ form.accentColor }}</span>
+        <!-- 显示密度 -->
+        <div class="ee-field">
+          <label class="ee-label">显示密度</label>
+          <div class="ee-density-row">
+            <button
+              v-for="d in densities"
+              :key="d.value"
+              class="ee-density-btn"
+              :class="{ active: form.density === d.value }"
+              @click="form.density = d.value"
+            >
+              <span class="ee-density-icon">{{ d.icon }}</span>
+              <span class="ee-density-label">{{ d.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 字体偏好 -->
+        <div class="ee-field">
+          <label class="ee-label">字体偏好</label>
+          <select v-model="form.fontFamily" class="ee-select">
+            <option value="serif">衬线体 (Serif)</option>
+            <option value="sans-serif">无衬线体 (Sans)</option>
+            <option value="monospace">等宽体 (Mono)</option>
+          </select>
+        </div>
+
+        <!-- 过渡动画 -->
+        <div class="ee-field">
+          <label class="ee-label">页面过渡动画</label>
+          <select v-model="form.transition" class="ee-select">
+            <option value="fade">淡入淡出</option>
+            <option value="slide">滑动</option>
+            <option value="none">无</option>
+          </select>
+        </div>
+
+        <div class="ee-actions">
+          <button class="ee-btn primary" @click="saveEnvironment">保存设置</button>
+          <button class="ee-btn" @click="resetEnvironment">重置默认</button>
         </div>
       </div>
-
-      <!-- 显示密度 -->
-      <div class="ee-field">
-        <label class="ee-label">显示密度</label>
-        <div class="ee-density-row">
-          <button
-            v-for="d in densities"
-            :key="d.value"
-            class="ee-density-btn"
-            :class="{ active: form.density === d.value }"
-            @click="form.density = d.value"
-          >
-            <span class="ee-density-icon">{{ d.icon }}</span>
-            <span class="ee-density-label">{{ d.label }}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 字体偏好 -->
-      <div class="ee-field">
-        <label class="ee-label">字体偏好</label>
-        <select v-model="form.fontFamily" class="ee-select">
-          <option value="serif">衬线体 (Serif)</option>
-          <option value="sans-serif">无衬线体 (Sans)</option>
-          <option value="monospace">等宽体 (Mono)</option>
-        </select>
-      </div>
-
-      <!-- 过渡动画 -->
-      <div class="ee-field">
-        <label class="ee-label">页面过渡动画</label>
-        <select v-model="form.transition" class="ee-select">
-          <option value="fade">淡入淡出</option>
-          <option value="slide">滑动</option>
-          <option value="none">无</option>
-        </select>
-      </div>
-
-      <div class="ee-actions">
-        <button class="ee-btn primary" @click="saveEnvironment">保存设置</button>
-        <button class="ee-btn" @click="resetEnvironment">重置默认</button>
-      </div>
-    </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -81,6 +75,7 @@ import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useStyleStore } from '../stores/style'
 import { recordDecorationHistory } from '../modules/decoration-history'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const styleStore = useStyleStore()
@@ -140,16 +135,10 @@ function resetEnvironment() {
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
-  min-height: 100vh;
+  min-height: 100%;
   overflow-y: auto;
   background: transparent;
 }
-.header-ornament { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 10px; }
-.orn-line { display: block; width: 60px; height: 1px; background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent); }
-.orn-diamond { font-size: 10px; color: rgba(var(--accent-rgb), 0.4); }
-.header-kicker { text-align: center; font-size: 12px; color: rgba(var(--accent-rgb), 0.3); letter-spacing: 4px; margin: 0 0 6px; }
-.ee-title { text-align: center; font-family: var(--font-heading-en); font-size: 28px; font-weight: 400; color: rgba(var(--accent-rgb), 0.75); letter-spacing: 6px; margin: 0 0 20px; }
 .ee-form { display: flex; flex-direction: column; gap: 20px; }
 .ee-field { display: flex; flex-direction: column; gap: 6px; }
 .ee-label { font-size: 13px; font-weight: 500; color: var(--text-bright); }

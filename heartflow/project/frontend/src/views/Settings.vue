@@ -1227,6 +1227,8 @@ function readFileAsDataUrl(file: File): Promise<string> {
 
 // ---- 房间背景（宪法第二条超级自定义 · 每房间可单独设背景 / 跟随全局 / 多房间选同一项即天然分组） ----
 const roomStyle = useRoomStyle()
+// 仅隐藏「设置页房间自定义列表」的房间；与 engine/room-graph.ts 的 DEDUPED_ROOM_IDS 两套装
+// （后者管侧栏导航可见性）。两者分工独立，新增需双处隐藏的房间时两处都要改。
 const EXCLUDED_ROOM_IDS = ['home', 'home-space', 'settings']
 const roomList = computed(() => getAllRooms().filter((r) => !EXCLUDED_ROOM_IDS.includes(r.id)))
 const selectedRoomId = ref<string>(roomList.value[0]?.id ?? '')
@@ -1426,6 +1428,9 @@ const crystalStyleOptions = [
   { value: 'glass', label: '玻璃光球' },
   { value: 'line', label: '极简线晶' },
   { value: 'prism', label: '极光棱镜' },
+  { value: 'translucent', label: '通透水晶' },
+  { value: 'motif', label: '图标形象' },
+  { value: 'pixel', label: '像素角色' },
 ]
 
 // 背景视频播放速度实时应用到设置页预览。

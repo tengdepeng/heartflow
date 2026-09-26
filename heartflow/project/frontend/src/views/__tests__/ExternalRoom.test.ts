@@ -18,7 +18,8 @@ describe('外链房 /external', () => {
 
   it('渲染房间标题与五个分区标签', () => {
     const wrapper = mount(ExternalRoom)
-    expect(wrapper.find('.header-title').text()).toBe('外链房')
+    // 标题现由统一房间壳层 RoomLayout 渲染（.rh-title），原 bespoke .header-title 已移除
+    expect(wrapper.find('.rh-title').text()).toBe('外链房')
     const tabs = wrapper.findAll('.tab')
     expect(tabs).toHaveLength(5)
     const labels = tabs.map((t) => t.text().trim())

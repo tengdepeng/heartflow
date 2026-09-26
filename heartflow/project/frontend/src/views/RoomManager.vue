@@ -6,37 +6,35 @@
       <div class="rm-ambient-glow"></div>
     </div>
 
-    <!-- Header -->
-    <header data-enter class="rm-header">
-      <div class="rm-ornament">
-        <span class="rm-ornament-line"></span>
-        <span class="rm-ornament-diamond">✦</span>
-        <span class="rm-ornament-line"></span>
-      </div>
-      <p class="rm-kicker">ROOM CONFIGURATION</p>
-      <h1>房间管理器</h1>
-      <p class="rm-subtitle">管理所有房间的可见性和自定义</p>
-    </header>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部（装饰菱形 / 标题 / 副标题 / 眉标） -->
+    <RoomLayout
+      title="房间管理器"
+      kicker="ROOM CONFIGURATION"
+      subtitle="管理所有房间的可见性和自定义"
+      :ornament="true"
+      data-enter
+    >
+      <!-- 复用聚合面板（与殿堂设置内的「房间设置」同源，单一实现、两处入口） -->
+      <RoomSettingsPanel />
 
-    <!-- 复用聚合面板（与殿堂设置内的「房间设置」同源，单一实现、两处入口） -->
-    <RoomSettingsPanel />
+      <!-- 空间健康（INCR-237 补挂载孤儿组件 SpaceHealthPanel：报告/问题/告警/趋势，引擎唯一、零 props 直驱） -->
+      <SpaceHealthPanel />
 
-    <!-- 空间健康（INCR-237 补挂载孤儿组件 SpaceHealthPanel：报告/问题/告警/趋势，引擎唯一、零 props 直驱） -->
-    <SpaceHealthPanel />
+      <!-- 房间模板（INCR-238 补挂载孤儿组件 RoomTemplatesPanel：模板/布局/场景，引擎唯一、零 props 直驱） -->
+      <RoomTemplatesPanel />
 
-    <!-- 房间模板（INCR-238 补挂载孤儿组件 RoomTemplatesPanel：模板/布局/场景，引擎唯一、零 props 直驱） -->
-    <RoomTemplatesPanel />
+      <!-- 空间编排（INCR-245 补挂载孤儿组件 SpaceOrchestrationPanel：总览/转换/依赖/快照，引擎 useSpaceOrchestrator 自初始化房间图、零 props 直驱） -->
+      <SpaceOrchestrationPanel />
 
-    <!-- 空间编排（INCR-245 补挂载孤儿组件 SpaceOrchestrationPanel：总览/转换/依赖/快照，引擎 useSpaceOrchestrator 自初始化房间图、零 props 直驱） -->
-    <SpaceOrchestrationPanel />
-
-    <!-- 空间路线谱（INCR-262 补挂载孤儿组件 SpaceRouteArchivePanel：路由构成与访问分析，引擎 useDynamicRoutes 自初始化静态路由、零 props 直驱） -->
-    <SpaceRouteArchivePanel />
+      <!-- 空间路线谱（INCR-262 补挂载孤儿组件 SpaceRouteArchivePanel：路由构成与访问分析，引擎 useDynamicRoutes 自初始化静态路由、零 props 直驱） -->
+      <SpaceRouteArchivePanel />
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useViewEntrance } from '../composables/useViewEntrance'
+import RoomLayout from '../components/RoomLayout.vue'
 import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
 import SpaceHealthPanel from '../components/SpaceHealthPanel.vue'
 import RoomTemplatesPanel from '../components/RoomTemplatesPanel.vue'
@@ -59,9 +57,9 @@ const { entranceRef, entranceClass } = useViewEntrance()
   position: relative;
   max-width: 720px;
   margin: 0 auto;
-  padding: 40px 24px 80px;
+  padding: 0;
   background: transparent;
-  min-height: 100vh;
+  min-height: 100%;
   overflow: hidden;
 }
 
@@ -97,88 +95,5 @@ const { entranceRef, entranceClass } = useViewEntrance()
 @keyframes rm-ambient-pulse {
   0% { opacity: 0.5; transform: translateX(-50%) scale(1); }
   100% { opacity: 1; transform: translateX(-50%) scale(1.08); }
-}
-
-/* =============================================
-   Header
-   ============================================= */
-.rm-header {
-  position: relative;
-  z-index: 1;
-  margin-bottom: 36px;
-  text-align: center;
-}
-
-.rm-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.rm-ornament-line {
-  display: block;
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--rm-accent-rgb), 0.4), transparent);
-}
-
-.rm-ornament-diamond {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: var(--rm-accent);
-  opacity: 0.7;
-  animation: rm-ornament-spin 8s linear infinite;
-}
-
-@keyframes rm-ornament-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.rm-kicker {
-  font-size: 10px;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: rgba(var(--rm-accent-rgb), 0.5);
-  margin: 0 0 10px;
-  font-weight: 400;
-}
-
-.rm-header h1 {
-  font-size: 22px;
-  font-weight: 500;
-  color: var(--text-primary, #e8e0d8);
-  margin: 0;
-}
-
-.rm-subtitle {
-  font-size: 13px;
-  color: var(--text-muted, var(--text-muted));
-  margin-top: 6px;
-}
-
-/* =============================================
-   Responsive
-   ============================================= */
-@media (max-width: 480px) {
-  .rm-room-manager {
-    padding: 24px 16px 64px;
-  }
-
-  .rm-header {
-    margin-bottom: 28px;
-  }
-
-  .rm-header h1 {
-    font-size: 20px;
-  }
-
-  .rm-ornament-line {
-    width: 28px;
-  }
 }
 </style>

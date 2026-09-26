@@ -273,18 +273,11 @@ const { currentScent, enabled, cycleSceneScent, setEnabled, load: loadScent } = 
 loadScent()
 
 // ---- 气候层氛围预设（含气味维度第五维）接线 ----
-// 引擎预设的 roomTypes 使用 home 模块的房间词表（living-room / dining-room / bathroom / balcony），
-// 与 HomeSpace 的 ROOM_SCENES id（living / dining / bath）不一致，故做别名映射，
-// 让「适合房间的预设」在当前场景正确命中；无命中时回退全量预设，保证功能始终可用。
+// ROOM_SCENES 与 HOME_ROOMS 已统一为同一套房间词表（living-room / dining-room / bathroom / balcony），
+// 场景 id 可直接作为氛围引擎的 roomType 命中「适合房间的预设」；无命中时回退全量预设。
 const atmosphere = useHomeAtmosphereEngine()
-const SCENE_TO_ATMOS_ROOM: Record<string, string> = {
-  living: 'living-room',
-  dining: 'dining-room',
-  bath: 'bathroom',
-}
 const roomAtmospherePresets = computed<AtmospherePreset[]>(() => {
-  const atmosRoom = SCENE_TO_ATMOS_ROOM[currentSceneId.value] ?? currentSceneId.value
-  const matched = atmosphere.getPresetsForRoom(atmosRoom)
+  const matched = atmosphere.getPresetsForRoom(currentSceneId.value)
   return matched.length > 0 ? matched : atmosphere.presets.value
 })
 const activePresetId = atmosphere.activePresetId
@@ -316,21 +309,18 @@ const ROOM_COMPONENTS: Record<string, Component> = {
   entrance: EntranceHall,
   wardrobe: ClosetRoom,
   kitchen: KitchenDining,
-  dining: DiningRoom,
+  'dining-room': DiningRoom,
   bedroom: Bedroom,
-  bath: Bathroom,
-  living: LivingRoom,
+  bathroom: Bathroom,
+  'living-room': LivingRoom,
   study: StudyRoom,
   courtyard: Courtyard,
   balcony: Balcony,
   storage: StorageRoom,
 }
 
-/** 房间 ID 别名映射（HOME_ROOMS 词表与场景词表对齐） */
+/** 房间 ID 别名映射（仅保留非恒等的遗留别名；HOME_ROOMS 与场景词表已统一为同一套 id） */
 const ROOM_ID_ALIAS: Record<string, string> = {
-  'living-room': 'living',
-  'bathroom': 'bath',
-  'dining-room': 'dining',
   'yard': 'courtyard',
 }
 

@@ -218,8 +218,8 @@ describe('Craft 匠庐视图', () => {
 
   it('渲染头部标题和面包屑', async () => {
     const wrapper = await getWrapper()
-    // 标题
-    expect(wrapper.find('.craft-title').text()).toBe('匠庐')
+    // 标题（统一房间壳层 RoomLayout 渲染 .rh-title）
+    expect(wrapper.find('.rh-title').text()).toBe('匠庐')
     // 面包屑：有「家」链接
     expect(wrapper.text()).toContain('家')
     // 面包屑：有当前房间名

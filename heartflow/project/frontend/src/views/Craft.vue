@@ -39,60 +39,49 @@
       <div class="atmos-work-light"></div>
     </div>
 
-    <!-- Header -->
-    <header data-enter class="craft-header">
-      <div class="breadcrumb-row">
-        <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
-          <span class="breadcrumb-home-icon">🏠</span>
-          <span>家</span>
-        </button>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-link current">
-          <span class="breadcrumb-icon">{{ roomData?.icon }}</span>
-          <span>{{ roomData?.name }}</span>
-        </span>
-      </div>
-      <div class="craft-header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <h1 class="craft-title">{{ roomData?.name }}</h1>
-      <p class="craft-subtitle">{{ roomData?.description }}</p>
-      <p class="craft-kicker">从更漏 · 工作日志中锻造出的作品</p>
-    </header>
+    <!-- 统一房间壳层：RoomLayout 提供标准化头部 + 面包屑（家 › 当前房间） -->
+    <RoomLayout
+      :title="roomData?.name ?? ''"
+      :subtitle="roomData?.description"
+      kicker="从更漏 · 工作日志中锻造出的作品"
+      :breadcrumb="breadcrumb"
+      data-enter
+      @navigate="onCrumb"
+    >
+      <CraftStatsOverview />
+      <!-- 匠庐·桥接驾驶舱（INCR-386 补挂载孤儿桥接面板 CraftBridgePanel：useCraftBridge 聚合 craftHealth 匠庐健康度/dashboard 工坊仪表/synthesisEfficiencies 合成效率/workRecommendations 作品指引, Craft.vue 原仅 CraftStatsOverview 4 项基础统计+专项子面板, 桥接层驾驶舱聚合面零呈现, 真缺口） -->
+      <CraftBridgePanel />
+      <!-- 匠庐档案（craft-analytics：概览/状态/类型/进化/节律/健康/洞察/标签） -->
+      <CraftArchivePanel />
+      <CraftWorkbench />
+      <CraftWipBench />
+      <CraftExhibitionShelf />
+      <CraftEvolutionTimeline />
+      <!-- 材料库（craft/materials 引擎：材料种类/库存/低库存预警/添加消耗/来源标签，INCR-209） -->
+      <CraftMaterialsPanel />
+      <!-- 高级工坊（craft/craft-advanced 引擎：创作分析/类型分布/月度趋势/灵感追踪/版本留档，INCR-210） -->
+      <CraftAdvancedPanel />
+      <CraftScenePresets />
+      <WorkFormModal />
 
-    <CraftStatsOverview />
-    <!-- 匠庐·桥接驾驶舱（INCR-386 补挂载孤儿桥接面板 CraftBridgePanel：useCraftBridge 聚合 craftHealth 匠庐健康度/dashboard 工坊仪表/synthesisEfficiencies 合成效率/workRecommendations 作品指引, Craft.vue 原仅 CraftStatsOverview 4 项基础统计+专项子面板, 桥接层驾驶舱聚合面零呈现, 真缺口） -->
-    <CraftBridgePanel />
-    <!-- 匠庐档案（craft-analytics：概览/状态/类型/进化/节律/健康/洞察/标签） -->
-    <CraftArchivePanel />
-    <CraftWorkbench />
-    <CraftWipBench />
-    <CraftExhibitionShelf />
-    <CraftEvolutionTimeline />
-    <!-- 材料库（craft/materials 引擎：材料种类/库存/低库存预警/添加消耗/来源标签，INCR-209） -->
-    <CraftMaterialsPanel />
-    <!-- 高级工坊（craft/craft-advanced 引擎：创作分析/类型分布/月度趋势/灵感追踪/版本留档，INCR-210） -->
-    <CraftAdvancedPanel />
-    <CraftScenePresets />
-    <WorkFormModal />
-
-    <!-- 底部铭文 -->
-    <footer class="craft-colophon">
-      <div class="colophon-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="colophon-text">匠人匠心 · 成果为证</p>
-    </footer>
+      <!-- 底部铭文 -->
+      <footer class="craft-colophon">
+        <div class="colophon-ornament">
+          <span class="orn-line"></span>
+          <span class="orn-diamond">✦</span>
+          <span class="orn-line"></span>
+        </div>
+        <p class="colophon-text">匠人匠心 · 成果为证</p>
+      </footer>
+    </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
-import { provide } from 'vue'
+import { computed, provide } from 'vue'
 import { useCraftUi, CRAFT_UI_KEY } from '../modules/craft/useCraftUi'
+import RoomLayout from '../components/RoomLayout.vue'
+import type { BreadcrumbItem } from '../components/RoomHeader.vue'
 import CraftStatsOverview from '../components/craft/CraftStatsOverview.vue'
 import CraftBridgePanel from '../components/CraftBridgePanel.vue'
 import CraftArchivePanel from '../components/CraftArchivePanel.vue'
@@ -108,6 +97,15 @@ import WorkFormModal from '../components/craft/WorkFormModal.vue'
 const ui = useCraftUi()
 provide(CRAFT_UI_KEY, ui)
 const { entranceRef, entranceClass, nav, roomData } = ui
+
+const breadcrumb = computed<BreadcrumbItem[]>(() => [
+  { label: '家', icon: '🏠', to: 'home-space' },
+  { label: roomData.value?.name ?? '', icon: roomData.value?.icon },
+])
+
+function onCrumb(item: BreadcrumbItem) {
+  if (item.to) nav.enterRoom(item.to)
+}
 </script>
 
 <style scoped src="../components/craft/craft-shared.css"></style>
