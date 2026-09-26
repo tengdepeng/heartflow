@@ -27,7 +27,7 @@ describe('useRoomAtmosphere', () => {
 
   it('switchScene 切换场景后氛围光色变化', () => {
     const { switchScene, currentScene } = useRoomAtmosphere()
-    switchScene('bath')
+    switchScene('bathroom')
     expect(currentScene.value.atmosphereColor).toBe('#c8e8f0')
     expect(currentScene.value.atmosphereLabel).toBe('水雾蓝 · 5000K')
   })
@@ -38,10 +38,10 @@ describe('useRoomAtmosphere', () => {
     expect(ids).toContain('entrance')
     expect(ids).toContain('wardrobe')
     expect(ids).toContain('kitchen')
-    expect(ids).toContain('dining')
+    expect(ids).toContain('dining-room')
     expect(ids).toContain('bedroom')
-    expect(ids).toContain('bath')
-    expect(ids).toContain('living')
+    expect(ids).toContain('bathroom')
+    expect(ids).toContain('living-room')
     expect(ids).toContain('study')
     expect(ids).toContain('courtyard')
     expect(ids).toContain('balcony')

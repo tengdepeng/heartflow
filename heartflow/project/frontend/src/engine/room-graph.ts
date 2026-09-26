@@ -1070,6 +1070,8 @@ export function getExtraRooms(): RoomNode[] {
 // ---- 收编房间默认不进侧边栏（路由保留、父房间内链可达） ----
 // 与 modules/room-manager/__tests__/nav-dedupe.test.ts 契约一致；
 // 删除任何房间直达入口前，务必先确认此处未将其标记为 defaultNavVisible:false（默认进侧栏）。
+// 与 views/Settings.vue 的 EXCLUDED_ROOM_IDS 是两套独立「隐藏名单」：本集合管侧栏导航可见性，
+// EXCLUDED_ROOM_IDS 管设置页房间自定义列表。新增需双处隐藏的房间时两处都要改。
 const DEDUPED_ROOM_IDS = new Set<string>([
   'style-market', 'template-market', 'component-market', 'carrier-editor',
   'advisor-affinity', 'plugin-market', 'space-customizer', 'data-outflow',
