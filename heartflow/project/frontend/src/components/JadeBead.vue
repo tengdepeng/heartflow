@@ -3,8 +3,16 @@
     <!-- 外层光晕 -->
     <div class="bead-aura" :class="{ 'aura--pulse': pulseActive }" />
 
-    <!-- 玉珠本体 -->
-    <svg
+    <!-- 玉珠本体：translucent 时以 HTML 玻璃层呈现，材质与幕僚球（MirrorSelf .ms-orb）完全同源 -->
+    <div class="bead-stage">
+      <!-- 幕僚球同款玻璃层（与 MirrorSelf .ms-orb 同一配方：净透琉璃 + 焦散 + 高光 + 厚边环） -->
+      <div v-if="translucent" class="bead-glass" aria-hidden="true">
+        <div class="bgl-caustic" />
+        <div class="bgl-spec" />
+        <div class="bgl-sheen" />
+        <div class="bgl-rim" />
+      </div>
+      <svg
       class="bead-svg"
       viewBox="0 0 200 200"
       @click="$emit('toggle')"
@@ -46,13 +54,11 @@
         </filter>
       </defs>
 
-      <!-- 主体圆：translucent 时为平涂半透明圆盘 + 2px 亮边（对齐幕僚玻璃球）；否则用玉质径向渐变 -->
+      <!-- 主体圆（translucent 时由 .bead-glass 接管，此层经 CSS 隐藏） -->
       <circle
         cx="100" cy="100" r="62"
-        :fill="translucent ? 'rgba(172, 200, 235, 0.16)' : `url(#${gradientId})`"
-        :stroke="translucent ? 'rgba(172, 200, 235, 0.42)' : 'none'"
-        :stroke-width="translucent ? 2 : 0"
-        :filter="translucent ? undefined : 'url(#innerGlow)'"
+        :fill="`url(#${gradientId})`"
+        filter="url(#innerGlow)"
         class="bead-body"
       />
       <!-- 光泽层 -->
@@ -67,7 +73,7 @@
         fill="url(#moonCore)"
         class="bead-core"
       />
-      <!-- translucent 平涂圆盘由 bead-body 自身 fill/stroke 实现，无需额外质感层 -->
+      <!-- translucent 时珠体由 .bead-glass 接管，SVG 各珠体层经 CSS 隐藏（呼吸环/进度弧除外） -->
       <!-- 呼吸环 -->
       <circle
         cx="100" cy="100" r="68"
@@ -92,6 +98,7 @@
         class="bead-progress"
       />
     </svg>
+    </div>
 
     <!-- 计时显示（玉珠下方） -->
     <div class="bead-timer" @click="$emit('toggle')">
@@ -387,27 +394,112 @@ function particleStyle(i: number) {
 .pulse-leave-active { transition: opacity 0.5s; }
 .pulse-enter-from, .pulse-leave-to { opacity: 0; }
 
-/* ---- 通透玻璃模式（translucent prop）：与幕僚玻璃球同款 ----
-   幕僚球：background = primary+'22'（≈13% 透明，平涂）+ border = 2px solid primary+'44'（≈27% 透明）。
-   此处以心流冷色复刻：平涂半透明圆盘 + 2px 亮边，无体积渐变/高光/Fresnel。
-   珠体填充与亮边由模板按 translucent 条件直接给出，此处仅收尾隐藏质感层。 */
-.bead--translucent .bead-gloss {
-  opacity: 0;
+/* ---- 通透玻璃模式（translucent prop）：与幕僚球（MirrorSelf .ms-orb）完全同源 ----
+   直接复刻 .ms-orb 的净透琉璃配方：层叠背景 + 1px 亮边 + backdrop-filter + 内阴影组，
+   外加焦散/高光/掠光/厚边环四层，保证两颗球同材质。
+   .bead-glass 绝对定位对齐 SVG 珠体圆（viewBox 200 / r62 → 19% 偏移 + 62% 直径），
+   SVG 各珠体层在 translucent 下隐藏，进度弧/计时不受影响。 */
+.bead-stage {
+  position: relative;
 }
+
+.bead-glass {
+  position: absolute;
+  left: 19%;
+  top: 19%;
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+  pointer-events: none;
+  background:
+    linear-gradient(178deg, rgba(255, 255, 255, 0.26) 0%, rgba(255, 255, 255, 0.07) 24%, rgba(255, 255, 255, 0) 44%),
+    radial-gradient(ellipse 80% 32% at 50% 97%, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0) 74%),
+    radial-gradient(circle at 74% 66%, rgba(150, 176, 216, 0.15), rgba(150, 176, 216, 0) 58%),
+    radial-gradient(circle at 40% 34%, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.025) 56%, rgba(255, 255, 255, 0.008) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(3px) saturate(1.5) brightness(1.08);
+  -webkit-backdrop-filter: blur(3px) saturate(1.5) brightness(1.08);
+  box-shadow:
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.78),
+    inset 2px 3px 7px rgba(255, 255, 255, 0.28),
+    inset -3px -4px 10px rgba(142, 172, 216, 0.2),
+    inset 0 -2px 5px rgba(255, 255, 255, 0.22),
+    0 4px 14px rgba(4, 8, 16, 0.3),
+    0 0 19px rgba(150, 168, 215, 0.28);
+}
+
+/* 下缘焦散亮弧：光自玻璃底缘汇聚（screen 只加光不减光） */
+.bgl-caustic {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  filter: blur(0.6px);
+  background: radial-gradient(ellipse 54% 22% at 50% 91%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 72%);
+}
+
+/* 上缘锐高光 + 柔光斑：玻璃第一高光 */
+.bgl-spec {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse 24% 15% at 30% 21%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 72%),
+    radial-gradient(ellipse 38% 20% at 34% 29%, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 76%);
+}
+
+/* 游走高光 sheen：玉珠水头（9s 缓扫一次，克制） */
+.bgl-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.bgl-sheen::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.14) 50%, transparent 62%);
+  transform: translateX(-32%);
+  animation: bead-sheen-sweep 9s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes bead-sheen-sweep {
+  0% { transform: translateX(-32%); }
+  50% { transform: translateX(32%); }
+  100% { transform: translateX(-32%); }
+}
+
+/* 玻璃厚边环：利落珠缘 */
+.bgl-rim {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 0 0 1.4px rgba(255, 255, 255, 0.2),
+    inset 0 0 5px rgba(255, 255, 255, 0.13);
+}
+
+/* translucent 下隐藏 SVG 珠体各层（玻璃层接管）；呼吸环一并隐去（幕僚球无环）。
+   注意 bead-ring 的 ring-pulse 动画会覆盖 opacity，须用 display:none */
+.bead--translucent .bead-body,
+.bead--translucent .bead-gloss,
 .bead--translucent .bead-core {
   opacity: 0;
 }
 .bead--translucent .bead-ring {
-  stroke: rgba(172, 200, 235, 0.42);
-  opacity: 0.5;
+  display: none;
+}
+.bead--translucent .bead-svg {
+  filter: none;
 }
 .bead--translucent .bead-aura {
-  background: radial-gradient(circle at 50% 50%, rgba(165, 195, 235, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(150, 168, 215, 0.28) 0%, transparent 68%);
 }
 .bead--translucent .bead-particle {
   background: rgba(172, 200, 235, 0.55);
-}
-.bead--translucent .bead-svg {
-  filter: drop-shadow(0 0 18px rgba(150, 185, 230, 0.30));
 }
 </style>
