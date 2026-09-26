@@ -198,7 +198,8 @@ const dominantLabel = computed(() => {
 })
 
 const ringStyle = computed(() => ({
-  background: `conic-gradient(hsl(${state.value.dominantHue} 60% 60%) ${Math.round(state.value.threadDensity * 360)}deg, rgba(var(--accent-rgb), 0.08) 0deg)`,
+  // 透明玻璃质感，对齐幕僚玉珠：冷白月光进度弧（半透明），背景可透出
+  background: `conic-gradient(rgba(216, 232, 252, 0.45) ${Math.round(state.value.threadDensity * 360)}deg, rgba(255, 255, 255, 0.05) 0deg)`,
   animation: `clp-spin ${Math.round(20 - state.value.rotationSpeed * 12)}s linear infinite`,
   // 提升为独立合成层：conic-gradient 只在首帧绘制，后续旋转由 GPU 变换纹理，
   // 避免每帧重绘渐变（移动端 WebView 上表现为闪烁）。
@@ -304,8 +305,9 @@ onUnmounted(() => {
 .clp-state-ring {
   width: 72px; height: 72px; border-radius: 50%; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
-  border: 1px solid rgba(var(--accent-rgb), 0.25);
-  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.12);
+  /* 透明玻璃质感，对齐幕僚玉珠：细冷白描边 + 柔月光晕，背景透出 */
+  border: 1px solid rgba(216, 232, 252, 0.35);
+  box-shadow: 0 0 22px rgba(165, 195, 235, 0.28);
 }
 .clp-state-core { font-size: 20px; }
 .clp-state-meta { flex: 1; display: flex; flex-direction: column; gap: 6px; }
