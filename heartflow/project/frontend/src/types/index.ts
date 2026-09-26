@@ -81,6 +81,12 @@ export interface TimeCrystal {
   tags: string[]
   /** 解锁的感悟/备注 */
   insight: string | null
+  /** 自定义图标形象（crystalMotifs 中的 key，如 sprout/leaf/flower…） */
+  motif?: string
+  /** 自定义像素形象（crystalMotifs 中的像素 key，如 cat/ghost/sprout） */
+  pixel?: string
+  /** 自定义图片（dataURL），优先级高于 motif/pixel 与全局风格 */
+  image?: string
 }
 
 export type CrystalShape = 'sphere' | 'tetrahedron' | 'octahedron' | 'dodecahedron' | 'irregular'

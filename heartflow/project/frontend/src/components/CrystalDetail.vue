@@ -7,27 +7,33 @@
           <div class="crystal-display">
             <div class="crystal-icon" :style="{ color: crystal.color }">
               <svg viewBox="0 0 48 48" width="80" height="80">
-                <polygon
-                  :points="shapePoints"
-                  fill="none"
-                  :stroke="crystal.color"
-                  stroke-width="1.5"
-                  opacity="0.9"
-                />
-                <polygon
-                  :points="shapePoints"
-                  :fill="crystal.color + '22'"
-                  :stroke="crystal.color"
-                  stroke-width="0.5"
-                  opacity="0.6"
-                />
-                <circle
-                  v-for="i in 5" :key="i"
-                  :cx="glowCx(i)" :cy="glowCy(i)" :r="glowR(i)"
-                  :fill="crystal.color"
-                  :opacity="glowOpacity(i)"
-                  class="glow-particle"
-                />
+                <defs>
+                  <clipPath id="cd-img-clip"><circle cx="24" cy="24" r="18" /></clipPath>
+                </defs>
+                <g v-if="customDisplay" v-html="customDisplay"></g>
+                <template v-else>
+                  <polygon
+                    :points="shapePoints"
+                    fill="none"
+                    :stroke="crystal.color"
+                    stroke-width="1.5"
+                    opacity="0.9"
+                  />
+                  <polygon
+                    :points="shapePoints"
+                    :fill="crystal.color + '22'"
+                    :stroke="crystal.color"
+                    stroke-width="0.5"
+                    opacity="0.6"
+                  />
+                  <circle
+                    v-for="i in 5" :key="i"
+                    :cx="glowCx(i)" :cy="glowCy(i)" :r="glowR(i)"
+                    :fill="crystal.color"
+                    :opacity="glowOpacity(i)"
+                    class="glow-particle"
+                  />
+                </template>
               </svg>
             </div>
             <div class="crystal-intensity">
@@ -66,6 +72,45 @@
             </div>
           </div>
 
+          <!-- 形象定制（宪法第二条超级自定义） -->
+          <div class="crystal-custom">
+            <div class="custom-title">形象定制</div>
+
+            <div class="custom-sub">图标</div>
+            <div class="custom-grid">
+              <button
+                v-for="m in MOTIFS" :key="m.key"
+                class="custom-cell"
+                :class="{ active: crystal?.motif === m.key }"
+                :style="{ borderColor: crystal?.motif === m.key ? crystal.color : undefined }"
+                @click="pickMotif(m.key)"
+              >
+                <svg viewBox="0 0 48 48" width="28" height="28" v-html="motifSvg(m.key, crystal?.color || '#aab4ff', true)"></svg>
+                <span>{{ m.label }}</span>
+              </button>
+            </div>
+
+            <div class="custom-sub">像素</div>
+            <div class="custom-grid">
+              <button
+                v-for="p in PIXELS" :key="p.key"
+                class="custom-cell"
+                :class="{ active: crystal?.pixel === p.key }"
+                :style="{ borderColor: crystal?.pixel === p.key ? crystal.color : undefined }"
+                @click="pickPixel(p.key)"
+              >
+                <svg viewBox="0 0 48 48" width="28" height="28" v-html="pixelSvg(p.key, crystal?.color || '#aab4ff', true)"></svg>
+                <span>{{ p.label }}</span>
+              </button>
+            </div>
+
+            <div class="custom-actions">
+              <button class="custom-btn" @click="fileInput?.click()">上传图片</button>
+              <button class="custom-btn ghost" @click="clearCustom()">清除形象</button>
+              <input ref="fileInput" type="file" accept="image/*" hidden @change="onUpload" />
+            </div>
+          </div>
+
           <!-- 感悟 -->
           <div v-if="crystal.insight" class="crystal-insight">
             <div class="insight-text">"{{ crystal.insight }}"</div>
@@ -80,9 +125,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import type { TimeCrystal, FocusSession } from '../types'
 import { formatDate, formatDuration } from '../utils/time'
+import { updateCrystal } from '../engine/storage/crystal'
+import {
+  MOTIFS,
+  PIXELS,
+  motifSvg,
+  pixelSvg,
+  defaultMotifFor,
+  defaultPixelFor,
+} from '../modules/canvas/crystalMotifs'
 
 const props = defineProps<{
   crystal: TimeCrystal | null
@@ -160,6 +214,48 @@ function glowR(i: number): number {
 }
 function glowOpacity(i: number): number {
   return [0.6, 0.4, 0.7, 0.3, 0.5][i - 1] ?? 0.5
+}
+
+// ---- 形象定制 ----
+const fileInput = ref<HTMLInputElement | null>(null)
+
+/** 弹窗主图：有自定义形象时渲染对应 SVG（图片用 <image>） */
+const customDisplay = computed(() => {
+  const c = crystal.value
+  if (!c) return ''
+  if (c.image) {
+    return `<image href="${c.image}" x="6" y="6" width="36" height="36" preserveAspectRatio="xMidYMid slice" clip-path="url(#cd-img-clip)"/>`
+  }
+  if (c.motif) return motifSvg(c.motif, c.color, true)
+  if (c.pixel) return pixelSvg(c.pixel, c.color, true)
+  return ''
+})
+
+function pickMotif(key: string) {
+  if (!crystal.value) return
+  updateCrystal(crystal.value.id, { motif: key, pixel: undefined, image: undefined })
+}
+function pickPixel(key: string) {
+  if (!crystal.value) return
+  updateCrystal(crystal.value.id, { pixel: key, motif: undefined, image: undefined })
+}
+function onUpload(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file || !crystal.value) return
+  const reader = new FileReader()
+  reader.onload = () => {
+    const dataUrl = reader.result as string
+    if (crystal.value) {
+      updateCrystal(crystal.value.id, { image: dataUrl, motif: undefined, pixel: undefined })
+    }
+  }
+  reader.readAsDataURL(file)
+  input.value = ''
+}
+function clearCustom() {
+  if (!crystal.value) return
+  updateCrystal(crystal.value.id, { motif: undefined, pixel: undefined, image: undefined })
 }
 </script>
 
@@ -278,6 +374,76 @@ function glowOpacity(i: number): number {
   border: 1px solid;
   font-size: 12px;
   opacity: 0.8;
+}
+
+/* 形象定制 */
+.crystal-custom {
+  margin-bottom: 16px;
+  border-top: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+  padding-top: 14px;
+}
+.custom-title {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  opacity: 0.85;
+}
+.custom-sub {
+  font-size: 11px;
+  opacity: 0.45;
+  margin: 8px 0 6px;
+}
+.custom-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.custom-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  border-radius: 12px;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.custom-cell:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.custom-cell.active {
+  background: rgba(255, 255, 255, 0.1);
+}
+.custom-cell span {
+  font-size: 10px;
+  opacity: 0.7;
+}
+.custom-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.custom-btn {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, #e0e0e0);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.custom-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+.custom-btn.ghost {
+  background: transparent;
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  opacity: 0.7;
 }
 
 /* 专注状态颜色 */

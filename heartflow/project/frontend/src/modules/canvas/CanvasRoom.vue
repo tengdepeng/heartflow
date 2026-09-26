@@ -97,7 +97,23 @@
             <stop offset="48%" stop-color="#6ab8ff" />
             <stop offset="100%" stop-color="#e79bff" />
           </linearGradient>
+          <!-- 自定义图片的圆形裁剪（image 分支使用） -->
+          <clipPath :id="imgClipId(cc)">
+            <circle cx="24" cy="24" r="18" />
+          </clipPath>
         </defs>
+
+        <!-- 自定义图片（优先于一切几何风格） -->
+        <g v-if="cc.crystal.image">
+          <circle cx="24" cy="24" r="18" fill="none" :stroke="shadeColor(cc.crystal.color, 0.3)" :stroke-width="strong ? 1.4 : 0.8" :opacity="strong ? 0.8 : 0.4" />
+          <image :href="cc.crystal.image" x="6" y="6" width="36" height="36" :opacity="strong ? 1 : 0.78" :clip-path="`url(#${imgClipId(cc)})`" preserveAspectRatio="xMidYMid slice" />
+        </g>
+
+        <!-- 自定义形象（图标/像素/全局 motif·pixel 派生） -->
+        <g
+          v-else-if="cc.crystal.motif || cc.crystal.pixel || crystalStyle === 'motif' || crystalStyle === 'pixel'"
+          v-html="customCrystalMarkup(cc)"
+        ></g>
 
         <!-- 玻璃光球 + 辉光 -->
         <g v-if="crystalStyle === 'glass'">
@@ -180,6 +196,12 @@ import { getEffectMultiplier } from '../../engine/constitution-effect'
 import { useAdaptiveQuality } from '../../modules/adaptive'
 import { useConfigStore } from '../../stores/config'
 import { useAppearance } from '../../modules/customization/useAppearance'
+import {
+  motifSvg,
+  pixelSvg,
+  defaultMotifFor,
+  defaultPixelFor,
+} from './crystalMotifs'
 import { createShell } from '../../modules/world-shell'
 import { getRoomsBySlot } from '../../engine/room-graph'
 import { setScreenRect, resetScreenRect } from '../../modules/world-shell/screenContract'
@@ -459,6 +481,27 @@ function topVertex(shape: CrystalShape): { x: number; y: number } {
       return { x, y }
     })
   return pts.reduce((min, p) => (p.y < min.y ? p : min), pts[0])
+}
+
+/** 每颗结晶自定义图片的圆形裁剪唯一 id */
+function imgClipId(cc: CanvasCrystal): string {
+  return `crystal-img-${cc.crystal.id}`
+}
+
+/**
+ * 结晶「具象化」内层 SVG：
+ * 优先级 图片 > 像素形象 > 图标形象 > 全局风格默认派生形象。
+ * 返回供 <g v-html> 注入的标记字符串；若应由几何风格分支处理则返回 ''。
+ */
+function customCrystalMarkup(cc: CanvasCrystal): string {
+  const c = cc.crystal
+  if (c.image) return '' // 图片由独立 <image> 分支渲染
+  if (c.motif) return motifSvg(c.motif, c.color, strong.value)
+  if (c.pixel) return pixelSvg(c.pixel, c.color, strong.value)
+  // 无单独定制 → 回退全局风格；仅 motif/pixel 需派生默认形象
+  if (crystalStyle.value === 'motif') return motifSvg(defaultMotifFor(c.id), c.color, strong.value)
+  if (crystalStyle.value === 'pixel') return pixelSvg(defaultPixelFor(c.id), c.color, strong.value)
+  return ''
 }
 
 // ---- 尺寸更新 ----
