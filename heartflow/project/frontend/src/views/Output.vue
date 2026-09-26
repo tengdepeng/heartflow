@@ -205,6 +205,9 @@
       :delete-record="deleteRecord"
       @changed="onAdvancedChanged"
     />
+
+    <!-- 发布流水线（INCR-411：usePublishPipeline 引擎能力面零 UI 消费，薄委托直引） -->
+    <PublishPipelinePanel />
     </RoomLayout>
   </div>
 </template>
@@ -218,6 +221,7 @@ import OutputSnapshotsPanel from '../components/OutputSnapshotsPanel.vue'
 import OutputStatsPanel from '../components/OutputStatsPanel.vue'
 import RoomLayout from '../components/RoomLayout.vue'
 import OutputAdvancedPanel from '../components/OutputAdvancedPanel.vue'
+import PublishPipelinePanel from '../components/PublishPipelinePanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
