@@ -460,8 +460,37 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
     inset 0 0 0 0.5px rgba(255, 255, 255, calc(0.12 * var(--bar-a, 1)));
   pointer-events: auto;
   /* 呼吸：玻璃内高光游走 + 极弱冷白微光（尺寸恒定不缩放），节奏由 --bar-breath-dur 控制。
-     注意：此处不能用 overflow:hidden —— 会裁掉呼吸的外发光；扫光裁剪改由 .bar-sheen-mask 承担。 */
-  animation: bar-breathe var(--bar-breath-dur, 7s) ease-in-out infinite;
+     注意：此处不能用 overflow:hidden —— 会裁掉呼吸的外发光；扫光裁剪改由 .bar-sheen-mask 承担。
+     ⚠️ 呼吸辉光已改由 ::after 的 opacity 淡变承担：本元素带 backdrop-filter，
+     若直接动画 box-shadow 会每帧重绘并强制重算背景模糊，移动端 WebView 表现为闪烁。 */
+}
+
+/* 呼吸峰值辉光层：只动 opacity（合成属性，GPU 合成，不触发重绘/重算模糊）。
+   父级 .bar-cluster 无 overflow:hidden，故外发光不会被裁。 */
+.bar-cluster::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    0 16px 50px rgba(0, 0, 0, 0.34),
+    0 2px 10px rgba(0, 0, 0, 0.22),
+    inset 0 1px 2px rgba(255, 255, 255, calc(0.58 * var(--bar-a, 1))),
+    inset 0 -2px 7px rgba(0, 0, 0, 0.34),
+    0 0 14px rgba(225, 235, 255, 0.12);
+  opacity: 0;
+  animation: bar-breathe-veil var(--bar-breath-dur, 7s) ease-in-out infinite;
+}
+
+/* 右岛轻错相：与外壳呼吸保持同一错相 */
+.bar-cluster--right::after {
+  animation-delay: calc(var(--bar-breath-dur, 7s) * -0.18);
+}
+
+@keyframes bar-breathe-veil {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 /* 扫光裁剪遮罩：仅锁死 .bar-sheen 在浮岛圆角矩形内（满足「闪光只在悬窗内、不允许全屏出现」），
@@ -483,30 +512,11 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
 .bar-cluster--right { animation-delay: calc(var(--bar-breath-dur, 7s) * -0.18); }
 
 /* 关闭呼吸：静止如镜 */
-.bar-cluster.no-breath { animation: none; }
+.bar-cluster.no-breath,
+.bar-cluster.no-breath::after { animation: none; }
 
-/* 克制版呼吸：外壳尺寸恒定不动（不再整体 scale 喘气），
-   仅玻璃内高光明暗缓缓游走 + 极弱冷白微光，模拟光在液态玻璃里折射。 */
-@keyframes bar-breathe {
-  0%, 100% {
-    box-shadow:
-      0 14px 42px rgba(0, 0, 0, 0.30),
-      0 1px 6px rgba(0, 0, 0, 0.20),
-      inset 0 1px 1px rgba(255, 255, 255, calc(0.34 * var(--bar-a, 1))),
-      inset 0 -2px 6px rgba(0, 0, 0, 0.30),
-      0 0 0 rgba(255, 255, 255, 0);
-  }
-  50% {
-    /* 内高光略增 + 极弱冷白外微光（取代原暖琥珀脉冲，去廉价感）；
-       外发光幅度适度，恢复「两岛都在呼吸」的可见度（此前被 overflow:hidden 裁掉）。 */
-    box-shadow:
-      0 16px 50px rgba(0, 0, 0, 0.34),
-      0 2px 10px rgba(0, 0, 0, 0.22),
-      inset 0 1px 2px rgba(255, 255, 255, calc(0.58 * var(--bar-a, 1))),
-      inset 0 -2px 7px rgba(0, 0, 0, 0.34),
-      0 0 14px rgba(225, 235, 255, 0.12);
-  }
-}
+/* 旧 bar-breathe（直接动画 box-shadow）已废弃：辉光改由 .bar-cluster::after 的
+   bar-breathe-veil 承担 —— 避免在带 backdrop-filter 的元素上每帧重绘 + 重算背景模糊。 */
 
 /* 缓慢扫过的高光（液态流动感）：严格限定在浮岛矩形内（top/left/宽高均不溢出），
    绝不外泄到全屏 —— 满足「闪光只在悬浮窗内、不允许全屏出现」。 */

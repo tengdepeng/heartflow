@@ -200,6 +200,9 @@ const dominantLabel = computed(() => {
 const ringStyle = computed(() => ({
   background: `conic-gradient(hsl(${state.value.dominantHue} 60% 60%) ${Math.round(state.value.threadDensity * 360)}deg, rgba(var(--accent-rgb), 0.08) 0deg)`,
   animation: `clp-spin ${Math.round(20 - state.value.rotationSpeed * 12)}s linear infinite`,
+  // 提升为独立合成层：conic-gradient 只在首帧绘制，后续旋转由 GPU 变换纹理，
+  // 避免每帧重绘渐变（移动端 WebView 上表现为闪烁）。
+  willChange: 'transform',
 }))
 
 function barWidth(key: WorkCategory): number {

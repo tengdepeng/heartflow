@@ -468,6 +468,9 @@ watch(() => timer.isCompleted, (done) => {
   border-radius: 50%;
   border: 1px solid rgba(180, 205, 235, 0.22);
   animation: moon-ripple 7s ease-out infinite;
+  /* scale(0.62→1.5) 属大幅缩放：不提升合成层会每帧重新光栅化（移动端表现为闪烁/掉帧）。
+     本元素有 3 个错相实例（r1/r2/r3），开销 ×3，故必须提升。 */
+  will-change: transform, opacity;
 }
 
 .moon-ripple.r2 { animation-delay: 2.33s; border-color: rgba(180, 205, 235, 0.16); }
@@ -707,6 +710,8 @@ watch(() => timer.isCompleted, (done) => {
   border-radius: 50%;
   border: 1px solid rgba(var(--accent-rgb), 0.045);
   animation: lens-ring-expand 8s ease-in-out infinite;
+  /* 120vmin 的超大圆环 + scale 动画：不提升合成层会每帧重新光栅化近整屏区域 */
+  will-change: transform, opacity;
 }
 
 .gravity-lens-rings::after {
@@ -720,6 +725,8 @@ watch(() => timer.isCompleted, (done) => {
   border-radius: 50%;
   border: 1px solid rgba(var(--accent-rgb), 0.025);
   animation: lens-ring-expand 8s ease-in-out infinite 2s;
+  /* 80vmin 超大圆环 + scale 动画：同上，提升合成层避免每帧重新光栅化 */
+  will-change: transform, opacity;
 }
 
 /* ---- 引力流光线 ---- */

@@ -139,7 +139,10 @@ export function useBreathing(opts?: {
     const base = MAP[mood.value]
     const styleVars: BreathingPhase['styleVars'] = { ...base }
     const baseCycle = parseInt(base['--br-cycle-ms'], 10) || 8000
-    styleVars['--br-cycle-ms'] = String(Math.round(baseCycle * cycleScale.value))
+    // 必须带单位：CSS 里是 animation-duration: var(--br-cycle-ms)，
+    // 无单位的纯数字属无效 <time>，会退回 initial 0s，配合 infinite 导致动画每帧重启（整屏高频闪烁）。
+    // 注意 var() 的 fallback 只在变量未定义时生效，救不了无效值。
+    styleVars['--br-cycle-ms'] = `${Math.round(baseCycle * cycleScale.value)}ms`
     return {
       mood: mood.value,
       styleVars,

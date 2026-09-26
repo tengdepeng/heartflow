@@ -44,7 +44,7 @@ const styleBindings = computed(() => {
     return {
       '--br-glow-opacity': '0',
       '--br-glow-color': 'transparent',
-      '--br-cycle-ms': '0',
+      '--br-cycle-ms': '0ms',
       '--br-glow-calm': '0',
       '--br-glow-peak': '0',
       '--br-scale-calm': '1',

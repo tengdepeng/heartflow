@@ -386,6 +386,11 @@ function crystalNodeStyle(cc: { x: number; y: number; scale: number; opacity: nu
     left: `${cc.x}px`,
     top: `${cc.y}px`,
     '--crystal-scale': mode === 'full' ? cc.scale : cc.scale * 0.6,
+    // 浮动改由纯 CSS 动画承担（见 @keyframes crystal-float）：
+    // 原先 floatLoop 每 50ms 遍历所有结晶写 --float-y，既占主线程又只有 20fps。
+    '--float-amp': mode === 'full' ? '6px' : '3px',
+    // 相位偏移用负 animation-delay 表达（floatPhase ∈ [0, 2π)，周期 12.566s）
+    '--float-delay': `-${((cc.floatPhase / (Math.PI * 2)) * 12.566).toFixed(3)}s`,
     opacity: mode === 'full' ? cc.opacity * props.intensity : cc.opacity * 0.4 * props.intensity,
     pointerEvents: (interactionEnabled.value ? 'auto' : 'none') as 'auto' | 'none',
   }
@@ -803,38 +808,11 @@ onUnmounted(() => {
 })
 
 // ============================================================
-// 结晶浮动动画 — 根据 renderMode 调度
+// 结晶浮动动画 — 已迁移为纯 CSS（见 @keyframes crystal-float）
 // ============================================================
-let floatAnimId = 0
-let lastFloatUpdate = 0
-
-function floatLoop(timestamp: number) {
-  const interval = props.renderMode === 'full' ? 50 : 100
-  if (timestamp - lastFloatUpdate > interval) {
-    lastFloatUpdate = timestamp
-    if (containerRef.value) {
-      const crystals = containerRef.value.querySelectorAll('.crystal-node') as NodeListOf<HTMLElement>
-      canvasCrystals.value.forEach((cc, i) => {
-        const el = crystals[i]
-        if (el) {
-          const amplitude = props.renderMode === 'full' ? 6 : 3
-          const floatY = Math.sin(timestamp / 2000 + cc.floatPhase) * amplitude
-          // 只更新 transform 合成用的 CSS 变量，不触发布局
-          el.style.setProperty('--float-y', `${floatY}px`)
-        }
-      })
-    }
-  }
-  floatAnimId = requestAnimationFrame(floatLoop)
-}
-
-onMounted(() => {
-  floatAnimId = requestAnimationFrame(floatLoop)
-})
-
-onUnmounted(() => {
-  cancelAnimationFrame(floatAnimId)
-})
+// 旧实现：rAF 每 50ms/100ms 遍历 .crystal-node 写 --float-y，主线程每轮都要
+// querySelectorAll + N 次 setProperty，且浮动只有 20fps（观感偏抖）。
+// 现由 .crystal-float 的 CSS animation 配合 --float-amp / --float-delay 承担，主线程零参与。
 </script>
 
 <style scoped>
@@ -974,9 +952,18 @@ onUnmounted(() => {
 .crystal-float {
   width: 100%;
   height: 100%;
-  /* 每帧浮动走 transform 合成，零布局；无 transition 保持修改前一致的即时浮动观感 */
+  /* 浮动走纯 CSS 动画（transform 合成，零布局，主线程零参与）。
+     原先由 floatLoop 每 50ms 遍历结晶写 --float-y，主线程开销大且只有 20fps。 */
   transform: translateY(var(--float-y, 0px));
   will-change: transform;
+  animation: crystal-float 12.566s ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+/* 正弦浮动的 CSS 近似（ease-in-out 缓动），周期与旧实现 sin(t/2000) 一致（2000×2π≈12566ms） */
+@keyframes crystal-float {
+  0%, 100% { transform: translateY(calc(-1 * var(--float-amp, 3px))); }
+  50% { transform: translateY(var(--float-amp, 3px)); }
 }
 .crystal-node:hover {
   filter: brightness(1.3) drop-shadow(0 0 12px currentColor);

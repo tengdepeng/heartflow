@@ -86,7 +86,7 @@ describe('breathing 模块', () => {
     const br = await fresh()
     expect(br.phase.value.mood).toBe('calm')
     expect(br.phase.value.styleVars).toBeDefined()
-    expect(br.phase.value.styleVars['--br-cycle-ms']).toBe('8000')
+    expect(br.phase.value.styleVars['--br-cycle-ms']).toBe('8000ms')
     vi.useRealTimers()
   })
 
@@ -94,7 +94,7 @@ describe('breathing 模块', () => {
     vi.useFakeTimers()
     const br = await fresh()
     br.pulse()
-    expect(br.phase.value.styleVars['--br-cycle-ms']).toBe('1500')
+    expect(br.phase.value.styleVars['--br-cycle-ms']).toBe('1500ms')
     vi.useRealTimers()
   })
 
@@ -102,7 +102,7 @@ describe('breathing 模块', () => {
     vi.useFakeTimers()
     const br = await fresh()
     br.setMood('focusing')
-    expect(br.phase.value.styleVars['--br-cycle-ms']).toBe('12000')
+    expect(br.phase.value.styleVars['--br-cycle-ms']).toBe('12000ms')
     vi.useRealTimers()
   })
 

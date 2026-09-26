@@ -95,14 +95,16 @@ export function useSanctuaryTrigger(config: SanctuaryTriggerConfig = {}) {
     isCooldown.value = false
   }
 
+  // ⚠️ 只监听 pointerdown：一次物理点击只触发一次。
+  // 旧实现同时监听 click + touchstart，触屏设备上一次触摸会先触发 touchstart、
+  // 浏览器再合成 click，导致每次点击被计 2 次 —— "五击"实际约 2.5 次即触发，极易误入安全岛。
+  // Pointer Events 统一了鼠标/触摸/笔，且无 click 的 300ms 延迟。
   onMounted(() => {
-    document.addEventListener('click', handleTap)
-    document.addEventListener('touchstart', handleTap, { passive: true })
+    document.addEventListener('pointerdown', handleTap, { passive: true })
   })
 
   onUnmounted(() => {
-    document.removeEventListener('click', handleTap)
-    document.removeEventListener('touchstart', handleTap)
+    document.removeEventListener('pointerdown', handleTap)
     if (clearTimer) clearTimeout(clearTimer)
   })
 
