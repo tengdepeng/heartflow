@@ -82,17 +82,19 @@ defineExpose({ br })
   /* 降级：不认得 @property 的浏览器直接忽略 transition */
 }
 
-/* ---- 核心光晕：中心径向呼吸 ---- */
+/* ---- 核心光晕：中心径向呼吸（多段柔和衰减，避免硬截断边缘） ---- */
 .br-glow {
   position: absolute;
   inset: 0;
   background: radial-gradient(
-    circle at 50% 50%,
+    circle at 50% 48%,
     var(--br-glow-color, transparent) 0%,
-    transparent 65%
+    color-mix(in srgb, var(--br-glow-color, transparent) 55%, transparent) 32%,
+    color-mix(in srgb, var(--br-glow-color, transparent) 20%, transparent) 55%,
+    transparent 78%
   );
   opacity: var(--br-glow-opacity, 0.15);
-  animation: breathe-glow var(--br-cycle-ms, 8000ms) ease-in-out infinite;
+  animation: breathe-glow var(--br-cycle-ms, 8000ms) cubic-bezier(0.45, 0, 0.55, 1) infinite;
   will-change: transform, opacity;
 }
 
@@ -101,23 +103,26 @@ defineExpose({ br })
   position: absolute;
   inset: -20%;
   background: radial-gradient(
-    circle at 50% 50%,
-    var(--br-glow-color) 0%,
-    transparent 50%
+    circle at 50% 52%,
+    color-mix(in srgb, var(--br-glow-color) 70%, transparent) 0%,
+    color-mix(in srgb, var(--br-glow-color) 30%, transparent) 40%,
+    transparent 62%
   );
   opacity: calc(var(--br-glow-opacity, 0.15) * 0.6);
-  animation: breathe-aura calc(var(--br-cycle-ms, 8000ms) * 1.3) ease-in-out infinite;
+  animation: breathe-aura calc(var(--br-cycle-ms, 8000ms) * 1.3) cubic-bezier(0.45, 0, 0.55, 1) infinite;
   will-change: transform, opacity;
 }
 
-/* ---- 微妙线框光晕 ---- */
+/* ---- 呼吸光环：静态 blur 烘焙成柔光晕（一次光栅化），与核心光晕错峰呼吸 ---- */
 .br-ring {
   position: absolute;
   inset: 15%;
   border-radius: 50%;
   border: 1px solid var(--br-glow-color);
-  opacity: calc(var(--br-glow-opacity, 0.15) * 0.5);
-  animation: breathe-ring var(--br-cycle-ms, 8000ms) ease-in-out infinite;
+  filter: blur(8px);
+  opacity: calc(var(--br-glow-opacity, 0.15) * 0.4);
+  animation: breathe-ring calc(var(--br-cycle-ms, 8000ms) * 0.85) cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  animation-delay: calc(var(--br-cycle-ms, 8000ms) * -0.4);
   will-change: transform, opacity;
 }
 

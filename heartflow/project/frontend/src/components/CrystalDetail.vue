@@ -134,8 +134,6 @@ import {
   PIXELS,
   motifSvg,
   pixelSvg,
-  defaultMotifFor,
-  defaultPixelFor,
 } from '../modules/canvas/crystalMotifs'
 
 const props = defineProps<{

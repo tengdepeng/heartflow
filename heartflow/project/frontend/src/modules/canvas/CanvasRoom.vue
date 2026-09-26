@@ -87,10 +87,16 @@
             <stop offset="42%" stop-color="#ffffff" stop-opacity="0.08" />
             <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
           </linearGradient>
-          <radialGradient v-if="crystalStyle === 'glass'" :id="glassId(cc)" cx="38%" cy="30%" r="78%">
+          <radialGradient v-if="crystalStyle === 'glass' || crystalStyle === 'translucent'" :id="glassId(cc)" cx="38%" cy="30%" r="78%">
             <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
             <stop offset="46%" :stop-color="shadeColor(cc.crystal.color, 0.28)" />
             <stop offset="100%" :stop-color="shadeColor(cc.crystal.color, -0.32)" />
+          </radialGradient>
+          <!-- 共享 Fresnel 边缘亮环（透明中心→白色边缘，玻璃折射感） -->
+          <radialGradient id="crystalFresnel" cx="50%" cy="50%" r="50%">
+            <stop offset="56%" stop-color="#ffffff" stop-opacity="0" />
+            <stop offset="90%" stop-color="#ffffff" stop-opacity="0.4" />
+            <stop offset="100%" stop-color="#ffffff" stop-opacity="0.14" />
           </radialGradient>
           <linearGradient v-if="crystalStyle === 'prism'" :id="prismId(cc)" x1="6%" y1="4%" x2="94%" y2="96%">
             <stop offset="0%" stop-color="#79f6c8" />
@@ -281,12 +287,25 @@ const hitLayerEnabled = computed(() => false)
 
 // 命中层激活（home 引力场 + 全模式 + 宅院/星辰壳）时，整层画布容器抬到命中层(z:5)之上：
 //  - z-index:6 使结晶节点（容器内 z:2，交互态 pointer-events:auto）真实可点，不再被全屏命中层吞掉；
+// ---- 呼吸效果（纯 CSS 驱动） ----
+// useCanvasBreathing 不再跑 rAF：只在 intensity 变化时产出低频 CSS 变量
+// （--cb-cycle/--cb-amp/--cb-glow/--glow-color），呼吸与辉光由本组件样式块的
+// canvas-breathe / canvas-glow keyframes 承担（合成属性动画，真机零频闪）。
+const { isSanctuaryActive } = useRuntimeState()
+const { particleSpeed, breathVars } = useCanvasBreathing(
+  computed(() => props.intensity),
+  isSanctuaryActive
+)
+
 //  - 容器 pointer-events:none，使空白处点击穿透到命中层继续做「点墨点/建筑进房间」空间递进导航。
 // 非 home（命中层关闭）保持原逻辑：full→auto / ambient→none，z-index 回落到 App.vue 的 :deep 0
 // （低于 main-content z:1），结晶作为极淡背景衬于内容之下，不干扰房间内交互。
 const canvasRoomRootStyle = computed<Record<string, string>>(() => {
   const style: Record<string, string> = {
     pointerEvents: props.renderMode === 'full' ? 'auto' : 'none',
+    // 呼吸参数（低频更新）+ 安全岛暂停开关（CSS 变量可继承进 ::after 伪元素）
+    ...breathVars.value,
+    '--cb-play': isSanctuaryActive.value ? 'paused' : 'running',
   }
   if (hitLayerEnabled.value) {
     style.pointerEvents = 'none'
@@ -346,14 +365,6 @@ function onShellHoverLeave() {
 
 const containerRef = ref<HTMLElement | null>(null)
 const particleCanvasRef = ref<HTMLCanvasElement | null>(null)
-
-// ---- 呼吸效果 ----
-const { isSanctuaryActive } = useRuntimeState()
-const { particleSpeed } = useCanvasBreathing(
-  computed(() => props.intensity),
-  isSanctuaryActive,
-  containerRef
-)
 
 // ---- 运行时状态 ----
 const timer = useTimer()
@@ -882,15 +893,49 @@ onUnmounted(() => {
   overflow: hidden;
   border-radius: 16px;
   background: radial-gradient(ellipse at 50% 48%, rgba(255,255,255,0.02) 0%, transparent 70%);
-  /* 呼吸效果 CSS 变量（scale() 创建 stacking context，但 3D 切换按钮已 Teleport 出 body
-     不再受困于本容器） */
-  transform: scale(var(--breathing-scale, 1));
-  opacity: var(--breathing-opacity, 1);
-  transition: opacity 0.3s ease;
-  /* 辉光效果 */
+  /* 呼吸效果 — 纯 CSS 合成动画（只动 transform/opacity，JS 零每帧写入）。
+     旧实现 rAF 每秒 ~12 次直写 --breathing-scale/--breathing-opacity，
+     全屏容器反复样式失效→合成层重提交，真机（Android WebView）表现为结晶层高频频闪。
+     --cb-cycle/--cb-amp 由 useCanvasBreathing 低频注入（仅 intensity 变化时更新）。
+     scale() 动画保持 stacking context（3D 切换按钮已 Teleport 出 body 不受困）。 */
+  animation: canvas-breathe var(--cb-cycle, 12000ms) ease-in-out infinite;
+  animation-play-state: var(--cb-play, running);
+  will-change: transform, opacity;
+}
+
+/* 辉光 — 挪到伪元素：box-shadow 静态烘焙进层，动画只动 opacity（合成属性）。
+   旧实现在容器上每秒 ~12 次改写 box-shadow 的 color-mix α → 每次全屏重绘 = 频闪根源。
+   两个阴影的相对比例（30% : 15%）静态固定，绝对强度交给 opacity 动画（0 ↔ --cb-glow）。 */
+.canvas-room::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
   box-shadow:
-    inset 0 0 60px color-mix(in srgb, var(--glow-color, #d4a574) calc(var(--glow-opacity, 0) * 30%), transparent),
-    inset 0 0 120px color-mix(in srgb, var(--glow-color, #d4a574) calc(var(--glow-opacity, 0) * 15%), transparent);
+    inset 0 0 60px color-mix(in srgb, var(--glow-color, #d4a574) 30%, transparent),
+    inset 0 0 120px color-mix(in srgb, var(--glow-color, #d4a574) 15%, transparent);
+  opacity: 0;
+  animation: canvas-glow var(--cb-cycle, 12000ms) ease-in-out infinite;
+  animation-play-state: var(--cb-play, running);
+  will-change: opacity;
+}
+
+/* 呼吸 keyframes — 幅度随 --cb-amp（= intensity）缩放，与旧 rAF 版逐帧等价：
+   旧版 scale = 0.98 + phase*0.04*i、opacity = 0.85 + phase*0.15*i（i=intensity） */
+@keyframes canvas-breathe {
+  0%, 100% {
+    transform: scale(calc(1 - 0.02 * var(--cb-amp, 1)));
+    opacity: calc(1 - 0.15 * var(--cb-amp, 1));
+  }
+  50% {
+    transform: scale(calc(1 + 0.02 * var(--cb-amp, 1)));
+    opacity: 1;
+  }
+}
+@keyframes canvas-glow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: var(--cb-glow, 0.5); }
 }
 
 /* 粒子背景层 — 永远存在 */
@@ -966,8 +1011,9 @@ onUnmounted(() => {
 /* 结晶计数 */
 .crystal-count {
   position: absolute;
-  top: 14px;
-  left: 16px;
+  /* Android targetSdk36 强制 edge-to-edge：避让系统状态栏（桌面 env=0，渲染不变） */
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  left: calc(16px + env(safe-area-inset-left, 0px));
   font-size: 13px;
   opacity: 0.35;
   z-index: 10;
