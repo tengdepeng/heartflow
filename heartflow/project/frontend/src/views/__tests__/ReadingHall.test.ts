@@ -4,6 +4,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { _resetReadingModuleState } from '../../modules/reading/challenges'
+import {
+  emitRoomSignal,
+  clearRoomSignals,
+  getSignals,
+  ROOM_LABELS,
+} from '../../modules/room-resonance'
 
 // ---- 模拟 storage ----
 const mockStore: Record<string, any> = {}
@@ -37,6 +43,14 @@ async function getWrapper() {
       stubs: {
         Teleport: true,
         Transition: true,
+        // ⚠️ shallow 模式下桩组件默认「不渲染插槽」，而阅览殿全部正文都挂在
+        // RoomLayout 内 → 不显式透传插槽时 wrapper.text() 恒为空串（会让本文件
+        // 15/20 用例静默红灯）。这里给出会渲染 title/kicker props + meta +
+        // 默认插槽的手写桩，既修复红灯也保住「标题经 props 下传」这一契约断言。
+        RoomLayout: {
+          props: ['title', 'kicker'],
+          template: '<div><i class="stub-room-title">{{ title }}</i><i class="stub-room-kicker">{{ kicker }}</i><slot name="meta" /><slot /></div>',
+        },
       },
     },
   })
@@ -250,5 +264,76 @@ describe('集成：书评 · 笔记面板', () => {
     expect(wrapper.findAll('.brv-review').length).toBe(2)
     await wrapper.find('.brv-del').trigger('click')
     expect(wrapper.findAll('.brv-review').length).toBe(1)
+  })
+})
+
+// ============================================================
+// 集成：跨房间共鸣（阅览殿纳入 RoomKey='reading'）
+// ============================================================
+describe('ReadingHall 跨房间共鸣', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.keys(mockStore).forEach(k => delete mockStore[k])
+    clearRoomSignals()
+    _resetReadingModuleState()
+  })
+
+  it('阅览殿加入房间标签表', () => {
+    expect(ROOM_LABELS['reading']).toBe('阅览殿')
+  })
+
+  it('挂载后发射本房「阅读」信号（空书架）', async () => {
+    await getWrapper()
+    const mine = getSignals('reading')
+    expect(mine.length).toBeGreaterThan(0)
+    const last = mine[mine.length - 1]
+    expect(last.room).toBe('reading')
+    expect(last.kind).toBe('reading')
+    expect(last.label).toBe('书架还空着')
+  })
+
+  it('呈现其他房间的光痕并过滤本房回声', async () => {
+    emitRoomSignal({ room: 'study', kind: 'note', label: '3 篇思绪在架上', ts: Date.now() })
+    const wrapper = await getWrapper()
+    const text = wrapper.text()
+    expect(text).toContain('跨房间共鸣态势')
+    expect(text).toContain('思绪书房')
+    expect(text).toContain('3 篇思绪在架上')
+    // 本房回声不复现
+    const items = wrapper.findAll('.climate-item')
+    expect(items).toHaveLength(1)
+    expect(items[0].text()).not.toContain('阅览殿')
+  })
+
+  it('无其他房间信号时展示静默文案', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.climate-empty').exists()).toBe(true)
+    expect(wrapper.findAll('.climate-item')).toHaveLength(0)
+  })
+
+  // ⚠️ 本用例必须放在最后：它用 vi.resetModules() 重置模块表以让 hall 引擎的
+  // 模块级 books/sessions 快照吃到种子数据，此后本文件顶部的静态 import 绑定
+  // 指向旧单例，故它之后不得再有依赖 store 的用例。
+  it('有藏书 / 阅读会话时信号带藏书、在读与今日分钟', async () => {
+    const today = new Date().toISOString().split('T')[0]
+    mockStore['hf:reading:books'] = JSON.stringify([
+      { id: 'b1', title: '活着', author: '余华', totalPages: 200, currentPage: 40, status: 'reading', tags: [], quotes: [], totalReadingTime: 25 },
+      { id: 'b2', title: '平凡的世界', author: '路遥', totalPages: 300, currentPage: 300, status: 'finished', tags: [], quotes: [], totalReadingTime: 90 },
+    ])
+    mockStore['hf:reading:sessions'] = JSON.stringify([
+      { id: 's1', bookId: 'b1', startPage: 0, endPage: 40, duration: 25, date: today, timestamp: new Date().toISOString() },
+    ])
+
+    vi.resetModules()
+    const { useReadingHall } = await import('../../modules/reading/hall')
+    const { getSignals: freshSignals } = await import('../../modules/room-resonance')
+    expect(useReadingHall().books.value).toHaveLength(2)
+
+    await getWrapper()
+    const last = freshSignals('reading').pop()!
+    expect(last.label).toContain('藏书 2 本')
+    expect(last.label).toContain('在读 1')
+    expect(last.label).toContain('今日 25 分')
+    expect(last.detail).toBe('已读完 1 本')
   })
 })

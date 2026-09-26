@@ -156,6 +156,18 @@
     <!-- 书评 · 笔记面板（INCR-239：补挂载孤儿组件 BookReviewsPanel，reading·useBookReviews/useReadingNotes 完备） -->
     <BookReviewsPanel />
 
+    <!-- 跨房间共鸣态势（仅其他房间，过滤本房回声）· 阅览殿已纳入 RoomKey -->
+    <section data-enter class="cross-room-climate">
+      <h2 class="climate-title">跨房间共鸣态势</h2>
+      <p v-if="externalFeed.length === 0" class="climate-empty">各房间尚在静默，去其他房间留一道光痕吧。</p>
+      <ul v-else class="climate-list">
+        <li v-for="s in externalFeed" :key="s.room" class="climate-item">
+          <span class="climate-room">{{ roomLabel(s.room) }}</span>
+          <span class="climate-signal">{{ s.label }}</span>
+        </li>
+      </ul>
+    </section>
+
     <!-- ========== 摘录对话框 ========== -->
     <div data-enter v-if="showDialog" class="rh-dialog-overlay" @click.self="closeDialog">
       <div class="rh-dialog-card">
@@ -177,12 +189,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
-import { useReadingInsights, useReadingSpeed, useReading } from '../modules/reading'
+import { useReadingInsights, useReadingSpeed, useReading, useReadingHall } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
+import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
 import ClassicalVerticalPanel from '../components/ClassicalVerticalPanel.vue'
 import ReadingHabitsPanel from '../components/ReadingHabitsPanel.vue'
@@ -349,8 +362,40 @@ const readingAnalytics = computed(() => {
 
 const speedStats = computed(() => readingSpeed.computeSpeedStats())
 
+// ---- 跨房间共鸣联动：阅览殿发射「阅读」信号，并呈现其他房间的光痕 ----
+// 数据源 = 阅览殿自有引擎 useReadingHall（hf:reading:books / hf:reading:sessions）；
+// 信号纯内存态、不落盘、不外发（守「本地私有」）。
+const { crossRoomFeed, emitRoomSignal } = useRoomResonance()
+const hall = useReadingHall()
+const externalFeed = computed(() => crossRoomFeed.value.filter((s) => s.room !== 'reading'))
+
+function roomLabel(r: keyof typeof ROOM_LABELS): string {
+  return ROOM_LABELS[r]
+}
+
+function emitReadingSignal() {
+  const stats = hall.getReadingStats()
+  const readingNow = hall.getBooksByStatus('reading').length
+  const label = stats.totalBooks === 0
+    ? '书架还空着'
+    : `藏书 ${stats.totalBooks} 本${readingNow > 0 ? ` · 在读 ${readingNow}` : ''}${stats.todayMinutes > 0 ? ` · 今日 ${stats.todayMinutes} 分` : ''}`
+  emitRoomSignal({
+    room: 'reading',
+    kind: 'reading',
+    label,
+    detail: stats.finishedBooks > 0 ? `已读完 ${stats.finishedBooks} 本` : undefined,
+    ts: Date.now(),
+    strength: Math.min(1, hall.getGoalProgress().dailyProgress),
+  })
+}
+
 // ---- 初始化 ----
-onMounted(reading.load)
+onMounted(() => {
+  reading.load()
+  emitReadingSignal()
+})
+// 藏书 / 阅读会话增减时刷新阅览殿信号，让其他房间实时感知
+watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSignal)
 </script>
 
 <style scoped>
@@ -745,6 +790,55 @@ onMounted(reading.load)
   color: var(--accent);
   margin: 0 0 10px;
   letter-spacing: 1px;
+}
+
+/* ---- 跨房间共鸣态势（与思绪书房同源样式） ---- */
+.cross-room-climate {
+  position: relative;
+  z-index: 1;
+  margin: 20px 0 0;
+  padding: 18px 20px;
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+}
+
+.climate-title {
+  margin: 0 0 12px;
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: rgba(var(--accent-rgb), 0.6);
+}
+
+.climate-empty {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.4);
+}
+
+.climate-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.climate-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.climate-room {
+  flex: 0 0 72px;
+  color: rgba(var(--accent-rgb), 0.75);
+}
+
+.climate-signal {
+  color: rgba(var(--accent-rgb), 0.9);
 }
 
 /* ---- 对话框 ---- */
