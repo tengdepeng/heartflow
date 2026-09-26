@@ -57,6 +57,7 @@
               :isFocusing="isFocusing"
               :beadCount="timer.todayCompletedCount"
               :progress="progress"
+              :translucent="true"
               @toggle="toggle"
             />
           </div>
@@ -489,19 +490,7 @@ watch(() => timer.isCompleted, (done) => {
   filter: drop-shadow(0 0 30px rgba(165, 195, 235, 0.45));
 }
 
-/* 对调：大珠 = 月华光晕 + 玉白核（发光月轮；白色实心已移交幕僚球） */
-.focus-orb :deep(.bead-body) {
-  fill: url(#moonDisc);
-  filter: none;
-}
-
-.focus-orb :deep(.bead-gloss) {
-  opacity: 0.5;
-}
-
-.focus-orb :deep(.bead-core) {
-  filter: drop-shadow(0 0 28px rgba(226, 238, 255, 0.92));
-}
+/* 注：珠体/白核透明度现由 JadeBead 的 translucent prop 在组件内部处理（:deep 覆盖会被子组件 scoped 样式压过，不生效） */
 
 /* 外光晕：清冷月华（对调后由它承担大珠的「光晕」主体） */
 .focus-orb :deep(.bead-aura) {

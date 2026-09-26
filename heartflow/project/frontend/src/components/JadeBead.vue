@@ -44,26 +44,15 @@
           <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
           <feComposite in="SourceGraphic" in2="blur" operator="over" />
         </filter>
-        <!-- 玻璃体积渐变（translucent 专用）：受光面亮、向边缘转暗，营造球体体积 -->
-        <radialGradient id="glassGradient" cx="35%" cy="28%" r="82%">
-          <stop offset="0%" stop-color="rgba(230,241,253,0.55)" />
-          <stop offset="40%" stop-color="rgba(174,202,236,0.28)" />
-          <stop offset="78%" stop-color="rgba(120,150,198,0.18)" />
-          <stop offset="100%" stop-color="rgba(96,126,176,0.14)" />
-        </radialGradient>
-        <!-- Fresnel 边缘亮环：中心透明、近边缘提亮，模拟玻璃折射边缘光 -->
-        <radialGradient id="glassRim" cx="50%" cy="50%" r="50%">
-          <stop offset="56%" stop-color="rgba(206,226,250,0)" />
-          <stop offset="90%" stop-color="rgba(208,227,250,0.40)" />
-          <stop offset="100%" stop-color="rgba(208,227,250,0.14)" />
-        </radialGradient>
       </defs>
 
-      <!-- 主体圆 -->
+      <!-- 主体圆：translucent 时为平涂半透明圆盘 + 2px 亮边（对齐幕僚玻璃球）；否则用玉质径向渐变 -->
       <circle
         cx="100" cy="100" r="62"
-        :fill="translucent ? 'url(#glassGradient)' : `url(#${gradientId})`"
-        filter="url(#innerGlow)"
+        :fill="translucent ? 'rgba(172, 200, 235, 0.16)' : `url(#${gradientId})`"
+        :stroke="translucent ? 'rgba(172, 200, 235, 0.42)' : 'none'"
+        :stroke-width="translucent ? 2 : 0"
+        :filter="translucent ? undefined : 'url(#innerGlow)'"
         class="bead-body"
       />
       <!-- 光泽层 -->
@@ -78,21 +67,7 @@
         fill="url(#moonCore)"
         class="bead-core"
       />
-      <!-- 玻璃质感层（仅 translucent）：Fresnel 边缘亮环 + 镜面高光 -->
-      <circle
-        v-if="translucent"
-        cx="100" cy="100" r="60"
-        fill="url(#glassRim)"
-        class="bead-glass-rim"
-      />
-      <ellipse
-        v-if="translucent"
-        cx="74" cy="66" rx="16" ry="10"
-        fill="rgba(255,255,255,0.82)"
-        filter="url(#innerGlow)"
-        transform="rotate(-28 74 66)"
-        class="bead-spec"
-      />
+      <!-- translucent 平涂圆盘由 bead-body 自身 fill/stroke 实现，无需额外质感层 -->
       <!-- 呼吸环 -->
       <circle
         cx="100" cy="100" r="68"
@@ -412,25 +387,18 @@ function particleStyle(i: number) {
 .pulse-leave-active { transition: opacity 0.5s; }
 .pulse-enter-from, .pulse-leave-to { opacity: 0; }
 
-/* ---- 通透玻璃模式（translucent prop）：对齐幕僚玻璃球，带体积/边缘光/高光 质感 ---- */
-/* 置于基础规则之后，等特异性下靠源码顺序胜出，确保必定生效。
-   幕僚球：background = primary+'22'（≈13% 透明）/ border = primary+'44'（≈27% 透明）。
-   此处以心流冷色复刻，并加玻璃 质感：径向体积渐变 + Fresnel 边缘亮环 + 镜面高光。
-   珠体填充由模板按 translucent 切到 glassGradient（含受光→边缘的体积感），不再用平涂。 */
+/* ---- 通透玻璃模式（translucent prop）：与幕僚玻璃球同款 ----
+   幕僚球：background = primary+'22'（≈13% 透明，平涂）+ border = 2px solid primary+'44'（≈27% 透明）。
+   此处以心流冷色复刻：平涂半透明圆盘 + 2px 亮边，无体积渐变/高光/Fresnel。
+   珠体填充与亮边由模板按 translucent 条件直接给出，此处仅收尾隐藏质感层。 */
 .bead--translucent .bead-gloss {
-  opacity: 0.3;
-}
-.bead--translucent .bead-glass-rim {
-  /* 填充由 glassRim 渐变提供（中心透明、边缘提亮），无需额外样式 */
-}
-.bead--translucent .bead-spec {
-  /* 镜面高光，填充/模糊由属性提供 */
+  opacity: 0;
 }
 .bead--translucent .bead-core {
   opacity: 0;
 }
 .bead--translucent .bead-ring {
-  stroke: rgba(172, 200, 235, 0.5);
+  stroke: rgba(172, 200, 235, 0.42);
   opacity: 0.5;
 }
 .bead--translucent .bead-aura {
@@ -440,6 +408,6 @@ function particleStyle(i: number) {
   background: rgba(172, 200, 235, 0.55);
 }
 .bead--translucent .bead-svg {
-  filter: drop-shadow(0 0 26px rgba(150, 185, 230, 0.45));
+  filter: drop-shadow(0 0 18px rgba(150, 185, 230, 0.30));
 }
 </style>
