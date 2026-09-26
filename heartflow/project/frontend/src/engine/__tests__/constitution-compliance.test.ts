@@ -29,9 +29,10 @@ import { refreshConstitutionEffect } from '../constitution-effect'
  * 「第2条：无超过 50 行的模块级常量定义」14988ms，双双逼近/越过
  * vitest 默认 testTimeout=15000ms，导致**与功能无关的随机红灯**。
  *
- * 放宽到 60s 只抬超时上限，不影响用例本身的合规检测能力。
+ * 先用 60s 抬限，但在全量 12867 项并行洪流下仍被冲到 60s 超时；
+ * 故再放到 120s（仅抬上限，不影响用例本身的合规检测能力）。
  */
-const SCAN_TIMEOUT = 60_000
+const SCAN_TIMEOUT = 120_000
 
 // ---- 2.1.1 文案中立性扫描 ----
 

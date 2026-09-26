@@ -180,7 +180,7 @@ describe('AdvisorHub 视图（真实档案层）', () => {
   it('渲染标题"幕僚阁"', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('幕僚阁')
-  })
+  }, 45000)
 
   it('显示幕僚总数为 0', async () => {
     const wrapper = await getWrapper()

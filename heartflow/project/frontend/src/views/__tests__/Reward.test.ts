@@ -84,7 +84,7 @@ describe('Reward 视图', () => {
   it('渲染标题"劳酬"', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('劳酬')
-  })
+  }, 45000)
 
   it('渲染天平对比概览', async () => {
     const wrapper = await getWrapper()

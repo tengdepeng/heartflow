@@ -118,7 +118,7 @@ describe('GuardRoom 视图', () => {
   it('渲染标题', async () => {
     const wrapper = await getWrapper()
     expect(wrapper.text()).toContain('守护室')
-  })
+  }, 45000)
 
   it('显示联系人数量', async () => {
     mockStore['hf:contacts'] = [
