@@ -17,7 +17,7 @@ function entry(overrides: Record<string, any> = {}) {
   }
 }
 
-async function mountPanel(kvStore: Record<string, any> = {}) {
+async function mountPanel(kvStore: Record<string, any> = {}, props: Record<string, any> = {}) {
   vi.resetModules()
   const storageMock = createMockStorage()
   storageMock.setItem('heartflow:storage', JSON.stringify({
@@ -29,9 +29,15 @@ async function mountPanel(kvStore: Record<string, any> = {}) {
   ;(globalThis as any).localStorage = storageMock
   invalidateCache()
   const mod = await import('../PhotoDiaryPanel.vue')
-  const wrapper = mount(mod.default)
+  // Teleport 桩掉：全屏浮层内容改在原地渲染，便于断言
+  const wrapper = mount(mod.default, { props, global: { stubs: { Teleport: true } } })
   await wrapper.vm.$nextTick()
   return wrapper
+}
+
+function savedEntry() {
+  const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+  return saved.kvStore['hf:anchor:photo_diary'][0]
 }
 
 describe('PhotoDiaryPanel 照片日记', () => {
@@ -63,5 +69,94 @@ describe('PhotoDiaryPanel 照片日记', () => {
     await wrapper.find('.pd-img-remove').trigger('click')
     const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
     expect(saved.kvStore['hf:anchor:photo_diary'][0].images.length).toBe(1)
+  })
+})
+
+// ============================================================
+// P1：拖拽排序 / 逐图说明 / 全屏导航 / 日期绑定
+// ============================================================
+describe('PhotoDiaryPanel P1', () => {
+  const A = 'data:image/png;base64,AAA'
+  const B = 'data:image/png;base64,BBB'
+  const C = 'data:image/png;base64,CCC'
+
+  it('拖拽缩略图可排序并持久化', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ images: [A, B, C] })],
+    })
+    const wraps = wrapper.findAll('.pd-img-wrap')
+    expect(wraps.length).toBe(3)
+
+    await wraps[0].trigger('dragstart')
+    await wraps[2].trigger('dragover')
+    await wraps[2].trigger('drop')
+
+    expect(savedEntry().images).toEqual([B, C, A])
+    // 顺序徽标随之重排
+    expect(wrapper.findAll('.pd-img-order').map(n => n.text())).toEqual(['1', '2', '3'])
+  })
+
+  it('点击缩略图打开全屏并能翻页', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ images: [A, B] })],
+    })
+    expect(wrapper.find('.pd-viewer').exists()).toBe(false)
+    await wrapper.findAll('.pd-img')[0].trigger('click')
+    expect(wrapper.find('.pd-viewer').exists()).toBe(true)
+    expect(wrapper.find('.pd-viewer-idx').text()).toBe('1 / 2')
+
+    const next = wrapper.findAll('.pd-viewer-bar .pd-btn').find(b => b.text().includes('下一张'))!
+    await next.trigger('click')
+    expect(wrapper.find('.pd-viewer-idx').text()).toBe('2 / 2')
+    expect(wrapper.find('.pd-viewer-img').attributes('src')).toBe(B)
+  })
+
+  it('全屏内写单图说明并持久化到 captions 下标位', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ images: [A, B] })],
+    })
+    await wrapper.findAll('.pd-img')[1].trigger('click')
+    const input = wrapper.find('.pd-viewer-cap-input')
+    await input.setValue('第二张的说明')
+    await input.trigger('change')
+    expect(savedEntry().captions).toEqual(['', '第二张的说明'])
+  })
+
+  it('全屏内可前移排序与删除当前图', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ images: [A, B, C] })],
+    })
+    await wrapper.findAll('.pd-img')[1].trigger('click')
+    const shiftBack = wrapper.findAll('.pd-viewer-bar .pd-btn').find(b => b.text() === '前移')!
+    await shiftBack.trigger('click')
+    expect(savedEntry().images).toEqual([B, A, C])
+
+    const del = wrapper.findAll('.pd-viewer-bar .pd-btn').find(b => b.text() === '删除此图')!
+    await del.trigger('click')
+    expect(savedEntry().images).toEqual([A, C])
+  })
+
+  it('日期绑定：展示该日心锚数并提供心锚日期快速跳转', async () => {
+    const today = new Date()
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`
+    const wrapper = await mountPanel(
+      { 'hf:anchor:photo_diary': [entry({ date: todayStr, images: [A] })] },
+      { anchorDates: [todayStr, '2026-09-20', '2026-09-18'] },
+    )
+    expect(wrapper.text()).toContain('该日心锚')
+    const chips = wrapper.findAll('.pd-date-chip')
+    expect(chips.length).toBe(3)
+    expect(chips[0].text()).toBe(todayStr.slice(5))
+
+    // 今日已有 1 张 → 余量 8
+    expect(wrapper.text()).toContain('8')
+    expect(wrapper.text()).toContain('1 / 9 张')
+  })
+
+  it('无心锚日期时不渲染跳转 chips', async () => {
+    const wrapper = await mountPanel({ 'hf:anchor:photo_diary': [entry({ images: [A] })] })
+    expect(wrapper.findAll('.pd-date-chip').length).toBe(0)
+    expect(wrapper.text()).toContain('该日心锚')
   })
 })

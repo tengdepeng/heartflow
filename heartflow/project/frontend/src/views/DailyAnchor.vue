@@ -469,8 +469,8 @@
     <!-- 心愿锚 -->
     <WishAnchorPanel />
 
-    <!-- 照片日记 -->
-    <PhotoDiaryPanel />
+    <!-- 照片日记（传入有心锚的日期，用于日期强绑定与快速跳转） -->
+    <PhotoDiaryPanel :anchor-dates="anchorDatesWithItems" />
 
     <!-- 智能提醒 -->
     <SmartReminderPanel :anchors="anchor.allAnchors.value" />
@@ -578,6 +578,11 @@ function emitAnchorResonanceSignal() {
   })
 }
 watch(() => anchor.todayAnchors.value.length, emitAnchorResonanceSignal)
+
+// ---- 照片日记的日期强绑定：把「有心锚的日期」下传给面板 ----
+const anchorDatesWithItems = computed<string[]>(() =>
+  [...new Set(anchor.allAnchors.value.map(a => a.targetDate).filter(Boolean))],
+)
 
 const newText = ref('')
 type Scale = 'day' | 'week' | 'month' | 'year'
