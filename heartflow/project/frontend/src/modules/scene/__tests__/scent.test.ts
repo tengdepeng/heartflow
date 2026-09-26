@@ -67,7 +67,7 @@ describe('useRoomScent 房间气味维度', () => {
   })
 
   it('cycleSceneScent 在当前房间循环切换气味', () => {
-    setScene('bath') // 默认薄荷清凉
+    setScene('bathroom') // 默认薄荷清凉
     const m = useRoomScent()
     const before = m.currentScent.value?.id
     m.cycleSceneScent()
