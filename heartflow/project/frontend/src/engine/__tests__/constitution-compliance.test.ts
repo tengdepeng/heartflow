@@ -20,6 +20,19 @@ import { storage } from '../../engine/storage'
 import { useConfigStore } from '../../stores/config'
 import { refreshConstitutionEffect } from '../constitution-effect'
 
+/**
+ * 全仓扫描型用例的超时上限。
+ *
+ * 这类用例要 glob 遍历 src/** 再逐文件读取跑正则，天然 IO 密集：
+ * **单独跑约 1s**，但并行跑时会被其它 worker 抢 IO 而急剧膨胀——
+ * 实测「第1条：src 目录下无未声明的网络请求」在并行下涨到 18457ms、
+ * 「第2条：无超过 50 行的模块级常量定义」14988ms，双双逼近/越过
+ * vitest 默认 testTimeout=15000ms，导致**与功能无关的随机红灯**。
+ *
+ * 放宽到 60s 只抬超时上限，不影响用例本身的合规检测能力。
+ */
+const SCAN_TIMEOUT = 60_000
+
 // ---- 2.1.1 文案中立性扫描 ----
 
 /**
@@ -142,7 +155,7 @@ describe('宪法合规 · 文案中立性', () => {
       const msg = violations.map(v => `  ${v.file}: ${v.match}`).join('\n')
       expect.fail(`发现 ${violations.length} 处文案违规（第3条宪法：心流第一）：\n${msg}`)
     }
-  })
+  }, SCAN_TIMEOUT)
 
   it('第3条：所有 .vue 文件无暗示性完成度/比较性文案', () => {
     // 第2条超级自定义：如果用户启用了 comparativePhrases 覆盖，跳过此检测
@@ -198,7 +211,7 @@ describe('宪法合规 · 文案中立性', () => {
       const msg = violations.map(v => `  ${v.file}: 匹配模式 "${v.pattern}"`).join('\n')
       expect.fail(`发现 ${violations.length} 处暗示性文案违规（第3条宪法：心流第一）：\n${msg}`)
     }
-  })
+  }, SCAN_TIMEOUT)
 })
 
 // ---- 2.1.2 交互默认值合规 ----
@@ -363,7 +376,7 @@ describe('宪法合规 · 数据主权 （第1条）', () => {
       )
     }
     expect(violations).toEqual([])
-  })
+  }, SCAN_TIMEOUT)
 })
 
 // ---- 2.2 配置完备性扫描 ----
@@ -477,7 +490,7 @@ describe('宪法合规 · 硬编码值扫描 （第2条）', () => {
       console.warn(`[宪法合规] 以下文件包含大段常量定义，可能需配置化：\n${hugeConstantFiles.map(f => `  - ${f}`).join('\n')}`)
     }
     expect(true).toBe(true)
-  })
+  }, SCAN_TIMEOUT)
 
   it('第2条：所有模块 DEFAULT_* 常量与 core.ts 中定义一致', async () => {
     const { DEFAULT_CONFIG } = await import('../../engine/storage/core')
