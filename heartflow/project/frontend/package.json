@@ -12,11 +12,12 @@
     "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "check:circular": "madge --circular --extensions ts --ts-config tsconfig.json src",
-    "guard": "vue-tsc --noEmit && eslint . --quiet && vitest run --no-file-parallelism && vite build --outDir node_modules/.hf-guard-dist",
-    "tauri": "tauri",
+    "check:circular": "node scripts/gates/check-circular-deps.mjs",
+    "check:circular:update": "node scripts/gates/check-circular-deps.mjs --update-baseline",
+    "guard": "vue-tsc --noEmit && eslint . --quiet && node scripts/gates/check-circular-deps.mjs && vitest run --no-file-parallelism && vite build --outDir node_modules/.hf-guard-dist",
+    "tauri": "cd ../ && tauri",
     "tauri:dev": "node ../scripts/tauri-dev.mjs",
-    "tauri:build": "tauri build --project-dir ../src-tauri"
+    "tauri:build": "cd ../ && tauri build"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

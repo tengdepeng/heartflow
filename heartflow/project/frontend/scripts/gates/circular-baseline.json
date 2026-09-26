@@ -1,0 +1,15 @@
+{
+  "$comment": [
+    "循环依赖基线：登记「已知且已评估」的环，闸门对它们放行，对新增环红灯。",
+    "当前状态：**空**。全仓 0 个环（1426 文件 / ~2950 条静态导入边）。",
+    "历史：曾登记 9 个环，形态统一为「barrel index.ts ↔ *-bridge.ts」——模块内某 *-bridge.ts",
+    "从自己的 barrel `./index` 取符号，而 index.ts 又 `export { ... } from './xxx-bridge'` 回 re-export。",
+    "2026-09 已全部真修，配方两种：",
+    "  (a) 符号在兄弟文件里 → bridge 改指真实定义文件（worklog / parallel-world / visualization）；",
+    "  (b) 符号定义在 index.ts 内 → 把「本地定义段」下沉到兄弟 *-store.ts，index.ts 退化为纯 barrel",
+    "      （bag / play / plugin / seasonal / visitor；goal 为 store 拆分）。",
+    "新增环请务必先尝试真正打断（优先 (a)(b) 两种配方），不要直接登记。",
+    "确需临时放行：node scripts/gates/check-circular-deps.mjs --update-baseline，并在本数组补写原因。"
+  ],
+  "cycles": []
+}
