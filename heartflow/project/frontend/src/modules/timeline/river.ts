@@ -2,6 +2,7 @@ import { storage } from '../../engine/storage'
 import type { TimeCrystal, FocusSession, Note } from '../../types'
 import type { EmotionRecord } from '../emotion'
 import type { Anchor } from '../anchor'
+import { PHOTO_DIARY_KEY, type PhotoEntry } from '../anchor/photo-diary'
 import { getBodyRingLogs } from '../body/rings'
 import type { DailyRingLog } from '../body/rings'
 import { getHabits } from '../discipline'
@@ -13,7 +14,7 @@ import type { BreakRecord } from '../rest'
 import { getDialogueSessions } from '../mirror'
 import type { DialogueSession } from '../mirror'
 
-export type RiverItemType = 'crystal' | 'note' | 'emotion' | 'session' | 'anchor' | 'body' | 'habit' | 'movement' | 'rest' | 'dialogue'
+export type RiverItemType = 'crystal' | 'note' | 'emotion' | 'session' | 'anchor' | 'body' | 'habit' | 'movement' | 'rest' | 'dialogue' | 'photo'
 
 export interface RiverItem {
   type: RiverItemType
@@ -29,6 +30,7 @@ export interface RiverItem {
   movement?: MovementRecord
   rest?: BreakRecord
   dialogue?: DialogueSession
+  photo?: PhotoEntry
 }
 
 /** 返回跨时间线类型唯一且稳定的项键。 */
@@ -47,6 +49,7 @@ export interface RiverSource {
   movementRecords: MovementRecord[]
   breakRecords: BreakRecord[]
   dialogueSessions: DialogueSession[]
+  photoEntries?: PhotoEntry[]
 }
 
 /** 管理可变播放速率的单一回看计时器。 */
@@ -190,6 +193,17 @@ export function createRiverItems(
     }
   }
 
+  if (enabled.has('photo')) {
+    for (const entry of source.photoEntries ?? []) {
+      items.push({
+        type: 'photo',
+        id: `photo-${entry.id}`,
+        ts: new Date(entry.createdAt).getTime(),
+        photo: entry,
+      })
+    }
+  }
+
   return items.sort((a, b) => b.ts - a.ts)
 }
 
@@ -205,6 +219,7 @@ export function getRiverSource(): RiverSource {
     movementRecords: getMovementRecords(),
     breakRecords: getBreakRecords(),
     dialogueSessions: getDialogueSessions(),
+    photoEntries: storage.getKV<PhotoEntry[]>(PHOTO_DIARY_KEY, []),
   }
 }
 

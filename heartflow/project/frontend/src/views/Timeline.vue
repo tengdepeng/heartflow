@@ -88,6 +88,7 @@
                 :note="item.note??null" :emotion="item.emotion??null" :anchor="item.anchor??null"
                 :body="item.body??null" :habit="item.habit??null"
                 :movement="item.movement??null" :rest="item.rest??null" :dialogue="item.dialogue??null"
+                :photo="item.photo??null"
                 :class="{'frag-highlight':highlightedIds.has(getRiverItemKey(item)), 'frag-dimmed':dimmedIds.has(getRiverItemKey(item))}"
                 @click="handleFragmentClick(item)"/>
             </template>
@@ -134,8 +135,8 @@ const { entranceClass } = useViewEntrance()
 const router=useRouter();const dataPort=useDataPort()
 const activeSubTab=ref<string>('river')
 const subTabs=[{id:'river',label:'时间之河',icon:'≋'},{id:'calendar',label:'日历',icon:'📅'},{id:'stats',label:'统计',icon:'📊'},{id:'radar',label:'数据雷达',icon:'📡'},{id:'export',label:'导出',icon:'📤'},{id:'lens',label:'透视',icon:'🔭'},{id:'archive',label:'时光档案',icon:'🗓️'},{id:'records',label:'记录',icon:'📋'},{id:'corridor',label:'时间长廊',icon:'◈'}]
-const activeFilters=ref<RiverItemType[]>(['crystal','note','emotion','session','anchor','body','habit','movement','rest','dialogue'])
-const typeFilters:{key:RiverItemType;label:string;icon:string}[]=[{key:'crystal',label:'结晶',icon:'💎'},{key:'note',label:'笔记',icon:'📝'},{key:'emotion',label:'情绪',icon:'🌷'},{key:'session',label:'专注',icon:'⏱️'},{key:'anchor',label:'心锚',icon:'⚓'},{key:'body',label:'身体',icon:'🌿'},{key:'habit',label:'习惯',icon:'🎯'},{key:'movement',label:'运动',icon:'🏃'},{key:'rest',label:'休息',icon:'🍃'},{key:'dialogue',label:'对话',icon:'💬'}]
+const activeFilters=ref<RiverItemType[]>(['crystal','note','emotion','session','anchor','body','habit','movement','rest','dialogue','photo'])
+const typeFilters:{key:RiverItemType;label:string;icon:string}[]=[{key:'crystal',label:'结晶',icon:'💎'},{key:'note',label:'笔记',icon:'📝'},{key:'emotion',label:'情绪',icon:'🌷'},{key:'session',label:'专注',icon:'⏱️'},{key:'anchor',label:'心锚',icon:'⚓'},{key:'body',label:'身体',icon:'🌿'},{key:'habit',label:'习惯',icon:'🎯'},{key:'movement',label:'运动',icon:'🏃'},{key:'rest',label:'休息',icon:'🍃'},{key:'dialogue',label:'对话',icon:'💬'},{key:'photo',label:'照片',icon:'📷'}]
 function toggleFilter(k:RiverItemType){const i=activeFilters.value.indexOf(k);i>=0&&activeFilters.value.length>1?activeFilters.value.splice(i,1):activeFilters.value.push(k)}
 
 type ImportFeedback = { kind:'success';counts:ImportCounts } | { kind:'error';message:string }
@@ -242,6 +243,7 @@ function handleFragmentClick(item:RiverItem){
   else if(item.type==='movement')router.push('/movement')
   else if(item.type==='rest')router.push('/rest')
   else if(item.type==='dialogue')router.push('/word-mirror')
+  else if(item.type==='photo')router.push('/anchor')
 }
 
 onUnmounted(stopReplay)

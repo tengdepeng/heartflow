@@ -136,6 +136,26 @@
           </span>
         </div>
       </template>
+
+      <!-- 照片日记 -->
+      <template v-else-if="type === 'photo'">
+        <div class="frag-icon-wrap photo-icon">📷</div>
+        <div class="frag-main">
+          <span class="frag-title">照片日记 · {{ photo?.images?.length || 0 }} 张</span>
+          <span class="frag-meta">{{ photo?.date }} · {{ formatTimeShort(photo?.createdAt) }}</span>
+          <div class="frag-thumbs">
+            <img
+              v-for="(t, i) in (photo?.thumbs || []).filter(Boolean).slice(0, 4)"
+              :key="i"
+              :src="t"
+              class="frag-thumb"
+              alt="照片"
+              loading="lazy"
+            />
+          </div>
+          <span v-if="photo?.caption" class="frag-excerpt">{{ photo.caption }}</span>
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -151,9 +171,10 @@ import { HABIT_DIFFICULTY_META, type Habit } from '../modules/discipline'
 import { MOVEMENT_TYPE_META, MOVEMENT_INTENSITY_META, type MovementRecord } from '../modules/movement'
 import type { BreakRecord } from '../modules/rest'
 import type { DialogueSession } from '../modules/mirror'
+import type { PhotoEntry } from '../modules/anchor/photo-diary'
 
 const props = defineProps<{
-  type: 'crystal' | 'note' | 'emotion' | 'session' | 'anchor' | 'body' | 'habit' | 'movement' | 'rest' | 'dialogue'
+  type: 'crystal' | 'note' | 'emotion' | 'session' | 'anchor' | 'body' | 'habit' | 'movement' | 'rest' | 'dialogue' | 'photo'
   crystal?: TimeCrystal | null
   session?: FocusSession | null
   note?: Note | null
@@ -164,6 +185,7 @@ const props = defineProps<{
   movement?: MovementRecord | null
   rest?: BreakRecord | null
   dialogue?: DialogueSession | null
+  photo?: PhotoEntry | null
 }>()
 
 defineEmits<{ click: [] }>()
@@ -180,6 +202,7 @@ const dotColor = computed(() => {
     case 'movement': return MOVEMENT_INTENSITY_META[props.movement?.intensity ?? 'light'].color
     case 'rest': return '#b5707a'
     case 'dialogue': return '#22d3ee'
+    case 'photo': return '#c49a5a'
     default: return '#555'
   }
 })
@@ -377,6 +400,22 @@ function formatTimeShort(iso?: string | null): string {
 .frag-intensity { font-size: 10px; padding: 1px 5px; border-radius: 3px; background: rgba(255,255,255,0.06); }
 .rest-icon { color: #b5707a; }
 .dialogue-icon { color: #22d3ee; }
+.photo-icon { color: #c49a5a; }
+
+.frag-thumbs {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.frag-thumb {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
 
 .done-mark { color: var(--success); }
 .pending-mark { color: rgba(255,255,255,0.3); }

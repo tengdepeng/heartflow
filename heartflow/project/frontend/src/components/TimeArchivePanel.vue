@@ -119,7 +119,7 @@ import type { RiverItemType } from '../modules/timeline/river'
 
 const TYPE_LABELS: Partial<Record<RiverItemType, string>> = {
   session: '专注', crystal: '结晶', note: '笔记', emotion: '情绪', anchor: '心锚',
-  body: '身体', habit: '习惯', movement: '运动', rest: '休息', dialogue: '对话',
+  body: '身体', habit: '习惯', movement: '运动', rest: '休息', dialogue: '对话', photo: '照片',
 }
 
 const EMO_BADGE: Record<string, string> = {

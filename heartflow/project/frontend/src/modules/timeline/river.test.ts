@@ -257,6 +257,44 @@ describe('createRiverItems', () => {
     expect(items[0].dialogue?.title).toBe('今晚复盘')
     expect(items[0].id).toBe('dialogue-dlg-1')
   })
+
+  it('聚合照片日记为独立照片条目（启用时）', () => {
+    const items = createRiverItems(
+      {
+        ...source,
+        photoEntries: [
+          {
+            id: 'ph-1', date: '2026-07-17', images: ['data:image/jpeg;base64,AAA'],
+            thumbs: ['data:image/jpeg;base64,BBB'], captions: ['日落'], createdAt: '2026-07-17T20:00:00.000Z',
+          },
+        ],
+      },
+      ['photo'],
+    )
+
+    expect(items).toHaveLength(1)
+    expect(items[0].type).toBe('photo')
+    expect(items[0].photo?.images.length).toBe(1)
+    expect(items[0].id).toBe('photo-ph-1')
+    expect(items[0].ts).toBe(new Date('2026-07-17T20:00:00.000Z').getTime())
+  })
+
+  it('未启用 photo 筛选时不聚合照片条目', () => {
+    const items = createRiverItems(
+      {
+        ...source,
+        photoEntries: [
+          {
+            id: 'ph-1', date: '2026-07-17', images: ['data:image/jpeg;base64,AAA'],
+            thumbs: [], captions: [], createdAt: '2026-07-17T20:00:00.000Z',
+          },
+        ],
+      },
+      ['crystal'],
+    )
+
+    expect(items.every(i => i.type !== 'photo')).toBe(true)
+  })
 })
 
 describe('createReplayTimer', () => {
