@@ -53,7 +53,7 @@
           <span class="reading-label">阅读</span>
           <button class="text-btn" @click="clearReadingText">清除文本</button>
         </div>
-        <div class="reading-content" ref="readingRef" @mouseup="onTextSelect">
+        <div class="reading-content" ref="readingRef" @mouseup="onTextSelect" @scroll="onReaderScroll">
           <p
             v-for="(para, idx) in paragraphs"
             :key="idx"
@@ -67,6 +67,8 @@
         <div v-if="pendingText" class="excerpt-float-bar">
           <span class="float-preview">"{{ pendingText.slice(0, 60) }}{{ pendingText.length > 60 ? '…' : '' }}"</span>
           <button class="rh-btn excerpt-btn" @click="openExcerptDialog">摘录</button>
+          <button class="rh-btn excerpt-btn flow-btn" @click="flowHighlight">流入思绪书房</button>
+          <span v-if="flowedHint" class="flow-hint">已归入思绪书房</span>
         </div>
       </div>
     </div>
@@ -194,11 +196,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
-import { useReadingInsights, useReadingSpeed, useReading, useReadingHall } from '../modules/reading'
+import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
@@ -235,6 +237,63 @@ const pendingText = ref('')
 const showDialog = ref(false)
 const excerptNote = ref('')
 
+// ---- 按书登记与续读 ----
+// 当前正在阅读的书（导入文本时按标题去重建书，正文存入按书存储域）
+const activeBookId = ref('')
+const activeBookTitle = ref('')
+const flowedHint = ref(false)
+
+// 由正文推导书名（首行非空，截断 40 字；无则「粘贴文本」）
+function deriveTitle(text: string): string {
+  const firstLine = text.split(/\n+/).map(p => p.trim()).find(p => p) ?? ''
+  return firstLine ? firstLine.slice(0, 40) : '粘贴文本'
+}
+// 粗略页数估计：按非空段数
+function estimatePages(text: string): number {
+  return Math.max(1, text.split(/\n+/).filter(p => p.trim()).length)
+}
+// 把当前正文登记成书架书目（去重）+ 记录激活书，必要时续读定位
+function registerActiveBook(text: string) {
+  const title = deriveTitle(text)
+  const book = hall.addBookFromText(title, '', estimatePages(text), text)
+  activeBookId.value = book.id
+  activeBookTitle.value = book.title
+  const resume = book.lastPosition ?? 0
+  if (resume > 0) nextTick(() => scrollToParagraph(resume))
+}
+// 滚动到指定段落（续读定位）
+function scrollToParagraph(idx: number) {
+  const scroller = readingRef.value
+  if (!scroller) return
+  const ps = scroller.querySelectorAll('p')
+  const target = ps[idx] as HTMLElement | undefined
+  if (target) scroller.scrollTop = target.offsetTop
+}
+// 阅读器滚动 → 节流记录续读位置（按段落索引）
+let lastProgressSave = 0
+function onReaderScroll() {
+  if (!activeBookId.value || !readingRef.value) return
+  const scroller = readingRef.value
+  const ps = scroller.querySelectorAll('p')
+  let idx = 0
+  for (let i = 0; i < ps.length; i++) {
+    if ((ps[i] as HTMLElement).offsetTop - scroller.scrollTop <= 4) idx = i
+    else break
+  }
+  const now = Date.now()
+  if (now - lastProgressSave > 800) {
+    lastProgressSave = now
+    hall.setBookProgress(activeBookId.value, idx)
+  }
+}
+// 划线/摘录 流入思绪书房（全局 Note，自动进入双链与间隔重复）
+function flowHighlight() {
+  if (!pendingText.value) return
+  flowHighlightToStudy(pendingText.value, activeBookTitle.value)
+  flowedHint.value = true
+  setTimeout(() => { flowedHint.value = false }, 2000)
+}
+
 // 段落
 const paragraphs = computed(() => {
   if (!readingText.value) return []
@@ -262,6 +321,7 @@ function loadPastedText() {
   readingText.value = pastedText.value
   pastedText.value = ''
   reading.saveText()
+  registerActiveBook(readingText.value)
 }
 
 function handleFileUpload(e: Event) {
@@ -274,6 +334,7 @@ function handleFileUpload(e: Event) {
     if (text) {
       readingText.value = text
       reading.saveText()
+      registerActiveBook(text)
     }
   }
   reader.readAsText(file)
@@ -399,6 +460,14 @@ function emitReadingSignal() {
 // ---- 初始化 ----
 onMounted(() => {
   reading.load()
+  // 若已有正文，尝试把激活书关联到同名书目，延续「流入思绪书房」的溯源标签
+  if (readingText.value) {
+    const match = hall.books.value.find(b => b.title === deriveTitle(readingText.value))
+    if (match) {
+      activeBookId.value = match.id
+      activeBookTitle.value = match.title
+    }
+  }
   emitReadingSignal()
 })
 // 藏书 / 阅读会话增减时刷新阅览殿信号，让其他房间实时感知
@@ -1003,6 +1072,16 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   .float-preview {
     font-size: 12px;
     width: 100%;
+  }
+
+  .flow-btn {
+    background: rgba(var(--accent-rgb), 0.16);
+    color: var(--accent);
+    border-color: rgba(var(--accent-rgb), 0.28);
+  }
+  .flow-hint {
+    font-size: 11px;
+    color: var(--success, #2ecc71);
   }
 
   .rh-excerpt-card {

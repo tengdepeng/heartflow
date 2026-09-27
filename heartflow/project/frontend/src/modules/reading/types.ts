@@ -16,6 +16,8 @@ export interface Book {
   totalPages: number
   /** 当前页数 */
   currentPage: number
+  /** 续读位置（按书正文的段落索引；用于「合上书下次接着读」） */
+  lastPosition?: number
   /** 阅读状态 */
   status: ReadingStatus
   /** 评分 1-5 */

@@ -7,6 +7,7 @@ import { ref } from 'vue'
 import type { Book, BookQuote, ReadingSession, ReadingStatus, ReadingGoal } from './types'
 import { READING_STORAGE_KEYS } from './types'
 import { storage } from '../../engine/storage'
+import { saveBookContent, removeBookContent } from './book-content'
 
 function generateId(): string {
   return `read_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
@@ -55,6 +56,36 @@ export function useReadingHall() {
     book.status = status
     if (status === 'reading' && !book.startDate) book.startDate = todayStr()
     if (status === 'finished') book.finishDate = todayStr()
+    books.value = [...books.value]
+    saveBooks(books.value)
+    return true
+  }
+
+  /**
+   * 从一段文本建书（导入 .txt / 粘贴正文时使用）。
+   * 按标题去重：同名书已存在则复用并更新其按书正文，避免重复书目。
+   * 返回该书对象（含 id，可用于加载按书正文做续读）。
+   */
+  function addBookFromText(title: string, author: string, totalPages: number, text: string, tags: string[] = []): Book {
+    const norm = title.trim()
+    const existing = books.value.find(b => b.title.trim() === norm)
+    if (existing) {
+      saveBookContent(existing.id, text)
+      existing.lastPosition = 0
+      books.value = [...books.value]
+      saveBooks(books.value)
+      return existing
+    }
+    const book = addBook(norm, author, totalPages, tags)
+    saveBookContent(book.id, text)
+    return book
+  }
+
+  /** 记录续读位置（按书正文段落索引） */
+  function setBookProgress(id: string, position: number): boolean {
+    const book = books.value.find(b => b.id === id)
+    if (!book) return false
+    book.lastPosition = Math.max(0, Math.floor(position))
     books.value = [...books.value]
     saveBooks(books.value)
     return true
@@ -138,13 +169,14 @@ export function useReadingHall() {
     if (idx === -1) return false
     books.value = books.value.filter(b => b.id !== id)
     saveBooks(books.value)
+    removeBookContent(id)
     return true
   }
 
   return {
     books, sessions, readingGoal,
-    addBook, updateBookStatus, addQuote, rateBook, getBooksByStatus,
-    recordSession, getReadingStats,
+    addBook, addBookFromText, updateBookStatus, addQuote, rateBook, getBooksByStatus,
+    recordSession, getReadingStats, setBookProgress,
     updateGoal, getGoalProgress,
     removeBook,
   }

@@ -20,6 +20,7 @@ import type {
   ReadingNote,
   ChallengeType,
 } from './index'
+import { flowHighlightToStudy } from './highlight-flow'
 
 // ---- 聚合类型 ----
 
@@ -148,6 +149,25 @@ export function useReadingBridge() {
     return hall.addBook(title, author, totalPages, tags, cover)
   }
 
+  /**
+   * 从一段文本建书（导入 .txt / 粘贴正文）。
+   * 按标题去重；同时把正文存入按书存储域（hf:reading:content:<id>）。
+   */
+  function addBookFromText(
+    title: string,
+    author: string,
+    totalPages: number,
+    text: string,
+    tags?: string[],
+  ): Book {
+    return hall.addBookFromText(title, author, totalPages, text, tags)
+  }
+
+  /** 记录续读位置（按书正文段落索引） */
+  function setBookProgress(id: string, position: number): boolean {
+    return hall.setBookProgress(id, position)
+  }
+
   function updateBookStatus(id: string, status: ReadingStatus): boolean {
     return hall.updateBookStatus(id, status)
   }
@@ -267,6 +287,9 @@ export function useReadingBridge() {
     // 操作
     initialize,
     addBook,
+    addBookFromText,
+    setBookProgress,
+    flowHighlightToStudy,
     updateBookStatus,
     addQuote,
     rateBook,

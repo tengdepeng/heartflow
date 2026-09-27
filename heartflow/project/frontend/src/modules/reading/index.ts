@@ -58,6 +58,18 @@ export type { SrsGrade, SrsReviewItem } from './srs'
 export { useReading } from './reading-content'
 export type { Excerpt } from './reading-content'
 
+// ---- 按书正文存储（取代全局单字符串，支持多书 + 续读） ----
+export {
+  saveBookContent,
+  getBookContent,
+  removeBookContent,
+  hasBookContent,
+  BOOK_CONTENT_PREFIX,
+} from './book-content'
+
+// ---- 划线/摘录 回流思绪书房 ----
+export { flowHighlightToStudy } from './highlight-flow'
+
 // ---- 古典竖排阅读（ClassicalVerticalPanel 消费，影印对照控件并入 INCR-398） ----
 export {
   useClassicalVertical,
