@@ -159,6 +159,7 @@ vi.mock('../../engine/storage', () => ({
     setKV: vi.fn((key: string, value: any) => {
       mockKVStore[key] = value
     }),
+    getGoals: vi.fn(() => (mockKVStore['hf:goals'] ? JSON.parse(JSON.stringify(mockKVStore['hf:goals'])) : [])),
   },
 }))
 

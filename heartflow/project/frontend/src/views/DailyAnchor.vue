@@ -489,6 +489,9 @@
     <!-- ============================================================ -->
     <AnchorJournalRetroPanel :journals="journals" />
 
+    <!-- 光丝串联（INCR-412 补挂载孤儿引擎 anchor-threads：锚点间光丝 · 锚点↔留光阁联动 · 完成推进预览 · 锚点池倒入预览，薄委托） -->
+    <AnchorThreadsPanel :anchors="anchor.allAnchors.value" />
+
     <!-- 时令元数据（INCR-256 补挂载孤儿组件：时辰·节气·季节·天气采集） -->
     <ZeitgeistPanel />
   </div>
@@ -515,6 +518,7 @@ import CalendarExportPanel from '../components/CalendarExportPanel.vue'
 import AnchorTimeScalePanel from '../components/AnchorTimeScalePanel.vue'
 import AnchorJournalPanel from '../components/AnchorJournalPanel.vue'
 import AnchorJournalRetroPanel from '../components/AnchorJournalRetroPanel.vue'
+import AnchorThreadsPanel from '../components/AnchorThreadsPanel.vue'
 import ZeitgeistPanel from '../components/ZeitgeistPanel.vue'
 
 const { entranceClass } = useViewEntrance()
