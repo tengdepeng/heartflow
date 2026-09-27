@@ -135,6 +135,11 @@
       </div>
     </div>
 
+    <!-- ========== 书架（接 hall 引擎：增书/改状态/记会话/评分/目标） ========== -->
+    <div data-enter v-if="activeTab === 'shelf'" class="rh-panel rh-shelf-panel">
+      <BookShelfPanel />
+    </div>
+
     <!-- 阅读总览仪表盘（INCR-160：已构建但从未接线的 reading-bridge + useReadingDashboard） -->
     <ReadingDashboardPanel />
 
@@ -204,6 +209,7 @@ import BookRecommendationsPanel from '../components/BookRecommendationsPanel.vue
 import ReadingChallengesPanel from '../components/ReadingChallengesPanel.vue'
 import BookReviewsPanel from '../components/BookReviewsPanel.vue'
 import TtsControlPanel from '../components/TtsControlPanel.vue'
+import BookShelfPanel from '../components/BookShelfPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -213,8 +219,9 @@ const tabs = [
   { key: 'book', label: '书卷' },
   { key: 'excerpts', label: '摘录集' },
   { key: 'review', label: '回顾' },
+  { key: 'shelf', label: '书架' },
 ] as const
-const activeTab = ref<'book' | 'excerpts' | 'review'>('book')
+const activeTab = ref<'book' | 'excerpts' | 'review' | 'shelf'>('book')
 
 // ---- 阅读文本 ----
 const reading = useReading()
