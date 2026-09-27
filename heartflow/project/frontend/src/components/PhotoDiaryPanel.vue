@@ -68,12 +68,23 @@
     <!-- 画廊 -->
     <div v-if="diary.entries.value.length" class="pd-block">
       <span class="pd-block-label">照片墙 <small class="pd-tip">拖动缩略图可排序 · 点击可写单图说明</small></span>
-      <div v-for="entry in sortedEntries" :key="entry.id" class="pd-entry">
+      <template v-for="group in groupedEntries" :key="group.key">
+        <div class="pd-month">{{ group.label }}</div>
+        <div v-for="entry in group.entries" :key="entry.id" class="pd-entry">
         <div class="pd-entry-head">
           <span class="pd-entry-date">{{ entry.date }}</span>
           <span class="pd-entry-count">{{ entry.images.length }} / {{ PHOTO_MAX_PER_ENTRY }} 张</span>
+          <span class="pd-entry-actions">
+            <button class="pd-btn pd-mini" data-test="pd-edit-cap" @click="startEditCaption(entry)">编辑说明</button>
+            <button class="pd-btn pd-mini pd-danger" data-test="pd-del-day" @click="removeDay(entry)">删除本日</button>
+          </span>
         </div>
-        <p v-if="entry.caption" class="pd-entry-caption">{{ entry.caption }}</p>
+        <p v-if="editingCaptionId === entry.id" class="pd-entry-cap-edit">
+          <input v-model="editCaptionText" class="pd-input pd-caption" placeholder="整条日记说明" data-test="pd-cap-input" />
+          <button class="pd-btn pd-mini" data-test="pd-cap-save" @click="saveCaption(entry)">保存</button>
+          <button class="pd-btn pd-mini pd-ghost" data-test="pd-cap-cancel" @click="cancelEditCaption">取消</button>
+        </p>
+        <p v-else-if="entry.caption" class="pd-entry-caption">{{ entry.caption }}</p>
         <div class="pd-grid">
           <div
             v-for="(img, i) in entry.images"
@@ -103,6 +114,7 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
     <p v-else class="pd-hint">还没有照片日记。选几张图片记录今天吧。</p>
 
@@ -117,6 +129,7 @@
           <button class="pd-btn" :disabled="viewer.index === 0" @click="shift(-1)">前移</button>
           <button class="pd-btn" :disabled="viewer.index >= viewerEntry.images.length - 1" @click="shift(1)">后移</button>
           <button class="pd-btn pd-danger" @click="removeCurrent">删除此图</button>
+          <button class="pd-btn pd-journal" data-test="pd-send-journal" @click.stop="sendToJournal(viewer.date, viewer.index)">📔 收入手札</button>
           <button class="pd-btn" @click="closeViewer">关闭</button>
         </div>
         <div class="pd-viewer-cap-row" @click.stop>
@@ -143,13 +156,19 @@ import {
   clearPhotoDiaryMessages,
   PHOTO_FULL_DIM,
   PHOTO_MAX_PER_ENTRY,
+  PHOTO_THUMB_DIM,
+  type PhotoEntry,
 } from '../modules/anchor/photo-diary'
 import { fileToDownscaledDataUrl } from '../utils/image'
-import { PHOTO_THUMB_DIM } from '../modules/anchor/photo-diary'
 
 const props = defineProps<{
   /** 逐日心锚中「有心锚」的日期（YYYY-MM-DD），用于日期强绑定与快速跳转 */
   anchorDates?: string[]
+}>()
+
+const emit = defineEmits<{
+  /** 把某日某张照片收入手札（由宿主按时写入锚点手札） */
+  (e: 'send-to-journal', payload: { date: string; index: number }): void
 }>()
 
 const diary = usePhotoDiary()
@@ -173,6 +192,23 @@ const photoCount = computed(() => diary.entries.value.reduce((s, e) => s + e.ima
 const remaining = computed(() => PHOTO_MAX_PER_ENTRY - (diary.getByDate(date.value)?.images.length ?? 0))
 
 const sortedEntries = computed(() => [...diary.entries.value].sort((a, b) => b.date.localeCompare(a.date)))
+
+// 照片墙按月分组（续13）：同月条目归入一组，组间按月份倒序，组内保持按日倒序
+const groupedEntries = computed(() => {
+  const byMonth = new Map<string, PhotoEntry[]>()
+  for (const e of sortedEntries.value) {
+    const ym = e.date.slice(0, 7)
+    if (!byMonth.has(ym)) byMonth.set(ym, [])
+    byMonth.get(ym)!.push(e)
+  }
+  return [...byMonth.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([key, entries]) => ({ key, label: formatMonthLabel(key), entries }))
+})
+function formatMonthLabel(ym: string): string {
+  const [y, m] = ym.split('-')
+  return `${y} 年 ${Number(m)} 月`
+}
 
 const anchorDateSet = computed(() => new Set(props.anchorDates ?? []))
 const anchorsOnDate = computed(() => (anchorDateSet.value.has(date.value) ? '有' : 0))
@@ -251,6 +287,11 @@ function openViewer(d: string, i: number) {
 function closeViewer() {
   viewer.open = false
 }
+
+/** 把当前查看的照片收入手札（不直接写锚点，交由宿主按时写入） */
+function sendToJournal(d: string, i: number) {
+  emit('send-to-journal', { date: d, index: i })
+}
 function step(delta: number) {
   const total = viewerEntry.value?.images.length ?? 0
   if (total < 2) return
@@ -274,6 +315,28 @@ function onViewerCaption(e: Event) {
 
 function removeImage(d: string, index: number) {
   diary.removeImage(d, index)
+}
+
+// ---- 整条（按日）日记说明：编辑孤儿 API setEntryCaption ----
+const editingCaptionId = ref<string | null>(null)
+const editCaptionText = ref('')
+function startEditCaption(entry: PhotoEntry) {
+  editingCaptionId.value = entry.id
+  editCaptionText.value = entry.caption ?? ''
+}
+function saveCaption(entry: PhotoEntry) {
+  diary.setEntryCaption(entry.date, editCaptionText.value)
+  editingCaptionId.value = null
+  editCaptionText.value = ''
+}
+function cancelEditCaption() {
+  editingCaptionId.value = null
+  editCaptionText.value = ''
+}
+
+// ---- 整日删除：孤儿 API removeEntry ----
+function removeDay(entry: PhotoEntry) {
+  diary.removeEntry(entry.id)
 }
 
 function exportBackup() {
@@ -311,8 +374,10 @@ async function onImport(e: Event) {
 
 <style scoped>
 .pd-panel {
-  background: linear-gradient(135deg, rgba(60, 70, 90, 0.35), rgba(40, 48, 64, 0.25));
-  border: 1px solid rgba(140, 160, 190, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 14px;
   padding: 16px;
   margin: 12px 0;
@@ -349,8 +414,10 @@ async function onImport(e: Event) {
 }
 .pd-stat {
   flex: 1;
-  background: rgba(20, 26, 38, 0.45);
-  border: 1px solid rgba(140, 160, 190, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border-radius: 10px;
   padding: 10px;
   text-align: center;
@@ -448,18 +515,51 @@ async function onImport(e: Event) {
   margin: 6px 0 0;
 }
 .pd-entry {
-  background: rgba(20, 26, 38, 0.45);
-  border: 1px solid rgba(140, 160, 190, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 10px;
 }
+.pd-month {
+  font-size: 12px;
+  font-weight: 600;
+  color: #9fc4e8;
+  margin: 12px 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(140, 160, 190, 0.12);
+  letter-spacing: 0.5px;
+}
+.pd-month:first-child { margin-top: 0; }
 .pd-entry-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
 }
+.pd-entry-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+.pd-mini {
+  padding: 3px 10px;
+  font-size: 11px;
+}
+.pd-ghost {
+  background: transparent;
+  color: #8a97ad;
+  border-color: rgba(140, 160, 190, 0.18);
+}
+.pd-entry-cap-edit {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 8px;
+}
+.pd-entry-cap-edit .pd-caption { margin-bottom: 0; }
 .pd-entry-date {
   font-size: 13px;
   font-weight: 600;
@@ -483,6 +583,8 @@ async function onImport(e: Event) {
   position: relative;
   border-radius: 8px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: grab;
 }
 .pd-img-wrap.is-dragging { opacity: 0.45; }

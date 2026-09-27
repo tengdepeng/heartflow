@@ -13,6 +13,14 @@ import { storage } from '../../engine/storage'
 
 export const ANCHOR_JOURNALS_KEY = 'anchor_journals'
 
+/** 照片手札引用：指向照片日记某日某张图（与 PhotoEntry.images/thumbs 下标一致） */
+export interface PhotoRef {
+  /** 照片日记归属日期（YYYY-MM-DD），与 PhotoEntry.date 同口径 */
+  date: string
+  /** 该日照片日记中的图序（0 起） */
+  index: number
+}
+
 export interface AnchorJournal {
   anchorId: string
   content: string
@@ -22,6 +30,8 @@ export interface AnchorJournal {
   title?: string
   /** 情绪标记（可选） */
   mood?: string
+  /** 关联的照片日记引用（照片进手札）；可挂多张 */
+  photoRef?: PhotoRef[]
 }
 
 // ---- 模块级单例 ref ----

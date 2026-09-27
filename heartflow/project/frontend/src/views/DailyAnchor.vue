@@ -470,7 +470,7 @@
     <WishAnchorPanel />
 
     <!-- 照片日记（传入有心锚的日期，用于日期强绑定与快速跳转） -->
-    <PhotoDiaryPanel :anchor-dates="anchorDatesWithItems" />
+    <PhotoDiaryPanel :anchor-dates="anchorDatesWithItems" @send-to-journal="onSendPhotoToJournal" />
 
     <!-- 智能提醒 -->
     <SmartReminderPanel :anchors="anchor.allAnchors.value" />
@@ -513,6 +513,7 @@ import { useCelebration } from '../modules/anchor/celebration'
 import { useAnchorClustering } from '../modules/anchor/anchor-cluster'
 import WishAnchorPanel from '../components/WishAnchorPanel.vue'
 import PhotoDiaryPanel from '../components/PhotoDiaryPanel.vue'
+import { usePhotoDiary, todayKey } from '../modules/anchor/photo-diary'
 import SmartReminderPanel from '../components/SmartReminderPanel.vue'
 import CalendarExportPanel from '../components/CalendarExportPanel.vue'
 import AnchorTimeScalePanel from '../components/AnchorTimeScalePanel.vue'
@@ -562,26 +563,42 @@ function anchorRelatedOpen(id: string): boolean {
   return relatedAnchorId.value === id
 }
 
-// ---- 跨房间共鸣联动：逐日心锚发射「焦点」信号 ----
+// ---- 跨房间共鸣联动：逐日心锚发射「焦点」信号（含照片日记）----
 const { emitRoomSignal: emitAnchorResonance, crossRoomFeed, summarizeClimate, getSignals } = useRoomResonance()
+const diary = usePhotoDiary()
+diary.load()
 
 // ---- 跨房间共鸣接收（双向联动收口）：过滤本房回声，只呈现其他房间的光痕 ----
 const externalFeed = computed(() => crossRoomFeed.value.filter((s) => s.room !== 'daily-anchor'))
 const externalClimate = computed(() => aggregateClimate(getSignals().filter((s) => s.room !== 'daily-anchor')))
 function roomLabel(r: RoomKey): string { return ROOM_LABELS[r] ?? r }
+
+const photoTotalCount = computed(() => diary.entries.value.reduce((s, e) => s + e.images.length, 0))
+const todayPhotoCount = computed(() => {
+  const t = todayKey()
+  return diary.entries.value.filter((e) => e.date === t).reduce((s, e) => s + e.images.length, 0)
+})
+
 function emitAnchorResonanceSignal() {
   const list = anchor.todayAnchors.value
   const pending = list.filter((a) => !a.done).length
+  // 照片日记融入信号：今日有照片显今日张数，否则有历史则显总数（让其他房间感知照片活动）
+  const photoPart = todayPhotoCount.value > 0
+    ? ` · 今日 ${todayPhotoCount.value} 张照片`
+    : photoTotalCount.value > 0
+      ? ` · 共 ${photoTotalCount.value} 张照片`
+      : ''
   emitAnchorResonance({
     room: 'daily-anchor',
     kind: 'focus',
-    label: pending > 0 ? `待完成 ${pending} 项心锚` : '今日心锚已清空',
-    detail: list.length ? `今日共 ${list.length} 项` : undefined,
+    label: (pending > 0 ? `待完成 ${pending} 项心锚` : '今日心锚已清空') + photoPart,
+    detail: list.length ? `今日共 ${list.length} 项` : (photoTotalCount.value ? `共 ${photoTotalCount.value} 张照片` : undefined),
     ts: Date.now(),
     strength: Math.min(1, pending / 5),
   })
 }
-watch(() => anchor.todayAnchors.value.length, emitAnchorResonanceSignal)
+// 心锚增减或照片增删均刷新本房共鸣信号（照片在子面板内改，模块级 entries 单例同步）
+watch([() => anchor.todayAnchors.value.length, photoTotalCount], emitAnchorResonanceSignal)
 
 // ---- 照片日记的日期强绑定：把「有心锚的日期」下传给面板 ----
 const anchorDatesWithItems = computed<string[]>(() =>
@@ -770,6 +787,22 @@ function saveJournal() {
   journalStore.save()
   journalSavedHint.value = '已保存'
   setTimeout(() => { journalSavedHint.value = '' }, 2000)
+}
+
+// ---- 照片进手札：把某日某张照片写入该日锚点的手札（照片日记 → 手札回流） ----
+function onSendPhotoToJournal(payload: { date: string; index: number }) {
+  const { date, index } = payload
+  const anchorId = anchor.allAnchors.value.find(a => a.targetDate === date)?.id
+  if (!anchorId) return // 该日尚无锚点，不强行写入
+  const now = new Date().toISOString()
+  journals.value.push({
+    anchorId,
+    content: `📷 照片手札 · ${date} · 第 ${index + 1} 张`,
+    photoRef: [{ date, index }],
+    createdAt: now,
+    updatedAt: now,
+  })
+  journalStore.save()
 }
 
 function sortAnchorsForDisplay(items: Anchor[]): Anchor[] {

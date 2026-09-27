@@ -50,4 +50,18 @@ describe('useAnchorJournals 手札日记', () => {
     load()
     expect(items.value).toEqual([])
   })
+
+  it('photoRef 字段可保存与回读（照片进手札）', () => {
+    const { items, save, load } = useAnchorJournals()
+    items.value = [{
+      anchorId: 'a3',
+      content: '📷 照片手札 · 2026-08-20 · 第 1 张',
+      photoRef: [{ date: '2026-08-20', index: 0 }],
+      createdAt: '2026-08-20T08:00:00.000Z',
+      updatedAt: '2026-08-20T08:00:00.000Z',
+    }]
+    save()
+    load()
+    expect(items.value[0].photoRef).toEqual([{ date: '2026-08-20', index: 0 }])
+  })
 })

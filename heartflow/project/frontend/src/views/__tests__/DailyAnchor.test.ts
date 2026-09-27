@@ -5,7 +5,8 @@ import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref, computed } from 'vue'
 import type { Anchor } from '../../modules/anchor/types'
-import { emitRoomSignal, clearRoomSignals } from '../../modules/room-resonance'
+import { emitRoomSignal, clearRoomSignals, getSignals } from '../../modules/room-resonance'
+import { todayKey } from '../../modules/anchor/photo-diary'
 
 // ---- 模拟锚点数据 ----
 const mockAnchorData = ref<Anchor[]>([])
@@ -590,6 +591,28 @@ describe('跨房间共鸣联动（双向收口）', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.cross-room-strip').exists()).toBe(false)
     clearRoomSignals()
+  })
+
+  // ---- 照片日记融入本房共鸣信号（跨房间共鸣·照片，续12）----
+  it('照片日记融入共鸣信号（历史照片显示总数）', async () => {
+    mockKVStore['hf:anchor:photo_diary'] = [
+      { id: 'pd1', date: '2026-08-20', images: ['data:image/png;base64,AAAA', 'data:image/png;base64,BBBB'], thumbs: [], captions: [], createdAt: '2026-08-20T08:00:00Z' },
+    ]
+    await createWrapper()
+    const mine = getSignals('daily-anchor')
+    expect(mine.length).toBeGreaterThan(0)
+    const last = mine[mine.length - 1]
+    expect(last.room).toBe('daily-anchor')
+    expect(last.label).toContain('共 2 张照片')
+  })
+
+  it('今日照片显示在共鸣信号中', async () => {
+    mockKVStore['hf:anchor:photo_diary'] = [
+      { id: 'pd2', date: todayKey(), images: ['x', 'y', 'z'], thumbs: [], captions: [], createdAt: new Date().toISOString() },
+    ]
+    await createWrapper()
+    const last = getSignals('daily-anchor').pop()!
+    expect(last.label).toContain('今日 3 张照片')
   })
 })
 

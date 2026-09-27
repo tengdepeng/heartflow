@@ -160,3 +160,108 @@ describe('PhotoDiaryPanel P1', () => {
     expect(wrapper.text()).toContain('该日心锚')
   })
 })
+
+// ============================================================
+// P2：照片进手札（全屏「收入手札」→ emit send-to-journal）
+// ============================================================
+describe('PhotoDiaryPanel 照片进手札', () => {
+  it('全屏点击「收入手札」触发 send-to-journal 事件', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ images: ['data:image/png;base64,AAAA', 'data:image/png;base64,BBBB'] })],
+    })
+    await wrapper.findAll('.pd-img')[0].trigger('click')
+    const btn = wrapper.find('[data-test="pd-send-journal"]')
+    expect(btn.exists()).toBe(true)
+    await btn.trigger('click')
+    const ev = wrapper.emitted('send-to-journal')
+    expect(ev).toBeTruthy()
+    expect(ev![0]).toEqual([{ date: '2026-08-20', index: 0 }])
+  })
+})
+
+// ============================================================
+// P2：孤儿 API 挂 UI（续11）
+//  - 整条（按日）日记说明编辑 → usePhotoDiary().setEntryCaption
+//  - 整日删除 → usePhotoDiary().removeEntry
+// ============================================================
+describe('PhotoDiaryPanel 孤儿 API 挂 UI', () => {
+  function savedEntries() {
+    const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+    return saved.kvStore['hf:anchor:photo_diary']
+  }
+
+  it('编辑整条日记说明并持久化（setEntryCaption）', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ caption: '今天的天空' })],
+    })
+    await wrapper.find('[data-test="pd-edit-cap"]').trigger('click')
+    const input = wrapper.find('[data-test="pd-cap-input"]')
+    expect(input.exists()).toBe(true)
+    await input.setValue('改后的整日说明')
+    await wrapper.find('[data-test="pd-cap-save"]').trigger('click')
+    expect(savedEntries()[0].caption).toBe('改后的整日说明')
+    // 编辑态退出
+    expect(wrapper.find('[data-test="pd-cap-input"]').exists()).toBe(false)
+  })
+
+  it('取消编辑整条说明不改写原值', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ caption: '原说明' })],
+    })
+    await wrapper.find('[data-test="pd-edit-cap"]').trigger('click')
+    await wrapper.find('[data-test="pd-cap-input"]').setValue('临时改')
+    await wrapper.find('[data-test="pd-cap-cancel"]').trigger('click')
+    expect(savedEntries()[0].caption).toBe('原说明')
+  })
+
+  it('删除整日条目（removeEntry）', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [
+        entry({ id: 'day_a', date: '2026-08-20', images: ['data:image/png;base64,AAAA'] }),
+        entry({ id: 'day_b', date: '2026-08-19', images: ['data:image/png;base64,BBBB'] }),
+      ],
+    })
+    expect(savedEntries().length).toBe(2)
+    // 渲染顺序为倒序（最新在前）→ 第一条即 2026-08-20
+    const delBtns = wrapper.findAll('[data-test="pd-del-day"]')
+    expect(delBtns.length).toBe(2)
+    await delBtns[0].trigger('click')
+    const left = savedEntries()
+    expect(left.length).toBe(1)
+    expect(left[0].id).toBe('day_b')
+  })
+})
+
+// ============================================================
+// 续13：照片墙按月分组（长列表可读性）
+// ============================================================
+describe('PhotoDiaryPanel 照片墙按月分组', () => {
+  it('跨月照片按月份分组渲染并标注年月，组内按日倒序', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [
+        entry({ id: 'a', date: '2026-09-20', images: ['data:image/png;base64,AAAA'] }),
+        entry({ id: 'b', date: '2026-09-05', images: ['data:image/png;base64,BBBB'] }),
+        entry({ id: 'c', date: '2026-08-15', images: ['data:image/png;base64,CCCC'] }),
+      ],
+    })
+    const months = wrapper.findAll('.pd-month')
+    expect(months.length).toBe(2)
+    expect(months[0].text()).toBe('2026 年 9 月')
+    expect(months[1].text()).toBe('2026 年 8 月')
+    const entriesEls = wrapper.findAll('.pd-entry')
+    expect(entriesEls.length).toBe(3)
+    // 第一条为最新（9 月 20 日）
+    expect(entriesEls[0].find('.pd-entry-date').text()).toBe('2026-09-20')
+  })
+
+  it('单月照片只渲染一个月份标题', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [
+        entry({ id: 'a', date: '2026-08-20', images: ['A'] }),
+        entry({ id: 'b', date: '2026-08-19', images: ['B'] }),
+      ],
+    })
+    expect(wrapper.findAll('.pd-month').length).toBe(1)
+    expect(wrapper.find('.pd-month').text()).toBe('2026 年 8 月')
+  })
+})

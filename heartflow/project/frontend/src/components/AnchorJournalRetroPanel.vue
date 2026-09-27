@@ -59,6 +59,28 @@
       </div>
     </div>
 
+    <!-- 照片手札：照片日记回流的视觉碎片 -->
+    <div v-if="photoJournals.length" class="ajr-card" data-test="ajr-photos">
+      <span class="ajr-card-t">🖼️ 照片手札</span>
+      <div class="ajr-photo-grid">
+        <figure
+          v-for="j in photoJournals"
+          :key="j.anchorId + j.createdAt"
+          class="ajr-photo-fig"
+        >
+          <img
+            v-if="thumbOf(j)"
+            :src="thumbOf(j)"
+            class="ajr-photo"
+            :alt="j.content"
+            data-test="ajr-photo"
+            @click="openPhoto(fullOf(j))"
+          />
+          <figcaption class="ajr-photo-cap">{{ j.content }}</figcaption>
+        </figure>
+      </div>
+    </div>
+
     <!-- 书写脚手架 -->
     <div class="ajr-card" data-test="ajr-templates">
       <span class="ajr-card-t">🧩 书写脚手架</span>
@@ -74,11 +96,17 @@
       </div>
       <p v-if="journals.length === 0" class="ajr-empty">还没有手札。从上面的脚手架开始写下第一篇吧。</p>
     </div>
+    <!-- 照片手札大图 -->
+    <Teleport to="body">
+      <div v-if="photoViewer.open" class="ajr-photo-viewer" @click="closePhoto">
+        <img :src="photoViewer.src" class="ajr-photo-viewer-img" alt="照片手札" @click.stop />
+      </div>
+    </Teleport>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import {
   filterJournals,
   journalMoodStats,
@@ -86,6 +114,7 @@ import {
   journalDateKey,
 } from '../modules/anchor/anchor-journals'
 import type { AnchorJournal } from '../modules/anchor/anchor-journals'
+import { usePhotoDiary } from '../modules/anchor/photo-diary'
 import {
   JOURNAL_TEMPLATES,
   journalTemplateName,
@@ -94,6 +123,32 @@ import {
 const props = defineProps<{
   journals: AnchorJournal[]
 }>()
+
+// ---- 照片手札：从照片日记取缩略图/原图回显 ----
+const diary = usePhotoDiary()
+diary.load()
+const photoJournals = computed(() =>
+  props.journals.filter(j => Array.isArray(j.photoRef) && j.photoRef.length > 0),
+)
+function thumbOf(j: AnchorJournal): string {
+  const ref = j.photoRef![0]
+  const entry = diary.getByDate(ref.date)
+  if (!entry) return ''
+  return entry.thumbs[ref.index] || entry.images[ref.index] || ''
+}
+function fullOf(j: AnchorJournal): string {
+  const ref = j.photoRef![0]
+  return diary.getByDate(ref.date)?.images[ref.index] || ''
+}
+const photoViewer = reactive({ open: false, src: '' })
+function openPhoto(src: string) {
+  if (!src) return
+  photoViewer.src = src
+  photoViewer.open = true
+}
+function closePhoto() {
+  photoViewer.open = false
+}
 
 // ---- 那年今日 ----
 const thisDayItems = computed(() => journalsOnThisDay(props.journals, new Date()))
@@ -290,5 +345,54 @@ const searched = computed(() =>
   font-size: 10px;
   opacity: 0.5;
   white-space: pre-wrap;
+}
+.ajr-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+.ajr-photo-fig {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ajr-photo {
+  width: 100%;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+.ajr-photo:hover {
+  transform: scale(1.04);
+}
+.ajr-photo-cap {
+  font-size: 10px;
+  opacity: 0.6;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ajr-photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: rgba(8, 10, 14, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  padding-top: calc(24px + env(safe-area-inset-top, 0px));
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.ajr-photo-viewer-img {
+  max-width: 92vw;
+  max-height: 82vh;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  object-fit: contain;
 }
 </style>
