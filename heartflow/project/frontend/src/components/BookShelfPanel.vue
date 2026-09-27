@@ -40,6 +40,10 @@
       <button type="submit" class="bsf-btn" :disabled="!newBook.title.trim()">加入书架</button>
     </form>
 
+    <!-- 导入电子书（本地解析 .txt/.epub/.pdf → 按书正文） -->
+    <button type="button" class="bsf-btn bsf-import-btn" @click="importInput?.click()">导入电子书 (.txt/.epub/.pdf)</button>
+    <input ref="importInput" type="file" accept=".txt,.epub,.pdf" hidden @change="onImportBook" />
+
     <!-- 书架分区 -->
     <p v-if="books.length === 0" class="bsf-empty">书架还空着，先加入一本想读的书吧。</p>
     <div v-for="st in STATUS_ORDER" :key="st" class="bsf-shelf">
@@ -91,6 +95,9 @@
           <!-- 在读：记进度 -->
           <button v-if="st === 'reading'" type="button" class="bsf-link" @click="openSession(b)">记进度</button>
 
+          <!-- 有导入正文：打开逐书阅读器（自动定位续读） -->
+          <button v-if="hasBookContent(b.id)" type="button" class="bsf-read" @click="openReading(b)">打开阅读</button>
+
           <button type="button" class="bsf-del" :title="`移除《${b.title}》`" @click="onRemove(b)">✕</button>
         </div>
 
@@ -111,9 +118,11 @@
 import { computed, reactive, ref } from 'vue'
 import { useReadingBridge } from '../modules/reading/reading-bridge'
 import { READING_STATUS_META } from '../modules/reading/types'
+import { hasBookContent, parseBookFile } from '../modules/reading'
 import type { Book, ReadingStatus } from '../modules/reading/types'
 
 const bridge = useReadingBridge()
+const emit = defineEmits<{ (e: 'open-reading', id: string): void }>()
 
 const books = bridge.books
 const booksByStatus = bridge.booksByStatus
@@ -133,6 +142,7 @@ const goalPct = computed(() =>
 
 // ---- 新增书籍 ----
 const newBook = reactive({ title: '', author: '', totalPages: 200 as number | null, tags: '' })
+const importInput = ref<HTMLInputElement | null>(null)
 
 function onAdd() {
   if (!newBook.title.trim()) return
@@ -143,6 +153,26 @@ function onAdd() {
   newBook.author = ''
   newBook.totalPages = 200
   newBook.tags = ''
+}
+
+// 导入电子书：本地解析为纯文本并按书名建书（含按书正文），随后可在书卡上「打开阅读」
+async function onImportBook(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input?.files?.[0]
+  input.value = '' // 允许重复导入同名文件
+  if (!file) return
+  try {
+    const { title, text } = await parseBookFile(file)
+    if (!text) return
+    bridge.addBookFromText(
+      title || file.name.replace(/\.[^.]+$/, ''),
+      '',
+      Math.max(1, text.split(/\n+/).filter(p => p.trim()).length),
+      text,
+    )
+  } catch (err) {
+    console.error('[BookShelfPanel] 导入电子书失败', err)
+  }
 }
 
 // ---- 状态 / 评分 / 移除 ----
@@ -157,6 +187,11 @@ function onRate(b: Book, n: number) {
 
 function onRemove(b: Book) {
   bridge.removeBook(b.id)
+}
+
+// 打开逐书阅读器（由父组件 ReadingHall 接管加载正文 + 续读定位）
+function openReading(b: Book) {
+  emit('open-reading', b.id)
 }
 
 // ---- 年度目标 ----
@@ -296,6 +331,8 @@ void openGoalEditor
 .bsf-select:focus { outline: none; border-color: rgba(var(--accent-rgb), 0.4); }
 .bsf-link { border: none; background: transparent; color: var(--accent); font-size: 11px; font-family: inherit; cursor: pointer; padding: 4px 6px; border-radius: 6px; }
 .bsf-link:hover { background: rgba(var(--accent-rgb), 0.1); }
+.bsf-read { border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.12); color: var(--accent); font-size: 11px; font-family: inherit; padding: 4px 10px; border-radius: 14px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.bsf-read:hover { background: rgba(var(--accent-rgb), 0.2); border-color: rgba(var(--accent-rgb), 0.45); }
 .bsf-del { border: none; background: transparent; color: rgba(var(--text-primary-rgb), 0.35); cursor: pointer; font-size: 12px; padding: 4px 6px; }
 .bsf-del:hover { color: #c46a5a; }
 
@@ -306,6 +343,7 @@ void openGoalEditor
   .bsf-input { min-width: 0; flex: 1 1 100%; }
   .bsf-input--num { width: 100%; flex: 1 1 100%; }
   .bsf-add .bsf-btn { flex: 1 1 100%; }
+.bsf-import-btn { width: 100%; }
   .bsf-book-main { min-width: 0; flex-basis: 100%; }
 }
 </style>

@@ -98,4 +98,23 @@ describe('BookShelfPanel 书架录入（接 hall 引擎）', () => {
     expect(bridge.readingGoal.value.yearlyTarget).toBe(20)
     expect(bridge.readingGoal.value.dailyTarget).toBe(45)
   })
+
+  it('有导入正文的书籍显示「打开阅读」并向上 emit 书的 id', async () => {
+    const created = bridge.addBookFromText('有正文的书', '', 3, '第一段\n第二段\n第三段')
+    const w = mount(BookShelfPanel)
+
+    const openBtn = w.find('.bsf-read')
+    expect(openBtn.exists()).toBe(true)
+    expect(openBtn.text()).toContain('打开阅读')
+
+    await openBtn.trigger('click')
+    expect(w.emitted('open-reading')).toBeTruthy()
+    expect(w.emitted('open-reading')![0]).toEqual([created.id])
+  })
+
+  it('无导入正文的书籍（仅录入元数据）不显示「打开阅读」', async () => {
+    bridge.addBook('只有书名的书', '某作者', 200, ['测试'])
+    const w = mount(BookShelfPanel)
+    expect(w.find('.bsf-read').exists()).toBe(false)
+  })
 })

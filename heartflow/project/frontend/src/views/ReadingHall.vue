@@ -41,8 +41,8 @@
         <div class="rh-actions">
           <button class="rh-btn" :disabled="!pastedText.trim()" @click="loadPastedText">载入</button>
           <label class="rh-btn rh-upload-label">
-            上传 .txt 文件
-            <input type="file" accept=".txt" hidden @change="handleFileUpload" />
+            上传 .txt / .epub / .pdf
+            <input type="file" accept=".txt,.epub,.pdf" hidden @change="handleFileUpload" />
           </label>
         </div>
       </div>
@@ -50,7 +50,7 @@
       <!-- 有文本时：阅读区域 -->
       <div v-else class="reading-area">
         <div class="reading-toolbar">
-          <span class="reading-label">阅读</span>
+          <span class="reading-label">{{ activeBookTitle || '阅读' }}</span>
           <button class="text-btn" @click="clearReadingText">清除文本</button>
         </div>
         <div class="reading-content" ref="readingRef" @mouseup="onTextSelect" @scroll="onReaderScroll">
@@ -139,7 +139,22 @@
 
     <!-- ========== 书架（接 hall 引擎：增书/改状态/记会话/评分/目标） ========== -->
     <div data-enter v-if="activeTab === 'shelf'" class="rh-panel rh-shelf-panel">
-      <BookShelfPanel />
+      <BookShelfPanel @open-reading="openBookForReading" />
+    </div>
+
+    <!-- ========== 待读箱（乙-3：本地 content_snapshot，打开阅读 / 转正书架） ========== -->
+    <div data-enter v-if="activeTab === 'inbox'" class="rh-panel rh-inbox-panel">
+      <ReadingInboxPanel @open-item="openInboxItem" />
+    </div>
+
+    <!-- ========== 人生之书（路线甲：呼吸书 + 正/侧/横三维 + 8 维剖面） ========== -->
+    <div data-enter v-if="activeTab === 'lifebook'" class="rh-panel rh-lifebook-panel">
+      <LifeBookPanel />
+    </div>
+
+    <!-- ========== 读书便签（轻量随手记，独立于书评笔记系统） ========== -->
+    <div data-enter v-if="activeTab === 'memo'" class="rh-panel rh-memo-panel">
+      <ReadingMemoPanel :book-id="activeBookId" :book-title="activeBookTitle" />
     </div>
 
     <!-- 阅读总览仪表盘（INCR-160：已构建但从未接线的 reading-bridge + useReadingDashboard） -->
@@ -200,7 +215,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
-import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy } from '../modules/reading'
+import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
@@ -212,6 +227,9 @@ import ReadingChallengesPanel from '../components/ReadingChallengesPanel.vue'
 import BookReviewsPanel from '../components/BookReviewsPanel.vue'
 import TtsControlPanel from '../components/TtsControlPanel.vue'
 import BookShelfPanel from '../components/BookShelfPanel.vue'
+import ReadingInboxPanel from '../components/ReadingInboxPanel.vue'
+import LifeBookPanel from '../components/LifeBookPanel.vue'
+import ReadingMemoPanel from '../components/ReadingMemoPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -221,9 +239,12 @@ const tabs = [
   { key: 'book', label: '书卷' },
   { key: 'excerpts', label: '摘录集' },
   { key: 'review', label: '回顾' },
+  { key: 'inbox', label: '待读箱' },
+  { key: 'lifebook', label: '人生之书' },
   { key: 'shelf', label: '书架' },
+  { key: 'memo', label: '读书便签' },
 ] as const
-const activeTab = ref<'book' | 'excerpts' | 'review' | 'shelf'>('book')
+const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'memo'>('book')
 
 // ---- 阅读文本 ----
 const reading = useReading()
@@ -253,8 +274,8 @@ function estimatePages(text: string): number {
   return Math.max(1, text.split(/\n+/).filter(p => p.trim()).length)
 }
 // 把当前正文登记成书架书目（去重）+ 记录激活书，必要时续读定位
-function registerActiveBook(text: string) {
-  const title = deriveTitle(text)
+function registerActiveBook(text: string, preferredTitle?: string) {
+  const title = preferredTitle?.trim() || deriveTitle(text)
   const book = hall.addBookFromText(title, '', estimatePages(text), text)
   activeBookId.value = book.id
   activeBookTitle.value = book.title
@@ -285,6 +306,20 @@ function onReaderScroll() {
     lastProgressSave = now
     hall.setBookProgress(activeBookId.value, idx)
   }
+}
+// 从书架打开某本已导入正文的书籍：切换书卷 tab + 按书加载正文 + 定位续读
+function openBookForReading(bookId: string) {
+  const book = hall.books.value.find(b => b.id === bookId)
+  if (!book) return
+  const content = getBookContent(bookId)
+  if (!content) return
+  activeTab.value = 'book'
+  readingText.value = content
+  reading.saveText()
+  activeBookId.value = book.id
+  activeBookTitle.value = book.title
+  const resume = book.lastPosition ?? 0
+  nextTick(() => scrollToParagraph(resume))
 }
 // 划线/摘录 流入思绪书房（全局 Note，自动进入双链与间隔重复）
 function flowHighlight() {
@@ -327,23 +362,26 @@ function loadPastedText() {
 function handleFileUpload(e: Event) {
   const input = e.target as HTMLInputElement
   const file = input?.files?.[0]
+  input.value = '' // allow re-upload
   if (!file) return
-  const reader = new FileReader()
-  reader.onload = () => {
-    const text = reader.result as string
-    if (text) {
+  // 本地解析 .txt/.epub/.pdf（动态懒加载解析库，不触云）
+  parseBookFile(file)
+    .then(({ title, text }) => {
+      if (!text) return
       readingText.value = text
       reading.saveText()
-      registerActiveBook(text)
-    }
-  }
-  reader.readAsText(file)
-  input.value = '' // allow re-upload
+      registerActiveBook(text, title)
+    })
+    .catch((err) => {
+      console.error('[ReadingHall] 解析书籍文件失败', err)
+    })
 }
 
 function clearReadingText() {
   readingText.value = ''
   pendingText.value = ''
+  activeBookId.value = ''
+  activeBookTitle.value = ''
   reading.saveText()
 }
 
@@ -436,6 +474,20 @@ const speedStats = computed(() => readingSpeed.computeSpeedStats())
 const { crossRoomFeed, emitRoomSignal } = useRoomResonance()
 const hall = useReadingHall()
 const externalFeed = computed(() => crossRoomFeed.value.filter((s) => s.room !== 'reading'))
+
+// ---- 待读箱：打开某项内容进入书卷阅读（不入书架，不写续读进度） ----
+const inbox = useReadingInbox()
+function openInboxItem(id: string) {
+  const item = inbox.inbox.value.find(i => i.id === id)
+  const content = inbox.getInboxContent(id)
+  if (!content) return
+  activeTab.value = 'book'
+  readingText.value = content
+  reading.saveText()
+  activeBookId.value = '' // 待读箱项不直接入书架，不写续读进度
+  activeBookTitle.value = item?.title || '待读内容'
+  inbox.markInboxRead(id)
+}
 
 function roomLabel(r: keyof typeof ROOM_LABELS): string {
   return ROOM_LABELS[r]

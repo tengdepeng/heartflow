@@ -70,6 +70,22 @@ export {
 // ---- 划线/摘录 回流思绪书房 ----
 export { flowHighlightToStudy } from './highlight-flow'
 
+// ---- 电子书本地解析（乙-2：epub/pdf/txt → 纯文本，不触云） ----
+export { parseBookFile, stripHtmlToText, readFileAsText } from './book-import'
+export type { ParsedBook } from './book-import'
+
+// ---- 待读箱（乙-3：本地 content_snapshot + content_hash 去重，转正书架） ----
+export { useReadingInbox, computeContentHash, addInboxItem, getInboxContent, removeInboxItem, markInboxRead, promoteToBook } from './inbox'
+export type { InboxItem, InboxStatus } from './inbox'
+
+// ---- 读书便签（轻量随手记，独立于 challenges 的书评笔记 useReadingNotes） ----
+export { useReadingMemos } from './reading-memo'
+export type { ReadingMemo } from './reading-memo'
+
+// ---- 人生之书（路线甲：呼吸书 + 正/侧/横三维 + 8 维剖面） ----
+export { useLifeBook, computeLifeBook, buildLifeBook, monthlySeries, tagBreakdown, breadthMetrics, clamp01 } from './life-book'
+export type { LifeBook, LifeBookPoint, LifeBookSnapshot, LifeDimensions, LifeDimKey, BreathStyle } from './life-book'
+
 // ---- 古典竖排阅读（ClassicalVerticalPanel 消费，影印对照控件并入 INCR-398） ----
 export {
   useClassicalVertical,

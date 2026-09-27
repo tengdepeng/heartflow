@@ -75,13 +75,41 @@ describe('ReadingHall 阅览殿', () => {
     expect(wrapper.text()).toContain('结晶数')
   })
 
-  it('显示三个标签页', async () => {
+  it('显示七个标签页（含待读箱、人生之书与读书便签）', async () => {
     const wrapper = await getWrapper()
     const tabs = wrapper.findAll('.rh-tab')
-    expect(tabs.length).toBe(3)
+    expect(tabs.length).toBe(7)
     expect(tabs[0].text()).toContain('书卷')
     expect(tabs[1].text()).toContain('摘录集')
     expect(tabs[2].text()).toContain('回顾')
+    expect(tabs[3].text()).toContain('待读箱')
+    expect(tabs[4].text()).toContain('人生之书')
+    expect(tabs[5].text()).toContain('书架')
+    expect(tabs[6].text()).toContain('读书便签')
+  })
+
+  it('挂载读书便签面板 ReadingMemoPanel', async () => {
+    const wrapper = await getWrapper()
+    const tabs = wrapper.findAll('.rh-tab')
+    await tabs[6].trigger('click') // 读书便签
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('reading-memo-panel-stub').exists()).toBe(true)
+  })
+
+  it('挂载待读箱面板 ReadingInboxPanel', async () => {
+    const wrapper = await getWrapper()
+    const tabs = wrapper.findAll('.rh-tab')
+    await tabs[3].trigger('click') // 待读箱
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('reading-inbox-panel-stub').exists()).toBe(true)
+  })
+
+  it('挂载人生之书面板 LifeBookPanel', async () => {
+    const wrapper = await getWrapper()
+    const tabs = wrapper.findAll('.rh-tab')
+    await tabs[4].trigger('click') // 人生之书
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('life-book-panel-stub').exists()).toBe(true)
   })
 
   // ---- 批量收口：补挂载孤儿面板（INCR-173）----

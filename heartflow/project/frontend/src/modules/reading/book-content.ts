@@ -34,7 +34,9 @@ export function getBookContent(bookId: string): string {
 /** 删除某本书的正文（书被移除时调用，避免孤儿数据） */
 export function removeBookContent(bookId: string): void {
   if (!bookId) return
-  storage.removeKV(contentKey(bookId))
+  storage.removeKV?.(contentKey(bookId))
+  // removeKV 可能未实现（旧引擎），用覆盖式清空兜底
+  try { storage.setKV(contentKey(bookId), '') } catch { /* noop */ }
 }
 
 /** 是否存在某本书的正文 */
