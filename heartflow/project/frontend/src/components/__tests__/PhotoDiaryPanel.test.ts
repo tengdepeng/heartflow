@@ -265,3 +265,124 @@ describe('PhotoDiaryPanel 照片墙按月分组', () => {
     expect(wrapper.find('.pd-month').text()).toBe('2026 年 8 月')
   })
 })
+
+// ============================================================
+// 相册：模式切换（长廊 / 按月 / 收藏册）+ 收藏册（新建/归入/筛选）
+// ============================================================
+describe('PhotoDiaryPanel 相册（长廊 + 收藏册）', () => {
+  it('模式切换到长廊渲染扁平画廊，总数=全部照片，按月标题消失', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [
+        entry({ date: '2026-09-20', images: ['A', 'B'] }),
+        entry({ date: '2026-08-15', images: ['C'] }),
+      ],
+    })
+    // 默认按月
+    expect(wrapper.findAll('.pd-month').length).toBe(2)
+    await wrapper.find('[data-test="pd-mode-corridor"]').trigger('click')
+    expect(wrapper.find('.pd-corridor').exists()).toBe(true)
+    expect(wrapper.findAll('.pd-corridor-item').length).toBe(3)
+    expect(wrapper.findAll('.pd-month').length).toBe(0)
+    // 点击长廊项开灯箱
+    await wrapper.findAll('.pd-corridor-item')[0].trigger('click')
+    expect(wrapper.find('.pd-viewer').exists()).toBe(true)
+  })
+
+  it('收藏册空状态提示', async () => {
+    const wrapper = await mountPanel({ 'hf:anchor:photo_diary': [entry({ images: ['A'] })] })
+    await wrapper.find('[data-test="pd-mode-album"]').trigger('click')
+    expect(wrapper.text()).toContain('还没有相册')
+  })
+
+  it('新建相册并归入某日，相册视图只显示该日照片', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [
+        entry({ id: 'day_a', date: '2026-08-20', images: ['A'] }),
+        entry({ id: 'day_b', date: '2026-08-19', images: ['B'] }),
+      ],
+    })
+    // 进入收藏册 → 新建
+    await wrapper.find('[data-test="pd-mode-album"]').trigger('click')
+    await wrapper.find('[data-test="pd-new-album-input"]').setValue('旅行')
+    await wrapper.find('[data-test="pd-new-album"]').trigger('click')
+    // 自动选中 → 相册视图
+    expect(wrapper.find('.pd-album-title').text()).toBe('旅行')
+    expect(wrapper.text()).toContain('这个相册还没有照片')
+    // 返回列表，卡片可见
+    await wrapper.find('[data-test="pd-album-back"]').trigger('click')
+    const card = wrapper.find('[data-test="pd-album-card"]')
+    expect(card.exists()).toBe(true)
+    expect(card.find('.pd-album-name').text()).toBe('旅行')
+
+    // 读取随机相册 id
+    const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+    const albumId = saved.kvStore['hf:anchor:photo_albums'][0].id
+
+    // 切到按月，把 day_a 归入相册（渲染倒序：首条为 08-20）
+    await wrapper.find('[data-test="pd-mode-month"]').trigger('click')
+    const selects = wrapper.findAll('[data-test="pd-album-select"]')
+    await selects[0].setValue(albumId)
+
+    // 回到收藏册，点开相册 → 仅 day_a
+    await wrapper.find('[data-test="pd-mode-album"]').trigger('click')
+    await wrapper.find('[data-test="pd-album-card"]').trigger('click')
+    const entriesEls = wrapper.findAll('.pd-entry')
+    expect(entriesEls.length).toBe(1)
+    expect(entriesEls[0].find('.pd-entry-date').text()).toBe('2026-08-20')
+  })
+
+  it('相册视图全屏内「设为封面」写封面且卡片列表随之变', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [
+        entry({ id: 'day_a', date: '2026-08-20', images: ['A', 'B'] }),
+      ],
+    })
+    // 进入收藏册 → 新建相册（建完自动选中进入相册视图）
+    await wrapper.find('[data-test="pd-mode-album"]').trigger('click')
+    await wrapper.find('[data-test="pd-new-album-input"]').setValue('旅行')
+    await wrapper.find('[data-test="pd-new-album"]').trigger('click')
+    const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+    const albumId = saved.kvStore['hf:anchor:photo_albums'][0].id
+
+    // 返回相册列表（清除选中），以便后续从卡片进入
+    await wrapper.find('[data-test="pd-album-back"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // 切到按月，把 day_a 归入相册
+    await wrapper.find('[data-test="pd-mode-month"]').trigger('click')
+    const selects = wrapper.findAll('[data-test="pd-album-select"]')
+    await selects[0].setValue(albumId)
+    await wrapper.vm.$nextTick()
+
+    // 回到收藏册列表 → 点开卡片
+    await wrapper.find('[data-test="pd-mode-album"]').trigger('click')
+    await wrapper.find('[data-test="pd-album-card"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // 点开第 2 张（index 1）灯箱 → 设为封面
+    const imgs = wrapper.findAll('.pd-grid .pd-img')
+    expect(imgs.length).toBe(2)
+    await imgs[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    const setBtn = wrapper.find('[data-test="pd-set-cover"]')
+    expect(setBtn.exists()).toBe(true)
+    await setBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // 封面写入相册（date + index）
+    const saved2 = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+    const album = saved2.kvStore['hf:anchor:photo_albums'][0]
+    expect(album.coverDate).toBe('2026-08-20')
+    expect(album.coverIndex).toBe(1)
+    // 当前封面按钮出现
+    expect(wrapper.find('[data-test="pd-clear-cover"]').exists()).toBe(true)
+
+    // 关闭灯箱，返回列表，卡片封面应反映自定义封面（index 1 = B）
+    await wrapper.findAll('.pd-viewer-bar .pd-btn').find(b => b.text() === '关闭')!.trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-test="pd-album-back"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    const cardImg = wrapper.find('[data-test="pd-album-card"] .pd-album-cover .pd-img')
+    expect(cardImg.attributes('src')).toBe('B')
+  })
+})

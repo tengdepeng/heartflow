@@ -24,6 +24,21 @@ import { storage } from '../../engine/storage'
 import { getLocalDateKey } from '../../utils/time'
 
 export const PHOTO_DIARY_KEY = 'hf:anchor:photo_diary'
+export const PHOTO_ALBUMS_KEY = 'hf:anchor:photo_albums'
+
+/** 收藏册（用户自定义相册）。
+ * - 未设封面（coverDate/coverIndex 均无）时，封面取该相册首张照片缩略图，由 UI 计算
+ * - 二者同时存在时才视为「自定义封面」；任一方为 null 即恢复自动首图
+ */
+export interface PhotoAlbum {
+  id: string
+  name: string
+  createdAt: string
+  /** 自定义封面的归属日期（指向某条 PhotoEntry.date） */
+  coverDate?: string | null
+  /** 自定义封面的图序（指向该 date 下 images 的下标） */
+  coverIndex?: number | null
+}
 
 /** localStorage 后端下的软上限（字符数），留余量给其它数据 */
 export const PHOTO_SOFT_LIMIT_CHARS = 4_200_000
@@ -47,6 +62,8 @@ export interface PhotoEntry {
   captions: string[]
   /** 可选整条日记说明 */
   caption?: string
+  /** 可选归属相册（收藏册）。未分类照片无此字段，向后兼容按月/长廊/胶囊/手札/共鸣接线 */
+  albumId?: string
   createdAt: string
 }
 
@@ -62,6 +79,18 @@ export function clearPhotoDiaryMessages(): void {
 }
 
 const entries = ref<PhotoEntry[]>([])
+
+const albums = ref<PhotoAlbum[]>([])
+
+function loadAlbums() {
+  const raw = storage.getKV<unknown>(PHOTO_ALBUMS_KEY, [])
+  albums.value = Array.isArray(raw)
+    ? raw.filter((a): a is PhotoAlbum => !!a && typeof a === 'object' && typeof (a as { id?: unknown }).id === 'string')
+    : []
+}
+function saveAlbums() {
+  storage.setKV(PHOTO_ALBUMS_KEY, albums.value)
+}
 
 /** 把列表对齐到长度 len（截断多余项，缺失位补空串），始终返回新数组 */
 function alignList(list: string[] | undefined, len: number): string[] {
@@ -86,6 +115,7 @@ function alignEntry(raw: Partial<PhotoEntry> & { images?: unknown }): PhotoEntry
     thumbs: alignList(raw.thumbs as string[] | undefined, n),
     captions: alignList(raw.captions as string[] | undefined, n),
     caption: typeof raw.caption === 'string' && raw.caption ? raw.caption : undefined,
+    albumId: typeof raw.albumId === 'string' ? raw.albumId : undefined,
     createdAt: typeof raw.createdAt === 'string' ? raw.createdAt : new Date().toISOString(),
   }
 }
@@ -97,6 +127,7 @@ function load() {
     .filter((e): e is Partial<PhotoEntry> => !!e && typeof e === 'object')
     .filter(e => Array.isArray((e as { images?: unknown }).images))
     .map(e => alignEntry(e))
+  loadAlbums()
 }
 
 function save() {
@@ -280,6 +311,74 @@ export function usePhotoDiary() {
     save()
   }
 
+  // ---- 收藏册（用户自定义相册）----
+  function getAlbum(id: string): PhotoAlbum | undefined {
+    return albums.value.find(a => a.id === id)
+  }
+
+  /** 新建相册；空名忽略返回 null */
+  function addAlbum(name: string): PhotoAlbum | null {
+    const trimmed = name.trim()
+    if (!trimmed) return null
+    const album: PhotoAlbum = {
+      id: `al_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+      name: trimmed,
+      createdAt: new Date().toISOString(),
+    }
+    albums.value = [album, ...albums.value]
+    saveAlbums()
+    return album
+  }
+
+  /** 改名；相册不存在或空名返回 false */
+  function renameAlbum(id: string, name: string): boolean {
+    const a = albums.value.find(x => x.id === id)
+    if (!a) return false
+    const t = name.trim()
+    if (!t) return false
+    a.name = t
+    albums.value = [...albums.value]
+    saveAlbums()
+    return true
+  }
+
+  /** 删除相册并清除归属照片的 albumId，避免孤儿引用 */
+  function removeAlbum(id: string): boolean {
+    if (!albums.value.some(x => x.id === id)) return false
+    albums.value = albums.value.filter(x => x.id !== id)
+    entries.value = entries.value.map(e => (e.albumId === id ? { ...e, albumId: undefined } : e))
+    saveAlbums()
+    save()
+    return true
+  }
+
+  /** 把某日照片归入相册（albumId 为 null 即取消归类） */
+  function setEntryAlbum(date: string, albumId: string | null): boolean {
+    const e = entries.value.find(x => x.date === date)
+    if (!e) return false
+    e.albumId = albumId || undefined
+    entries.value = [...entries.value]
+    save()
+    return true
+  }
+
+  /**
+   * 设置 / 清除相册自定义封面。
+   * @param albumId 目标相册
+   * @param date 封面指向的日期；为 null 即清除自定义封面（恢复自动首图）
+   * @param index 封面指向的图序；为 null（或 date 为 null）即清除
+   * @returns 相册不存在返回 false，其余一律成功（封面实时随动，无需额外校验照片归属）
+   */
+  function setAlbumCover(albumId: string, date: string | null, index: number | null): boolean {
+    const a = albums.value.find(x => x.id === albumId)
+    if (!a) return false
+    a.coverDate = date || null
+    a.coverIndex = date == null ? null : index ?? null
+    albums.value = [...albums.value]
+    saveAlbums()
+    return true
+  }
+
   /** 导出全部图片日记为 JSON 字符串（本地备份，不上传） */
   function exportJson(): string {
     return JSON.stringify(
@@ -318,6 +417,7 @@ export function usePhotoDiary() {
 
   return {
     entries,
+    albums,
     load,
     addImages,
     getByDate,
@@ -329,6 +429,12 @@ export function usePhotoDiary() {
     setImageCaption,
     setEntryCaption,
     removeEntry,
+    getAlbum,
+    addAlbum,
+    renameAlbum,
+    removeAlbum,
+    setEntryAlbum,
+    setAlbumCover,
     exportJson,
     importJson,
   }

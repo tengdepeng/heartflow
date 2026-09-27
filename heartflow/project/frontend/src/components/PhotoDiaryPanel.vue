@@ -65,55 +65,117 @@
       <input ref="importInput" type="file" accept="application/json,.json" class="pd-file" @change="onImport" />
     </div>
 
-    <!-- 画廊 -->
+    <!-- 画廊：模式切换（长廊 / 按月 / 收藏册） -->
     <div v-if="diary.entries.value.length" class="pd-block">
-      <span class="pd-block-label">照片墙 <small class="pd-tip">拖动缩略图可排序 · 点击可写单图说明</small></span>
-      <template v-for="group in groupedEntries" :key="group.key">
-        <div class="pd-month">{{ group.label }}</div>
-        <div v-for="entry in group.entries" :key="entry.id" class="pd-entry">
-        <div class="pd-entry-head">
-          <span class="pd-entry-date">{{ entry.date }}</span>
-          <span class="pd-entry-count">{{ entry.images.length }} / {{ PHOTO_MAX_PER_ENTRY }} 张</span>
-          <span class="pd-entry-actions">
-            <button class="pd-btn pd-mini" data-test="pd-edit-cap" @click="startEditCaption(entry)">编辑说明</button>
-            <button class="pd-btn pd-mini pd-danger" data-test="pd-del-day" @click="removeDay(entry)">删除本日</button>
-          </span>
+      <div class="pd-mode-bar">
+        <button class="pd-mode" :class="{ active: viewMode === 'corridor' }" data-test="pd-mode-corridor" @click="viewMode = 'corridor'">长廊</button>
+        <button class="pd-mode" :class="{ active: viewMode === 'month' }" data-test="pd-mode-month" @click="viewMode = 'month'">按月</button>
+        <button class="pd-mode" :class="{ active: viewMode === 'album' }" data-test="pd-mode-album" @click="viewMode = 'album'">收藏册</button>
+      </div>
+
+      <!-- 长廊：全部照片扁平画廊（相册长廊） -->
+      <div v-if="viewMode === 'corridor'" class="pd-corridor">
+        <div
+          v-for="p in corridorPhotos"
+          :key="`${p.date}-${p.index}`"
+          class="pd-corridor-item"
+          @click="openViewer(p.date, p.index)"
+        >
+          <img :src="p.thumb" class="pd-img" alt="照片" loading="lazy" draggable="false" />
         </div>
-        <p v-if="editingCaptionId === entry.id" class="pd-entry-cap-edit">
-          <input v-model="editCaptionText" class="pd-input pd-caption" placeholder="整条日记说明" data-test="pd-cap-input" />
-          <button class="pd-btn pd-mini" data-test="pd-cap-save" @click="saveCaption(entry)">保存</button>
-          <button class="pd-btn pd-mini pd-ghost" data-test="pd-cap-cancel" @click="cancelEditCaption">取消</button>
-        </p>
-        <p v-else-if="entry.caption" class="pd-entry-caption">{{ entry.caption }}</p>
-        <div class="pd-grid">
-          <div
-            v-for="(img, i) in entry.images"
-            :key="`${entry.id}-${i}`"
-            class="pd-img-wrap"
-            :class="{
-              'is-dragging': drag.date === entry.date && drag.from === i,
-              'is-drop-target': drag.date === entry.date && drag.over === i && drag.from !== i,
-            }"
-            draggable="true"
-            @dragstart="onDragStart(entry.date, i)"
-            @dragover.prevent="onDragOver(entry.date, i)"
-            @drop.prevent="onDrop(entry.date, i)"
-            @dragend="onDragEnd"
-          >
-            <img
-              :src="entry.thumbs[i] || img"
-              class="pd-img"
-              alt="照片日记"
-              loading="lazy"
-              draggable="false"
-              @click="openViewer(entry.date, i)"
-            />
-            <span class="pd-img-order">{{ i + 1 }}</span>
-            <button class="pd-img-remove" @click="removeImage(entry.date, i)">×</button>
-            <p v-if="entry.captions[i]" class="pd-img-caption">{{ entry.captions[i] }}</p>
+        <p v-if="!corridorPhotos.length" class="pd-hint">还没有照片。</p>
+      </div>
+
+      <!-- 按月 / 选中相册：条目墙 -->
+      <template v-else-if="viewMode === 'month' || (viewMode === 'album' && selectedAlbumId)">
+        <!-- 选中相册时的管理条 -->
+        <div v-if="viewMode === 'album' && selectedAlbumId" class="pd-album-head">
+          <button class="pd-btn pd-mini" data-test="pd-album-back" @click="selectedAlbumId = null">‹ 返回</button>
+          <span class="pd-album-title">{{ currentAlbumName }}</span>
+          <input v-model="renameAlbumName" class="pd-input pd-caption pd-album-rename-input" data-test="pd-album-rename-input" />
+          <button class="pd-btn pd-mini" data-test="pd-album-rename" @click="renameCurrentAlbum">改名</button>
+          <button class="pd-btn pd-mini pd-danger" data-test="pd-album-del" @click="deleteCurrentAlbum">删除相册</button>
+        </div>
+        <span class="pd-block-label">照片墙 <small class="pd-tip">拖动缩略图可排序 · 点击可写单图说明</small></span>
+        <template v-for="group in visibleGroups" :key="group.key">
+          <div class="pd-month">{{ group.label }}</div>
+          <div v-for="entry in group.entries" :key="entry.id" class="pd-entry">
+          <div class="pd-entry-head">
+            <span class="pd-entry-date">{{ entry.date }}</span>
+            <span class="pd-entry-count">{{ entry.images.length }} / {{ PHOTO_MAX_PER_ENTRY }} 张</span>
+            <select class="pd-album-select" data-test="pd-album-select" :value="entry.albumId || ''" @change="onAssignAlbum(entry, $event)">
+              <option value="">未分类</option>
+              <option v-for="a in albums" :key="a.id" :value="a.id">{{ a.name }}</option>
+            </select>
+            <span class="pd-entry-actions">
+              <button class="pd-btn pd-mini" data-test="pd-edit-cap" @click="startEditCaption(entry)">编辑说明</button>
+              <button class="pd-btn pd-mini pd-danger" data-test="pd-del-day" @click="removeDay(entry)">删除本日</button>
+            </span>
+          </div>
+          <p v-if="editingCaptionId === entry.id" class="pd-entry-cap-edit">
+            <input v-model="editCaptionText" class="pd-input pd-caption" placeholder="整条日记说明" data-test="pd-cap-input" />
+            <button class="pd-btn pd-mini" data-test="pd-cap-save" @click="saveCaption(entry)">保存</button>
+            <button class="pd-btn pd-mini pd-ghost" data-test="pd-cap-cancel" @click="cancelEditCaption">取消</button>
+          </p>
+          <p v-else-if="entry.caption" class="pd-entry-caption">{{ entry.caption }}</p>
+          <div class="pd-grid">
+            <div
+              v-for="(img, i) in entry.images"
+              :key="`${entry.id}-${i}`"
+              class="pd-img-wrap"
+              :class="{
+                'is-dragging': drag.date === entry.date && drag.from === i,
+                'is-drop-target': drag.date === entry.date && drag.over === i && drag.from !== i,
+              }"
+              draggable="true"
+              @dragstart="onDragStart(entry.date, i)"
+              @dragover.prevent="onDragOver(entry.date, i)"
+              @drop.prevent="onDrop(entry.date, i)"
+              @dragend="onDragEnd"
+            >
+              <img
+                :src="entry.thumbs[i] || img"
+                class="pd-img"
+                alt="照片日记"
+                loading="lazy"
+                draggable="false"
+                @click="openViewer(entry.date, i)"
+              />
+              <span class="pd-img-order">{{ i + 1 }}</span>
+              <button class="pd-img-remove" @click="removeImage(entry.date, i)">×</button>
+              <p v-if="entry.captions[i]" class="pd-img-caption">{{ entry.captions[i] }}</p>
+            </div>
           </div>
         </div>
-      </div>
+        </template>
+        <p v-if="viewMode === 'album' && selectedAlbumId && !visibleGroups.length" class="pd-hint">这个相册还没有照片。在照片上点「归入相册」即可加入。</p>
+      </template>
+
+      <!-- 收藏册列表 -->
+      <template v-else>
+        <div class="pd-album-new">
+          <input v-model="newAlbumName" class="pd-input pd-caption" data-test="pd-new-album-input" placeholder="新建相册名称" />
+          <button class="pd-btn pd-btn-primary" data-test="pd-new-album" @click="createAlbum">新建</button>
+        </div>
+        <div v-if="albumList.length" class="pd-album-grid">
+          <div
+            v-for="a in albumList"
+            :key="a.id"
+            class="pd-album-card"
+            data-test="pd-album-card"
+            @click="openAlbum(a.id)"
+          >
+            <div class="pd-album-cover">
+              <img v-if="a.cover" :src="a.cover" class="pd-img" alt="封面" draggable="false" />
+              <span v-else class="pd-album-cover-empty">📷</span>
+            </div>
+            <div class="pd-album-meta">
+              <span class="pd-album-name">{{ a.name }}</span>
+              <span class="pd-album-count">{{ a.count }} 张</span>
+            </div>
+          </div>
+        </div>
+        <p v-else class="pd-hint">还没有相册。新建一个，把照片归入收藏吧。</p>
       </template>
     </div>
     <p v-else class="pd-hint">还没有照片日记。选几张图片记录今天吧。</p>
@@ -130,6 +192,8 @@
           <button class="pd-btn" :disabled="viewer.index >= viewerEntry.images.length - 1" @click="shift(1)">后移</button>
           <button class="pd-btn pd-danger" @click="removeCurrent">删除此图</button>
           <button class="pd-btn pd-journal" data-test="pd-send-journal" @click.stop="sendToJournal(viewer.date, viewer.index)">📔 收入手札</button>
+          <button v-if="viewMode === 'album' && selectedAlbumId && !isCurrentCover" class="pd-btn pd-cover" data-test="pd-set-cover" @click.stop="setCurrentAsCover">⭐ 设为封面</button>
+          <button v-if="viewMode === 'album' && selectedAlbumId && isCurrentCover" class="pd-btn pd-cover-clear" data-test="pd-clear-cover" @click.stop="clearAlbumCover">取消封面</button>
           <button class="pd-btn" @click="closeViewer">关闭</button>
         </div>
         <div class="pd-viewer-cap-row" @click.stop>
@@ -193,10 +257,10 @@ const remaining = computed(() => PHOTO_MAX_PER_ENTRY - (diary.getByDate(date.val
 
 const sortedEntries = computed(() => [...diary.entries.value].sort((a, b) => b.date.localeCompare(a.date)))
 
-// 照片墙按月分组（续13）：同月条目归入一组，组间按月份倒序，组内保持按日倒序
-const groupedEntries = computed(() => {
+// 按月份分组（续13）：抽为可复用 helper，按月模式与选中相册共用
+function groupByMonth(list: PhotoEntry[]): { key: string; label: string; entries: PhotoEntry[] }[] {
   const byMonth = new Map<string, PhotoEntry[]>()
-  for (const e of sortedEntries.value) {
+  for (const e of list) {
     const ym = e.date.slice(0, 7)
     if (!byMonth.has(ym)) byMonth.set(ym, [])
     byMonth.get(ym)!.push(e)
@@ -204,10 +268,100 @@ const groupedEntries = computed(() => {
   return [...byMonth.entries()]
     .sort((a, b) => b[0].localeCompare(a[0]))
     .map(([key, entries]) => ({ key, label: formatMonthLabel(key), entries }))
-})
+}
+const groupedEntries = computed(() => groupByMonth(sortedEntries.value))
+
 function formatMonthLabel(ym: string): string {
   const [y, m] = ym.split('-')
   return `${y} 年 ${Number(m)} 月`
+}
+
+// ---- 相册（收藏册）视图状态 ----
+const viewMode = ref<'corridor' | 'month' | 'album'>('month')
+const selectedAlbumId = ref<string | null>(null)
+const newAlbumName = ref('')
+const renameAlbumName = ref('')
+const albums = diary.albums
+
+// 长廊：全部照片扁平画廊（相册长廊），点击开灯箱
+const corridorPhotos = computed(() => {
+  const out: { date: string; index: number; thumb: string; image: string; caption: string }[] = []
+  for (const e of sortedEntries.value) {
+    for (let i = 0; i < e.images.length; i++) {
+      out.push({ date: e.date, index: i, thumb: e.thumbs[i] || e.images[i], image: e.images[i], caption: e.captions[i] || '' })
+    }
+  }
+  return out
+})
+
+// 选中相册时的月份分组（否则用全量按月）
+const visibleGroups = computed(() =>
+  viewMode.value === 'album' && selectedAlbumId.value
+    ? groupByMonth(sortedEntries.value.filter(e => e.albumId === selectedAlbumId.value))
+    : groupedEntries.value,
+)
+
+// 相册卡片列表（封面优先取自定义封面，否则首张缩略图 + 数量）
+const albumList = computed(() =>
+  albums.value.map(a => {
+    const ents = sortedEntries.value.filter(e => e.albumId === a.id)
+    const count = ents.reduce((s, e) => s + e.images.length, 0)
+    let cover = ''
+    // 自定义封面：coverDate + coverIndex 同时有效
+    if (a.coverDate && typeof a.coverIndex === 'number') {
+      const target = diary.getByDate(a.coverDate)
+      const img = target?.images[a.coverIndex]
+      if (img) cover = target!.thumbs[a.coverIndex] || img
+    }
+    // 回退：该相册首张照片
+    if (!cover) {
+      const first = ents[0]
+      if (first) cover = first.thumbs[0] || first.images[0]
+    }
+    return { ...a, count, cover }
+  }),
+)
+
+// 当前全屏查看的照片是否为所选相册的封面（用于切换按钮文案）
+const isCurrentCover = computed(() => {
+  if (viewMode.value !== 'album' || !selectedAlbumId.value) return false
+  const a = albums.value.find(x => x.id === selectedAlbumId.value)
+  return !!a && !!a.coverDate && typeof a.coverIndex === 'number' && a.coverDate === viewer.date && a.coverIndex === viewer.index
+})
+function setCurrentAsCover() {
+  if (viewMode.value !== 'album' || !selectedAlbumId.value) return
+  diary.setAlbumCover(selectedAlbumId.value, viewer.date, viewer.index)
+}
+function clearAlbumCover() {
+  if (selectedAlbumId.value) diary.setAlbumCover(selectedAlbumId.value, null, null)
+}
+const currentAlbumName = computed(() => albums.value.find(a => a.id === selectedAlbumId.value)?.name ?? '')
+
+function openAlbum(id: string) {
+  selectedAlbumId.value = id
+  renameAlbumName.value = currentAlbumName.value
+}
+function createAlbum() {
+  const a = diary.addAlbum(newAlbumName.value)
+  if (a) {
+    newAlbumName.value = ''
+    selectedAlbumId.value = a.id
+    renameAlbumName.value = a.name
+  }
+}
+function renameCurrentAlbum() {
+  if (selectedAlbumId.value) diary.renameAlbum(selectedAlbumId.value, renameAlbumName.value)
+}
+function deleteCurrentAlbum() {
+  if (!selectedAlbumId.value) return
+  if (typeof window !== 'undefined' && !window.confirm('删除相册会将其下照片归为「未分类」，确定？')) return
+  diary.removeAlbum(selectedAlbumId.value)
+  selectedAlbumId.value = null
+  renameAlbumName.value = ''
+}
+function onAssignAlbum(entry: PhotoEntry, e: Event) {
+  const val = (e.target as HTMLSelectElement).value
+  diary.setEntryAlbum(entry.date, val || null)
 }
 
 const anchorDateSet = computed(() => new Set(props.anchorDates ?? []))
@@ -683,6 +837,132 @@ async function onImport(e: Event) {
 .pd-viewer-idx { color: #7a879c; }
 .pd-viewer-cap-row { width: min(92vw, 720px); }
 .pd-viewer-cap-input { width: 100%; box-sizing: border-box; }
+
+.pd-mode-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.pd-mode {
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(140, 160, 190, 0.25);
+  background: transparent;
+  color: #aab6c9;
+  font-size: 12px;
+  cursor: pointer;
+}
+.pd-mode.active {
+  background: rgba(120, 150, 200, 0.22);
+  border-color: rgba(140, 170, 220, 0.5);
+  color: #dce4f0;
+}
+.pd-corridor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 6px;
+}
+.pd-corridor-item {
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: zoom-in;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.pd-corridor-item .pd-img {
+  height: 84px;
+}
+.pd-album-select {
+  padding: 3px 6px;
+  border-radius: 8px;
+  border: 1px solid rgba(140, 160, 190, 0.2);
+  background: rgba(20, 26, 38, 0.6);
+  color: #c6d0e0;
+  font-size: 11px;
+  max-width: 120px;
+}
+.pd-album-new {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.pd-album-new .pd-caption { margin-bottom: 0; }
+.pd-album-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.pd-album-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.pd-album-cover {
+  position: relative;
+  width: 100%;
+  height: 96px;
+  background: rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pd-album-cover .pd-img {
+  width: 100%;
+  height: 96px;
+}
+.pd-album-cover-empty {
+  font-size: 26px;
+  opacity: 0.5;
+}
+.pd-album-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+}
+.pd-album-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dce4f0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pd-album-count {
+  font-size: 11px;
+  color: #7a879c;
+  margin-left: 6px;
+}
+.pd-album-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.pd-album-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #dce4f0;
+}
+.pd-album-rename-input {
+  width: 140px;
+  margin-bottom: 0;
+}
+.pd-cover {
+  background: rgba(240, 200, 80, 0.18);
+  border-color: rgba(240, 200, 80, 0.5);
+  color: #f0d27a;
+}
+.pd-cover-clear {
+  background: rgba(140, 160, 190, 0.16);
+  border-color: rgba(140, 160, 190, 0.4);
+  color: #aab6c9;
+}
 
 @media (max-width: 640px) {
   .pd-upload-row { gap: 6px; }

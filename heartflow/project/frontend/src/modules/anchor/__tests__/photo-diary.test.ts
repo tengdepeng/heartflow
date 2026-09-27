@@ -260,3 +260,118 @@ describe('photo-diary P1', () => {
     expect(d.setEntryCaption('2099-01-01', 'x')).toBe(false)
   })
 })
+
+// ============================================================
+// 收藏册（相册）数据层
+// ============================================================
+describe('photo-diary 收藏册（相册）', () => {
+  it('新建相册并持久化', async () => {
+    setup()
+    const { usePhotoDiary, PHOTO_ALBUMS_KEY } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    const a = d.addAlbum('旅行')
+    expect(a).not.toBeNull()
+    expect(a!.name).toBe('旅行')
+    expect(d.albums.value.length).toBe(1)
+    const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+    expect(saved.kvStore[PHOTO_ALBUMS_KEY][0].name).toBe('旅行')
+  })
+
+  it('空名不建相册', async () => {
+    setup()
+    const { usePhotoDiary } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    expect(d.addAlbum('   ')).toBeNull()
+    expect(d.albums.value.length).toBe(0)
+  })
+
+  it('改名与删除', async () => {
+    setup()
+    const { usePhotoDiary } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    const a = d.addAlbum('旅行')!
+    expect(d.renameAlbum(a.id, '远方')).toBe(true)
+    expect(d.getAlbum(a.id)!.name).toBe('远方')
+    expect(d.renameAlbum('nope', 'x')).toBe(false)
+    expect(d.removeAlbum(a.id)).toBe(true)
+    expect(d.albums.value.length).toBe(0)
+  })
+
+  it('把某日照片归入相册，并随删除相册解除归属（避免孤儿）', async () => {
+    setup()
+    const { usePhotoDiary, PHOTO_DIARY_KEY } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    d.addImages('2026-09-26', ['data:image/jpeg;base64,I1'], undefined, ['data:image/jpeg;base64,T1'])
+    const a = d.addAlbum('旅行')!
+    expect(d.setEntryAlbum('2026-09-26', a.id)).toBe(true)
+    expect(d.getByDate('2026-09-26')!.albumId).toBe(a.id)
+    const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+    expect(saved.kvStore[PHOTO_DIARY_KEY][0].albumId).toBe(a.id)
+    // 取消归类
+    expect(d.setEntryAlbum('2026-09-26', null)).toBe(true)
+    expect(d.getByDate('2026-09-26')!.albumId).toBeUndefined()
+    // 删除相册清除归属
+    d.setEntryAlbum('2026-09-26', a.id)
+    expect(d.removeAlbum(a.id)).toBe(true)
+    expect(d.getByDate('2026-09-26')!.albumId).toBeUndefined()
+  })
+
+  it('load 兼容无 albumId 老数据与独立相册存储', async () => {
+    setup({
+      'hf:anchor:photo_diary': [{ id: 'legacy', date: '2026-01-02', images: ['data:image/jpeg;base64,L1'], createdAt: '2026-01-02T00:00:00.000Z' }],
+      'hf:anchor:photo_albums': [{ id: 'al_x', name: '旧相册', createdAt: '2026-01-01T00:00:00.000Z' }],
+    })
+    const { usePhotoDiary } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    expect(d.getByDate('2026-01-02')!.albumId).toBeUndefined()
+    expect(d.albums.value.length).toBe(1)
+    expect(d.getAlbum('al_x')!.name).toBe('旧相册')
+  })
+
+  it('setAlbumCover 设置与清除封面并持久化', async () => {
+    setup()
+    const { usePhotoDiary, PHOTO_ALBUMS_KEY } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    d.addImages('2026-09-26', ['data:image/jpeg;base64,I1', 'data:image/jpeg;base64,I2'], undefined, ['data:image/jpeg;base64,T1', 'data:image/jpeg;base64,T2'])
+    const a = d.addAlbum('旅行')!
+    // 指定第 2 张（index 1）为封面
+    expect(d.setAlbumCover(a.id, '2026-09-26', 1)).toBe(true)
+    expect(d.getAlbum(a.id)!.coverDate).toBe('2026-09-26')
+    expect(d.getAlbum(a.id)!.coverIndex).toBe(1)
+    const saved = JSON.parse((globalThis as any).localStorage.getItem('heartflow:storage'))
+    expect(saved.kvStore[PHOTO_ALBUMS_KEY][0].coverDate).toBe('2026-09-26')
+    expect(saved.kvStore[PHOTO_ALBUMS_KEY][0].coverIndex).toBe(1)
+    // 清除封面
+    expect(d.setAlbumCover(a.id, null, null)).toBe(true)
+    expect(d.getAlbum(a.id)!.coverDate).toBeNull()
+    expect(d.getAlbum(a.id)!.coverIndex).toBeNull()
+  })
+
+  it('setAlbumCover 对不存在的相册返回 false', async () => {
+    setup()
+    const { usePhotoDiary } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    expect(d.setAlbumCover('no-such', '2026-09-26', 0)).toBe(false)
+  })
+
+  it('setAlbumCover 自动首图回退：清除后仍可用首张', async () => {
+    setup()
+    const { usePhotoDiary } = await loadModule()
+    const d = usePhotoDiary()
+    d.load()
+    d.addImages('2026-09-26', ['data:image/jpeg;base64,I1'], undefined, ['data:image/jpeg;base64,T1'])
+    const a = d.addAlbum('旅行')!
+    d.setEntryAlbum('2026-09-26', a.id)
+    expect(d.setAlbumCover(a.id, '2026-09-26', 0)).toBe(true)
+    expect(d.setAlbumCover(a.id, null, null)).toBe(true)
+    // 清除后封面应回退到该相册首张（由 UI 计算，数据层仅清标记）
+    expect(d.getAlbum(a.id)!.coverDate).toBeNull()
+  })
+})
