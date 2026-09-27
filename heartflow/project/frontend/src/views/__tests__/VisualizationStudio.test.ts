@@ -298,3 +298,16 @@ describe('集成：数据源连接器面板', () => {
   })
 })
 
+// ============================================================
+// 集成：图表渲染面板 VisualChartPanel（INCR-413 补挂载孤儿引擎 svg.ts）
+// 空数据下面板渲染空态引导（测试环境 storage 无记录 → items 为空）。
+// ============================================================
+describe('集成：图表渲染面板', () => {
+  it('渲染图表渲染面板（标题/副题/空态引导）', () => {
+    const wrapper = mount(VisualizationStudio)
+    expect(wrapper.find('.vcp').exists()).toBe(true)
+    expect(wrapper.text()).toContain('图表渲染')
+    expect(wrapper.find('[data-testid="vcp-empty"]').exists()).toBe(true)
+  })
+})
+

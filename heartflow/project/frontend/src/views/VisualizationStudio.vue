@@ -14,6 +14,7 @@ import VisualizationInteractionPanel from '../components/VisualizationInteractio
 import VisualizationCockpitPanel from '../components/VisualizationCockpitPanel.vue'
 import DimensionMappingPanel from '../components/DimensionMappingPanel.vue'
 import DataSourceConnectorPanel from '../components/DataSourceConnectorPanel.vue'
+import VisualChartPanel from '../components/VisualChartPanel.vue'
 
 useViewEntrance()
 
@@ -159,6 +160,9 @@ onMounted(renderToCanvas)
 
     <!-- 数据源连接器（INCR-404 补挂载零 UI 引擎 DataSourceConnectorPanel：datasource-connector 的 useDataSourceConnector 数据源注册/连接生命周期/订阅/轮询/缓存/错误恢复 整体仅被 visualization-bridge 聚合, 驾驶舱只呈现健康计数, 管理面零 UI 消费, 可视化主题内真缺口） -->
     <DataSourceConnectorPanel />
+
+    <!-- 图表渲染（INCR-413 补挂载零消费引擎 VisualChartPanel：visualization/svg.ts 图表工具库 插值/坐标轴/网格/图例/折线/柱状/环状/面积/边界缩放 整体仅被 barrel 转发、无任何视图消费, 工坊宿主仅 canvas 绘光点, 图表渲染能力面零 UI 呈现, 可视化主题内真缺口。薄委托直引 svg.ts 助手的 v-html SVG 字符串管线） -->
+    <VisualChartPanel :items="studio.items.value" />
 
     <section class="studio-canvas-wrap">
       <canvas ref="canvasRef" class="studio-canvas" data-testid="studio-canvas"></canvas>
