@@ -9,13 +9,23 @@ import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
 
 /** 胶囊内引用的条目类型 */
-export type CapsuleItemType = 'note' | 'crystal'
+export type CapsuleItemType = 'note' | 'crystal' | 'photo'
+
+/** 照片引用：指向照片日记某日某张图（与 PhotoEntry.images/thumbs 下标一致） */
+export interface PhotoRef {
+  /** 照片日记归属日期（YYYY-MM-DD），与 PhotoEntry.date 同口径 */
+  date: string
+  /** 该日照片日记中的图序（0 起） */
+  index: number
+}
 
 /** 胶囊内引用的条目（轻量指针，避免重复存储正文） */
 export interface CapsuleItemRef {
   type: CapsuleItemType
   id: string
   title: string
+  /** 关联的照片日记引用（照片进胶囊）；仅 type==='photo' 时存在 */
+  photoRef?: PhotoRef
 }
 
 /** 胶囊范围：年度时间胶囊 / 自由胶囊 */

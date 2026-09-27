@@ -71,6 +71,38 @@ describe('capsule 模块', () => {
     expect(api.getCapsule(c.id)?.items).toHaveLength(0)
   })
 
+  it('addItem 支持 photo 类型并保留 photoRef', async () => {
+    const api = await fresh()
+    const c = api.createCapsule('带照片', futureDate(1))
+    api.addItem(c.id, {
+      type: 'photo',
+      id: '2026-08-20__0',
+      title: '📷 照片',
+      photoRef: { date: '2026-08-20', index: 0 },
+    })
+    const saved = api.getCapsule(c.id)?.items[0]
+    expect(saved?.type).toBe('photo')
+    expect(saved?.photoRef).toEqual({ date: '2026-08-20', index: 0 })
+  })
+
+  it('normalizeCapsule 保留 photo 类型的 photoRef', async () => {
+    const { storage } = await import('../../../engine/storage')
+    const { invalidateCache } = await import('../../../engine/storage/core')
+    storage.setKV('hf:time_capsules', JSON.stringify([
+      {
+        id: 'cap-p',
+        title: '照片胶囊',
+        items: [{ type: 'photo', id: '2026-08-20__1', title: 'x', photoRef: { date: '2026-08-20', index: 1 } }],
+        openDate: '2099-01-01',
+      },
+    ]))
+    invalidateCache()
+    const api = await fresh()
+    const item = api.getCapsule('cap-p')?.items[0]
+    expect(item?.type).toBe('photo')
+    expect(item?.photoRef).toEqual({ date: '2026-08-20', index: 1 })
+  })
+
   it('sealed / opened 计算属性分类正确', async () => {
     const api = await fresh()
     const sealedOne = api.createCapsule('封存中', futureDate(20))

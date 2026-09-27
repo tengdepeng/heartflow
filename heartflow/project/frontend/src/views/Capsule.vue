@@ -51,6 +51,28 @@
             <p v-if="recentNotes.length === 0" class="cap-empty-hint">还没有笔记可封存</p>
           </div>
         </div>
+        <div class="cap-field">
+          <span class="cap-label">封存照片（可选）</span>
+          <div v-if="photoGroups.length === 0" class="cap-empty-hint">还没有照片日记可封存</div>
+          <div v-else class="cap-photo-picker">
+            <div v-for="g in photoGroups" :key="g.date" class="cap-photo-day">
+              <span class="cap-photo-day-label">{{ g.date }}</span>
+              <div class="cap-photo-grid">
+                <button
+                  v-for="p in g.photos"
+                  :key="p.key"
+                  type="button"
+                  class="cap-photo-chip"
+                  :class="{ selected: selectedPhotoKeys.includes(p.key) }"
+                  :data-test="`cap-photo-pick-${p.key}`"
+                  @click="togglePhoto(p.key)"
+                >
+                  <img v-if="p.thumb" :src="p.thumb" class="cap-photo-thumb" :alt="`${g.date} 第 ${p.index + 1} 张`" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="cap-form-actions">
           <button class="cap-btn-cancel" @click="resetForm">清空</button>
           <button class="cap-btn-save" :disabled="!canCreate" @click="create">封存</button>
@@ -98,14 +120,26 @@
         <div class="cap-items">
           <span class="cap-items-label">封存内容（{{ c.items?.length ?? 0 }}）</span>
           <ul class="cap-item-list">
-            <li v-for="it in c.items" :key="it.type + it.id" class="cap-item">
-              <span class="cap-item-type">{{ it.type === 'note' ? '📝' : '💎' }}</span>
-              <span class="cap-item-title">{{ it.title || '（无标题）' }}</span>
-              <button
-                class="cap-item-remove"
-                @click="removeItem(c.id, it.type, it.id)"
-                title="移除"
-              >×</button>
+            <li v-for="it in c.items" :key="it.type + it.id" class="cap-item" :data-test="`cap-item-row-${it.type}`">
+              <template v-if="it.type === 'photo'">
+                <img v-if="photoThumbOf(it)" :src="photoThumbOf(it)" class="cap-item-photo" :alt="it.title" data-test="cap-item-photo" @click="openPhoto(photoFullOf(it))" />
+                <span v-else class="cap-item-type">📷</span>
+                <span class="cap-item-title">{{ it.title || '（无标题）' }}</span>
+                <button
+                  class="cap-item-remove"
+                  @click="removeItem(c.id, it.type, it.id)"
+                  title="移除"
+                >×</button>
+              </template>
+              <template v-else>
+                <span class="cap-item-type">{{ it.type === 'note' ? '📝' : '💎' }}</span>
+                <span class="cap-item-title">{{ it.title || '（无标题）' }}</span>
+                <button
+                  class="cap-item-remove"
+                  @click="removeItem(c.id, it.type, it.id)"
+                  title="移除"
+                >×</button>
+              </template>
             </li>
             <li v-if="(c.items?.length ?? 0) === 0" class="cap-item-empty">空胶囊</li>
           </ul>
@@ -115,26 +149,65 @@
         </div>
       </div>
     </section>
+
+    <Teleport to="body">
+      <div v-if="photoViewer.open" class="cap-photo-viewer" @click="closePhoto">
+        <img :src="photoViewer.src" class="cap-photo-viewer-img" alt="照片胶囊" @click.stop />
+      </div>
+    </Teleport>
   </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
-import { ref, computed } from 'vue'
+import { ref, computed, reactive } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
-import { useTimeCapsule, type CapsuleItemRef } from '../modules/capsule'
+import { useTimeCapsule, type CapsuleItemRef, type CapsuleItemType } from '../modules/capsule'
 import { getNoteStore } from '../modules/note'
+import { usePhotoDiary } from '../modules/anchor/photo-diary'
 import CapsuleArchivePanel from '../components/CapsuleArchivePanel.vue'
 import CapsuleVaultPanel from '../components/CapsuleVaultPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const capsule = useTimeCapsule()
 const noteStore = getNoteStore()
+const diary = usePhotoDiary()
+diary.load()
 
 const showForm = ref(false)
 const form = ref({ title: '', openDate: '', note: '' })
 const selectedNoteIds = ref<string[]>([])
+const selectedPhotoKeys = ref<string[]>([])
+
+/** 照片日记按日期分组，供「封存照片」选择器使用 */
+const photoGroups = computed(() =>
+  diary
+    .allDates()
+    .map(date => {
+      const entry = diary.getByDate(date)
+      if (!entry) return null
+      return {
+        date,
+        photos: entry.thumbs.map((thumb, i) => ({
+          key: `${date}__${i}`,
+          thumb: thumb || entry.images[i] || '',
+          index: i,
+        })),
+      }
+    })
+    .filter(
+      (g): g is { date: string; photos: { key: string; thumb: string; index: number }[] } => g !== null,
+    ),
+)
+
+function togglePhoto(key: string) {
+  if (selectedPhotoKeys.value.includes(key)) {
+    selectedPhotoKeys.value = selectedPhotoKeys.value.filter(k => k !== key)
+  } else {
+    selectedPhotoKeys.value = [...selectedPhotoKeys.value, key]
+  }
+}
 
 const recentNotes = computed(() =>
   noteStore.allNotes.value.slice(0, 20).map(n => ({ id: n.id, title: n.title })),
@@ -150,15 +223,28 @@ const opened = capsule.opened
 function resetForm() {
   form.value = { title: '', openDate: '', note: '' }
   selectedNoteIds.value = []
+  selectedPhotoKeys.value = []
 }
 
 function create() {
   if (!canCreate.value) return
-  const items: CapsuleItemRef[] = selectedNoteIds.value.map(id => {
+  const noteItems: CapsuleItemRef[] = selectedNoteIds.value.map(id => {
     const n = noteStore.getNoteById(id)
     return { type: 'note', id, title: n?.title || '未命名笔记' }
   })
-  capsule.createCapsule(form.value.title, form.value.openDate, items, form.value.note)
+  const photoItems: CapsuleItemRef[] = selectedPhotoKeys.value.map(key => {
+    const [date, idxStr] = key.split('__')
+    const index = Number(idxStr)
+    const entry = diary.getByDate(date)
+    const cap = entry?.captions[index] || ''
+    return {
+      type: 'photo',
+      id: key,
+      title: `📷 照片 · ${date} · 第 ${index + 1} 张${cap ? ' · ' + cap : ''}`,
+      photoRef: { date, index },
+    }
+  })
+  capsule.createCapsule(form.value.title, form.value.openDate, [...noteItems, ...photoItems], form.value.note)
   resetForm()
   showForm.value = false
 }
@@ -175,8 +261,30 @@ function remove(id: string) {
   capsule.removeCapsule(id)
 }
 
-function removeItem(id: string, type: 'note' | 'crystal', itemId: string) {
+function removeItem(id: string, type: CapsuleItemType, itemId: string) {
   capsule.removeItem(id, type, itemId)
+}
+
+function photoThumbOf(it: CapsuleItemRef): string {
+  if (it.type !== 'photo' || !it.photoRef) return ''
+  const entry = diary.getByDate(it.photoRef.date)
+  if (!entry) return ''
+  return entry.thumbs[it.photoRef.index] || entry.images[it.photoRef.index] || ''
+}
+
+function photoFullOf(it: CapsuleItemRef): string {
+  if (it.type !== 'photo' || !it.photoRef) return ''
+  return diary.getByDate(it.photoRef.date)?.images[it.photoRef.index] || ''
+}
+
+const photoViewer = reactive({ open: false, src: '' })
+function openPhoto(src: string) {
+  if (!src) return
+  photoViewer.src = src
+  photoViewer.open = true
+}
+function closePhoto() {
+  photoViewer.open = false
 }
 
 function formatDate(iso: string | null): string {
@@ -395,4 +503,39 @@ function formatDate(iso: string | null): string {
 }
 .cap-item-remove:hover { color: #f87171; }
 .cap-opened-at { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
+
+/* 封存照片选择器 */
+.cap-photo-picker { display: flex; flex-direction: column; gap: 10px; max-height: 220px; overflow-y: auto; padding: 8px; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; background: rgba(0, 0, 0, 0.2); }
+.cap-photo-day { display: flex; flex-direction: column; gap: 6px; }
+.cap-photo-day-label { font-size: 12px; color: rgba(255, 255, 255, 0.45); }
+.cap-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; }
+.cap-photo-chip {
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  transition: border-color 0.15s;
+}
+.cap-photo-chip.selected { border-color: #a07c8c; }
+.cap-photo-chip:hover { border-color: rgba(160, 124, 140, 0.5); }
+.cap-photo-thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 已开启胶囊内的照片缩略图 */
+.cap-item-photo { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; cursor: zoom-in; flex-shrink: 0; }
+
+/* 照片放大查看器 */
+.cap-photo-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.82);
+  cursor: zoom-out;
+}
+.cap-photo-viewer-img { max-width: 90vw; max-height: 90vh; border-radius: 10px; box-shadow: 0 12px 48px rgba(0, 0, 0, 0.5); }
 </style>

@@ -12,6 +12,7 @@ import type { TimeCapsule, CapsuleItemType } from './index'
 export const CAPSULE_ITEM_TYPE_META: Record<CapsuleItemType, { icon: string; label: string }> = {
   note: { icon: '📝', label: '笔记' },
   crystal: { icon: '💎', label: '结晶' },
+  photo: { icon: '📷', label: '照片' },
 }
 
 export function capsuleItemTypeLabel(t: string): string {
@@ -65,6 +66,7 @@ export interface CapsuleArchiveOverview {
   itemCount: number
   noteCount: number
   crystalCount: number
+  photoCount: number
   /** 今天或已到开启日的胶囊数（可开启/期盼中） */
   openableToday: number
   /** 距最近的待开启胶囊的天数；无待开启则为 null */
@@ -87,10 +89,12 @@ export function capsuleArchiveOverview(capsules: TimeCapsule[], now: Date): Caps
   let itemCount = 0
   let noteCount = 0
   let crystalCount = 0
+  let photoCount = 0
   for (const c of capsules) {
     itemCount += c.items.length
     noteCount += c.items.filter(i => i.type === 'note').length
     crystalCount += c.items.filter(i => i.type === 'crystal').length
+    photoCount += c.items.filter(i => i.type === 'photo').length
   }
 
   let openableToday = 0
@@ -121,6 +125,7 @@ export function capsuleArchiveOverview(capsules: TimeCapsule[], now: Date): Caps
     itemCount,
     noteCount,
     crystalCount,
+    photoCount,
     openableToday,
     nextOpenDays,
     avgSealDays,
@@ -150,7 +155,7 @@ export function capsuleItemTypeRows(capsules: TimeCapsule[]): CapsuleItemTypeRow
     }
   }
   const total = [...map.values()].reduce((a, b) => a + b, 0)
-  return (['note', 'crystal'] as const)
+  return (['note', 'crystal', 'photo'] as const)
     .map(type => ({
       type,
       icon: capsuleItemTypeIcon(type),
@@ -392,6 +397,10 @@ export function capsuleInsights(capsules: TimeCapsule[], now: Date): CapsuleInsi
 
   if (ov.crystalCount > 0) {
     out.push({ text: `封存了 ${ov.crystalCount} 枚结晶，被收藏的瞬间最难忘。` })
+  }
+
+  if (ov.photoCount > 0) {
+    out.push({ text: `封存了 ${ov.photoCount} 张照片，岁月被定格成可回望的画面。` })
   }
 
   if (rhy.currentStreak >= 2) {
