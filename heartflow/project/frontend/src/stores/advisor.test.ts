@@ -241,15 +241,22 @@ describe('advisor annual dialogue', () => {
   })
 
   it('triggerAnnualDialogue does not fail when not Jan 1', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-06-15'))
     const advisor = useAdvisorStore()
     const result = advisor.triggerAnnualDialogue()
     expect(result).toBe(false)
+    vi.useRealTimers()
   })
 
   it('triggerQuarterlyDialogue does not fail when not quarter end', () => {
+    // 固定到非季末日期，避免"真实 now 落在季末月最后 7 天"时假红
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-15'))
     const advisor = useAdvisorStore()
     const result = advisor.triggerQuarterlyDialogue()
     expect(result).toBe(false)
+    vi.useRealTimers()
   })
 })
 

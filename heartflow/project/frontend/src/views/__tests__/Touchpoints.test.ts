@@ -478,7 +478,8 @@ describe('Touchpoints 殿堂触角视图', () => {
           title: '降低 邮件通知 优先级', description: '邮件评分远低于其他渠道',
           currentValue: '优先级 2', suggestedValue: '优先级 1',
           expectedImprovement: '预计提升 5%', confidence: 0.75,
-          severity: 'warning', autoApplicable: true, createdAt: '2026-09-18T08:00:00.000Z',
+          // 动态近期时间：activeSuggestions 有 7 天有效期过滤，过期建议会被隐藏
+          severity: 'warning', autoApplicable: true, createdAt: new Date(Date.now() - 2 * 86400000).toISOString(),
         },
       ])
       const wrapper = await createWrapper()
