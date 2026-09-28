@@ -76,14 +76,8 @@
         </svg>
       </div>
     </div>
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">岁时有序，仪式长存</p>
-    <h1 class="sr-title">岁时阁</h1>
+    <!-- 统一房间头 + 统一内容区（RoomLayout） -->
+    <RoomLayout title="岁时阁" kicker="岁时有序，仪式长存" align="center" data-enter>
 
     <!-- 统计概览 -->
     <section data-enter class="sr-stats-section">
@@ -391,6 +385,7 @@
     <SeasonalHealthPanel
       :rituals="srCtx.rituals.value"
     />
+    </RoomLayout>
   </div>
 </template>
 
@@ -407,6 +402,7 @@ import SeasonalYearOverviewPanel from '../components/SeasonalYearOverviewPanel.v
 import SeasonalHealthPanel from '../components/SeasonalHealthPanel.vue'
 import SeasonalBridgePanel from '../components/SeasonalBridgePanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 // ---- 模块化 composables ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -559,7 +555,8 @@ const srStats = srCtx.stats
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 80px;
   min-height: 100vh;
   background: transparent;
   color: var(--text-primary);
@@ -684,47 +681,6 @@ const srStats = srCtx.stats
   25% { transform: translate(15px, -10px); opacity: 0.08; }
   50% { transform: translate(-5px, -20px); opacity: 0.03; }
   75% { transform: translate(-15px, -5px); opacity: 0.07; }
-}
-
-/* 装饰性头部 */
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.3), transparent);
-}
-
-.orn-diamond {
-  color: var(--accent);
-  font-size: 11px;
-  opacity: 0.6;
-}
-
-.header-kicker {
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.5);
-  letter-spacing: 4px;
-  margin: 0 0 4px 0;
-  font-weight: 300;
-}
-
-.sr-title {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 500;
-  letter-spacing: 6px;
-  color: var(--accent);
-  margin: 0 0 28px 0;
-  text-shadow: 0 0 30px rgba(var(--accent-rgb), 0.15);
 }
 
 /* 统计概览 */
@@ -1839,13 +1795,13 @@ section h3 {
 }
 
 @media (max-width: 860px) {
-  .sr { padding: 32px 20px 64px; }
+  .sr { padding: 0 0 64px; }
   .sr-stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .sr-ritual-card-body { gap: 6px; }
 }
 
 @media (max-width: 640px) {
-  .sr { padding: 24px 14px 56px; }
+  .sr { padding: 0 0 56px; }
   .sr-stats-row { grid-template-columns: 1fr; gap: 8px; }
   .sr-season-tabs { flex-wrap: wrap; }
   .sr-season-tab { flex: 1 1 calc(50% - 4px); min-width: 0; }
