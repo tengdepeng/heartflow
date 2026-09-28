@@ -43,30 +43,21 @@
       <div class="atmos-warm-glow"></div>
     </div>
 
-    <!-- ===== 头部区域 ===== -->
-    <header data-enter class="bag-header">
-      <div class="bag-header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-
-      <!-- 面包屑导航 -->
-      <nav class="bag-breadcrumb">
-        <router-link to="/home-space" class="bc-link">家</router-link>
-        <span class="bc-sep">→</span>
-        <router-link to="/worklog" class="bc-link">更漏</router-link>
-        <span class="bc-sep">→</span>
-        <span class="bc-current">行囊</span>
-      </nav>
-
-      <h1 class="bag-title">
-        <span class="bag-title-icon">🎒</span>
-        <span class="bag-title-text">行囊</span>
-      </h1>
-      <p class="bag-subtitle">工作技能与工具</p>
-      <p class="bag-description">随身携带的能力与资源，在职业旅途中不断积累与精进。</p>
-    </header>
+    <RoomLayout
+      title="🎒 行囊"
+      kicker="工作技能与工具"
+      subtitle="随身携带的能力与资源，在职业旅途中不断积累与精进。"
+      data-enter
+    >
+      <template #breadcrumb>
+        <nav class="bag-breadcrumb">
+          <router-link to="/home-space" class="bc-link">家</router-link>
+          <span class="bc-sep">→</span>
+          <router-link to="/worklog" class="bc-link">更漏</router-link>
+          <span class="bc-sep">→</span>
+          <span class="bc-current">行囊</span>
+        </nav>
+      </template>
 
     <!-- ===== 概览统计 ===== -->
     <section data-enter class="bag-section">
@@ -350,6 +341,7 @@
         </div>
       </div>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -362,6 +354,7 @@ import BagOrganizePanel from '../components/bag/BagOrganizePanel.vue'
 import BagEvolutionPanel from '../components/BagEvolutionPanel.vue'
 import LauncherPanel from '../components/LauncherPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -413,7 +406,7 @@ const {
   position: relative;
   max-width: 860px;
   margin: 0 auto;
-  padding: 48px 32px 100px;
+  padding: 0 0 100px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -528,39 +521,6 @@ const {
   50% { opacity: 1; }
 }
 
-/* ---- 头部 ---- */
-.bag-header {
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.bag-header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 12px 0;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(160, 124, 140, 0.25),
-    transparent
-  );
-}
-
-.orn-diamond {
-  font-size: 9px;
-  color: var(--accent);
-  opacity: 0.4;
-}
-
 /* ---- 面包屑 ---- */
 .bag-breadcrumb {
   display: flex;
@@ -592,46 +552,6 @@ const {
   color: var(--accent);
   opacity: 0.8;
   letter-spacing: 0.5px;
-}
-
-/* ---- 标题 ---- */
-.bag-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin: 0;
-}
-
-.bag-title-icon {
-  font-size: 32px;
-  line-height: 1;
-}
-
-.bag-title-text {
-  font-size: 28px;
-  font-weight: 600;
-  font-family: var(--font-heading-zh);
-  letter-spacing: 3px;
-  color: var(--text-primary);
-}
-
-.bag-subtitle {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 8px 0 0;
-  letter-spacing: 1px;
-}
-
-.bag-description {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin: 6px 0 0;
-  letter-spacing: 0.5px;
-  line-height: 1.6;
-  max-width: 400px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* ---- 通用 section ---- */
@@ -1432,24 +1352,8 @@ select.bef-input {
 /* ---- 平板端 (max-width: 860px) ---- */
 @media (max-width: 860px) {
   .bag-view {
-    padding: 28px 20px 100px;
+    padding: 0 0 100px;
     gap: 28px;
-  }
-
-  .bag-title-text {
-    font-size: 24px;
-  }
-
-  .bag-title-icon {
-    font-size: 28px;
-  }
-
-  .bag-header-ornament {
-    gap: 8px;
-  }
-
-  .orn-line {
-    width: 40px;
   }
 
   /* 分类网格：2列 */
@@ -1486,41 +1390,8 @@ select.bef-input {
 /* ---- 移动端 (max-width: 640px) ---- */
 @media (max-width: 640px) {
   .bag-view {
-    padding: 20px 14px 90px;
+    padding: 0 0 90px;
     gap: 24px;
-  }
-
-  .bag-header {
-    padding-top: 32px;
-  }
-
-  .bag-title-text {
-    font-size: 20px;
-    letter-spacing: 2px;
-  }
-
-  .bag-title-icon {
-    font-size: 24px;
-  }
-
-  .bag-subtitle {
-    font-size: 12px;
-  }
-
-  .bag-description {
-    font-size: 11px;
-  }
-
-  .bag-header-ornament {
-    gap: 6px;
-  }
-
-  .orn-line {
-    width: 28px;
-  }
-
-  .orn-diamond {
-    font-size: 7px;
   }
 
   .bag-breadcrumb {
