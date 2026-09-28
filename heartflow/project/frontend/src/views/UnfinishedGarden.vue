@@ -55,7 +55,7 @@
           <button class="uf-del" @click="removeSeed(s.id)">×</button>
         </div>
       </div>
-      <p v-else class="empty">这里暂时没有搁置的种子</p>
+      <EmptyState v-else icon="" title="这里暂时没有搁置的种子" :glow="false" cta-label="" />
     </section>
 
     <!-- 开了头的书 -->
@@ -92,7 +92,7 @@
           <button class="uf-del" @click="removeBook(b.id)">×</button>
         </div>
       </div>
-      <p v-else class="empty">还没有开了头的书……</p>
+      <EmptyState v-else icon="" title="还没有开了头的书……" :glow="false" cta-label="" />
     </section>
 
     <!-- 写了一半的笔记 -->
@@ -143,7 +143,7 @@
           <button class="uf-del" @click="uncompleteItem(c.id)" title="移回未完成">↩</button>
         </div>
       </div>
-      <p v-else class="empty">还没有完成的项目，继续加油</p>
+      <EmptyState v-else icon="" title="还没有完成的项目，继续加油" :glow="false" cta-label="" />
     </section>
 
     <!-- 清理按钮 -->
@@ -184,6 +184,7 @@ import {
   type UItemType,
   type UItem,
 } from '../modules/unfinished'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -765,8 +766,6 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
 .cleanup-btn:hover { background: rgba(255, 120, 90, 0.1) !important; color: #ff785a !important; }
 
 /* ========== 空状态 ========== */
-
-.empty { font-size: 13px; color: var(--amber-text-muted); padding: 8px 0; }
 
 /* ========== 自动光点（纸隐喻 · 半透明） ========== */
 

@@ -5,10 +5,7 @@
       <span class="ufw-sub">花园气象 · 今日该拾起 · 拾起时机 · 复垦洞察</span>
     </header>
 
-    <div v-if="empty" class="ufw-empty">
-      <span class="ufw-empty-icon">🌱</span>
-      <p>{{ insights.length ? insights[0] : '花园还空着。放一件未完成的事进来，它会慢慢变肥沃。' }}</p>
-    </div>
+    <EmptyState v-if="empty" icon="🌱" :title="insights.length ? insights[0] : '花园还空着。放一件未完成的事进来，它会慢慢变肥沃。'" :glow="false" cta-label="" />
 
     <template v-else>
       <!-- 花园气象 -->
@@ -100,6 +97,7 @@ import {
   type GardenType,
   type BucketKey,
 } from '../modules/unfinished'
+import EmptyState from './EmptyState.vue'
 
 const props = defineProps<{ items: UItem[] }>()
 
@@ -175,23 +173,6 @@ function bucketMeta(k: BucketKey) {
   font-size: 11px;
   color: var(--text-secondary);
   letter-spacing: 1px;
-}
-.ufw-empty {
-  padding: 20px;
-  border-radius: 12px;
-  background: rgba(var(--accent-rgb), 0.05);
-  border: 1px dashed rgba(var(--accent-rgb), 0.2);
-  text-align: center;
-}
-.ufw-empty-icon {
-  display: block;
-  font-size: 22px;
-  margin-bottom: 8px;
-}
-.ufw-empty p {
-  font-size: 13px;
-  color: var(--text-secondary);
-  line-height: 1.7;
 }
 .ufw-card {
   padding: 14px 16px;

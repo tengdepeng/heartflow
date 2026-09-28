@@ -41,7 +41,7 @@ describe('ReclamationWeatherPanel', () => {
   it('空库渲染档案标题与空态引导', () => {
     const wrapper = mountPanel([])
     expect(wrapper.text()).toContain('复垦气象')
-    expect(wrapper.find('.ufw-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('花园还空着')
   })
 

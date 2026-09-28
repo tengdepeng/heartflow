@@ -12,6 +12,7 @@ import {
   traditionsInsights,
 } from '../modules/traditions'
 import type { FolkloreEntry } from '../modules/traditions'
+import EmptyState from './EmptyState.vue'
 
 const props = defineProps<{ entries: FolkloreEntry[] }>()
 
@@ -55,11 +56,7 @@ function formatDate(iso: string | null | undefined): string {
       <span class="trp-sub">档案概览 · 技艺 · 仪式 · 来源 · 地域 · 实践 · 文明健康 · 温和洞察</span>
     </header>
 
-    <div v-if="empty" class="trp-empty">
-      <span class="trp-empty-icon">🌱</span>
-      <p v-if="insights.length">{{ insights[0] }}</p>
-      <p v-else>文明的根系还是一片空地。记下第一项技艺或仪式，让余温生根。</p>
-    </div>
+    <EmptyState v-if="empty" icon="🌱" :title="insights.length ? insights[0] : '文明的根系还是一片空地。记下第一项技艺或仪式，让余温生根。'" :glow="false" cta-label="" />
 
     <template v-else>
       <!-- 档案概览 -->
@@ -203,25 +200,6 @@ function formatDate(iso: string | null | undefined): string {
   font-size: 11px;
   color: rgba(196, 160, 96, 0.55);
   letter-spacing: 1px;
-}
-.trp-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px 0;
-  color: rgba(232, 221, 208, 0.3);
-}
-.trp-empty-icon {
-  font-size: 26px;
-  opacity: 0.5;
-}
-.trp-empty p {
-  font-size: 12px;
-  line-height: 1.7;
-  text-align: center;
-  margin: 0;
-  max-width: 420px;
 }
 .trp-card {
   padding: 14px;

@@ -96,10 +96,7 @@
     <!-- 路径列表 -->
     <div class="lpp-block">
       <span class="lpp-block-label">路径列表</span>
-      <div v-if="!paths.length" class="lpp-empty">
-        <span class="lpp-empty-icon">🛤</span>
-        <p class="lpp-empty-text">还没有学习路径，先分析技能缺口并生成一条吧</p>
-      </div>
+      <EmptyState v-if="!paths.length" icon="🛤" title="还没有学习路径，先分析技能缺口并生成一条吧" :glow="false" cta-label="" />
       <div v-else class="lpp-paths">
         <div
           v-for="p in sortedPaths"
@@ -153,6 +150,7 @@ import { useLearningPath, LEARNING_PATH_TYPE_META } from '../modules/career/skil
 import { SKILL_CATEGORY_META, PROFICIENCY_META } from '../modules/career/skill-map'
 import type { SkillNode, SkillCategory, ProficiencyLevel } from '../modules/career/skill-map'
 import type { SkillGap, LearningPathType, LearningPath } from '../modules/career/skill-path'
+import EmptyState from './EmptyState.vue'
 
 const props = defineProps<{ skills: SkillNode[] }>()
 
@@ -349,10 +347,6 @@ onMounted(() => {
 .lpp-gap-bar { height: 5px; border-radius: 999px; background: rgba(255,255,255,0.05); overflow: hidden; }
 .lpp-gap-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #8a9a7a, #c46a5a); }
 .lpp-gen-row { display: flex; gap: 8px; align-items: center; justify-content: flex-end; margin-top: 4px; }
-
-.lpp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 0; text-align: center; }
-.lpp-empty-icon { font-size: 30px; opacity: 0.5; }
-.lpp-empty-text { font-size: 12px; color: rgba(232, 221, 208, 0.5); margin: 0; }
 
 .lpp-paths { display: flex; flex-direction: column; gap: 10px; }
 .lpp-path {

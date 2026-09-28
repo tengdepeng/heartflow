@@ -184,7 +184,7 @@ describe('Career 视图', () => {
     await searchInput.setValue('不存在的联系人')
     await w.vm.$nextTick()
 
-    const emptyTexts = w.findAll('.tier-empty')
+    const emptyTexts = w.findAll('.tier-contacts .hf-empty')
     expect(emptyTexts).toHaveLength(4)
   })
 
@@ -612,7 +612,7 @@ describe('集成：转业推荐面板', () => {
     await panel.vm.$nextTick()
     expect(panel.find('.trp-panel').exists()).toBe(true)
     expect(panel.text()).toContain('转业 · 转型推荐')
-    expect(panel.find('.trp-empty').text()).toContain('先补充技能图谱与人脉')
+    expect(panel.find('.hf-empty').text()).toContain('先补充技能图谱与人脉')
     expect((panel.find('.trp-run').element as HTMLButtonElement).disabled).toBe(true)
     panel.unmount()
   })
@@ -786,7 +786,7 @@ describe('集成：影响力分析面板', () => {
     it('无路径时显示空态与零指标', async () => {
       const w = await getWrapper()
       const el = lpp(w)
-      expect(el.find('.lpp-empty').exists()).toBe(true)
+      expect(el.find('.hf-empty').exists()).toBe(true)
       expect(el.text()).toContain('还没有学习路径，先分析技能缺口并生成一条吧')
       expect(el.findAll('.lpp-metric b')[0].text()).toBe('0')
     })

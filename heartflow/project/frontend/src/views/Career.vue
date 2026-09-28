@@ -205,7 +205,7 @@
               <span class="tier-contact-name">{{ contact.name }}</span>
               <span class="tier-contact-affinity" :style="{ '--affinity-pct': (contact.affinity / 10) * 100 + '%' }"></span>
             </span>
-            <span v-if="tier.contacts.length === 0" class="tier-empty">暂无记录</span>
+            <EmptyState v-if="tier.contacts.length === 0" icon="" title="暂无记录" :glow="false" cta-label="" />
           </div>
           <div class="tier-affinity-bar" :style="{ '--tier-avg': tier.avgAffinity + '%' }">
             <span class="tier-affinity-label">亲密度均值</span>
@@ -495,6 +495,7 @@ import SkillGapVisualizationPanel from '../components/SkillGapVisualizationPanel
 import LearningPathPanel from '../components/LearningPathPanel.vue'
 import TransitionRecommendPanel from '../components/TransitionRecommendPanel.vue'
 import InfluenceAnalysisPanel from '../components/InfluenceAnalysisPanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const nav = useRoomNavigation()
@@ -1674,13 +1675,6 @@ const skillSummary = computed(() => {
   width: var(--affinity-pct);
   background: var(--career-accent);
   border-radius: 2px;
-}
-
-.tier-empty {
-  font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
-  font-style: italic;
-  opacity: 0.6;
 }
 
 .tier-affinity-bar {

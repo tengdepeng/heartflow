@@ -74,7 +74,7 @@ describe('UnfinishedGarden 未完成花园视图', () => {
   // ------- 空状态提示 -------
   it('无数据时三个区域显示空状态提示', async () => {
     const wrapper = await createWrapper()
-    const emptyTexts = wrapper.findAll('.empty')
+    const emptyTexts = wrapper.findAll('.hf-empty').filter((el) => !el.element.closest('.ufw-panel'))
     expect(emptyTexts.length).toBe(3) // 种子、书籍、已完成
     expect(wrapper.text()).toContain('这里暂时没有搁置的种子')
     expect(wrapper.text()).toContain('还没有开了头的书')
@@ -242,7 +242,7 @@ describe('UnfinishedGarden 未完成花园视图', () => {
     expect(wrapper.find('.ufw-panel').exists()).toBe(true)
     expect(wrapper.text()).toContain('复垦气象')
     // 无未完成项 → 空态
-    expect(wrapper.find('.ufw-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     // 空库洞察引导
     expect(wrapper.text()).toContain('花园还空着')
   })

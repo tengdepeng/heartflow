@@ -22,13 +22,14 @@
     </div>
 
     <!-- 空态 -->
-    <p v-if="!dataReady" class="trp-empty">
-      先补充技能图谱与人脉，再来生成转型推荐
-    </p>
-    <p
+    <EmptyState v-if="!dataReady" icon="" title="先补充技能图谱与人脉，再来生成转型推荐" :glow="false" cta-label="" />
+    <EmptyState
       v-else-if="result && result.recommendations.length === 0"
-      class="trp-empty trp-empty-warn"
-    >{{ result.summary }}</p>
+      icon=""
+      :title="result.summary"
+      :glow="false"
+      cta-label=""
+    />
 
     <template v-else-if="result">
       <p class="trp-summary">{{ result.summary }}</p>
@@ -101,6 +102,7 @@ import { useCareerPath } from '../modules/career/path'
 import type { CareerContact, CareerConnection } from '../modules/career/career'
 import type { Contact as EngineContact, CareerConnection as EngineConnection } from '../modules/career/types'
 import type { SkillNode, CareerMilestone } from '../modules/career/skill-map'
+import EmptyState from './EmptyState.vue'
 
 const props = defineProps({
   contacts: { type: Array as PropType<CareerContact[]>, default: () => [] },
@@ -208,9 +210,6 @@ function gapTitle(g: SkillGapDetail): string {
 }
 .trp-run:hover:not(:disabled) { background: rgba(138, 154, 122, 0.25); }
 .trp-run:disabled { opacity: 0.35; cursor: not-allowed; }
-
-.trp-empty { font-size: 12px; opacity: 0.55; text-align: center; padding: 12px; }
-.trp-empty-warn { color: #e0b060; }
 
 .trp-summary {
   font-size: 12px; line-height: 1.7; color: rgba(232, 228, 216, 0.75);
