@@ -284,10 +284,7 @@ function toggle() {
     0 1px 10px rgba(var(--accent-rgb), 0.10);
 }
 
-.nav-item.active::before {
-  height: 60%;
-  opacity: 1;
-}
+/* 激活态左缘条改由 App.vue .nav-active-indicator 滑动呈现（去静态双条） */
 
 /* 拖拽落点高亮（虚线描边，提示可放下） */
 .nav-item.is-drop-target {

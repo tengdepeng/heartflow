@@ -105,9 +105,11 @@
         </div>
       </div>
 
-      <div class="nav-scroll">
+      <div class="nav-scroll" ref="navScrollRef">
         <!-- 蓝图18空间排布 · 全量导航树（家为原点 → 主链路 → 世界空间七领域 → 系统边界） -->
         <div class="nav-links nav-tree">
+          <!-- 激活项滑动指示条：锚定列表内容随滚动同步移动，房间切换/分组展开时垂直+水平滑动（细节交互） -->
+          <div class="nav-active-indicator" :class="{ 'is-ready': indicatorReady }" :style="indicatorStyle" aria-hidden="true"></div>
           <NavTreeNode
             v-for="node in navTree"
             :key="node.id"
@@ -1037,10 +1039,26 @@ onMounted(() => {
   // 模块内部串行 + 每片之间让出主线程（requestIdleCallback），且失败静默，
   // 仅作优化，绝不阻塞首屏初始化链。
   void prefetchRooms()
+
+  // 侧栏细节交互：挂载后量一次指示条/边缘渐隐，并监听滚动与尺寸变化
+  const sc0 = navScrollRef.value
+  if (sc0) sc0.addEventListener('scroll', onNavScroll, { passive: true })
+  nextTick(() => {
+    measureNav()
+    // 首帧后再置 is-ready，避免挂载时指示条从顶部滑入
+    requestAnimationFrame(() => { indicatorReady.value = true; measureNav() })
+  })
+  navScrollRO = new ResizeObserver(() => measureNav())
+  if (sc0) navScrollRO.observe(sc0)
+  window.addEventListener('resize', measureNav)
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', onResize)
+  if (navScrollRO) { navScrollRO.disconnect(); navScrollRO = null }
+  const scU = navScrollRef.value
+  if (scU) scU.removeEventListener('scroll', onNavScroll)
+  window.removeEventListener('resize', measureNav)
   if (breathRaf != null) {
     cancelAnimationFrame(breathRaf)
     breathRaf = null
@@ -1072,6 +1090,43 @@ const effectiveBackground = computed<BackgroundMediaConfig>(() => {
 
 // ---- 房间数据 ----
 const currentRoomId = computed(() => nav.currentRoomId.value)
+
+// ---- 侧栏细节交互：激活项滑动指示条 + 列表边缘渐隐 ----
+const navScrollRef = ref<HTMLElement | null>(null)
+const indicatorY = ref(0)
+const indicatorH = ref(0)
+const indicatorX = ref(0)
+const indicatorVisible = ref(false)
+const indicatorReady = ref(false)
+const indicatorStyle = computed(() => ({
+  transform: `translateY(${indicatorY.value}px)`,
+  height: `${indicatorH.value}px`,
+  left: `${indicatorX.value}px`,
+  opacity: indicatorVisible.value ? 1 : 0,
+}))
+let navScrollRO: ResizeObserver | null = null
+function measureIndicator() {
+  const sc = navScrollRef.value
+  if (!sc) return
+  const active = sc.querySelector('.nav-item.active') as HTMLElement | null
+  if (!active) { indicatorVisible.value = false; return }
+  // 锚定到 .nav-links（随内容滚动），用内容坐标让指示条与激活项一起滚动，滚动时无需重测
+  const links = sc.querySelector('.nav-links') as HTMLElement | null
+  const base = (links ?? sc).getBoundingClientRect()
+  const ar = active.getBoundingClientRect()
+  indicatorX.value = ar.left - base.left
+  indicatorY.value = ar.top - base.top
+  indicatorH.value = ar.height
+  indicatorVisible.value = true
+}
+function measureScrollFade() {
+  const sc = navScrollRef.value
+  if (!sc) return
+  sc.classList.toggle('can-scroll-up', sc.scrollTop > 2)
+  sc.classList.toggle('can-scroll-down', sc.scrollTop + sc.clientHeight < sc.scrollHeight - 2)
+}
+function measureNav() { measureIndicator(); measureScrollFade() }
+function onNavScroll() { measureScrollFade() }
 const currentRoom = computed(() => nav.currentRoom.value)
 const adjacentIds = computed(() => nav.adjacentRooms.value.map(r => r.id))
 
@@ -1267,6 +1322,8 @@ function toggleExpand(id: string) {
   else s.add(id)
   expandedIds.value = s
 }
+// 分组展开/收起带动布局位移，动画结束后重测指示条与边缘渐隐
+watch(expandedIds, () => { nextTick(measureNav); setTimeout(measureNav, 360) })
 // 默认展开分类分组头：挂载即把当前 navTree 中所有 tax-* 头加入展开集（仅追加，尊重手动折叠）
 watch(
   navTree,
@@ -1375,6 +1432,7 @@ const pageTransition = computed(() => {
 // 路由切换时重置过渡状态，使新视图等待过渡完成再入场
 watch(() => nav.currentRoomId.value, () => {
   routeTransitionDone.value = false
+  nextTick(measureNav)
 })
 </script>
 
@@ -1834,16 +1892,54 @@ watch(() => nav.currentRoomId.value, () => {
   padding: 0 8px;
   /* 整栏 touch-action:none 时会禁掉列表触摸滚动，这里恢复纵向滚动 */
   touch-action: pan-y;
-  /* 列表上下边缘柔化渐隐，避免首/尾项硬切在滚动边界（细节交互质感） */
+  /* 边缘柔化渐隐：默认无遮罩；仅在可向上/向下滚动时才出现（滚动到顶/底自动消失），短列表不常显 */
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.nav-scroll.can-scroll-up {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 16px);
+}
+.nav-scroll.can-scroll-down {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 16px), transparent 100%);
+}
+.nav-scroll.can-scroll-up.can-scroll-down {
   -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
   mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
 }
 
 .nav-links {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 1px;
   padding-bottom: 16px;
+}
+
+/* 激活项滑动指示条：3px 琥珀竖条，随房间切换/分组展开滑动；锚定 .nav-links 随滚动同步移动 */
+.nav-active-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: none;
+}
+.nav-active-indicator.is-ready {
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    left 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.2s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-active-indicator.is-ready { transition: none; }
 }
 
 .nav-group-title {
