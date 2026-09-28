@@ -1,6 +1,14 @@
 <template>
   <UnlockGate v-if="showUnlock" />
-  <div v-else-if="!isAuraWindow" class="app-shell" :class="{ 'sidebar-collapsed': sidebarCollapsed, 'chrome-hidden': chromeHidden, 'is-mobile': isMobile, 'docked-mode': navMode === 'docked', 'surface-3d': is3dShell, 'sidebar-glass': sidebarBgMode === 'glass' }" :style="shellStyle">
+  <div v-else-if="!isAuraWindow" class="app-shell" :class="{
+        'sidebar-collapsed': appearance === 'hidden',
+        'sidebar-rail': appearance === 'rail',
+        'rail-flyout': sidebarCollapseMode === 'rail-flyout',
+        'rail-expand': sidebarCollapseMode === 'rail-expand',
+        'rail-text': sidebarCollapseMode === 'rail-text',
+        'rail-three': sidebarCollapseMode === 'three-state',
+        'chrome-hidden': chromeHidden, 'is-mobile': isMobile, 'docked-mode': navMode === 'docked', 'surface-3d': is3dShell, 'sidebar-glass': sidebarBgMode === 'glass'
+      }" :style="shellStyle">
     <!-- 全局自定义背景层：垫在画布之下，跨路由持久化 -->
     <!-- effectiveBackground 已注入单房间覆盖的背景场景（否则跟随全局） -->
     <div class="app-base-bg" aria-hidden="true">
@@ -105,7 +113,7 @@
         </div>
       </div>
 
-      <div class="nav-scroll" ref="navScrollRef">
+      <div class="nav-scroll" ref="navScrollRef" @mouseover="onNavItemEnter" @mouseout="onNavItemLeave">
         <!-- 蓝图18空间排布 · 全量导航树（家为原点 → 主链路 → 世界空间七领域 → 系统边界） -->
         <div class="nav-links nav-tree">
           <!-- 激活项滑动指示条：锚定列表内容随滚动同步移动，房间切换/分组展开时垂直+水平滑动（细节交互） -->
@@ -125,6 +133,8 @@
           />
         </div>
       </div>
+      <!-- 图标栏·悬停浮出标签（rail-flyout）：fixed 定位逃逸 nav-scroll 裁剪，跟随悬停项右侧 -->
+      <div v-if="railFlyout.show" class="rail-flyout-chip" :style="{ top: railFlyout.top + 'px', left: railFlyout.left + 'px' }">{{ railFlyout.text }}</div>
 
       <!-- 幕僚任务：侧栏常驻显示调令任务（与幕僚阁调令系统联动） -->
       <div
@@ -262,7 +272,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, provide, onMounted, computed, onUnmounted, nextTick, watch, defineAsyncComponent } from 'vue'
+import { ref, reactive, provide, onMounted, computed, onUnmounted, nextTick, watch, defineAsyncComponent } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useConstitutionStore } from './stores/constitution'
 import { initAutoArchiveScheduler } from './modules/archive/auto-archive'
@@ -433,6 +443,7 @@ const {
   navMode,
   sidebarCollapsed,
   setSidebarCollapsed,
+  sidebarCollapseMode,
 } = useAppearance()
 
 // 导航布局模式：floating（悬浮双浮岛）/ docked（桌面端上下固定栏），由 navMode 直接驱动模板
@@ -540,7 +551,8 @@ const navBarFloatStyle = computed((): Record<string, string> => {
   // - free 态（pos 有值）：内联 transform 覆盖 normal 的 none，就近滑出。
   // - 吸附态（pos 为 null）：不写内联 transform，交还 CSS .nav-bar.collapsed / .float-edge-* 规则，
   //   它已正确合并居中偏移（如 translate(-110%,-50%)），保证滑动轨迹贴边不卡中间。
-  if (sidebarCollapsed.value || sidebarAutoHidden.value) {
+  // rail 形态下不滑出：仅 hidden(完全隐藏) 才就近滑出+淡出，保持窄栏常驻。
+  if (appearance.value === 'hidden') {
     const edge = sidebarFloatEdge.value
     const toRight = edge === 'right' || edge.endsWith('r')
     const slide = toRight ? 'translateX(110%)' : 'translateX(-110%)'
@@ -935,6 +947,43 @@ const isMobile = bp.isPhone
 const isMobileOrTablet = computed(() => !bp.isDesktop.value)
 const isDesktop = bp.isDesktop
 
+// 侧栏收起形态：rail 仅桌面端(≥1024)生效；三态循环的「完全隐藏」子态由 railHidden 记录。
+// appearance：expanded(全展开) / rail(窄栏常驻) / hidden(完全隐藏·现状)。
+// - hidden 模式：与现状一致，collapsed=滑出隐藏。
+// - rail 模式(桌面)：collapsed=窄栏常驻（不滑出）；移动/平板降级为 hidden 保现状。
+// - three-state：≡ 在 展开→窄栏→隐藏 间循环。
+const railMode = computed(() => sidebarCollapseMode.value !== 'hidden' && !isMobileOrTablet.value)
+const railHidden = ref(false)
+const appearance = computed<'expanded' | 'rail' | 'hidden'>(() => {
+  const collapsed = sidebarCollapsed.value || sidebarAutoHidden.value
+  if (!collapsed) return 'expanded'
+  if (sidebarCollapseMode.value === 'hidden') return 'hidden'
+  if (!railMode.value) return 'hidden'
+  if (sidebarCollapseMode.value === 'three-state' && railHidden.value) return 'hidden'
+  return 'rail'
+})
+
+// 图标栏·悬停浮出标签（rail-flyout）：委托监听，读悬停项 .nav-label 文本，fixed 浮标跟随。
+const railFlyout = reactive({ show: false, text: '', top: 0, left: 0 })
+function onNavItemEnter(e: MouseEvent) {
+  if (sidebarCollapseMode.value !== 'rail-flyout' || appearance.value !== 'rail') return
+  const el = (e.target as HTMLElement).closest('.nav-item') as HTMLElement | null
+  if (!el) return
+  const label = el.querySelector('.nav-label')?.textContent?.trim() || ''
+  if (!label) { railFlyout.show = false; return }
+  const r = el.getBoundingClientRect()
+  railFlyout.text = label
+  railFlyout.top = r.top + r.height / 2
+  railFlyout.left = r.right + 8
+  railFlyout.show = true
+}
+function onNavItemLeave(e: MouseEvent) {
+  const el = (e.target as HTMLElement).closest('.nav-item') as HTMLElement | null
+  // 仅在真正离开条目时隐藏，避免子元素间移动闪烁
+  if (el && (e.relatedTarget as HTMLElement | null)?.closest?.('.nav-item') === el) return
+  railFlyout.show = false
+}
+
 // 上一次视口断点（isDesktop 态），用于检测 1024px 边界跃迁
 let lastIsDesktop: boolean | null = null
 
@@ -979,8 +1028,20 @@ function onResize() {
 //   「原位置」（sidebarFloatPos 拖动位置）可见。
 // - 隐藏（collapsed → true）：加 .collapsed 类滑出，用户主动收起。
 function onToggleSidebar() {
+  // 三态循环：展开 → 窄栏(rail) → 隐藏(hidden) → 展开
+  if (sidebarCollapseMode.value === 'three-state') {
+    if (!sidebarCollapsed.value) {
+      setSidebarCollapsed(true); railHidden.value = false
+    } else if (!railHidden.value) {
+      railHidden.value = true
+    } else {
+      setSidebarCollapsed(false); railHidden.value = false
+    }
+    return
+  }
   const next = !sidebarCollapsed.value
   setSidebarCollapsed(next)
+  railHidden.value = false
   if (!next) pokeSidebar() // 调出时唤醒无操作隐藏，确保不被自动隐藏遮挡
 }
 
@@ -2388,6 +2449,97 @@ watch(() => nav.currentRoomId.value, () => {
   /* 主内容全宽，不被侧栏占位 */
   .main-content { margin-left: 0; }
   .sidebar-collapsed .main-content { margin-left: 0; }
+
+  /* ---- 侧栏收起形态：rail 窄栏常驻（仅桌面端，移动/平板走 hidden） ---- */
+  .app-shell.sidebar-rail .nav-bar {
+    width: 60px;
+    transform: none; /* 兜底：rail 不滑出 */
+  }
+  .app-shell.rail-text.sidebar-rail .nav-bar { width: 96px; }
+
+  /* 窄栏下：隐藏文字/次要元素，仅留图标；位置键紧凑重排 */
+  .app-shell.sidebar-rail .nav-brand .brand-text { display: none; }
+  .app-shell.sidebar-rail .nav-label,
+  .app-shell.sidebar-rail .nav-pill,
+  .app-shell.sidebar-rail .nav-caret { display: none; }
+  .app-shell.sidebar-rail .nav-tasks { display: none; }
+  .app-shell.sidebar-rail .nav-item {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .app-shell.sidebar-rail .sidebar-pos {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px;
+    padding: 2px 4px 8px;
+  }
+  .app-shell.sidebar-rail .pos-btn {
+    width: 24px;
+    height: 20px;
+    font-size: 9px;
+    padding: 0;
+  }
+  /* 常驻窄栏·始终文字：保留小号标签 */
+  .app-shell.rail-text.sidebar-rail .nav-label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .app-shell.rail-text.sidebar-rail .nav-item.active .nav-label { color: var(--accent); }
+  /* 图标栏·悬停整栏展开（rail-expand / three-state 的 rail 态）：悬停整栏展开为全宽并显标 */
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover {
+    width: var(--sidebar-w, 220px);
+    z-index: 60;
+  }
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover .nav-label,
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover .nav-pill,
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover .nav-caret,
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover .nav-brand .brand-text,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover .nav-label,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover .nav-pill,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover .nav-caret,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover .nav-brand .brand-text {
+    display: block;
+  }
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover .nav-item,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover .nav-item {
+    justify-content: flex-start;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover .sidebar-pos,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover .sidebar-pos {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 2px clamp(10px, 1vw, 14px) 10px;
+  }
+  .app-shell.rail-expand.sidebar-rail .nav-bar:hover .pos-btn,
+  .app-shell.rail-three.sidebar-rail .nav-bar:hover .pos-btn {
+    width: auto;
+    height: 22px;
+    font-size: 11px;
+    padding: 0 6px;
+  }
+  /* 图标栏·悬停浮出标签（rail-flyout）：固定浮标，逃逸 nav-scroll 裁剪 */
+  .rail-flyout-chip {
+    position: fixed;
+    transform: translateY(-50%);
+    background: #241d15;
+    border: 1px solid var(--border-light, rgba(212, 165, 116, 0.16));
+    color: var(--txt);
+    font-size: 12px;
+    padding: 4px 9px;
+    border-radius: 7px;
+    z-index: 200;
+    pointer-events: none;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  }
 }
 
 /* 平板端：可折叠侧边栏（覆盖式弹窗，与桌面端一致） */

@@ -667,6 +667,22 @@
           </button>
         </div>
 
+        <div class="toggle-row" style="margin-top: 14px">
+          <div class="toggle-info">
+            <span class="toggle-label">收起形态</span>
+            <span class="toggle-desc">≡ 收起时的形态：默认完全隐藏；可选图标栏常驻（悬停浮标 / 悬停展开 / 始终文字）或三态循环。仅桌面端生效</span>
+          </div>
+        </div>
+        <div class="seg" style="margin-top: 10px; flex-wrap: wrap">
+          <button
+            v-for="m in sidebarCollapseModeOptions"
+            :key="m.value"
+            type="button"
+            :class="['seg-btn', 'hf-press', { active: sidebarCollapseMode === m.value }]"
+            @click="setSidebarCollapseMode(m.value)"
+          >{{ m.label }}</button>
+        </div>
+
         <div class="slider-group" v-if="sidebarBgMode === 'glass'" style="margin-top: 14px">
           <label class="slider-label">
             <span>叠加倍率</span>
@@ -1391,6 +1407,7 @@ const {
   sidebarWidth,
   sidebarGlass,
   sidebarBgMode,
+  sidebarCollapseMode,
   sidebarDefaultCollapsed,
   sidebarDensity,
   edgeBarAlpha,
@@ -1408,6 +1425,7 @@ const {
   setSidebarWidth,
   setSidebarGlass,
   setSidebarBgMode,
+  setSidebarCollapseMode,
   setSidebarDefaultCollapsed,
   setSidebarDensity,
   setEdgeBarAlpha,
@@ -1472,6 +1490,15 @@ const sidebarDensityOptions = [
 function toggleSidebarBgMode() {
   setSidebarBgMode(sidebarBgMode.value === 'glass' ? 'solid' : 'glass')
 }
+
+// 侧栏收起形态可选项（超级自定义 · 侧边栏子组）
+const sidebarCollapseModeOptions = [
+  { value: 'hidden', label: '完全隐藏' },
+  { value: 'rail-flyout', label: '图标栏·浮标' },
+  { value: 'rail-expand', label: '图标栏·展开' },
+  { value: 'rail-text', label: '窄栏·文字' },
+  { value: 'three-state', label: '三态循环' },
+]
 
 // 侧栏通透强度（滑块实时写入）
 function onSidebarGlass(e: Event) {

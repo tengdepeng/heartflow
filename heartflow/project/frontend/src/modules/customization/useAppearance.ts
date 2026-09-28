@@ -96,6 +96,10 @@ const sidebarDensityCtrl = createSimple<string>('ui:sidebar-density', 'standard'
 
 // 桌面端：用户主动收起/展开态（汉堡 ≡ 切换，跨刷新保留）
 const sidebarCollapsedCtrl = createSimple<boolean>('ui:sidebar-collapsed', false)
+// 收起形态（超级自定义 · 侧边栏子组）：hidden 完全隐藏(默认·现状) / rail-flyout 图标栏·悬停浮出标签
+// / rail-expand 图标栏·悬停整栏展开 / rail-text 常驻窄栏·始终文字 / three-state 三态循环(展开↔窄栏↔隐藏)。
+// 仅桌面端(≥1024)生效；移动/平板与 hidden 同语义，保持现状。
+const sidebarCollapseModeCtrl = createSimple<string>('ui:sidebar-collapse-mode', 'hidden')
 // 桌面端悬浮侧栏自由坐标（px；拖动后落盘；null=交 CSS 边缘吸附）
 const sidebarFloatPosCtrl = createSimple<{ x: number; y: number } | null>('ui:sidebar-float-pos', null)
 // 桌面端悬浮侧栏吸附边（拖动松手后落盘）
@@ -148,6 +152,7 @@ export function useAppearance() {
     sidebarDefaultCollapsed: sidebarDefaultCollapsedCtrl.state,
     sidebarDensity: sidebarDensityCtrl.state,
     sidebarCollapsed: sidebarCollapsedCtrl.state,
+    sidebarCollapseMode: sidebarCollapseModeCtrl.state,
     sidebarFloatPos: sidebarFloatPosCtrl.state,
     sidebarFloatEdge: sidebarFloatEdgeCtrl.state,
     navFloatPos: navFloatPosCtrl.state,
@@ -173,6 +178,7 @@ export function useAppearance() {
     setSidebarDefaultCollapsed: sidebarDefaultCollapsedCtrl.set,
     setSidebarDensity: sidebarDensityCtrl.set,
     setSidebarCollapsed: sidebarCollapsedCtrl.set,
+    setSidebarCollapseMode: sidebarCollapseModeCtrl.set,
     setSidebarFloatPos: sidebarFloatPosCtrl.set,
     setSidebarFloatEdge: sidebarFloatEdgeCtrl.set,
     setNavFloatPos: navFloatPosCtrl.set,
