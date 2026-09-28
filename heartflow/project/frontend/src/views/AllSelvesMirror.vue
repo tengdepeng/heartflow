@@ -1,13 +1,7 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance asm">
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">众生皆我 · 我皆众生</p>
-    <h1 class="asm-title">众生象</h1>
+    <!-- 统一房间头 + 统一内容区（RoomLayout） -->
+    <RoomLayout title="众生象" kicker="众生皆我 · 我皆众生" align="center" data-enter>
 
     <!-- 时间范围切换 -->
     <div data-enter class="asm-time-range">
@@ -168,6 +162,7 @@
     <IntentFeedbackPanel />
 
     <p class="asm-quote">"我看到了。我接受了。这些全都是我。"</p>
+    </RoomLayout>
   </div>
 </template>
 
@@ -183,6 +178,7 @@ import SelfTalkArchivePanel from '../components/SelfTalkArchivePanel.vue'
 import TopicClusteringPanel from '../components/TopicClusteringPanel.vue'
 import PersonalityModelPanel from '../components/PersonalityModelPanel.vue'
 import IntentFeedbackPanel from '../components/IntentFeedbackPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useTimer } from '../resonance/bridges/timer'
 import { getIntentRoute, isDirectAction } from '../modules/mirror/intent-launch'
 import { useMirrorToolCards, type MirrorToolCard } from '../modules/mirror'
@@ -359,7 +355,8 @@ onMounted(() => { loadTalks() })
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 80px;
   min-height: 100vh;
   overflow-y: auto;
   background: transparent;
@@ -384,52 +381,6 @@ onMounted(() => { loadTalks() })
 .asm::after {
   right: 0;
   background: radial-gradient(ellipse at right center, rgba(var(--accent-rgb), 0.05), transparent 70%);
-}
-
-/* ---- 装饰性头部 ---- */
-.header-ornament {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 0;
-  margin-bottom: 10px;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.4);
-}
-
-.header-kicker {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
-  letter-spacing: 4px;
-  margin: 0 0 6px;
-}
-
-.asm-title {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-family: var(--font-heading-en);
-  font-size: 28px;
-  font-weight: 400;
-  color: rgba(var(--accent-rgb), 0.75);
-  letter-spacing: 6px;
-  margin: 0 0 16px;
 }
 
 /* ---- 时间范围切换 ---- */
@@ -1038,13 +989,13 @@ section h3 {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .asm { padding: 32px 20px 64px; }
+  .asm { padding: 0 0 64px; }
   .asm-overview-cards { gap: 8px; }
   .asm-stats-row { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .asm { padding: 24px 14px 56px; }
+  .asm { padding: 0 0 56px; }
   .asm-overview-cards { flex-direction: column; }
   .asm-insight-actions { flex-direction: column; }
 }
