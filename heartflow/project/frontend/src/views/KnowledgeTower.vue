@@ -114,7 +114,7 @@
       <template #meta>
         <!-- AI管家浮动按钮 -->
         <button
-          class="kt-steward-btn"
+          class="kt-steward-btn hf-press"
           :class="{ active: showSteward }"
           @click="showSteward = !showSteward"
           title="AI管家"
@@ -152,8 +152,8 @@
 
     <!-- 展示模式切换 -->
     <div data-enter class="kt-tabs">
-      <button v-for="m in modes" :key="m.key" :class="['kt-tab',{active:mode===m.key}]" @click="mode=m.key">{{m.icon}} {{m.label}}</button>
-      <button class="kt-tab kt-import-tab" @click="showImportModal=true">📥 导入</button>
+      <button v-for="m in modes" :key="m.key" :class="['kt-tab', 'hf-press',{active:mode===m.key}]" @click="mode=m.key">{{m.icon}} {{m.label}}</button>
+      <button class="kt-tab kt-import-tab hf-press" @click="showImportModal=true">📥 导入</button>
     </div>
 
     <!-- 搜索/筛选栏 -->

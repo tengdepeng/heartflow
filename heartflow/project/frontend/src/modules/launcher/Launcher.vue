@@ -251,7 +251,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
         <div
           v-for="e in list"
           :key="e.id"
-          class="app-card"
+          class="app-card hf-press"
           :class="{ 'is-dragging': dragId === e.id, 'is-over': overId === e.id }"
           draggable="true"
           @dragstart="onDragStart($event, e, cat)"

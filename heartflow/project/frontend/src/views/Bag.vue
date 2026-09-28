@@ -107,7 +107,7 @@
         <div
           v-for="cat in filteredCategories"
           :key="cat.id"
-          class="bag-category-card"
+          class="bag-category-card hf-press hf-lift"
           :style="{ '--cat-color': cat.color }"
         >
           <div class="bcc-header">
@@ -165,7 +165,7 @@
         <div
           v-for="cat in categoryDistribution"
           :key="cat.value"
-          class="bcm-card"
+          class="bcm-card hf-press hf-lift"
           :style="{ '--bcm-color': cat.color, '--bcm-bg': cat.bgColor }"
         >
           <div class="bcm-header">
@@ -244,19 +244,19 @@
     <!-- ===== 底部导航 ===== -->
     <section class="bag-section">
       <div class="bag-footer-nav">
-        <router-link to="/worklog" class="bag-nav-link">
+        <router-link to="/worklog" class="bag-nav-link hf-press">
           <span class="bnl-icon">⏳</span>
           <span class="bnl-text">返回更漏</span>
         </router-link>
-        <router-link to="/home-space" class="bag-nav-link">
+        <router-link to="/home-space" class="bag-nav-link hf-press">
           <span class="bnl-icon">🏠</span>
           <span class="bnl-text">回到家的</span>
         </router-link>
-        <router-link to="/craft" class="bag-nav-link">
+        <router-link to="/craft" class="bag-nav-link hf-press">
           <span class="bnl-icon">🔧</span>
           <span class="bnl-text">匠庐</span>
         </router-link>
-        <router-link to="/career" class="bag-nav-link">
+        <router-link to="/career" class="bag-nav-link hf-press">
           <span class="bnl-icon">🌐</span>
           <span class="bnl-text">业脉</span>
         </router-link>

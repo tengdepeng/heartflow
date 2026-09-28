@@ -28,7 +28,7 @@
 
     <!-- 退役幕僚列表 -->
     <div data-enter v-if="retiredAdvisors.length" class="aar-list">
-      <div v-for="a in retiredAdvisors" :key="a.id" class="aar-card">
+      <div v-for="a in retiredAdvisors" :key="a.id" class="aar-card hf-press hf-lift">
         <div class="aar-card-hd">
           <div class="aar-avatar" :style="avatarStyle(a)">
             <span class="aar-icon">{{ roleIcon(a.role) }}</span>

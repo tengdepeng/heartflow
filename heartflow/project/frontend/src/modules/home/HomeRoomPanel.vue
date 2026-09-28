@@ -1,5 +1,5 @@
 <template>
-  <div class="home-room-panel" :class="{ 'room-panel--open': isOpen, 'room-panel--embedded': embedded }">
+  <div class="home-room-panel hf-press hf-lift" :class="{ 'room-panel--open': isOpen, 'room-panel--embedded': embedded }">
     <!-- 切换开关（内嵌模式下由幕僚坞标签接管，隐藏） -->
     <button
       v-if="!embedded"

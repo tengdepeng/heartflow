@@ -119,7 +119,7 @@
             <button
               v-for="t in filterTypes"
               :key="t.value"
-              :class="['wl-filter-type-btn', { active: filter.type === t.value }]"
+              :class="['wl-filter-type-btn', 'hf-press', { active: filter.type === t.value }]"
               @click="filter.type = t.value"
             >{{ t.label }}</button>
           </div>
@@ -271,7 +271,7 @@
         <div
           v-for="room in crossRoomStats"
           :key="room.key"
-          class="wl-cross-card"
+          class="wl-cross-card hf-press hf-lift"
           role="button"
           tabindex="0"
           :aria-label="'前往 ' + room.name"

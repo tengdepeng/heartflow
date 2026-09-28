@@ -34,7 +34,7 @@
         <article
           v-for="pack in packs"
           :key="pack.id"
-          class="sm-pack-card"
+          class="sm-pack-card hf-press hf-lift"
           :class="{ 'sm-pack-card--active': pack.id === activeId }"
         >
           <div class="sm-pack-colors">
@@ -70,14 +70,14 @@
       <div class="sm-create-form">
         <div class="sm-mode-tabs">
           <button
-            class="sm-mode-tab"
+            class="sm-mode-tab hf-press"
             :class="{ active: newPackMode === 'dark' }"
             @click="newPackMode = 'dark'"
           >
             暗色
           </button>
           <button
-            class="sm-mode-tab"
+            class="sm-mode-tab hf-press"
             :class="{ active: newPackMode === 'light' }"
             @click="newPackMode = 'light'"
           >
@@ -360,7 +360,7 @@ function handleImport(event: Event) {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  transition: border-color 0.25s ease, background 0.25s ease;
+  transition: border-color 0.25s ease, background 0.25s ease, transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sm-pack-card:hover {

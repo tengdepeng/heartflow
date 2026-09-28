@@ -36,7 +36,7 @@
         v-for="scene in ROOM_SCENES"
         :key="scene.id"
         ref="tabRefs"
-        class="scene-tab"
+        class="scene-tab hf-press"
         :class="{ active: currentSceneId === scene.id }"
         @click="switchScene(scene.id)"
       >
@@ -72,7 +72,7 @@
         <button
           v-for="preset in roomAtmospherePresets"
           :key="preset.id"
-          class="preset-chip"
+          class="preset-chip hf-press"
           :class="{ active: activePresetId === preset.id }"
           :title="preset.description"
           @click="activateAtmospherePreset(preset.id)"

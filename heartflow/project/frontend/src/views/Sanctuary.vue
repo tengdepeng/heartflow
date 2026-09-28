@@ -56,7 +56,7 @@
           <button
             v-for="f in overlayForms"
             :key="f.id"
-            class="form-seg__item"
+            class="form-seg__item hf-press"
             :class="{ 'form-seg__item--on': overlayForm === f.id }"
             :disabled="!isAllowed"
             :title="f.desc"
@@ -254,7 +254,7 @@
         <div
           v-for="log in logs.slice(0, 20)"
           :key="log.id"
-          class="visit-record-item"
+          class="visit-record-item hf-press"
           :class="{ 'visit-record-item--current': log.id === currentLogId }"
         >
           <span class="visit-record-time">{{ formatVisitTime(log.enterAt) }}</span>
@@ -829,7 +829,7 @@ onUnmounted(() => {
   border: 1px solid var(--border-subtle);
   border-radius: 9px;
   cursor: pointer;
-  transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease;
+  transition: border-color 0.3s ease, background 0.3s ease, color 0.3s ease, transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .form-seg__item:hover:not(:disabled) {
@@ -1632,7 +1632,7 @@ onUnmounted(() => {
   padding: 6px 8px;
   border-radius: 8px;
   background: rgba(10, 8, 6, 0.3);
-  transition: background 0.3s, border-color 0.3s;
+  transition: background 0.3s, border-color 0.3s, transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
   border: 0.5px solid transparent;
 }
 
