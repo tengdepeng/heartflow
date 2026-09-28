@@ -121,11 +121,7 @@
 
     <!-- 记录列表 -->
     <div class="record-list">
-      <div v-if="filteredRecords.length === 0" class="empty-vault">
-        <span class="empty-icon">📭</span>
-        <p class="empty-text">暂无输出记录</p>
-        <p class="empty-hint">各房间的产出将汇集于此</p>
-      </div>
+      <EmptyState v-if="filteredRecords.length === 0" icon="📭" title="暂无输出记录" hint="各房间的产出将汇集于此" :glow="false" cta-label="" />
 
       <div
         v-for="record in paginatedRecords"
@@ -220,6 +216,7 @@ import type { OutputRecord, OutputRecordType } from '../modules/output'
 import OutputSnapshotsPanel from '../components/OutputSnapshotsPanel.vue'
 import OutputStatsPanel from '../components/OutputStatsPanel.vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import OutputAdvancedPanel from '../components/OutputAdvancedPanel.vue'
 import PublishPipelinePanel from '../components/PublishPipelinePanel.vue'
 
@@ -678,29 +675,6 @@ function truncateContent(text: string, maxLen: number): string {
   display: flex;
   flex-direction: column;
   gap: 8px;
-}
-
-.empty-vault {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.empty-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 12px;
-}
-
-.empty-text {
-  font-size: 1.1rem;
-  color: var(--ink, #e4e6ed);
-  margin: 0 0 4px;
-}
-
-.empty-hint {
-  font-size: 0.85rem;
-  color: var(--muted, #7a7f8c);
-  margin: 0;
 }
 
 /* 记录卡片 */
