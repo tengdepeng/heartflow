@@ -13,7 +13,7 @@
           <li
             v-for="item in navItems"
             :key="item.key"
-            class="settings-nav__item"
+            class="settings-nav__item hf-press"
             :class="{ 'is-active': activeKey === item.key }"
             role="button"
             tabindex="0"
@@ -230,7 +230,7 @@
                 v-for="m in roomBgModeOptions"
                 :key="m.value"
                 type="button"
-                :class="['seg-btn', { active: roomBgMode === m.value }]"
+                :class="['seg-btn', 'hf-press', { active: roomBgMode === m.value }]"
                 @click="setRoomBgMode(m.value)"
               >{{ m.label }}</button>
             </div>
@@ -303,7 +303,7 @@
               v-for="t in TAXONOMY_ORDER"
               :key="t"
               type="button"
-              class="seg-btn"
+              class="seg-btn hf-press"
               :class="{ active: selectedTaxonomy === t }"
               @click="setTaxonomy(t)"
             >{{ TAXONOMY_LABELS[t] }}</button>
@@ -364,7 +364,7 @@
             v-for="opt in OPERATION_MODE_OPTIONS"
             :key="opt.value"
             type="button"
-            class="opmode-option"
+            class="opmode-option hf-press"
             :class="{ 'opmode-option--active': configRef.operationMode === opt.value }"
             @click="setOperationMode(opt.value)"
           >
@@ -558,7 +558,7 @@
             v-for="opt in dialogueShapeOptions"
             :key="opt.value"
             type="button"
-            :class="['seg-btn', { active: dialogueShape === opt.value }]"
+            :class="['seg-btn', 'hf-press', { active: dialogueShape === opt.value }]"
             @click="setDialogueShape(opt.value)"
           >{{ opt.label }}</button>
         </div>
@@ -572,7 +572,7 @@
             v-for="opt in crystalStyleOptions"
             :key="opt.value"
             type="button"
-            :class="['seg-btn', { active: crystalStyle === opt.value }]"
+            :class="['seg-btn', 'hf-press', { active: crystalStyle === opt.value }]"
             @click="setCrystalStyle(opt.value)"
           >{{ opt.label }}</button>
         </div>
@@ -643,7 +643,7 @@
               v-for="w in sidebarWidthOptions"
               :key="w"
               type="button"
-              :class="['seg-btn', { active: sidebarWidth === w }]"
+              :class="['seg-btn', 'hf-press', { active: sidebarWidth === w }]"
               @click="setSidebarWidth(w)"
             >{{ w }}</button>
           </div>
@@ -712,7 +712,7 @@
               v-for="d in sidebarDensityOptions"
               :key="d.value"
               type="button"
-              :class="['seg-btn', { active: sidebarDensity === d.value }]"
+              :class="['seg-btn', 'hf-press', { active: sidebarDensity === d.value }]"
               @click="setSidebarDensity(d.value)"
             >{{ d.label }}</button>
           </div>
@@ -783,7 +783,7 @@
             v-for="s in astrolabeSchemes"
             :key="s.value"
             type="button"
-            class="theme-chip"
+            class="theme-chip hf-press"
             :class="{ 'theme-chip--active': astrolabeTheme.scheme === s.value }"
             :style="{ '--chip-accent': s.color }"
             @click="setAstrolabeScheme(s.value)"
@@ -801,7 +801,7 @@
               v-for="st in astrolabeSearchStyles"
               :key="st.value"
               type="button"
-              :class="['seg-btn', { active: astrolabeTheme.search === st.value }]"
+              :class="['seg-btn', 'hf-press', { active: astrolabeTheme.search === st.value }]"
               @click="setAstrolabeSearchStyle(st.value)"
             >{{ st.label }}</button>
           </div>
@@ -1710,7 +1710,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   color: var(--text-secondary, #b8b0a8);
   cursor: pointer;
   border: 1px solid transparent;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
 }
 .settings-nav__item:hover {
   background: rgba(138, 138, 138, 0.08);

@@ -98,7 +98,7 @@
         <button :class="['domain-btn-sm', { active: domainFilter === '' }]"
           @click="domainFilter = ''">全部领域</button>
         <button v-for="d in domains" :key="d.key"
-          :class="['domain-btn-sm', { active: domainFilter === d.key }]"
+          :class="['domain-btn-sm', 'hf-press', { active: domainFilter === d.key }]"
           :style="domainFilter === d.key ? { background: (DOMAIN_COLORS as Record<string,string>)[d.key] + '22', borderColor: (DOMAIN_COLORS as Record<string,string>)[d.key] } : {}"
           @click="domainFilter = d.key">{{ d.label }}</button>
       </div>
@@ -145,9 +145,9 @@
     <section data-enter class="goal-tier">
       <div class="tier-header target-header"><span>🎯 目标</span><button class="btn-add-sm" @click="openCreate('target')">+</button></div>
       <div class="goal-cards target-cards" v-if="filteredTargets.length">
-        <div v-for="t in filteredTargets" :key="t.id" class="goal-card target-card" :class="`status-${t.status}`"
+        <div v-for="t in filteredTargets" :key="t.id" class="goal-card target-card hf-lift" :class="`status-${t.status}`"
           :style="{borderColor:domainColor(t.domain)+'44'}">
-          <div class="card-body" role="button" tabindex="0" :aria-label="'推进目标 ' + t.title + ' 的进展'" @click="goal.promoteStatus(t.id)" @keydown.enter.prevent="goal.promoteStatus(t.id)" @keydown.space.prevent="goal.promoteStatus(t.id)">
+          <div class="card-body hf-press" role="button" tabindex="0" :aria-label="'推进目标 ' + t.title + ' 的进展'" @click="goal.promoteStatus(t.id)" @keydown.enter.prevent="goal.promoteStatus(t.id)" @keydown.space.prevent="goal.promoteStatus(t.id)">
             <span class="card-icon">{{statusIcon(t.status)}}</span>
             <div class="card-info">
               <span class="card-title">{{t.title}}</span>
@@ -183,7 +183,7 @@
     <!-- 计划层 -->
     <section data-enter class="goal-tier"><div class="tier-header plan-header"><span>📋 计划</span><button class="btn-add-sm" @click="openCreate('plan')">+</button></div>
       <div class="goal-cards plan-list" v-if="goal.plans.value.length">
-        <div v-for="p in goal.plans.value" :key="p.id" class="goal-card plan-card" :class="{done:p.status==='bloom'}">
+        <div v-for="p in goal.plans.value" :key="p.id" class="goal-card plan-card hf-lift" :class="{done:p.status==='bloom'}">
           <span class="plan-check" role="checkbox" tabindex="0" :aria-checked="p.status==='bloom'" :aria-label="'标记计划 ' + p.title + (p.status==='bloom' ? ' 为未完成' : ' 完成')" @click="goal.markPlanDone(p.id)" @keydown.enter.prevent="goal.markPlanDone(p.id)" @keydown.space.prevent="goal.markPlanDone(p.id)">{{p.status==='bloom'?'⚓':'○'}}</span>
           <span class="card-title" :class="{'line-through':p.status==='bloom'}">{{p.title}}</span>
           <span class="plan-progress">{{p.anchorDone}}/{{p.anchorCount||'?'}}</span>
@@ -305,7 +305,7 @@
           <h3>新建{{tierLabel(createTier)}}</h3>
           <input v-model="form.title" class="form-input" placeholder="名称…" @keyup.enter="saveGoal" autofocus/>
           <div class="domain-pick">
-            <button v-for="d in domains" :key="d.key" :class="['domain-btn',{active:form.domain===d.key}]"
+            <button v-for="d in domains" :key="d.key" :class="['domain-btn','hf-press',{active:form.domain===d.key}]"
               :style="form.domain===d.key?{background:DOMAIN_COLORS[d.key]+'22',borderColor:DOMAIN_COLORS[d.key]}:{}"
               @click="form.domain=d.key">{{d.label}}</button>
           </div>

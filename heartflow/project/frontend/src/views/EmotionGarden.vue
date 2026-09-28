@@ -178,13 +178,13 @@
       <section class="filter-section">
         <div class="filter-group">
           <button
-            :class="['filter-pill', { active: filterType === 'all' }]"
+            :class="['filter-pill', 'hf-press', { active: filterType === 'all' }]"
             @click="filterType = 'all'"
           >全部</button>
           <button
             v-for="opt in EMOTION_OPTIONS"
             :key="opt.type"
-            :class="['filter-pill', { active: filterType === opt.type }]"
+            :class="['filter-pill', 'hf-press', { active: filterType === opt.type }]"
             :style="filterType === opt.type ? { borderColor: EMOTION_FLOWERS[opt.type].color, color: EMOTION_FLOWERS[opt.type].color } : {}"
             @click="filterType = opt.type"
           >
@@ -199,7 +199,7 @@
         <button
           v-for="opt in EMOTION_OPTIONS"
           :key="opt.type"
-          :class="['emo-btn', { active: selectedType === opt.type }]"
+          :class="['emo-btn', 'hf-press', { active: selectedType === opt.type }]"
           :style="selectedType === opt.type ? { borderColor: EMOTION_FLOWERS[opt.type].color, background: EMOTION_FLOWERS[opt.type].color + '14' } : {}"
           @click="selectedType = opt.type"
         >
@@ -403,7 +403,7 @@
           <p class="empty-hint">标记你此刻的情绪，种下第一朵花</p>
         </div>
         <div v-else :class="['flower-grid', `lod-${currentLOD}`]">
-          <div v-for="r in displayRecords" :key="r.id" :class="['flower-item', `lod-${currentLOD}`]">
+          <div v-for="r in displayRecords" :key="r.id" :class="['flower-item', 'hf-press', `lod-${currentLOD}`]">
             <button
               class="flower-delete-btn"
               :style="{ '--del-color': EMOTION_FLOWERS[r.type].color }"

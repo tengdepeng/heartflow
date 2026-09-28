@@ -87,13 +87,13 @@
 
     <!-- 尺度切换 -->
     <div class="scale-tabs">
-      <button v-for="s in scales" :key="s.key" :class="['scale-tab', { active: scale === s.key }]" @click="scale = s.key">{{ s.label }}</button>
+      <button v-for="s in scales" :key="s.key" :class="['scale-tab', 'hf-press', { active: scale === s.key }]" @click="scale = s.key">{{ s.label }}</button>
       <button
-        :class="['scale-tab', { active: showReview }]"
+        :class="['scale-tab', 'hf-press', { active: showReview }]"
         @click="showReview = !showReview"
       >📊 回顾</button>
       <button
-        :class="['scale-tab', { active: batchMode }]"
+        :class="['scale-tab', 'hf-press', { active: batchMode }]"
         @click="toggleBatchMode()"
       >📋 批量</button>
     </div>
@@ -326,7 +326,7 @@
       <div class="anchor-list">
         <template v-if="scale === 'day'">
           <TransitionGroup name="anchor-drift">
-            <div v-for="a in pending" :key="a.id" class="anchor-card" :class="`prio-${a.priority}`">
+            <div v-for="a in pending" :key="a.id" class="anchor-card hf-press hf-lift" :class="`prio-${a.priority}`">
               <span v-if="batchMode" class="batch-checkbox" @click.stop="anchorBatch.toggleSelection(a.id)">
                 <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
               </span>
@@ -352,7 +352,7 @@
           <div v-for="group in groupedPending" :key="group.date" class="anchor-group">
             <div class="anchor-group-title">{{ formatGroupTitle(group.date) }}</div>
             <TransitionGroup name="anchor-drift">
-              <div v-for="a in group.items" :key="a.id" class="anchor-card" :class="`prio-${a.priority}`">
+              <div v-for="a in group.items" :key="a.id" class="anchor-card hf-press hf-lift" :class="`prio-${a.priority}`">
                 <span v-if="batchMode" class="batch-checkbox" @click.stop="anchorBatch.toggleSelection(a.id)">
                   <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
                 </span>
@@ -384,7 +384,7 @@
       <div class="section-label">{{ scaleDoneLabel }} · {{ done.length }}</div>
       <div class="anchor-list">
         <template v-if="scale === 'day'">
-          <div v-for="a in done" :key="a.id" class="anchor-card done-card">
+          <div v-for="a in done" :key="a.id" class="anchor-card done-card hf-press hf-lift">
             <span v-if="batchMode" class="batch-checkbox" @click.stop="anchorBatch.toggleSelection(a.id)">
               <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
             </span>
@@ -406,7 +406,7 @@
         <template v-else>
           <div v-for="group in groupedDone" :key="group.date" class="anchor-group">
             <div class="anchor-group-title">{{ formatGroupTitle(group.date) }}</div>
-            <div v-for="a in group.items" :key="a.id" class="anchor-card done-card">
+            <div v-for="a in group.items" :key="a.id" class="anchor-card done-card hf-press hf-lift">
               <span v-if="batchMode" class="batch-checkbox" @click.stop="anchorBatch.toggleSelection(a.id)">
                 <span class="batch-checkbox-mark" v-if="anchorBatch.selection.value.selectedIds.has(a.id)">✓</span>
               </span>

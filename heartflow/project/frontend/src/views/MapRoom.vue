@@ -93,7 +93,7 @@
         <input v-model="searchQ" placeholder="搜索地点…" class="mr-input" />
       </div>
       <div class="place-list" v-if="filteredPlaces.length">
-        <div v-for="p in filteredPlaces" :key="p.id" class="place-card" :class="{ expanded: p._expanded, focused: p.id === focusedId }" role="button" tabindex="0" :aria-expanded="!!p._expanded" :aria-label="'展开或收起地点 ' + p.name" @click="p._expanded = !p._expanded" @keydown.enter.prevent="p._expanded = !p._expanded" @keydown.space.prevent="p._expanded = !p._expanded">
+        <div v-for="p in filteredPlaces" :key="p.id" class="place-card hf-press hf-lift" :class="{ expanded: p._expanded, focused: p.id === focusedId }" role="button" tabindex="0" :aria-expanded="!!p._expanded" :aria-label="'展开或收起地点 ' + p.name" @click="p._expanded = !p._expanded" @keydown.enter.prevent="p._expanded = !p._expanded" @keydown.space.prevent="p._expanded = !p._expanded">
           <div class="place-card-header">
             <span class="place-icon">{{ typeIcon(p.type) }}</span>
             <div class="place-info">
@@ -113,7 +113,7 @@
     <section data-enter class="mr-section">
       <h3 class="section-title">人生节点</h3>
       <div class="node-list" v-if="lifeNodes.length">
-        <div v-for="n in lifeNodes" :key="n.id" class="node-card" :style="{ borderLeftColor: n.color }">
+        <div v-for="n in lifeNodes" :key="n.id" class="node-card hf-press hf-lift" :style="{ borderLeftColor: n.color }">
           <span class="node-year">{{ n.year }}</span>
           <div class="node-body">
             <strong>{{ n.text }}</strong>

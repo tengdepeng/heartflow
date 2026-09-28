@@ -24,13 +24,13 @@
         <!-- 标签筛选 -->
         <div class="tag-filter" v-if="study.allTags.value.length > 0">
           <button
-            :class="['filter-chip', { active: activeTag === '' }]"
+            :class="['filter-chip', 'hf-press', { active: activeTag === '' }]"
             @click="activeTag = ''"
           >全部</button>
           <button
             v-for="t in study.allTags.value"
             :key="t"
-            :class="['filter-chip', { active: activeTag === t }]"
+            :class="['filter-chip', 'hf-press', { active: activeTag === t }]"
             @click="activeTag = t"
           >{{ t }}</button>
         </div>
@@ -101,7 +101,7 @@
         <article
           v-for="note in dailySerendipity"
           :key="note.id"
-          class="serendipity-card"
+          class="serendipity-card hf-press"
           :style="{ '--spine-color': getSpineColor(note.tags) }"
           @click="openEdit(note)"
         >
@@ -140,7 +140,7 @@
         <div
           v-for="note in filteredNotes"
           :key="note.id"
-          class="book-card"
+          class="book-card hf-press hf-lift"
           role="button"
           tabindex="0"
           :aria-label="'编辑笔记 ' + note.title"
