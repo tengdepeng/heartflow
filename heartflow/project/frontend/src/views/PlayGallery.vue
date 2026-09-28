@@ -61,30 +61,24 @@
         </svg>
       </div>
     </div>
-    <!-- ===== 装饰性头部 ===== -->
-    <header data-enter class="pg-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">让喜欢的游戏与藏品有一个落脚的地方</p>
-      <h1>逸趣阁</h1>
-      <div class="header-cards">
-        <div class="header-card">
-          <span class="header-card-num">{{ pg.games.length }}</span>
-          <span class="header-card-label">游戏数</span>
+    <!-- 统一房间头 + 统一内容区（RoomLayout） -->
+    <RoomLayout title="逸趣阁" kicker="让喜欢的游戏与藏品有一个落脚的地方" align="center" data-enter>
+      <template #meta>
+        <div class="header-cards">
+          <div class="header-card">
+            <span class="header-card-num">{{ pg.games.length }}</span>
+            <span class="header-card-label">游戏数</span>
+          </div>
+          <div class="header-card">
+            <span class="header-card-num">{{ pg.totalItems }}</span>
+            <span class="header-card-label">藏品数</span>
+          </div>
+          <div class="header-card">
+            <span class="header-card-num">{{ pg.totalGameHours }}</span>
+            <span class="header-card-label">总计时长</span>
+          </div>
         </div>
-        <div class="header-card">
-          <span class="header-card-num">{{ pg.totalItems }}</span>
-          <span class="header-card-label">藏品数</span>
-        </div>
-        <div class="header-card">
-          <span class="header-card-num">{{ pg.totalGameHours }}</span>
-          <span class="header-card-label">总计时长</span>
-        </div>
-      </div>
-    </header>
+      </template>
 
     <!-- ===== 统计概览行 ===== -->
     <section data-enter class="overview-row">
@@ -502,6 +496,7 @@
 
     <!-- 空状态 -->
     <EmptyState v-if="pg.isEmpty" icon="🎮" title="还没有记录" :glow="false" cta-label="" />
+    </RoomLayout>
   </div>
 </template>
 
@@ -522,6 +517,7 @@ import SeedLineageGraphPanel from '../components/SeedLineageGraphPanel.vue'
 import PlayArchivePanel from '../components/PlayArchivePanel.vue'
 import PlayBridgePanel from '../components/PlayBridgePanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 // ===== 时间种子（生长阶段系统） =====
@@ -738,7 +734,8 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
 .play {
   max-width: 520px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 80px;
   min-height: 100%;
   overflow-y: auto;
   background: transparent;
@@ -840,42 +837,6 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
 }
 
 /* ===== 装饰性头部 ===== */
-.pg-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.orn-line {
-  display: block;
-  width: 50px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
-}
-.orn-diamond {
-  font-size: 8px;
-  color: var(--accent);
-  opacity: 0.35;
-}
-.header-kicker {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.5);
-  margin-bottom: 8px;
-  letter-spacing: 1px;
-}
-.pg-header h1 {
-  font-family: var(--font-heading-en);
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  color: rgba(var(--text-primary-rgb), 0.92);
-  margin-bottom: 20px;
-}
 .header-cards {
   display: flex;
   gap: 8px;
@@ -1440,14 +1401,14 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
 
 /* === Responsive === */
 @media (max-width: 860px) {
-  .play { padding: 32px 20px 64px; }
+  .play { padding: 0 0 64px; }
   .header-cards { gap: 8px; }
   .header-card { padding: 12px 8px; }
   .item-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 640px) {
-  .play { padding: 24px 14px 56px; }
+  .play { padding: 0 0 56px; }
   .header-cards { flex-direction: column; }
   .section-label { font-size: 12px; }
 }
