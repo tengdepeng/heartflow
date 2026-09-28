@@ -250,7 +250,7 @@ describe('ConstitutionEditor 宪法编辑器视图', () => {
     const wrapper = await createWrapper()
 
     // 空状态应该显示
-    expect(wrapper.find('.empty-state').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('暂无条款数据')
   })
 

@@ -106,7 +106,7 @@
           <div v-if="p._expanded && p.note" class="place-detail"><p>{{ p.note }}</p></div>
         </div>
       </div>
-      <div v-else class="empty-hint">还没有记录地点</div>
+      <EmptyState v-else title="还没有记录地点" :glow="false" cta-label="" />
     </section>
 
     <!-- 人生节点时间线 -->
@@ -128,7 +128,7 @@
         </div>
       </div>
       <div v-else class="empty-hint">
-        <p>标记人生中重要的迁居、远行或转折</p>
+        <EmptyState title="标记人生中重要的迁居、远行或转折" :glow="false" cta-label="" />
         <div class="add-row" style="margin-top:8px">
           <input v-model="nodeForm.year" placeholder="年份" class="mr-input" style="width:60px" />
           <input v-model="nodeForm.text" placeholder="事件" class="mr-input" />
@@ -178,6 +178,7 @@ import TravelAnalyticsPanel from '../components/TravelAnalyticsPanel.vue'
 import SpatialPatternPanel from '../components/SpatialPatternPanel.vue'
 import GeoProjectionPanel from '../components/GeoProjectionPanel.vue'
 import Globe3D from '../components/Globe3D.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { places, lifeNodes, load, save, loadNodes, saveNodes } = useMap()
@@ -678,9 +679,6 @@ onMounted(() => { load(); loadNodes() })
   text-align: center;
   padding: 20px 0;
   line-height: 1.8;
-}
-.empty-hint p {
-  margin: 0;
 }
 
 /* ============================================================

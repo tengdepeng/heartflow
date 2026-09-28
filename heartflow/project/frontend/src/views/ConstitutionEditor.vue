@@ -58,11 +58,7 @@
       </div>
 
       <!-- 空状态提示 -->
-      <div v-if="editableArticles.length === 0" class="empty-state">
-        <div class="empty-icon">&#128221;</div>
-        <p class="empty-text">暂无条款数据</p>
-        <p class="empty-hint">请先初始化宪法数据</p>
-      </div>
+      <EmptyState v-if="editableArticles.length === 0" icon="✏️" title="暂无条款数据" hint="请先初始化宪法数据" :glow="false" cta-label="" />
 
       <!-- 可编辑条款列表 -->
       <div class="articles-list">
@@ -133,6 +129,7 @@ import { useConstitutionStore } from '../stores/constitution'
 import { ruleHasRuntimeEffect } from '../engine/constitution-effects'
 import ClauseEditorPanel from '../components/ClauseEditorPanel.vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useConstitutionStore()
@@ -599,31 +596,6 @@ async function handleSave() {
 .stylus-btn-save:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* ---- 空状态 ---- */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  border: 1px dashed var(--border-color);
-  border-radius: var(--radius-lg);
-}
-
-.empty-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
-  opacity: 0.5;
-}
-
-.empty-text {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-}
-
-.empty-hint {
-  font-size: 12px;
-  color: var(--text-secondary);
 }
 
 /* ---- 动画 ---- */

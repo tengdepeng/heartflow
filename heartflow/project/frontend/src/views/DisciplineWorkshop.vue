@@ -52,7 +52,7 @@
     <section v-if="activeTab === 'checkin'" data-enter class="dw-section">
       <h3>📋 今日习惯</h3>
       <div v-if="todayHabits.length === 0" class="empty-state">
-        <p>还没有创建习惯，从预设模板开始吧</p>
+        <EmptyState title="还没有创建习惯，从预设模板开始吧" :glow="false" cta-label="" />
         <div class="quick-templates">
           <button
             v-for="tpl in quickTemplates"
@@ -120,7 +120,7 @@
     <section v-if="activeTab === 'challenges'" data-enter class="dw-section">
       <h3>⚔️ 挑战赛</h3>
       <div v-if="activeChallenges.length === 0" class="empty-state">
-        <p>暂无进行中的挑战</p>
+        <EmptyState title="暂无进行中的挑战" :glow="false" cta-label="" />
         <div class="quick-templates">
           <button
             v-for="tpl in challengeTemplates"
@@ -311,6 +311,7 @@ import { useChallengeRecommender } from '../modules/discipline/challenge-recomme
 import { HABIT_DIFFICULTY_META } from '../modules/discipline/types'
 import QuadrantBoardPanel from '../components/QuadrantBoardPanel.vue'
 import { useTaskManager } from '../modules/tasks'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
