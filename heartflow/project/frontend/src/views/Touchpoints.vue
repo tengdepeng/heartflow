@@ -3,15 +3,7 @@
     <!-- ============================================ -->
     <!-- 殿堂触角 · 页面标题 -->
     <!-- ============================================ -->
-    <header data-enter class="tp-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">殿堂触角 · 设备交互与通知</p>
-      <h1 class="tp-title">殿堂触角</h1>
-    </header>
+    <RoomLayout title="殿堂触角" kicker="殿堂触角 · 设备交互与通知" align="center" data-enter>
 
     <!-- ============================================ -->
     <!-- 概览卡片 -->
@@ -409,6 +401,7 @@
     </section>
 
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
+    </RoomLayout>
   </div>
 </template>
 
@@ -423,6 +416,7 @@ import NotificationCenterPanel from '../components/NotificationCenterPanel.vue'
 import OrchestrationPanel from '../components/OrchestrationPanel.vue'
 import ChannelOptimizerPanel from '../components/ChannelOptimizerPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import {
   useDeliveryStrategy,
   usePushChannel,
@@ -596,7 +590,8 @@ onMounted(() => {
 .tp {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 80px;
   /* 移动端用 dvh 替代 vh：避免底部内容被浏览器工具栏遮挡（守布局契约：禁 HARD 100vh） */
   min-height: 100vh;
   min-height: 100dvh;
@@ -627,52 +622,6 @@ onMounted(() => {
   background: radial-gradient(ellipse at 50% 100%, rgba(var(--accent-rgb), 0.04) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
-}
-
-/* ---- 顶部标题 ---- */
-
-.tp-header {
-  text-align: center;
-  margin-bottom: 32px;
-  position: relative;
-  z-index: 1;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.orn-line {
-  display: block;
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.4), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-.header-kicker {
-  font-size: 11px;
-  color: rgba(var(--accent-rgb), 0.5);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-
-.tp-title {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  color: var(--accent);
-  margin: 0;
 }
 
 /* ---- 概览卡片 ---- */
@@ -1164,15 +1113,7 @@ onMounted(() => {
 /* 860px: 平板过渡 — 紧凑重排 */
 @media (max-width: 860px) {
   .tp {
-    padding: 32px 20px 72px;
-  }
-
-  .tp-header {
-    margin-bottom: 24px;
-  }
-
-  .tp-title {
-    font-size: 22px;
+    padding: 0 0 72px;
   }
 
   .tp-phone-frame {
@@ -1191,7 +1132,7 @@ onMounted(() => {
 
 @media (max-width: 640px) {
   .tp {
-    padding: 24px 16px 60px;
+    padding: 0 0 60px;
   }
 
   .tp-phone-frame {
@@ -1267,16 +1208,7 @@ onMounted(() => {
 /* 375px: 最小常见视口（iPhone SE 等）— 防溢出 + 舒适点击目标 */
 @media (max-width: 375px) {
   .tp {
-    padding: 20px 12px 56px;
-  }
-
-  .tp-header {
-    margin-bottom: 20px;
-  }
-
-  .tp-title {
-    font-size: 20px;
-    letter-spacing: 2px;
+    padding: 0 0 56px;
   }
 
   .overview-card {
