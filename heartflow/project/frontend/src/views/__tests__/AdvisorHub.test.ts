@@ -539,7 +539,7 @@ describe('集成：见证收件箱', () => {
     expect(wrapper.find('.awp').exists()).toBe(true)
     expect(wrapper.text()).toContain('📜 见证收件箱')
     expect(wrapper.text()).toContain('幕僚见证你的每一次成长')
-    expect(wrapper.find('.awp-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('先创建幕僚，才能记录见证')
   })
 
@@ -645,7 +645,7 @@ describe('集成：庆祝与退休', () => {
     expect(wrapper.find('.acp').exists()).toBe(true)
     expect(wrapper.text()).toContain('🎉 庆祝与退休')
     expect(wrapper.text()).toContain('为幕僚的里程碑举杯，为告别留一份遗产')
-    expect(wrapper.find('.acp-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('先创建幕僚，才能为他们庆祝')
   })
 
@@ -783,7 +783,7 @@ describe('集成：作息与场景', () => {
     expect(wrapper.find('.adp').exists()).toBe(true)
     expect(wrapper.text()).toContain('🌗 作息与场景')
     expect(wrapper.text()).toContain('幕僚此刻在做什么')
-    expect(wrapper.find('.adp-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('先创建幕僚，才能安排他们的作息')
     // 时段徽标（时段文案依赖运行小时，仅断言前缀）
     expect(wrapper.find('.adp-slot').text()).toMatch(/^🌗/)

@@ -9,10 +9,7 @@
     </div>
 
     <!-- 空态 -->
-    <div v-if="!advisors.length" class="acp-empty">
-      <span class="acp-empty-icon">🎉</span>
-      <p>先创建幕僚，才能为他们庆祝</p>
-    </div>
+    <EmptyState v-if="!advisors.length" icon="🎉" title="先创建幕僚，才能为他们庆祝" :glow="false" cta-label="" />
 
     <template v-else>
       <!-- 创建庆祝 -->
@@ -94,6 +91,7 @@ import { useAdvisorCelebration } from '../modules/advisor/celebration'
 import { CELEBRATION_TYPE_META } from '../modules/advisor/types'
 import type { CelebrationType, RetirementPhase } from '../modules/advisor/types'
 import type { AdvisorProfile } from '../types/advisor'
+import EmptyState from './EmptyState.vue'
 
 const props = defineProps<{ advisors: AdvisorProfile[] }>()
 
@@ -180,10 +178,6 @@ onMounted(() => {
 .acp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
 .acp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .acp-count { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); white-space: nowrap; }
-
-.acp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 0; text-align: center; }
-.acp-empty-icon { font-size: 30px; opacity: 0.5; }
-.acp-empty p { font-size: 12px; color: rgba(232, 221, 208, 0.5); margin: 0; }
 
 .acp-add { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); }
 .acp-add-label { font-size: 10px; letter-spacing: 1px; color: rgba(var(--accent-rgb), 0.5); }

@@ -9,10 +9,7 @@
     </div>
 
     <!-- 空态 -->
-    <div v-if="!advisors.length" class="awp-empty">
-      <span class="awp-empty-icon">📜</span>
-      <p>先创建幕僚，才能记录见证</p>
-    </div>
+    <EmptyState v-if="!advisors.length" icon="📜" title="先创建幕僚，才能记录见证" :glow="false" cta-label="" />
 
     <template v-else>
       <!-- 记录见证 -->
@@ -65,6 +62,7 @@ import { useAdvisorWitness, generateReaction } from '../modules/advisor/witness'
 import { WITNESS_EVENT_META } from '../modules/advisor/types'
 import type { WitnessEventType, AdvisorWitnessRecord } from '../modules/advisor/types'
 import type { AdvisorProfile } from '../types/advisor'
+import EmptyState from './EmptyState.vue'
 
 const props = defineProps<{ advisors: AdvisorProfile[] }>()
 
@@ -129,10 +127,6 @@ onMounted(() => {
 .awp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
 .awp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .awp-count { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); white-space: nowrap; }
-
-.awp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 0; text-align: center; }
-.awp-empty-icon { font-size: 30px; opacity: 0.5; }
-.awp-empty p { font-size: 12px; color: rgba(232, 221, 208, 0.5); margin: 0; }
 
 .awp-add { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); }
 .awp-add-label { font-size: 10px; letter-spacing: 1px; color: rgba(var(--accent-rgb), 0.5); }

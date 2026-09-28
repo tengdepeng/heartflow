@@ -63,7 +63,7 @@
       </div>
     </div>
 
-    <p v-else class="cdp-empty" data-test="cdp-empty">下达一句跨领域调令，管家会分派字段分别查询真实记录再汇总。</p>
+    <EmptyState v-else icon="" title="下达一句跨领域调令，管家会分派字段分别查询真实记录再汇总。" :glow="false" cta-label="" data-test="cdp-empty" />
   </section>
 </template>
 
@@ -79,6 +79,7 @@ import {
 } from '../modules/advisor/task-decompose'
 import type { CommandSubTask } from '../modules/advisor/task-decompose'
 import type { DomainKey } from '../modules/association/types'
+import EmptyState from './EmptyState.vue'
 
 const query = ref('')
 const subtasks = ref<CommandSubTask[]>([])
@@ -174,6 +175,4 @@ function collectAll(): void {
 .cdp-summary { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(138, 154, 122, 0.12); border: 1px solid rgba(138, 154, 122, 0.3); }
 .cdp-summary-label { font-size: 0.72rem; font-weight: 700; color: #5f7a52; letter-spacing: 1px; }
 .cdp-summary-text { font-size: 0.84rem; color: var(--text, #2b2b35); margin: 4px 0 0; line-height: 1.6; }
-
-.cdp-empty { font-size: 0.82rem; color: var(--text-dim, #9a9aab); padding: 8px 0; }
 </style>

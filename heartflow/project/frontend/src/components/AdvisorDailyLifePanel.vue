@@ -9,10 +9,7 @@
     </div>
 
     <!-- 空态 -->
-    <div v-if="!advisors.length" class="adp-empty">
-      <span class="adp-empty-icon">🌗</span>
-      <p>先创建幕僚，才能安排他们的作息</p>
-    </div>
+    <EmptyState v-if="!advisors.length" icon="🌗" title="先创建幕僚，才能安排他们的作息" :glow="false" cta-label="" />
 
     <template v-else>
       <!-- 场景分布 -->
@@ -63,6 +60,7 @@ import { useAdvisorDailyLife } from '../modules/advisor/daily-life'
 import { TIME_SLOT_META, ACTIVITY_META } from '../modules/advisor/types'
 import type { ActivityType } from '../modules/advisor/types'
 import type { AdvisorProfile } from '../types/advisor'
+import EmptyState from './EmptyState.vue'
 
 const props = defineProps<{ advisors: AdvisorProfile[] }>()
 
@@ -126,10 +124,6 @@ onMounted(() => {
 .adp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
 .adp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .adp-slot { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); white-space: nowrap; }
-
-.adp-empty { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 28px 0; text-align: center; }
-.adp-empty-icon { font-size: 30px; opacity: 0.5; }
-.adp-empty p { font-size: 12px; color: rgba(232, 221, 208, 0.5); margin: 0; }
 
 .adp-scenes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; margin-bottom: 14px; }
 .adp-scene { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
