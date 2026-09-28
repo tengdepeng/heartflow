@@ -1,11 +1,8 @@
 <template>
   <div class="traditions-view">
+    <RoomLayout title="文明根系" subtitle="把技艺、仪式与民俗沉淀成本地记忆，随实践而生长">
     <!-- 文明根系 -->
     <section class="trad-block">
-      <header class="trad-head">
-        <h1 class="trad-title">文明根系</h1>
-        <p class="trad-sub">把技艺、仪式与民俗沉淀成本地记忆，随实践而生长</p>
-      </header>
 
       <div class="trad-stats">
         <span class="trad-stat"><b>{{ summary.totalEntries }}</b> 条记录</span>
@@ -111,9 +108,7 @@
           </div>
         </li>
       </ul>
-      <p v-else class="trad-empty">
-        文明根系还是空的。把家中代代相传的技艺、节令仪式或民俗记下来，它们会在这里生根。
-      </p>
+      <EmptyState v-else icon="🌱" title="文明根系还是空的。把家中代代相传的技艺、节令仪式或民俗记下来，它们会在这里生根。" :glow="false" cta-label="" />
     </section>
 
     <!-- 文明档案（INCR-16）档案概览/技艺/仪式/来源/地域/实践/文明健康/标签/洞察 -->
@@ -180,10 +175,9 @@
           </div>
         </li>
       </ul>
-      <p v-else class="trad-empty">
-        还没有个人文明收藏。把相关的根系收拢成一片切片，留作你自己的文明记忆。
-      </p>
+      <EmptyState v-else icon="📦" title="还没有个人文明收藏。把相关的根系收拢成一片切片，留作你自己的文明记忆。" :glow="false" cta-label="" />
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -192,6 +186,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useTraditionsBridge } from '../modules/traditions/traditions-bridge'
 import { CRAFT_CATEGORY_LABELS, RITUAL_TYPE_LABELS } from '../modules/traditions'
 import type { CraftCategory, RitualType, FolkloreEntry } from '../modules/traditions'
+import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import TraditionsArchivePanel from '../components/TraditionsArchivePanel.vue'
 import RootVitalityPanel from '../components/RootVitalityPanel.vue'
 
@@ -389,7 +385,6 @@ onMounted(async () => {
 <style scoped>
 .traditions-view {
   min-height: 100%;
-  padding: 24px 28px 40px;
   color: var(--text-primary, #e8e3da);
   background: transparent;
   position: relative;
@@ -645,11 +640,4 @@ onMounted(async () => {
   align-self: flex-start;
 }
 
-.trad-empty {
-  margin: 8px 0 0;
-  max-width: 420px;
-  font-size: 14px;
-  line-height: 1.7;
-  opacity: 0.55;
-}
 </style>

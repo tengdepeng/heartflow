@@ -82,7 +82,7 @@ describe('TraditionsView', () => {
   it('无任何数据时两个区块均显示空态且不渲染卡片', async () => {
     const wrapper = mount(TraditionsView)
     await flushPromises()
-    expect(wrapper.find('.trad-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.find('.trad-entry').exists()).toBe(false)
     expect(wrapper.find('.trad-mirror').exists()).toBe(false)
   })
