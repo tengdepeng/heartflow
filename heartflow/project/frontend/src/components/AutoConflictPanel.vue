@@ -10,12 +10,8 @@
     </div>
 
     <!-- 空态 -->
-    <p v-if="branches.length === 0" class="acp-empty">
-      还没有平行分支可仲裁。先在「分支星图」种下时间分支与检查点，再让规则替你裁决分歧。
-    </p>
-    <p v-else-if="branches.length < 2" class="acp-empty">
-      至少需要两个分支才能仲裁。当前仅有「{{ branches[0].name }}」，再多建一个分支吧。
-    </p>
+    <EmptyState v-if="branches.length === 0" icon="🌱" title="还没有平行分支可仲裁。先在「分支星图」种下时间分支与检查点，再让规则替你裁决分歧。" :glow="false" cta-label="" />
+    <EmptyState v-else-if="branches.length < 2" icon="🌿" :title="`至少需要两个分支才能仲裁。当前仅有「${branches[0].name}」，再多建一个分支吧。`" :glow="false" cta-label="" />
 
     <template v-else>
       <!-- 标签页 -->
@@ -82,7 +78,7 @@
         <!-- 解决历史（并入 ConflictResolutionPanel 独有能力 INCR-400） -->
         <div class="acp-block">
           <div class="acp-block-title">解决历史（{{ historyRecords.length }}）</div>
-          <p v-if="!historyRecords.length" class="acp-empty">还没有解决记录。检测并解决冲突后会记录在这里。</p>
+          <EmptyState v-if="!historyRecords.length" icon="📜" title="还没有解决记录。检测并解决冲突后会记录在这里。" :glow="false" cta-label="" />
           <div v-else class="acp-history">
             <div
               v-for="h in historyRecords"
@@ -104,7 +100,7 @@
           <span class="acp-block-title">解决规则（{{ rules.length }}）</span>
           <button class="acp-btn acp-mini" @click="resetRules">重置默认</button>
         </div>
-        <p v-if="!rules.length" class="acp-empty">还没有规则。添加一条规则，让冲突自动裁决。</p>
+        <EmptyState v-if="!rules.length" icon="⚙️" title="还没有规则。添加一条规则，让冲突自动裁决。" :glow="false" cta-label="" />
         <div v-else class="acp-rules">
           <div v-for="r in rules" :key="r.id" class="acp-rule" :class="{ disabled: !r.enabled }">
             <div class="acp-rule-body">
@@ -146,7 +142,7 @@
                 <span>{{ t.label }}</span>
               </label>
             </div>
-            <p v-if="!ruleForm.conflictTypes.length" class="acp-empty acp-hint">至少选择一种冲突类型</p>
+            <EmptyState v-if="!ruleForm.conflictTypes.length" icon="" title="至少选择一种冲突类型" :glow="false" cta-label="" />
             <button class="acp-btn acp-add acp-rule-save" :disabled="!ruleForm.name.trim() || ruleForm.conflictTypes.length === 0" @click="addRule">添加规则</button>
           </div>
         </div>
@@ -154,9 +150,7 @@
 
       <!-- 分析页 -->
       <div v-else class="acp-page">
-        <p v-if="!analysis.totalResolved" class="acp-empty">
-          还没有解决记录。先在「仲裁」页检测并解决一次冲突，这里会生成模式分析。
-        </p>
+        <EmptyState v-if="!analysis.totalResolved" icon="📊" title="还没有解决记录。先在「仲裁」页检测并解决一次冲突，这里会生成模式分析。" :glow="false" cta-label="" />
         <template v-else>
           <div class="acp-stats">
             <div class="acp-stat">
@@ -194,6 +188,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
+import EmptyState from './EmptyState.vue'
 import { useAutoConflictResolution } from '../modules/parallel-world'
 import type { WorldBranch, Checkpoint } from '../modules/parallel-world/types'
 import type {
@@ -366,7 +361,6 @@ function branchName(id: string): string {
   background: rgba(195, 159, 106, 0.16); border: 1px solid rgba(195, 159, 106, 0.4);
   color: #d9c390; font-size: 12px; white-space: nowrap;
 }
-.acp-empty { font-size: 13px; color: #a6a096; line-height: 1.7; }
 
 .acp-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
 .acp-tab {
@@ -473,6 +467,5 @@ function branchName(id: string): string {
 .acp-type-cell { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(195, 159, 106, 0.22); background: rgba(195, 159, 106, 0.06); font-size: 12px; cursor: pointer; }
 .acp-type-cell.on { border-color: rgba(138, 154, 122, 0.5); background: rgba(138, 154, 122, 0.14); }
 .acp-type-check { accent-color: #8a9a7a; }
-.acp-hint { margin: 0; font-size: 11px; }
 .acp-rule-save { align-self: flex-start; }
 </style>
