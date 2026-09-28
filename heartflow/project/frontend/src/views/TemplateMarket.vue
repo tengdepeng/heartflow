@@ -36,7 +36,7 @@
     <!-- 房间模板 -->
     <section data-enter class="tm-room-section">
       <h2 class="tm-section-title">房间模板</h2>
-      <div v-if="roomTemplates.length === 0" class="tm-empty-hint">暂无房间模板</div>
+      <EmptyState v-if="roomTemplates.length === 0" icon="🏠" title="暂无房间模板" :glow="false" cta-label="" />
       <div v-else class="tm-template-grid">
         <article
           v-for="tmpl in roomTemplates"
@@ -67,7 +67,7 @@
     <!-- 幕僚性格模板 -->
     <section data-enter class="tm-personality-section">
       <h2 class="tm-section-title">幕僚性格模板</h2>
-      <div v-if="advisorTemplates.length === 0" class="tm-empty-hint">暂无幕僚性格模板</div>
+      <EmptyState v-if="advisorTemplates.length === 0" icon="🎭" title="暂无幕僚性格模板" :glow="false" cta-label="" />
       <div v-else class="tm-template-grid">
         <article
           v-for="tmpl in advisorTemplates"
@@ -129,6 +129,7 @@ import type { RoomTemplate } from '../modules/template/types'
 import { useTemplateMarket } from '../modules/template'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useStyle } from '../resonance/bridges/style'
 import { isShareLocalOnly } from '../modules/share/share-local'
 
@@ -757,15 +758,6 @@ function handleImport(event: Event) {
 
 /* ---- Empty Hint ---- */
 
-.tm-empty-hint {
-  padding: 24px;
-  text-align: center;
-  font-size: 13px;
-  color: rgba(var(--text-primary-rgb), 0.40);
-  border-radius: 12px;
-  background: rgba(var(--accent-rgb), 0.03);
-  border: 1px dashed rgba(var(--accent-rgb), 0.10);
-}
 
 /* ---- Screen Reader Only ---- */
 

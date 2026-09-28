@@ -48,12 +48,12 @@
               />
               <span class="cap-note-title">{{ n.title || '未命名笔记' }}</span>
             </label>
-            <p v-if="recentNotes.length === 0" class="cap-empty-hint">还没有笔记可封存</p>
+            <EmptyState v-if="recentNotes.length === 0" icon="📝" title="还没有笔记可封存" :glow="false" cta-label="" />
           </div>
         </div>
         <div class="cap-field">
           <span class="cap-label">封存照片（可选）</span>
-          <div v-if="photoGroups.length === 0" class="cap-empty-hint">还没有照片日记可封存</div>
+          <EmptyState v-if="photoGroups.length === 0" icon="📷" title="还没有照片日记可封存" :glow="false" cta-label="" />
           <div v-else class="cap-photo-picker">
             <div v-for="g in photoGroups" :key="g.date" class="cap-photo-day">
               <span class="cap-photo-day-label">{{ g.date }}</span>
@@ -161,6 +161,7 @@
 
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { ref, computed, reactive } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useTimeCapsule, type CapsuleItemRef, type CapsuleItemType } from '../modules/capsule'
@@ -391,7 +392,6 @@ function formatDate(iso: string | null): string {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.cap-empty-hint { font-size: 12px; color: rgba(255, 255, 255, 0.52); margin: 0; }
 
 .cap-form-actions { display: flex; justify-content: flex-end; gap: 10px; }
 .cap-btn-cancel, .cap-btn-save {

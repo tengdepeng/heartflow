@@ -76,7 +76,7 @@
           <span class="vt-dist-value">{{ d.total }}</span>
         </div>
       </div>
-      <div v-else class="vt-empty-hint">还没有资产记录</div>
+      <EmptyState v-else icon="💰" title="还没有资产记录" :glow="false" cta-label="" />
     </section>
 
     <!-- 添加资产 -->
@@ -108,7 +108,7 @@
           <span v-for="m in monthlyTrend.slice(-6)" :key="m.label" class="vt-trend-label">{{ m.label.slice(5) }}</span>
         </div>
       </div>
-      <div v-else class="vt-empty-hint">资产记录满一个月后开始显示趋势</div>
+      <EmptyState v-else icon="📈" title="资产记录满一个月后开始显示趋势" :glow="false" cta-label="" />
     </section>
 
     <!-- 重要档案 -->
@@ -175,6 +175,7 @@ import BackupRecoveryPanel from '../components/BackupRecoveryPanel.vue'
 import VaultAuditPanel from '../components/VaultAuditPanel.vue'
 import VaultPasswordPanel from '../components/VaultPasswordPanel.vue'
 import VaultCredentialPanel from '../components/VaultCredentialPanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -781,12 +782,6 @@ onMounted(() => {
 /* ============================================================
    空状态
    ============================================================ */
-.vt-empty-hint {
-  font-size: 12px;
-  color: var(--text-faint);
-  text-align: center;
-  padding: 16px 0;
-}
 
 /* ============================================================
    锁定 / 初始化

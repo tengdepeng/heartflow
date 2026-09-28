@@ -115,9 +115,13 @@
     <!-- ========== 我的记录列表 ========== -->
     <section data-enter class="wp-records-section">
       <h3>📋 我的记录 <span class="record-count">({{ filteredRecords.length }})</span></h3>
-      <div v-if="filteredRecords.length === 0" class="wp-empty-hint">
-        <p>{{ searchQuery ? '未找到匹配的记录' : '暂无记录，在上面添加一条吧' }}</p>
-      </div>
+      <EmptyState
+        v-if="filteredRecords.length === 0"
+        :icon="searchQuery ? '🔍' : ''"
+        :title="searchQuery ? '未找到匹配的记录' : '暂无记录，在上面添加一条吧'"
+        :glow="false"
+        cta-label=""
+      />
       <div v-for="record in filteredRecords" :key="record.id" class="wp-record-card">
         <div
           class="wp-record-header"
@@ -175,6 +179,7 @@
 
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
@@ -828,12 +833,6 @@ section h3 {
   font-size: 12px;
   font-weight: 400;
   color: rgba(var(--accent-rgb), 0.35);
-}
-.wp-empty-hint {
-  padding: 24px 0;
-  text-align: center;
-  font-size: 13px;
-  color: rgba(var(--accent-rgb), 0.45);
 }
 .wp-record-card {
   border-radius: 10px;

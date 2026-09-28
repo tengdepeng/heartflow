@@ -512,10 +512,14 @@
     <RewardMilestonePanel :bridge="rewardBridge.milestones" />
 
     <!-- 空状态 -->
-    <div v-if="!records.length" class="rw-empty">
-      <p>天平静置，尚无记录。</p>
-      <p class="rw-empty-hint">衡量的每一次付出与回报，都在这里沉淀</p>
-    </div>
+    <EmptyState
+      v-if="!records.length"
+      icon="⚖️"
+      title="天平静置，尚无记录。"
+      hint="衡量的每一次付出与回报，都在这里沉淀"
+      :glow="false"
+      cta-label=""
+    />
     </RoomLayout>
   </div>
 </template>
@@ -525,6 +529,7 @@ import { ref, computed, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useRewardBridge } from '../modules/reward/reward-bridge'
 import { useBudgetOptimizer } from '../modules/reward/budget-optimizer'
 import { useFinancialForecast } from '../modules/reward/financial-forecast'
@@ -1410,17 +1415,6 @@ function fmt(iso: string) {
 }
 .rw-health-findings ul li, .rw-health-recs ul li { margin-bottom: 2px; }
 
-/* ---- Empty ---- */
-.rw-empty {
-  text-align: center; padding: 60px 20px;
-  font-size: 14px; line-height: 1.8;
-  color: rgba(232, 192, 96, 0.5);
-  border: 1px solid rgba(232,192,96,0.06);
-  border-radius: 16px;
-  background: rgba(232,192,96,0.02);
-  position: relative; z-index: 1;
-}
-.rw-empty-hint { font-size: 12px; color: rgba(232, 192, 96, 0.38); margin-top: 4px; }
 
 /* ---- Balance SVG ---- */
 .rw-balance-anvil {

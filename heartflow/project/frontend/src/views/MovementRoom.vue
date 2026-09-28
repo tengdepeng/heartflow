@@ -16,7 +16,7 @@
           <span class="mv-traj-label">{{ stats.total }} 次 · {{ stats.totalMin }} 分钟</span>
         </div>
       </div>
-      <div v-else class="mv-empty-hint">开始记录后，运动轨迹会在这里生长</div>
+      <EmptyState v-else icon="🏞️" title="开始记录后，运动轨迹会在这里生长" :glow="false" cta-label="" />
     </section>
 
     <!-- 记录运动表单 -->
@@ -115,10 +115,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="mv-empty-hint">
-        <span>🏃</span>
-        <p>记录你的每一次身体律动</p>
-      </div>
+      <EmptyState v-else icon="🏃" title="记录你的每一次身体律动" :glow="false" cta-label="" />
     </section>
 
     <!-- 运动计划与成就 -->
@@ -148,6 +145,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useMovement } from '../modules/movement/movement-log'
 import MovementAchievementsPanel from '../components/movement/MovementAchievementsPanel.vue'
 import MovementAnalyticsPanel from '../components/MovementAnalyticsPanel.vue'
@@ -380,24 +378,6 @@ section h3 {
   justify-content: space-between;
   font-size: 11px;
   color: rgba(var(--accent-rgb), 0.35);
-}
-.mv-empty-hint {
-  text-align: center;
-  padding: 24px;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
-  border-radius: 12px;
-  background: var(--card-bg);
-  border: 1px dashed rgba(var(--accent-rgb), 0.08);
-}
-.mv-empty-hint span {
-  font-size: 36px;
-  display: block;
-  margin-bottom: 6px;
-}
-.mv-empty-hint p {
-  margin: 0;
-  color: rgba(var(--accent-rgb), 0.3);
 }
 
 /* Form card */
