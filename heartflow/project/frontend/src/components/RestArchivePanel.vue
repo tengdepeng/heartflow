@@ -6,9 +6,7 @@
         <span class="rap-title">🌿 休憩档案</span>
         <span class="rap-badge rap-badge-neutral">息壤未耕</span>
       </div>
-      <p class="rap-empty">
-        息壤未曾耕动。允许自己停下来喝杯茶、散个步——记下一笔休憩，档案便会在此显影：活动分布、休憩节律、恢复健康与温和洞察都将汇聚。
-      </p>
+      <EmptyState title="息壤未曾耕动。允许自己停下来喝杯茶、散个步——记下一笔休憩，档案便会在此显影：活动分布、休憩节律、恢复健康与温和洞察都将汇聚。" :glow="false" cta-label="" />
     </template>
 
     <!-- 填充态 -->
@@ -127,6 +125,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { BreakRecord, RestPractice } from '../modules/rest'
+import EmptyState from '../components/EmptyState.vue'
 import {
   restOverview,
   restActivityRows,
@@ -194,12 +193,6 @@ function shortDate(iso: string): string {
   border-color: rgba(148, 163, 184, 0.25);
 }
 
-.rap-empty {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.7;
-  color: #9aa090;
-}
 
 .rap-block {
   display: flex;

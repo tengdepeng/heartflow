@@ -638,7 +638,7 @@ describe('集成：休憩档案面板', () => {
     expect(wrapper.find('.rap-panel').exists()).toBe(true)
     expect(wrapper.text()).toContain('休憩档案')
     expect(wrapper.text()).toContain('息壤未耕')
-    expect(wrapper.find('.rap-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
   })
 })
 
@@ -675,7 +675,7 @@ describe('集成：休憩成就与趋势面板', () => {
       props: { records: [], practices: DEFAULT_PRACTICES.map(p => ({ ...p })) },
     })
     expect(wrapper.find('.ratp-panel').exists()).toBe(true)
-    expect(wrapper.find('.ratp-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('尚无休憩记录')
     expect(wrapper.text()).toContain('尚未启程')
   })

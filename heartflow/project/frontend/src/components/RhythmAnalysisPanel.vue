@@ -8,9 +8,7 @@
       <span class="rap-tag">{{ analysis.frequencyScore }} 分</span>
     </div>
 
-    <p v-if="!records.length" class="rap-empty">
-      记录运动后，这里会分析你的运动节奏与最佳时刻。
-    </p>
+    <EmptyState v-if="!records.length" title="记录运动后，这里会分析你的运动节奏与最佳时刻。" :glow="false" cta-label="" />
 
     <template v-else>
       <!-- 频率 + 多样性 -->
@@ -76,6 +74,7 @@ import { computed, ref, watch } from 'vue'
 import { useMovement, useRhythmAnalysis, movesToRecords, deriveRhythm } from '../modules/movement'
 import { MOVEMENT_TYPE_META, MOVEMENT_INTENSITY_META } from '../modules/movement'
 import type { RhythmAnalysis as RhythmAnalysisData } from '../modules/movement'
+import EmptyState from '../components/EmptyState.vue'
 
 const movement = useMovement()
 movement.load()
@@ -111,7 +110,6 @@ function intensityColor(i: string) { return MOVEMENT_INTENSITY_META[i as keyof t
 .rap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
 .rap-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .rap-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e3c08a; white-space: nowrap; }
-.rap-empty { font-size: 12px; color: rgba(232, 221, 208, 0.4); margin: 4px 0 0; line-height: 1.7; }
 
 .rap-scores { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
 .rap-score { display: flex; align-items: center; gap: 10px; }

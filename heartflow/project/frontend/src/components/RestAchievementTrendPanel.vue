@@ -12,9 +12,7 @@
     </div>
 
     <!-- 空态 -->
-    <p v-if="totalRecords === 0" class="ratp-empty">
-      尚无休憩记录。记下一笔休憩后，此处将亮起成就勋章、并描摹你近 30 日的休息节律——每一次停歇都值得被看见。
-    </p>
+    <EmptyState v-if="totalRecords === 0" title="尚无休憩记录。记下一笔休憩后，此处将亮起成就勋章、并描摹你近 30 日的休息节律——每一次停歇都值得被看见。" :glow="false" cta-label="" />
 
     <template v-if="totalRecords > 0">
       <!-- 趋势概览 -->
@@ -100,6 +98,7 @@
 import { computed, onMounted } from 'vue'
 import type { BreakRecord, RestPractice } from '../modules/rest'
 import { useRestAchievements, useRestTrend } from '../modules/rest/rest-advanced'
+import EmptyState from '../components/EmptyState.vue'
 
 const props = defineProps<{ records: BreakRecord[]; practices: RestPractice[] }>()
 
@@ -211,12 +210,6 @@ function handleReset(): void {
   border-color: rgba(148, 163, 184, 0.25);
 }
 
-.ratp-empty {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.7;
-  color: #9aa090;
-}
 
 .ratp-block {
   display: flex;

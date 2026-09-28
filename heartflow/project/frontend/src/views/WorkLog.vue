@@ -384,12 +384,8 @@
       </div>
     </section>
 
-    <div v-if="shifts.length === 0" class="wl-empty">
-      <span>⏳</span><p>更漏尚未开始记录</p>
-    </div>
-    <div v-else-if="paginatedShifts.length === 0" class="wl-empty">
-      <span>🔍</span><p>没有匹配的筛选结果</p>
-    </div>
+    <EmptyState v-if="shifts.length === 0" icon="⏳" title="更漏尚未开始记录" :glow="false" cta-label="" />
+    <EmptyState v-else-if="paginatedShifts.length === 0" icon="🔍" title="没有匹配的筛选结果" :glow="false" cta-label="" />
   </RoomLayout>
   </div>
 </template>
@@ -409,6 +405,7 @@ import WorkRhythmPanel from '../components/WorkRhythmPanel.vue'
 import TaskDecomposerPanel from '../components/TaskDecomposerPanel.vue'
 import WorklogBridgePanel from '../components/WorklogBridgePanel.vue'
 import ClepsydraPanel from '../components/ClepsydraPanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -1138,8 +1135,6 @@ function navigateToRoom(key: string) {
 .wl-btn-more { font-size: 12px; padding: 8px 20px; }
 
 /* ===== 空状态 ===== */
-.wl-empty { text-align: center; padding: 80px 0; color: rgba(var(--accent-rgb), 0.2); position: relative; z-index: 1; }
-.wl-empty span { font-size: 40px; display: block; margin-bottom: 8px; }
 
 /* ===== 光仪编织 (Sundial Weaving) ===== */
 .wl-sundial-section { margin-bottom: 24px; position: relative; z-index: 1; }

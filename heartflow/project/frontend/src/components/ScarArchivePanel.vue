@@ -6,9 +6,7 @@
         <span class="scap-title">⚒️ 铸造档案</span>
         <span class="scap-badge scap-badge-neutral">印记待启</span>
       </div>
-      <p class="scap-empty">
-        工痕尚未开炉。身体留下的印记值得被如实看见——点下砧板，记下最近一道，铸造档案便会在此显影：锻造节律、铸造健康与温和洞察都将汇聚。
-      </p>
+      <EmptyState title="工痕尚未开炉。身体留下的印记值得被如实看见——点下砧板，记下最近一道，铸造档案便会在此显影：锻造节律、铸造健康与温和洞察都将汇聚。" :glow="false" cta-label="" />
     </template>
 
     <!-- 填充态 -->
@@ -113,6 +111,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { ScarMark } from '../modules/scar'
+import EmptyState from '../components/EmptyState.vue'
 import {
   scarOverview,
   scarRhythm,
@@ -186,12 +185,6 @@ const lastActiveLabel = computed(() => {
   border-color: rgba(138, 138, 122, 0.2);
 }
 
-.scap-empty {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.8;
-  color: rgba(220, 208, 196, 0.72);
-}
 
 .scap-block {
   display: flex;

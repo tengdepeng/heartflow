@@ -374,7 +374,7 @@ describe('Scar 视图', () => {
     // 温和洞察
     expect(wrapper.findAll('.scap-insight').length).toBeGreaterThan(0)
     // 不渲染空态
-    expect(wrapper.find('.scap-empty').exists()).toBe(false)
+    expect(wrapper.find('.hf-empty').exists()).toBe(false)
   })
 
   it('无印记时渲染空态引导（印记待启）', async () => {
@@ -382,7 +382,7 @@ describe('Scar 视图', () => {
     const wrapper = await getWrapper()
     const panel = wrapper.find('.scap-panel')
     expect(panel.exists()).toBe(true)
-    expect(wrapper.find('.scap-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('工痕尚未开炉')
     expect(wrapper.text()).toContain('印记待启')
   })
