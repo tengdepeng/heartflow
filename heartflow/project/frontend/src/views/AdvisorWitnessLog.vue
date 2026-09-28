@@ -23,10 +23,7 @@
           <span class="awl-summary-label">{{ eventLabel(type) }}</span>
           <span class="awl-summary-value">{{ count }}</span>
         </div>
-        <div v-if="Object.keys(summary).length === 0" class="awl-summary-empty">
-          <span class="awl-summary-empty-icon">📜</span>
-          <span class="awl-summary-empty-text">尚无见证记录</span>
-        </div>
+        <EmptyState v-if="Object.keys(summary).length === 0" icon="📜" title="尚无见证记录" :glow="false" cta-label="" />
       </div>
     </section>
 
@@ -71,10 +68,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="awl-empty">
-        <span class="awl-empty-icon">🔍</span>
-        <p class="awl-empty-text">没有匹配的见证记录</p>
-      </div>
+      <EmptyState v-else icon="🔍" title="没有匹配的见证记录" :glow="false" cta-label="" />
     </section>
 
     <!-- 清空按钮 -->
@@ -91,6 +85,7 @@ import { computed, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -307,23 +302,6 @@ function handleClear() {
   font-weight: 500;
   color: var(--accent);
 }
-.awl-summary-empty {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: rgba(var(--accent-rgb), 0.03);
-  border: 1px dashed rgba(var(--accent-rgb), 0.08);
-}
-.awl-summary-empty-icon {
-  font-size: 20px;
-  opacity: 0.4;
-}
-.awl-summary-empty-text {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
-}
 
 /* ---- Filter Bar ---- */
 .awl-filter-bar {
@@ -430,24 +408,6 @@ function handleClear() {
   margin: 0;
 }
 
-/* ---- Empty ---- */
-.awl-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 40px 20px;
-  text-align: center;
-}
-.awl-empty-icon {
-  font-size: 28px;
-  opacity: 0.4;
-}
-.awl-empty-text {
-  font-size: 13px;
-  color: rgba(var(--accent-rgb), 0.3);
-  margin: 0;
-}
 
 /* ---- Clear Button ---- */
 .awl-clear-btn {

@@ -110,10 +110,7 @@
             <span class="gp-phase">{{ getPhaseLabel(plant.phase) }}</span>
           </div>
         </div>
-        <div v-if="plants.length === 0" class="garden-empty">
-          <span class="ge-icon">🌱</span>
-          <p class="ge-text">开始休憩，种下你的第一株植物</p>
-        </div>
+        <EmptyState v-if="plants.length === 0" icon="🌱" title="开始休憩，种下你的第一株植物" :glow="false" cta-label="" />
       </div>
     </section>
 
@@ -147,9 +144,7 @@
           <span class="cal-legend-item"><span class="cal-legend-dot cal-legend-dot--streak"></span> 连续休息</span>
         </div>
       </div>
-      <div v-else class="cal-empty">
-        <p class="cal-empty-text">暂无休息记录</p>
-      </div>
+      <EmptyState v-else icon="" title="暂无休息记录" :glow="false" cta-label="" />
     </section>
 
     <!-- ===== 疲劳处方 ===== -->
@@ -218,6 +213,7 @@ import {
   type RestRitual,
   type FatigueLevel,
 } from '../modules/rest/rest-rituals'
+import EmptyState from '../components/EmptyState.vue'
 
 const rituals = useRestRituals()
 const plantGrowth = usePlantGrowth()
@@ -645,24 +641,6 @@ function soundscapeLabel(soundscape: string): string {
   color: var(--text-secondary);
 }
 
-.garden-empty {
-  grid-column: 1 / -1;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.ge-icon {
-  font-size: 36px;
-  opacity: 0.3;
-  display: block;
-  margin-bottom: 8px;
-}
-
-.ge-text {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
 /* ---- 日历 ---- */
 .cal-month {
@@ -766,16 +744,6 @@ function soundscapeLabel(soundscape: string): string {
   border: 1px solid rgba(122, 184, 122, 0.4);
 }
 
-.cal-empty {
-  padding: 30px;
-  text-align: center;
-}
-
-.cal-empty-text {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
 /* ---- 疲劳评估 ---- */
 .ritual-fatigue {

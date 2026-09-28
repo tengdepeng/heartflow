@@ -70,11 +70,7 @@
     </div>
 
     <!-- Empty state -->
-    <div v-else class="af-empty">
-      <span>🏛</span>
-      <p>暂无幕僚数据</p>
-      <p class="af-empty-hint">请在幕僚大厅创建幕僚后查看好感度</p>
-    </div>
+    <EmptyState v-else icon="🏛" title="暂无幕僚数据" hint="请在幕僚大厅创建幕僚后查看好感度" :glow="false" cta-label="" />
 
     <button class="af-btn-back" @click="$router.push('/advisors')">← 返回幕僚大厅</button>
   </div>
@@ -87,6 +83,7 @@ import { useAdvisor } from '../resonance/bridges/advisor'
 import { ADVISOR_ROLES, ADVISOR_PERSONALITIES, AFFINITY_TIERS } from '../types'
 import type { AdvisorProfile } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const $router = useRouter()
@@ -465,30 +462,6 @@ function progressStyle(affinity: number): Record<string, string> {
   letter-spacing: 1px;
 }
 
-/* ---- Empty state ---- */
-.af-empty {
-  text-align: center;
-  padding: 80px 0;
-  color: rgba(var(--accent-rgb), 0.2);
-  position: relative;
-  z-index: 1;
-}
-
-.af-empty span {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 12px;
-}
-
-.af-empty p {
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-
-.af-empty-hint {
-  font-size: 12px;
-  opacity: 0.5;
-}
 
 /* ---- Back button ---- */
 .af-btn-back {

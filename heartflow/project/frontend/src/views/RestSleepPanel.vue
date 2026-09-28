@@ -29,11 +29,7 @@
           <span class="ssc-label">睡眠债务</span>
         </div>
       </div>
-      <div v-else class="sleep-dashboard-empty">
-        <span class="sde-icon">🌙</span>
-        <p class="sde-text">开始记录你的睡眠，至少需要 3 天数据才能生成分析</p>
-        <button class="sde-btn" @click="showSleepForm = true">记录今晚睡眠</button>
-      </div>
+      <EmptyState v-else icon="🌙" title="开始记录你的睡眠，至少需要 3 天数据才能生成分析" cta-label="记录今晚睡眠" @cta="showSleepForm = true" :glow="false" />
     </section>
 
     <!-- ===== 周趋势 ===== -->
@@ -152,12 +148,7 @@
             <button class="src-delete" @click="sleepQuality.deleteSleepRecord(r.id)" title="删除">✕</button>
           </div>
         </div>
-        <div v-if="sleepQuality.recentRecords.value.length === 0" class="rest-recent-empty">
-          <div class="rre-placeholder">
-            <span class="rre-icon">🌙</span>
-            <p class="rre-text">尚未记录睡眠数据</p>
-          </div>
-        </div>
+        <EmptyState v-if="sleepQuality.recentRecords.value.length === 0" icon="🌙" title="尚未记录睡眠数据" :glow="false" cta-label="" />
       </div>
     </section>
 
@@ -263,6 +254,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useSleepQuality } from '../modules/rest/sleep-quality'
 import type { SleepRecord } from '../modules/rest/sleep-quality'
+import EmptyState from '../components/EmptyState.vue'
 
 const sleepQuality = useSleepQuality()
 
@@ -410,14 +402,6 @@ onMounted(() => {
   letter-spacing: 1px;
 }
 
-.sleep-dashboard-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 40px 20px;
-  text-align: center;
-}
 
 .sde-icon {
   font-size: 40px;

@@ -69,11 +69,7 @@
     </div>
 
     <!-- 空状态 -->
-    <div data-enter v-else class="aar-empty">
-      <span>🏛</span>
-      <p>暂无退役幕僚</p>
-      <p class="aar-empty-hint">在位幕僚可在幕僚大厅中选择「沉睡」后退役</p>
-    </div>
+    <EmptyState v-else icon="🏛" title="暂无退役幕僚" hint="在位幕僚可在幕僚大厅中选择「沉睡」后退役" :glow="false" cta-label="" />
 
     <!-- 在位幕僚速览 -->
     <section data-enter class="aar-section" v-if="activeAdvisors.length">
@@ -95,6 +91,7 @@ import { useAdvisor } from '../resonance/bridges/advisor'
 import { ADVISOR_ROLES, AFFINITY_TIERS } from '../types'
 import type { AdvisorProfile } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -433,27 +430,6 @@ function goBack() {
   color: #78c8a0;
 }
 
-/* ---- Empty ---- */
-.aar-empty {
-  text-align: center;
-  padding: 60px 0;
-  color: rgba(var(--accent-rgb), 0.2);
-  position: relative;
-  z-index: 1;
-}
-.aar-empty span {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 8px;
-}
-.aar-empty p {
-  font-size: 15px;
-  margin-bottom: 4px;
-}
-.aar-empty-hint {
-  font-size: 12px;
-  opacity: 0.5;
-}
 
 /* ---- Active Advisors Section ---- */
 .aar-section {

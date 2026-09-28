@@ -274,11 +274,7 @@
     <textarea v-model="form.detail" placeholder="展开详情（可选）——一个片段、一段回忆、一句话…" class="rt-textarea" rows="2" />
 
     <!-- 溯源树生长提示 -->
-    <div data-enter v-if="!roots.length" class="empty">
-      <span>🌳</span>
-      <p>溯源树还在等待生长</p>
-      <span class="empty-hint">在时间长廊里偶遇一段旧记忆时，来这里种下一个根系节点</span>
-    </div>
+    <EmptyState v-if="!roots.length" icon="🌳" title="溯源树还在等待生长" hint="在时间长廊里偶遇一段旧记忆时，来这里种下一个根系节点" :glow="false" cta-label="" />
 
     <!-- 根系可视化（roots·useRootVisualization：生命力地图 / 根脉图谱 / 标签聚类，INCR-163） -->
     <RootVisualizationPanel v-if="roots.length" />
@@ -296,6 +292,7 @@
 
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useDecayEngine } from '../modules/roots/decay-engine'
@@ -512,8 +509,7 @@ header,
 .stats-row,
 .tree-section,
 .add-box,
-.rt-textarea,
-.empty {
+.rt-textarea {
   position: relative;
   z-index: 1;
 }
@@ -771,21 +767,6 @@ header {
   color: var(--text-secondary);
 }
 
-/* ---- empty ---- */
-.empty {
-  text-align: center;
-  padding: 60px 0;
-  color: var(--text-faint);
-}
-.empty span {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 8px;
-}
-.empty-hint {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
 /* ---- 溯源树 SVG ---- */
 .tree-viz {
