@@ -1914,102 +1914,6 @@ watch(() => nav.currentRoomId.value, () => {
   font-family: monospace;
 }
 
-/* ---- 导航项 ---- */
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: var(--nav-item-py, 9px) clamp(10px, 1vw, 14px);
-  border-radius: 8px;
-  font-size: var(--nav-item-font, 13px);
-  color: var(--text-secondary);
-  transition: all var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-item::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 0;
-  border-radius: 0 2px 2px 0;
-  background: var(--accent);
-  transition: height var(--transition);
-  opacity: 0;
-}
-
-.nav-item:hover {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-}
-
-.nav-item.active {
-  background: var(--accent-glow);
-  color: var(--accent);
-}
-
-.nav-item.active::before {
-  height: 60%;
-  opacity: 1;
-}
-
-.nav-item.is-adjacent {
-  opacity: 1;
-}
-
-.nav-item-core {
-  background: rgba(255, 255, 255, 0.01);
-}
-
-.nav-icon {
-  font-size: clamp(14px, 1.3vw, 16px);
-  width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.nav-item.active .nav-icon {
-  opacity: 1;
-}
-
-.nav-label {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.nav-pill {
-  margin-left: auto;
-  padding: 2px 7px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.35);
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.nav-item.active .nav-pill,
-.nav-item-core:hover .nav-pill {
-  border-color: rgba(var(--accent-rgb), 0.2);
-  color: var(--accent);
-}
-
-.pill-silent {
-  border-color: rgba(255, 255, 255, 0.04);
-  color: rgba(255, 255, 255, 0.2);
-}
-
-/* 宪法 nav-item */
-.nav-item-constitution {
-  position: relative;
-}
-
 /* section 分隔线 */
 .nav-section-sep {
   height: 1px;
@@ -2449,11 +2353,6 @@ watch(() => nav.currentRoomId.value, () => {
 
   .brand-text strong {
     font-size: 14px;
-  }
-
-  .nav-item {
-    padding: 8px 10px;
-    font-size: 12px;
   }
 }
 
