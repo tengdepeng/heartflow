@@ -258,9 +258,7 @@
     <!-- 底部：载体列表 -->
     <section data-enter class="ce-carriers">
       <h2 class="ce-carriers-title">已保存载体 <span class="ce-carriers-count">{{ carriers.length }}/6</span></h2>
-      <div v-if="carriers.length === 0" class="ce-carriers-empty">
-        <span>暂无保存的载体，在上方编辑后保存</span>
-      </div>
+      <EmptyState v-if="carriers.length === 0" icon="🗂" title="暂无保存的载体" hint="在上方编辑后保存" :glow="false" cta-label="" />
       <div v-else class="ce-carriers-grid">
         <div
           v-for="c in carriers"
@@ -295,6 +293,7 @@ import type { JadeBeadCarrier } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { CATEGORY_PALETTE } from '../theme/categoryColors'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 // ---- 类型定义 ----
 
@@ -1212,12 +1211,6 @@ onMounted(() => {
   font-weight: 400;
 }
 
-.ce-carriers-empty {
-  text-align: center;
-  padding: 24px;
-  color: rgba(var(--accent-rgb), 0.3);
-  font-size: 13px;
-}
 
 .ce-carriers-grid {
   display: grid;

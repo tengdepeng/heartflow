@@ -123,13 +123,7 @@
           </Transition>
         </div>
       </div>
-      <div v-else class="dfa-empty">
-        <div class="dfa-empty-icon-wrap">
-          <span class="dfa-empty-icon">🔨</span>
-        </div>
-        <p class="dfa-empty-title">定音锤尚未敲响</p>
-        <p class="dfa-empty-hint">当你在殿堂中留下足迹，定音锤会为你聚合来自所有角落的证据。先走走看看吧。</p>
-      </div>
+      <EmptyState v-else icon="🔨" title="定音锤尚未敲响" hint="当你在殿堂中留下足迹，定音锤会为你聚合来自所有角落的证据。先走走看看吧。" :glow="false" cta-label="" />
     </div>
 
     <!-- 铁律回应 -->
@@ -153,6 +147,7 @@ import {
 } from '../modules/mirror/dingyin-engine'
 import type { FourActItem } from '../stores/advisor'
 import type { DingyinFreshness } from '../modules/mirror/dingyin-engine'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const $router = useRouter()
@@ -551,50 +546,6 @@ onMounted(() => {
   .dingyin-detail-inner { padding: 4px 14px 14px 78px; }
 }
 
-/* ---- 空状态 ---- */
-.dfa-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px 20px;
-  text-align: center;
-  animation: dfa-empty-enter 0.5s ease-out;
-}
-.dfa-empty-icon-wrap {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: rgba(200, 180, 160, 0.04);
-  border: 1px solid rgba(200, 180, 160, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-.dfa-empty-icon {
-  font-size: 24px;
-  opacity: 0.4;
-}
-.dfa-empty-title {
-  font-size: 15px;
-  color: rgba(220, 200, 180, 0.45);
-  margin: 0 0 8px;
-  font-weight: 500;
-  letter-spacing: 2px;
-}
-.dfa-empty-hint {
-  font-size: 12px;
-  color: rgba(200, 180, 160, 0.45);
-  margin: 0;
-  line-height: 1.6;
-  max-width: 260px;
-  letter-spacing: 0.5px;
-}
-@keyframes dfa-empty-enter {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
 
 /* ---- 新鲜度提示 ---- */
 .dfa-freshness-banner {

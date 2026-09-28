@@ -203,7 +203,7 @@
           <span class="cog-reflection-date">{{ fmt(r.at) }}</span>
         </div>
       </div>
-      <div v-else class="cog-empty-hint">还没有反思记录，从上面的释光仪开始吧</div>
+      <EmptyState v-else title="还没有反思记录" hint="从上面的释光仪开始吧" :glow="false" cta-label="" />
     </section>
 
     <!-- 字镜墙 / 素镜墙 双模 -->
@@ -277,9 +277,7 @@
             <span class="cog-word-date">{{ fmt(w.at) }}</span>
           </div>
         </div>
-        <div v-else class="cog-empty-hint">
-          还没有收集的词语。在反思中标记那些反复出现的词，它们会在这里聚成光墙。
-        </div>
+        <EmptyState v-else title="还没有收集的词语" hint="在反思中标记那些反复出现的词，它们会在这里聚成光墙。" :glow="false" cta-label="" />
       </div>
 
       <!-- ===== 素镜墙 ===== -->
@@ -293,9 +291,7 @@
             <p class="cog-plain-behavior">{{ h.behavior }}</p>
           </div>
         </div>
-        <div v-else class="cog-empty-hint">
-          还没有行为记录。在素镜回看中留下痕迹，这里会忠实地呈现它们。
-        </div>
+        <EmptyState v-else title="还没有行为记录" hint="在素镜回看中留下痕迹，这里会忠实地呈现它们。" :glow="false" cta-label="" />
       </div>
     </section>
 
@@ -356,6 +352,7 @@ import ClarionStatsPanel from '../components/ClarionStatsPanel.vue'
 import PerceptionCompliancePanel from '../components/PerceptionCompliancePanel.vue'
 import CognitionHealthPanel from '../components/CognitionHealthPanel.vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -864,12 +861,6 @@ section h3 {
   color: var(--cog-text-muted);
   margin-top: 4px;
   display: block;
-}
-.cog-empty-hint {
-  font-size: 12px;
-  color: var(--cog-text-muted);
-  text-align: center;
-  padding: 24px 0;
 }
 
 /* === 字镜墙 / 素镜墙 双模 === */

@@ -445,9 +445,7 @@
           </button>
         </div>
       </div>
-      <div v-else class="mw-empty">
-        <span class="mw-empty-text">无可用的隐喻调色板</span>
-      </div>
+      <EmptyState v-else icon="🎨" title="无可用的隐喻调色板" :glow="false" cta-label="" />
     </section>
 
     <!-- ============================================================ -->
@@ -605,6 +603,7 @@ import type { MetaphorType } from '../modules/visualization/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomStyle } from '../modules/customization/useRoomStyle'
 import MaterialLibraryPanel from '../components/MaterialLibraryPanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 import type { PresetScene } from '../types'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -1728,21 +1727,6 @@ function handleSelectMetaphor(type: MetaphorType) {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ---- Empty State ---- */
-.mw-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 20px;
-  border-radius: 14px;
-  border: 1px dashed var(--mw-border, rgba(var(--accent-rgb), 0.08));
-  background: rgba(var(--bg-card-rgb), 0.2);
-}
-
-.mw-empty-text {
-  font-size: 13px;
-  color: var(--text-muted, var(--text-muted));
-}
 
 /* ---- Colophon ---- */
 .mw-colophon {

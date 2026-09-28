@@ -93,7 +93,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="gw-empty">还没有目标，种下一颗吧</p>
+      <EmptyState v-else icon="" title="还没有目标，种下一颗吧" :glow="false" cta-label="" />
     </section>
 
     <!-- 种子区 -->
@@ -111,7 +111,7 @@
           <button class="gw-del" @click.stop="removeSeed(s.id)">×</button>
         </div>
       </div>
-      <p v-else class="gw-empty">还没有种下种子</p>
+      <EmptyState v-else icon="" title="还没有种下种子" :glow="false" cta-label="" />
     </section>
 
     <!-- 习惯区 -->
@@ -131,7 +131,7 @@
           <button class="gw-del" @click.stop="removeHabit(h.id)">×</button>
         </div>
       </div>
-      <p v-else class="gw-empty">还没有追踪的习惯</p>
+      <EmptyState v-else icon="" title="还没有追踪的习惯" :glow="false" cta-label="" />
     </section>
 
     <!-- 罗盘 -->
@@ -201,6 +201,7 @@ import { generateYearReview, type Season, type SeasonalJournalEntry, type Cocoon
 import { placeInUnfinishedGarden } from '../modules/unfinished'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import type { GoalStatus } from '../modules/goal'
 import GoalVisualizationPanel from '../components/GoalVisualizationPanel.vue'
 import GoalProgressPanel from '../components/GoalProgressPanel.vue'

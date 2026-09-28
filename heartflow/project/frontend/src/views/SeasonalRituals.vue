@@ -221,17 +221,14 @@
           </div>
         </div>
       </div>
-      <div v-else class="sr-empty-rituals">
-        <span class="sr-empty-icon">🕊</span>
-        <template v-if="searchQuery.trim()">
-          <p>没有匹配的仪式</p>
-          <p class="sr-empty-hint">尝试其他关键词</p>
-        </template>
-        <template v-else>
-          <p>暂无 {{ SEASON_META.find(s => s.key === srCtx.activeSeason.value)?.label }} 仪式</p>
-          <p class="sr-empty-hint">在下方的表单中添加一个吧</p>
-        </template>
-      </div>
+      <EmptyState
+        v-else
+        icon="🕊"
+        :title="searchQuery.trim() ? '没有匹配的仪式' : '暂无 ' + (SEASON_META.find(s => s.key === srCtx.activeSeason.value)?.label ?? '') + ' 仪式'"
+        :hint="searchQuery.trim() ? '尝试其他关键词' : '在下方的表单中添加一个吧'"
+        :glow="false"
+        cta-label=""
+      />
     </section>
 
     <!-- 添加仪式表单 -->
@@ -409,6 +406,7 @@ import SeasonalArchivePanel from '../components/SeasonalArchivePanel.vue'
 import SeasonalYearOverviewPanel from '../components/SeasonalYearOverviewPanel.vue'
 import SeasonalHealthPanel from '../components/SeasonalHealthPanel.vue'
 import SeasonalBridgePanel from '../components/SeasonalBridgePanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 // ---- 模块化 composables ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -1122,30 +1120,6 @@ const srStats = srCtx.stats
   font-weight: 700;
 }
 
-/* 空状态 */
-.sr-empty-rituals {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 24px 0;
-  gap: 6px;
-  color: rgba(232, 221, 208, 0.45);
-}
-
-.sr-empty-rituals .sr-empty-icon {
-  font-size: 28px;
-  opacity: 0.4;
-}
-
-.sr-empty-rituals p {
-  font-size: 13px;
-  margin: 0;
-}
-
-.sr-empty-hint {
-  font-size: 11px;
-  opacity: 0.5;
-}
 
 /* 添加仪式表单 */
 .sr-add-section {

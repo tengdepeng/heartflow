@@ -151,9 +151,7 @@
               <span class="bcc-tag-proficiency">·{{ item.proficiency }}</span>
             </span>
           </div>
-          <div v-if="cat.items.length === 0" class="bcc-empty">
-            <span class="bcc-empty-text">暂无记录</span>
-          </div>
+          <EmptyState v-if="cat.items.length === 0" icon="📦" title="暂无记录" :glow="false" cta-label="" />
         </div>
       </div>
     </section>
@@ -227,12 +225,7 @@
           </div>
           <span class="be-level" :class="'be-level--' + evo.levelClass">{{ evo.levelLabel }}</span>
         </div>
-        <div v-if="evolution.length === 0" class="bag-evo-empty">
-          <div class="bee-placeholder">
-            <span class="bee-icon">🌱</span>
-            <p class="bee-text">尚未记录成长轨迹，开始使用工具和技能吧。</p>
-          </div>
-        </div>
+        <EmptyState v-if="evolution.length === 0" icon="🌱" title="尚未记录成长轨迹" hint="开始使用工具和技能吧。" :glow="false" cta-label="" />
       </div>
     </section>
 
@@ -368,6 +361,7 @@ import BagBridgePanel from '../components/BagBridgePanel.vue'
 import BagOrganizePanel from '../components/bag/BagOrganizePanel.vue'
 import BagEvolutionPanel from '../components/BagEvolutionPanel.vue'
 import LauncherPanel from '../components/LauncherPanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -919,19 +913,6 @@ const {
   color: var(--accent);
 }
 
-.bcc-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-}
-
-.bcc-empty-text {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-style: italic;
-  opacity: 0.6;
-}
 
 /* ---- 成长轨迹 ---- */
 .bag-evolution {
@@ -1055,37 +1036,6 @@ const {
   border-color: rgba(160, 124, 140, 0.3);
 }
 
-/* ---- 空状态 ---- */
-.bag-evo-empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 20px;
-  border-radius: 16px;
-  background: var(--card-bg);
-  border: 1px dashed var(--card-border);
-}
-
-.bee-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-}
-
-.bee-icon {
-  font-size: 28px;
-  opacity: 0.4;
-}
-
-.bee-text {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin: 0;
-  line-height: 1.6;
-  max-width: 280px;
-}
 
 /* ---- 底部导航 ---- */
 .bag-footer-nav {

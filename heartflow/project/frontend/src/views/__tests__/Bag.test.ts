@@ -284,7 +284,7 @@ describe('Bag 行囊视图', () => {
   it('空状态下显示成长轨迹提示', async () => {
     mockEvolution.value = []
     const wrapper = await getWrapper()
-    expect(wrapper.find('.bag-evo-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('尚未记录成长轨迹')
   })
 
