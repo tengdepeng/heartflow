@@ -167,14 +167,14 @@
         />
         <div class="career-tier-filters">
           <button
-            class="tier-filter-btn"
+            class="tier-filter-btn hf-press"
             :class="{ active: activeTierFilter === null }"
             @click="activeTierFilter = null"
           >全部</button>
           <button
             v-for="def in TIER_DEFS"
             :key="def.id"
-            class="tier-filter-btn"
+            class="tier-filter-btn hf-press"
             :class="{ active: activeTierFilter === def.id }"
             :style="{ '--tier-filter-color': def.color }"
             @click="activeTierFilter = activeTierFilter === def.id ? null : def.id"
@@ -228,7 +228,7 @@
         <div
           v-for="project in projects"
           :key="project.id"
-          class="project-card"
+          class="project-card hf-press hf-lift"
           :style="{ '--project-color': project.color }"
           @click="openProjectForm(project)"
         >
@@ -378,7 +378,7 @@
                 <button
                   v-for="def in TIER_DEFS"
                   :key="def.id"
-                  class="form-tier-option"
+                  class="form-tier-option hf-press"
                   :class="{ selected: contactForm.tier === def.id }"
                   :style="{ '--tier-opt-color': def.color }"
                   @click="contactForm.tier = def.id"
@@ -394,7 +394,7 @@
                 <button
                   v-for="nt in NODE_TYPE_DEFS"
                   :key="nt.id"
-                  class="form-tier-option"
+                  class="form-tier-option hf-press"
                   :class="{ selected: contactForm.nodeType === nt.id }"
                   :style="{ '--tier-opt-color': nt.color }"
                   @click="contactForm.nodeType = nt.id"
@@ -454,7 +454,7 @@
                 <button
                   v-for="opt in STATUS_OPTIONS"
                   :key="opt.value"
-                  class="form-status-option"
+                  class="form-status-option hf-press"
                   :class="{ selected: projectForm.status === opt.value }"
                   @click="projectForm.status = opt.value"
                 >{{ opt.label }}</button>

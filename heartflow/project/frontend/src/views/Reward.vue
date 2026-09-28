@@ -190,15 +190,15 @@
       <h3 class="rw-section-label">📈 月度趋势</h3>
       <div class="rw-trend-tabs">
         <button
-          :class="['rw-trend-tab', { active: trendType === 'income' }]"
+          :class="['rw-trend-tab', 'hf-press', { active: trendType === 'income' }]"
           @click="trendType = 'income'"
         >收入</button>
         <button
-          :class="['rw-trend-tab', { active: trendType === 'expense' }]"
+          :class="['rw-trend-tab', 'hf-press', { active: trendType === 'expense' }]"
           @click="trendType = 'expense'"
         >支出</button>
         <button
-          :class="['rw-trend-tab', { active: trendType === 'net' }]"
+          :class="['rw-trend-tab', 'hf-press', { active: trendType === 'net' }]"
           @click="trendType = 'net'"
         >净结余</button>
       </div>
@@ -334,11 +334,11 @@
         <div class="rw-form-row">
           <div class="rw-type-group">
             <button
-              :class="['rw-type-btn', { active: formType === 'income' }]"
+              :class="['rw-type-btn', 'hf-press', { active: formType === 'income' }]"
               @click="formType = 'income'"
             >📥 收入</button>
             <button
-              :class="['rw-type-btn', { active: formType === 'expense' }]"
+              :class="['rw-type-btn', 'hf-press', { active: formType === 'expense' }]"
               @click="formType = 'expense'"
             >📤 支出</button>
           </div>

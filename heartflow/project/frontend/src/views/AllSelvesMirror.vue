@@ -11,7 +11,7 @@
 
     <!-- 时间范围切换 -->
     <div data-enter class="asm-time-range">
-      <button v-for="opt in timeRangeOptions" :key="opt.value" :class="['tr-btn', { active: timeRange === opt.value }]" @click="timeRange = opt.value">
+      <button v-for="opt in timeRangeOptions" :key="opt.value" :class="['tr-btn', 'hf-press', { active: timeRange === opt.value }]" @click="timeRange = opt.value">
         {{ opt.label }}
       </button>
     </div>
@@ -50,7 +50,7 @@
         <button
           v-for="card in toolCards"
           :key="card.id"
-          class="asm-toolcard"
+          class="asm-toolcard hf-press"
           :class="{ editing: editMode }"
           :title="card.description"
           @click="onToolCardClick(card)"
@@ -111,7 +111,7 @@
     <!-- 不同房间的镜像 -->
     <section><h3>不同房间的镜像</h3>
       <div class="asm-rooms">
-        <div v-for="r in roomMirrors" :key="r.room" class="asm-room-card" :class="{ active: activeRoom?.room === r.room }" role="button" tabindex="0" :aria-label="'查看 ' + r.room + ' 房间的镜像'" @click="selectRoom(r)" @keydown.enter.prevent="selectRoom(r)" @keydown.space.prevent="selectRoom(r)">
+        <div v-for="r in roomMirrors" :key="r.room" class="asm-room-card hf-press hf-lift" :class="{ active: activeRoom?.room === r.room }" role="button" tabindex="0" :aria-label="'查看 ' + r.room + ' 房间的镜像'" @click="selectRoom(r)" @keydown.enter.prevent="selectRoom(r)" @keydown.space.prevent="selectRoom(r)">
           <span class="asm-room-icon">{{ r.icon }}</span>
           <div class="asm-room-body">
             <strong>{{ r.room }}</strong>

@@ -136,7 +136,7 @@
 
     <!-- ===== 入口册视图 ===== -->
     <div data-enter v-if="viewMode === 'list'" class="entry-book">
-      <div v-for="b in filteredBookmarks" :key="b.bookmark_id" class="entry-row" :class="{ archived: b.status === 'archived' }" role="button" tabindex="0" :aria-label="'打开书签 ' + (b.title || b.url)" @click="openBookmark(b)" @keydown.enter.prevent="openBookmark(b)" @keydown.space.prevent="openBookmark(b)">
+      <div v-for="b in filteredBookmarks" :key="b.bookmark_id" class="entry-row hf-press" :class="{ archived: b.status === 'archived' }" role="button" tabindex="0" :aria-label="'打开书签 ' + (b.title || b.url)" @click="openBookmark(b)" @keydown.enter.prevent="openBookmark(b)" @keydown.space.prevent="openBookmark(b)">
         <span class="entry-icon">{{ b.favicon || '📎' }}</span>
         <div class="entry-info">
           <span class="entry-title">{{ b.title || b.url }}</span>
@@ -151,7 +151,7 @@
     <!-- ===== 标签云视图 ===== -->
     <div data-enter v-if="viewMode === 'tagcloud'" class="tag-cloud-view">
       <div class="tag-cloud">
-        <span v-for="tag in tagCloud" :key="tag.name" class="cloud-tag" :class="{ active: filterTag === tag.name }" :style="{ fontSize: tag.size + 'px', opacity: 0.4 + tag.weight * 0.6 }" role="button" tabindex="0" :aria-pressed="filterTag === tag.name" :aria-label="'切换标签筛选 ' + tag.name" @click="toggleTagFilter(tag.name)" @keydown.enter.prevent="toggleTagFilter(tag.name)" @keydown.space.prevent="toggleTagFilter(tag.name)">
+        <span v-for="tag in tagCloud" :key="tag.name" class="cloud-tag hf-press" :class="{ active: filterTag === tag.name }" :style="{ fontSize: tag.size + 'px', opacity: 0.4 + tag.weight * 0.6 }" role="button" tabindex="0" :aria-pressed="filterTag === tag.name" :aria-label="'切换标签筛选 ' + tag.name" @click="toggleTagFilter(tag.name)" @keydown.enter.prevent="toggleTagFilter(tag.name)" @keydown.space.prevent="toggleTagFilter(tag.name)">
           {{ tag.name }}
           <span class="cloud-tag-count">{{ tag.count }}</span>
         </span>
@@ -1048,7 +1048,7 @@ function fmt(iso: string) {
   padding: 8px 12px;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
 }
 .entry-row:hover {
   background: rgba(var(--accent-rgb), 0.04);
