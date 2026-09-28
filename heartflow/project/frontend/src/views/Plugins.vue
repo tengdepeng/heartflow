@@ -175,12 +175,7 @@
     </section>
 
     <!-- 空状态 -->
-    <section class="pl-core-section" v-if="plugins.length === 0">
-      <div class="pl-empty-hint">
-        <span class="empty-icon">🔌</span>
-        <p>插件管理器尚未初始化</p>
-      </div>
-    </section>
+    <EmptyState v-if="plugins.length === 0" icon="🔌" title="插件管理器尚未初始化" :glow="false" cta-label="" />
   </div>
 </template>
 
@@ -196,6 +191,7 @@ import type {
 import { PERMISSION_LABELS } from '../modules/plugin/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import PluginEcosystemPanel from '../components/PluginEcosystemPanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const pluginBridge = usePlugin()
@@ -788,19 +784,6 @@ function uninstall(id: string) {
   color: #ef9a9a;
   border-color: rgba(239, 154, 154, 0.3);
   background: rgba(239, 154, 154, 0.08);
-}
-
-/* ===== Empty ===== */
-.pl-empty-hint {
-  text-align: center;
-  padding: 60px 20px;
-  color: rgba(232, 221, 208, 0.52);
-}
-
-.empty-icon {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 12px;
 }
 
 /* === Entrance Animation === */

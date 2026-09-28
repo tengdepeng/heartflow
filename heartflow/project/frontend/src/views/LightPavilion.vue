@@ -138,7 +138,7 @@
             :title="v.title">✦</span>
         </div>
       </div>
-      <p v-else class="tier-empty">在穹顶点亮一颗星，许下一个愿景</p>
+      <EmptyState v-else icon="" title="在穹顶点亮一颗星，许下一个愿景" :glow="false" cta-label="" />
     </section>
 
     <!-- 目标层 -->
@@ -169,7 +169,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="tier-empty">中等距离的光…</p>
+      <EmptyState v-else icon="" title="中等距离的光…" :glow="false" cta-label="" />
     </section>
 
     <!-- 目标间连线（相关目标） -->
@@ -190,7 +190,7 @@
           <button class="lp-del" @click="goal.remove(p.id)">×</button>
         </div>
       </div>
-      <p v-else class="tier-empty">具体的下一步…</p>
+      <EmptyState v-else icon="" title="具体的下一步…" :glow="false" cta-label="" />
     </section>
 
     <!-- 职业发展区 -->
@@ -226,9 +226,7 @@
         <span class="section-count">{{ specialPlans.length }}</span>
         <button class="section-add-btn" @click="openSpecialPlanModal">+ 新建专项</button>
       </div>
-      <div v-if="specialPlans.length === 0" class="special-plan-empty">
-        <p>还没有跨目标规划，创建一个将多个目标串联起来</p>
-      </div>
+      <EmptyState v-if="specialPlans.length === 0" icon="" title="还没有跨目标规划，创建一个将多个目标串联起来" :glow="false" cta-label="" />
       <div v-else class="special-plan-list">
         <div v-for="plan in specialPlans" :key="plan.id" class="special-plan-card">
           <div class="plan-card-header" role="button" tabindex="0" :aria-expanded="expandedPlanId === plan.id" :aria-label="'展开或收起专项计划 ' + plan.title" @click="toggleExpandPlan(plan.id)" @keydown.enter.prevent="toggleExpandPlan(plan.id)" @keydown.space.prevent="toggleExpandPlan(plan.id)">
@@ -333,6 +331,7 @@
 
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useGoal } from '../modules/goal'
@@ -962,12 +961,6 @@ function toggleExpandPlan(planId: string) {
   color: var(--accent);
   border-color: rgba(var(--accent-rgb), 0.25);
 }
-.tier-empty {
-  font-size: 13px;
-  color: rgba(var(--text-primary-rgb), 0.15);
-  padding: 10px 0;
-  font-style: italic;
-}
 
 /* ---- 目标卡片列表 ---- */
 .goal-cards {
@@ -1541,13 +1534,6 @@ function toggleExpandPlan(planId: string) {
 .section-add-btn:hover {
   background: rgba(var(--accent-rgb), 0.18);
   border-color: rgba(var(--accent-rgb), 0.25);
-}
-.special-plan-empty {
-  font-size: 13px;
-  color: rgba(var(--text-primary-rgb), 0.15);
-  padding: 6px 0 2px;
-  font-style: italic;
-  margin: 0;
 }
 .special-plan-list {
   display: flex;

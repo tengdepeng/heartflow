@@ -269,7 +269,7 @@
           <button class="pg-del" @click="pg.removeToy(t.id)">x</button>
         </div>
       </div>
-      <div v-else-if="pg.toys.length" class="filter-empty">当前筛选条件下无结果</div>
+      <EmptyState v-else-if="pg.toys.length" icon="" title="当前筛选条件下无结果" :glow="false" cta-label="" />
     </section>
 
     <!-- ===== 模型/手办 ===== -->
@@ -335,7 +335,7 @@
           <button class="pg-del" @click="pg.removeOther(o.id)">x</button>
         </div>
       </div>
-      <div v-else-if="pg.others.length && pg.otherSearch && !pg.filteredOthers.length" class="filter-empty">未找到匹配的藏品</div>
+      <EmptyState v-else-if="pg.others.length && pg.otherSearch && !pg.filteredOthers.length" icon="" title="未找到匹配的藏品" :glow="false" cta-label="" />
     </section>
 
     <!-- ===== 最近添加 ===== -->
@@ -488,7 +488,7 @@
           </transition>
         </div>
       </div>
-      <div v-else class="seeds-empty">还没有时间种子，种下第一颗吧</div>
+      <EmptyState v-else icon="" title="还没有时间种子，种下第一颗吧" :glow="false" cta-label="" />
     </section>
 
     <!-- ===== 时间种子的遗传（第46/47/48条治理面板 · 发送端） ===== -->
@@ -501,10 +501,7 @@
     <SeedLineageGraphPanel />
 
     <!-- 空状态 -->
-    <div v-if="pg.isEmpty" class="empty">
-      <span class="empty-icon">🎮</span>
-      <p>还没有记录</p>
-    </div>
+    <EmptyState v-if="pg.isEmpty" icon="🎮" title="还没有记录" :glow="false" cta-label="" />
   </div>
 </template>
 
@@ -524,6 +521,7 @@ import ReceivedSeedsInbox from '../components/ReceivedSeedsInbox.vue'
 import SeedLineageGraphPanel from '../components/SeedLineageGraphPanel.vue'
 import PlayArchivePanel from '../components/PlayArchivePanel.vue'
 import PlayBridgePanel from '../components/PlayBridgePanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 // ===== 时间种子（生长阶段系统） =====
@@ -1346,23 +1344,6 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
   color: var(--text-secondary);
 }
 
-/* ===== 空状态 & 筛选空 ===== */
-.empty {
-  text-align: center;
-  padding: 60px 0;
-  color: var(--text-secondary);
-}
-.empty-icon {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 8px;
-}
-.filter-empty {
-  text-align: center;
-  padding: 24px 0;
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
 /* ===== 排序与搜索 ===== */
 .sort-bar {
@@ -1673,12 +1654,6 @@ const collectionSeeds = computed<CollectionSeed[]>(() => {
   color: rgba(var(--text-primary-rgb), 0.75);
   line-height: 1.5;
   margin: 0;
-}
-.seeds-empty {
-  text-align: center;
-  padding: 16px 0;
-  font-size: 12px;
-  color: var(--text-secondary);
 }
 
 @keyframes germinate-in {

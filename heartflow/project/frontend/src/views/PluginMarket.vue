@@ -36,10 +36,7 @@
         已安装插件
         <span class="pm-section-count">{{ plugins.length }}</span>
       </h2>
-      <div v-if="plugins.length === 0" class="pm-empty-hint">
-        <span class="pm-empty-icon">📦</span>
-        <p>暂无已安装的插件</p>
-      </div>
+      <EmptyState v-if="plugins.length === 0" icon="📦" title="暂无已安装的插件" :glow="false" cta-label="" />
       <div v-else class="pm-plugin-grid hf-room-grid--wide">
         <div
           v-for="p in plugins"
@@ -137,10 +134,7 @@
       </button>
 
       <!-- 每插件沙箱明细 -->
-      <div v-if="sandboxSnapshot.rows.length === 0" class="pm-empty-hint pm-sandbox-empty">
-        <span class="pm-empty-icon">🛡️</span>
-        <p>尚无可用沙箱环境</p>
-      </div>
+      <EmptyState v-if="sandboxSnapshot.rows.length === 0" icon="🛡️" title="尚无可用沙箱环境" :glow="false" cta-label="" />
       <div v-else class="pm-sandbox-grid">
         <div
           v-for="row in sandboxSnapshot.rows"
@@ -179,10 +173,7 @@
         更新管理
         <span class="pm-section-count">{{ updateCount }} 项待更</span>
       </h2>
-      <div v-if="updates.length === 0" class="pm-empty-hint pm-updates-empty">
-        <span class="pm-empty-icon">✅</span>
-        <p>所有插件均已是最新版本</p>
-      </div>
+      <EmptyState v-if="updates.length === 0" icon="✅" title="所有插件均已是最新版本" :glow="false" cta-label="" />
       <div v-else>
         <button class="pm-btn-update-all" @click="updateAll">全部更新</button>
         <div class="pm-update-list">
@@ -246,11 +237,7 @@
         </div>
       </div>
 
-      <div v-if="availablePlugins.length === 0" class="pm-empty-hint pm-filter-empty">
-        <span class="pm-empty-icon">🔍</span>
-        <p>没有匹配的市场插件</p>
-        <p class="pm-empty-hint-sub">试试更换关键词或切换分类</p>
-      </div>
+      <EmptyState v-if="availablePlugins.length === 0" icon="🔍" title="没有匹配的市场插件" hint="试试更换关键词或切换分类" :glow="false" cta-label="" />
       <div v-else class="pm-plugin-grid hf-room-grid--wide">
         <div
           v-for="plugin in availablePlugins"
@@ -410,7 +397,7 @@
         <div class="pm-doc-block">
           <h3 class="pm-doc-subtitle">当前可用能力</h3>
           <p class="pm-doc-lead">仅插件已启用且权限已授予的能力出现在这里，随启停与授权实时更新。</p>
-          <div v-if="capabilityDocs.liveCapabilities.length === 0" class="pm-doc-empty">当前没有可用能力</div>
+          <EmptyState v-if="capabilityDocs.liveCapabilities.length === 0" icon="" title="当前没有可用能力" :glow="false" cta-label="" />
           <div v-else class="pm-doc-live">
             <div
               v-for="(c, i) in capabilityDocs.liveCapabilities"
@@ -446,6 +433,7 @@ import type { PluginDependency } from '../modules/plugin/plugin-marketplace'
 import type { CapabilityApiDocs } from '../modules/plugin/capability-docs'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const pluginBridge = usePlugin()
@@ -928,11 +916,6 @@ function tierLabel(t: PluginTier): string {
   font-family: var(--font-mono, 'SF Mono', 'Fira Code', monospace);
 }
 
-.pm-filter-empty .pm-empty-hint-sub {
-  font-size: 11px;
-  color: rgba(237,224,212,0.5);
-  margin-top: 2px;
-}
 
 /* ---- Plugin Grid ---- */
 /* ② 自适应整改：由单列 flex 改为 auto-fit 多列网格，
@@ -1087,9 +1070,6 @@ function tierLabel(t: PluginTier): string {
   position: relative;
 }
 
-.pm-updates-empty {
-  padding: 28px 20px;
-}
 
 .pm-btn-update-all {
   font-size: 12px;
@@ -1234,18 +1214,6 @@ function tierLabel(t: PluginTier): string {
   white-space: nowrap;
 }
 
-/* ---- Empty State ---- */
-.pm-empty-hint {
-  text-align: center;
-  padding: 40px 20px;
-  color: rgba(237,224,212,0.6);
-}
-
-.pm-empty-icon {
-  font-size: 36px;
-  display: block;
-  margin-bottom: 10px;
-}
 
 /* ---- Install Animation (kept for script compat) ---- */
 .installed-anim {
@@ -1470,9 +1438,6 @@ function tierLabel(t: PluginTier): string {
   color: #7fd1a7;
 }
 
-.pm-sandbox-empty {
-  padding: 22px 16px;
-}
 
 /* ---- 响应式 ---- */
 @media (max-width: 860px) {
@@ -1690,21 +1655,6 @@ function tierLabel(t: PluginTier): string {
     padding: 1px 5px;
   }
 
-  .pm-empty-hint {
-    padding: 40px 0;
-  }
-
-  .pm-empty-icon {
-    font-size: 32px;
-  }
-
-  .pm-empty-hint p {
-    font-size: 12px;
-  }
-
-  .pm-empty-hint .pm-empty-hint {
-    font-size: 11px;
-  }
 }
 
 /* ============================================================
@@ -2030,11 +1980,6 @@ function tierLabel(t: PluginTier): string {
   padding: 2px 8px;
 }
 
-.pm-doc-empty {
-  font-size: 12px;
-  color: rgba(237, 224, 212, 0.48);
-  padding: 8px;
-}
 
 @media (max-width: 760px) {
   .pm-doc-tiers {

@@ -196,14 +196,7 @@
       </div>
     </div>
 
-    <div v-else class="empty-state">
-      <div class="empty-icon-wrap">
-        <span class="empty-icon">👥</span>
-        <div class="empty-glow" />
-      </div>
-      <p>还没有记录任何人</p>
-      <span class="empty-hint">点击上方「添加羁绊」开始记录</span>
-    </div>
+    <EmptyState v-else icon="👥" title="还没有记录任何人" hint="点击上方「添加羁绊」开始记录" :glow="false" cta-label="" />
     </template>
 
     <!-- ============================================================
@@ -238,7 +231,7 @@
             <text y="28" text-anchor="middle" class="ft-member-name">{{ m.name }}</text>
           </g>
         </svg>
-        <p v-if="familyMembers.length === 0" class="ft-empty">暂无家人记录，请先在「关系网」中添加家人</p>
+        <EmptyState v-if="familyMembers.length === 0" icon="" title="暂无家人记录，请先在「关系网」中添加家人" :glow="false" cta-label="" />
       </div>
     </template>
 
@@ -333,6 +326,7 @@ import AnniversaryHealthPanel from '../components/AnniversaryHealthPanel.vue'
 import RelationInsightPanel from '../components/RelationInsightPanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 // ============================================================
 // Tab 切换
@@ -879,53 +873,6 @@ function savePerson() {
   color: var(--danger);
 }
 
-/* ============================================================
-   空状态
-   ============================================================ */
-.empty-state {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 0;
-  gap: 6px;
-  color: var(--text-faint);
-}
-
-.empty-icon-wrap {
-  position: relative;
-  margin-bottom: 8px;
-}
-
-.empty-icon {
-  font-size: 40px;
-  opacity: 0.35;
-  position: relative;
-  z-index: 1;
-}
-
-.empty-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 70px;
-  height: 70px;
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.06), transparent 70%);
-  border-radius: 50%;
-}
-
-.empty-state p {
-  font-size: 14px;
-  color: var(--text-low);
-}
-
-.empty-hint {
-  font-size: 12px;
-  color: var(--text-faint);
-}
 
 /* ============================================================
    模态弹窗
@@ -1212,12 +1159,6 @@ function savePerson() {
   font-size: 11px;
 }
 
-.ft-empty {
-  font-size: 13px;
-  color: var(--text-secondary);
-  text-align: center;
-  padding: 40px 0;
-}
 
 /* ============================================================
    留座 · 纪念座位

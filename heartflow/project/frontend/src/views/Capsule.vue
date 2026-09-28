@@ -83,7 +83,7 @@
     <!-- 封存中 -->
     <section data-enter class="capsule-section">
       <h3 class="cap-section-title">封存中 · {{ sealed.length }}</h3>
-      <div v-if="sealed.length === 0" class="cap-empty">暂无封存中的胶囊</div>
+      <EmptyState v-if="sealed.length === 0" icon="" title="暂无封存中的胶囊" :glow="false" cta-label="" />
       <div v-for="c in sealed" :key="c.id" class="cap-card sealed">
         <div class="cap-card-head">
           <span class="cap-card-title">{{ c.title }}</span>
@@ -107,7 +107,7 @@
     <!-- 已开启 -->
     <section data-enter class="capsule-section">
       <h3 class="cap-section-title">已开启 · {{ opened.length }}</h3>
-      <div v-if="opened.length === 0" class="cap-empty">还没有开启过的胶囊</div>
+      <EmptyState v-if="opened.length === 0" icon="" title="还没有开启过的胶囊" :glow="false" cta-label="" />
       <div v-for="c in opened" :key="c.id" class="cap-card opened">
         <div class="cap-card-head">
           <span class="cap-card-title">{{ c.title }}</span>
@@ -141,7 +141,7 @@
                 >×</button>
               </template>
             </li>
-            <li v-if="(c.items?.length ?? 0) === 0" class="cap-item-empty">空胶囊</li>
+            <li v-if="(c.items?.length ?? 0) === 0"><EmptyState icon="" title="空胶囊" :glow="false" cta-label="" /></li>
           </ul>
         </div>
         <div class="cap-card-meta">
@@ -415,7 +415,6 @@ function formatDate(iso: string | null): string {
   padding-bottom: 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
-.cap-empty { font-size: 13px; color: rgba(255, 255, 255, 0.5); padding: 12px 0; }
 
 .cap-card {
   padding: 14px 16px;
@@ -493,7 +492,6 @@ function formatDate(iso: string | null): string {
   background: rgba(255, 255, 255, 0.03);
 }
 .cap-item-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.cap-item-empty { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
 .cap-item-remove {
   border: none;
   background: transparent;

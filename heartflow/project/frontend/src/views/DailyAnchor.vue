@@ -233,10 +233,7 @@
         </div>
       </div>
 
-      <div v-else class="review-empty">
-        <span class="review-empty-icon">📊</span>
-        <p>{{ reviewPeriods.find(p => p.key === reviewPeriod)?.label }}暂无锚点数据</p>
-      </div>
+      <EmptyState v-else icon="📊" :title="(reviewPeriods.find(p => p.key === reviewPeriod)?.label ?? '') + '暂无锚点数据'" :glow="false" cta-label="" />
     </section>
 
     <!-- ===== 批量管理工具栏 ===== -->
@@ -457,14 +454,7 @@
     </section>
 
     <!-- 空状态 -->
-    <div v-if="scopedAnchors.length === 0" class="empty-anchor">
-      <div class="empty-icon-wrap">
-        <span class="empty-icon">⚓</span>
-        <span class="empty-glow" />
-      </div>
-      <p>{{ scalePeriodLabel }}还没有锚点</p>
-      <p class="empty-hint">可以先在这里放下一件事，再决定何时安放</p>
-    </div>
+    <EmptyState v-if="scopedAnchors.length === 0" icon="⚓" :title="scalePeriodLabel + '还没有锚点'" hint="可以先在这里放下一件事，再决定何时安放" :glow="true" cta-label="" />
 
     <!-- 心愿锚 -->
     <WishAnchorPanel />
@@ -506,6 +496,7 @@ import { useAnchorJournals } from '../modules/anchor/anchor-journals'
 import AnchorLightThread from '../components/AnchorLightThread.vue'
 import AnchorCelebration from '../components/AnchorCelebration.vue'
 import RoomHeader from '../components/RoomHeader.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS, aggregateClimate } from '../modules/room-resonance'
 import type { RoomKey } from '../modules/room-resonance'
@@ -1933,65 +1924,6 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
 /* ============================================================
    空状态 — 温暖等待
    ============================================================ */
-.empty-anchor {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 0;
-  gap: 8px;
-  color: var(--text-faint);
-}
-
-.empty-icon-wrap {
-  position: relative;
-  margin-bottom: 12px;
-}
-
-.empty-icon {
-  font-size: 44px;
-  opacity: 0.4;
-  position: relative;
-  z-index: 1;
-  filter: grayscale(0.3) brightness(1.1);
-  animation: emptyIconBreathe 4s ease-in-out infinite;
-}
-
-@keyframes emptyIconBreathe {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.04); }
-}
-
-.empty-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90px;
-  height: 90px;
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.08) 0%, rgba(var(--accent-rgb), 0.03) 30%, transparent 70%);
-  border-radius: 50%;
-  animation: emptyGlowPulse 4s ease-in-out infinite;
-}
-
-@keyframes emptyGlowPulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-  50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-}
-
-.empty-anchor p {
-  font-size: 14px;
-  color: var(--text-faint);
-  text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.04);
-}
-
-.empty-hint {
-  font-size: 12px;
-  opacity: 0.5;
-  color: rgba(var(--accent-rgb), 0.15);
-}
 
 /* ============================================================
    关联心锚 · 聚类可视化
@@ -2578,23 +2510,6 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   line-height: 1.6;
 }
 
-.review-empty {
-  padding: 40px 0;
-  text-align: center;
-  color: var(--text-faint);
-}
-
-.review-empty-icon {
-  font-size: 32px;
-  display: block;
-  margin-bottom: 8px;
-  opacity: 0.4;
-}
-
-.review-empty p {
-  font-size: 13px;
-  color: var(--text-faint);
-}
 
 /* ============================================================
    批量管理工具栏
@@ -2953,10 +2868,6 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   .pool-item-btn { font-size: 9px; padding: 2px 6px; }
 
   .hint-text { font-size: 11px; }
-
-  .empty-state { padding: 40px 0; }
-  .empty-state span { font-size: 32px; }
-  .empty-state p { font-size: 13px; }
 }
 
 /* ============================================================
