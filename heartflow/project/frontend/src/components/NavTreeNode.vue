@@ -235,9 +235,12 @@ function toggle() {
   border-radius: 8px;
   font-size: var(--nav-item-font, 13px);
   color: var(--text-secondary);
-  transition: all var(--transition);
+  /* 触感过渡：背景/颜色柔、阴影缓、位移用 premium 缓动 */
+  transition: background 0.2s ease, color 0.2s ease,
+    box-shadow 0.28s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
   position: relative;
   overflow: hidden;
+  will-change: background, color;
 }
 
 .nav-item::before {
@@ -250,18 +253,33 @@ function toggle() {
   height: 0;
   border-radius: 0 2px 2px 0;
   background: var(--accent);
-  transition: height var(--transition);
+  transition: height 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
   opacity: 0;
 }
 
 .nav-item:hover {
   background: var(--bg-surface);
   color: var(--text-primary);
+  /* 悬停抬升 + 暖琥珀内描边，立得住不飘 */
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(var(--accent-rgb), 0.07);
+}
+/* 悬停时左缘强调条微露，预示「激活」方向，又不抢 active 满条 */
+.nav-item:not(.active):hover::before {
+  height: 32%;
+  opacity: 0.6;
+}
+
+.nav-item:not(.is-dragging):active {
+  transform: scale(0.985);
 }
 
 .nav-item.active {
   background: var(--accent-glow);
   color: var(--accent);
+  /* active 柔光：内描边 + 极淡外晕，区别于普通 hover */
+  box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), 0.16),
+    0 1px 10px rgba(var(--accent-rgb), 0.10);
 }
 
 .nav-item.active::before {
@@ -375,6 +393,7 @@ function toggle() {
   text-align: center;
   flex-shrink: 0;
   opacity: 0.7;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
 }
 
 .nav-icon-img {
@@ -393,6 +412,11 @@ function toggle() {
 
 .nav-item.active .nav-icon {
   opacity: 1;
+  transform: scale(1.05);
+}
+.nav-item:not(.active):hover .nav-icon {
+  opacity: 0.95;
+  transform: scale(1.08);
 }
 
 .nav-label {
@@ -410,6 +434,7 @@ function toggle() {
   color: rgba(255, 255, 255, 0.5);
   letter-spacing: 0.5px;
   white-space: nowrap;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .nav-item.active .nav-pill,
@@ -450,7 +475,7 @@ function toggle() {
   line-height: 1;
   cursor: pointer;
   opacity: 0.5;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
