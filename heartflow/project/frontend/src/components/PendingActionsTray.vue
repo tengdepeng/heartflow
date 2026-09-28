@@ -101,11 +101,11 @@ onUnmounted(() => {
         </div>
         <p class="pat-msg">{{ item.message }}</p>
         <div class="pat-actions" v-if="item.decision === 'confirm'">
-          <button class="pat-btn pat-btn--primary" @click="confirmExecute(item)">执行</button>
-          <button class="pat-btn" @click="dismiss(item.id)">忽略</button>
+          <button class="pat-btn pat-btn--primary hf-press" @click="confirmExecute(item)">执行</button>
+          <button class="pat-btn hf-press" @click="dismiss(item.id)">忽略</button>
         </div>
         <div class="pat-actions" v-else>
-          <button class="pat-btn" @click="dismiss(item.id)">知道了</button>
+          <button class="pat-btn hf-press" @click="dismiss(item.id)">知道了</button>
         </div>
       </div>
     </transition-group>

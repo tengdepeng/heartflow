@@ -45,7 +45,7 @@
               <button
                 v-for="action in actions"
                 :key="action.id"
-                class="panel-action"
+                class="panel-action hf-press hf-lift"
                 @click="action.handler"
               >
                 <span class="action-icon">{{ action.icon }}</span>
@@ -63,7 +63,7 @@
               <button
                 v-for="p in styleStore.installedPacks"
                 :key="p.id"
-                :class="['style-chip', { active: styleStore.activeId === p.id }]"
+                :class="['style-chip', 'hf-press', { active: styleStore.activeId === p.id }]"
                 @click="styleStore.activate(p.id)"
               >
                 {{ p.name }}

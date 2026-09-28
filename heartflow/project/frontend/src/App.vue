@@ -74,10 +74,10 @@
       </div>
 
       <div class="sidebar-pos" v-if="!isMobileOrTablet" role="group" aria-label="侧边栏位置">
-        <button type="button" class="pos-btn" :class="{ active: sidebarEdgeActive('left') }" title="贴左" aria-label="贴左" @click="setSidebarEdge('left')">◧</button>
-        <button type="button" class="pos-btn" :class="{ active: sidebarEdgeActive('right') }" title="贴右" aria-label="贴右" @click="setSidebarEdge('right')">◨</button>
-        <button type="button" class="pos-btn" :class="{ active: sidebarEdgeActive('free') }" title="自由摆放" aria-label="自由摆放" @click="setSidebarFree()">⤢</button>
-        <button type="button" class="pos-btn" title="复位" aria-label="复位" @click="resetSidebarPos()">⟲</button>
+        <button type="button" class="pos-btn hf-press" :class="{ active: sidebarEdgeActive('left') }" title="贴左" aria-label="贴左" @click="setSidebarEdge('left')">◧</button>
+        <button type="button" class="pos-btn hf-press" :class="{ active: sidebarEdgeActive('right') }" title="贴右" aria-label="贴右" @click="setSidebarEdge('right')">◨</button>
+        <button type="button" class="pos-btn hf-press" :class="{ active: sidebarEdgeActive('free') }" title="自由摆放" aria-label="自由摆放" @click="setSidebarFree()">⤢</button>
+        <button type="button" class="pos-btn hf-press" title="复位" aria-label="复位" @click="resetSidebarPos()">⟲</button>
       </div>
 
       <div class="style-row">
@@ -2380,7 +2380,7 @@ watch(() => nav.currentRoomId.value, () => {
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition);
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
 }
 
 .pos-btn:hover {
