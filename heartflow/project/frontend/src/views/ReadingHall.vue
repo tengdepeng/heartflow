@@ -79,15 +79,29 @@
         <p>还没有摘录。</p>
         <p class="empty-hint">在书卷中阅读时，选中文字即可摘录。</p>
       </div>
-      <div v-else class="rh-excerpts-list">
-        <div v-for="ex in excerpts" :key="ex.id" class="rh-excerpt-card">
-          <div class="excerpt-original">"{{ ex.text }}"</div>
-          <div v-if="ex.note" class="rh-excerpt-note">{{ ex.note }}</div>
-          <div class="excerpt-meta">
-            <span class="meta-source">{{ ex.source || '未命名文本' }}</span>
-            <span class="meta-time">{{ formatTime(ex.createdAt) }}</span>
+      <div v-else>
+        <div class="rh-export-bar">
+          <span class="rh-export-hint">本地私有 · 仅存于本机</span>
+          <div class="rh-export-actions">
+            <button class="rh-btn rh-export-btn" data-test="export-excerpts" @click="readingExport.exportExcerpts">导出摘录(MD)</button>
+            <button
+              class="rh-btn rh-export-btn"
+              data-test="export-all-json"
+              :disabled="!excerpts.length && !readingExport.memoCount.value"
+              @click="readingExport.exportAllJson"
+            >导出全部(JSON)</button>
           </div>
-          <button class="text-btn delete-btn" @click="deleteExcerpt(ex.id)">删除</button>
+        </div>
+        <div class="rh-excerpts-list">
+          <div v-for="ex in excerpts" :key="ex.id" class="rh-excerpt-card">
+            <div class="excerpt-original">"{{ ex.text }}"</div>
+            <div v-if="ex.note" class="rh-excerpt-note">{{ ex.note }}</div>
+            <div class="excerpt-meta">
+              <span class="meta-source">{{ ex.source || '未命名文本' }}</span>
+              <span class="meta-time">{{ formatTime(ex.createdAt) }}</span>
+            </div>
+            <button class="text-btn delete-btn" @click="deleteExcerpt(ex.id)">删除</button>
+          </div>
         </div>
       </div>
     </div>
@@ -157,6 +171,21 @@
       <ReadingMemoPanel :book-id="activeBookId" :book-title="activeBookTitle" />
     </div>
 
+    <!-- ========== 阅读日历·热力图（#38：按日聚合阅读时长，月级热力小格） ========== -->
+    <div data-enter v-if="activeTab === 'calendar'" class="rh-panel rh-calendar-panel">
+      <ReadingCalendarPanel />
+    </div>
+
+    <!-- ========== 金句墙（#39：摘录卡片墙，数据源同书卷摘录集） ========== -->
+    <div data-enter v-if="activeTab === 'quote'" class="rh-panel rh-quote-panel">
+      <ReadingQuoteWallPanel />
+    </div>
+
+    <!-- ========== 年度阅读报告（#40：聚合 hall/insights/speed 的年度报告） ========== -->
+    <div data-enter v-if="activeTab === 'report'" class="rh-panel rh-report-panel">
+      <ReadingReportPanel />
+    </div>
+
     <!-- 阅读总览仪表盘（INCR-160：已构建但从未接线的 reading-bridge + useReadingDashboard） -->
     <ReadingDashboardPanel />
 
@@ -215,7 +244,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
-import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox } from '../modules/reading'
+import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox, useReadingExport } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
@@ -230,6 +259,9 @@ import BookShelfPanel from '../components/BookShelfPanel.vue'
 import ReadingInboxPanel from '../components/ReadingInboxPanel.vue'
 import LifeBookPanel from '../components/LifeBookPanel.vue'
 import ReadingMemoPanel from '../components/ReadingMemoPanel.vue'
+import ReadingCalendarPanel from '../components/ReadingCalendarPanel.vue'
+import ReadingQuoteWallPanel from '../components/ReadingQuoteWallPanel.vue'
+import ReadingReportPanel from '../components/ReadingReportPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -242,13 +274,19 @@ const tabs = [
   { key: 'inbox', label: '待读箱' },
   { key: 'lifebook', label: '人生之书' },
   { key: 'shelf', label: '书架' },
+  { key: 'calendar', label: '日历' },
+  { key: 'quote', label: '金句' },
+  { key: 'report', label: '报告' },
   { key: 'memo', label: '读书便签' },
 ] as const
-const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'memo'>('book')
+const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'calendar' | 'quote' | 'report' | 'memo'>('book')
 
 // ---- 阅读文本 ----
 const reading = useReading()
 const { readingText, excerpts } = reading
+
+// ---- 摘录 / 便签 本地导出（#41） ----
+const readingExport = useReadingExport()
 
 const pastedText = ref('')
 const readingRef = ref<HTMLElement | null>(null)
@@ -800,6 +838,47 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
 /* ---- 摘录集 ---- */
 .excerpts-panel {
   padding-top: 4px;
+}
+
+/* ---- 本地导出工具条 ---- */
+.rh-export-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(var(--accent-rgb), 0.04);
+  border: 1px solid rgba(var(--accent-rgb), 0.1);
+}
+
+.rh-export-hint {
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.5);
+}
+
+.rh-export-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.rh-export-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .rh-export-bar {
+    flex-wrap: wrap;
+  }
+  .rh-export-actions {
+    width: 100%;
+  }
+  .rh-export-btn {
+    flex: 1;
+    padding: 6px 10px;
+  }
 }
 
 .empty-state {

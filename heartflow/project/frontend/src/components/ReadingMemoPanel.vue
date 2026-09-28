@@ -3,6 +3,15 @@
     <div class="rm-head">
       <span class="rm-title">📝 读书便签</span>
       <span class="rm-sub">阅读时随手记 · 本地私有</span>
+      <div class="rm-export">
+        <button class="rm-btn" data-test="rm-export-md" :disabled="!visibleMemos.length" @click="readingExport.exportMemos">导出便签(MD)</button>
+        <button
+          class="rm-btn"
+          data-test="rm-export-json"
+          :disabled="!visibleMemos.length && !readingExport.excerptCount.value"
+          @click="readingExport.exportAllJson"
+        >导出全部(JSON)</button>
+      </div>
     </div>
 
     <!-- 新增 -->
@@ -64,7 +73,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useReadingMemos, type ReadingMemo } from '../modules/reading'
+import { useReadingMemos, useReadingExport, type ReadingMemo } from '../modules/reading'
 
 const props = defineProps<{
   /** 当前打开的书目 id（可选） */
@@ -74,6 +83,7 @@ const props = defineProps<{
 }>()
 
 const memos = useReadingMemos()
+const readingExport = useReadingExport()
 const draft = ref('')
 const onlyBook = ref(false)
 const editingId = ref<string | null>(null)
@@ -137,6 +147,27 @@ function formatTime(iso: string): string {
 .rm-sub {
   font-size: 12px;
   color: rgba(var(--accent-rgb, 140 160 190), 0.5);
+}
+.rm-export {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
+.rm-export .rm-btn {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+@media (max-width: 480px) {
+  .rm-head {
+    flex-wrap: wrap;
+  }
+  .rm-export {
+    margin-left: 0;
+    width: 100%;
+  }
+  .rm-export .rm-btn {
+    flex: 1;
+  }
 }
 .rm-compose {
   margin-bottom: 12px;

@@ -105,3 +105,23 @@ export type {
   VerticalMetrics,
   AnnotationGroup,
 } from './classical-vertical'
+
+// ---- 阅读日历 · 热力图（#38） ----
+export { useReadingCalendar, dayLevel, aggregateByDay, buildMonthCalendar, summarizeYear } from './reading-calendar'
+export type { DayReading, MonthCell, MonthCalendar, YearSummary } from './reading-calendar'
+
+// ---- 年度阅读报告（#40） ----
+export { useReadingReport, buildYearReport } from './reading-report'
+export type { YearReport, MonthPoint } from './reading-report'
+
+// ---- 摘录 / 读书便签 本地导出（#41） ----
+export {
+  useReadingExport,
+  buildExcerptsMarkdown,
+  buildMemosMarkdown,
+  buildReadingExportMarkdown,
+  buildReadingExportJson,
+  downloadReadingExport,
+  generateReadingExportFilename,
+} from './reading-export'
+export type { ReadingExportPayload } from './reading-export'
