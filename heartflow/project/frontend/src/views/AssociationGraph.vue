@@ -1,13 +1,7 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance ag">
-    <!-- 装饰性头部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <p class="header-kicker">我的记录如何彼此相连</p>
-    <h1 class="ag-title">共鸣图谱</h1>
+    <!-- 统一房间头 + 统一内容区（RoomLayout） -->
+    <RoomLayout title="共鸣图谱" kicker="我的记录如何彼此相连" align="center" data-enter>
 
     <!-- 概览 -->
     <div data-enter class="ag-overview">
@@ -174,6 +168,7 @@
     <div data-enter class="ag-back-row">
       <button class="ag-back-btn" @click="$router.back()">← 返回</button>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -187,6 +182,7 @@ import {
 import { computeLayout, type GraphLayout } from '../modules/association/layout'
 import AssociationArchivePanel from '../components/AssociationArchivePanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -489,43 +485,10 @@ onMounted(() => { /* 图数据在 setup 已计算；如需实时刷新可在此�
 .ag {
   max-width: 960px;
   margin: 0 auto;
-  padding: 40px 28px 80px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 80px;
   min-height: 100%;
   color: var(--text-primary, #e8e3da);
-}
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.orn-line {
-  display: inline-block;
-  width: 48px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
-}
-.orn-diamond {
-  font-size: 14px;
-  color: var(--accent);
-  opacity: 0.7;
-}
-.header-kicker {
-  text-align: center;
-  font-size: 11px;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: rgba(var(--accent-rgb), 0.5);
-  margin: 0 0 6px;
-}
-.ag-title {
-  text-align: center;
-  font-size: 26px;
-  font-weight: 400;
-  letter-spacing: 6px;
-  color: var(--accent);
-  margin: 0 0 24px;
 }
 .ag-overview {
   display: flex;
@@ -814,7 +777,7 @@ onMounted(() => { /* 图数据在 setup 已计算；如需实时刷新可在此�
 }
 
 @media (max-width: 640px) {
-  .ag { padding: 24px 14px 56px; }
+  .ag { padding: 0 0 56px; }
   .ag-detail { width: 200px; }
   .ag-controls { flex-direction: column; align-items: flex-start; }
 }
