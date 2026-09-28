@@ -43,7 +43,7 @@
     </div>
 
     <!-- Header -->
-    <RoomHeader
+    <RoomLayout
       class="career-room-header"
       data-enter
       :title="roomData?.name"
@@ -72,7 +72,6 @@
       <template #meta>
         <p class="career-kicker">从更漏 · 工作日志中生长出的关系网络</p>
       </template>
-    </RoomHeader>
 
     <!-- 概览统计 -->
     <section data-enter class="career-section">
@@ -476,6 +475,7 @@
         </div>
       </div>
     </Teleport>
+    </RoomLayout>
   </div>
 </template>
 
@@ -486,7 +486,7 @@ import { useRoomNavigation } from '../composables/useRoomNavigation'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useCareer, type CareerContact as Contact, type CareerProject, type NodeTypeId, type ProjectStatus } from '../modules/career/career'
 import { useCareerMilestones, useSkillMap, MILESTONE_TYPE_META } from '../modules/career/skill-map'
-import RoomHeader from '../components/RoomHeader.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import CareerArchivePanel from '../components/CareerArchivePanel.vue'
 import CareerVisualizationPanel from '../components/CareerVisualizationPanel.vue'
 import CareerSimulatorPanel from '../components/CareerSimulatorPanel.vue'
@@ -1064,7 +1064,8 @@ const skillSummary = computed(() => {
   position: relative;
   max-width: 860px;
   margin: 0 auto;
-  padding: 48px 32px 100px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 100px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -2225,7 +2226,7 @@ const skillSummary = computed(() => {
    ============================================================= */
 @media (max-width: 860px) {
   .career {
-    padding: 28px 20px 100px;
+    padding: 0 0 100px;
     gap: 32px;
   }
 
@@ -2267,7 +2268,7 @@ const skillSummary = computed(() => {
    ============================================================= */
 @media (max-width: 640px) {
   .career {
-    padding: 20px 14px 90px;
+    padding: 0 0 90px;
     gap: 24px;
   }
 
