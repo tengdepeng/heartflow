@@ -337,7 +337,10 @@
 .hf-press {
   transition:
     transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow calc(0.18s / var(--hf-animate-speed, 1)) ease;
+    box-shadow calc(0.18s / var(--hf-animate-speed, 1)) ease,
+    background-color calc(0.18s / var(--hf-animate-speed, 1)) ease,
+    color calc(0.18s / var(--hf-animate-speed, 1)) ease,
+    border-color calc(0.18s / var(--hf-animate-speed, 1)) ease;
 }
 .hf-press:active:not(:disabled) {
   transform: scale(0.96);
@@ -348,7 +351,9 @@
   transition:
     transform calc(0.2s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1),
     border-color calc(0.2s / var(--hf-animate-speed, 1)) ease,
-    box-shadow calc(0.2s / var(--hf-animate-speed, 1)) ease;
+    box-shadow calc(0.2s / var(--hf-animate-speed, 1)) ease,
+    background-color calc(0.2s / var(--hf-animate-speed, 1)) ease,
+    color calc(0.2s / var(--hf-animate-speed, 1)) ease;
 }
 @media (hover: hover) {
   .hf-lift:hover {
