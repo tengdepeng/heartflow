@@ -214,7 +214,7 @@
     <!-- 跨房间共鸣态势（仅其他房间，过滤本房回声）· 阅览殿已纳入 RoomKey -->
     <section data-enter class="cross-room-climate">
       <h2 class="climate-title">跨房间共鸣态势</h2>
-      <p v-if="externalFeed.length === 0" class="climate-empty">各房间尚在静默，去其他房间留一道光痕吧。</p>
+      <EmptyState v-if="externalFeed.length === 0" icon="" title="各房间尚在静默，去其他房间留一道光痕吧。" :glow="false" cta-label="" />
       <ul v-else class="climate-list">
         <li v-for="s in externalFeed" :key="s.room" class="climate-item">
           <span class="climate-room">{{ roomLabel(s.room) }}</span>
@@ -1007,11 +1007,6 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   color: rgba(var(--accent-rgb), 0.6);
 }
 
-.climate-empty {
-  margin: 0;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.4);
-}
 
 .climate-list {
   list-style: none;

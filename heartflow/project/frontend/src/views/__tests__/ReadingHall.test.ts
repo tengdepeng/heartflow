@@ -60,6 +60,7 @@ describe('ReadingHall 阅览殿', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     Object.keys(mockStore).forEach(k => delete mockStore[k])
+    clearRoomSignals()
   })
 
   it('渲染标题', async () => {
@@ -75,23 +76,26 @@ describe('ReadingHall 阅览殿', () => {
     expect(wrapper.text()).toContain('结晶数')
   })
 
-  it('显示七个标签页（含待读箱、人生之书与读书便签）', async () => {
+  it('显示十个标签页（书卷/摘录集/回顾/待读箱/人生之书/书架/日历/金句/报告/读书便签）', async () => {
     const wrapper = await getWrapper()
     const tabs = wrapper.findAll('.rh-tab')
-    expect(tabs.length).toBe(7)
+    expect(tabs.length).toBe(10)
     expect(tabs[0].text()).toContain('书卷')
     expect(tabs[1].text()).toContain('摘录集')
     expect(tabs[2].text()).toContain('回顾')
     expect(tabs[3].text()).toContain('待读箱')
     expect(tabs[4].text()).toContain('人生之书')
     expect(tabs[5].text()).toContain('书架')
-    expect(tabs[6].text()).toContain('读书便签')
+    expect(tabs[6].text()).toContain('日历')
+    expect(tabs[7].text()).toContain('金句')
+    expect(tabs[8].text()).toContain('报告')
+    expect(tabs[9].text()).toContain('读书便签')
   })
 
   it('挂载读书便签面板 ReadingMemoPanel', async () => {
     const wrapper = await getWrapper()
     const tabs = wrapper.findAll('.rh-tab')
-    await tabs[6].trigger('click') // 读书便签
+    await tabs[9].trigger('click') // 读书便签
     await wrapper.vm.$nextTick()
     expect(wrapper.find('reading-memo-panel-stub').exists()).toBe(true)
   })
@@ -148,7 +152,8 @@ describe('ReadingHall 阅览殿', () => {
     const wrapper = await getWrapper()
     const tabs = wrapper.findAll('.rh-tab')
     await tabs[1].trigger('click')
-    expect(wrapper.text()).toContain('还没有摘录')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent({ name: 'EmptyState' }).exists()).toBe(true)
   })
 
   it('回顾标签显示统计', async () => {
@@ -335,7 +340,7 @@ describe('ReadingHall 跨房间共鸣', () => {
 
   it('无其他房间信号时展示静默文案', async () => {
     const wrapper = await getWrapper()
-    expect(wrapper.find('.climate-empty').exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'EmptyState' }).exists()).toBe(true)
     expect(wrapper.findAll('.climate-item')).toHaveLength(0)
   })
 
