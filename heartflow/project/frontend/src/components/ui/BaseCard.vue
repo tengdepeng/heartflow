@@ -73,7 +73,11 @@ withDefaults(
     transform: translateY(-2px);
     border-color: var(--accent-dim);
     background: var(--bg-card-hover);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.34);
+    /* 抬升暗影 + 琥珀内描边辉光 + 外发光，三层次让交互卡片「被点亮」 */
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.34),
+      0 0 0 1px rgba(var(--accent-rgb), 0.1),
+      0 12px 40px rgba(var(--accent-rgb), 0.1);
   }
 }
 

@@ -141,12 +141,32 @@ onBeforeUnmount(() => document.removeEventListener('keydown', onKey))
   justify-content: flex-end;
 }
 
-/* 入场复用 animations.css 的 summon-fade-in 关键帧；时长挂 --hf-animate-speed */
-.hf-modal-enter-active {
-  animation: summon-fade-in calc(0.32s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
-}
+/* 遮罩淡入淡出（不再整屏 scale，避免模糊背景发飘）；
+   内层面板用 modal-pop 弹入，终态 transform:none（不为后代创建 containing block） */
+.hf-modal-enter-active,
 .hf-modal-leave-active {
-  animation: summon-fade-in calc(0.2s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) reverse;
+  transition: opacity calc(0.26s / var(--hf-animate-speed, 1)) ease;
+}
+.hf-modal-enter-from,
+.hf-modal-leave-to {
+  opacity: 0;
+}
+.hf-modal-enter-active .hf-modal {
+  animation: modal-pop calc(0.34s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
+}
+.hf-modal-leave-active .hf-modal {
+  animation: modal-pop calc(0.2s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) reverse;
+}
+@keyframes modal-pop {
+  from { opacity: 0; transform: translateY(12px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+/* 减少动态：仅淡入淡出，取消缩放 */
+@media (prefers-reduced-motion: reduce) {
+  .hf-modal-enter-active,
+  .hf-modal-leave-active { transition: opacity 0.2s ease; }
+  .hf-modal-enter-active .hf-modal,
+  .hf-modal-leave-active .hf-modal { animation: none; }
 }
 
 /* 窄屏：内边距与标题收敛一档 */

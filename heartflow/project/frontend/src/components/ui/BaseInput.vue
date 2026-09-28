@@ -83,7 +83,10 @@ function onInput(e: Event) {
   outline: none;
   border-color: var(--accent);
   background: var(--bg-secondary);
-  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.2);
+  /* 3px 环 + 琥珀外发光，聚焦如「点亮输入框」 */
+  box-shadow:
+    0 0 0 3px rgba(var(--accent-rgb), 0.2),
+    0 0 16px rgba(var(--accent-rgb), 0.14);
 }
 /* 错误态：边框用实心 --danger（无需三元组），环色走 color-mix 渐进增强 */
 .hf-input[aria-invalid='true'] {
@@ -97,7 +100,9 @@ function onInput(e: Event) {
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 20%, transparent);
   }
   .hf-input[aria-invalid='true']:focus {
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 26%, transparent);
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--danger) 26%, transparent),
+      0 0 16px color-mix(in srgb, var(--danger) 18%, transparent);
   }
 }
 .hf-input:disabled {

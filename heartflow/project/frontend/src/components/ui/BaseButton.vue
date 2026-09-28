@@ -45,6 +45,9 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
   line-height: 1.2;
   cursor: pointer;
   user-select: none;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   /* 具名属性过渡：不用 all，避免无关属性被拖进动画（如未来新增的 filter/padding）；
      时长 180ms 落在 150–300ms 区间，并挂宪法 --hf-animate-speed 全局调速 */
   transition:
@@ -59,13 +62,32 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
   width: 100%;
 }
 
+/* 光泽扫过：斜向高光自左出、向右扫过，纯合成层 transform 不重绘。
+   仅 primary/secondary 启用（front 微覆文字，毛玻璃质感）；hover:hover 收进，触屏不粘滞。 */
+.hf-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.22) 50%, transparent 68%);
+  transform: translateX(-130%);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .hf-btn--primary:hover::before,
+  .hf-btn--secondary:hover::before {
+    transform: translateX(130%);
+  }
+}
+
 /* Primary */
 .hf-btn--primary {
   background: var(--accent);
   color: #1a1208;
 }
 .hf-btn--primary:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.975);
 }
 
 /* Secondary */
@@ -76,7 +98,7 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
 }
 .hf-btn--secondary:active:not(:disabled) {
   /* 描边变体补按压缩进反馈（原实现只有 hover，点下去毫无回应） */
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.975);
   background: var(--accent-glow);
   border-color: var(--accent-dim);
 }
@@ -87,7 +109,7 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
   color: var(--text-medium);
 }
 .hf-btn--ghost:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.975);
   background: var(--bg-surface);
   color: var(--text-primary);
 }
@@ -98,7 +120,7 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
   color: #1a0a0a;
 }
 .hf-btn--danger:active:not(:disabled) {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.975);
 }
 
 /* ---- 悬停族：收进 (hover:hover)，触屏上 :hover 会粘滞，避免「点完卡在抬起态」 ---- */
@@ -149,5 +171,12 @@ defineEmits<{ (e: 'click', ev: MouseEvent): void }>()
     padding: 9px 16px;
     font-size: 13.5px;
   }
+}
+
+/* 减少动态：关闭光泽扫过，按压仅保留位移（scale 回弹一并关） */
+@media (prefers-reduced-motion: reduce) {
+  .hf-btn::before { transition: none; }
+  .hf-btn--primary:hover::before,
+  .hf-btn--secondary:hover::before { transform: none; }
 }
 </style>
