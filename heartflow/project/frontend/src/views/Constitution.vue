@@ -7,7 +7,7 @@
     </div>
 
     <!-- 顶部标题 · 圣约卷轴（统一页头组件，竖排居中保仪式感） -->
-    <RoomHeader
+    <RoomLayout
       class="constitution-room-header"
       data-enter
       :ornament="false"
@@ -37,7 +37,6 @@
           <span class="orn-line"></span>
         </div>
       </template>
-    </RoomHeader>
 
     <!-- 序言 · 羊皮卷 -->
     <section data-enter class="parchment-section">
@@ -615,6 +614,7 @@
         </div>
       </div>
     </Teleport>
+    </RoomLayout>
   </div>
 </template>
 
@@ -632,7 +632,7 @@ import ConstitutionBridgePanel from '@/components/ConstitutionBridgePanel.vue'
 import OsNotificationAuditPanel from '@/components/OsNotificationAuditPanel.vue'
 import ConstitutionGuardianPanel from '@/components/ConstitutionGuardianPanel.vue'
 import ConstitutionLiveVars from '@/components/ConstitutionLiveVars.vue'
-import RoomHeader from '../components/RoomHeader.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -959,7 +959,8 @@ function onThresholdChange(e: Event): void {
 .constitution-page {
   max-width: 840px;
   margin: 0 auto;
-  padding: 48px 32px 80px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 80px;
   position: relative;
   min-height: 100vh;
 }
@@ -2060,7 +2061,7 @@ function onThresholdChange(e: Event): void {
 /* 860px: 平板过渡 — 紧凑重排 */
 @media (max-width: 860px) {
   .constitution-page {
-    padding: 40px 28px 72px;
+    padding: 0 0 72px;
   }
 
   .scroll-title {
@@ -2078,7 +2079,7 @@ function onThresholdChange(e: Event): void {
 
 @media (max-width: 640px) {
   .constitution-page {
-    padding: 32px 16px 60px;
+    padding: 0 0 60px;
   }
 
   .pillars-grid {
