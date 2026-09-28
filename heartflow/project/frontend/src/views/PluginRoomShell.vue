@@ -50,7 +50,7 @@
           <span>{{ r.name }}</span>
         </button>
       </div>
-      <p v-else class="prs-adj-empty">暂无邻接房间</p>
+      <EmptyState v-else icon="" title="暂无邻接房间" :glow="false" cta-label="" />
     </div>
 
     <div class="prs-note" data-enter>
@@ -65,6 +65,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getRoom, getAdjacentRooms } from '../engine/room-graph'
 import { safePush } from '@/utils/router-safe'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import EmptyState from '../components/EmptyState.vue'
 
 defineOptions({ name: 'PluginRoomShell' })
 
@@ -226,11 +227,6 @@ function go(path: string): void {
 }
 .prs-adj-icon {
   font-size: 15px;
-}
-.prs-adj-empty {
-  text-align: center;
-  font-size: 12px;
-  color: rgba(232, 224, 208, 0.4);
 }
 
 .prs-note {

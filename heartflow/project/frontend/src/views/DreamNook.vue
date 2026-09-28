@@ -130,7 +130,7 @@
           </div>
         </div>
       </div>
-      <div v-else class="empty-hint">{{ showArchived ? '没有归档的梦境' : '还没有梦境记录' }}</div>
+      <EmptyState v-else :title="showArchived ? '没有归档的梦境' : '还没有梦境记录'" :glow="false" cta-label="" />
     </section>
     </RoomLayout>
   </div>
@@ -141,6 +141,7 @@ import { ref, computed, reactive } from 'vue'
 import { useDreamNookStore, DREAM_REALM_ID } from '../stores/dreamNook'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import DreamArchivePanel from '../components/DreamArchivePanel.vue'
 import DreamOmenPanel from '../components/DreamOmenPanel.vue'
 
@@ -572,12 +573,6 @@ section h3 {
   border-color: rgba(167, 139, 250, 0.55);
   color: #c4b5fd;
   background: rgba(167, 139, 250, 0.18);
-}
-.empty-hint {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-align: center;
-  padding: 24px 0;
 }
 
 /* 映照反馈 toast（#87，非阻塞替代 alert） */

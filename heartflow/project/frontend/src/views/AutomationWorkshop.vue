@@ -109,7 +109,7 @@
           <button class="aw-del" @click.stop="deleteFlow(f.id)">×</button>
         </div>
       </div>
-      <p v-else class="aw-empty-hint">还没有保存的流程</p>
+      <EmptyState v-else icon="" title="还没有保存的流程" :glow="false" cta-label="" />
     </section>
 
     <!-- 执行历史 -->
@@ -129,7 +129,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="aw-empty-hint">还没有执行记录</p>
+      <EmptyState v-else icon="" title="还没有执行记录" :glow="false" cta-label="" />
     </section>
 
     <!-- 安全红线 -->
@@ -146,6 +146,7 @@ import { automationEngine, getFlowTemplates, type SavedFlow, type ExecutionRecor
 import { useAutomationFlows } from '../modules/automation'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { flows: savedFlows, load: loadFlows, save: saveFlows } = useAutomationFlows()
@@ -436,8 +437,6 @@ section h3 { font-size: 14px; opacity: 0.7; margin-bottom: 10px; font-weight: 50
 /* ===== Rules ===== */
 .rules p { font-size: 12px; opacity: 0.4; padding: 2px 0; }
 
-/* ===== Empty hint ===== */
-.aw-empty-hint { font-size: 13px; color: rgba(255, 255, 255, 0.38); padding: 8px 0; }
 
 /* === Entrance Animation === */
 @keyframes fade-slide-up {

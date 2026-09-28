@@ -74,7 +74,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="empty">还没有词条，点击上方按钮添加</p>
+      <EmptyState v-else icon="" title="还没有词条，点击上方按钮添加" :glow="false" cta-label="" />
     </template>
 
     <!-- 书架视图 -->
@@ -106,7 +106,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="empty">还没有词条，点击上方按钮添加</p>
+      <EmptyState v-else icon="" title="还没有词条，点击上方按钮添加" :glow="false" cta-label="" />
     </template>
 
     <!-- 归档/活跃切换 -->
@@ -176,6 +176,7 @@
 import { ref, computed } from 'vue'
 import { useDictionaryStore, type DictEntry } from '../stores/dictionary'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import HanziLookupPanel from '../components/HanziLookupPanel.vue'
 import HandwritingPanel from '../components/HandwritingPanel.vue'
@@ -622,12 +623,6 @@ function importDict(e: Event) {
   font-size: 11px;
   color: var(--text-secondary);
   margin-top: 16px;
-  text-align: center;
-}
-.empty {
-  font-size: 13px;
-  color: rgba(var(--text-primary-rgb), 0.15);
-  padding: 30px 0;
   text-align: center;
 }
 

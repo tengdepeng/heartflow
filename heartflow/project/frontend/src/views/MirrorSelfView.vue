@@ -20,9 +20,7 @@
     <!-- 跨房间共鸣态势：镜我既消费也参与 6 房联动 -->
     <section data-enter class="msr-climate" aria-label="跨房间共鸣态势">
       <h2 class="msr-section-title">跨房间共鸣态势</h2>
-      <p v-if="otherRoomFeed.length === 0" class="msr-climate-empty">
-        各房间尚在静默，去其他房间留一道光痕吧。
-      </p>
+      <EmptyState v-if="otherRoomFeed.length === 0" icon="" title="各房间尚在静默，去其他房间留一道光痕吧。" :glow="false" cta-label="" />
       <ul v-else class="msr-climate-list">
         <li v-for="s in otherRoomFeed" :key="s.room + '-' + s.ts" class="msr-climate-item">
           <span class="msr-climate-room">{{ roomLabel(s.room) }}</span>
@@ -34,9 +32,7 @@
     <!-- 近期反思：镜我房间的连续性叙事表面（玉珠 tooltip 未呈现） -->
     <section data-enter class="msr-reflections" aria-label="近期反思">
       <h2 class="msr-section-title">近期反思</h2>
-      <p v-if="recentReflections.length === 0" class="msr-reflect-empty">
-        与镜我对话，沉淀你自己的倒影。
-      </p>
+      <EmptyState v-if="recentReflections.length === 0" icon="" title="与镜我对话，沉淀你自己的倒影。" :glow="false" cta-label="" />
       <ul v-else class="msr-reflect-list">
         <li v-for="r in recentReflections" :key="r.id" class="msr-reflect-item">
           <span class="msr-reflect-role" :class="r.role">{{ r.role === 'mirror' ? '镜我' : '你' }}</span>
@@ -86,6 +82,7 @@
 import { computed, onMounted } from 'vue'
 import MirrorSelf from '../components/MirrorSelf.vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import FourPillarsPanel from '../components/FourPillarsPanel.vue'
 import SelfMirrorPanel from '../components/SelfMirrorPanel.vue'
 import TwelveHousesGrid from '../components/TwelveHousesGrid.vue'
@@ -246,14 +243,6 @@ onMounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
 }
-.msr-climate-empty {
-  margin: 0;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  color: var(--text-low);
-  text-align: center;
-  line-height: 1.6;
-}
 .msr-climate-list {
   list-style: none;
   margin: 0;
@@ -291,14 +280,6 @@ onMounted(() => {
   background: rgba(14, 16, 24, 0.42);
   border: 1px solid rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(10px);
-}
-.msr-reflect-empty {
-  margin: 0;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  color: var(--text-low);
-  text-align: center;
-  line-height: 1.6;
 }
 .msr-reflect-list {
   list-style: none;

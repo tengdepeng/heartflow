@@ -56,14 +56,14 @@ describe('MirrorSelfView 镜我独立路由', () => {
     expect(wrapper.find('.msr-climate').exists()).toBe(true)
     expect(wrapper.text()).toContain('跨房间共鸣态势')
     // 测试环境仅镜我自身发射信号，已被过滤，故显示静默空态
-    expect(wrapper.find('.msr-climate-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
   })
 
   it('渲染「近期反思」小节（无对话时显示空态）', async () => {
     const wrapper = await createWrapper()
     expect(wrapper.find('.msr-reflections').exists()).toBe(true)
     expect(wrapper.text()).toContain('近期反思')
-    expect(wrapper.find('.msr-reflect-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
   })
 
   it('进入房间时向跨房间态势注入镜我信号（不报错）', async () => {

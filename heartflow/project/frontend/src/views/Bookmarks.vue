@@ -170,7 +170,7 @@
           <button class="bm-btn bm-btn-sm" @click.stop="openBookmark(b)">打开</button>
         </div>
       </div>
-      <p v-else-if="filterTag" class="empty">没有匹配的书签</p>
+      <EmptyState v-else-if="filterTag" icon="" title="没有匹配的书签" :glow="false" cta-label="" />
     </div>
 
     <!-- 归档柜 (抽屉柜视图底部) -->
@@ -193,7 +193,7 @@
       </div>
     </div>
 
-    <p v-if="viewMode === 'list' && !filteredBookmarks.length" class="empty">还没有书签，添加一个吧</p>
+    <EmptyState v-if="viewMode === 'list' && !filteredBookmarks.length" icon="" title="还没有书签，添加一个吧" :glow="false" cta-label="" />
     <div data-enter class="stats">共 {{ bookmarks.length }} 个书签（{{ activeBookmarks.length }} 活跃 · {{ archivedBookmarks.length }} 归档）</div>
 
     <!-- 网页剪藏（bookmarks·clip） -->
@@ -212,6 +212,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useBookmarks } from '../modules/bookmarks'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import ClipPanel from '../components/ClipPanel.vue'
 import BookmarkArchivePanel from '../components/BookmarkArchivePanel.vue'
 
@@ -1244,14 +1245,6 @@ function fmt(iso: string) {
 }
 
 /* ===== 空状态 ===== */
-.empty {
-  font-size: 13px;
-  color: rgba(var(--text-primary-rgb), 0.15);
-  padding: 30px 0;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
 
 /* === Entrance Animation === */
 @keyframes fade-slide-up {

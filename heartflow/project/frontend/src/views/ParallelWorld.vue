@@ -107,9 +107,7 @@
       </div>
 
       <!-- 空状态 -->
-      <div v-else class="pw-empty-hint">
-        <p>还没有抉择分叉。每一次选择，都可以在这里种下一棵分叉树。</p>
-      </div>
+      <EmptyState v-else icon="" title="还没有抉择分叉。每一次选择，都可以在这里种下一棵分叉树。" :glow="false" cta-label="" />
 
       <!-- 添加分叉表单 -->
       <div class="pw-fork-form">
@@ -178,9 +176,7 @@
         </div>
       </div>
 
-      <div v-else class="pw-empty-hint">
-        <p>还没有时间胶囊。给未来的自己写一段话，让它穿越时光吧。</p>
-      </div>
+      <EmptyState v-else icon="" title="还没有时间胶囊。给未来的自己写一段话，让它穿越时光吧。" :glow="false" cta-label="" />
 
       <div class="pw-add-row">
         <input v-model="capForm.message" placeholder="给未来的自己写一段话…" class="pw-input" @keydown.enter.prevent="addCapsule()" />
@@ -357,7 +353,7 @@
           <span class="pw-dream-tag">{{ fmt(d.at) }}</span>
         </div>
       </div>
-      <div v-else class="pw-empty-hint">还没有梦境被映照到这里。去「梦乡小筑」点 → 梦境区，把梦境投影到平行世界·梦境区。</div>
+      <EmptyState v-else icon="" title="还没有梦境被映照到这里。去「梦乡小筑」点 → 梦境区，把梦境投影到平行世界·梦境区。" :glow="false" cta-label="" />
     </section>
     </RoomLayout>
   </div>
@@ -369,6 +365,7 @@ import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useParallelWorld, useTimeCapsule, useParallelSelves } from '../modules/parallel-world'
 import type { Fork } from '../modules/parallel-world'
 import { DREAM_REALM_ID } from '../stores/dreamNook'
@@ -1455,19 +1452,6 @@ section {
   color: rgba(var(--accent-rgb), 0.6);
 }
 
-/* ---- Empty State ---- */
-.pw-empty-hint {
-  font-size: 12px;
-  color: var(--text-faint);
-  opacity: 0.85;
-  text-align: center;
-  padding: 20px 0;
-  letter-spacing: 0.5px;
-}
-
-.pw-empty-hint p {
-  margin: 0;
-}
 
 /* ---- Shared Controls ---- */
 .pw-btn {
