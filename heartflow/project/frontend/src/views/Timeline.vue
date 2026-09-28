@@ -76,11 +76,14 @@
           </div>
 
           <!-- 时间河流 -->
-          <div class="river-scroll" ref="riverScrollRef" v-if="riverFragments.length>0">
+          <div class="river-scroll hf-stagger" ref="riverScrollRef" v-if="riverFragments.length>0">
             <template v-for="(group,gi) in riverFragments" :key="gi">
               <div class="date-separator" :class="{dimmed:group.dimmed}">
                 <span class="date-line"/>
-                <span class="date-label">{{group.label}}</span>
+                <span class="date-label">
+                  {{group.label}}
+                  <span v-if="group.date===todayStr" class="now-dot hf-now-pulse" aria-hidden="true"></span>
+                </span>
                 <span class="date-line"/>
               </div>
               <TimelineFragment v-for="item in group.items" :key="getRiverItemKey(item)"
@@ -770,6 +773,17 @@ onUnmounted(stopReplay)
   padding: 0 22px;
   font-weight: 400;
   text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.15);
+}
+
+/* 「此刻」脉冲点：仅「今天」分组显示，琥珀光环外扩提示当前位置 */
+.now-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 7px;
+  background: var(--accent, #d4a574);
+  vertical-align: middle;
+  box-shadow: 0 0 8px var(--accent, #d4a574);
 }
 
 .date-separator.dimmed {

@@ -363,7 +363,7 @@
             <h3 class="career-modal-title">{{ editingContactId ? '编辑联系人' : '添加联系人' }}</h3>
             <button class="career-modal-close" @click="closeContactForm" title="关闭">✕</button>
           </div>
-          <div class="career-modal-body">
+          <div class="career-modal-body hf-stagger">
             <div class="form-group">
               <label class="form-label">姓名</label>
               <input v-model="contactForm.name" class="form-input" type="text" placeholder="联系人姓名" />
@@ -439,7 +439,7 @@
             <h3 class="career-modal-title">{{ editingProjectId ? '编辑项目' : '添加项目' }}</h3>
             <button class="career-modal-close" @click="closeProjectForm" title="关闭">✕</button>
           </div>
-          <div class="career-modal-body">
+          <div class="career-modal-body hf-stagger">
             <div class="form-group">
               <label class="form-label">项目名称</label>
               <input v-model="projectForm.name" class="form-input" type="text" placeholder="项目名称" />
