@@ -88,7 +88,7 @@ describe('AssociationGraph 共鸣图谱（C1-EXT）', () => {
     storage.clear()
     const { default: AssociationGraph } = await import('../AssociationGraph.vue')
     const wrapper = mount(AssociationGraph, {})
-    expect(wrapper.find('.ag-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('暂无可关联的跨域记录')
   })
 

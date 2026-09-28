@@ -38,7 +38,7 @@ describe('DataOutflowView 数据流出日志路由', () => {
 
   it('空态提示出现（尚无流出记录）', async () => {
     const wrapper = await createWrapper()
-    expect(wrapper.find('.dov-empty').exists()).toBe(true)
+    expect(wrapper.find('.hf-empty').exists()).toBe(true)
     expect(wrapper.text()).toContain('还没有数据离开本设备')
   })
 

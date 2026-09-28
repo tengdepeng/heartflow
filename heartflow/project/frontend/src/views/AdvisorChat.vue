@@ -27,10 +27,7 @@
         <p class="achat-invalid-desc">该幕僚不存在或已被移除，无法开始对话。</p>
         <button class="achat-invalid-back" @click="goBack">返回幕僚列表</button>
       </div>
-      <div v-else-if="chatMessages.length === 0" class="achat-empty">
-        <span class="achat-empty-icon">💬</span>
-        <p class="achat-empty-text">开始与 {{ advisorProfile?.name ?? '幕僚' }} 对话</p>
-      </div>
+      <EmptyState v-else-if="chatMessages.length === 0" icon="💬" :title="`开始与 ${advisorProfile?.name ?? '幕僚'} 对话`" :glow="false" cta-label="" />
       <!-- 对话分身档案（INCR-08：DeepSeek/Kimi 式分身画像） -->
       <AdvisorChatArchivePanel :advisor-id="advisorId" />
       <div
@@ -80,6 +77,7 @@ import { useAdvisor } from '../resonance/bridges/advisor'
 import { ADVISOR_PERSONALITIES, AFFINITY_TIERS } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import AdvisorChatArchivePanel from '../components/AdvisorChatArchivePanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -379,25 +377,6 @@ function goBack() {
   background: rgba(var(--accent-rgb), 0.22);
 }
 
-/* ---- Empty ---- */
-.achat-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 60px 20px;
-  text-align: center;
-}
-.achat-empty-icon {
-  font-size: 36px;
-  opacity: 0.3;
-}
-.achat-empty-text {
-  font-size: 13px;
-  color: rgba(var(--accent-rgb), 0.25);
-  margin: 0;
-}
 
 /* ---- Message ---- */
 .achat-msg {

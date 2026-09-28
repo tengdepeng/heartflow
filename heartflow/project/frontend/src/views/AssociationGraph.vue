@@ -165,10 +165,7 @@
       </div>
     </div>
 
-    <div data-enter v-else class="ag-empty">
-      <span class="ag-empty-icon">🕸</span>
-      <p>暂无可关联的跨域记录。当你在不同空间留下笔记、情绪、锚点或结晶时，它们之间的联系会在此显现。</p>
-    </div>
+    <EmptyState v-else icon="🕸" title="暂无可关联的跨域记录。当你在不同空间留下笔记、情绪、锚点或结晶时，它们之间的联系会在此显现。" :glow="false" cta-label="" />
 
     <!-- 关联档案（INCR-285 补挂载孤儿组件 AssociationArchivePanel：健康圆环/概览/类型分布/域对分布/温和洞察，消费 association-archive-analytics 纯函数，引擎应用内唯一） -->
     <AssociationArchivePanel v-if="graph.nodes.length" :graph="graph" />
@@ -189,6 +186,7 @@ import {
 } from '../modules/association'
 import { computeLayout, type GraphLayout } from '../modules/association/layout'
 import AssociationArchivePanel from '../components/AssociationArchivePanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -789,22 +787,6 @@ onMounted(() => { /* 图数据在 setup 已计算；如需实时刷新可在此�
 .ag-detail-empty {
   font-size: 12px;
   color: rgba(var(--accent-rgb), 0.4);
-}
-.ag-empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: rgba(var(--accent-rgb), 0.3);
-}
-.ag-empty-icon {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 10px;
-}
-.ag-empty p {
-  max-width: 360px;
-  margin: 0 auto;
-  font-size: 14px;
-  line-height: 1.7;
 }
 .ag-back-row {
   margin-top: 24px;

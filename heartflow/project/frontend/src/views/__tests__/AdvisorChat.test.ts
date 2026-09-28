@@ -90,7 +90,7 @@ describe('AdvisorChat 幕僚对话', () => {
 
   it('无消息时显示空状态', async () => {
     const wrapper = await getWrapper()
-    const emptyText = wrapper.find('.achat-empty')
+    const emptyText = wrapper.find('.hf-empty')
     expect(emptyText.exists()).toBe(true)
     expect(wrapper.text()).toContain('开始与')
     expect(wrapper.text()).toContain('对话')
@@ -139,7 +139,7 @@ describe('AdvisorChat 幕僚对话', () => {
     expect(sendBtn.attributes('disabled')).toBeDefined()
 
     // 空态不再显示
-    expect(wrapper.find('.achat-empty').exists()).toBe(false)
+    expect(wrapper.find('.hf-empty').exists()).toBe(false)
   })
 
   it('无效 ID 时返回按钮跳转幕僚列表', async () => {

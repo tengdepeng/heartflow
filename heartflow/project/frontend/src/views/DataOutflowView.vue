@@ -30,10 +30,7 @@
         仅记录 时间 / 渠道 / 净化后的去向 / 摘要 —— 绝不含任何数据内容，写入失败亦不会阻塞主流程。
       </p>
 
-      <div v-if="logs.length === 0" class="dov-empty">
-        <span class="dov-empty-icon">🌿</span>
-        <p>还没有数据离开本设备。</p>
-      </div>
+      <EmptyState v-if="logs.length === 0" icon="🌿" title="还没有数据离开本设备。" :glow="false" cta-label="" />
 
       <ul v-else class="dov-list">
         <li v-for="log in logs" :key="log.id" class="dov-item" :data-channel="log.channel">
@@ -60,6 +57,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import OutflowArchivePanel from '../components/OutflowArchivePanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useDataOutflow, type OutflowChannel } from '../engine/data-outflow'
 
@@ -213,22 +211,6 @@ onMounted(() => {
   color: var(--text-low);
 }
 
-.dov-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  padding: 48px 0;
-  color: var(--text-dim);
-}
-.dov-empty-icon {
-  font-size: 32px;
-  opacity: 0.6;
-}
-.dov-empty p {
-  margin: 0;
-  font-size: 13px;
-}
 
 .dov-list {
   list-style: none;
