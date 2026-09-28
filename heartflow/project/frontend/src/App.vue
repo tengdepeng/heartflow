@@ -1499,6 +1499,9 @@ watch(() => nav.currentRoomId.value, () => {
   animation: breathe 8s ease-in-out infinite;
   /* 超级自定义：环境辉光强度，默认 1 与现状一致 */
   opacity: var(--ambient-glow-alpha, 1);
+  /* 强度滑块改动时平滑过渡，不再硬跳 */
+  transition: opacity 0.7s ease;
+  will-change: opacity;
 }
 
 .ambient-grain {
@@ -1507,9 +1510,12 @@ watch(() => nav.currentRoomId.value, () => {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 256px 256px;
-  animation: grain 0.5s steps(6) infinite;
+  /* 由 steps 跳变改为连续缓移：颗粒如有机纹理般「活着」流动，去除电视雪花式硬闪 */
+  animation: grain 7s linear infinite;
   /* 超级自定义：环境颗粒强度，默认 0.5 与现状一致 */
   opacity: var(--ambient-grain-alpha, 0.5);
+  transition: opacity 0.7s ease;
+  will-change: opacity;
 }
 
 /* 漂浮微尘：此前为空占位，现补上可自定义强度的缓慢漂移层（默认 0.3，极淡） */
@@ -1525,6 +1531,8 @@ watch(() => nav.currentRoomId.value, () => {
   background-repeat: no-repeat;
   animation: dust-drift 60s linear infinite;
   opacity: var(--ambient-dust-alpha, 0.3);
+  transition: opacity 0.7s ease;
+  will-change: transform, opacity;
 }
 
 /* ---- 导航栏 ---- */
@@ -2132,6 +2140,13 @@ watch(() => nav.currentRoomId.value, () => {
     rgba(var(--accent-rgb), 0.08),
     transparent
   );
+  /* 底部光痕极缓呼吸，让侧栏收尾「活」着而非死线 */
+  animation: nav-footer-breathe 6s ease-in-out infinite;
+}
+
+@keyframes nav-footer-breathe {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 1; }
 }
 
 /* 宅院壳 3D 切换按钮已移除（改由全局 V 键触发），相关样式一并删除 */
@@ -2473,6 +2488,7 @@ watch(() => nav.currentRoomId.value, () => {
   color: var(--text-primary);
   background: var(--bg-surface);
   border-color: var(--glass-border-strong, rgba(255, 255, 255, 0.28));
+  transform: translateY(-1px);
 }
 
 .pos-btn:active {
