@@ -363,11 +363,13 @@
     <!-- 空状态 -->
     <section class="tp-section" v-else>
       <h2 class="tp-section-title">📈 触达分析</h2>
-      <div class="empty-state">
-        <span class="empty-icon">📊</span>
-        <p class="empty-text">暂无推送数据</p>
-        <p class="empty-hint">发送通知后，此处将展示触达效果分析</p>
-      </div>
+      <EmptyState
+        icon="📊"
+        title="暂无推送数据"
+        hint="发送通知后，此处将展示触达效果分析"
+        :glow="false"
+        cta-label=""
+      />
     </section>
 
     <!-- 文本感知：剪贴板实体速识（text-sense 模块，原已实现但未挂载） -->
@@ -420,6 +422,7 @@ import ClipboardPanel from '../components/ClipboardPanel.vue'
 import NotificationCenterPanel from '../components/NotificationCenterPanel.vue'
 import OrchestrationPanel from '../components/OrchestrationPanel.vue'
 import ChannelOptimizerPanel from '../components/ChannelOptimizerPanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 import {
   useDeliveryStrategy,
   usePushChannel,

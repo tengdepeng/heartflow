@@ -48,12 +48,14 @@
 
     <!-- 配置列表 -->
     <div class="config-list">
-      <!-- 空状态 -->
-      <div v-if="configs.length === 0" class="empty-state">
-        <span class="empty-icon">🔗</span>
-        <p class="empty-text">暂无交互配置</p>
-        <p class="empty-hint">创建你的第一个交互配置，定义空间中的手势与行为</p>
-      </div>
+      <EmptyState
+        v-if="configs.length === 0"
+        icon="🔗"
+        title="暂无交互配置"
+        hint="创建你的第一个交互配置，定义空间中的手势与行为"
+        :glow="false"
+        cta-label=""
+      />
 
       <!-- 配置卡片 -->
       <div
@@ -208,6 +210,7 @@ import type {
 } from '../modules/customization/interaction-engine'
 import { useInteractionConfigs } from '../modules/interaction'
 import InteractionConfigBody from '../components/interaction/InteractionConfigBody.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const { configs, load, save } = useInteractionConfigs()
@@ -660,15 +663,6 @@ function saveRule() {
   min-width: 40px;
 }
 
-/* ---- 空状态 ---- */
-.empty-state {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 80px 0; gap: 8px;
-}
-
-.empty-icon { font-size: 48px; opacity: 0.4; }
-.empty-text { font-size: 15px; color: rgba(var(--accent-rgb), 0.3); }
-.empty-hint { font-size: 12px; color: rgba(var(--accent-rgb), 0.18); }
 
 /* ---- 弹窗 ---- */
 .modal-overlay {

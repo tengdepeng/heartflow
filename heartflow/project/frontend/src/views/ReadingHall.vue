@@ -75,10 +75,14 @@
 
     <!-- ========== 摘录集 ========== -->
     <div data-enter v-if="activeTab === 'excerpts'" class="rh-panel excerpts-panel">
-      <div v-if="excerpts.length === 0" class="empty-state">
-        <p>还没有摘录。</p>
-        <p class="empty-hint">在书卷中阅读时，选中文字即可摘录。</p>
-      </div>
+      <EmptyState
+        v-if="excerpts.length === 0"
+        icon=""
+        title="还没有摘录。"
+        hint="在书卷中阅读时，选中文字即可摘录。"
+        :glow="false"
+        cta-label=""
+      />
       <div v-else>
         <div class="rh-export-bar">
           <span class="rh-export-hint">本地私有 · 仅存于本机</span>
@@ -244,6 +248,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox, useReadingExport } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
@@ -881,21 +886,6 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   }
 }
 
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--text-secondary);
-}
-
-.empty-state p {
-  margin: 0 0 6px;
-  font-size: 14px;
-}
-
-.empty-hint {
-  font-size: 12px;
-  color: rgba(var(--text-primary-rgb), 0.18);
-}
 
 .rh-excerpts-list {
   display: flex;

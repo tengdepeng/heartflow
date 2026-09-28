@@ -78,11 +78,14 @@
     <!-- 3. 时间线展示 -->
     <section data-enter class="tg-timeline-section">
       <h3 class="section-title">时间线</h3>
-      <div v-if="monthGroups.length === 0" class="empty-state">
-        <span class="empty-icon">🦋</span>
-        <p class="empty-text">蜕变会在合适的时候发生</p>
-        <p class="tg-empty-hint">记录你的第一个变化，开始见证成长</p>
-      </div>
+      <EmptyState
+        v-if="monthGroups.length === 0"
+        icon="🦋"
+        title="蜕变会在合适的时候发生"
+        hint="记录你的第一个变化，开始见证成长"
+        :glow="false"
+        cta-label=""
+      />
       <div v-else v-for="mg in monthGroups" :key="mg.month" class="tg-month-group">
         <div class="month-header">
           <span class="tg-month-label">{{ mg.monthLabel }}</span>
@@ -212,6 +215,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useTransformGallery } from '../modules/transform'
 import { useCocoonStore } from '../modules/seasonal/cocoon-store'
 import TransformMomentumPanel from '../components/TransformMomentumPanel.vue'
@@ -661,25 +665,6 @@ function remove(id: string) {
   margin-left: auto;
 }
 
-/* ===== 空状态 ===== */
-.empty-state {
-  text-align: center;
-  padding: 48px 0;
-}
-.empty-icon {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 8px;
-}
-.empty-text {
-  font-size: 15px;
-  color: rgba(232, 213, 192, 0.3);
-  margin-bottom: 4px;
-}
-.tg-empty-hint {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.25);
-}
 
 /* ===== 弹窗表单 ===== */
 .tg-modal-overlay {

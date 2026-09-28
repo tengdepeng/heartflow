@@ -310,7 +310,13 @@
       <h3 class="section-title">📜 近期记录</h3>
       <div v-for="l in recentLogs" :key="l.id" class="log-item"><span>{{l.icon}}</span><span>{{l.text}}</span><span class="log-time">{{l.time}}</span></div>
     </section>
-    <div v-if="recentLogs.length===0" class="empty-state"><span>🌱</span><p>温室还是空的</p></div>
+    <EmptyState
+      v-if="recentLogs.length===0"
+      icon="🌱"
+      title="温室还是空的"
+      :glow="false"
+      cta-label=""
+    />
     </RoomLayout>
   </div>
 </template>
@@ -322,6 +328,7 @@ import { storage } from '../engine/storage'
 import { useHealth } from '../resonance/bridges/health'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useHealthDashboard } from '../modules/body'
 import BodyRingsPanel from '../components/BodyRingsPanel.vue'
 import NutritionPanel from '../components/NutritionPanel.vue'
@@ -932,8 +939,6 @@ const recentLogs = computed(() =>
 }
 .log-item span:first-child { font-size: 16px; }
 .log-time { margin-left: auto; font-size: 11px; opacity: 0.4; }
-.empty-state { text-align: center; padding: 60px 0; color: var(--amber-text-muted); }
-.empty-state span { font-size: 40px; display: block; margin-bottom: 8px; }
 
 /* ---- 响应式 ---- */
 @media (max-width: 640px) {
