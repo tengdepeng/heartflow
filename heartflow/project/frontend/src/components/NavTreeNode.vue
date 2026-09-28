@@ -56,21 +56,23 @@
       </div>
     </div>
 
-    <div v-if="hasChildren && isOpen" class="nav-children">
-      <NavTreeNode
-        v-for="child in node.children"
-        :key="child.id"
-        :node="child"
-        :depth="depth + 1"
-        :active-id="activeId"
-        :adjacent-ids="adjacentIds"
-        :expanded-ids="expandedIds"
-        :toggle-expand="toggleExpand"
-        :draggable="child.path ? true : false"
-        @move-node="(id, target) => emit('moveNode', id, target)"
-        @close="emit('close')"
-      />
-    </div>
+    <Transition name="nav-expand">
+      <div v-if="hasChildren && isOpen" class="nav-children">
+        <NavTreeNode
+          v-for="child in node.children"
+          :key="child.id"
+          :node="child"
+          :depth="depth + 1"
+          :active-id="activeId"
+          :adjacent-ids="adjacentIds"
+          :expanded-ids="expandedIds"
+          :toggle-expand="toggleExpand"
+          :draggable="child.path ? true : false"
+          @move-node="(id, target) => emit('moveNode', id, target)"
+          @close="emit('close')"
+        />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -534,5 +536,31 @@ function toggle() {
     rgba(var(--accent-rgb), 0.14),
     rgba(var(--accent-rgb), 0.04)
   );
+}
+
+/* ---- 分组展开/收起平滑过渡（细节交互）----
+   max-height + opacity 缓动；终态为自然高度，不建 containing block，
+   不影响拖拽命中检测（elementFromPoint 按真实 DOM，mask 不参与）。
+   初始即展开的分组不播 enter（未设 appear），避免挂载闪现。 */
+.nav-expand-enter-active,
+.nav-expand-leave-active {
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.22s ease;
+}
+.nav-expand-enter-from,
+.nav-expand-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.nav-expand-enter-to,
+.nav-expand-leave-from {
+  max-height: 800px;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-expand-enter-active,
+  .nav-expand-leave-active { transition: none; }
 }
 </style>

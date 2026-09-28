@@ -1834,6 +1834,9 @@ watch(() => nav.currentRoomId.value, () => {
   padding: 0 8px;
   /* 整栏 touch-action:none 时会禁掉列表触摸滚动，这里恢复纵向滚动 */
   touch-action: pan-y;
+  /* 列表上下边缘柔化渐隐，避免首/尾项硬切在滚动边界（细节交互质感） */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
 }
 
 .nav-links {
