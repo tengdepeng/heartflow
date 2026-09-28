@@ -394,14 +394,13 @@
 
       <!-- 花海（网格视图） -->
       <section class="flower-section" v-if="viewMode === 'grid'">
-        <div v-if="displayRecords.length === 0" class="empty-garden">
-          <div class="empty-icon-wrap">
-            <span class="empty-icon">🌱</span>
-            <span class="empty-glow" />
-          </div>
-          <p class="empty-text">这里还是一片安静的土壤</p>
-          <p class="empty-hint">标记你此刻的情绪，种下第一朵花</p>
-        </div>
+        <EmptyState
+          v-if="displayRecords.length === 0"
+          icon="🌱"
+          title="这里还是一片安静的土壤"
+          hint="标记你此刻的情绪，种下第一朵花"
+          cta-label=""
+        />
         <div v-else :class="['flower-grid', `lod-${currentLOD}`]">
           <div v-for="r in displayRecords" :key="r.id" :class="['flower-item', 'hf-press', `lod-${currentLOD}`]">
             <button
@@ -546,6 +545,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'
 import RoomHeader from '../components/RoomHeader.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 // A2.3 批3：情绪可视化是否展示受宪法「情绪可视化」条款门控
 // （emotion:visualization，enable 型默认开启＝默认显示；关闭条款即隐藏趋势图与日历）。
@@ -2375,53 +2375,6 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
   background: rgba(13, 11, 9, 0.9);
 }
 
-/* ---- 空状态 ---- */
-.empty-garden {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 0;
-  gap: 8px;
-}
-.empty-icon-wrap {
-  position: relative;
-  margin-bottom: 8px;
-}
-.empty-icon {
-  font-size: 48px;
-  opacity: 0.35;
-  position: relative;
-  z-index: 1;
-  animation: empty-breathe 4s ease-in-out infinite;
-}
-@keyframes empty-breathe {
-  0%, 100% { transform: scale(1); opacity: 0.35; }
-  50% { transform: scale(1.08); opacity: 0.5; }
-}
-.empty-glow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80px;
-  height: 80px;
-  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.06), transparent 70%);
-  border-radius: 50%;
-  animation: glow-pulse 4s ease-in-out infinite;
-}
-@keyframes glow-pulse {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
-  50% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-}
-.empty-text {
-  font-size: 14px;
-  color: rgba(var(--text-primary-rgb), 0.25);
-}
-.empty-hint {
-  font-size: 12px;
-  color: rgba(var(--text-primary-rgb), 0.15);
-}
 
 /* ============================================================
    花房空间布局

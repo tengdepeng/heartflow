@@ -320,3 +320,32 @@ Heartflow 是**可换肤**系统，不是单一主色产品。两套事实来源
 6. 动效时长受 `--hf-animate-speed` 影响，勿硬编码秒数绕过。
 7. 组件默认 `scoped` 样式 + props 控制变体，避免全局污染。
 8. 完成后用真机窗口缩放验证不破版。
+
+---
+
+## 10. 共享原语清单（实际落地 · 2026-09 补充）
+
+> 本节把 §4 的「共享基类」对齐到仓库**真实结构**。当前共享原语**不在** `src/components/ui/`（该目录不存在），而是落在 `src/components/` 与 `src/assets/states.css`。新增 / 补全 UI 时请**优先复用**下列已落地原语，禁止重造散写版本。
+
+### 空态 EmptyState（必用）
+- 文件：`src/components/EmptyState.vue`（`.hf-empty*` scoped 样式）。已接入：ComponentMarket / DataAsset / HomeSpace / Study / EmotionGarden / Constitution。
+- Props：`icon`(emoji) · `title`(主文案) · `hint`(引导语) · `ctaLabel`(默认「新建」) · `glow`(默认 `true`) · `ctaDisabled`；事件 `@cta`。
+- **规则**：所有「无内容」占位统一用 `<EmptyState>`，禁止再散写 `.empty-*` 三件套（icon/text/hint 各写各的 scoped）。
+- **无操作按钮的空态必须显式传 `cta-label=""`**，否则会渲染默认「新建」按钮。
+- **氛围型房间保留 `glow` 默认呼吸光晕**（如情绪花园）；普通房间用 `:glow="false"` 保持安静。
+- 样式：虚线边框卡片 + `--bg-surface` 底 + 呼吸光晕；受宪法调速钩子控制（`--hf-empty-space` 留白 / `--hf-silence` 沉默 / `--hf-breathing-speed` 节奏）。
+
+### 全局交互状态原语（states.css，零特异性 `:where()` 兜底）
+- `.hf-state*` 内联状态条（loading/success/error/warning/info）+ `__icon` / `__text` / `__action`。
+- `.hf-spinner` 行内加载圈；`.hf-shimmer` 骨架闪烁（仅动 `background-position`）。
+- `.hf-sr-only` 屏幕阅读器专用文本；`.hf-tap-safe` 触屏最小命中区（≥24×24）。
+
+### 房间页头（RoomLayout / RoomHeader）
+- 53 个房间已接 `RoomLayout → RoomHeader`；页头类名口径 `.rh-title / .rh-kicker / .rh-subtitle / .rh-ornament / .rh-orn-line / .rh-orn-diamond`。
+- 旧 `.wl-* / .sr-* / .ce-* / .header-kicker / .orn-*` 已失效，迁移时勿复用。
+- 其余约 35 间裸写头部应逐步迁移到 RoomLayout（见后续「统一 padding / 头部」轴）。
+
+### 令牌治理红线（重申）
+- 组件 / scoped 样式里**禁止硬编码色值**（令牌定义文件除外）；带透明度令牌色一律 `rgba(var(--xxx-rgb), a)`。
+- 间距走 `--spacing-*`、圆角走 `--radius-*`、z 轴走 `--z-*`、阴影走 `--shadow*`；动效时长走 `calc(Ns / var(--hf-animate-speed, 1))`，不写死秒数。
+- 动画只动 `transform` / `opacity` / `background-color`；CSS 自定义属性当 `<time>` 必须带单位（`${n}ms`），否则回退 `0s` + `infinite` 致整屏高频闪。

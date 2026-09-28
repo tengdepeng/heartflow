@@ -272,11 +272,14 @@
           </div>
         </div>
 
-        <div v-if="filteredRules.length === 0" class="empty-state">
-          <div class="empty-icon">📜</div>
-          <p class="empty-text">没有找到匹配的戒律</p>
-          <p class="empty-hint">试试调整搜索词或筛选条件</p>
-        </div>
+        <EmptyState
+          v-if="filteredRules.length === 0"
+          icon="📜"
+          title="没有找到匹配的戒律"
+          hint="试试调整搜索词或筛选条件"
+          :glow="false"
+          cta-label=""
+        />
       </div>
     </section>
 
@@ -630,6 +633,7 @@ import OsNotificationAuditPanel from '@/components/OsNotificationAuditPanel.vue'
 import ConstitutionGuardianPanel from '@/components/ConstitutionGuardianPanel.vue'
 import ConstitutionLiveVars from '@/components/ConstitutionLiveVars.vue'
 import RoomHeader from '../components/RoomHeader.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const store = useConstitutionStore()
@@ -1752,30 +1756,6 @@ function onThresholdChange(e: Event): void {
   opacity: 0.6;
 }
 
-/* ---- 空状态 ---- */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  border: 1px dashed var(--border-color);
-  border-radius: var(--radius-lg);
-}
-
-.empty-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
-  opacity: 0.5;
-}
-
-.empty-text {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin-bottom: 4px;
-}
-
-.empty-hint {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
 /* ---- 弹窗 ---- */
 .modal-overlay {

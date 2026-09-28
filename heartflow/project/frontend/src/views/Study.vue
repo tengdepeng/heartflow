@@ -124,16 +124,20 @@
 
     <!-- 书架 -->
     <div class="bookshelf">
-      <!-- 空状态 -->
-      <div v-if="filteredNotes.length === 0 && study.notes.value.length === 0" class="empty-shelf">
-        <span class="empty-icon">📚</span>
-        <p class="empty-text">将你的思绪安放在这里</p>
-        <p class="empty-hint">书架还空着，写下第一篇笔记吧</p>
-      </div>
-
-      <div v-else-if="filteredNotes.length === 0" class="empty-shelf">
-        <p class="empty-text">没有匹配「{{ activeTag }}」的笔记</p>
-      </div>
+      <EmptyState
+        v-if="filteredNotes.length === 0 && study.notes.value.length === 0"
+        icon="📚"
+        title="将你的思绪安放在这里"
+        hint="书架还空着，写下第一篇笔记吧"
+        :glow="false"
+        cta-label=""
+      />
+      <EmptyState
+        v-else-if="filteredNotes.length === 0"
+        title="没有匹配「{{ activeTag }}」的笔记"
+        :glow="false"
+        cta-label=""
+      />
 
       <!-- 书本网格 -->
       <div v-else class="book-grid">
@@ -296,6 +300,7 @@ import StudyAiAssistPanel from '../components/StudyAiAssistPanel.vue'
 import type { Note } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -857,19 +862,6 @@ function toggleArchive(note: Note) {
   border-color: rgba(var(--accent-rgb), 0.4);
 }
 
-/* ---- 空状态 ---- */
-.empty-shelf {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 0;
-  gap: 8px;
-}
-
-.empty-icon { font-size: 48px; opacity: 0.4; }
-.empty-text { font-size: 15px; color: rgba(var(--accent-rgb), 0.3); }
-.empty-hint { font-size: 12px; color: rgba(var(--accent-rgb), 0.45); }
 
 /* ---- 删除确认弹窗 ---- */
 .confirm-overlay {
@@ -1491,21 +1483,6 @@ function toggleArchive(note: Note) {
     font-size: 12px;
   }
 
-  .empty-shelf {
-    padding: 40px 0;
-  }
-
-  .empty-icon {
-    font-size: 36px;
-  }
-
-  .empty-text {
-    font-size: 13px;
-  }
-
-  .empty-hint {
-    font-size: 11px;
-  }
 
   .tag-cloud-section, .tag-cloud-show {
     margin-left: 16px;
