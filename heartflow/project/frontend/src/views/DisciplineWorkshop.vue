@@ -1,15 +1,7 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance dw">
-    <!-- 装饰性头部 -->
-    <div data-enter class="dw-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">习惯养成 · 挑战自我 · 成就收集</p>
-      <h1 class="dw-title">自律工坊</h1>
-    </div>
+    <!-- 统一房间头 + 统一内容区（RoomLayout） -->
+    <RoomLayout title="自律工坊" kicker="习惯养成 · 挑战自我 · 成就收集" align="center" data-enter>
 
     <!-- 概览卡片 -->
     <div data-enter class="overview-cards">
@@ -288,6 +280,7 @@
     <section v-if="activeTab === 'tasks'" data-enter class="dw-section">
       <QuadrantBoardPanel />
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -312,6 +305,7 @@ import { HABIT_DIFFICULTY_META } from '../modules/discipline/types'
 import QuadrantBoardPanel from '../components/QuadrantBoardPanel.vue'
 import { useTaskManager } from '../modules/tasks'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -540,15 +534,7 @@ onMounted(() => {
    自律工坊 - 视图样式
    ============================================================ */
 
-.dw { padding: 2rem; max-width: 900px; margin: 0 auto; }
-
-/* 头部 */
-.dw-header { text-align: center; margin-bottom: 2rem; }
-.header-ornament { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 0.5rem; }
-.orn-line { width: 40px; height: 1px; background: var(--color-border, #334155); }
-.orn-diamond { color: var(--color-accent, #f59e0b); font-size: 0.75rem; }
-.header-kicker { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); margin: 0 0 0.25rem; text-transform: uppercase; letter-spacing: 0.1em; }
-.dw-title { font-size: 1.75rem; font-weight: 700; margin: 0; color: var(--color-text, #e2e8f0); }
+.dw { padding: 0; max-width: 900px; margin: 0 auto; }
 
 /* 概览卡片 */
 .overview-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
