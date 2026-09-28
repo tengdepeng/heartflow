@@ -306,6 +306,8 @@ const snowParticles = computed(() =>
   pointer-events: none;
   /* 超级自定义：全局自定义背景强度，默认 1 与现状一致（0 时完全透出壳层底色） */
   opacity: var(--app-bg-alpha, 1);
+  /* 强度滑块改动时平滑过渡，与氛围层同源手感 */
+  transition: opacity 0.7s ease;
 }
 
 /* 媒体层：稳定保活容器，显隐由 v-show 控制（不销毁 video 元素） */
