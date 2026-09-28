@@ -366,10 +366,56 @@
   }
 }
 
-/* 减少动态：关闭共享工具类位移/缩放 */
+/* 列表逐条入场：自触发 stagger（挂载即播，无需 JS 切换 .enter-to）。
+   仅动 opacity/transform，终态 transform:none 不建 containing block；
+   可复用于时间轴河流、表单字段、网格等需要「逐条浮现」的房间内部场景。 */
+@keyframes hf-rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.hf-stagger > * {
+  opacity: 0;
+  animation: hf-rise-in calc(0.45s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hf-stagger > *:nth-child(1) { animation-delay: calc(0ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(2) { animation-delay: calc(50ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(3) { animation-delay: calc(100ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(4) { animation-delay: calc(150ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(5) { animation-delay: calc(200ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(6) { animation-delay: calc(250ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(7) { animation-delay: calc(300ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(8) { animation-delay: calc(350ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(9) { animation-delay: calc(400ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(10) { animation-delay: calc(450ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(11) { animation-delay: calc(500ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(12) { animation-delay: calc(550ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(13) { animation-delay: calc(600ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(14) { animation-delay: calc(650ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(15) { animation-delay: calc(700ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(16) { animation-delay: calc(750ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(17) { animation-delay: calc(800ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(18) { animation-delay: calc(850ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(19) { animation-delay: calc(900ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(20) { animation-delay: calc(950ms / var(--hf-animate-speed, 1)); }
+.hf-stagger > *:nth-child(n+21) { animation-delay: calc(1000ms / var(--hf-animate-speed, 1)); }
+
+/* 时间轴「此刻」脉冲标记：琥珀光环向外扩散，提示当前位置 */
+@keyframes hf-now-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--accent-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0); }
+}
+.hf-now-pulse {
+  border-radius: 50%;
+  animation: hf-now-pulse 2.4s ease-out infinite;
+}
+
+/* 减少动态：关闭共享工具类位移/缩放与逐条入场、脉冲 */
 @media (prefers-reduced-motion: reduce) {
   .hf-press,
   .hf-lift { transition: none; }
   .hf-press:active:not(:disabled),
   .hf-lift:hover { transform: none; }
+  .hf-stagger > * { opacity: 1; animation: none; }
+  .hf-now-pulse { animation: none; }
 }
