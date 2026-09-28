@@ -10,7 +10,7 @@
       <div class="anchor-dust-particles" />
     </div>
 
-    <RoomHeader
+    <RoomLayout
       class="anchor-room-header"
       data-enter
       kicker="今日安放台"
@@ -34,7 +34,6 @@
           </article>
         </div>
       </template>
-    </RoomHeader>
 
     <!-- 跨房间共鸣联动（接收其他房间的光痕，过滤本房回声） -->
     <section v-if="externalFeed.length > 0" data-enter class="cross-room-strip">
@@ -484,6 +483,7 @@
 
     <!-- 时令元数据（INCR-256 补挂载孤儿组件：时辰·节气·季节·天气采集） -->
     <ZeitgeistPanel />
+    </RoomLayout>
   </div>
 </template>
 
@@ -495,7 +495,7 @@ import { PRIORITY_COLORS, PRIORITY_LABELS } from '../modules/anchor/types'
 import { useAnchorJournals } from '../modules/anchor/anchor-journals'
 import AnchorLightThread from '../components/AnchorLightThread.vue'
 import AnchorCelebration from '../components/AnchorCelebration.vue'
-import RoomHeader from '../components/RoomHeader.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomResonance, ROOM_LABELS, aggregateClimate } from '../modules/room-resonance'
@@ -936,7 +936,8 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   position: relative;
   max-width: 1040px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
+  padding: 0 0 80px;
   min-height: 100vh;
   /* 桌面木质纹理模拟 — 微妙的暖褐色底 */
   background:
@@ -2772,7 +2773,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
    响应式
    ============================================================ */
 @media (max-width: 860px) {
-  .anchor-page { padding: 24px 16px 72px; }
+  .anchor-page { padding: 0 0 72px; }
   .anchor-overview { grid-template-columns: 1fr; }
   .anchor-room-header :deep(.rh-title) { font-size: 26px; letter-spacing: 4px; }
 }
@@ -2799,7 +2800,7 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
 }
 
 @media (max-width: 480px) {
-  .anchor-page { padding: 20px 12px 72px; }
+  .anchor-page { padding: 0 0 72px; }
   .anchor-room-header :deep(.rh-title) { font-size: 22px; letter-spacing: 3px; }
   .anchor-room-header :deep(.rh-kicker) { font-size: 10px; letter-spacing: 2px; }
 
