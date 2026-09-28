@@ -22,8 +22,8 @@ describe('RouteProgress（接线孤儿 · 路由顶部加载条）', () => {
     await flushPromises()
     expect(wrapper.find('.rp--active').exists()).toBe(true)
     vm.finish()
-    // finish 内部 setTimeout(200) 收束显隐
-    await new Promise((r) => setTimeout(r, 260))
+    // finish 内部：宽度缓动到满(0.3s) → 整体淡出(setTimeout 300ms 收束显隐)
+    await new Promise((r) => setTimeout(r, 360))
     await flushPromises()
     expect(wrapper.find('.rp--active').exists()).toBe(false)
   })

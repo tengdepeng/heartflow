@@ -426,7 +426,7 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
 .floating-nav__drag.bar-idle .bar-cluster {
   transform: scale(0.78);
   opacity: 0.45;
-  transition: transform 0.45s ease, opacity 0.45s ease;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.55s ease;
 }
 .floating-nav__drag.bar-idle .bar-cluster:hover {
   transform: scale(1);
@@ -556,16 +556,20 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
   font-size: 17px;
   line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.18s ease, color 0.18s ease, border-color 0.18s ease,
+    box-shadow 0.28s ease;
   padding: 0;
 }
 .bar-btn:hover:not(:disabled) {
   color: #f0d6b8;
   border-color: rgba(212, 165, 116, 0.42);
   background: rgba(255, 255, 255, calc(0.12 * var(--bar-a, 1)));
-  box-shadow: 0 0 16px rgba(212, 165, 116, 0.14);
+  /* 触感微抬升 + 暖琥珀投影，hover 更「立得住」 */
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(212, 165, 116, 0.18);
 }
-.bar-btn:active:not(:disabled) { transform: scale(0.93); }
+.bar-btn:active:not(:disabled) { transform: scale(0.93) translateY(0); }
 .bar-btn:disabled { opacity: 0.28; cursor: default; }
 
 /* 汉堡 */
@@ -593,9 +597,12 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
   color: rgba(255, 255, 255, 0.84);
   cursor: pointer;
   font-family: inherit;
-  transition: background 0.2s ease;
+  transition: background 0.18s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.bar-room:hover { background: rgba(255, 255, 255, calc(0.10 * var(--bar-a, 1))); }
+.bar-room:hover {
+  background: rgba(255, 255, 255, calc(0.10 * var(--bar-a, 1)));
+  transform: translateY(-1px);
+}
 .bar-room-icon { font-size: 15px; flex-shrink: 0; }
 .bar-room-name {
   font-size: 13px;
@@ -671,12 +678,14 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
   color: rgba(255, 255, 255, 0.70);
   cursor: pointer;
   font-family: inherit;
-  transition: all 0.2s ease;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 .add-item:hover {
   color: #f0d6b8;
   border-color: rgba(212, 165, 116, 0.34);
   background: rgba(255, 255, 255, calc(0.12 * var(--bar-a, 1)));
+  transform: translateY(-2px);
 }
 .add-item-ic { font-size: 18px; line-height: 1; }
 .add-item-label { font-size: 10px; letter-spacing: 1px; }
