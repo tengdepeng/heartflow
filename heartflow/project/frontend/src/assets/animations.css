@@ -327,3 +327,44 @@
 .view-entrance.enter-to > [data-enter].enter-float {
   animation: gentle-float 6s ease-in-out infinite 1s;
 }
+
+/* ============================================================
+   共享交互工具类（opt-in：仅被显式添加 class 的元素生效，零回归）
+   供各房间 bespoke 面板复用统一质感；合成属性优先，避免重绘抖动。
+   ============================================================ */
+
+/* 按压回弹：点下去轻微缩、松手弹回 */
+.hf-press {
+  transition:
+    transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow calc(0.18s / var(--hf-animate-speed, 1)) ease;
+}
+.hf-press:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+/* 悬停抬升 + 琥珀辉光：卡片 / tile 可交互外观 */
+.hf-lift {
+  transition:
+    transform calc(0.2s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1),
+    border-color calc(0.2s / var(--hf-animate-speed, 1)) ease,
+    box-shadow calc(0.2s / var(--hf-animate-speed, 1)) ease;
+}
+@media (hover: hover) {
+  .hf-lift:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-dim);
+    box-shadow:
+      0 8px 28px rgba(0, 0, 0, 0.34),
+      0 0 0 1px rgba(var(--accent-rgb), 0.1),
+      0 12px 40px rgba(var(--accent-rgb), 0.1);
+  }
+}
+
+/* 减少动态：关闭共享工具类位移/缩放 */
+@media (prefers-reduced-motion: reduce) {
+  .hf-press,
+  .hf-lift { transition: none; }
+  .hf-press:active:not(:disabled),
+  .hf-lift:hover { transform: none; }
+}

@@ -159,6 +159,14 @@ const iconMap: Record<string, string> = {
 .toast-enter-active {
   animation: toast-in calc(0.3s / var(--hf-animate-speed, 1)) ease-out;
 }
+/* 图标回弹弹入（过冲缓动），与整条滑入错峰，更有「到达」感 */
+.toast-enter-active .toast-icon {
+  animation: toast-icon-pop calc(0.42s / var(--hf-animate-speed, 1)) cubic-bezier(0.34, 1.56, 0.64, 1) 0.04s;
+}
+@keyframes toast-icon-pop {
+  from { transform: scale(0.3) rotate(-14deg); opacity: 0; }
+  to { transform: scale(1) rotate(0); opacity: 1; }
+}
 
 .toast-leave-active {
   animation: toast-out calc(0.25s / var(--hf-animate-speed, 1)) ease-in forwards;
@@ -216,6 +224,7 @@ const iconMap: Record<string, string> = {
   .toast-leave-active {
     animation: none;
   }
+  .toast-enter-active .toast-icon { animation: none; }
   .toast-item {
     transition: none;
   }
