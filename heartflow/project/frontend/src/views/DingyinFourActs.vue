@@ -3,19 +3,15 @@
     <!-- 氛围背景 -->
     <div data-enter class="dfa-atmos" />
 
-    <!-- 头部 -->
-    <div data-enter class="dfa-header">
-      <button class="dingyin-back-btn" @click="goBack">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-        <span class="back-label">返回</span>
-      </button>
-      <div class="dfa-title-group">
-        <h1 class="dfa-title">定音锤</h1>
-        <p class="dfa-subtitle">四幕 · 回响集</p>
-      </div>
-    </div>
+    <RoomLayout title="定音锤" subtitle="四幕 · 回响集" data-enter>
+      <template #breadcrumb>
+        <button class="dingyin-back-btn" @click="goBack">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <span class="back-label">返回</span>
+        </button>
+      </template>
 
     <!-- 汇总进度 -->
     <div data-enter class="dingyin-summary-progress">
@@ -131,6 +127,7 @@
       <div class="dfa-iron-law-line"></div>
       <p class="dfa-iron-law-text">{{ ironLawResponse }}</p>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -148,6 +145,7 @@ import {
 import type { FourActItem } from '../stores/advisor'
 import type { DingyinFreshness } from '../modules/mirror/dingyin-engine'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const $router = useRouter()
@@ -200,7 +198,7 @@ onMounted(() => {
 .dfa {
   max-width: 600px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  padding: 0 0 80px;
   min-height: 100vh;
   background: transparent;
   position: relative;
@@ -231,15 +229,6 @@ onMounted(() => {
 }
 
 /* ---- Header ---- */
-.dfa-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 1;
-}
-
 .dingyin-back-btn {
   display: flex;
   align-items: center;
@@ -262,23 +251,6 @@ onMounted(() => {
 }
 .back-label {
   letter-spacing: 1px;
-}
-
-.dfa-title-group {
-  flex: 1;
-}
-.dfa-title {
-  font-size: 26px;
-  font-weight: 400;
-  letter-spacing: 6px;
-  color: rgba(220, 200, 180, 0.9);
-  margin: 0 0 4px;
-}
-.dfa-subtitle {
-  font-size: 12px;
-  letter-spacing: 3px;
-  color: rgba(200, 180, 160, 0.52);
-  margin: 0;
 }
 
 /* ---- Summary progress ---- */
@@ -536,12 +508,11 @@ onMounted(() => {
 
 /* ---- Responsive ---- */
 @media (max-width: 860px) {
-  .dfa { padding: 32px 20px 64px; }
+  .dfa { padding: 0 0 64px; }
 }
 
 @media (max-width: 640px) {
-  .dfa { padding: 24px 14px 56px; }
-  .dfa-title { font-size: 22px; }
+  .dfa { padding: 0 0 56px; }
   .dingyin-act-card-inner { padding: 14px 14px; gap: 10px; }
   .dingyin-detail-inner { padding: 4px 14px 14px 78px; }
 }
