@@ -59,41 +59,38 @@
       <div class="atmos-work-light"></div>
     </div>
 
-    <!-- Header -->
-    <header data-enter class="mw-header">
-      <div class="breadcrumb-row">
-        <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
-          <svg class="breadcrumb-home-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
-            <path d="M9 21V12h6v9" />
-          </svg>
-          <span>家</span>
-        </button>
-        <span class="breadcrumb-sep">›</span>
-        <button class="breadcrumb-link" @click="nav.enterRoom('craft')">
-          <svg class="breadcrumb-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
-          </svg>
-          <span>匠庐</span>
-        </button>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-link current">
-          <svg class="breadcrumb-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-          <span>{{ roomData?.name }}</span>
-        </span>
-      </div>
-      <div class="mw-header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">&#9670;</span>
-        <span class="orn-line"></span>
-      </div>
-      <h1 class="mw-title">{{ roomData?.name }}</h1>
-      <p class="mw-subtitle">{{ roomData?.description }}</p>
-      <p class="mw-kicker">材质配方 · 风格包与视觉隐喻的自定义工坊</p>
-    </header>
+    <RoomLayout
+      :title="roomData?.name"
+      kicker="材质配方 · 风格包与视觉隐喻的自定义工坊"
+      :subtitle="roomData?.description"
+      data-enter
+    >
+      <template #breadcrumb>
+        <div class="breadcrumb-row">
+          <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
+            <svg class="breadcrumb-home-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" />
+              <path d="M9 21V12h6v9" />
+            </svg>
+            <span>家</span>
+          </button>
+          <span class="breadcrumb-sep">›</span>
+          <button class="breadcrumb-link" @click="nav.enterRoom('craft')">
+            <svg class="breadcrumb-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" />
+            </svg>
+            <span>匠庐</span>
+          </button>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-link current">
+            <svg class="breadcrumb-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+            <span>{{ roomData?.name }}</span>
+          </span>
+        </div>
+      </template>
 
     <!-- ============================================================ -->
     <!-- 风格包管理区 -->
@@ -588,6 +585,7 @@
       </div>
       <p class="colophon-text">材质为器 · 风格为魂</p>
     </footer>
+    </RoomLayout>
   </div>
 </template>
 
@@ -604,6 +602,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomStyle } from '../modules/customization/useRoomStyle'
 import MaterialLibraryPanel from '../components/MaterialLibraryPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import type { PresetScene } from '../types'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -814,7 +813,7 @@ function handleSelectMetaphor(type: MetaphorType) {
   position: relative;
   max-width: 860px;
   margin: 0 auto;
-  padding: 48px 32px 100px;
+  padding: 0 0 100px;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -960,12 +959,6 @@ function handleSelectMetaphor(type: MetaphorType) {
 }
 
 /* ---- Header ---- */
-.mw-header {
-  text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
 /* Breadcrumb */
 .breadcrumb-row {
   display: flex;
@@ -1014,14 +1007,6 @@ function handleSelectMetaphor(type: MetaphorType) {
   font-size: 14px;
 }
 
-.mw-header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin: 12px 0;
-}
-
 .orn-line {
   display: block;
   width: 60px;
@@ -1038,29 +1023,6 @@ function handleSelectMetaphor(type: MetaphorType) {
   font-size: 9px;
   color: var(--mw-accent, #b8a080);
   opacity: 0.4;
-}
-
-.mw-title {
-  font-size: 28px;
-  font-weight: 600;
-  font-family: var(--font-heading-zh);
-  letter-spacing: 3px;
-  color: var(--text-primary, #e8e0d8);
-  margin: 0;
-}
-
-.mw-subtitle {
-  font-size: 14px;
-  color: var(--text-secondary, var(--text-secondary));
-  margin: 8px 0 4px;
-  letter-spacing: 1px;
-}
-
-.mw-kicker {
-  font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
-  margin: 0;
-  letter-spacing: 0.5px;
 }
 
 /* ---- Section ---- */
@@ -1757,7 +1719,7 @@ function handleSelectMetaphor(type: MetaphorType) {
    ============================================================= */
 @media (max-width: 860px) {
   .material-workshop {
-    padding: 28px 20px 100px;
+    padding: 0 0 100px;
     gap: 32px;
   }
 
@@ -1778,14 +1740,6 @@ function handleSelectMetaphor(type: MetaphorType) {
     min-width: 0;
   }
 
-  .mw-title {
-    font-size: 24px;
-  }
-
-  .mw-header-ornament {
-    gap: 8px;
-  }
-
   .orn-line {
     width: 40px;
   }
@@ -1796,29 +1750,8 @@ function handleSelectMetaphor(type: MetaphorType) {
    ============================================================= */
 @media (max-width: 640px) {
   .material-workshop {
-    padding: 20px 14px 90px;
+    padding: 0 0 90px;
     gap: 24px;
-  }
-
-  .mw-header {
-    padding-top: 40px;
-  }
-
-  .mw-title {
-    font-size: 20px;
-    letter-spacing: 2px;
-  }
-
-  .mw-subtitle {
-    font-size: 12px;
-  }
-
-  .mw-kicker {
-    font-size: 10px;
-  }
-
-  .mw-header-ornament {
-    gap: 6px;
   }
 
   .orn-line {
