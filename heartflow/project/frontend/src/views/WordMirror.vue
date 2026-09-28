@@ -217,7 +217,7 @@
       </div>
     </section>
 
-    <div data-enter v-if="!analysis.words.length && !history.length && !words.length" class="empty"><span>🪞</span><p>在这里映照你的文字，或添加词汇开始学习</p></div>
+    <EmptyState data-enter v-if="!analysis.words.length && !history.length && !words.length" icon="🪞" title="在这里映照你的文字，或添加词汇开始学习" :glow="false" cta-label="" />
 
     <!-- 间隔复习会话 -->
     <ReviewSessionPanel :words="wordEntries" />
@@ -310,7 +310,7 @@
         </div>
       </section>
 
-      <div data-enter v-if="!assocGraph" class="empty"><span>🔗</span><p>输入一个词，探索它的联想网络</p></div>
+      <EmptyState data-enter v-if="!assocGraph" icon="🔗" title="输入一个词，探索它的联想网络" :glow="false" cta-label="" />
     </template>
 
     <!-- ============== Tab 4: 写作增强 ============== -->
@@ -389,7 +389,7 @@
         </div>
       </section>
 
-      <div data-enter v-if="!selectedTemplate && !writingResult" class="empty"><span>✍️</span><p>选择一个模板开始写作，或粘贴文字进行分析</p></div>
+      <EmptyState data-enter v-if="!selectedTemplate && !writingResult" icon="✍️" title="选择一个模板开始写作，或粘贴文字进行分析" :glow="false" cta-label="" />
 
       <!-- 写作辅助 -->
       <WritingAssistantPanel :words="wordEntries" />
@@ -406,6 +406,7 @@
 
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { ref, reactive, computed, onMounted, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -1008,18 +1009,6 @@ section h3 {
   opacity: 0.7;
   margin-bottom: 10px;
   color: var(--text-primary);
-}
-
-/* ============== 空状态 ============== */
-.empty {
-  text-align: center;
-  padding: 60px 0;
-  color: rgba(var(--accent-rgb), 0.2);
-}
-.empty span {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 8px;
 }
 
 /* ============== 词汇管理区域样式 ============== */
