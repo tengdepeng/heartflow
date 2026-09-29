@@ -1559,6 +1559,8 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   background: transparent;
   min-height: 100vh;
   overflow: visible;
+  /* 移动端关键：允许整页收缩到视口宽，避免被子项 min-content 撑出（+28px 溢出） */
+  min-width: 0;
 }
 
 /* =============================================
@@ -2491,6 +2493,8 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 @media (max-width: 900px) {
   .settings-layout {
     flex-direction: column;
+    /* 移动端关键：列方向下必须 stretch，否则 settings-content 按子项 min-content 撑宽（手机端 +37.8px 溢出） */
+    align-items: stretch;
   }
   .settings-nav {
     position: static;
@@ -2515,6 +2519,16 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   .settings-filter {
     position: static;
   }
+  .settings * { min-width: 0; }
+  .sub-group__head,
+  .toggle-row,
+  .seg,
+  .seg-row,
+  .slider-label,
+  .bg-actions,
+  .bg-presets,
+  .roombg-room-select,
+  .opmode-option { flex-wrap: wrap; }
 }
 
 @media (max-width: 600px) {

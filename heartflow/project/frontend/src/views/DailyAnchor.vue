@@ -1032,7 +1032,8 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* 移动端关键：列方向下必须 stretch，否则 room-layout__body 不被拉伸、按子项 min-content 撑爆整房（手机端 +69.5px 溢出） */
+  align-items: stretch;
   gap: 10px;
   /* 标题背后的柔和光晕 */
 }
@@ -2973,4 +2974,5 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   .heat-grid { grid-template-columns: repeat(auto-fit, minmax(38px, 1fr)); gap: 4px; }
   .heat-cell { min-height: 42px; }
 }
+
 </style>
