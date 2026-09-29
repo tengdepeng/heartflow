@@ -2975,4 +2975,30 @@ function groupedDoneTimeLabel(iso?: string): string { const time = doneTime(iso)
   .heat-cell { min-height: 42px; }
 }
 
+/* 移动端(≤680)：让整房所有 flex/grid 子项可收缩 + 宽行换行，消除 .room-layout__body 整房 +92px 溢出 */
+@media (max-width: 680px) {
+  .anchor-page { max-width: 100%; }
+  .anchor-page * { min-width: 0; }
+  .anchor-input-row,
+  .anchor-quickbar,
+  .scale-tabs,
+  .cross-room-strip,
+  .pd-upload-row,
+  .ajp-form,
+  .ajp-row,
+  .ajp-type-row,
+  .wa-row,
+  .ce-row,
+  .ats-scales,
+  .ats-nav,
+  .crs-list,
+  .zgp-now,
+  .zgp-weather,
+  .zgp-ring,
+  .pd-stats,
+  .ajp-stats,
+  .wa-stats,
+  .atl-kpis { flex-wrap: wrap; }
+}
+
 </style>
