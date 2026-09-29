@@ -710,6 +710,10 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
   .bar-nav-cluster .bar-btn { min-width: var(--tap-target, 44px); min-height: var(--tap-target, 44px); }
   .bar-cluster { padding: 7px 8px; gap: 2px; }
   .bar-room { padding: 5px 6px; max-width: 72px; }
+  /* P2 修复：拖拽手柄与房间钮在移动端也撑到 44px 触控区（原 16px/31px 偏小，低于 36 好标准）；
+     与 P0 的 .bar-btn 44px 一致，靠 --tap-target 令牌驱动。 */
+  .bar-grip { min-width: var(--tap-target, 44px); min-height: var(--tap-target, 44px); }
+  .bar-room { min-width: var(--tap-target, 44px); min-height: var(--tap-target, 44px); }
   /* P0 修复：窄屏下两浮岛各自限宽 ≤ 半屏并允许换行，避免左岛（≡/房间/前后/星盘）越过中线
      撞上右岛（形态/返回/新建）造成按钮互压；房间名收起只留图标，进一步腾出空间。
      内容多时左岛按钮换行成两行、仍固定在左下角，不丢任何功能。 */

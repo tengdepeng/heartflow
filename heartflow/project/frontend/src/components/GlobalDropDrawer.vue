@@ -357,4 +357,10 @@ defineExpose({ open: () => setOpen(true, 'left'), close: () => close() })
   .gdd-enter-active, .gdd-leave-active, .gdd-mask { animation: none !important; }
   .gdd-grip, .gdd-grip-bar, .gdd-close { transition: none; }
 }
+
+/* P2 修复：移动端下拉抽屉把手触控区撑到 36px（原 28px，低于「好」标准 36；仍满足 WCAG AA ≥24）。
+   仅放宽把手高度，细胶囊视觉(4px)与主题不变。 */
+@media (max-width: 639px) {
+  .gdd-grip { height: 36px; padding-top: 16px; }
+}
 </style>
