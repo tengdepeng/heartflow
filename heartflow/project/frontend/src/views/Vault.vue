@@ -28,32 +28,30 @@
     </div>
 
     <!-- 已解锁：原有内容 -->
-    <template v-else>
-    <!-- 装饰性头部 -->
-    <header data-enter class="vt-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">保管你的财富与珍贵档案</p>
-      <h1 class="vt-title">保险库</h1>
-      <div class="vt-lock-row"><button class="vt-btn vt-lock-btn--ghost" type="button" @click="lockVault">🔒 锁定保险库</button></div>
-      <div class="vt-overview">
-        <div class="vt-ov-card">
-          <span class="vt-ov-value">{{ totalValue }}</span>
-          <span class="vt-ov-label">总价值</span>
+    <RoomLayout
+      v-else
+      title="保险库"
+      kicker="保管你的财富与珍贵档案"
+      align="center"
+      data-enter
+    >
+      <template #meta>
+        <div class="vt-lock-row"><button class="vt-btn vt-lock-btn--ghost" type="button" @click="lockVault">🔒 锁定保险库</button></div>
+        <div class="vt-overview">
+          <div class="vt-ov-card">
+            <span class="vt-ov-value">{{ totalValue }}</span>
+            <span class="vt-ov-label">总价值</span>
+          </div>
+          <div class="vt-ov-card">
+            <span class="vt-ov-value">{{ categoriesCount }}</span>
+            <span class="vt-ov-label">分类</span>
+          </div>
+          <div class="vt-ov-card">
+            <span class="vt-ov-value">{{ archives.length }}</span>
+            <span class="vt-ov-label">档案</span>
+          </div>
         </div>
-        <div class="vt-ov-card">
-          <span class="vt-ov-value">{{ categoriesCount }}</span>
-          <span class="vt-ov-label">分类</span>
-        </div>
-        <div class="vt-ov-card">
-          <span class="vt-ov-value">{{ archives.length }}</span>
-          <span class="vt-ov-label">档案</span>
-        </div>
-      </div>
-    </header>
+      </template>
 
     <!-- 自动锁定（vault auto-lock 模块） -->
     <VaultAutoLockPanel :settings="autoLockSettings" @update="handleAutoLockUpdate" />
@@ -156,7 +154,7 @@
 
     <!-- 凭证保险箱（INCR-371 补挂载孤儿引擎 vault-entries/vault-analytics：密码条目/弱密审计/重复口令） -->
     <VaultCredentialPanel />
-    </template>
+    </RoomLayout>
   </div>
 </template>
 
@@ -176,6 +174,7 @@ import VaultAuditPanel from '../components/VaultAuditPanel.vue'
 import VaultPasswordPanel from '../components/VaultPasswordPanel.vue'
 import VaultCredentialPanel from '../components/VaultCredentialPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -361,6 +360,14 @@ onMounted(() => {
   color: var(--text-high);
 }
 
+/* 解锁态包 RoomLayout：根 32px + section 20px 已是水平内边距，body 让位防三重叠加；
+   头部 36px 间距平移到 body 顶部，保持与 bespoke 头部一致的视觉落差 */
+.vt :deep(.room-layout__body) {
+  padding: 0;
+  gap: 0;
+  margin-top: 36px;
+}
+
 /* 环境光晕 */
 .vt::before {
   content: '';
@@ -389,13 +396,6 @@ onMounted(() => {
 /* ============================================================
    头部
    ============================================================ */
-.vt-header {
-  text-align: center;
-  margin-bottom: 36px;
-  position: relative;
-  z-index: 1;
-}
-
 .header-ornament {
   display: flex;
   align-items: center;
@@ -415,13 +415,6 @@ onMounted(() => {
   font-size: 12px;
   color: var(--accent);
   opacity: 0.7;
-}
-
-.header-kicker {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-  letter-spacing: 1px;
 }
 
 .vt-title {
