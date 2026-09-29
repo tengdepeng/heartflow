@@ -19,27 +19,26 @@
     </div>
 
     <!-- Header -->
-    <header data-enter class="wl-header">
-      <div class="breadcrumb-row">
-        <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
-          <span class="breadcrumb-home-icon">🏠</span>
-          <span>家</span>
-        </button>
-        <span class="breadcrumb-sep">›</span>
-        <span class="breadcrumb-link current">
-          <span class="breadcrumb-icon">{{ roomData?.icon }}</span>
-          <span>{{ roomData?.name }}</span>
-        </span>
-      </div>
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <h1 class="wl-title">{{ roomData?.name }}</h1>
-      <p class="wl-subtitle">{{ roomData?.description }}</p>
-      <p class="wl-kicker">让世界呼吸——昼夜交替、天气流转、世代传承</p>
-    </header>
+    <RoomLayout
+      :title="roomData?.name"
+      kicker="让世界呼吸——昼夜交替、天气流转、世代传承"
+      :subtitle="roomData?.description"
+      align="center"
+      data-enter
+    >
+      <template #breadcrumb>
+        <div class="breadcrumb-row">
+          <button class="breadcrumb-link" @click="nav.enterRoom('home-space')">
+            <span class="breadcrumb-home-icon">🏠</span>
+            <span>家</span>
+          </button>
+          <span class="breadcrumb-sep">›</span>
+          <span class="breadcrumb-link current">
+            <span class="breadcrumb-icon">{{ roomData?.icon }}</span>
+            <span>{{ roomData?.name }}</span>
+          </span>
+        </div>
+      </template>
 
     <!-- 当前世界状态 -->
     <section data-enter class="wl-section">
@@ -181,6 +180,7 @@
       </div>
       <p v-else class="wl-none">世界尚未开启传承。当第一位载体退休、新载体诞生时，世代将在此记录。</p>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -188,6 +188,7 @@
 import { computed, onMounted, onUnmounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomNavigation } from '../composables/useRoomNavigation'
+import RoomLayout from '../components/RoomLayout.vue'
 import { useDayNightCycle, useWeather, useWorldLegacy } from '../modules/world-life'
 import type { DayPhase } from '../modules/world-life'
 import type { WeatherType } from '../modules/world-life'
@@ -242,17 +243,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.wl { position: relative; max-width: 860px; margin: 0 auto; padding: 28px 20px 60px; }
+.wl { position: relative; max-width: 860px; margin: 0 auto; padding: 0 0 60px; }
 .wl-ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .wl-glow { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.14; }
 .wl-glow--top { width: 420px; height: 420px; top: -120px; right: -80px; background: #6b9fc4; }
 .wl-glow--bottom { width: 380px; height: 380px; bottom: -100px; left: -80px; background: #f59e6c; }
 .wl-orb { position: absolute; left: 8%; top: 16%; opacity: 0.5; }
-
-.wl-header { position: relative; z-index: 1; text-align: center; margin-bottom: 24px; }
-.wl-title { font-size: 26px; letter-spacing: 4px; color: var(--text-high, #d8c3a5); margin: 8px 0 4px; }
-.wl-subtitle { font-size: 13px; color: rgba(232, 221, 208, 0.6); margin: 0 0 6px; }
-.wl-kicker { font-size: 11px; letter-spacing: 2px; color: rgba(var(--accent-rgb), 0.5); margin: 0; }
 
 .wl-section { position: relative; z-index: 1; margin-bottom: 20px; padding: 18px 20px; border-radius: 14px; background: var(--card-bg, rgba(18, 14, 11, 0.6)); border: 1px solid var(--border, rgba(255, 255, 255, 0.08)); }
 .wl-section-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); margin: 0 0 12px; }
@@ -323,7 +319,7 @@ onUnmounted(() => {
 .wl-none { font-size: 12px; color: rgba(232, 221, 208, 0.45); text-align: center; padding: 16px 0; margin: 0; }
 
 @media (max-width: 640px) {
-  .wl { padding: 20px 14px 48px; }
+  .wl { padding: 0 0 48px; }
   .wl-now { grid-template-columns: 1fr; }
   .wl-phases { grid-template-columns: repeat(3, 1fr); }
   .wl-weathers { grid-template-columns: repeat(4, 1fr); }
