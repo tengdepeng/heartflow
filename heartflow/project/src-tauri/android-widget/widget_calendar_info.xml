@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 月历卡元数据：4×3 格、30 分钟系统刷新（跨零点由系统刷新换月） -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="180dp"
+    android:targetCellWidth="4"
+    android:targetCellHeight="3"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/widget_calendar"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen" />

@@ -1,0 +1,11 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop-widget",
+  "description": "系统桌面小组件窗能力：核心事件 + 窗口拖动/关闭",
+  "windows": ["desktop-widget"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-close"
+  ]
+}

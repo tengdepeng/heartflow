@@ -47,6 +47,87 @@ fn set_share_payload(payload: String) -> Result<(), String> {
     touchpoints::set_share_payload(payload)
 }
 
+// ============================================================
+// 系统桌面小组件（三端：Windows / macOS / Linux）
+// 实现路线：Tauri 无边框透明置顶小窗（skip_taskbar），
+// 前端经 getCurrentWindow().label === 'desktop-widget' 识别后
+// 只渲染 DesktopWidgetView。关闭请求转为隐藏（保活、免重建）。
+// ============================================================
+
+const DESKTOP_WIDGET_LABEL: &str = "desktop-widget";
+
+#[cfg(desktop)]
+fn show_desktop_widget_impl(app: &tauri::AppHandle) -> Result<(), String> {
+    if app.get_webview_window(DESKTOP_WIDGET_LABEL).is_none() {
+        tauri::WebviewWindowBuilder::new(
+            app,
+            DESKTOP_WIDGET_LABEL,
+            tauri::WebviewUrl::App("index.html".into()),
+        )
+        .title("Heartflow 小组件")
+        .transparent(true)
+        .always_on_top(true)
+        .decorations(false)
+        .skip_taskbar(true)
+        .resizable(true)
+        .inner_size(300.0, 420.0)
+        .build()
+        .map_err(|e| e.to_string())?;
+    }
+    if let Some(w) = app.get_webview_window(DESKTOP_WIDGET_LABEL) {
+        w.show().map_err(|e| e.to_string())?;
+        w.set_focus().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[cfg(not(desktop))]
+fn show_desktop_widget_impl(_app: &tauri::AppHandle) -> Result<(), String> {
+    Err("当前平台不支持系统桌面小组件窗".into())
+}
+
+#[tauri::command]
+async fn show_desktop_widget(app: tauri::AppHandle) -> Result<(), String> {
+    show_desktop_widget_impl(&app)
+}
+
+#[tauri::command]
+fn hide_desktop_widget(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(w) = app.get_webview_window(DESKTOP_WIDGET_LABEL) {
+        w.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn toggle_desktop_widget(app: tauri::AppHandle) -> Result<bool, String> {
+    if let Some(w) = app.get_webview_window(DESKTOP_WIDGET_LABEL) {
+        if w.is_visible().unwrap_or(false) {
+            w.hide().map_err(|e| e.to_string())?;
+            return Ok(false);
+        }
+    }
+    show_desktop_widget_impl(&app)?;
+    Ok(true)
+}
+
+#[tauri::command]
+fn is_desktop_widget_visible(app: tauri::AppHandle) -> bool {
+    app.get_webview_window(DESKTOP_WIDGET_LABEL)
+        .and_then(|w| w.is_visible().ok())
+        .unwrap_or(false)
+}
+
+/// 系统小组件数据桥：前端把小组件快照（一言/心锚/专注状态等）写入
+/// app_data_dir/widget_data.json。Android 桌面小组件（AppWidgetProvider）
+/// 读取同路径渲染；桌面端写入无害（供后续系统级扩展复用）。
+#[tauri::command]
+fn sync_widget_data(app: tauri::AppHandle, payload: String) -> Result<(), String> {
+    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
+    fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+    fs::write(dir.join("widget_data.json"), payload).map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 fn get_share_payload() -> Result<Option<String>, String> {
     touchpoints::get_share_payload()
@@ -125,13 +206,20 @@ pub fn run() {
     }
         // 主窗关闭即退出整个应用；aura 透明窗一并销毁，避免残留导致 app 不退出。
     builder.on_window_event(|window, event| {
-        if let tauri::WindowEvent::CloseRequested { .. } = event {
+        if let tauri::WindowEvent::CloseRequested { api, .. } = event {
             if window.label() == "main" {
                 // 主窗关闭即退出整个应用，避免「点关闭却关不掉」。
-                // aura 透明窗一并销毁，否则会残留导致 app 不退出。
+                // aura 透明窗 / 桌面小组件窗一并销毁，否则会残留导致 app 不退出。
                 if let Some(aura) = window.app_handle().get_webview_window("aura") {
                     let _ = aura.destroy();
                 }
+                if let Some(widget) = window.app_handle().get_webview_window(DESKTOP_WIDGET_LABEL) {
+                    let _ = widget.destroy();
+                }
+            } else if window.label() == DESKTOP_WIDGET_LABEL {
+                // 小组件窗「关闭」转为隐藏：保活免重建，状态与位置保留。
+                api.prevent_close();
+                let _ = window.hide();
             }
         }
     })
@@ -187,7 +275,12 @@ pub fn run() {
             get_share_payload,
             is_pairing_server_running,
             cmd_get_device_secret,
-            set_exit_to_aura
+            set_exit_to_aura,
+            show_desktop_widget,
+            hide_desktop_widget,
+            toggle_desktop_widget,
+            is_desktop_widget_visible,
+            sync_widget_data
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

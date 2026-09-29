@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 心流 Android 桌面小组件卡片：暗底暖琥珀，圆角玻璃感 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/widget_bg">
+
+    <TextView
+        android:id="@+id/widget_season"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="12sp"
+        android:textColor="#B6C0D8"
+        android:text="🌸 春 · 生发" />
+
+    <TextView
+        android:id="@+id/widget_quote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textSize="13sp"
+        android:lineSpacingMultiplier="1.4"
+        android:textStyle="italic"
+        android:textColor="#E3E8F6"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="「心之所向，素履以往。」" />
+
+    <TextView
+        android:id="@+id/widget_quote_author"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:textSize="11sp"
+        android:textColor="#7FA8D8"
+        android:text="—— 《易传》" />
+
+    <TextView
+        android:id="@+id/widget_anchors"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textSize="12sp"
+        android:lineSpacingMultiplier="1.35"
+        android:textColor="#C6D0E8"
+        android:maxLines="3"
+        android:ellipsize="end"
+        android:text="○ 还没有心锚" />
+
+    <TextView
+        android:id="@+id/widget_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="11sp"
+        android:textColor="#8A94AD"
+        android:text="🔒 等待开始" />
+</LinearLayout>

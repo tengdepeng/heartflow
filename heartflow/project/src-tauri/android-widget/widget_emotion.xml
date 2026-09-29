@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 情绪速记卡（2×2）：大数字计数 + 最近心情 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="12dp"
+    android:background="@drawable/widget_bg">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textColor="#8A94AD"
+        android:text="心情 · 情绪速记" />
+
+    <TextView
+        android:id="@+id/emotion_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textSize="38sp"
+        android:textStyle="bold"
+        android:textColor="#F4A88C"
+        android:text="0" />
+
+    <TextView
+        android:id="@+id/emotion_count_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textColor="#B6C0D8"
+        android:text="今日已记 0 次" />
+
+    <TextView
+        android:id="@+id/emotion_last"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:gravity="center"
+        android:textSize="12sp"
+        android:textColor="#C6D0E8"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:text="还没记，回应用点一下心情吧。" />
+</LinearLayout>

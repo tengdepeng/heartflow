@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 心锚清单卡（4×2）：标题行 + 多行清单 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/widget_bg">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#DBE3F7"
+            android:text="🎯 心锚清单" />
+
+        <TextView
+            android:id="@+id/anchors_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="11sp"
+            android:textColor="#7FA8D8"
+            android:text="0 项进行中" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/anchors_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textSize="12sp"
+        android:lineSpacingMultiplier="1.45"
+        android:textColor="#C6D0E8"
+        android:maxLines="6"
+        android:ellipsize="end"
+        android:text="还没有心锚，回应用许一个吧。" />
+</LinearLayout>
