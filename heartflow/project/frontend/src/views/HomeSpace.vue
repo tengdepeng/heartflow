@@ -1265,9 +1265,12 @@ onUnmounted(() => disable3D())
     font-size: 11px;
   }
 
-  /* 宪法箴言：底部紧凑 */
+  /* 宪法箴言：底部紧凑——移动端抬到底栏占位之上 */
   .home-mantra {
-    bottom: 12px;
+    /* position:fixed 忽略 .main-content 的 max-height 流约束，原 bottom:12px 会压
+       FloatingNavBar 双浮岛（navTop~752）；抬到安全区+12px 使其落到底栏之上。
+       79bc8a4 当初「零互压」系裁剪感知探针假阳（fixed 元素未被 max-height 护住）的遗留。 */
+    bottom: calc(var(--nav-safe-bottom, 120px) + 12px);
     padding: 8px 14px;
     max-width: calc(100vw - 28px);
     gap: 8px;
