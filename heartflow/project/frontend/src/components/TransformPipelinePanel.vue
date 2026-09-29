@@ -398,7 +398,7 @@ const resultTableColumns: string[] = ['date', 'domain', 'duration', 'score']
 /* 三端细节 P2：移动端把过窄的步骤启用/移除钮抬到可点宽度（高度由全局 min-height:36 兜底） */
 @media (max-width: 639px) {
   .tpp-step-toggle { min-width: 48px !important; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; }
-  .tpp-step-remove { min-width: 30px !important; display: inline-flex; align-items: center; justify-content: center; }
+  .tpp-step-remove { min-width: 36px !important; display: inline-flex; align-items: center; justify-content: center; }
 }
 
 .tpp-run { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }

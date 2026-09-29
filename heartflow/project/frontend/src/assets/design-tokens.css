@@ -187,9 +187,12 @@ button {
   input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]):not([type="image"]):not([type="hidden"]),
   [role="button"] {
     /* !important：组件 scoped 样式多带 data-v 属性（特异性 0,1,1）会覆写
-       类型选择器 button 的 min-height；用 !important 强制移动端下限。
-       仅作用在 ≤639px 媒体查询内，不影响桌面；min-height 恒钳制 height。 */
+       类型选择器 button 的 min-*；用 !important 强制移动端下限。
+       仅作用在 ≤639px 媒体查询内，不影响桌面；min-* 恒钳制对应维度，
+       已 ≥36 的控件不受影响。宽度下限（全量选项）会把图标钮/拖拽柄/
+       分段项等窄控件抬到 36 宽，可能撑宽密集工具栏，回归风险已知。 */
     min-height: 36px !important;
+    min-width: 36px !important;
   }
 }
 
