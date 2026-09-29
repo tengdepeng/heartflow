@@ -243,7 +243,7 @@ onUnmounted(() => {
   font-size: 22px;
   font-weight: 600;
   letter-spacing: 4px;
-  font-family: var(--font-heading-zh, serif);
+  font-family: var(--font-heading-zh, 'Noto Serif SC', 'Noto Sans SC', 'Source Han Serif SC', serif);
   text-shadow: 0 0 20px currentColor, 0 2px 6px rgba(0, 0, 0, 0.4);
   animation: celebBanner 2.4s ease-out forwards;
 }

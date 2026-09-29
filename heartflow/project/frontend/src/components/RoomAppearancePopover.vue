@@ -277,12 +277,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     rgba(18, 16, 22, 0.72);
   backdrop-filter: blur(22px) saturate(1.3);
   -webkit-backdrop-filter: blur(22px) saturate(1.3);
-  border: 1px solid rgba(var(--accent-rgb, 124, 108, 240), 0.18);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.18);
   border-radius: 18px;
   box-shadow:
     0 24px 70px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
 }
 
 /* 入场动画：scale + 位移 + 淡入，ease-out-expo 收束 */
@@ -304,7 +304,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   align-items: center;
   gap: 12px;
   padding: 16px 18px 14px;
-  border-bottom: 1px solid rgba(var(--accent-rgb, 124, 108, 240), 0.1);
+  border-bottom: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.1);
 }
 .rap-head__mark {
   display: inline-flex;
@@ -315,15 +315,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .rap-head__line {
   width: 20px;
   height: 1px;
-  background: var(--accent, #7c6cf0);
+  background: var(--accent, #d4a574);
   opacity: 0.45;
 }
 .rap-head__diamond {
   width: 6px;
   height: 6px;
   transform: rotate(45deg);
-  background: var(--accent, #7c6cf0);
-  box-shadow: 0 0 10px var(--accent, #7c6cf0);
+  background: var(--accent, #d4a574);
+  box-shadow: 0 0 10px var(--accent, #d4a574);
 }
 .rap-head__titles {
   display: flex;
@@ -341,7 +341,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 .rap-head__sub {
   margin: 0;
   font-size: 11px;
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.3px;
 }
 .rap-close {
@@ -353,15 +353,15 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .rap-close:hover {
-  color: var(--accent, #7c6cf0);
-  border-color: rgba(var(--accent-rgb, 124, 108, 240), 0.4);
-  background: rgba(var(--accent-rgb, 124, 108, 240), 0.08);
+  color: var(--accent, #d4a574);
+  border-color: rgba(var(--accent-rgb, 212, 165, 116), 0.4);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.08);
 }
 
 /* ---- 主体（预览 + 控制）---- */
@@ -377,7 +377,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 /* 预览：内嵌 RoomLayout，整块做轻微玻璃卡，padding 变化即时可见 */
 .rap-preview {
   border-radius: 12px;
-  border: 1px solid rgba(var(--accent-rgb, 124, 108, 240), 0.12);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.12);
   background: rgba(255, 255, 255, 0.03);
   overflow: hidden;
   /* padding 变化平滑过渡（ease-out-quart） */
@@ -410,13 +410,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--accent, #7c6cf0);
+  background: var(--accent, #d4a574);
   flex-shrink: 0;
 }
 .rap-preview__card-line {
   height: 7px;
   border-radius: 4px;
-  background: rgba(var(--accent-rgb, 124, 108, 240), 0.28);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.28);
 }
 .rap-preview__card-line--sm {
   height: 6px;
@@ -444,11 +444,11 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   font-size: 12.5px;
   font-weight: 500;
   letter-spacing: 0.4px;
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
 }
 .rap-field__hint {
   font-size: 10.5px;
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.2px;
 }
 
@@ -468,7 +468,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   letter-spacing: 0.3px;
   cursor: pointer;
@@ -478,12 +478,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
     box-shadow 0.22s ease;
 }
 .rap-seg__btn:hover {
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
 }
 .rap-seg__btn.is-active {
   color: #fff;
-  background: linear-gradient(180deg, var(--accent, #7c6cf0), color-mix(in srgb, var(--accent, #7c6cf0) 78%, #000));
-  box-shadow: 0 4px 14px rgba(var(--accent-rgb, 124, 108, 240), 0.35);
+  background: linear-gradient(180deg, var(--accent, #d4a574), color-mix(in srgb, var(--accent, #d4a574) 78%, #000));
+  box-shadow: 0 4px 14px rgba(var(--accent-rgb, 212, 165, 116), 0.35);
 }
 
 /* 开关 */
@@ -505,7 +505,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   background: none;
   padding: 2px 0;
   cursor: pointer;
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12.5px;
 }
 .rap-switch__text {
@@ -522,7 +522,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   flex-shrink: 0;
 }
 .rap-switch__track.is-on {
-  background: linear-gradient(180deg, var(--accent, #7c6cf0), color-mix(in srgb, var(--accent, #7c6cf0) 75%, #000));
+  background: linear-gradient(180deg, var(--accent, #d4a574), color-mix(in srgb, var(--accent, #d4a574) 75%, #000));
   border-color: transparent;
 }
 .rap-switch__knob {
@@ -559,24 +559,24 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   white-space: nowrap;
   padding: 7px 10px;
   border-radius: 9px;
-  background: rgba(var(--accent-rgb, 124, 108, 240), 0.08);
-  border: 1px solid rgba(var(--accent-rgb, 124, 108, 240), 0.14);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.08);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.14);
   font-size: 12px;
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
 }
 .rap-sample__rand {
   flex-shrink: 0;
   padding: 7px 12px;
   border-radius: 9px;
-  border: 1px solid rgba(var(--accent-rgb, 124, 108, 240), 0.3);
-  background: rgba(var(--accent-rgb, 124, 108, 240), 0.1);
-  color: var(--accent, #7c6cf0);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.3);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.1);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .rap-sample__rand:hover {
-  background: rgba(var(--accent-rgb, 124, 108, 240), 0.18);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.18);
 }
 .rap-sample__select {
   width: 100%;
@@ -584,12 +584,12 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   border-radius: 9px;
   background: rgba(0, 0, 0, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
   cursor: pointer;
 }
 .rap-sample__select:focus-visible {
-  outline: 1px solid var(--accent, #7c6cf0);
+  outline: 1px solid var(--accent, #d4a574);
 }
 
 /* ---- 底部 ---- */
@@ -599,25 +599,25 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
   justify-content: space-between;
   gap: 10px;
   padding: 12px 16px 14px;
-  border-top: 1px solid rgba(var(--accent-rgb, 124, 108, 240), 0.1);
+  border-top: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.1);
 }
 .rap-foot__reset {
   padding: 7px 14px;
   border-radius: 9px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .rap-foot__reset:hover {
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
   border-color: rgba(255, 255, 255, 0.2);
 }
 .rap-foot__note {
   font-size: 10.5px;
-  color: var(--text-secondary, #8e8e93);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.2px;
 }
 

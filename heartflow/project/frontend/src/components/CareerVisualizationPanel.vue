@@ -216,7 +216,7 @@ function polyPoints(kind: 'current' | 'target') {
 }
 .cvp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .cvp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.cvp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.cvp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .cvp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .cvp-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e0b88a; white-space: nowrap; }
 
@@ -259,7 +259,7 @@ function polyPoints(kind: 'current' | 'target') {
 .cvp-path-node.pivot .cvp-path-dot-core { background: #f0c040; }
 .cvp-path-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .cvp-path-head { display: flex; align-items: center; gap: 8px; }
-.cvp-path-head b { font-size: 13px; color: var(--text-high, #d8c3a5); font-weight: 500; }
+.cvp-path-head b { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 .cvp-path-pivot { font-size: 9px; padding: 1px 6px; border-radius: 6px; background: rgba(240,192,64,0.16); color: #f0c040; }
 .cvp-path-org { font-size: 11px; color: rgba(232, 221, 208, 0.5); }
 .cvp-path-duration { font-size: 10px; color: rgba(232, 221, 208, 0.35); }

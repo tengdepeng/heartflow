@@ -136,7 +136,7 @@ refresh()
 }
 .guardarch-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .guardarch-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.guardarch-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d6caf0); }
+.guardarch-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .guardarch-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .guardarch-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #b9b0e8; white-space: nowrap; }
 
@@ -159,7 +159,7 @@ refresh()
 
 .guardarch-metrics { display: flex; gap: 8px; margin-bottom: 14px; }
 .guardarch-metric { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; background: var(--bg-card, rgba(255,255,255,0.03)); }
-.guardarch-metric b { font-size: 15px; font-weight: 500; color: var(--text-high, #d6caf0); }
+.guardarch-metric b { font-size: 15px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .guardarch-metric span { font-size: 10px; color: rgba(226, 220, 240, 0.4); }
 
 .guardarch-summary { display: flex; flex-wrap: wrap; gap: 4px; font-size: 11px; color: rgba(226, 220, 240, 0.45); margin-bottom: 10px; }

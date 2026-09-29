@@ -1761,7 +1761,7 @@ function tierLabel(t: PluginTier): string {
 
 .pm-doc-tier {
   font-style: normal;
-  color: var(--accent, #d8b98a);
+  color: var(--accent, #d4a574);
   font-weight: 600;
 }
 
@@ -1858,7 +1858,7 @@ function tierLabel(t: PluginTier): string {
 
 .pm-doc-api-name {
   font-size: 12px;
-  color: var(--accent, #d8b98a);
+  color: var(--accent, #d4a574);
   white-space: pre-wrap;
   word-break: break-all;
 }
@@ -1890,7 +1890,7 @@ function tierLabel(t: PluginTier): string {
   height: 20px;
   border-radius: 999px;
   background: rgba(216, 185, 138, 0.16);
-  color: var(--accent, #d8b98a);
+  color: var(--accent, #d4a574);
   font-size: 11px;
   font-weight: 600;
   display: inline-flex;

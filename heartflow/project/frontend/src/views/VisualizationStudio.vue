@@ -207,7 +207,7 @@ onMounted(renderToCanvas)
   border-radius: 999px;
   border: 1px solid var(--border, rgba(212, 165, 116, 0.25));
   background: rgba(212, 165, 116, 0.06);
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -215,7 +215,7 @@ onMounted(renderToCanvas)
 
 .studio-tab.is-active {
   background: rgba(212, 165, 116, 0.18);
-  color: var(--text-primary, #f0e8dc);
+  color: var(--text-primary, #e8e0d8);
   border-color: rgba(212, 165, 116, 0.5);
 }
 
@@ -232,7 +232,7 @@ onMounted(renderToCanvas)
 .studio-control__label {
   display: block;
   font-size: 12px;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 8px;
 }
 
@@ -242,7 +242,7 @@ onMounted(renderToCanvas)
   border-radius: 10px;
   border: 1px solid var(--border, rgba(212, 165, 116, 0.25));
   background: rgba(15, 12, 10, 0.6);
-  color: var(--text-primary, #f0e8dc);
+  color: var(--text-primary, #e8e0d8);
   padding: 10px 12px;
   font-size: 13px;
   line-height: 1.6;
@@ -265,7 +265,7 @@ onMounted(renderToCanvas)
   border-radius: 10px;
   border: 1px solid var(--border, rgba(212, 165, 116, 0.3));
   background: rgba(212, 165, 116, 0.08);
-  color: var(--text-primary, #f0e8dc);
+  color: var(--text-primary, #e8e0d8);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -283,7 +283,7 @@ onMounted(renderToCanvas)
 .studio-control__hint {
   margin: 10px 0 0;
   font-size: 12px;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .studio-control__unrecognized {
@@ -306,7 +306,7 @@ onMounted(renderToCanvas)
 .studio-empty {
   margin-top: 14px;
   font-size: 13px;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 @media (max-width: 639px) {

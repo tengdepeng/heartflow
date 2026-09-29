@@ -1104,7 +1104,7 @@ section h3 {
 .rr-def {
   flex: 1;
   font-size: 11px;
-  color: rgba(var(--text-rgb), 0.55);
+  color: rgba(var(--text-primary-rgb), 0.55);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

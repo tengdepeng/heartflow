@@ -107,7 +107,7 @@ function intensityColor(i: string) { return MOVEMENT_INTENSITY_META[i as keyof t
 }
 .rap-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .rap-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.rap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.rap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .rap-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .rap-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e3c08a; white-space: nowrap; }
 
@@ -134,7 +134,7 @@ function intensityColor(i: string) { return MOVEMENT_INTENSITY_META[i as keyof t
 .rap-best { display: flex; gap: 8px; margin-bottom: 14px; }
 .rap-best-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; border-radius: 10px; background: rgba(var(--accent-rgb), 0.06); }
 .rap-best-label { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
-.rap-best-item b { font-size: 14px; font-weight: 500; color: var(--text-high, #d8c3a5); }
+.rap-best-item b { font-size: 14px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 
 .rap-advice { padding: 10px 12px; border-radius: 10px; background: var(--bg-card, rgba(255,255,255,0.03)); }
 .rap-advice-line { margin: 0; font-size: 12px; line-height: 1.7; color: rgba(232, 221, 208, 0.6); }

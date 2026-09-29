@@ -269,7 +269,7 @@ function formatTime(ts: string): string {
   padding: 16px;
   border: 1px solid var(--border, rgba(120, 140, 120, 0.25));
   border-radius: 12px;
-  background: var(--surface, rgba(20, 26, 20, 0.6));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.03));
 }
 .sop-head {
   display: flex;
@@ -283,7 +283,7 @@ function formatTime(ts: string): string {
 }
 .sop-sub {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-tabs {
   display: flex;
@@ -295,7 +295,7 @@ function formatTime(ts: string): string {
   border: 1px solid rgba(120, 140, 120, 0.2);
   border-radius: 999px;
   background: transparent;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-size: 12px;
   cursor: pointer;
 }
@@ -322,16 +322,16 @@ function formatTime(ts: string): string {
 .sop-stat-value {
   font-size: 18px;
   font-weight: 600;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .sop-stat-label {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-subtitle {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   margin: 4px 0 0;
 }
 .sop-list {
@@ -362,7 +362,7 @@ function formatTime(ts: string): string {
 }
 .sop-group-count {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-group-spaces {
   display: flex;
@@ -374,11 +374,11 @@ function formatTime(ts: string): string {
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-chip.st-active {
   background: rgba(138, 154, 122, 0.18);
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .sop-chip.st-error {
   background: rgba(196, 106, 90, 0.18);
@@ -417,13 +417,13 @@ function formatTime(ts: string): string {
   border: 1px solid rgba(120, 140, 120, 0.25);
   border-radius: 6px;
   background: transparent;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-size: 11px;
   cursor: pointer;
 }
 .sop-note {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 .sop-note--error {
@@ -446,7 +446,7 @@ function formatTime(ts: string): string {
   flex: 1;
 }
 .sop-transition-meta {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-size: 11px;
 }
 .sop-transition-error {
@@ -463,7 +463,7 @@ function formatTime(ts: string): string {
   padding: 3px 10px;
   border-radius: 999px;
   background: rgba(138, 154, 122, 0.12);
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-dep {
   display: flex;
@@ -488,11 +488,11 @@ function formatTime(ts: string): string {
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-dep-status.st-active {
   background: rgba(138, 154, 122, 0.18);
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .sop-dep-status.st-error {
   background: rgba(196, 106, 90, 0.18);
@@ -503,14 +503,14 @@ function formatTime(ts: string): string {
   flex-wrap: wrap;
   gap: 4px 12px;
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-dep-chain {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .sop-dep-chain-label {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .sop-dep-actions {
   display: flex;
@@ -523,7 +523,7 @@ function formatTime(ts: string): string {
   color: #c46a5a;
 }
 .sop-dep-result.ok {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .sop-snapshot {
   display: flex;
@@ -539,16 +539,16 @@ function formatTime(ts: string): string {
   flex: 1;
 }
 .sop-snapshot-count {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-size: 11px;
 }
 .sop-snapshot-active {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   font-size: 11px;
 }
 .sop-empty {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 </style>

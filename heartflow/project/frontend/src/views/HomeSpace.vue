@@ -554,7 +554,7 @@ onUnmounted(() => disable3D())
   border-radius: 999px;
   border: 1px solid rgba(var(--accent-rgb), 0.15);
   background: rgba(var(--accent-rgb), 0.04);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -582,7 +582,7 @@ onUnmounted(() => disable3D())
 
 .preset-scent-tag {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 1px;
 }
 
@@ -720,7 +720,7 @@ onUnmounted(() => disable3D())
 
 .home-subtitle {
   font-size: 13px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 8px 0 0;
   letter-spacing: 1px;
 }
@@ -729,7 +729,7 @@ onUnmounted(() => disable3D())
 .section-label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 16px;
   letter-spacing: 0.5px;
 }
@@ -783,7 +783,7 @@ onUnmounted(() => disable3D())
   border-radius: 999px;
   border: 1px solid transparent;
   background: transparent;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -887,7 +887,7 @@ onUnmounted(() => disable3D())
   border-radius: 999px;
   border: 1px solid rgba(180, 160, 130, 0.3);
   background: rgba(13, 11, 9, 0.85);
-  color: var(--text-secondary, var(--text-bright));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   letter-spacing: 1px;
   cursor: pointer;
@@ -960,23 +960,23 @@ onUnmounted(() => disable3D())
 
 .status-label {
   font-size: 12px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   transition: color 0.3s ease;
 }
 
 .status-card:hover .status-label {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .status-sub {
   font-size: 11px;
   line-height: 1.4;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   transition: color 0.3s ease;
 }
 
 .status-card:hover .status-sub {
-  color: var(--text-muted, var(--text-secondary));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 /* ---- 访客模式 ---- */
@@ -992,7 +992,7 @@ onUnmounted(() => disable3D())
   border-radius: 999px;
   border: 1px solid rgba(var(--accent-rgb), 0.15);
   background: rgba(var(--accent-rgb), 0.06);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
@@ -1038,7 +1038,7 @@ onUnmounted(() => disable3D())
 .guest-hint {
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0;
 }
 
@@ -1093,7 +1093,7 @@ onUnmounted(() => disable3D())
 .mantra-text {
   font-size: 12px;
   line-height: 1.5;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-style: italic;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1103,7 +1103,7 @@ onUnmounted(() => disable3D())
 
 .mantra-source {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-style: normal;
   opacity: 0.5;
   flex-shrink: 0;

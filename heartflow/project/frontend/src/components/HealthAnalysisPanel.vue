@@ -264,7 +264,7 @@ function priorityLabel(p: string): string { return PRIORITY_LABEL[p] ?? p }
 }
 .ha-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .ha-icon { font-size: 24px; line-height: 1; }
-.ha-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, #fff); }
+.ha-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .ha-desc { margin: 4px 0 0; font-size: 12px; opacity: 0.6; line-height: 1.6; }
 
 .ha-actions {
@@ -297,7 +297,7 @@ function priorityLabel(p: string): string { return PRIORITY_LABEL[p] ?? p }
   font-size: 44px; font-weight: 600; line-height: 1; min-width: 84px; text-align: center;
 }
 .ha-verdict-meta { display: flex; flex-direction: column; gap: 4px; }
-.ha-verdict-title { font-size: 15px; color: var(--text-high, #fff); letter-spacing: 1px; }
+.ha-verdict-title { font-size: 15px; color: var(--text-high, rgba(232, 224, 216, 0.88)); letter-spacing: 1px; }
 .ha-verdict-time { font-size: 11px; opacity: 0.55; }
 
 /* 五维评分 */
@@ -320,14 +320,14 @@ function priorityLabel(p: string): string { return PRIORITY_LABEL[p] ?? p }
   padding: 16px; border-radius: 14px;
   background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.ha-card-title { margin: 0 0 12px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, #fff); }
+.ha-card-title { margin: 0 0 12px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .ha-muted { font-size: 12px; opacity: 0.5; }
 .ha-more { margin: 10px 0 0; font-size: 11px; opacity: 0.5; }
 
 /* 经络 */
 .ha-merid { margin-bottom: 12px; }
 .ha-merid-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-.ha-merid-name { font-size: 13px; color: var(--text-high, #fff); min-width: 56px; }
+.ha-merid-name { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); min-width: 56px; }
 .ha-merid-trend { font-size: 11px; }
 .ha-merid-rate { margin-left: auto; font-size: 13px; font-weight: 600; }
 .trend-up { color: #8a9a7a; }
@@ -338,14 +338,14 @@ function priorityLabel(p: string): string { return PRIORITY_LABEL[p] ?? p }
 /* 情绪 */
 .ha-mood { margin-bottom: 12px; }
 .ha-mood-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-.ha-mood-label { font-size: 13px; color: var(--text-high, #fff); min-width: 40px; }
+.ha-mood-label { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); min-width: 40px; }
 .ha-mood-organ { font-size: 11px; opacity: 0.7; }
 .ha-mood-count { margin-left: auto; font-size: 11px; opacity: 0.5; }
 
 /* 体质趋势 */
 .ha-trend { width: 100%; height: 90px; }
 .ha-trend-foot { margin: 8px 0 0; font-size: 12px; opacity: 0.75; line-height: 1.7; }
-.ha-trend-foot b { color: var(--text-high, #fff); }
+.ha-trend-foot b { color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .ha-mut { margin-left: 8px; font-size: 11px; opacity: 0.5; }
 
 /* 建议 */
@@ -359,7 +359,7 @@ function priorityLabel(p: string): string { return PRIORITY_LABEL[p] ?? p }
 .ha-rec-medium { background: rgba(240, 192, 64, 0.14); color: #e0bd6e; }
 .ha-rec-low { background: rgba(138, 154, 122, 0.16); color: #8a9a7a; }
 .ha-rec-body { flex: 1; }
-.ha-rec-title { font-size: 13px; color: var(--text-high, #fff); }
+.ha-rec-title { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .ha-rec-cat {
   margin-left: 6px; font-size: 10px; color: rgba(240, 192, 64, 0.7);
   border: 1px solid rgba(240, 192, 64, 0.25); border-radius: 4px; padding: 1px 5px;

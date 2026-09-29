@@ -260,7 +260,7 @@ function formatTime(ts: string): string {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .abp-head {
   display: flex;
@@ -270,11 +270,11 @@ function formatTime(ts: string): string {
 .abp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .abp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .abp-tabs {
   display: flex;
@@ -286,7 +286,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
 }
@@ -318,7 +318,7 @@ function formatTime(ts: string): string {
 }
 .abp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .abp-create,
 .abp-select-row {
@@ -333,7 +333,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
 }
 .abp-input {
@@ -372,7 +372,7 @@ function formatTime(ts: string): string {
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .abp-exp-status,
 .abp-report-status {
@@ -403,7 +403,7 @@ function formatTime(ts: string): string {
 }
 .abp-exp-desc {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.5;
   margin: 8px 0;
 }
@@ -413,7 +413,7 @@ function formatTime(ts: string): string {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .abp-exp-result {
   margin-top: 8px;
@@ -438,7 +438,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
 
@@ -468,7 +468,7 @@ function formatTime(ts: string): string {
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .abp-winner {
   font-size: 12px;
@@ -486,7 +486,7 @@ function formatTime(ts: string): string {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 6px;
 }
 .abp-result-box {
@@ -504,13 +504,13 @@ function formatTime(ts: string): string {
 }
 .abp-report-rec {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.5;
   margin-top: 6px;
 }
 .abp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   padding: 16px 0;
   text-align: center;
 }

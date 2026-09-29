@@ -365,7 +365,7 @@ function formatTime(ts: string): string {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .ocp-head {
   display: flex;
@@ -375,11 +375,11 @@ function formatTime(ts: string): string {
 .ocp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .ocp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ocp-tabs {
   display: flex;
@@ -391,7 +391,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
 }
@@ -403,7 +403,7 @@ function formatTime(ts: string): string {
 .ocp-subtitle {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 4px;
 }
 .ocp-scene-card {
@@ -425,14 +425,14 @@ function formatTime(ts: string): string {
 .ocp-scene-name {
   flex: 1;
   font-size: 13px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ocp-scene-meta {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 8px;
 }
 .ocp-list {
@@ -465,7 +465,7 @@ function formatTime(ts: string): string {
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .ocp-preset-type,
 .ocp-rule-source,
@@ -491,7 +491,7 @@ function formatTime(ts: string): string {
 }
 .ocp-preset-desc {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.5;
   margin: 8px 0;
 }
@@ -502,7 +502,7 @@ function formatTime(ts: string): string {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ocp-preset-actions,
 .ocp-rule-actions {
@@ -528,7 +528,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
   width: 110px;
 }
@@ -550,7 +550,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
 
@@ -618,7 +618,7 @@ function formatTime(ts: string): string {
 }
 .ocp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ocp-type-row {
   display: flex;
@@ -631,7 +631,7 @@ function formatTime(ts: string): string {
 .ocp-type-name {
   width: 64px;
   font-size: 12px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .ocp-type-bar {
   flex: 1;
@@ -649,7 +649,7 @@ function formatTime(ts: string): string {
   width: 110px;
   text-align: right;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ocp-perf {
   padding: 12px 14px;
@@ -662,7 +662,7 @@ function formatTime(ts: string): string {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ocp-perf-suggestions {
   margin-top: 8px;
@@ -676,7 +676,7 @@ function formatTime(ts: string): string {
 }
 .ocp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   padding: 16px 0;
   text-align: center;
 }

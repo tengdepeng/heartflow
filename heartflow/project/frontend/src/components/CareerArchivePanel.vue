@@ -157,7 +157,7 @@ refresh()
 }
 .cap-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .cap-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.cap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.cap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .cap-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .cap-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e0b88a; white-space: nowrap; }
 
@@ -180,7 +180,7 @@ refresh()
 
 .cap-metrics { display: flex; gap: 8px; margin-bottom: 14px; }
 .cap-metric { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; background: var(--bg-card, rgba(255,255,255,0.03)); }
-.cap-metric b { font-size: 15px; font-weight: 500; color: var(--text-high, #d8c3a5); }
+.cap-metric b { font-size: 15px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .cap-metric span { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 
 .cap-block { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }

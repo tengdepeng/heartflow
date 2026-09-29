@@ -488,7 +488,7 @@ onMounted(() => { /* 图数据在 setup 已计算；如需实时刷新可在此�
   /* 左右/顶部内边距交给 RoomLayout 统一内容区，根仅保留底部浮层避让 */
   padding: 0 0 80px;
   min-height: 100%;
-  color: var(--text-primary, #e8e3da);
+  color: var(--text-primary, #e8e0d8);
 }
 .ag-overview {
   display: flex;
@@ -672,7 +672,7 @@ onMounted(() => { /* 图数据在 setup 已计算；如需实时刷新可在此�
   width: 240px;
   max-height: calc(100% - 24px);
   overflow-y: auto;
-  background: var(--bg-surface-alt, rgba(20, 18, 16, 0.92));
+  background: var(--bg-surface-alt, #0f0c09));
   border: 1px solid rgba(var(--accent-rgb), 0.18);
   border-radius: 12px;
   padding: 14px 16px;

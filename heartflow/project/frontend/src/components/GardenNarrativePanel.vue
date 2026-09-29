@@ -268,17 +268,17 @@ watch(() => records.value.length, () => regenerate())
 .gnp-title {
   font-size: 17px;
   font-weight: 650;
-  color: var(--text-primary, #efe8dd);
+  color: var(--text-primary, #e8e0d8);
 }
 .gnp-sub {
   font-size: 12px;
-  color: var(--text-muted, rgba(239, 232, 221, 0.55));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 .gnp-refresh,
 .gnp-mini {
-  border: 1px solid rgba(var(--accent-rgb, 138 154 122), 0.45);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.45);
   background: transparent;
-  color: var(--text-secondary, #d8d2c8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-radius: 8px;
   padding: 4px 10px;
   font-size: 12px;
@@ -286,15 +286,15 @@ watch(() => records.value.length, () => regenerate())
 }
 .gnp-refresh:hover,
 .gnp-mini:hover {
-  background: rgba(var(--accent-rgb, 138 154 122), 0.14);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.14);
 }
 
 .gnp-empty-hero {
-  color: var(--text-muted, rgba(239, 232, 221, 0.6));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 13px;
   text-align: center;
   padding: 26px 12px;
-  background: rgba(var(--accent-rgb, 138 154 122), 0.06);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.06);
   border-radius: 10px;
 }
 
@@ -331,12 +331,12 @@ watch(() => records.value.length, () => regenerate())
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #d8d2c8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 10px;
 }
 .gnp-block-title em {
   font-style: normal;
-  color: var(--text-muted, rgba(239, 232, 221, 0.55));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
   font-weight: 400;
 }
@@ -345,7 +345,7 @@ watch(() => records.value.length, () => regenerate())
 }
 
 .gnp-empty {
-  color: var(--text-muted, rgba(239, 232, 221, 0.5));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
   margin: 0;
   padding: 8px 0;
@@ -397,17 +397,17 @@ watch(() => records.value.length, () => regenerate())
 }
 .gnp-story-line strong {
   font-size: 13px;
-  color: var(--text-primary, #efe8dd);
+  color: var(--text-primary, #e8e0d8);
 }
 .gnp-story-body p {
   margin: 3px 0 4px;
   font-size: 12px;
   line-height: 1.55;
-  color: var(--text-secondary, #d8d2c8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gnp-story-body time {
   font-size: 11px;
-  color: var(--text-muted, rgba(239, 232, 221, 0.5));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 .gnp-milestone {
   color: #f0c040;
@@ -428,7 +428,7 @@ watch(() => records.value.length, () => regenerate())
 }
 .gnp-diary-head strong {
   font-size: 13px;
-  color: var(--text-primary, #efe8dd);
+  color: var(--text-primary, #e8e0d8);
 }
 .gnp-mood {
   font-size: 11px;
@@ -442,18 +442,18 @@ watch(() => records.value.length, () => regenerate())
 .gnp-mood--peaceful { background: rgba(128, 184, 208, 0.2); color: #80b8d0; }
 .gnp-private {
   font-size: 11px;
-  color: var(--text-muted, rgba(239, 232, 221, 0.5));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 .gnp-diary-item p {
   margin: 5px 0 3px;
   font-size: 12px;
   line-height: 1.55;
-  color: var(--text-secondary, #d8d2c8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gnp-diary-item em {
   font-style: normal;
   font-size: 11px;
-  color: var(--text-muted, rgba(239, 232, 221, 0.5));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .gnp-albums {
@@ -475,12 +475,12 @@ watch(() => records.value.length, () => regenerate())
   margin: 5px 0 4px;
   font-size: 12px;
   line-height: 1.55;
-  color: var(--text-secondary, #d8d2c8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gnp-album em {
   font-style: normal;
   font-size: 11px;
-  color: var(--text-muted, rgba(239, 232, 221, 0.5));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .gnp-share-actions {
@@ -493,7 +493,7 @@ watch(() => records.value.length, () => regenerate())
   font-size: 12px;
   padding: 6px 9px;
   border-radius: 8px;
-  background: rgba(var(--accent-rgb, 138 154 122), 0.1);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.1);
 }
 .gnp-share--off {
   background: rgba(var(--danger-rgb, 196 106 90), 0.1);
@@ -502,22 +502,22 @@ watch(() => records.value.length, () => regenerate())
   font-family: monospace;
   letter-spacing: 1px;
   font-size: 12px;
-  color: var(--text-primary, #efe8dd);
+  color: var(--text-primary, #e8e0d8);
 }
 .gnp-share span {
   margin-left: auto;
-  color: var(--text-muted, rgba(239, 232, 221, 0.55));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 11px;
 }
 .gnp-share button {
   border: none;
   background: transparent;
-  color: var(--text-muted, rgba(239, 232, 221, 0.55));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 11px;
   cursor: pointer;
 }
 .gnp-share button:hover {
-  color: var(--danger, #c46a5a);
+  color: var(--danger, #ff6b6b);
 }
 
 .gnp-msg-form {
@@ -533,14 +533,14 @@ watch(() => records.value.length, () => regenerate())
   border: 1px solid rgba(var(--border-rgb, 255 255 255), 0.1);
   border-radius: 8px;
   padding: 6px 9px;
-  color: var(--text-primary, #efe8dd);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
 }
 .gnp-msg-form button {
   flex: 0 0 auto;
-  border: 1px solid rgba(var(--accent-rgb, 138 154 122), 0.45);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.45);
   background: transparent;
-  color: var(--text-secondary, #d8d2c8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-radius: 8px;
   padding: 6px 12px;
   font-size: 12px;
@@ -563,12 +563,12 @@ watch(() => records.value.length, () => regenerate())
 }
 .gnp-message-head strong {
   font-size: 12px;
-  color: var(--text-secondary, #d8d2c8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gnp-message p {
   margin: 3px 0 0;
   font-size: 12px;
   line-height: 1.5;
-  color: var(--text-primary, #efe8dd);
+  color: var(--text-primary, #e8e0d8);
 }
 </style>

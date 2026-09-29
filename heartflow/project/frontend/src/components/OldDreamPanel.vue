@@ -168,13 +168,13 @@ function statusIcon(s: GoalStatus): string {
 
 .odp-sub {
   font-size: 11px;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .odp-count {
   font-size: 20px;
   font-weight: 700;
-  color: var(--accent, #e0a96d);
+  color: var(--accent, #d4a574);
 }
 
 .odp-toolbar {
@@ -196,7 +196,7 @@ function statusIcon(s: GoalStatus): string {
 }
 
 .odp-search:focus {
-  border-color: var(--accent, #e0a96d);
+  border-color: var(--accent, #d4a574);
 }
 
 .odp-domains {
@@ -210,14 +210,14 @@ function statusIcon(s: GoalStatus): string {
   border: 1px solid var(--line, #4a463d);
   border-radius: 999px;
   background: transparent;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-size: 11px;
   cursor: pointer;
 }
 
 .odp-chip.on {
-  border-color: var(--accent, #e0a96d);
-  color: var(--accent, #e0a96d);
+  border-color: var(--accent, #d4a574);
+  color: var(--accent, #d4a574);
 }
 
 .odp-stats {
@@ -231,7 +231,7 @@ function statusIcon(s: GoalStatus): string {
 
 .odp-stat {
   font-size: 12px;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .odp-domain-bars {
@@ -249,7 +249,7 @@ function statusIcon(s: GoalStatus): string {
 
 .odp-domain-label {
   font-size: 11px;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .odp-domain-track {
@@ -262,14 +262,14 @@ function statusIcon(s: GoalStatus): string {
 .odp-domain-fill {
   height: 100%;
   border-radius: 3px;
-  background: var(--accent, #e0a96d);
+  background: var(--accent, #d4a574);
   opacity: 0.85;
 }
 
 .odp-domain-count {
   font-size: 11px;
   text-align: right;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .odp-month-group {
@@ -281,7 +281,7 @@ function statusIcon(s: GoalStatus): string {
 .odp-month-label {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   letter-spacing: 0.5px;
 }
 
@@ -318,34 +318,34 @@ function statusIcon(s: GoalStatus): string {
 
 .odp-card-meta {
   font-size: 11px;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .odp-sunken {
   font-size: 10px;
-  color: var(--accent, #e0a96d);
-  border: 1px solid color-mix(in srgb, var(--accent, #e0a96d) 50%, transparent);
+  color: var(--accent, #d4a574);
+  border: 1px solid color-mix(in srgb, var(--accent, #d4a574) 50%, transparent);
   border-radius: 999px;
   padding: 1px 7px;
 }
 
 .odp-revive {
   padding: 4px 10px;
-  border: 1px solid var(--accent, #e0a96d);
+  border: 1px solid var(--accent, #d4a574);
   border-radius: 8px;
   background: transparent;
-  color: var(--accent, #e0a96d);
+  color: var(--accent, #d4a574);
   font-size: 11px;
   cursor: pointer;
 }
 
 .odp-revive:hover {
-  background: color-mix(in srgb, var(--accent, #e0a96d) 15%, transparent);
+  background: color-mix(in srgb, var(--accent, #d4a574) 15%, transparent);
 }
 
 .odp-empty {
   font-size: 12px;
-  color: var(--text-dim, #8a8578);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   text-align: center;
   padding: 14px 0;
 }

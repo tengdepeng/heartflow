@@ -185,7 +185,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   text-decoration: none;
   background: none;
   border: none;
@@ -194,7 +194,7 @@
   cursor: pointer;
   font-family: inherit;
   font-size: 12px;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .breadcrumb-link:hover {
@@ -215,7 +215,7 @@
 }
 
 .breadcrumb-sep {
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 14px;
 }
 
@@ -256,14 +256,14 @@
 
 .craft-subtitle {
   font-size: 14px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 8px 0 4px;
   letter-spacing: 1px;
 }
 
 .craft-kicker {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0;
   letter-spacing: 0.5px;
 }
@@ -280,7 +280,7 @@
   gap: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 6px;
   letter-spacing: 0.5px;
 }
@@ -294,7 +294,7 @@
 .section-desc {
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0 0 16px;
   font-style: italic;
   padding-left: 24px;
@@ -318,7 +318,7 @@
   border-radius: 14px;
   background: var(--craft-surface);
   border: 1px solid var(--craft-border);
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .stat-card:hover {
@@ -336,7 +336,7 @@
 
 .stat-label {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.5px;
 }
 
@@ -373,11 +373,11 @@
   font-size: 13px;
   font-family: inherit;
   outline: none;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .craft-search-input::placeholder {
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .craft-search-input:focus {
@@ -390,12 +390,12 @@
   border-radius: 10px;
   border: 1px solid var(--craft-border, rgba(var(--accent-rgb), 0.08));
   background: var(--craft-surface, rgba(42, 36, 30, 0.4));
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .craft-btn:hover:not(:disabled) {
@@ -436,17 +436,17 @@
   border-radius: 999px;
   border: 1px solid var(--craft-border, rgba(var(--accent-rgb), 0.08));
   background: var(--craft-surface, rgba(42, 36, 30, 0.4));
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .filter-chip:hover {
   background: var(--craft-surface-hover);
   border-color: var(--craft-border-hover);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .filter-chip.active {
@@ -478,7 +478,7 @@
   border-radius: 16px;
   background: var(--craft-surface);
   border: 1px solid var(--craft-border);
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
   position: relative;
   overflow: hidden;
 }
@@ -512,7 +512,7 @@
   font-size: 24px;
   line-height: 1;
   opacity: 0.7;
-  transition: opacity var(--transition, 0.25s ease);
+  transition: opacity var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .work-card:hover .work-icon {
@@ -559,7 +559,7 @@
 .work-desc {
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -580,7 +580,7 @@
   border-radius: 4px;
   background: rgba(184, 160, 128, 0.06);
   border: 1px solid rgba(184, 160, 128, 0.08);
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .work-meta {
@@ -588,7 +588,7 @@
   align-items: center;
   gap: 10px;
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .work-type {
@@ -614,7 +614,7 @@
 }
 
 .evolution-label-text {
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .evolution-label-value {
@@ -673,7 +673,7 @@
   border-radius: 50%;
   background: rgba(184, 160, 128, 0.12);
   border: 1px solid rgba(184, 160, 128, 0.08);
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
   cursor: default;
 }
 
@@ -699,7 +699,7 @@
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .work-btn--edit {
@@ -763,7 +763,7 @@
   background: rgba(var(--craft-accent-rgb), 0.05);
   border: 1px solid rgba(184, 160, 128, 0.1);
   width: fit-content;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .work-light-form:hover {
@@ -803,7 +803,7 @@
 
 .craft-empty-text {
   font-size: 13px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 /* ---- Exhibition Shelf ---- */
@@ -822,7 +822,7 @@
   border-radius: 16px;
   background: var(--craft-surface);
   border: 1px solid var(--craft-border);
-  transition: all var(--transition, 0.3s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
   position: relative;
   overflow: hidden;
   cursor: default;
@@ -838,7 +838,7 @@
     transparent 70%
   );
   opacity: 0;
-  transition: opacity var(--transition, 0.3s ease);
+  transition: opacity var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
   pointer-events: none;
 }
 
@@ -859,7 +859,7 @@
   border-radius: 50%;
   border: 1px solid var(--lf-accent, #b8a080);
   opacity: 0;
-  transition: all var(--transition, 0.3s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
   pointer-events: none;
 }
 
@@ -873,7 +873,7 @@
   line-height: 1;
   position: relative;
   z-index: 1;
-  transition: transform var(--transition, 0.3s ease);
+  transition: transform var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .light-form-badge:hover .lf-icon {
@@ -891,7 +891,7 @@
 
 .lf-desc {
   font-size: 10px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   text-align: center;
   line-height: 1.4;
   position: relative;
@@ -956,10 +956,10 @@
   border-radius: 8px;
   border: none;
   background: transparent;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 14px;
   cursor: pointer;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .modal-close:hover {
@@ -990,7 +990,7 @@
 
 .form-label {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.5px;
 }
 
@@ -1005,12 +1005,12 @@
   font-size: 13px;
   font-family: inherit;
   outline: none;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .form-input::placeholder,
 .form-textarea::placeholder {
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .form-input:focus,
@@ -1083,7 +1083,7 @@
 
 .colophon-text {
   font-size: 12px;
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 2px;
   font-style: italic;
   margin: 0;
@@ -1110,11 +1110,11 @@
   font-size: 13px;
   font-family: inherit;
   outline: none;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .deco-input::placeholder {
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .deco-input:focus {
@@ -1135,12 +1135,12 @@
   border-radius: 10px;
   border: 1px solid var(--craft-border, rgba(var(--accent-rgb), 0.08));
   background: var(--craft-surface, rgba(42, 36, 30, 0.4));
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
   white-space: nowrap;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .deco-btn:hover:not(:disabled) {
@@ -1221,7 +1221,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
   position: relative;
   overflow: hidden;
 }
@@ -1298,7 +1298,7 @@
 
 .deco-preset-meta {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1584,7 +1584,7 @@
   border-radius: 14px;
   background: var(--craft-surface);
   border: 1.5px dashed rgba(184, 160, 128, 0.2);
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .wip-card:hover {
@@ -1639,7 +1639,7 @@
 .wip-desc {
   font-size: 11px;
   line-height: 1.5;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1741,7 +1741,7 @@
   border: 2px solid rgba(184, 160, 128, 0.2);
   background: var(--craft-surface, rgba(42, 36, 30, 0.4));
   flex-shrink: 0;
-  transition: all var(--transition, 0.3s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .et-marker-dot--seed {
@@ -1818,7 +1818,7 @@
 
 .et-date {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
 }
@@ -1870,7 +1870,7 @@
   background: rgba(184, 160, 128, 0.15);
   border: 1px solid rgba(184, 160, 128, 0.1);
   cursor: default;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .et-history-dot:hover {

@@ -143,7 +143,7 @@ function fmtDate(iso: string): string {
   padding: 16px;
   border: 1px solid var(--border, rgba(120, 140, 120, 0.25));
   border-radius: 12px;
-  background: var(--surface, rgba(20, 26, 20, 0.6));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.03));
 }
 .stp-head {
   display: flex;
@@ -157,7 +157,7 @@ function fmtDate(iso: string): string {
 }
 .stp-sub {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .stp-block {
   display: flex;
@@ -170,7 +170,7 @@ function fmtDate(iso: string): string {
 .stp-block-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .stp-current {
   display: flex;
@@ -193,11 +193,11 @@ function fmtDate(iso: string): string {
 .stp-current-theme,
 .stp-current-meta {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .stp-days {
   font-size: 12px;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   white-space: nowrap;
 }
 .stp-transition {
@@ -214,7 +214,7 @@ function fmtDate(iso: string): string {
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(138, 154, 122, 0.15);
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .stp-advice {
   display: flex;
@@ -240,7 +240,7 @@ function fmtDate(iso: string): string {
 }
 .stp-advice-line {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 .stp-checkin-row {
@@ -253,7 +253,7 @@ function fmtDate(iso: string): string {
   border: 1px solid rgba(138, 154, 122, 0.4);
   border-radius: 8px;
   background: transparent;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   cursor: pointer;
 }
@@ -282,7 +282,7 @@ function fmtDate(iso: string): string {
   font-size: 12px;
 }
 .stp-checkin-term {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   min-width: 48px;
 }
 .stp-checkin-note {
@@ -290,11 +290,11 @@ function fmtDate(iso: string): string {
   flex: 1;
 }
 .stp-checkin-time {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .stp-empty {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 </style>

@@ -195,7 +195,7 @@ function removeRecord(id: string) {
   border-radius: 16px;
   padding: 18px 20px;
   margin-top: 16px;
-  color: var(--text-primary, #e8e4da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .dsp-head {

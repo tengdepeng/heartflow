@@ -112,7 +112,7 @@ watch(
   display: block;
   margin-top: 2px;
   font-size: 12px;
-  color: var(--text-muted-alt, #9a8f80);
+  color: var(--text-muted-alt, #8a8a8a);
 }
 .lv-grid {
   display: grid;
@@ -159,7 +159,7 @@ watch(
 .lv-desc {
   margin-top: 6px;
   font-size: 11px;
-  color: var(--text-muted-alt, #9a8f80);
+  color: var(--text-muted-alt, #8a8a8a);
   line-height: 1.4;
 }
 </style>

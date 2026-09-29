@@ -173,7 +173,7 @@ function dueClass(t: Task): string {
 .qbp-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   letter-spacing: 0.02em;
 }
 .qbp-badge {
@@ -188,14 +188,14 @@ function dueClass(t: Task): string {
   background: color-mix(in srgb, #f0c040 12%, transparent);
 }
 .qbp-badge-neutral {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
   background: transparent;
 }
 .qbp-empty {
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .qbp-add {
   display: flex;
@@ -211,7 +211,7 @@ function dueClass(t: Task): string {
   border-radius: 8px;
   border: 1px solid var(--border-light, #3a332a);
   background: color-mix(in srgb, var(--bg-card, #241f18) 55%, transparent);
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   font-size: 13px;
   font-family: inherit;
   outline: none;
@@ -254,7 +254,7 @@ function dueClass(t: Task): string {
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 12px;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   background: color-mix(in srgb, var(--bg-card, #241f18) 55%, transparent);
   border: 1px solid var(--border-light, #3a332a);
 }
@@ -295,13 +295,13 @@ function dueClass(t: Task): string {
 }
 .qbp-col-count {
   font-size: 11px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   white-space: nowrap;
 }
 .qbp-col-desc {
   font-size: 11px;
   line-height: 1.5;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 8px;
 }
 .qbp-task-list {
@@ -326,7 +326,7 @@ function dueClass(t: Task): string {
   display: block;
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   margin-bottom: 4px;
   word-break: break-all;
 }
@@ -341,7 +341,7 @@ function dueClass(t: Task): string {
   align-self: flex-end;
   border: none;
   background: transparent;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   opacity: 0.45;
   cursor: pointer;
   font-size: 12px;
@@ -366,7 +366,7 @@ function dueClass(t: Task): string {
   border: 1px solid;
 }
 .qbp-task-status.s-todo {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
 }
 .qbp-task-status.s-doing {
@@ -383,7 +383,7 @@ function dueClass(t: Task): string {
 }
 .qbp-task-due {
   font-size: 10px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .qbp-task-due.overdue {
   color: #c46a5a;
@@ -393,7 +393,7 @@ function dueClass(t: Task): string {
 }
 .qbp-col-empty {
   font-size: 11px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   opacity: 0.7;
   margin: 0;
 }
@@ -413,7 +413,7 @@ function dueClass(t: Task): string {
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .qbp-insight-mark {
   color: #f0c040;

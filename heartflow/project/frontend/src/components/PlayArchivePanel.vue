@@ -168,7 +168,7 @@ function pctOf(part: number, full: number): number {
   border-radius: var(--radius-lg, 16px);
   padding: 18px 20px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow, 0 4px 24px rgba(0, 0, 0, 0.4));
 }
 
 .pap-head {
@@ -183,7 +183,7 @@ function pctOf(part: number, full: number): number {
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
   font-size: 17px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pap-badge {
@@ -207,7 +207,7 @@ function pctOf(part: number, full: number): number {
 }
 
 .pap-empty {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   line-height: 1.7;
 }
@@ -221,12 +221,12 @@ function pctOf(part: number, full: number): number {
 .pap-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
 }
 
 .pap-hint {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   line-height: 1.6;
   margin-top: 8px;
@@ -257,7 +257,7 @@ function pctOf(part: number, full: number): number {
 .pap-cell-num {
   font-size: 19px;
   font-weight: 700;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pap-cell-num small {
@@ -269,7 +269,7 @@ function pctOf(part: number, full: number): number {
 
 .pap-cell-label {
   font-size: 11px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* ---- 品类分布 ---- */
@@ -292,7 +292,7 @@ function pctOf(part: number, full: number): number {
 }
 
 .pap-row-label {
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   white-space: nowrap;
 }
 
@@ -310,7 +310,7 @@ function pctOf(part: number, full: number): number {
 }
 
 .pap-row-num {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   text-align: right;
 }
@@ -337,11 +337,11 @@ function pctOf(part: number, full: number): number {
 }
 
 .pap-seed-label {
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pap-seed-num {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
 }
 
@@ -359,7 +359,7 @@ function pctOf(part: number, full: number): number {
 
 .pap-mood-chip {
   font-size: 11px;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(138, 154, 122, 0.14);
   border: 1px solid rgba(138, 154, 122, 0.25);
   border-radius: 999px;
@@ -389,7 +389,7 @@ function pctOf(part: number, full: number): number {
 
 .pap-health-label {
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 4px;
 }
 
@@ -409,7 +409,7 @@ function pctOf(part: number, full: number): number {
 }
 
 .pap-hbar-label {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .pap-hbar-track {
@@ -434,7 +434,7 @@ function pctOf(part: number, full: number): number {
 }
 
 .pap-hbar-num {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: right;
 }
 
@@ -463,7 +463,7 @@ function pctOf(part: number, full: number): number {
 }
 
 .pap-insight-text {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 @media (max-width: 480px) {

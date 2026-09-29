@@ -275,7 +275,7 @@ function threatLabel(l: string): string {
   border-radius: var(--radius-lg, 16px);
   padding: 18px 20px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow, 0 4px 24px rgba(0, 0, 0, 0.4));
 }
 
 .pdp-head {
@@ -290,7 +290,7 @@ function threatLabel(l: string): string {
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
   font-size: 17px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pdp-badge {
@@ -326,7 +326,7 @@ function threatLabel(l: string): string {
 }
 
 .pdp-empty {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   line-height: 1.7;
 }
@@ -340,12 +340,12 @@ function threatLabel(l: string): string {
 .pdp-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
 }
 
 .pdp-hint {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   line-height: 1.6;
 }
@@ -374,7 +374,7 @@ function threatLabel(l: string): string {
 .pdp-score-grade {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .pdp-score-meta {
@@ -382,7 +382,7 @@ function threatLabel(l: string): string {
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .pdp-dims {
@@ -395,7 +395,7 @@ function threatLabel(l: string): string {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 3px;
 }
 
@@ -433,12 +433,12 @@ function threatLabel(l: string): string {
 .pdp-stat-num {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pdp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* ---- 数据暴露面 ---- */
@@ -464,14 +464,14 @@ function threatLabel(l: string): string {
 }
 
 .pdp-exposure-label {
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .pdp-exposure-sens {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
 }
 
@@ -516,7 +516,7 @@ function threatLabel(l: string): string {
 }
 
 .pdp-exposure-score {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   text-align: right;
 }
@@ -533,7 +533,7 @@ function threatLabel(l: string): string {
 
 .pdp-rec {
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.6;
   padding-left: 14px;
   position: relative;
@@ -595,12 +595,12 @@ function threatLabel(l: string): string {
 .pdp-warning-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pdp-warning-desc {
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.6;
   margin: 0;
 }
@@ -614,7 +614,7 @@ function threatLabel(l: string): string {
 
 .pdp-lock-status {
   font-size: 13px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .pdp-lock-status--on {
@@ -639,7 +639,7 @@ function threatLabel(l: string): string {
 .pdp-btn--ghost {
   border-color: rgba(154, 143, 128, 0.3);
   background: transparent;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* ---- 温和洞察 ---- */
@@ -669,11 +669,11 @@ function threatLabel(l: string): string {
 .pdp-insight-text {
   display: flex;
   flex-direction: column;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .pdp-insight-text b {
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   font-weight: 600;
 }
 </style>

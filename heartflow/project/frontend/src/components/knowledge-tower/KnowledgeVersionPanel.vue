@@ -282,7 +282,7 @@ function fmtDate(iso: string): string {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 
 .kvp-sub {
@@ -310,7 +310,7 @@ function fmtDate(iso: string): string {
 .kvp-stat b {
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 
 .kvp-stat span {
@@ -392,7 +392,7 @@ function fmtDate(iso: string): string {
 }
 
 .kvp-chip:hover {
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   border-color: rgba(255, 255, 255, 0.25);
 }
 
@@ -421,7 +421,7 @@ function fmtDate(iso: string): string {
 .kvp-node-title {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 
 .kvp-btn {

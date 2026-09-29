@@ -1197,7 +1197,7 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   }
   .flow-hint {
     font-size: 11px;
-    color: var(--success, #2ecc71);
+    color: var(--success, #34d399);
   }
 
   .rh-excerpt-card {

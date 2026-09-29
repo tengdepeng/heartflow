@@ -152,9 +152,9 @@ function barPct(p: number): string {
 .chp {
   margin-top: 20px;
   padding: 16px 18px;
-  border: 1px solid rgba(var(--accent-rgb, 183, 134, 86), 0.22);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.22);
   border-radius: 14px;
-  background: linear-gradient(160deg, rgba(var(--accent-rgb, 183, 134, 86), 0.08), rgba(0, 0, 0, 0.15) 70%);
+  background: linear-gradient(160deg, rgba(var(--accent-rgb, 212, 165, 116), 0.08), rgba(0, 0, 0, 0.15) 70%);
 }
 .chp-head {
   display: flex;
@@ -229,7 +229,7 @@ function barPct(p: number): string {
 }
 .chp-sug-item {
   padding: 6px 10px;
-  border-left: 2px solid var(--accent, #b78656);
+  border-left: 2px solid var(--accent, #d4a574);
   font-size: 12.5px;
   background: rgba(255, 255, 255, 0.05);
   border-radius: 0 8px 8px 0;
@@ -254,8 +254,8 @@ function barPct(p: number): string {
   padding: 3px 9px;
   border-radius: 999px;
   font-size: 12px;
-  background: rgba(var(--accent-rgb, 183, 134, 86), 0.18);
-  border: 1px solid rgba(var(--accent-rgb, 183, 134, 86), 0.3);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.18);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.3);
 }
 .chp-insight-group { margin-top: 10px; }
 .chp-insight-group-label { display: block; font-size: 12px; opacity: 0.66; margin-bottom: 6px; }

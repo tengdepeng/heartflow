@@ -115,7 +115,7 @@ function fmtTime(iso: string): string {
 }
 .wp-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .wp-icon { font-size: 24px; line-height: 1; }
-.wp-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, #fff); }
+.wp-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .wp-desc { margin: 4px 0 0; font-size: 12px; opacity: 0.6; line-height: 1.6; }
 
 .wp-select { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
@@ -123,7 +123,7 @@ function fmtTime(iso: string): string {
   text-align: left; padding: 10px 12px; border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
-  font-family: inherit; color: var(--text-high, #fff);
+  font-family: inherit; color: var(--text-high, rgba(232, 224, 216, 0.88));
   cursor: pointer; transition: all 0.25s; display: flex; flex-direction: column; gap: 3px;
 }
 .wp-chip:hover { border-color: rgba(138, 154, 122, 0.4); }
@@ -137,7 +137,7 @@ function fmtTime(iso: string): string {
   padding: 16px; border-radius: 14px;
   background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.wp-card-title { margin: 0 0 12px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, #fff); }
+.wp-card-title { margin: 0 0 12px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .wp-list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .wp-list li { font-size: 13px; opacity: 0.85; line-height: 1.7; padding-left: 14px; position: relative; }
 .wp-list li::before { content: '·'; position: absolute; left: 0; color: #8a9a7a; font-weight: 700; }
@@ -145,7 +145,7 @@ function fmtTime(iso: string): string {
 
 .wp-acu { margin-bottom: 10px; }
 .wp-acu:last-child { margin-bottom: 0; }
-.wp-acu-name { font-size: 13px; color: var(--text-high, #fff); display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.wp-acu-name { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
 .wp-acu-pos { font-size: 11px; opacity: 0.55; font-weight: 400; }
 .wp-acu-tech { margin: 4px 0 0; font-size: 12px; opacity: 0.7; }
 

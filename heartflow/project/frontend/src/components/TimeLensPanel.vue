@@ -348,7 +348,7 @@ function categoryLabel(c: string): string {
 }
 .tl-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .tl-icon { font-size: 24px; line-height: 1; }
-.tl-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, #fff); }
+.tl-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .tl-desc { margin: 4px 0 0; font-size: 12px; opacity: 0.6; line-height: 1.6; }
 .tl-empty { font-size: 13px; opacity: 0.55; line-height: 1.8; }
 
@@ -368,10 +368,10 @@ function categoryLabel(c: string): string {
   padding: 16px; border-radius: 14px;
   background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
 }
-.tl-card-title { margin: 0 0 10px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, #fff); }
+.tl-card-title { margin: 0 0 10px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .tl-sub { margin-top: 12px; font-size: 12px; opacity: 0.7; }
 .tl-kpi { margin: 10px 0 0; font-size: 12px; opacity: 0.75; line-height: 1.7; }
-.tl-kpi b { color: var(--text-high, #fff); font-weight: 600; }
+.tl-kpi b { color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 600; }
 .tl-kpi-row { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 10px; font-size: 12px; opacity: 0.75; }
 
 .tl-radar { width: 100%; max-height: 240px; }

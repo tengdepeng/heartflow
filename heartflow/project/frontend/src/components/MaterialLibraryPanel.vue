@@ -389,7 +389,7 @@ onMounted(() => {
   margin: 0;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   padding-left: 24px;
   border-left: 2px solid rgba(184, 160, 128, 0.15);
 }
@@ -409,7 +409,7 @@ onMounted(() => {
   border-radius: 999px;
   border: 1px solid var(--mw-border, rgba(var(--accent-rgb), 0.08));
   background: transparent;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -417,7 +417,7 @@ onMounted(() => {
 }
 
 .mlp-chip:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--mw-border-hover, rgba(184, 160, 128, 0.2));
 }
 
@@ -465,7 +465,7 @@ onMounted(() => {
 
 .form-label {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.5px;
 }
 
@@ -482,7 +482,7 @@ onMounted(() => {
 }
 
 .form-input::placeholder {
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .form-input:focus {
@@ -586,7 +586,7 @@ onMounted(() => {
 
 .mlp-card-meta {
   font-size: 10px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.3px;
 }
 
@@ -613,7 +613,7 @@ onMounted(() => {
   border-radius: 7px;
   border: 1px solid transparent;
   background: transparent;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -625,11 +625,11 @@ onMounted(() => {
 }
 
 .mlp-icon-btn--confirm:hover {
-  color: var(--success-light, #7ec8a0);
+  color: var(--success-light, #6aba7a);
 }
 
 .mlp-icon-btn--danger:hover {
-  color: var(--danger, #c87a7a);
+  color: var(--danger, #ff6b6b);
   background: rgba(212, 106, 106, 0.08);
   border-color: rgba(212, 106, 106, 0.2);
 }
@@ -648,7 +648,7 @@ onMounted(() => {
 .mlp-empty-text {
   margin: 0;
   font-size: 12px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 /* ---- 底部 ---- */
@@ -666,7 +666,7 @@ onMounted(() => {
   border-radius: 9px;
   border: 1px solid var(--mw-border, rgba(var(--accent-rgb), 0.08));
   background: var(--mw-surface, rgba(42, 36, 30, 0.4));
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -699,7 +699,7 @@ onMounted(() => {
 .mlp-message {
   margin: 0;
   font-size: 12px;
-  color: var(--success-light, #7ec8a0);
+  color: var(--success-light, #6aba7a);
   animation: mlp-fade-in 0.3s ease;
 }
 

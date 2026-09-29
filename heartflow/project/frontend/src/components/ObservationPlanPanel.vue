@@ -104,7 +104,7 @@ onMounted(refresh)
 }
 .opp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .opp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.opp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #e8ddc8); }
+.opp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .opp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .opp-btn {
   display: inline-flex;

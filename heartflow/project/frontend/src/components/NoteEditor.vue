@@ -396,7 +396,7 @@ function chipStyle(tag: string) {
 }
 
 .title-input::placeholder {
-  color: var(--text-muted, rgba(255,255,255,0.44));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .close-btn {
@@ -456,7 +456,7 @@ function chipStyle(tag: string) {
 }
 
 .tag-remove:hover { opacity: 1; }
-.tag-remove:focus-visible { opacity: 1; outline: 2px solid var(--accent, currentColor); border-radius: 3px; }
+.tag-remove:focus-visible { opacity: 1; outline: 2px solid var(--accent, #d4a574); border-radius: 3px; }
 
 .tag-input {
   padding: 4px 8px;
@@ -799,7 +799,7 @@ function chipStyle(tag: string) {
 
 .word-count {
   font-size: 11px;
-  color: var(--text-muted, rgba(255,255,255,0.44));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .editor-actions {

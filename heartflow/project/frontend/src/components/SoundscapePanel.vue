@@ -104,7 +104,7 @@ const SEASON_LABELS: Record<Season, string> = {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .scp-head {
   display: flex;
@@ -114,11 +114,11 @@ const SEASON_LABELS: Record<Season, string> = {
 .scp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .scp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .scp-list {
   display: flex;
@@ -144,18 +144,18 @@ const SEASON_LABELS: Record<Season, string> = {
 .scp-item-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .scp-item.active .scp-item-name {
   color: #f0c040;
 }
 .scp-item-ambient {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .scp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .scp-detail {
   display: flex;
@@ -169,7 +169,7 @@ const SEASON_LABELS: Record<Season, string> = {
 .scp-detail-head {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .scp-section {
   display: flex;
@@ -178,7 +178,7 @@ const SEASON_LABELS: Record<Season, string> = {
 }
 .scp-section-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .scp-tags {
   display: flex;
@@ -189,7 +189,7 @@ const SEASON_LABELS: Record<Season, string> = {
   padding: 3px 9px;
   border-radius: 12px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.07));
 }
@@ -209,7 +209,7 @@ const SEASON_LABELS: Record<Season, string> = {
 }
 .scp-volume-label {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .scp-volume-value {
   font-size: 13px;
@@ -237,7 +237,7 @@ const SEASON_LABELS: Record<Season, string> = {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;

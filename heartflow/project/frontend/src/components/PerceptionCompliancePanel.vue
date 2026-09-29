@@ -152,7 +152,7 @@ function alwaysOnLabel(item: string): string {
   border-radius: var(--radius-lg, 16px);
   padding: 18px 20px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow, 0 4px 24px rgba(0, 0, 0, 0.4));
 }
 
 .pcm-head {
@@ -167,7 +167,7 @@ function alwaysOnLabel(item: string): string {
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
   font-size: 17px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pcm-badge {
@@ -205,7 +205,7 @@ function alwaysOnLabel(item: string): string {
 .pcm-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
 }
 
@@ -222,11 +222,11 @@ function alwaysOnLabel(item: string): string {
 
 .pcm-stat {
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .pcm-hint {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   line-height: 1.6;
   margin-bottom: 10px;
@@ -247,7 +247,7 @@ function alwaysOnLabel(item: string): string {
   gap: 8px;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .pcm-rule-mark {
@@ -291,12 +291,12 @@ function alwaysOnLabel(item: string): string {
 .pcm-item-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pcm-item-desc {
   font-size: 11px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* 开关 */
@@ -354,7 +354,7 @@ function alwaysOnLabel(item: string): string {
   border-radius: 999px;
   border: 1px solid rgba(154, 143, 128, 0.25);
   background: rgba(154, 143, 128, 0.08);
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* 操作区 */

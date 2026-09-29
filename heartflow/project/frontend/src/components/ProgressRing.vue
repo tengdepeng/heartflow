@@ -87,7 +87,7 @@ const displayValue = computed(() => (props.showRaw ? `${props.value}` : `${perce
 }
 .ring-fill {
   fill: none;
-  stroke: var(--color-accent, #f59e0b);
+  stroke: var(--accent, #d4a574);
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s ease;
 }
@@ -99,6 +99,6 @@ const displayValue = computed(() => (props.showRaw ? `${props.value}` : `${perce
   justify-content: center;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--color-text, #e2e8f0);
+  color: var(--text-primary, #e8e0d8);
 }
 </style>

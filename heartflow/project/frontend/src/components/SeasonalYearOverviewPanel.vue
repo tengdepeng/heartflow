@@ -150,7 +150,7 @@ function cmpWidth(value: number, all: number[]): string {
 .syo-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   letter-spacing: 0.02em;
 }
 .syo-badge {
@@ -165,14 +165,14 @@ function cmpWidth(value: number, all: number[]): string {
   background: color-mix(in srgb, #f0c040 12%, transparent);
 }
 .syo-badge-neutral {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
   background: transparent;
 }
 .syo-empty {
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .syo-years {
   display: flex;
@@ -185,7 +185,7 @@ function cmpWidth(value: number, all: number[]): string {
   border-radius: 999px;
   border: 1px solid var(--border-light, #3a332a);
   background: transparent;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -214,7 +214,7 @@ function cmpWidth(value: number, all: number[]): string {
 }
 .syo-ov-cell span {
   font-size: 10px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .syo-ov-cell b {
   font-size: 15px;
@@ -232,7 +232,7 @@ function cmpWidth(value: number, all: number[]): string {
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   margin-bottom: 10px;
 }
 .syo-heatmap {
@@ -259,7 +259,7 @@ function cmpWidth(value: number, all: number[]): string {
 }
 .syo-heat-label {
   font-size: 9px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .syo-compare {
   display: flex;
@@ -274,7 +274,7 @@ function cmpWidth(value: number, all: number[]): string {
 .syo-cmp-year {
   width: 40px;
   font-size: 11px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   flex-shrink: 0;
 }
 .syo-cmp-track {
@@ -313,7 +313,7 @@ function cmpWidth(value: number, all: number[]): string {
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .syo-insight-mark {
   color: #f0c040;

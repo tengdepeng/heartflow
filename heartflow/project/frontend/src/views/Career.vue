@@ -1218,7 +1218,7 @@ const skillSummary = computed(() => {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   text-decoration: none;
   background: none;
   border: none;
@@ -1248,7 +1248,7 @@ const skillSummary = computed(() => {
 }
 
 .breadcrumb-sep {
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 14px;
 }
 
@@ -1289,14 +1289,14 @@ const skillSummary = computed(() => {
 
 .career-room-header :deep(.rh-subtitle) {
   font-size: 14px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 8px 0 4px;
   letter-spacing: 1px;
 }
 
 .career-kicker {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0;
   letter-spacing: 0.5px;
 }
@@ -1325,7 +1325,7 @@ const skillSummary = computed(() => {
   gap: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 16px;
   letter-spacing: 0.5px;
 }
@@ -1385,7 +1385,7 @@ const skillSummary = computed(() => {
 }
 
 .career-search-input::placeholder {
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .career-search-input:focus {
@@ -1404,7 +1404,7 @@ const skillSummary = computed(() => {
   border-radius: 999px;
   border: 1px solid var(--career-border);
   background: var(--career-surface);
-  color: var(--text-muted, var(--text-dim));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
@@ -1413,7 +1413,7 @@ const skillSummary = computed(() => {
 }
 
 .tier-filter-btn:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--career-border-hover);
 }
 
@@ -1459,12 +1459,12 @@ const skillSummary = computed(() => {
 .cos-unit {
   font-size: 16px;
   font-weight: 400;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .cos-label {
   font-size: 12px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.5px;
 }
 
@@ -1514,7 +1514,7 @@ const skillSummary = computed(() => {
 .career-legend-title {
   font-size: 11px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.5px;
 }
 
@@ -1529,7 +1529,7 @@ const skillSummary = computed(() => {
   align-items: center;
   gap: 4px;
   font-size: 10px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   padding: 3px 8px;
   border-radius: 4px;
   background: rgba(138, 154, 122, 0.05);
@@ -1615,13 +1615,13 @@ const skillSummary = computed(() => {
 .tier-count {
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-variant-numeric: tabular-nums;
 }
 
 .tier-desc {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   line-height: 1.5;
 }
 
@@ -1638,7 +1638,7 @@ const skillSummary = computed(() => {
   padding: 3px 8px;
   border-radius: 4px;
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   background: rgba(138, 154, 122, 0.08);
   border: 1px solid rgba(138, 154, 122, 0.1);
   line-height: 1.4;
@@ -1689,14 +1689,14 @@ const skillSummary = computed(() => {
 
 .tier-affinity-label {
   font-size: 10px;
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.3px;
 }
 
 .tier-affinity-val {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-variant-numeric: tabular-nums;
 }
 
@@ -1797,7 +1797,7 @@ const skillSummary = computed(() => {
 .project-desc {
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1810,7 +1810,7 @@ const skillSummary = computed(() => {
   align-items: center;
   gap: 10px;
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .project-partners {
@@ -1886,13 +1886,13 @@ const skillSummary = computed(() => {
 
 .career-milestone-date {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin-left: auto;
 }
 
 .career-milestone-desc {
   font-size: 12px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 4px 0 0;
   line-height: 1.5;
 }
@@ -1907,7 +1907,7 @@ const skillSummary = computed(() => {
 
 .colophon-text {
   font-size: 12px;
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 2px;
   font-style: italic;
   margin: 0;
@@ -1976,7 +1976,7 @@ const skillSummary = computed(() => {
   border-radius: 8px;
   border: 1px solid var(--career-border);
   background: var(--career-surface);
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 13px;
   cursor: pointer;
   transition: all 0.25s ease;
@@ -2016,13 +2016,13 @@ const skillSummary = computed(() => {
 .form-label {
   font-size: 12px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.3px;
 }
 
 .form-label-hint {
   font-weight: 400;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 11px;
 }
 
@@ -2041,7 +2041,7 @@ const skillSummary = computed(() => {
 }
 
 .form-input::placeholder {
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .form-input:focus {
@@ -2066,7 +2066,7 @@ const skillSummary = computed(() => {
 }
 
 .form-textarea::placeholder {
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .form-textarea:focus {
@@ -2115,7 +2115,7 @@ const skillSummary = computed(() => {
   display: flex;
   justify-content: space-between;
   font-size: 10px;
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin-top: 2px;
 }
 
@@ -2134,7 +2134,7 @@ const skillSummary = computed(() => {
   border-radius: 8px;
   border: 1px solid var(--career-border);
   background: rgba(8, 10, 9, 0.6);
-  color: var(--text-muted, var(--text-dim));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -2142,7 +2142,7 @@ const skillSummary = computed(() => {
 }
 
 .form-tier-option:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--career-border-hover);
 }
 
@@ -2164,7 +2164,7 @@ const skillSummary = computed(() => {
   border-radius: 8px;
   border: 1px solid var(--career-border);
   background: rgba(8, 10, 9, 0.6);
-  color: var(--text-muted, var(--text-dim));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -2172,7 +2172,7 @@ const skillSummary = computed(() => {
 }
 
 .form-status-option:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--career-border-hover);
 }
 
@@ -2196,11 +2196,11 @@ const skillSummary = computed(() => {
 
 .form-btn-secondary {
   background: var(--career-surface);
-  color: var(--text-muted, var(--text-dim));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .form-btn-secondary:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   background: var(--career-surface-hover);
   border-color: var(--career-border-hover);
 }

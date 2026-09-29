@@ -154,7 +154,7 @@ function dirLabel(d: string) {
 }
 .hpp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .hpp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.hpp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.hpp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .hpp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .hpp-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e0b88a; white-space: nowrap; }
 

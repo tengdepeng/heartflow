@@ -268,7 +268,7 @@ function typeIcon(t: MeditationType): string {
   border-radius: var(--radius-lg, 16px);
   padding: 18px 20px;
   margin-bottom: 16px;
-  box-shadow: var(--shadow, 0 4px 20px rgba(0, 0, 0, 0.18));
+  box-shadow: var(--shadow, 0 4px 24px rgba(0, 0, 0, 0.4));
 }
 
 .cstp-head {
@@ -283,7 +283,7 @@ function typeIcon(t: MeditationType): string {
   font-family: var(--font-serif, Georgia, 'Songti SC', serif);
   font-size: 17px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .cstp-badge {
@@ -313,7 +313,7 @@ function typeIcon(t: MeditationType): string {
 }
 
 .cstp-empty {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   line-height: 1.7;
 }
@@ -327,12 +327,12 @@ function typeIcon(t: MeditationType): string {
 .cstp-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
 }
 
 .cstp-hint {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   line-height: 1.6;
   margin-top: 8px;
@@ -352,12 +352,12 @@ function typeIcon(t: MeditationType): string {
 .cstp-clarity-label {
   font-size: 17px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .cstp-clarity-note {
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* ---- 统计格 ---- */
@@ -380,7 +380,7 @@ function typeIcon(t: MeditationType): string {
 .cstp-stat-num {
   font-size: 20px;
   font-weight: 700;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .cstp-stat-num small {
@@ -392,7 +392,7 @@ function typeIcon(t: MeditationType): string {
 
 .cstp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* ---- 释怀统计 ---- */
@@ -421,7 +421,7 @@ function typeIcon(t: MeditationType): string {
 
 .cstp-release-label {
   font-size: 12px;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .cstp-release-bar {
@@ -457,7 +457,7 @@ function typeIcon(t: MeditationType): string {
 }
 
 .cstp-type-label {
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -477,7 +477,7 @@ function typeIcon(t: MeditationType): string {
 }
 
 .cstp-type-num {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   text-align: right;
 }
@@ -524,11 +524,11 @@ function typeIcon(t: MeditationType): string {
 }
 
 .cstp-rec-label {
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .cstp-rec-value {
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 /* ---- 温和洞察 ---- */
@@ -558,11 +558,11 @@ function typeIcon(t: MeditationType): string {
 .cstp-insight-text {
   display: flex;
   flex-direction: column;
-  color: var(--text-secondary, #a89e8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .cstp-insight-text b {
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   font-weight: 600;
 }
 

@@ -259,7 +259,7 @@ function typeLabel(t: string): string {
 .kgp-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   letter-spacing: 0.02em;
 }
 .kgp-badge {
@@ -274,14 +274,14 @@ function typeLabel(t: string): string {
   background: color-mix(in srgb, #f0c040 12%, transparent);
 }
 .kgp-badge-neutral {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
   background: transparent;
 }
 .kgp-empty {
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .kgp-stats {
   display: grid;
@@ -306,7 +306,7 @@ function typeLabel(t: string): string {
 }
 .kgp-stat-label {
   font-size: 10px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .kgp-card {
   padding: 12px 14px;
@@ -319,7 +319,7 @@ function typeLabel(t: string): string {
   display: block;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   margin-bottom: 10px;
 }
 .kgp-svg {
@@ -337,7 +337,7 @@ function typeLabel(t: string): string {
   stroke-width: 1.2;
 }
 .kgp-svg-label {
-  fill: var(--text-primary, #ede5d8);
+  fill: var(--text-primary, #e8e0d8);
   font-size: 10px;
   text-anchor: middle;
   dominant-baseline: middle;
@@ -345,7 +345,7 @@ function typeLabel(t: string): string {
 .kgp-svg-hint {
   margin: 8px 0 0;
   font-size: 11px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .kgp-disc {
   padding: 10px 12px;
@@ -389,13 +389,13 @@ function typeLabel(t: string): string {
   margin: 0 0 4px;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .kgp-disc-action {
   margin: 0;
   font-size: 12px;
   line-height: 1.5;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .kgp-hubs {
   display: flex;
@@ -410,7 +410,7 @@ function typeLabel(t: string): string {
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, #f0c040 40%, transparent);
   background: color-mix(in srgb, #f0c040 10%, transparent);
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
 }
 .kgp-hub-chip em {
@@ -434,7 +434,7 @@ function typeLabel(t: string): string {
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .kgp-insight-mark {
   color: #f0c040;

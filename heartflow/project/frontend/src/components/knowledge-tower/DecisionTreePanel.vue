@@ -301,7 +301,7 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .dtp-sub {
   font-size: 10px;
@@ -325,7 +325,7 @@ onMounted(() => {
 .dtp-stat b {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .dtp-stat span {
   font-size: 10px;
@@ -375,7 +375,7 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.25);
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   font-size: 12px;
   font-family: inherit;
   outline: none;
@@ -393,7 +393,7 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.25);
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   font-size: 12px;
   font-family: inherit;
   outline: none;
@@ -403,7 +403,7 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(240, 192, 64, 0.25);
   background: transparent;
-  color: var(--accent, #d8c3a5);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -455,7 +455,7 @@ onMounted(() => {
 .dtp-tree-name {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .dtp-tree-actions {
   display: flex;
@@ -491,7 +491,7 @@ onMounted(() => {
 .dtp-node-label {
   flex: 1;
   font-size: 12px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .dtp-node-val,
 .dtp-node-prob {
@@ -535,7 +535,7 @@ onMounted(() => {
 .dtp-stat-cell b {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .dtp-stat-cell span {
   font-size: 10px;
@@ -566,7 +566,7 @@ onMounted(() => {
 .dtp-path-text {
   margin: 0;
   font-size: 12px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   line-height: 1.5;
 }
 .dtp-path-meta {

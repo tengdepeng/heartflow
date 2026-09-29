@@ -2484,7 +2484,7 @@ watch(() => nav.currentRoomId.value, () => {
   .app-shell.rail-text.sidebar-rail .nav-label {
     display: block;
     font-size: 10px;
-    color: var(--muted);
+    color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

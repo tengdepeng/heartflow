@@ -156,7 +156,7 @@ function del(id: string): void {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .rc-banner {
   display: inline-flex;
@@ -183,7 +183,7 @@ function del(id: string): void {
   flex: 1 1 220px; min-width: 0;
   padding: 8px 11px; border-radius: 9px; font-size: 13px;
   background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e9e0d0); font-family: inherit;
+  color: var(--text-primary, #e8e0d8); font-family: inherit;
 }
 .rc-input:disabled { opacity: 0.4; cursor: default; }
 .rc-input--label { flex: 1 1 120px; }
@@ -191,7 +191,7 @@ function del(id: string): void {
 
 .rc-btn {
   padding: 8px 16px; border-radius: 9px; font-size: 13px; cursor: pointer;
-  background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e9e0d0);
+  background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e8e0d8);
   border: 1px solid rgba(255, 255, 255, 0.1); transition: border-color 0.2s ease, background 0.2s ease;
   white-space: nowrap;
 }

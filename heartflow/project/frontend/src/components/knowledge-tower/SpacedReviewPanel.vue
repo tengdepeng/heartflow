@@ -192,7 +192,7 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .srp-sub {
   font-size: 10px;
@@ -216,7 +216,7 @@ onMounted(() => {
 .srp-stat b {
   font-size: 18px;
   font-weight: 600;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .srp-stat span {
   font-size: 10px;
@@ -255,7 +255,7 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(240, 192, 64, 0.25);
   background: transparent;
-  color: var(--accent, #d8c3a5);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -278,7 +278,7 @@ onMounted(() => {
 }
 .srp-btn--ghost:hover {
   border-color: rgba(240, 192, 64, 0.4);
-  color: var(--accent, #d8c3a5);
+  color: var(--accent, #d4a574);
 }
 .srp-empty {
   display: flex;
@@ -388,7 +388,7 @@ onMounted(() => {
 .srp-face-title {
   margin: 0;
   font-size: 15px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   line-height: 1.5;
   word-break: break-word;
 }

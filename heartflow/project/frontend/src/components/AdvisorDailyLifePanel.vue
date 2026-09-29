@@ -121,7 +121,7 @@ onMounted(() => {
 }
 .adp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .adp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.adp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.adp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .adp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .adp-slot { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); white-space: nowrap; }
 
@@ -129,7 +129,7 @@ onMounted(() => {
 .adp-scene { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
 .adp-scene.active { border-color: rgba(var(--accent-rgb), 0.25); }
 .adp-scene-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.adp-scene-name { font-size: 12px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.adp-scene-name { font-size: 12px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .adp-scene-occ { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 .adp-scene-desc { font-size: 10px; color: rgba(232, 221, 208, 0.45); margin: 4px 0; line-height: 1.4; }
 .adp-scene-acts { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -138,15 +138,15 @@ onMounted(() => {
 .adp-list { display: flex; flex-direction: column; gap: 8px; }
 .adp-item { padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
 .adp-item-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
-.adp-item-name { font-size: 13px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.adp-item-name { font-size: 13px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .adp-item-state { font-size: 10px; padding: 1px 8px; border-radius: 8px; background: rgba(138,154,122,0.15); color: #8a9a7a; }
 .adp-item-state.off { background: rgba(148,163,184,0.12); color: #94a3b8; }
 .adp-item-acts { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
 .adp-act-chip { font-size: 10px; padding: 2px 8px; border-radius: 6px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); }
 .adp-item-ctrl { display: flex; gap: 6px; align-items: center; }
-.adp-select { flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, #d8c3a5); font-size: 12px; font-family: inherit; outline: none; }
+.adp-select { flex: 1; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 12px; font-family: inherit; outline: none; }
 .adp-select:focus { border-color: rgba(var(--accent-rgb), 0.4); }
-.adp-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d8c3a5); font-size: 11px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+.adp-btn { padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d4a574); font-size: 11px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .adp-btn:hover { background: rgba(var(--accent-rgb), 0.18); }
 .adp-btn--ghost { background: transparent; border-color: rgba(255,255,255,0.15); color: rgba(232, 221, 208, 0.6); }
 .adp-btn--ghost:hover { border-color: rgba(196,106,90,0.4); color: #c46a5a; background: rgba(196,106,90,0.08); }

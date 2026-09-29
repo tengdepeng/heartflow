@@ -119,7 +119,7 @@ function toggleAutoCollect(e: Event): void {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .zgp-head {
   display: flex;
@@ -129,11 +129,11 @@ function toggleAutoCollect(e: Event): void {
 .zgp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .zgp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .zgp-block {
   display: flex;
@@ -143,7 +143,7 @@ function toggleAutoCollect(e: Event): void {
 .zgp-block-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .zgp-now {
   display: flex;
@@ -158,20 +158,20 @@ function toggleAutoCollect(e: Event): void {
   gap: 2px;
   padding: 10px;
   border-radius: 8px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.04));
+  background: var(--bg-panel, #1a1612);
 }
 .zgp-now-big {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .zgp-now-meta {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .zgp-hint {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
 }
 .zgp-ring {
@@ -188,7 +188,7 @@ function toggleAutoCollect(e: Event): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: default;
 }
 .zgp-ring-item.on {
@@ -217,7 +217,7 @@ function toggleAutoCollect(e: Event): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
 }
 .zgp-weather-item.on {
@@ -248,20 +248,20 @@ function toggleAutoCollect(e: Event): void {
   gap: 2px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.04));
+  background: var(--bg-panel, #1a1612);
 }
 .zgp-last-date {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .zgp-last-meta {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .zgp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
 }
 .zgp-pref {
@@ -269,7 +269,7 @@ function toggleAutoCollect(e: Event): void {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   cursor: pointer;
 }
 </style>

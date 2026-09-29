@@ -193,7 +193,7 @@ const resultRing = computed(() => {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .wgp-head {
   display: flex;
@@ -203,11 +203,11 @@ const resultRing = computed(() => {
 .wgp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wgp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wgp-stats {
   display: grid;
@@ -231,7 +231,7 @@ const resultRing = computed(() => {
 }
 .wgp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wgp-start,
 .wgp-play,
@@ -246,7 +246,7 @@ const resultRing = computed(() => {
 }
 .wgp-add-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wgp-add-row {
   display: flex;
@@ -263,7 +263,7 @@ const resultRing = computed(() => {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
@@ -280,7 +280,7 @@ const resultRing = computed(() => {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -317,18 +317,18 @@ const resultRing = computed(() => {
 .wgp-done-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wgp-play-progress,
 .wgp-done-score {
   margin-left: auto;
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wgp-play-question {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wgp-play-options {
   display: flex;
@@ -340,7 +340,7 @@ const resultRing = computed(() => {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
   text-align: left;
   cursor: pointer;
@@ -361,7 +361,7 @@ const resultRing = computed(() => {
 }
 .wgp-play-hint {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wgp-play-feedback {
   display: flex;
@@ -436,18 +436,18 @@ const resultRing = computed(() => {
 .wgp-item-type {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wgp-item-score {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wgp-item-state {
   margin-left: auto;
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   background: rgba(255, 255, 255, 0.04);
 }
 .wgp-item-state.done {
@@ -456,6 +456,6 @@ const resultRing = computed(() => {
 }
 .wgp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 </style>

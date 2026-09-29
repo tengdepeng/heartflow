@@ -214,7 +214,7 @@ function duplicate(b: AIPromptTemplate): void {
   display: flex;
   flex-direction: column;
   gap: 22px;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .pt-block { display: flex; flex-direction: column; gap: 10px; }
 .pt-block-head { display: flex; align-items: center; justify-content: space-between; }
@@ -244,7 +244,7 @@ function duplicate(b: AIPromptTemplate): void {
 
 .pt-btn {
   padding: 7px 15px; border-radius: 9px; font-size: 13px; cursor: pointer;
-  background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e9e0d0);
+  background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e8e0d8);
   border: 1px solid rgba(255, 255, 255, 0.1); transition: border-color 0.2s ease, background 0.2s ease;
 }
 .pt-btn:hover { border-color: rgba(212, 165, 116, 0.35); }
@@ -263,14 +263,14 @@ function duplicate(b: AIPromptTemplate): void {
   background: #1e1913; border: 1px solid rgba(212, 165, 116, 0.25);
 }
 .pt-modal-head { display: flex; align-items: center; justify-content: space-between; font-size: 16px; font-weight: 500; margin-bottom: 14px; }
-.pt-x { background: none; border: none; color: var(--text-primary, #e9e0d0); opacity: 0.5; cursor: pointer; font-size: 16px; }
+.pt-x { background: none; border: none; color: var(--text-primary, #e8e0d8); opacity: 0.5; cursor: pointer; font-size: 16px; }
 .pt-form { display: flex; flex-direction: column; gap: 12px; }
 .pt-row { display: flex; flex-direction: column; gap: 5px; }
 .pt-label { font-size: 12px; opacity: 0.6; }
 .pt-input {
   padding: 8px 11px; border-radius: 9px; font-size: 13px;
   background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e9e0d0); font-family: inherit;
+  color: var(--text-primary, #e8e0d8); font-family: inherit;
 }
 .pt-area { resize: vertical; line-height: 1.6; }
 .pt-vars { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); }

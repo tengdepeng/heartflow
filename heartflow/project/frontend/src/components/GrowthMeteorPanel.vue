@@ -118,7 +118,7 @@ refresh()
   border: 1px solid rgba(var(--accent-rgb), 0.1);
 }
 .gmp-head { margin-bottom: 14px; }
-.gmp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); display: block; }
+.gmp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); display: block; }
 .gmp-sub { font-size: 11px; color: rgba(200, 180, 160, 0.5); }
 
 /* ---- 势能圆环 + 指标 ---- */

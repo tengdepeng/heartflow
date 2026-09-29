@@ -265,13 +265,13 @@ function formatTime(ts: number): string {
   margin-bottom: 10px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .psp-disabled-hint {
   font-size: 11px;
   font-weight: 400;
-  color: var(--text-dim, rgba(236, 229, 218, 0.45));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-textarea {
@@ -282,7 +282,7 @@ function formatTime(ts: number): string {
   padding: 10px 12px;
   font-size: 13px;
   line-height: 1.55;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(var(--accent-rgb), 0.12);
 }
@@ -328,7 +328,7 @@ function formatTime(ts: number): string {
 
 .psp-risk-confidence {
   font-size: 12px;
-  color: var(--text-dim, rgba(236, 229, 218, 0.55));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-warning {
@@ -357,7 +357,7 @@ function formatTime(ts: number): string {
   padding-left: 18px;
   font-size: 12px;
   line-height: 1.7;
-  color: var(--text-dim, rgba(236, 229, 218, 0.7));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-clean-hint {
@@ -389,13 +389,13 @@ function formatTime(ts: number): string {
 
 .psp-stat span {
   font-size: 11px;
-  color: var(--text-dim, rgba(236, 229, 218, 0.55));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-last-checkin {
   margin-top: 10px;
   font-size: 12px;
-  color: var(--text-dim, rgba(236, 229, 218, 0.65));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-checkin-list {
@@ -438,11 +438,11 @@ function formatTime(ts: number): string {
 }
 
 .psp-checkin-time {
-  color: var(--text-dim, rgba(236, 229, 218, 0.5));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-checkin-note {
-  color: var(--text-dim, rgba(236, 229, 218, 0.7));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-call-form {
@@ -458,7 +458,7 @@ function formatTime(ts: number): string {
   border-radius: 10px;
   padding: 8px 12px;
   font-size: 13px;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(var(--accent-rgb), 0.12);
 }
@@ -472,7 +472,7 @@ function formatTime(ts: number): string {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: var(--text-dim, rgba(236, 229, 218, 0.65));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 .psp-delay input {
@@ -480,7 +480,7 @@ function formatTime(ts: number): string {
   border-radius: 8px;
   padding: 6px 8px;
   font-size: 13px;
-  color: var(--text-primary, #ece5da);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(var(--accent-rgb), 0.12);
 }
@@ -512,14 +512,14 @@ function formatTime(ts: number): string {
 
 .psp-call-phone {
   font-size: 12px;
-  color: var(--text-dim, rgba(236, 229, 218, 0.55));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin-left: 6px;
 }
 
 .psp-call-reason-text {
   margin: 0;
   font-size: 12px;
-  color: var(--text-dim, rgba(236, 229, 218, 0.7));
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 
 @keyframes psp-ring {

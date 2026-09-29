@@ -366,7 +366,7 @@ onUnmounted(stopReplay)
   font-family: var(--font-heading-zh);
   font-size: 24px;
   font-weight: 600;
-  color: var(--text-primary, var(--text-high));
+  color: var(--text-primary, #e8e0d8));
   letter-spacing: 4px;
   margin: 0 0 8px;
   animation: titleGlow 4s ease-in-out infinite;
@@ -375,7 +375,7 @@ onUnmounted(stopReplay)
 .header-subtitle {
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   max-width: 480px;
   margin: 0 auto 20px;
   letter-spacing: 0.5px;
@@ -413,7 +413,7 @@ onUnmounted(stopReplay)
 
 .stat-label {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 1px;
 }
 
@@ -468,7 +468,7 @@ onUnmounted(stopReplay)
   border-radius: 8px 8px 0 0;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   background: transparent;
   transition: all 0.3s ease;
   position: relative;
@@ -478,7 +478,7 @@ onUnmounted(stopReplay)
 }
 
 .sub-tab:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   background: var(--accent-dim, rgba(var(--accent-rgb), 0.2));
 }
 
@@ -544,7 +544,7 @@ onUnmounted(stopReplay)
   border-radius: 12px;
   border: 1px solid var(--border-color, rgba(var(--accent-rgb), 0.12));
   background: transparent;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
@@ -554,7 +554,7 @@ onUnmounted(stopReplay)
 }
 
 .river-filter-btn:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--accent, #d4a574);
 }
 
@@ -591,7 +591,7 @@ onUnmounted(stopReplay)
   margin: -4px 0 8px;
   border-radius: 8px;
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   background: var(--accent-dim, rgba(var(--accent-rgb), 0.2));
   border: 1px solid var(--border-color, rgba(var(--accent-rgb), 0.12));
 }
@@ -601,7 +601,7 @@ onUnmounted(stopReplay)
 }
 
 .import-feedback.is-error {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: rgba(var(--accent-rgb), 0.2);
 }
 
@@ -629,7 +629,7 @@ onUnmounted(stopReplay)
   border-radius: 6px;
   border: 1px solid var(--border-color, rgba(var(--accent-rgb), 0.12));
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   font-size: 12px;
   display: flex;
@@ -649,7 +649,7 @@ onUnmounted(stopReplay)
 
 .replay-date {
   font-size: 12px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   min-width: 80px;
 }
 
@@ -866,7 +866,7 @@ onUnmounted(stopReplay)
   justify-content: center;
   flex: 1;
   gap: 6px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .river-empty .empty-icon {

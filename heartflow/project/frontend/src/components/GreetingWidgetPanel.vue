@@ -261,7 +261,7 @@ function resetWidgets() {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .gwp-head {
   display: flex;
@@ -271,11 +271,11 @@ function resetWidgets() {
 .gwp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .gwp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gwp-block {
   display: flex;
@@ -289,7 +289,7 @@ function resetWidgets() {
 .gwp-block-title {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .gwp-row {
   display: flex;
@@ -299,7 +299,7 @@ function resetWidgets() {
 }
 .gwp-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   min-width: 56px;
 }
 .gwp-period {
@@ -321,7 +321,7 @@ function resetWidgets() {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
@@ -349,18 +349,18 @@ function resetWidgets() {
 .gwp-preview-msg {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .gwp-preview-sub {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gwp-btn {
   padding: 6px 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -403,7 +403,7 @@ function resetWidgets() {
 }
 .gwp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gwp-widget-list {
   display: flex;
@@ -431,11 +431,11 @@ function resetWidgets() {
 .gwp-widget-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .gwp-widget-meta {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .gwp-widget-controls {
   display: flex;
@@ -448,7 +448,7 @@ function resetWidgets() {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 11px;
   outline: none;
 }
@@ -503,6 +503,6 @@ function resetWidgets() {
 }
 .gwp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 </style>

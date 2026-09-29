@@ -124,7 +124,7 @@ function moodLabel(mood: string): string {
 .dmo-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   letter-spacing: 0.02em;
 }
 .dmo-badge {
@@ -139,14 +139,14 @@ function moodLabel(mood: string): string {
   background: color-mix(in srgb, #f0c040 12%, transparent);
 }
 .dmo-badge-neutral {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
   background: transparent;
 }
 .dmo-empty {
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .dmo-block {
   margin-top: 18px;
@@ -156,7 +156,7 @@ function moodLabel(mood: string): string {
 .dmo-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
   letter-spacing: 0.06em;
 }
@@ -172,7 +172,7 @@ function moodLabel(mood: string): string {
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 12px;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   background: color-mix(in srgb, var(--bg-card, #241f18) 55%, transparent);
   border: 1px solid var(--border-light, #3a332a);
 }
@@ -196,7 +196,7 @@ function moodLabel(mood: string): string {
 .dmo-echo-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .dmo-echo-mood {
   font-size: 14px;
@@ -204,7 +204,7 @@ function moodLabel(mood: string): string {
 .dmo-echo-prefix {
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 6px;
 }
 .dmo-echo-omens {
@@ -224,7 +224,7 @@ function moodLabel(mood: string): string {
 .dmo-echo-line {
   font-size: 12px;
   line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 4px 0 0;
 }
 .dmo-echo-prompt {
@@ -249,7 +249,7 @@ function moodLabel(mood: string): string {
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .dmo-insight-mark {
   color: #f0c040;

@@ -1662,7 +1662,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 
 .settings-room-header :deep(.rh-subtitle) {
   font-size: 13px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin-top: 6px;
 }
 
@@ -1695,7 +1695,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 
 .section-desc {
   font-size: 12px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0 0 16px;
   line-height: 1.6;
 }
@@ -1718,7 +1718,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 }
 .settings-nav__title {
   font-size: 12px;
-  color: var(--text-muted, #8a8a8a);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0 0 10px;
   letter-spacing: 0.08em;
 }
@@ -1734,7 +1734,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   font-size: 13px;
   padding: 8px 10px;
   border-radius: 10px;
-  color: var(--text-secondary, #b8b0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   border: 1px solid transparent;
   transition: background 0.15s, color 0.15s, transform calc(0.16s / var(--hf-animate-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1);
@@ -1773,7 +1773,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   border-color: rgba(138, 138, 138, 0.32);
 }
 .settings-filter__input::placeholder {
-  color: var(--text-muted, #8a8a8a);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 .sub-group.is-hidden {
   display: none;
@@ -1914,7 +1914,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 
 .sub-desc {
   font-size: 12px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0 0 14px;
   line-height: 1.6;
 }
@@ -1932,7 +1932,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   outline: none;
 }
 .sub-group__head:focus-visible .sub-group__heading {
-  box-shadow: 0 0 0 2px var(--accent, rgba(180, 150, 255, 0.5));
+  box-shadow: 0 0 0 2px var(--accent, #d4a574));
   border-radius: 8px;
 }
 .sub-group__chevron {
@@ -2042,7 +2042,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 }
 .toggle-desc {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   line-height: 1.5;
 }
 
@@ -2110,7 +2110,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   justify-content: center;
   font-size: 13px;
   letter-spacing: 0.08em;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .bg-preview__badge {
@@ -2126,7 +2126,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   background: rgba(13, 11, 9, 0.72);
   border: 1px solid rgba(138, 138, 138, 0.12);
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   backdrop-filter: blur(8px);
 }
 
@@ -2164,7 +2164,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 .bg-btn--ghost {
   background: transparent;
   border-color: rgba(138, 138, 138, 0.1);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 /* ---- 预设场景 ---- */
@@ -2175,7 +2175,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 .preset-title {
   font-size: 13px;
   font-weight: 400;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 10px;
 }
 
@@ -2193,7 +2193,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   border-radius: 12px;
   border: 1px solid rgba(138, 138, 138, 0.08);
   background: rgba(255, 255, 255, 0.02);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -2243,7 +2243,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   border-radius: 12px;
   border: 1px solid rgba(138, 138, 138, 0.08);
   background: rgba(255, 255, 255, 0.02);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -2280,13 +2280,13 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 /* ---- 背景状态信息 ---- */
 .bg-summary {
   font-size: 12px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 2px;
 }
 
 .bg-meta {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0;
   opacity: 0.7;
 }
@@ -2318,7 +2318,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 }
 .rm-detail-label {
   font-size: 13px;
-  color: var(--text-secondary, #b8b0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
 }
 .roombg-select {
@@ -2347,7 +2347,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
 }
 
@@ -2397,7 +2397,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   display: flex;
   justify-content: space-between;
   font-size: 10px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin-top: 6px;
 }
 
@@ -2412,7 +2412,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 
 .seg-label {
   font-size: 13px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   flex-shrink: 0;
 }
 
@@ -2429,7 +2429,7 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   border-radius: 10px;
   border: 1px solid rgba(138, 138, 138, 0.18);
   background: rgba(138, 138, 138, 0.06);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -2579,9 +2579,9 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 }
 
 .opmode-option--active {
-  border-color: var(--accent, #c9a96a);
+  border-color: var(--accent, #d4a574);
   background: linear-gradient(135deg, rgba(201, 169, 106, 0.16), rgba(201, 169, 106, 0.05));
-  box-shadow: 0 0 0 1px var(--accent, #c9a96a) inset;
+  box-shadow: 0 0 0 1px var(--accent, #d4a574) inset;
 }
 
 .opmode-option__icon {

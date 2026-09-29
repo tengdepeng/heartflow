@@ -243,7 +243,7 @@ const healthRing = computed(() => {
 }
 .iap-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .iap-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.iap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.iap-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .iap-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .iap-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); white-space: nowrap; }
 
@@ -261,7 +261,7 @@ const healthRing = computed(() => {
 .iap-health-ring span { position: relative; font-size: 9px; color: rgba(232,221,208,0.5); }
 .iap-health-grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .iap-health-item { display: flex; flex-direction: column; gap: 2px; }
-.iap-health-item b { font-size: 15px; font-weight: 500; color: var(--text-high, #d8c3a5); font-variant-numeric: tabular-nums; }
+.iap-health-item b { font-size: 15px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-variant-numeric: tabular-nums; }
 .iap-health-item span { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
 
 .iap-rank { display: flex; flex-direction: column; gap: 8px; }
@@ -272,7 +272,7 @@ const healthRing = computed(() => {
 .iap-rank-idx.top { background: rgba(240,192,64,0.16); color: #f0c040; }
 .iap-rank-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
 .iap-rank-head { display: flex; align-items: center; gap: 8px; }
-.iap-rank-head b { font-size: 12px; color: var(--text-high, #d8c3a5); font-weight: 500; }
+.iap-rank-head b { font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 .iap-rank-trend { font-size: 9px; padding: 1px 6px; border-radius: 6px; }
 .iap-rank-trend.is-rising { background: rgba(138,154,122,0.18); color: #8a9a7a; }
 .iap-rank-trend.is-declining { background: rgba(196,106,90,0.16); color: #c46a5a; }
@@ -284,12 +284,12 @@ const healthRing = computed(() => {
 
 .iap-centrality { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .iap-cent-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 6px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
-.iap-cent-item b { font-size: 15px; font-weight: 500; color: var(--text-high, #d8c3a5); font-variant-numeric: tabular-nums; }
+.iap-cent-item b { font-size: 15px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-variant-numeric: tabular-nums; }
 .iap-cent-item span { font-size: 9px; color: rgba(232, 221, 208, 0.45); text-align: center; }
 
 .iap-prop { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .iap-prop-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
-.iap-prop-stat b { font-size: 16px; font-weight: 500; color: var(--text-high, #d8c3a5); font-variant-numeric: tabular-nums; }
+.iap-prop-stat b { font-size: 16px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-variant-numeric: tabular-nums; }
 .iap-prop-stat span { font-size: 9px; color: rgba(232, 221, 208, 0.45); }
 .iap-paths { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
 .iap-paths-label { font-size: 10px; color: rgba(232, 221, 208, 0.4); }

@@ -309,7 +309,7 @@ function onPinSlotChange(roomId: string, value: string) {
 
 .rm-overview-label {
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.05em;
 }
 

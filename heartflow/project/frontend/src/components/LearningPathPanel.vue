@@ -252,13 +252,13 @@ onMounted(() => {
 }
 .lpp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .lpp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.lpp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.lpp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .lpp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .lpp-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.7); white-space: nowrap; }
 
 .lpp-metrics { display: flex; gap: 8px; margin-bottom: 16px; }
 .lpp-metric { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 4px; border-radius: 10px; background: rgba(255,255,255,0.03); }
-.lpp-metric b { font-size: 18px; font-weight: 600; color: var(--text-high, #d8c3a5); font-variant-numeric: tabular-nums; }
+.lpp-metric b { font-size: 18px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-variant-numeric: tabular-nums; }
 .lpp-metric span { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 
 .lpp-block { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; border-top: 1px solid rgba(var(--accent-rgb), 0.1); }
@@ -274,7 +274,7 @@ onMounted(() => {
   border-radius: 10px;
   border: 1px solid var(--border, rgba(255,255,255,0.08));
   background: rgba(255,255,255,0.02);
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   font-size: 12px;
   font-family: inherit;
   outline: none;
@@ -312,7 +312,7 @@ onMounted(() => {
 .lpp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .lpp-btn--ghost { background: transparent; color: rgba(232, 221, 208, 0.6); }
 .lpp-btn--ghost:hover:not(:disabled) { color: rgba(232, 221, 208, 0.85); background: rgba(255,255,255,0.04); }
-.lpp-btn--primary { background: rgba(var(--accent-rgb), 0.16); color: var(--text-high, #d8c3a5); }
+.lpp-btn--primary { background: rgba(var(--accent-rgb), 0.16); color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 
 .lpp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .lpp-chip {
@@ -341,7 +341,7 @@ onMounted(() => {
 .lpp-gaps { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
 .lpp-gap { display: flex; flex-direction: column; gap: 4px; }
 .lpp-gap-head { display: flex; align-items: center; gap: 8px; }
-.lpp-gap-name { font-size: 12px; color: var(--text-high, #d8c3a5); flex: 1; }
+.lpp-gap-name { font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); flex: 1; }
 .lpp-gap-level { font-size: 10px; color: rgba(232, 221, 208, 0.5); }
 .lpp-gap-hours { font-size: 10px; color: rgba(var(--accent-rgb), 0.6); font-variant-numeric: tabular-nums; }
 .lpp-gap-bar { height: 5px; border-radius: 999px; background: rgba(255,255,255,0.05); overflow: hidden; }
@@ -361,7 +361,7 @@ onMounted(() => {
 .lpp-path-head { display: flex; align-items: center; gap: 10px; }
 .lpp-path-icon { font-size: 20px; flex-shrink: 0; }
 .lpp-path-title-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.lpp-path-name { font-size: 13px; color: var(--text-high, #d8c3a5); font-weight: 500; }
+.lpp-path-name { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 .lpp-path-meta { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
 .lpp-path-pct { font-size: 15px; font-weight: 600; color: var(--path-accent, #8a9a7a); font-variant-numeric: tabular-nums; }
 .lpp-path-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.05); overflow: hidden; }
@@ -413,7 +413,7 @@ onMounted(() => {
 }
 .lpp-node.done .lpp-node-check { background: var(--path-accent, #8a9a7a); border-color: var(--path-accent, #8a9a7a); color: #0e110e; }
 .lpp-node-body { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }
-.lpp-node-name { font-size: 12px; color: var(--text-high, #d8c3a5); }
+.lpp-node-name { font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .lpp-node.done .lpp-node-name { text-decoration: line-through; }
 .lpp-node-meta { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 .lpp-node-date { font-size: 10px; color: rgba(232, 221, 208, 0.3); }

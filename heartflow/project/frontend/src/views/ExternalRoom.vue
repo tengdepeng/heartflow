@@ -96,7 +96,7 @@ const externalConsented = computed(() => isExternalAIConsented())
   margin: 0 auto;
   min-height: 100%;
   padding: 0;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .gate-banner {
@@ -138,7 +138,7 @@ const externalConsented = computed(() => isExternalAIConsented())
   border-radius: 10px;
   font-size: 13px;
   cursor: pointer;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, background 0.2s ease;

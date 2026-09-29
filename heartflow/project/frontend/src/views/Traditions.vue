@@ -385,7 +385,7 @@ onMounted(async () => {
 <style scoped>
 .traditions-view {
   min-height: 100%;
-  color: var(--text-primary, #e8e3da);
+  color: var(--text-primary, #e8e0d8);
   background: transparent;
   position: relative;
 }
@@ -466,7 +466,7 @@ onMounted(async () => {
   border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 10px;
   padding: 9px 12px;
-  color: var(--text-primary, #e8e3da);
+  color: var(--text-primary, #e8e0d8);
   font-size: 13px;
   outline: none;
   width: 100%;
@@ -488,7 +488,7 @@ onMounted(async () => {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   padding: 8px 14px;
-  color: var(--text-primary, #e8e3da);
+  color: var(--text-primary, #e8e0d8);
   font-size: 13px;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;

@@ -273,7 +273,7 @@ function clearCustom() {
   position: relative;
   width: 380px;
   max-width: 90vw;
-  background: var(--bg-surface, rgba(255,255,255,0.06));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--border, var(--glass-border));
   border-radius: 24px;
   padding: 32px;
@@ -405,7 +405,7 @@ function clearCustom() {
   border-radius: 12px;
   border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   transition: all 0.18s ease;
 }
@@ -430,7 +430,7 @@ function clearCustom() {
   border-radius: 10px;
   border: none;
   background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e0e0e0);
+  color: var(--text-primary, #e8e0d8);
   font-size: 13px;
   cursor: pointer;
   transition: all 0.18s ease;
@@ -474,7 +474,7 @@ function clearCustom() {
   border-radius: 50%;
   border: none;
   background: rgba(255,255,255,0.06);
-  color: var(--text-secondary, rgba(255,255,255,0.5));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 14px;
   cursor: pointer;
   display: flex;
@@ -485,7 +485,7 @@ function clearCustom() {
 
 .close-btn:hover {
   background: rgba(255,255,255,0.12);
-  color: var(--text-primary, #e0e0e0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 /* 弹窗动画 */

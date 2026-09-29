@@ -243,7 +243,7 @@ function handleResolveAlert(id: string): void {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .shp-head {
   display: flex;
@@ -253,11 +253,11 @@ function handleResolveAlert(id: string): void {
 .shp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .shp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-tabs {
   display: flex;
@@ -269,7 +269,7 @@ function handleResolveAlert(id: string): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
 }
@@ -286,7 +286,7 @@ function handleResolveAlert(id: string): void {
 .shp-block-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-overview-top {
   display: flex;
@@ -301,7 +301,7 @@ function handleResolveAlert(id: string): void {
   gap: 2px;
   padding: 10px 16px;
   border-radius: 8px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.04));
+  background: var(--bg-panel, #1a1612);
 }
 .shp-score-value {
   font-size: 22px;
@@ -310,14 +310,14 @@ function handleResolveAlert(id: string): void {
 }
 .shp-score-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-overview-meta {
   display: flex;
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-levels {
   display: flex;
@@ -332,13 +332,13 @@ function handleResolveAlert(id: string): void {
 }
 .shp-level-label {
   width: 32px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-level-bar {
   flex: 1;
   height: 8px;
   border-radius: 4px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.06));
+  background: var(--bg-panel, #1a1612);
   overflow: hidden;
 }
 .shp-level-fill {
@@ -349,22 +349,22 @@ function handleResolveAlert(id: string): void {
 .shp-level-count {
   width: 16px;
   text-align: right;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .shp-extreme {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-extreme-item b {
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-weight: 600;
 }
 .shp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
 }
 .shp-btn {
@@ -384,7 +384,7 @@ function handleResolveAlert(id: string): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 6px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
 }
@@ -394,7 +394,7 @@ function handleResolveAlert(id: string): void {
   gap: 4px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.04));
+  background: var(--bg-panel, #1a1612);
 }
 .shp-report-head {
   display: flex;
@@ -404,7 +404,7 @@ function handleResolveAlert(id: string): void {
 .shp-report-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .shp-report-level {
   font-size: 12px;
@@ -413,13 +413,13 @@ function handleResolveAlert(id: string): void {
 .shp-report-score {
   margin-left: auto;
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-report-meta {
   display: flex;
   gap: 10px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .shp-delta--up {
   color: #8a9a7a;
@@ -433,7 +433,7 @@ function handleResolveAlert(id: string): void {
   gap: 4px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.04));
+  background: var(--bg-panel, #1a1612);
 }
 .shp-issue-head {
   display: flex;
@@ -443,7 +443,7 @@ function handleResolveAlert(id: string): void {
 .shp-issue-type {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .shp-issue-sev {
   font-size: 11px;
@@ -469,7 +469,7 @@ function handleResolveAlert(id: string): void {
 }
 .shp-issue-desc {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
 }
 .shp-issue-suggestion {
@@ -483,7 +483,7 @@ function handleResolveAlert(id: string): void {
   gap: 4px;
   padding: 8px 10px;
   border-radius: 8px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.04));
+  background: var(--bg-panel, #1a1612);
 }
 .shp-alert-head {
   display: flex;
@@ -515,11 +515,11 @@ function handleResolveAlert(id: string): void {
 .shp-alert-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .shp-alert-desc {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0;
 }
 .shp-alert-actions {
@@ -533,7 +533,7 @@ function handleResolveAlert(id: string): void {
   height: 52px;
   padding: 2px;
   border-radius: 8px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .shp-trend-col {
   flex: 1;

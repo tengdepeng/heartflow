@@ -159,7 +159,7 @@ function shortTime(iso: string): string {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .vfp-head {
   display: flex;
@@ -169,11 +169,11 @@ function shortTime(iso: string): string {
 .vfp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .vfp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .vfp-stats {
   display: grid;
@@ -197,7 +197,7 @@ function shortTime(iso: string): string {
 }
 .vfp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .vfp-add {
   display: flex;
@@ -219,12 +219,12 @@ function shortTime(iso: string): string {
   border-radius: 10px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
   outline: none;
 }
 .vfp-input::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .vfp-chip {
   display: inline-flex;
@@ -235,7 +235,7 @@ function shortTime(iso: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
@@ -252,7 +252,7 @@ function shortTime(iso: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -294,7 +294,7 @@ function shortTime(iso: string): string {
 .vfp-item-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .vfp-tag {
   padding: 2px 8px;
@@ -307,13 +307,13 @@ function shortTime(iso: string): string {
 .vfp-item-time {
   margin-left: auto;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .vfp-item-msg,
 .vfp-item-flower,
 .vfp-item-reply {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .vfp-reply {
   display: flex;
@@ -322,6 +322,6 @@ function shortTime(iso: string): string {
 }
 .vfp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 </style>

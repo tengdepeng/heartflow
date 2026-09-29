@@ -219,12 +219,12 @@ onMounted(() => {
 .corridor-title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary, rgba(255,255,255,0.85));
+  color: var(--text-primary, #e8e0d8));
 }
 
 .corridor-scale {
   font-size: 11px;
-  color: var(--text-muted, rgba(255,255,255,0.44));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   cursor: default;
   user-select: none;
 }

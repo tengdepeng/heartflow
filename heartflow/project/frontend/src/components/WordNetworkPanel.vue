@@ -244,7 +244,7 @@ function relationLabel(r: SemanticRelation): string {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .wnp-head {
   display: flex;
@@ -254,11 +254,11 @@ function relationLabel(r: SemanticRelation): string {
 .wnp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wnp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-stats {
   display: grid;
@@ -282,7 +282,7 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-block {
   display: flex;
@@ -296,7 +296,7 @@ function relationLabel(r: SemanticRelation): string {
 .wnp-block-title {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wnp-row {
   display: flex;
@@ -311,19 +311,19 @@ function relationLabel(r: SemanticRelation): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
   outline: none;
 }
 .wnp-input::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-btn {
   padding: 6px 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -356,11 +356,11 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-etymology-origin {
   font-size: 13px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wnp-etymology-meta {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-tags {
   display: flex;
@@ -371,7 +371,7 @@ function relationLabel(r: SemanticRelation): string {
   padding: 3px 10px;
   border-radius: 10px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.8));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   background: rgba(138, 154, 122, 0.12);
   border: 1px solid rgba(138, 154, 122, 0.25);
 }
@@ -382,7 +382,7 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-relatives-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-chips {
   display: flex;
@@ -419,12 +419,12 @@ function relationLabel(r: SemanticRelation): string {
 .wnp-suggest-word {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wnp-search-origin,
 .wnp-suggestion-origin {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-suggest-rel {
   padding: 1px 8px;
@@ -435,7 +435,7 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-suggest-reason {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-network {
   display: flex;
@@ -462,7 +462,7 @@ function relationLabel(r: SemanticRelation): string {
 }
 .wnp-edge {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-saved {
   display: flex;
@@ -476,15 +476,15 @@ function relationLabel(r: SemanticRelation): string {
 .wnp-saved-center {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .wnp-saved-meta {
   margin-left: auto;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wnp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 </style>

@@ -154,7 +154,7 @@ function difficultyLabel(d: string) {
 }
 .wpp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .wpp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.wpp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.wpp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .wpp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .wpp-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e3c08a; white-space: nowrap; }
 .wpp-block-label { display: block; font-size: 11px; color: rgba(232, 221, 208, 0.5); letter-spacing: 1px; margin-bottom: 8px; }
@@ -174,7 +174,7 @@ function difficultyLabel(d: string) {
 .wpp-plan-head { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
 .wpp-plan-icon { font-size: 18px; flex-shrink: 0; }
 .wpp-plan-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-.wpp-plan-name { font-size: 13px; font-weight: 500; color: var(--text-high, #d8c3a5); }
+.wpp-plan-name { font-size: 13px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .wpp-plan-desc { font-size: 11px; color: rgba(232, 221, 208, 0.4); line-height: 1.5; }
 .wpp-plan-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: rgba(var(--accent-rgb), 0.16); color: #e3c08a; white-space: nowrap; flex-shrink: 0; }
 .wpp-plan-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; color: rgba(232, 221, 208, 0.45); margin-bottom: 8px; }
@@ -194,12 +194,12 @@ function difficultyLabel(d: string) {
 .wpp-form-row { display: flex; gap: 8px; }
 .wpp-input {
   flex: 1; padding: 8px 10px; border: 1px solid rgba(var(--accent-rgb), 0.12); border-radius: 8px;
-  background: var(--bg-card, rgba(255,255,255,0.03)); color: var(--text-high, #d8c3a5); font-size: 12px; font-family: inherit; outline: none;
+  background: var(--bg-card, rgba(255,255,255,0.03)); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 12px; font-family: inherit; outline: none;
 }
 .wpp-input::placeholder { color: rgba(232, 221, 208, 0.3); }
 .wpp-input:focus { border-color: rgba(var(--accent-rgb), 0.35); }
 .wpp-select {
   flex: 1; padding: 8px 10px; border: 1px solid rgba(var(--accent-rgb), 0.12); border-radius: 8px;
-  background: var(--bg-card, rgba(255,255,255,0.03)); color: var(--text-high, #d8c3a5); font-size: 12px; font-family: inherit; outline: none; cursor: pointer;
+  background: var(--bg-card, rgba(255,255,255,0.03)); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 12px; font-family: inherit; outline: none; cursor: pointer;
 }
 </style>

@@ -129,7 +129,7 @@ function formatTime(iso: string): string {
 <style scoped>
 .rm-panel {
   background: var(--card-bg, rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(var(--accent-rgb, 140 160 190), 0.08);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.08);
   border-radius: 14px;
   padding: 16px;
 }
@@ -142,11 +142,11 @@ function formatTime(iso: string): string {
 .rm-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-high, #dce4f0);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .rm-sub {
   font-size: 12px;
-  color: rgba(var(--accent-rgb, 140 160 190), 0.5);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.5);
 }
 .rm-export {
   margin-left: auto;
@@ -176,9 +176,9 @@ function formatTime(iso: string): string {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(var(--accent-rgb, 140 160 190), 0.14);
-  background: rgba(var(--bg-card-rgb, 20 26 38), 0.5);
-  color: var(--text-high, #c6d0e0);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.14);
+  background: rgba(var(--bg-card-rgb, 42, 36, 30), 0.5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   font-size: 13px;
   font-family: inherit;
   line-height: 1.5;
@@ -187,7 +187,7 @@ function formatTime(iso: string): string {
 }
 .rm-input:focus {
   outline: none;
-  border-color: rgba(var(--accent-rgb, 140 160 190), 0.3);
+  border-color: rgba(var(--accent-rgb, 212, 165, 116), 0.3);
 }
 .rm-compose-actions {
   display: flex;
@@ -198,7 +198,7 @@ function formatTime(iso: string): string {
 }
 .rm-linked {
   font-size: 12px;
-  color: rgba(var(--accent-rgb, 140 160 190), 0.6);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.6);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -211,7 +211,7 @@ function formatTime(iso: string): string {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: rgba(var(--accent-rgb, 140 160 190), 0.7);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.7);
   cursor: pointer;
 }
 .rm-list {
@@ -222,14 +222,14 @@ function formatTime(iso: string): string {
 .rm-item {
   padding: 12px 14px;
   border-radius: 10px;
-  border: 1px solid rgba(var(--accent-rgb, 140 160 190), 0.08);
-  background: rgba(var(--accent-rgb, 140 160 190), 0.04);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.08);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.04);
 }
 .rm-text {
   margin: 0 0 8px;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-high, #dce4f0);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   white-space: pre-wrap;
   word-break: break-word;
 }
@@ -238,21 +238,21 @@ function formatTime(iso: string): string {
   align-items: center;
   gap: 8px;
   font-size: 11px;
-  color: rgba(var(--accent-rgb, 140 160 190), 0.45);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.45);
   flex-wrap: wrap;
 }
 .rm-book-chip {
   padding: 1px 8px;
   border-radius: 999px;
-  border: 1px solid rgba(var(--accent-rgb, 140 160 190), 0.3);
-  color: rgba(var(--accent-rgb, 140 160 190), 0.85);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.3);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.85);
   max-width: 180px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .rm-time {
-  color: rgba(var(--accent-rgb, 140 160 190), 0.45);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.45);
 }
 .rm-item-actions {
   margin-left: auto;
@@ -262,9 +262,9 @@ function formatTime(iso: string): string {
 .rm-btn {
   padding: 5px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(var(--accent-rgb, 140 160 190), 0.22);
-  background: rgba(var(--accent-rgb, 140 160 190), 0.1);
-  color: var(--accent, #9fc4e8);
+  border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.22);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.1);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -275,11 +275,11 @@ function formatTime(iso: string): string {
   cursor: not-allowed;
 }
 .rm-btn:hover:not(:disabled) {
-  background: rgba(var(--accent-rgb, 140 160 190), 0.18);
+  background: rgba(var(--accent-rgb, 212, 165, 116), 0.18);
 }
 .rm-ghost {
   background: transparent;
-  color: rgba(var(--accent-rgb, 140 160 190), 0.6);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.6);
 }
 .rm-del {
   color: #ff9b8a;
@@ -290,7 +290,7 @@ function formatTime(iso: string): string {
 }
 .rm-empty {
   font-size: 12px;
-  color: rgba(var(--accent-rgb, 140 160 190), 0.5);
+  color: rgba(var(--accent-rgb, 212, 165, 116), 0.5);
   margin: 8px 0 0;
 }
 </style>

@@ -244,7 +244,7 @@ const scoreRing = computed(() => {
 }
 .csp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .csp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.csp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.csp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .csp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .csp-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e0b88a; white-space: nowrap; }
 
@@ -254,7 +254,7 @@ const scoreRing = computed(() => {
 .csp-scenario.active { border-color: var(--scn-color, #8a9a7a); background: rgba(var(--accent-rgb), 0.1); }
 .csp-scn-icon { font-size: 20px; flex-shrink: 0; }
 .csp-scn-body { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.csp-scn-name { font-size: 13px; color: var(--text-high, #d8c3a5); }
+.csp-scn-name { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .csp-scn-desc { font-size: 10px; color: rgba(232, 221, 208, 0.5); line-height: 1.5; }
 .csp-scn-type { font-size: 9px; color: var(--scn-color, #8a9a7a); font-style: normal; }
 
@@ -271,7 +271,7 @@ const scoreRing = computed(() => {
 .csp-score span { position: relative; font-size: 9px; color: rgba(232,221,208,0.5); }
 .csp-ev { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
 .csp-ev-label { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
-.csp-ev b { font-size: 22px; font-weight: 500; color: var(--text-high, #d8c3a5); }
+.csp-ev b { font-size: 22px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .csp-ev-type { font-size: 11px; color: rgba(232, 221, 208, 0.6); }
 
 .csp-reco { padding: 12px 14px; border-radius: 10px; background: rgba(var(--accent-rgb), 0.08); margin-bottom: 14px; }
@@ -285,7 +285,7 @@ const scoreRing = computed(() => {
 .csp-path-step { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
 .csp-path-head { display: flex; align-items: center; gap: 8px; }
 .csp-path-idx { width: 20px; height: 20px; border-radius: 50%; background: rgba(var(--accent-rgb), 0.14); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text-high); flex-shrink: 0; }
-.csp-path-head b { font-size: 12px; color: var(--text-high, #d8c3a5); font-weight: 500; }
+.csp-path-head b { font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 .csp-cum { margin-left: auto; font-size: 10px; color: rgba(var(--accent-rgb), 0.75); }
 .csp-path-outcome { font-size: 12px; color: rgba(232, 221, 208, 0.65); margin: 6px 0 4px; }
 .csp-badge-is-best { font-size: 9px; padding: 1px 6px; border-radius: 6px; background: rgba(138,154,122,0.18); color: #8a9a7a; margin-left: 6px; }
@@ -315,7 +315,7 @@ const scoreRing = computed(() => {
 .csp-factor { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
 .csp-factor + .csp-factor { margin-top: 8px; }
 .csp-factor-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.csp-factor-head b { font-size: 12px; color: var(--text-high, #d8c3a5); font-weight: 500; }
+.csp-factor-head b { font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 .csp-factor-sev { font-size: 10px; letter-spacing: 2px; }
 .csp-factor-mit { margin: 0; padding-left: 16px; display: flex; flex-direction: column; gap: 4px; }
 .csp-factor-mit li { font-size: 11px; color: rgba(232, 221, 208, 0.55); }
@@ -323,7 +323,7 @@ const scoreRing = computed(() => {
 .csp-alts { display: flex; flex-direction: column; gap: 8px; }
 .csp-alt { padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
 .csp-alt-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-.csp-alt-head b { font-size: 12px; color: var(--text-high, #d8c3a5); font-weight: 500; }
+.csp-alt-head b { font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 .csp-alt-ev { font-size: 10px; color: rgba(var(--accent-rgb), 0.75); }
 .csp-alt p { font-size: 11px; color: rgba(232, 221, 208, 0.55); margin: 0; line-height: 1.5; }
 

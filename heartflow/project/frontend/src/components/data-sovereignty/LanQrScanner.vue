@@ -263,7 +263,7 @@ onUnmounted(stop)
 }
 .lqs-idle-sub {
   font-size: 12px;
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.5;
 }
 
@@ -303,7 +303,7 @@ onUnmounted(stop)
 /* ---- 文案 ---- */
 .lqs-hint {
   font-size: 13px;
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: center;
 }
 .lqs-error {
@@ -323,7 +323,7 @@ onUnmounted(stop)
 .guard-btn--ghost {
   background: transparent;
   border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.35);
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .guard-btn--ghost:hover {
   border-color: rgba(var(--accent-rgb, 212, 165, 116), 0.6);

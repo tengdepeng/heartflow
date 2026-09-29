@@ -88,7 +88,7 @@ function copy(text: string) {
 <style scoped>
 .saa {
   padding: 4px 2px 16px;
-  color: var(--text-primary, var(--text-high));
+  color: var(--text-primary, #e8e0d8));
 }
 .saa-head {
   display: flex;
@@ -105,7 +105,7 @@ function copy(text: string) {
 }
 .saa-sub {
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.5px;
 }
 .saa-body {
@@ -121,7 +121,7 @@ function copy(text: string) {
 .saa-field-t {
   font-size: 11px;
   letter-spacing: 1px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .saa-input, .saa-output {
   width: 100%;
@@ -131,13 +131,13 @@ function copy(text: string) {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color, rgba(var(--accent-rgb), 0.12));
-  color: var(--text-primary, var(--text-high));
+  color: var(--text-primary, #e8e0d8));
   font-family: inherit;
   font-size: 13px;
   line-height: 1.7;
 }
 .saa-input::placeholder {
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 .saa-actions {
   display: flex;
@@ -170,7 +170,7 @@ function copy(text: string) {
 }
 .saa-tones-label {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 1px;
 }
 .saa-tone {
@@ -178,7 +178,7 @@ function copy(text: string) {
   border-radius: 999px;
   border: 1px solid var(--border-color, rgba(var(--accent-rgb), 0.12));
   background: transparent;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-family: inherit;
   font-size: 12px;
   cursor: pointer;
@@ -201,7 +201,7 @@ function copy(text: string) {
 }
 .saa-mode {
   font-size: 10px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 .saa-result-ops {
   display: flex;
@@ -219,6 +219,6 @@ function copy(text: string) {
 }
 .saa-op--ghost {
   background: transparent;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 </style>

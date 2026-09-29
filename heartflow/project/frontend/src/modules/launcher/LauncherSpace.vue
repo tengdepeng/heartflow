@@ -173,12 +173,12 @@ onUnmounted(() => {
 .space-tip-name {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .space-tip-meta {
   font-size: 11px;
   opacity: 0.72;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .space-fallback {
@@ -190,14 +190,14 @@ onUnmounted(() => {
   margin: 0 0 12px;
   font-size: 12px;
   opacity: 0.5;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .space-fallback-empty {
   font-size: 13px;
   opacity: 0.5;
   text-align: center;
   margin-top: 24px;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .space-fallback-grid {
   display: grid;
@@ -214,7 +214,7 @@ onUnmounted(() => {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
   cursor: pointer;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 .fb-item:hover {

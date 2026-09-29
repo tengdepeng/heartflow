@@ -216,7 +216,7 @@ function generate() {
 }
 .hcarch-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .hcarch-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.hcarch-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d6caf0); }
+.hcarch-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .hcarch-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .hcarch-gen {
   display: inline-flex;

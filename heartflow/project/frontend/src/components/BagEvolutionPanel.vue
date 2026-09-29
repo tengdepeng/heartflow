@@ -226,7 +226,7 @@ function evolve(p: EvolutionPath) {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .bep-head {
   display: flex;
@@ -236,11 +236,11 @@ function evolve(p: EvolutionPath) {
 .bep-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .bep-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-block {
   display: flex;
@@ -254,7 +254,7 @@ function evolve(p: EvolutionPath) {
 .bep-block-title {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .bep-row {
   display: flex;
@@ -267,19 +267,19 @@ function evolve(p: EvolutionPath) {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
   outline: none;
 }
 .bep-input::placeholder {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-btn {
   padding: 6px 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 12px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -326,7 +326,7 @@ function evolve(p: EvolutionPath) {
 }
 .bep-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-dist {
   display: flex;
@@ -359,7 +359,7 @@ function evolve(p: EvolutionPath) {
   width: 18px;
   text-align: right;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-avail-list {
   display: flex;
@@ -381,11 +381,11 @@ function evolve(p: EvolutionPath) {
 .bep-avail-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .bep-avail-stage {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-left: auto;
 }
 .bep-path-list {
@@ -419,11 +419,11 @@ function evolve(p: EvolutionPath) {
 .bep-path-name {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .bep-path-meta {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-path-head .bep-btn {
   margin-left: auto;
@@ -453,7 +453,7 @@ function evolve(p: EvolutionPath) {
 }
 .bep-stage-node-label {
   font-size: 10px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-req-list {
   display: flex;
@@ -468,7 +468,7 @@ function evolve(p: EvolutionPath) {
 .bep-req-label {
   width: 52px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-req-bar {
   flex: 1;
@@ -490,7 +490,7 @@ function evolve(p: EvolutionPath) {
   width: 64px;
   text-align: right;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-req.unmet .bep-req-val {
   color: #c46a5a;
@@ -508,10 +508,10 @@ function evolve(p: EvolutionPath) {
 }
 .bep-cannot-evolve {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .bep-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 </style>

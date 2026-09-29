@@ -45,7 +45,7 @@ const { entranceRef, entranceClass } = useViewEntrance()
   max-width: 680px;
   margin: 0 auto;
   min-height: 100%;
-  color: var(--text-primary, #e8e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .pdr-meta {

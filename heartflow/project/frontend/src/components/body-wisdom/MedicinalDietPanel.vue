@@ -129,7 +129,7 @@ function toggleExpand(id: string) {
   padding: 16px;
   border: 1px solid var(--border, rgba(120, 140, 120, 0.25));
   border-radius: 12px;
-  background: var(--surface, rgba(20, 26, 20, 0.6));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.03));
 }
 .mdp-head {
   display: flex;
@@ -143,7 +143,7 @@ function toggleExpand(id: string) {
 }
 .mdp-sub {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .mdp-block {
   display: flex;
@@ -156,7 +156,7 @@ function toggleExpand(id: string) {
 .mdp-block-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .mdp-today {
   display: flex;
@@ -178,19 +178,19 @@ function toggleExpand(id: string) {
 }
 .mdp-today-desc {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 .mdp-today-meta {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .mdp-effect-chip {
   font-size: 11px;
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(138, 154, 122, 0.15);
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   white-space: nowrap;
 }
 .mdp-fav-btn {
@@ -200,7 +200,7 @@ function toggleExpand(id: string) {
   
   border: none;
   background: transparent;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   cursor: pointer;
   padding: 2px 6px;
@@ -254,7 +254,7 @@ function toggleExpand(id: string) {
 }
 .mdp-recipe-desc {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 .mdp-recipe-detail {
@@ -270,20 +270,20 @@ function toggleExpand(id: string) {
   font-size: 12px;
 }
 .mdp-detail-row strong {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   min-width: 52px;
 }
 .mdp-detail-row span {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .mdp-steps {
   margin: 0;
   padding-left: 18px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .mdp-empty {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 .mdp-fav-list {
@@ -319,10 +319,10 @@ function toggleExpand(id: string) {
   font-size: 13px;
 }
 .mdp-stat-label {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .mdp-stat-count {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   font-weight: 600;
 }
 </style>

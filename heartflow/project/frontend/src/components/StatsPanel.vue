@@ -312,7 +312,7 @@ function barHeight(minutes: number): string {
 .goal-progress-fill {
   height: 100%;
   border-radius: 4px;
-  background: linear-gradient(90deg, var(--accent, #a07c8c), var(--success));
+  background: linear-gradient(90deg, var(--accent, #d4a574), var(--success));
   transition: width 0.5s ease;
 }
 .goal-progress-label {

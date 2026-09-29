@@ -293,13 +293,13 @@ const note = computed(() => {
   margin: 0 0 4px;
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #f0e8dc);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .vcp-sub {
   margin: 0;
   font-size: 12px;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   max-width: 480px;
   line-height: 1.6;
 }
@@ -309,7 +309,7 @@ const note = computed(() => {
   padding: 3px 10px;
   border-radius: 999px;
   border: 1px solid var(--border, rgba(212, 165, 116, 0.3));
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   white-space: nowrap;
 }
@@ -317,7 +317,7 @@ const note = computed(() => {
 .vcp-empty {
   margin: 6px 0 10px;
   font-size: 13px;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .vcp-bar {
@@ -343,7 +343,7 @@ const note = computed(() => {
 
 .vcp-ctl-label {
   font-size: 11px;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .vcp-select {
@@ -351,7 +351,7 @@ const note = computed(() => {
   border-radius: 8px;
   border: 1px solid var(--border, rgba(212, 165, 116, 0.25));
   background: rgba(15, 12, 10, 0.6);
-  color: var(--text-primary, #f0e8dc);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
 }
 
@@ -365,7 +365,7 @@ const note = computed(() => {
   border-radius: 999px;
   border: 1px solid var(--border, rgba(212, 165, 116, 0.22));
   background: rgba(212, 165, 116, 0.05);
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -373,7 +373,7 @@ const note = computed(() => {
 
 .vcp-chip.is-active {
   background: rgba(212, 165, 116, 0.2);
-  color: var(--text-primary, #f0e8dc);
+  color: var(--text-primary, #e8e0d8);
   border-color: rgba(212, 165, 116, 0.5);
 }
 
@@ -385,7 +385,7 @@ const note = computed(() => {
   margin: 0 0 10px;
   font-size: 12px;
   font-family: ui-monospace, monospace;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .vcp-canvas :deep(svg) {
@@ -401,7 +401,7 @@ const note = computed(() => {
 .vcp-note {
   margin: 10px 0 0;
   font-size: 12px;
-  color: var(--text-secondary, #a89a88);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: right;
 }
 </style>

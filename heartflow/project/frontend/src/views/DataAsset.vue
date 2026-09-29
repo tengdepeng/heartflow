@@ -263,18 +263,18 @@ onMounted(() => {
 /* 头部（已迁移至 RoomLayout 统一头部，面包屑经 #breadcrumb 插槽保留 nav.enterRoom） */
 
 .da-section { position: relative; z-index: 1; margin-bottom: 20px; padding: 18px 20px; border-radius: 14px; background: var(--card-bg, rgba(18, 14, 11, 0.6)); border: 1px solid var(--border, rgba(255, 255, 255, 0.08)); }
-.da-panel-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); margin: 0 0 12px; }
+.da-panel-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); margin: 0 0 12px; }
 
 .da-overview { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .da-ov-card { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 12px 4px; border-radius: 10px; background: rgba(255,255,255,0.03); }
 .da-ov-card--main { background: rgba(var(--accent-rgb), 0.08); border: 1px solid rgba(var(--accent-rgb), 0.15); }
-.da-ov-value { font-size: 19px; font-weight: 600; color: var(--text-high, #d8c3a5); font-variant-numeric: tabular-nums; }
+.da-ov-value { font-size: 19px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-variant-numeric: tabular-nums; }
 .da-ov-label { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
 
 .da-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .da-panel { padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); }
 .da-storage { display: flex; flex-direction: column; gap: 4px; }
-.da-storage-size { font-size: 22px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.da-storage-size { font-size: 22px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .da-storage-meta { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
 .da-trend { display: flex; flex-direction: column; gap: 8px; }
 .da-trend-badge { align-self: flex-start; font-size: 12px; padding: 3px 12px; border-radius: 8px; background: rgba(148,163,184,0.12); color: #94a3b8; }
@@ -282,12 +282,12 @@ onMounted(() => {
 .da-trend--declining { background: rgba(196,106,90,0.12); color: #c46a5a; }
 .da-trend--dormant { background: rgba(148,163,184,0.12); color: #94a3b8; }
 .da-trend-stats { display: flex; flex-wrap: wrap; gap: 8px; font-size: 10px; color: rgba(232, 221, 208, 0.5); }
-.da-trend-stats b { color: var(--text-high, #d8c3a5); font-variant-numeric: tabular-nums; }
+.da-trend-stats b { color: var(--text-high, rgba(232, 224, 216, 0.88)); font-variant-numeric: tabular-nums; }
 
 .da-health { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .da-health-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); }
-.da-health-name { font-size: 12px; font-weight: 600; color: var(--text-high, #d8c3a5); }
-.da-health-count { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--text-high, #d8c3a5); font-variant-numeric: tabular-nums; }
+.da-health-name { font-size: 12px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
+.da-health-count { margin-left: auto; font-size: 13px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-variant-numeric: tabular-nums; }
 .da-health-state { font-size: 10px; padding: 1px 8px; border-radius: 8px; }
 .da-health--healthy .da-health-state { background: rgba(138,154,122,0.15); color: #8a9a7a; }
 .da-health--warning .da-health-state { background: rgba(240,192,64,0.12); color: #f0c040; }
@@ -303,11 +303,11 @@ onMounted(() => {
 .da-export { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .da-export-meta { font-size: 11px; color: rgba(232, 221, 208, 0.5); }
 .da-export-ctrl { display: flex; gap: 8px; }
-.da-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d8c3a5); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+.da-btn { padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d4a574); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .da-btn:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.18); border-color: rgba(var(--accent-rgb), 0.5); }
 .da-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .da-btn--ghost { background: transparent; border-color: rgba(255,255,255,0.15); color: rgba(232, 221, 208, 0.6); }
-.da-btn--ghost:hover { border-color: rgba(var(--accent-rgb), 0.4); color: var(--accent, #d8c3a5); background: rgba(var(--accent-rgb), 0.08); }
+.da-btn--ghost:hover { border-color: rgba(var(--accent-rgb), 0.4); color: var(--accent, #d4a574); background: rgba(var(--accent-rgb), 0.08); }
 
 .da-recs { display: flex; flex-direction: column; gap: 8px; }
 .da-rec { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,0.03); }
@@ -316,7 +316,7 @@ onMounted(() => {
 .da-rec--medium .da-rec-pri { background: rgba(240,192,64,0.12); color: #f0c040; }
 .da-rec--low .da-rec-pri { background: rgba(148,163,184,0.12); color: #94a3b8; }
 .da-rec-body { display: flex; flex-direction: column; gap: 2px; }
-.da-rec-title { font-size: 12px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.da-rec-title { font-size: 12px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .da-rec-desc { font-size: 11px; color: rgba(232, 221, 208, 0.5); margin: 0; line-height: 1.5; }
 
 @media (max-width: 640px) {

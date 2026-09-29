@@ -164,7 +164,7 @@ function pct(v: number): string {
 .wmap-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   letter-spacing: 0.02em;
 }
 .wmap-badge {
@@ -179,14 +179,14 @@ function pct(v: number): string {
   background: color-mix(in srgb, #f0c040 12%, transparent);
 }
 .wmap-badge-neutral {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
   background: transparent;
 }
 .wmap-empty {
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wmap-block {
   margin-top: 18px;
@@ -196,7 +196,7 @@ function pct(v: number): string {
 .wmap-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
   letter-spacing: 0.06em;
 }
@@ -222,11 +222,11 @@ function pct(v: number): string {
 .wmap-cell-num {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .wmap-cell-label {
   font-size: 11px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: center;
 }
 .wmap-rows {
@@ -247,7 +247,7 @@ function pct(v: number): string {
 }
 .wmap-row-label {
   font-size: 12px;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .wmap-row-track {
   height: 6px;
@@ -263,7 +263,7 @@ function pct(v: number): string {
 }
 .wmap-row-num {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: right;
 }
 .wmap-tags {
@@ -275,7 +275,7 @@ function pct(v: number): string {
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 12px;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   background: color-mix(in srgb, var(--bg-card, #241f18) 60%, transparent);
   border: 1px solid var(--border-light, #3a332a);
 }
@@ -299,7 +299,7 @@ function pct(v: number): string {
 }
 .wmap-health-label {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wmap-health-bars {
   flex: 1;
@@ -315,7 +315,7 @@ function pct(v: number): string {
 }
 .wmap-hbar-label {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .wmap-hbar-track {
   height: 6px;
@@ -338,7 +338,7 @@ function pct(v: number): string {
 }
 .wmap-hbar-num {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: right;
 }
 .wmap-insights {
@@ -357,7 +357,7 @@ function pct(v: number): string {
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .wmap-insight-mark {
   color: #f0c040;

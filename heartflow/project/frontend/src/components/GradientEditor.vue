@@ -152,11 +152,11 @@ function addStop() {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ge-value {
-  color: var(--text-primary, #e8e8ed);
+  color: var(--text-primary, #e8e0d8);
   font-variant-numeric: tabular-nums;
 }
 
@@ -190,7 +190,7 @@ function addStop() {
 
 .ge-stop__pos {
   font-size: 12px;
-  color: var(--text-muted, rgba(255, 255, 255, 0.35));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-variant-numeric: tabular-nums;
 }
 
@@ -200,7 +200,7 @@ function addStop() {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   font-size: 16px;
   line-height: 1;
@@ -223,7 +223,7 @@ function addStop() {
   border: 1px dashed rgba(255, 255, 255, 0.18);
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(255, 255, 255, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   cursor: pointer;
   transition: all 0.18s ease;

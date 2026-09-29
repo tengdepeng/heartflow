@@ -154,7 +154,7 @@ onMounted(() => { refreshTick.value++ })
 .aap-hint { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
 .aap-run { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .aap-threshold-label { font-size: 13px; color: var(--text-high); display: inline-flex; align-items: center; gap: 8px; }
-.aap-threshold { padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: var(--bg-panel, rgba(20,18,15,0.6)); color: var(--text-high); font-size: 13px; }
+.aap-threshold { padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); background: var(--bg-panel, #1a1612)); color: var(--text-high); font-size: 13px; }
 .aap-run-btn {
   padding: 8px 16px; border-radius: 8px; cursor: pointer;
   background: rgba(var(--accent-rgb), 0.15); border: 1px solid rgba(var(--accent-rgb), 0.4); color: var(--accent);
@@ -167,7 +167,7 @@ onMounted(() => { refreshTick.value++ })
 .aap-log-item { display: flex; gap: 10px; align-items: center; font-size: 12px; color: var(--text-secondary); }
 .aap-log-time { flex: 0 0 90px; opacity: 0.7; font-variant-numeric: tabular-nums; }
 .aap-log-text { flex: 1; }
-.aap-restore-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: var(--bg-surface, rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.07); }
+.aap-restore-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: var(--bg-surface, rgba(255, 255, 255, 0.03)); border: 1px solid rgba(255,255,255,0.07); }
 .aap-item-kind { font-size: 15px; }
 .aap-item-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .aap-item-title { font-size: 13px; color: var(--text-high); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

@@ -162,7 +162,7 @@ function shortTime(iso: string): string {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .cbp-head {
   display: flex;
@@ -172,11 +172,11 @@ function shortTime(iso: string): string {
 .cbp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .cbp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cbp-climate {
   display: flex;
@@ -189,7 +189,7 @@ function shortTime(iso: string): string {
 }
 .cbp-climate-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cbp-climate-chips {
   display: flex;
@@ -201,7 +201,7 @@ function shortTime(iso: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 14px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -234,7 +234,7 @@ function shortTime(iso: string): string {
 }
 .cbp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cbp-result {
   display: flex;
@@ -260,12 +260,12 @@ function shortTime(iso: string): string {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .cbp-result-meta {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 2px;
 }
 .cbp-recipes {
@@ -294,12 +294,12 @@ function shortTime(iso: string): string {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .cbp-recipe-desc {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 2px;
 }
 .cbp-recipe-meta {
@@ -307,7 +307,7 @@ function shortTime(iso: string): string {
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 4px;
   flex-wrap: wrap;
 }
@@ -322,7 +322,7 @@ function shortTime(iso: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s;
@@ -339,7 +339,7 @@ function shortTime(iso: string): string {
 }
 .cbp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   padding: 16px 0;
   text-align: center;
 }

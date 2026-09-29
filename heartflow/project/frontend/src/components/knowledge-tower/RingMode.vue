@@ -10,7 +10,7 @@
             <text v-for="n in r.nodes" :key="'t'+n.id" :x="n.cx" :y="n.cy - 9" text-anchor="middle" fill="rgba(232,224,216,0.6)" font-size="7" class="kt-ring-label">{{n.title.slice(0,6)}}</text>
           </template>
           <circle cx="150" cy="150" r="18" fill="rgba(var(--accent-rgb), 0.08)" stroke="rgba(var(--accent-rgb), 0.15)" stroke-width="1"/>
-          <text x="150" y="150" text-anchor="middle" dominant-baseline="central" fill="rgba(var(--accent-rgb), 0.5)" font-size="16" style="font-family: var(--font-heading-zh, 'Noto Serif SC', serif)">知</text>
+          <text x="150" y="150" text-anchor="middle" dominant-baseline="central" fill="rgba(var(--accent-rgb), 0.5)" font-size="16" style="font-family: var(--font-heading-zh, 'Noto Serif SC', 'Noto Sans SC', 'Source Han Serif SC', serif)">知</text>
         </svg>
       </div>
       <div v-else class="kt-empty"><span>🌟</span><p>知识星图等待第一个节点</p></div>

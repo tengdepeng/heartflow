@@ -226,7 +226,7 @@ function trendArrow(t: string): string {
   padding: 16px;
   border: 1px solid var(--border, rgba(120, 140, 120, 0.25));
   border-radius: 12px;
-  background: var(--surface, rgba(20, 26, 20, 0.6));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.03));
 }
 .mvp-head {
   display: flex;
@@ -240,7 +240,7 @@ function trendArrow(t: string): string {
 }
 .mvp-sub {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .mvp-tabs {
   display: flex;
@@ -252,7 +252,7 @@ function trendArrow(t: string): string {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: transparent;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-size: 12px;
   cursor: pointer;
   font-family: inherit;
@@ -278,7 +278,7 @@ function trendArrow(t: string): string {
 .mvp-block-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .mvp-block-label--gap {
   margin-top: 6px;
@@ -305,7 +305,7 @@ function trendArrow(t: string): string {
 }
 .mvp-stat-label {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .mvp-best-worst {
   display: flex;
@@ -348,7 +348,7 @@ function trendArrow(t: string): string {
   padding: 1px 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.06);
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   white-space: nowrap;
 }
 .mvp-hour-item.current .mvp-hour-tag {
@@ -361,11 +361,11 @@ function trendArrow(t: string): string {
   min-width: 24px;
 }
 .mvp-hour-time {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-variant-numeric: tabular-nums;
 }
 .mvp-hour-advice {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   flex: 1;
   text-align: right;
 }
@@ -386,7 +386,7 @@ function trendArrow(t: string): string {
   background: rgba(138, 154, 122, 0.1);
 }
 .mvp-clock-time {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   min-width: 96px;
   font-variant-numeric: tabular-nums;
 }
@@ -396,7 +396,7 @@ function trendArrow(t: string): string {
   min-width: 24px;
 }
 .mvp-clock-meridian {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   min-width: 96px;
 }
 .mvp-clock-bar {
@@ -410,10 +410,10 @@ function trendArrow(t: string): string {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: var(--accent, #8a9a7a);
+  background: var(--accent, #d4a574);
 }
 .mvp-clock-rate {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   min-width: 56px;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -461,7 +461,7 @@ function trendArrow(t: string): string {
   background: #8a9a7a;
 }
 .mvp-heat-score {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   min-width: 24px;
   text-align: right;
   font-variant-numeric: tabular-nums;
@@ -532,7 +532,7 @@ function trendArrow(t: string): string {
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.06);
   background: transparent;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   font-size: 11px;
   cursor: pointer;
   font-family: inherit;
@@ -562,7 +562,7 @@ function trendArrow(t: string): string {
   font-size: 12px;
 }
 .mvp-trend-date {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   min-width: 44px;
   font-variant-numeric: tabular-nums;
 }
@@ -577,17 +577,17 @@ function trendArrow(t: string): string {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: var(--accent, #8a9a7a);
+  background: var(--accent, #d4a574);
 }
 .mvp-trend-rate {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   min-width: 36px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 .mvp-empty {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 </style>

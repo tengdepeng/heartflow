@@ -498,7 +498,7 @@ function truncateContent(text: string, maxLen: number): string {
 
 .overview-label {
   font-size: 0.8rem;
-  color: var(--muted, #7a7f8c);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin-top: 4px;
 }
 
@@ -537,7 +537,7 @@ function truncateContent(text: string, maxLen: number): string {
 
 .stat-label {
   font-size: 0.85rem;
-  color: var(--muted, #7a7f8c);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   width: 40px;
   flex-shrink: 0;
 }
@@ -610,7 +610,7 @@ function truncateContent(text: string, maxLen: number): string {
 }
 
 .output-search::placeholder {
-  color: var(--muted, #7a7f8c);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .filter-group {
@@ -758,12 +758,12 @@ function truncateContent(text: string, maxLen: number): string {
 
 .status-published { background: var(--green, #34d399); }
 .status-draft { background: var(--yellow, #f0c040); }
-.status-archived { background: var(--muted, #7a7f8c); }
+.status-archived { background: var(--text-muted, rgba(232, 224, 216, 0.44)); }
 .status-deleted { background: var(--red, #ef4444); }
 
 .card-room {
   font-size: 0.8rem;
-  color: var(--muted, #7a7f8c);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   flex-shrink: 0;
 }
 
@@ -776,7 +776,7 @@ function truncateContent(text: string, maxLen: number): string {
 }
 
 .card-content.card-empty {
-  color: var(--muted, #7a7f8c);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-style: italic;
 }
 
@@ -788,7 +788,7 @@ function truncateContent(text: string, maxLen: number): string {
 
 .meta-time {
   font-size: 0.75rem;
-  color: var(--muted, #7a7f8c);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .meta-format,
@@ -860,6 +860,6 @@ function truncateContent(text: string, maxLen: number): string {
 
 .page-info {
   font-size: 0.85rem;
-  color: var(--muted, #7a7f8c);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 </style>

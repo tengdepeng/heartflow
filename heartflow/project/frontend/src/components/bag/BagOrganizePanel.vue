@@ -172,7 +172,7 @@ function fmtDate(iso: string): string {
   padding: 16px;
   border: 1px solid var(--border, rgba(160, 124, 140, 0.25));
   border-radius: 12px;
-  background: var(--surface, rgba(20, 26, 20, 0.6));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.03));
 }
 .bop-head {
   display: flex;
@@ -186,7 +186,7 @@ function fmtDate(iso: string): string {
 }
 .bop-sub {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .bop-block {
   display: flex;
@@ -199,7 +199,7 @@ function fmtDate(iso: string): string {
 .bop-block-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent, #a07c8c);
+  color: var(--accent, #d4a574);
 }
 .bop-stats {
   display: flex;
@@ -222,11 +222,11 @@ function fmtDate(iso: string): string {
 }
 .bop-stat-label {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .bop-last {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .bop-sort-row,
 .bop-add-row {
@@ -251,7 +251,7 @@ function fmtDate(iso: string): string {
   border: 1px solid rgba(160, 124, 140, 0.35);
   border-radius: 8px;
   background: transparent;
-  color: var(--accent, #a07c8c);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   cursor: pointer;
   white-space: nowrap;
@@ -300,11 +300,11 @@ function fmtDate(iso: string): string {
   padding: 2px 8px;
   border-radius: 999px;
   background: rgba(160, 124, 140, 0.15);
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .bop-rule-desc {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 .bop-suggest {
@@ -335,7 +335,7 @@ function fmtDate(iso: string): string {
   color: #8a9a7a;
 }
 .bop-suggest-text {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   flex: 1;
 }
 .bop-result {
@@ -352,14 +352,14 @@ function fmtDate(iso: string): string {
   flex: 1;
 }
 .bop-result-count {
-  color: var(--accent, #a07c8c);
+  color: var(--accent, #d4a574);
 }
 .bop-result-date {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .bop-empty {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 </style>

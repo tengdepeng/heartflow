@@ -353,7 +353,7 @@ const displayBeads = computed<BeadPos[]>(() => {
 }
 
 .carrier-bead-count {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.3px;
 }

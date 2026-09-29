@@ -353,16 +353,16 @@ const resultTableColumns: string[] = ['date', 'domain', 'duration', 'score']
   background: rgba(26, 22, 18, 0.45);
 }
 .tpp-head { margin-bottom: 12px; }
-.tpp-title { font-size: 15px; font-weight: 600; color: var(--text-primary, #f0e8dc); margin: 0 0 4px; }
-.tpp-sub { margin: 0; font-size: 12px; color: var(--text-secondary, #a89a88); line-height: 1.6; }
+.tpp-title { font-size: 15px; font-weight: 600; color: var(--text-primary, #e8e0d8); margin: 0 0 4px; }
+.tpp-sub { margin: 0; font-size: 12px; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); line-height: 1.6; }
 
-.tpp-stats { display: flex; gap: 16px; margin-bottom: 12px; font-size: 12px; color: var(--text-secondary, #a89a88); }
-.tpp-stat b { color: var(--text-primary, #f0e8dc); }
+.tpp-stats { display: flex; gap: 16px; margin-bottom: 12px; font-size: 12px; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); }
+.tpp-stat b { color: var(--text-primary, #e8e0d8); }
 
 .tpp-add { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .tpp-chip {
   padding: 5px 12px; border-radius: 999px; border: 1px solid var(--border, rgba(212, 165, 116, 0.3));
-  background: rgba(212, 165, 116, 0.08); color: var(--text-primary, #f0e8dc); font-size: 12px; cursor: pointer;
+  background: rgba(212, 165, 116, 0.08); color: var(--text-primary, #e8e0d8); font-size: 12px; cursor: pointer;
   transition: all 0.2s ease;
 }
 .tpp-chip:hover { background: rgba(212, 165, 116, 0.2); }
@@ -372,11 +372,11 @@ const resultTableColumns: string[] = ['date', 'domain', 'duration', 'score']
   display: flex; flex-wrap: wrap; gap: 10px; padding: 12px; margin-bottom: 10px;
   border-radius: 10px; background: rgba(15, 12, 10, 0.6); font-size: 12px;
 }
-.tpp-form label { display: flex; flex-direction: column; gap: 4px; color: var(--text-secondary, #a89a88); }
+.tpp-form label { display: flex; flex-direction: column; gap: 4px; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); }
 .tpp-form-wide { flex: 1 1 100%; }
 .tpp-form select, .tpp-form input {
   border-radius: 8px; border: 1px solid var(--border, rgba(212, 165, 116, 0.25));
-  background: rgba(15, 12, 10, 0.7); color: var(--text-primary, #f0e8dc); padding: 5px 8px; font-size: 12px;
+  background: rgba(15, 12, 10, 0.7); color: var(--text-primary, #e8e0d8); padding: 5px 8px; font-size: 12px;
 }
 .tpp-form-actions { display: flex; gap: 8px; align-items: flex-end; flex: 1 1 100%; }
 
@@ -389,28 +389,28 @@ const resultTableColumns: string[] = ['date', 'domain', 'duration', 'score']
 .tpp-step.is-off { opacity: 0.5; }
 .tpp-step-idx {
   width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
-  background: rgba(212, 165, 116, 0.2); color: var(--text-primary, #f0e8dc); font-size: 11px; flex: none;
+  background: rgba(212, 165, 116, 0.2); color: var(--text-primary, #e8e0d8); font-size: 11px; flex: none;
 }
-.tpp-step-op { font-weight: 600; color: var(--text-primary, #f0e8dc); flex: none; }
-.tpp-step-summary { flex: 1; color: var(--text-secondary, #a89a88); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tpp-step-op { font-weight: 600; color: var(--text-primary, #e8e0d8); flex: none; }
+.tpp-step-summary { flex: 1; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tpp-step-toggle { border: none; background: transparent; color: var(--accent, #d4a574); cursor: pointer; font-size: 12px; }
 .tpp-step-remove { border: none; background: transparent; color: #c46a5a; cursor: pointer; font-size: 15px; line-height: 1; }
 
 .tpp-run { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .tpp-btn {
   padding: 6px 16px; border-radius: 10px; border: 1px solid var(--border, rgba(212, 165, 116, 0.3));
-  background: rgba(212, 165, 116, 0.08); color: var(--text-primary, #f0e8dc); font-size: 12px; cursor: pointer;
+  background: rgba(212, 165, 116, 0.08); color: var(--text-primary, #e8e0d8); font-size: 12px; cursor: pointer;
   transition: all 0.2s ease;
 }
 .tpp-btn--primary { background: rgba(212, 165, 116, 0.22); border-color: rgba(212, 165, 116, 0.55); }
 .tpp-btn:hover { background: rgba(212, 165, 116, 0.3); }
-.tpp-run-hint { font-size: 12px; color: var(--text-secondary, #a89a88); }
+.tpp-run-hint { font-size: 12px; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); }
 
 .tpp-result { border-radius: 10px; border: 1px solid var(--border, rgba(212, 165, 116, 0.15)); overflow: hidden; }
 .tpp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
 .tpp-table th, .tpp-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border, rgba(212, 165, 116, 0.12)); }
-.tpp-table th { color: var(--text-secondary, #a89a88); font-weight: 500; background: rgba(212, 165, 116, 0.05); }
-.tpp-table td { color: var(--text-primary, #f0e8dc); }
-.tpp-more { padding: 6px 10px; font-size: 11px; color: var(--text-secondary, #a89a88); }
-.tpp-empty { margin: 8px 0 0; font-size: 12px; color: var(--text-secondary, #a89a88); }
+.tpp-table th { color: var(--text-secondary, rgba(232, 224, 216, 0.55)); font-weight: 500; background: rgba(212, 165, 116, 0.05); }
+.tpp-table td { color: var(--text-primary, #e8e0d8); }
+.tpp-more { padding: 6px 10px; font-size: 11px; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); }
+.tpp-empty { margin: 8px 0 0; font-size: 12px; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); }
 </style>

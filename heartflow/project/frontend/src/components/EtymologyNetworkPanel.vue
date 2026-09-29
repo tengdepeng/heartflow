@@ -147,15 +147,15 @@ onMounted(() => {
 }
 .enp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .enp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.enp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.enp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .enp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .enp-size { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); white-space: nowrap; }
 
 .enp-search { display: flex; gap: 8px; margin-bottom: 10px; }
-.enp-input { flex: 1; padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, #d8c3a5); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s; }
+.enp-input { flex: 1; padding: 9px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 13px; font-family: inherit; outline: none; transition: border-color 0.2s; }
 .enp-input:focus { border-color: rgba(var(--accent-rgb), 0.4); }
 .enp-input::placeholder { color: rgba(232, 221, 208, 0.35); }
-.enp-go { padding: 9px 18px; border-radius: 10px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d8c3a5); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+.enp-go { padding: 9px 18px; border-radius: 10px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d4a574); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .enp-go:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.18); border-color: rgba(var(--accent-rgb), 0.5); }
 .enp-go:disabled { opacity: 0.35; cursor: not-allowed; }
 
@@ -163,13 +163,13 @@ onMounted(() => {
 .enp-result { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid transparent; background: rgba(255,255,255,0.03); color: inherit; text-align: left; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .enp-result:hover { background: rgba(var(--accent-rgb), 0.08); }
 .enp-result.active { border-color: rgba(var(--accent-rgb), 0.4); background: rgba(var(--accent-rgb), 0.1); }
-.enp-result-word { font-size: 15px; color: var(--text-high, #d8c3a5); flex-shrink: 0; }
+.enp-result-word { font-size: 15px; color: var(--text-high, rgba(232, 224, 216, 0.88)); flex-shrink: 0; }
 .enp-result-origin { font-size: 11px; color: rgba(232, 221, 208, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .enp-none { font-size: 12px; color: rgba(232, 221, 208, 0.45); margin: 4px 0 10px; }
 
 .enp-detail { padding: 16px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); }
 .enp-detail-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-.enp-word { font-size: 30px; font-weight: 600; color: var(--text-high, #d8c3a5); letter-spacing: 6px; }
+.enp-word { font-size: 30px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); letter-spacing: 6px; }
 .enp-lang { font-size: 11px; padding: 2px 10px; border-radius: 10px; background: rgba(var(--accent-rgb), 0.14); color: rgba(var(--accent-rgb), 0.8); }
 .enp-origin { font-size: 13px; color: rgba(232, 221, 208, 0.7); line-height: 1.7; margin: 0 0 14px; }
 
@@ -178,13 +178,13 @@ onMounted(() => {
 .enp-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .enp-chip { font-size: 11px; padding: 3px 10px; border-radius: 7px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.8); }
 .enp-cognates { display: flex; flex-wrap: wrap; gap: 6px; }
-.enp-cognate { font-size: 12px; padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-high, #d8c3a5); font-family: inherit; cursor: pointer; transition: all 0.2s; }
+.enp-cognate { font-size: 12px; padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .enp-cognate:hover { border-color: rgba(var(--accent-rgb), 0.4); background: rgba(var(--accent-rgb), 0.08); }
 
 .enp-relatives { display: flex; flex-direction: column; gap: 6px; }
 .enp-relative { display: flex; align-items: baseline; gap: 10px; padding: 8px 12px; border-radius: 8px; border: 1px solid transparent; background: rgba(255,255,255,0.02); color: inherit; text-align: left; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .enp-relative:hover { background: rgba(var(--accent-rgb), 0.06); border-color: rgba(var(--accent-rgb), 0.2); }
-.enp-relative b { font-size: 14px; color: var(--text-high, #d8c3a5); flex-shrink: 0; }
+.enp-relative b { font-size: 14px; color: var(--text-high, rgba(232, 224, 216, 0.88)); flex-shrink: 0; }
 .enp-relative span { font-size: 11px; color: rgba(232, 221, 208, 0.5); }
 
 .enp-langs { display: flex; flex-direction: column; gap: 6px; }

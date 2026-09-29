@@ -153,7 +153,7 @@ refresh()
 }
 .cvp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .cvp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.cvp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d6caf0); }
+.cvp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .cvp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .cvp-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; white-space: nowrap; }
 
@@ -167,7 +167,7 @@ refresh()
   padding: 8px 4px; border-radius: 10px; background: var(--bg-card, rgba(255,255,255,0.03));
 }
 .cvp-status-icon { font-size: 13px; }
-.cvp-status-cell b { font-size: 15px; font-weight: 500; color: var(--text-high, #d6caf0); }
+.cvp-status-cell b { font-size: 15px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .cvp-status-label { font-size: 10px; color: rgba(226, 220, 240, 0.4); }
 .cvp-status-cell b { color: var(--st); }
 

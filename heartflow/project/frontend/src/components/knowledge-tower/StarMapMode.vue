@@ -9,10 +9,10 @@
             <circle cx="200" cy="200" r="198" fill="none" stroke="rgba(var(--accent-rgb), 0.06)" stroke-width="1" />
             <circle cx="200" cy="200" r="192" fill="none" stroke="rgba(var(--accent-rgb), 0.04)" stroke-width="0.5" stroke-dasharray="4,6" />
             <!-- 方位标记（四正位） -->
-            <text x="200" y="10" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', serif)">北</text>
-            <text x="200" y="394" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', serif)">南</text>
-            <text x="8" y="203" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', serif)">西</text>
-            <text x="394" y="203" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', serif)">东</text>
+            <text x="200" y="10" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', 'Noto Sans SC', 'Source Han Serif SC', serif)">北</text>
+            <text x="200" y="394" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', 'Noto Sans SC', 'Source Han Serif SC', serif)">南</text>
+            <text x="8" y="203" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', 'Noto Sans SC', 'Source Han Serif SC', serif)">西</text>
+            <text x="394" y="203" text-anchor="middle" fill="rgba(var(--accent-rgb), 0.08)" font-size="8" style="font-family: var(--font-heading-zh, 'Noto Serif SC', 'Noto Sans SC', 'Source Han Serif SC', serif)">东</text>
             <!-- 内圈装饰 -->
             <circle cx="200" cy="200" r="180" fill="none" stroke="rgba(var(--accent-rgb), 0.02)" stroke-width="0.5" />
           </svg>

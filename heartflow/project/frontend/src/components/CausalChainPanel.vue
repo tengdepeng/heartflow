@@ -167,7 +167,7 @@ function emLabel(em: string) {
 }
 .ccp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .ccp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.ccp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.ccp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .ccp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .ccp-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: #e0b88a; white-space: nowrap; }
 

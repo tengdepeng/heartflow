@@ -112,7 +112,7 @@ function onRemove(layer: FloatingLayerState) {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--accent, #d4af74);
+  color: var(--accent, #d4a574);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,7 +139,7 @@ function onRemove(layer: FloatingLayerState) {
 }
 .fl-btn:hover {
   background: rgba(212, 175, 116, 0.16);
-  color: var(--accent, #d4af74);
+  color: var(--accent, #d4a574);
 }
 .fl-remove:hover {
   background: rgba(180, 80, 60, 0.22);

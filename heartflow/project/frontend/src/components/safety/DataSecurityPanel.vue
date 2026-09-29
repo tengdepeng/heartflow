@@ -280,7 +280,7 @@ function handleClear() {
   border: 1px solid var(--border, rgba(var(--accent-rgb), 0.12));
   border-radius: var(--radius-lg, 16px);
   padding: 20px;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .data-security-panel:hover {

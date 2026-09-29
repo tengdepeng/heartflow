@@ -125,7 +125,7 @@ function fmtTime(iso: string): string {
 }
 .mc-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
 .mc-icon { font-size: 24px; line-height: 1; }
-.mc-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, #fff); }
+.mc-title { margin: 0; font-size: 18px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .mc-desc { margin: 4px 0 0; font-size: 12px; opacity: 0.6; line-height: 1.6; }
 
 .mc-actions {
@@ -158,7 +158,7 @@ function fmtTime(iso: string): string {
   font-size: 44px; font-weight: 600; line-height: 1; min-width: 84px; text-align: center;
 }
 .mc-verdict-meta { display: flex; flex-direction: column; gap: 4px; }
-.mc-verdict-title { font-size: 15px; color: var(--text-high, #fff); letter-spacing: 1px; }
+.mc-verdict-title { font-size: 15px; color: var(--text-high, rgba(232, 224, 216, 0.88)); letter-spacing: 1px; }
 .mc-verdict-time { font-size: 11px; opacity: 0.55; }
 
 .mc-card {
@@ -166,7 +166,7 @@ function fmtTime(iso: string): string {
   background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);
   margin-top: 12px;
 }
-.mc-card-title { margin: 0 0 12px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, #fff); display: flex; align-items: center; gap: 6px; }
+.mc-card-title { margin: 0 0 12px; font-size: 14px; letter-spacing: 1px; color: var(--text-high, rgba(232, 224, 216, 0.88)); display: flex; align-items: center; gap: 6px; }
 .mc-count { font-size: 11px; opacity: 0.55; }
 .mc-muted { font-size: 12px; opacity: 0.5; }
 
@@ -174,7 +174,7 @@ function fmtTime(iso: string): string {
 .mc-worst { border-color: rgba(196, 106, 90, 0.28); background: rgba(196, 106, 90, 0.06); }
 .mc-worst-body { display: flex; flex-direction: column; gap: 6px; }
 .mc-worst-emotion { margin: 0; font-size: 16px; color: #dfa093; font-weight: 600; }
-.mc-worst-desc { margin: 0; font-size: 13px; color: var(--text-high, #fff); line-height: 1.6; }
+.mc-worst-desc { margin: 0; font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); line-height: 1.6; }
 .mc-worst-remedy { margin: 0; font-size: 12px; opacity: 0.7; line-height: 1.7; }
 
 /* 问题清单 */
@@ -188,7 +188,7 @@ function fmtTime(iso: string): string {
 .mc-issue-moderate { border-left-color: #f0c040; }
 .mc-issue-mild { border-left-color: #8a9a7a; }
 .mc-issue-top { display: flex; align-items: center; gap: 8px; }
-.mc-issue-organ { font-size: 14px; font-weight: 600; color: var(--text-high, #fff); }
+.mc-issue-organ { font-size: 14px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .mc-issue-sev {
   font-size: 10px; padding: 1px 8px; border-radius: 999px;
 }

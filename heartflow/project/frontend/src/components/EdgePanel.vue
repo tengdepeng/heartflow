@@ -317,7 +317,7 @@ const actions = [
 .panel-title {
   font-size: 15px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .panel-close {
@@ -326,13 +326,13 @@ const actions = [
   border-radius: 50%;
   border: 1px solid rgba(var(--accent-rgb), 0.1);
   background: var(--card-bg);
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   cursor: pointer;
   font-size: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .panel-close:hover {
@@ -355,11 +355,11 @@ const actions = [
   border: 1px solid rgba(var(--accent-rgb), 0.06);
   border-radius: 10px;
   background: rgba(var(--bg-card-rgb), 0.3);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .adjacent-room-btn:hover {
@@ -403,7 +403,7 @@ const actions = [
 .adjacent-more {
   padding: 8px 12px 4px;
   font-size: 11px;
-  color: var(--text-muted, var(--text-low));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   text-align: center;
 }
 
@@ -421,11 +421,11 @@ const actions = [
   border: 1px solid transparent;
   border-radius: 10px;
   background: rgba(var(--bg-card-rgb), 0.3);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .panel-action:hover {
@@ -469,7 +469,7 @@ const actions = [
 
 .section-label {
   font-size: 12px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   display: block;
   margin-bottom: 10px;
 }
@@ -485,17 +485,17 @@ const actions = [
   border-radius: 8px;
   border: 1px solid rgba(var(--accent-rgb), 0.06);
   background: transparent;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
   text-align: left;
-  transition: all var(--transition, 0.25s ease);
+  transition: all var(--transition, 0.25s cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .style-chip:hover {
   background: var(--card-bg);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .style-chip.active {

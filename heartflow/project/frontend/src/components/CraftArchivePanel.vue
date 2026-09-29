@@ -187,7 +187,7 @@ function pct(v: number): string {
 .cap-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   letter-spacing: 0.02em;
 }
 .cap-badge {
@@ -202,7 +202,7 @@ function pct(v: number): string {
   background: color-mix(in srgb, #f0c040 12%, transparent);
 }
 .cap-badge-neutral {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
   background: transparent;
 }
@@ -214,7 +214,7 @@ function pct(v: number): string {
 .cap-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
   letter-spacing: 0.06em;
 }
@@ -240,23 +240,23 @@ function pct(v: number): string {
 .cap-cell-num {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .cap-cell-num small {
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cap-cell-label {
   font-size: 11px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: center;
 }
 .cap-hint {
   margin-top: 8px;
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cap-rows {
   display: flex;
@@ -280,7 +280,7 @@ function pct(v: number): string {
 }
 .cap-row-label {
   font-size: 13px;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   white-space: nowrap;
 }
 .cap-row-bar {
@@ -296,7 +296,7 @@ function pct(v: number): string {
 }
 .cap-row-num {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: right;
   white-space: nowrap;
 }
@@ -320,7 +320,7 @@ function pct(v: number): string {
 }
 .cap-health-label {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cap-health-bars {
   flex: 1;
@@ -336,7 +336,7 @@ function pct(v: number): string {
 }
 .cap-hbar-label {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cap-hbar-track {
   height: 6px;
@@ -358,7 +358,7 @@ function pct(v: number): string {
 }
 .cap-hbar-num {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: right;
 }
 .cap-tags {
@@ -370,7 +370,7 @@ function pct(v: number): string {
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 12px;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   background: color-mix(in srgb, var(--bg-card, #241f18) 60%, transparent);
   border: 1px solid var(--border-light, #3a332a);
 }
@@ -390,7 +390,7 @@ function pct(v: number): string {
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .cap-insight-mark {
   color: #f0c040;

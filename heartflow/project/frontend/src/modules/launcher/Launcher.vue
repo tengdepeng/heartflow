@@ -343,7 +343,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
   max-width: 960px;
   margin: 0 auto;
   padding: 28px 24px 140px;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .header-section { text-align: center; }
@@ -376,7 +376,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
   cursor: pointer;
   border: none;
   background: rgba(255, 255, 255, 0.03);
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   transition: background 0.2s ease, color 0.2s ease;
 }
 .vs-btn:hover { background: rgba(212, 165, 116, 0.08); }
@@ -395,7 +395,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .search-input {
   flex: 1; padding: 10px 14px; border-radius: 12px;
   background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-primary, #e9e0d0); font-size: 14px;
+  color: var(--text-primary, #e8e0d8); font-size: 14px;
 }
 .search-input::placeholder { color: rgba(233, 224, 208, 0.4); }
 
@@ -406,7 +406,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .ln-btn:hover { transform: translateY(-1px); }
 .ln-btn:active { transform: translateY(0); }
 .ln-primary { background: var(--accent, #d4a574); color: #1c1712; font-weight: 600; }
-.ln-ghost { background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e9e0d0); border-color: rgba(255, 255, 255, 0.1); }
+.ln-ghost { background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e8e0d8); border-color: rgba(255, 255, 255, 0.1); }
 .ln-go { background: rgba(212, 165, 116, 0.16); color: var(--accent, #d4a574); border-color: rgba(212, 165, 116, 0.3); }
 .ln-danger { color: #e07a6a; }
 
@@ -427,7 +427,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
   justify-content: center;
   
   background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(212, 165, 116, 0.4);
-  border-radius: 6px; color: var(--text-primary, #e9e0d0); font-size: 13px;
+  border-radius: 6px; color: var(--text-primary, #e8e0d8); font-size: 13px;
   padding: 1px 8px; letter-spacing: 2px; width: 130px;
 
   min-height: 26px;
@@ -469,7 +469,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
 }
 .ln-modal-head { display: flex; align-items: center; justify-content: space-between; font-size: 16px; font-weight: 600; margin-bottom: 14px; }
-.ln-x { background: none; border: none; color: var(--text-primary, #e9e0d0); opacity: 0.5; cursor: pointer; font-size: 16px; }
+.ln-x { background: none; border: none; color: var(--text-primary, #e8e0d8); opacity: 0.5; cursor: pointer; font-size: 16px; }
 .ln-form { display: flex; flex-direction: column; gap: 12px; }
 .ln-row { display: flex; flex-direction: column; gap: 5px; }
 .ln-row--check { flex-direction: row; align-items: center; gap: 8px; }
@@ -477,7 +477,7 @@ function flash(kind: 'ok' | 'warn' | 'err', text: string): void {
 .ln-input {
   padding: 9px 12px; border-radius: 10px; font-size: 14px;
   background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .ln-input--icon { width: 72px; text-align: center; font-size: 20px; }
 .ln-modal-foot { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }

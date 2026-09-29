@@ -124,25 +124,25 @@ onMounted(() => {
 }
 .awp-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .awp-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.awp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.awp-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .awp-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .awp-count { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); white-space: nowrap; }
 
 .awp-add { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); }
 .awp-add-label { font-size: 10px; letter-spacing: 1px; color: rgba(var(--accent-rgb), 0.5); }
 .awp-add-row { display: flex; gap: 8px; align-items: center; }
-.awp-select { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, #d8c3a5); font-size: 12px; font-family: inherit; outline: none; }
+.awp-select { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 12px; font-family: inherit; outline: none; }
 .awp-select:focus { border-color: rgba(var(--accent-rgb), 0.4); }
-.awp-input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, #d8c3a5); font-size: 12px; font-family: inherit; outline: none; }
+.awp-input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 12px; font-family: inherit; outline: none; }
 .awp-input:focus { border-color: rgba(var(--accent-rgb), 0.4); }
 .awp-input::placeholder { color: rgba(232, 221, 208, 0.35); }
-.awp-add-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d8c3a5); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+.awp-add-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d4a574); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .awp-add-btn:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.18); border-color: rgba(var(--accent-rgb), 0.5); }
 .awp-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .awp-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
 .awp-stat { flex: 1; min-width: 80px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; background: rgba(255,255,255,0.03); }
-.awp-stat b { font-size: 17px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.awp-stat b { font-size: 17px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .awp-stat span { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 
 .awp-list { display: flex; flex-direction: column; gap: 8px; }
@@ -151,7 +151,7 @@ onMounted(() => {
 .awp-item.unviewed { border-left: 2px solid #f0c040; }
 .awp-item-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
 .awp-item-icon { font-size: 14px; }
-.awp-item-name { font-size: 13px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.awp-item-name { font-size: 13px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .awp-item-type { font-size: 11px; color: rgba(var(--accent-rgb), 0.7); }
 .awp-item-date { margin-left: auto; font-size: 10px; color: rgba(232, 221, 208, 0.35); }
 .awp-unviewed-dot { width: 8px; height: 8px; border-radius: 50%; background: #f0c040; }

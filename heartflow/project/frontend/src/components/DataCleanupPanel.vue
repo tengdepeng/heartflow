@@ -175,13 +175,13 @@ onMounted(refresh)
   margin: 0 0 6px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e8ea);
+  color: var(--text-primary, #e8e0d8);
 }
 .cleanup-panel__desc {
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-secondary, #a0a0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cleanup-panel__desc code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -189,7 +189,7 @@ onMounted(refresh)
   padding: 1px 5px;
   border-radius: 4px;
   background: rgba(127, 127, 127, 0.18);
-  color: var(--text-primary, #e8e8ea);
+  color: var(--text-primary, #e8e0d8);
 }
 .cleanup-panel__head {
   margin-bottom: 14px;
@@ -204,7 +204,7 @@ onMounted(refresh)
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--text-secondary, #a0a0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
 }
 .cleanup-panel__list {
@@ -244,11 +244,11 @@ onMounted(refresh)
 }
 .cleanup-panel__item-date {
   font-size: 13px;
-  color: var(--text-primary, #e8e8ea);
+  color: var(--text-primary, #e8e0d8);
 }
 .cleanup-panel__item-meta {
   font-size: 12px;
-  color: var(--text-secondary, #a0a0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cleanup-panel__actions {
   display: flex;
@@ -259,7 +259,7 @@ onMounted(refresh)
 }
 .cleanup-panel__count {
   font-size: 12px;
-  color: var(--text-secondary, #a0a0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cleanup-panel__confirm {
   border: none;
@@ -278,7 +278,7 @@ onMounted(refresh)
 }
 .cleanup-panel__empty {
   font-size: 13px;
-  color: var(--text-secondary, #a0a0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 4px 0 0;
 }
 .cleanup-panel__restore {
@@ -288,20 +288,20 @@ onMounted(refresh)
   margin: 0 0 8px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #a0a0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cleanup-panel__restore-btn {
   border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
   background: transparent;
-  color: var(--text-secondary, #a0a0a8);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-radius: 8px;
   padding: 4px 12px;
   font-size: 12px;
   cursor: pointer;
 }
 .cleanup-panel__restore-btn:hover {
-  color: var(--text-primary, #e8e8ea);
-  border-color: var(--text-secondary, #a0a0a8);
+  color: var(--text-primary, #e8e0d8);
+  border-color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cleanup-panel__msg {
   margin: 12px 0 0;

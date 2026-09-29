@@ -973,7 +973,7 @@ function handleSelectMetaphor(type: MetaphorType) {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   text-decoration: none;
   background: none;
   border: none;
@@ -1003,7 +1003,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 }
 
 .breadcrumb-sep {
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 14px;
 }
 
@@ -1037,7 +1037,7 @@ function handleSelectMetaphor(type: MetaphorType) {
   gap: 8px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 6px;
   letter-spacing: 0.5px;
 }
@@ -1050,7 +1050,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 .section-desc {
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0 0 16px;
   font-style: italic;
   padding-left: 24px;
@@ -1132,7 +1132,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 
 .pack-card-mode {
   font-size: 10px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.5px;
 }
 
@@ -1184,7 +1184,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 
 .form-label {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.5px;
 }
 
@@ -1201,7 +1201,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 }
 
 .form-input::placeholder {
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .form-input:focus {
@@ -1263,7 +1263,7 @@ function handleSelectMetaphor(type: MetaphorType) {
   border-radius: 6px;
   border: none;
   background: transparent;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;
@@ -1272,7 +1272,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 }
 
 .mode-btn:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .mode-btn.active {
@@ -1306,7 +1306,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 
 .preview-mode {
   font-size: 10px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin-left: auto;
   letter-spacing: 0.5px;
 }
@@ -1320,7 +1320,7 @@ function handleSelectMetaphor(type: MetaphorType) {
   border-radius: 10px;
   border: 1px solid var(--mw-border, rgba(var(--accent-rgb), 0.08));
   background: var(--mw-surface, rgba(42, 36, 30, 0.4));
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 13px;
   font-family: inherit;
   cursor: pointer;
@@ -1438,7 +1438,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 .metaphor-desc {
   font-size: 10px;
   line-height: 1.4;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin: 0;
 }
 
@@ -1500,14 +1500,14 @@ function handleSelectMetaphor(type: MetaphorType) {
 
 .palette-color-key {
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 0.5px;
 }
 
 .palette-color-hex {
   font-size: 10px;
   font-family: 'JetBrains Mono', 'Consolas', monospace;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
 }
 
 .palette-color-edit {
@@ -1594,7 +1594,7 @@ function handleSelectMetaphor(type: MetaphorType) {
   border-radius: 999px;
   border: 1px solid var(--mw-border);
   background: transparent;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -1603,7 +1603,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 }
 
 .room-override-toggle:hover {
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--mw-border-hover);
 }
 
@@ -1630,7 +1630,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 
 .ro-control .form-label {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 0.5px;
 }
 
@@ -1708,7 +1708,7 @@ function handleSelectMetaphor(type: MetaphorType) {
 
 .colophon-text {
   font-size: 12px;
-  color: var(--text-muted, var(--text-faint));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 2px;
   font-style: italic;
   margin: 0;

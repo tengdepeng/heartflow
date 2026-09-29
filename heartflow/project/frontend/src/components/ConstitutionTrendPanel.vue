@@ -119,7 +119,7 @@ function fmtDate(iso: string): string {
   padding: 16px;
   border: 1px solid var(--border, rgba(120, 140, 120, 0.25));
   border-radius: 12px;
-  background: var(--surface, rgba(20, 26, 20, 0.6));
+  background: var(--bg-surface, rgba(255, 255, 255, 0.03));
 }
 .ctp-head {
   display: flex;
@@ -133,7 +133,7 @@ function fmtDate(iso: string): string {
 }
 .ctp-sub {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .ctp-block {
   display: flex;
@@ -146,7 +146,7 @@ function fmtDate(iso: string): string {
 .ctp-block-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
 }
 .ctp-stability-row,
 .ctp-trend-row {
@@ -186,7 +186,7 @@ function fmtDate(iso: string): string {
 }
 .ctp-stability-meta {
   font-size: 11px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .ctp-bar,
 .ctp-trend-bar,
@@ -202,7 +202,7 @@ function fmtDate(iso: string): string {
   display: block;
   height: 100%;
   border-radius: 999px;
-  background: var(--accent, #8a9a7a);
+  background: var(--accent, #d4a574);
 }
 .ctp-trend-list {
   display: flex;
@@ -216,7 +216,7 @@ function fmtDate(iso: string): string {
   font-size: 12px;
 }
 .ctp-trend-date {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   min-width: 44px;
 }
 .ctp-trend-label {
@@ -227,7 +227,7 @@ function fmtDate(iso: string): string {
   flex: 1;
 }
 .ctp-trend-score {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   min-width: 28px;
   text-align: right;
 }
@@ -265,14 +265,14 @@ function fmtDate(iso: string): string {
   font-size: 12px;
 }
 .ctp-score-dim-label {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   min-width: 56px;
 }
 .ctp-score-dim-bar {
   flex: 1;
 }
 .ctp-score-dim-val {
-  color: var(--accent, #8a9a7a);
+  color: var(--accent, #d4a574);
   min-width: 24px;
   text-align: right;
 }
@@ -299,11 +299,11 @@ function fmtDate(iso: string): string {
   color: #c46a5a;
 }
 .ctp-change-date {
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
 }
 .ctp-empty {
   font-size: 12px;
-  color: var(--text-dim, #9aa59a);
+  color: var(--text-dim, rgba(232, 224, 216, 0.48));
   margin: 0;
 }
 </style>

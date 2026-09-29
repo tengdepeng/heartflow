@@ -137,7 +137,7 @@ function collectAll(): void {
 .cdp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .cdp-head-titles { display: flex; flex-direction: column; }
 .cdp-title { font-size: 1.05rem; font-weight: 700; color: var(--text, #2b2b35); }
-.cdp-sub { font-size: 0.78rem; color: var(--text-dim, #9a9aab); margin-top: 2px; }
+.cdp-sub { font-size: 0.78rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); margin-top: 2px; }
 .cdp-badge { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: rgba(138, 154, 122, 0.2); color: #8a9a7a; }
 
 .cdp-card { margin-top: 12px; padding: 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(138, 154, 122, 0.25); }
@@ -149,13 +149,13 @@ function collectAll(): void {
 
 .cdp-preview { margin-top: 12px; }
 .cdp-preview-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.cdp-preview-label { font-size: 0.76rem; font-weight: 600; color: var(--text-dim, #9a9aab); }
+.cdp-preview-label { font-size: 0.76rem; font-weight: 600; color: var(--text-dim, rgba(232, 224, 216, 0.48)); }
 .cdp-cross { font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
 .cdp-cross.yes { background: rgba(138, 154, 122, 0.18); color: #5f7a52; }
 .cdp-cross.no { background: rgba(155, 155, 175, 0.16); color: #8a8a9a; }
 .cdp-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .cdp-chip { font-size: 0.76rem; padding: 4px 10px; border-radius: 999px; background: rgba(138, 154, 122, 0.14); color: #5f7a52; }
-.cdp-preview-empty { font-size: 0.76rem; color: var(--text-dim, #9a9aab); margin-top: 8px; }
+.cdp-preview-empty { font-size: 0.76rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); margin-top: 8px; }
 
 .cdp-results-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .cdp-block-title { font-size: 0.88rem; font-weight: 700; color: var(--text, #2b2b35); }
@@ -168,7 +168,7 @@ function collectAll(): void {
 .cdp-sub-main { flex: 1; min-width: 0; }
 .cdp-sub-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
 .cdp-sub-head strong { font-size: 0.84rem; color: var(--text, #2b2b35); }
-.cdp-sub-status { font-size: 0.7rem; color: var(--text-dim, #9a9aab); }
+.cdp-sub-status { font-size: 0.7rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); }
 .cdp-sub-result { font-size: 0.8rem; color: #5f7a52; margin: 4px 0 0; line-height: 1.5; }
 .cdp-link { background: none; border: none; padding: 0; margin-top: 4px; color: #5f7a52; font-size: 0.76rem; cursor: pointer; text-decoration: underline; }
 

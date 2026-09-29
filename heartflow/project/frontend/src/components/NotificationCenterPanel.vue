@@ -220,7 +220,7 @@ function handleMaxNotifications(e: Event): void {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .ncp-head {
   display: flex;
@@ -230,11 +230,11 @@ function handleMaxNotifications(e: Event): void {
 .ncp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .ncp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ncp-tabs {
   display: flex;
@@ -246,7 +246,7 @@ function handleMaxNotifications(e: Event): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
 }
@@ -288,13 +288,13 @@ function handleMaxNotifications(e: Event): void {
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .ncp-item-meta,
 .ncp-rule-meta {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 2px;
 }
 .ncp-item-priority {
@@ -317,7 +317,7 @@ function handleMaxNotifications(e: Event): void {
 }
 .ncp-item-msg {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.5;
   margin: 8px 0;
 }
@@ -334,7 +334,7 @@ function handleMaxNotifications(e: Event): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
@@ -363,7 +363,7 @@ function handleMaxNotifications(e: Event): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
   flex-shrink: 0;
@@ -388,7 +388,7 @@ function handleMaxNotifications(e: Event): void {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.06));
   font-size: 13px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   cursor: pointer;
 }
 .ncp-pref-row input[type='checkbox'] {
@@ -402,7 +402,7 @@ function handleMaxNotifications(e: Event): void {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
 }
 .ncp-quiet-note {
@@ -433,7 +433,7 @@ function handleMaxNotifications(e: Event): void {
 }
 .ncp-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ncp-block {
   display: flex;
@@ -442,7 +442,7 @@ function handleMaxNotifications(e: Event): void {
 }
 .ncp-block-label {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .ncp-row {
   display: flex;
@@ -452,7 +452,7 @@ function handleMaxNotifications(e: Event): void {
 }
 .ncp-row-label {
   width: 40px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   flex-shrink: 0;
 }
 .ncp-row-bar {
@@ -469,12 +469,12 @@ function handleMaxNotifications(e: Event): void {
 .ncp-row-count {
   width: 28px;
   text-align: right;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   flex-shrink: 0;
 }
 .ncp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   padding: 16px 0;
   text-align: center;
 }

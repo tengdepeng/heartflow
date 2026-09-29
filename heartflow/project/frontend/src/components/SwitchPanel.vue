@@ -129,7 +129,7 @@ function pickSurface(v: SurfaceState) {
   font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--accent, #d4af74);
+  color: var(--accent, #d4a574);
 }
 
 .sp-close {
@@ -146,7 +146,7 @@ function pickSurface(v: SurfaceState) {
 }
 .sp-close:hover {
   background: rgba(var(--accent-rgb), 0.18);
-  color: var(--accent, #d4af74);
+  color: var(--accent, #d4a574);
 }
 
 .sp-group + .sp-group {
@@ -185,7 +185,7 @@ function pickSurface(v: SurfaceState) {
 }
 .sp-chip.active {
   background: rgba(212, 175, 116, 0.28);
-  border-color: var(--accent, #d4af74);
+  border-color: var(--accent, #d4a574);
   color: #fff4e0;
   box-shadow: 0 0 0 1px rgba(212, 175, 116, 0.4) inset;
 }

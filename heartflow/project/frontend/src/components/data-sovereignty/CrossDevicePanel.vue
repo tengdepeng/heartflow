@@ -597,7 +597,7 @@ onUnmounted(() => {
   flex: 1;
   min-width: 140px;
   font-size: 13px;
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .guard-input {
   background: rgba(255, 255, 255, 0.06);
@@ -621,21 +621,21 @@ onUnmounted(() => {
 }
 .cd-token-label {
   font-size: 12px;
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cd-token {
   font-family: ui-monospace, monospace;
   font-size: 20px;
   letter-spacing: 2px;
   font-weight: 600;
-  color: var(--accent, #a8d5ba);
+  color: var(--accent, #d4a574);
 }
 .cd-qr-data {
   margin-top: 10px;
 }
 .lqs-addr-note {
   font-size: 12px;
-  color: var(--text-muted, #8a8a8a);
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   margin-top: -2px;
 }
 .cd-progress {
@@ -653,7 +653,7 @@ onUnmounted(() => {
 .cd-status {
   margin-top: 8px;
   font-size: 13px;
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cd-remaining {
   font-size: 12px;
@@ -688,7 +688,7 @@ onUnmounted(() => {
 .cd-device-os,
 .cd-history-time {
   font-size: 12px;
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cd-history-info {
   display: flex;
@@ -701,7 +701,7 @@ onUnmounted(() => {
 }
 .cd-history-status {
   font-size: 12px;
-  color: var(--text-secondary, #9aa3b2);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .guard-btn--file {
   position: relative;

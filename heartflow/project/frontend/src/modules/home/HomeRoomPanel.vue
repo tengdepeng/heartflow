@@ -126,7 +126,7 @@ function selectRoom(id: string) {
   background: rgba(13, 11, 9, 0.9);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
@@ -203,7 +203,7 @@ function selectRoom(id: string) {
 
 .selector-subtitle {
   font-size: 11px;
-  color: var(--text-muted, var(--text-muted));
+  color: var(--text-muted, rgba(232, 224, 216, 0.44));
   letter-spacing: 1px;
 }
 
@@ -281,7 +281,7 @@ function selectRoom(id: string) {
 
 .room-name {
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   letter-spacing: 1px;
   transition: color 0.3s ease;
 }
@@ -315,7 +315,7 @@ function selectRoom(id: string) {
 .room-description {
   font-size: 12px;
   line-height: 1.6;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 0 0 10px;
 }
 
@@ -380,7 +380,7 @@ function selectRoom(id: string) {
   margin: 0;
   font-size: 11px;
   line-height: 1.5;
-  color: var(--text-secondary, var(--text-medium));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -394,7 +394,7 @@ function selectRoom(id: string) {
 }
 .today-stat {
   font-size: 11px;
-  color: var(--text-secondary, var(--text-secondary));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .today-stat b {
   color: var(--room-color, var(--accent, #d4a574));

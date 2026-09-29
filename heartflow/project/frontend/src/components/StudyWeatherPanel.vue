@@ -137,7 +137,7 @@ function pct(v: number): string {
 .swp-title {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   letter-spacing: 0.02em;
 }
 .swp-badge {
@@ -152,14 +152,14 @@ function pct(v: number): string {
   background: color-mix(in srgb, #f0c040 12%, transparent);
 }
 .swp-badge-neutral {
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   border-color: var(--border-light, #3a332a);
   background: transparent;
 }
 .swp-empty {
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .swp-block {
   margin-top: 18px;
@@ -169,7 +169,7 @@ function pct(v: number): string {
 .swp-block-title {
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-bottom: 10px;
   letter-spacing: 0.06em;
 }
@@ -195,11 +195,11 @@ function pct(v: number): string {
 .swp-cell-num {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .swp-cell-label {
   font-size: 11px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: center;
 }
 .swp-tags {
@@ -212,7 +212,7 @@ function pct(v: number): string {
   padding: 3px 10px;
   border-radius: 999px;
   font-size: 12px;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
   background: color-mix(in srgb, var(--bg-card, #241f18) 60%, transparent);
   border: 1px solid var(--border-light, #3a332a);
 }
@@ -228,11 +228,11 @@ function pct(v: number): string {
 .swp-suggest-title {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .swp-suggest-reason {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .swp-health {
   display: flex;
@@ -254,7 +254,7 @@ function pct(v: number): string {
 }
 .swp-health-label {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .swp-health-bars {
   flex: 1;
@@ -270,7 +270,7 @@ function pct(v: number): string {
 }
 .swp-hbar-label {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .swp-hbar-track {
   height: 6px;
@@ -293,7 +293,7 @@ function pct(v: number): string {
 }
 .swp-hbar-num {
   font-size: 12px;
-  color: var(--text-secondary, #b5aa98);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   text-align: right;
 }
 .swp-insights {
@@ -312,7 +312,7 @@ function pct(v: number): string {
   align-items: flex-start;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--text-primary, #ede5d8);
+  color: var(--text-primary, #e8e0d8);
 }
 .swp-insight-mark {
   color: #f0c040;

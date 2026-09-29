@@ -183,7 +183,7 @@ onMounted(() => {
 }
 .aip-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .aip-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.aip-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.aip-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .aip-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .aip-count { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); color: rgba(var(--accent-rgb), 0.75); white-space: nowrap; }
 
@@ -194,20 +194,20 @@ onMounted(() => {
 .aip-add { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); }
 .aip-add-label { font-size: 10px; letter-spacing: 1px; color: rgba(var(--accent-rgb), 0.5); }
 .aip-add-row { display: flex; gap: 8px; align-items: center; }
-.aip-select { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, #d8c3a5); font-size: 12px; font-family: inherit; outline: none; }
+.aip-select { flex: 1; padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 12px; font-family: inherit; outline: none; }
 .aip-select:focus { border-color: rgba(var(--accent-rgb), 0.4); }
 .aip-add-arrow { color: rgba(var(--accent-rgb), 0.5); font-size: 14px; flex-shrink: 0; }
-.aip-input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, #d8c3a5); font-size: 12px; font-family: inherit; outline: none; }
+.aip-input { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: var(--text-high, rgba(232, 224, 216, 0.88)); font-size: 12px; font-family: inherit; outline: none; }
 .aip-input:focus { border-color: rgba(var(--accent-rgb), 0.4); }
 .aip-input::placeholder { color: rgba(232, 221, 208, 0.35); }
-.aip-add-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d8c3a5); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
+.aip-add-btn { padding: 8px 18px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb), 0.3); background: rgba(var(--accent-rgb), 0.1); color: var(--accent, #d4a574); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s; }
 .aip-add-btn:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.18); border-color: rgba(var(--accent-rgb), 0.5); }
 .aip-add-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .aip-list { display: flex; flex-direction: column; gap: 8px; }
 .aip-rel { padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); }
 .aip-rel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-.aip-rel-names { font-size: 13px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.aip-rel-names { font-size: 13px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .aip-rel-names i { font-style: normal; color: rgba(var(--accent-rgb), 0.5); margin: 0 4px; }
 .aip-rel-type { font-size: 11px; }
 .aip-rel-body { display: flex; flex-direction: column; gap: 6px; }
@@ -219,7 +219,7 @@ onMounted(() => {
 .aip-history { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; padding-top: 6px; border-top: 1px dashed rgba(var(--accent-rgb), 0.12); }
 .aip-history-item { display: flex; align-items: center; gap: 8px; font-size: 11px; }
 .aip-history-type { flex-shrink: 0; }
-.aip-history-topic { color: var(--text-high, #d8c3a5); flex-shrink: 0; }
+.aip-history-topic { color: var(--text-high, rgba(232, 224, 216, 0.88)); flex-shrink: 0; }
 .aip-history-summary { color: rgba(232, 221, 208, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .aip-history-delta { margin-left: auto; font-variant-numeric: tabular-nums; font-size: 10px; }
 .aip-history-delta.is-pos { color: #8a9a7a; }

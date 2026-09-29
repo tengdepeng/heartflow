@@ -170,7 +170,7 @@ function del(id: string): void {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .sc-banner {
   display: inline-flex;
@@ -214,7 +214,7 @@ function del(id: string): void {
 
 .sc-toggle {
   flex: none; padding: 5px 14px; border-radius: 8px; font-size: 12px; cursor: pointer;
-  background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e9e0d0);
+  background: rgba(255, 255, 255, 0.05); color: var(--text-primary, #e8e0d8);
   border: 1px solid rgba(255, 255, 255, 0.1); transition: border-color 0.2s ease, background 0.2s ease;
 }
 .sc-toggle.on { background: rgba(212, 165, 116, 0.2); color: var(--accent, #d4a574); border-color: rgba(212, 165, 116, 0.4); }
@@ -231,7 +231,7 @@ function del(id: string): void {
 .sc-input {
   flex: 1 1 200px; min-width: 0; padding: 8px 11px; border-radius: 9px; font-size: 13px;
   background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e9e0d0); font-family: inherit;
+  color: var(--text-primary, #e8e0d8); font-family: inherit;
 }
 .sc-input--icon { flex: 1 1 90px; }
 .sc-input::placeholder { opacity: 0.4; }

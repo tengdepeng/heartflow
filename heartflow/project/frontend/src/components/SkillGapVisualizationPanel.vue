@@ -345,7 +345,7 @@ onMounted(refresh)
 }
 .sgv-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
 .sgv-title-wrap { display: flex; flex-direction: column; gap: 3px; }
-.sgv-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, #d8c3a5); }
+.sgv-title { font-size: 13px; letter-spacing: 2px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .sgv-sub { font-size: 11px; color: rgba(var(--accent-rgb), 0.45); }
 .sgv-tag { font-size: 11px; padding: 2px 10px; border-radius: 12px; background: rgba(var(--accent-rgb), 0.12); white-space: nowrap; }
 
@@ -361,12 +361,12 @@ onMounted(refresh)
 
 .sgv-metrics { display: flex; gap: 8px; margin-bottom: 10px; }
 .sgv-metric { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 10px; background: rgba(255,255,255,0.03); }
-.sgv-metric b { font-size: 17px; font-weight: 600; color: var(--text-high, #d8c3a5); }
+.sgv-metric b { font-size: 17px; font-weight: 600; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .sgv-metric span { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 
 .sgv-focus { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 14px; padding: 8px 0; border-top: 1px dashed rgba(var(--accent-rgb), 0.14); border-bottom: 1px dashed rgba(var(--accent-rgb), 0.14); }
 .sgv-focus span { font-size: 11px; color: rgba(232, 221, 208, 0.55); }
-.sgv-focus b { color: var(--text-high, #d8c3a5); font-weight: 500; }
+.sgv-focus b { color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 
 .sgv-block { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; padding-top: 14px; border-top: 1px solid rgba(var(--accent-rgb), 0.1); }
 .sgv-block-label { font-size: 11px; letter-spacing: 1px; color: rgba(var(--accent-rgb), 0.5); }
@@ -388,7 +388,7 @@ onMounted(refresh)
 .sgv-matrix-row { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 8px; }
 .sgv-matrix-row:nth-child(even) { background: rgba(255,255,255,0.02); }
 .sgv-matrix-head { background: rgba(var(--accent-rgb), 0.08) !important; }
-.sgv-matrix-skill { flex: 0 0 30%; font-size: 12px; color: var(--text-high, #d8c3a5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sgv-matrix-skill { flex: 0 0 30%; font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sgv-matrix-dim { flex: 1; font-size: 9px; color: rgba(232, 221, 208, 0.4); text-align: center; }
 .sgv-matrix-val { flex: 1; font-size: 12px; color: rgba(232, 221, 208, 0.75); text-align: center; font-variant-numeric: tabular-nums; }
 .sgv-matrix-ann { flex: 1; display: flex; justify-content: center; gap: 4px; }
@@ -409,7 +409,7 @@ onMounted(refresh)
 .sgv-phase-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
 .sgv-phase-num { width: 24px; height: 24px; border-radius: 50%; background: var(--phase-num-bg, rgba(138,154,122,0.14)); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text-high); flex-shrink: 0; }
 .sgv-phase-title-wrap { display: flex; flex-direction: column; }
-.sgv-phase-name { font-size: 13px; color: var(--text-high, #d8c3a5); }
+.sgv-phase-name { font-size: 13px; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .sgv-phase-meta { font-size: 10px; color: rgba(232, 221, 208, 0.4); }
 .sgv-phase-objective { font-size: 11px; color: rgba(232, 221, 208, 0.6); margin: 0 0 8px; line-height: 1.5; }
 .sgv-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
@@ -425,7 +425,7 @@ onMounted(refresh)
 .sgv-mstone-item:last-child::before { display: none; }
 .sgv-mstone-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--mweek-pct) linear-gradient(135deg, #8a9a7a, #6b9fc4); flex-shrink: 0; box-shadow: 0 0 6px rgba(138,154,122,0.2); }
 .sgv-mstone-body { display: flex; flex-direction: column; gap: 2px; }
-.sgv-mstone-body b { font-size: 12px; color: var(--text-high, #d8c3a5); font-weight: 500; }
+.sgv-mstone-body b { font-size: 12px; color: var(--text-high, rgba(232, 224, 216, 0.88)); font-weight: 500; }
 .sgv-mstone-body span { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
 
 .sgv-note { font-size: 10px; color: rgba(232, 221, 208, 0.35); margin: 4px 0 0; }
@@ -433,7 +433,7 @@ onMounted(refresh)
 /* Comparison */
 .sgv-cmp-head { display: flex; align-items: center; gap: 12px; justify-content: space-around; margin-bottom: 12px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.03); }
 .sgv-cmp-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.sgv-cmp-stat b { font-size: 22px; font-weight: 500; color: var(--text-high, #d8c3a5); }
+.sgv-cmp-stat b { font-size: 22px; font-weight: 500; color: var(--text-high, rgba(232, 224, 216, 0.88)); }
 .sgv-cmp-stat span { font-size: 10px; color: rgba(232, 221, 208, 0.45); }
 .sgv-cmp-arrow { font-size: 16px; color: rgba(232, 221, 208, 0.4); }
 .sgv-radar { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }

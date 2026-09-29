@@ -591,7 +591,7 @@ function removeScene(id: string): void {
   width: min(380px, 92vw);
   border-radius: 12px;
   padding: 16px 18px;
-  background: var(--bg-deep, #1a1a1a);
+  background: var(--bg-deep, #14100b);
   border: 1px solid rgba(var(--accent-rgb), 0.2);
 }
 

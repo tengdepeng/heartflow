@@ -348,7 +348,7 @@ onMounted(() => {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .scp-sub {
   font-size: 10px;
@@ -372,7 +372,7 @@ onMounted(() => {
 .scp-stat b {
   font-size: 16px;
   font-weight: 600;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .scp-stat span {
   font-size: 10px;
@@ -422,7 +422,7 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.25);
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   font-size: 12px;
   font-family: inherit;
   outline: none;
@@ -440,7 +440,7 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(0, 0, 0, 0.25);
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   font-size: 12px;
   font-family: inherit;
   outline: none;
@@ -454,7 +454,7 @@ onMounted(() => {
   border-radius: 8px;
   border: 1px solid rgba(240, 192, 64, 0.25);
   background: transparent;
-  color: var(--accent, #d8c3a5);
+  color: var(--accent, #d4a574);
   font-size: 12px;
   font-family: inherit;
   cursor: pointer;
@@ -506,7 +506,7 @@ onMounted(() => {
 .scp-scenario-name {
   font-size: 14px;
   font-weight: 600;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .scp-scenario-actions {
   display: flex;
@@ -546,7 +546,7 @@ onMounted(() => {
 .scp-driver-name {
   flex: 1;
   font-size: 12px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .scp-driver-unc {
   font-size: 10px;
@@ -590,7 +590,7 @@ onMounted(() => {
 .scp-factor-name {
   flex: 1;
   font-size: 12px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .scp-factor-prob {
   font-size: 10px;
@@ -699,6 +699,6 @@ onMounted(() => {
 }
 .scp-matrix-cell--name {
   text-align: left;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 </style>

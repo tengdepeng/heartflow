@@ -274,7 +274,7 @@ function formatTime(ts: string): string {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .cop-head {
   display: flex;
@@ -284,11 +284,11 @@ function formatTime(ts: string): string {
 .cop-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .cop-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cop-tabs {
   display: flex;
@@ -300,7 +300,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 12px;
   cursor: pointer;
 }
@@ -332,7 +332,7 @@ function formatTime(ts: string): string {
 }
 .cop-stat-label {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cop-state-row {
   display: flex;
@@ -341,7 +341,7 @@ function formatTime(ts: string): string {
 }
 .cop-state-label {
   font-size: 13px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .cop-toggle {
   display: inline-flex;
@@ -352,7 +352,7 @@ function formatTime(ts: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
 
@@ -372,7 +372,7 @@ function formatTime(ts: string): string {
 }
 .cop-last {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cop-list {
   display: flex;
@@ -421,12 +421,12 @@ function formatTime(ts: string): string {
   flex: 1;
   font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .cop-sug-desc,
 .cop-combo-desc {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   line-height: 1.5;
   margin: 8px 0;
 }
@@ -435,11 +435,11 @@ function formatTime(ts: string): string {
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   margin-bottom: 8px;
 }
 .cop-sug-arrow {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cop-sug-improve {
   color: #8a9a7a;
@@ -451,7 +451,7 @@ function formatTime(ts: string): string {
 }
 .cop-sug-conf {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-right: auto;
 }
 .cop-btn--small {
@@ -486,7 +486,7 @@ function formatTime(ts: string): string {
   flex-direction: column;
   gap: 2px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cop-block {
   display: flex;
@@ -495,7 +495,7 @@ function formatTime(ts: string): string {
 }
 .cop-block-label {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .cop-hours {
   display: flex;
@@ -554,7 +554,7 @@ function formatTime(ts: string): string {
 .cop-mini-channel,
 .cop-hist-channel {
   flex: 1;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .cop-mini-effect,
 .cop-hist-effect {
@@ -564,7 +564,7 @@ function formatTime(ts: string): string {
   color: #8a9a7a;
 }
 .eff-no_change {
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .eff-degraded {
   color: #c46a5a;
@@ -574,12 +574,12 @@ function formatTime(ts: string): string {
   justify-content: space-between;
   gap: 8px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 6px;
 }
 .cop-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   padding: 16px 0;
   text-align: center;
 }

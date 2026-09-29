@@ -2176,7 +2176,7 @@ function onThresholdChange(e: Event): void {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--accent-cyan, #8bc4b0);
+  color: var(--accent-cyan, #5ab8a0);
 }
 
 .effect-summary-icon {
@@ -2209,7 +2209,7 @@ function onThresholdChange(e: Event): void {
 }
 
 .effect-target-label {
-  color: var(--accent-cyan, #8bc4b0);
+  color: var(--accent-cyan, #5ab8a0);
   font-weight: 500;
 }
 
@@ -2285,7 +2285,7 @@ function onThresholdChange(e: Event): void {
 
 .badge-enable {
   background: rgba(90, 184, 160, 0.12);
-  color: var(--accent-cyan, #8bc4b0);
+  color: var(--accent-cyan, #5ab8a0);
 }
 
 .badge-disable {

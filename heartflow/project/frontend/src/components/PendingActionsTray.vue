@@ -129,7 +129,7 @@ onUnmounted(() => {
   pointer-events: auto;
   background: rgba(22, 24, 30, 0.94);
   border: 1px solid var(--glass-border-faint);
-  border-left: 3px solid var(--accent, #c9a96a);
+  border-left: 3px solid var(--accent, #d4a574);
   border-radius: 12px;
   padding: 12px 14px;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4);
@@ -156,7 +156,7 @@ onUnmounted(() => {
 }
 
 .pat-badge--confirm {
-  background: var(--accent, #c9a96a);
+  background: var(--accent, #d4a574);
 }
 
 .pat-badge--suggest {
@@ -197,15 +197,15 @@ onUnmounted(() => {
 }
 
 .pat-btn--primary {
-  background: var(--accent, #c9a96a);
-  border-color: var(--accent, #c9a96a);
+  background: var(--accent, #d4a574);
+  border-color: var(--accent, #d4a574);
   color: #1a1c22;
   font-weight: 600;
 }
 
 .pat-btn--primary:hover {
   filter: brightness(1.08);
-  background: var(--accent, #c9a96a);
+  background: var(--accent, #d4a574);
 }
 
 .pat-enter-active,

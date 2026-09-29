@@ -225,7 +225,7 @@ function clearBackground(): void {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .sp-block {
@@ -253,7 +253,7 @@ function clearBackground(): void {
   border-radius: 10px;
   font-size: 13px;
   cursor: pointer;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, background 0.2s ease;
@@ -285,7 +285,7 @@ function clearBackground(): void {
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, background 0.2s ease;
@@ -315,7 +315,7 @@ function clearBackground(): void {
   border-radius: 10px;
   font-size: 13px;
   cursor: pointer;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   transition: border-color 0.2s ease, background 0.2s ease;
@@ -352,7 +352,7 @@ function clearBackground(): void {
   font-size: 13px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .sp-hint {
   margin: 0;
@@ -380,7 +380,7 @@ function clearBackground(): void {
 }
 .sp-btn--ghost {
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   border-color: rgba(255, 255, 255, 0.1);
   align-self: flex-start;
 }

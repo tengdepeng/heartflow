@@ -220,7 +220,7 @@ function shortTime(iso: string): string {
   padding: 14px;
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
   border-radius: 12px;
-  background: var(--panel-bg, rgba(255, 255, 255, 0.03));
+  background: var(--bg-panel, #1a1612);
 }
 .lcp-head {
   display: flex;
@@ -230,11 +230,11 @@ function shortTime(iso: string): string {
 .lcp-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .lcp-sub {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.6));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .lcp-form {
   display: flex;
@@ -255,7 +255,7 @@ function shortTime(iso: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   font-size: 12px;
 }
 .lcp-input--name { flex: 2; min-width: 140px;
@@ -274,7 +274,7 @@ function shortTime(iso: string): string {
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.55));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
 }
 .lcp-form-actions {
@@ -286,7 +286,7 @@ function shortTime(iso: string): string {
   border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   border-radius: 8px;
   background: transparent;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.7));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-size: 11px;
   cursor: pointer;
   transition: all 0.2s;
@@ -327,7 +327,7 @@ function shortTime(iso: string): string {
 }
 .lcp-msg {
   font-size: 12px;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
   padding: 0 2px;
 }
 .lcp-msg.err {
@@ -355,7 +355,7 @@ function shortTime(iso: string): string {
 }
 .lcp-group-count {
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   flex: 1;
 }
 .lcp-list {
@@ -384,17 +384,17 @@ function shortTime(iso: string): string {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-primary, #e8e6e1);
+  color: var(--text-primary, #e8e0d8);
 }
 .lcp-item-meta {
   display: block;
   font-size: 11px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin-top: 1px;
 }
 .lcp-empty {
   font-size: 12px;
-  color: var(--text-secondary, rgba(232, 230, 225, 0.53));
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   padding: 16px 0;
   text-align: center;
 }

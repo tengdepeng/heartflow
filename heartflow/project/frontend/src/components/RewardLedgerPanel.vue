@@ -125,15 +125,15 @@ onMounted(() => { tick.value++ })
 .rlp-sub { font-size: 11px; color: var(--text-secondary); }
 
 .rlp-suggest { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; border-radius: 12px; background: rgba(232,192,96,0.07); border: 1px solid rgba(232,192,96,0.3); }
-.rlp-suggest-kicker { margin: 0; font-size: 12px; color: var(--accent, #e8c060); }
+.rlp-suggest-kicker { margin: 0; font-size: 12px; color: var(--accent, #d4a574); }
 .rlp-suggest-main { display: flex; align-items: center; gap: 12px; }
 .rlp-suggest-icon { font-size: 1.6rem; }
 .rlp-suggest-body { flex: 1; display: flex; flex-direction: column; gap: 2px; }
 .rlp-suggest-title { font-size: 14px; color: var(--text-high); }
 .rlp-suggest-cost { font-size: 11px; color: var(--text-secondary); }
-.rlp-suggest-redeem { flex-shrink: 0; padding: 6px 14px; border-radius: 8px; cursor: pointer; background: rgba(232,192,96,0.18); border: 1px solid rgba(232,192,96,0.45); color: var(--accent, #e8c060); font-size: 12px; }
+.rlp-suggest-redeem { flex-shrink: 0; padding: 6px 14px; border-radius: 8px; cursor: pointer; background: rgba(232,192,96,0.18); border: 1px solid rgba(232,192,96,0.45); color: var(--accent, #d4a574); font-size: 12px; }
 .rlp-suggest-redeem:hover { background: rgba(232,192,96,0.3); }
-.rlp-note-input { width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg-panel, rgba(20,18,15,0.6)); color: var(--text-high); font-size: 12px; }
+.rlp-note-input { width: 100%; padding: 6px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: var(--bg-panel, #1a1612)); color: var(--text-high); font-size: 12px; }
 .rlp-redeemed-msg { font-size: 12px; color: #e8c060; }
 
 .rlp-stats { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -145,7 +145,7 @@ onMounted(() => { tick.value++ })
 .rlp-milestone-label { font-size: 12px; color: var(--text-secondary); margin-right: 4px; }
 .rlp-milestone { font-size: 11px; padding: 3px 8px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); }
 .rlp-milestone.reached { background: rgba(138,154,122,0.14); border-color: rgba(138,154,122,0.45); color: #8a9a7a; }
-.rlp-milestone.next { background: rgba(232,192,96,0.16); border-color: rgba(232,192,96,0.5); color: var(--accent, #e8c060); }
+.rlp-milestone.next { background: rgba(232,192,96,0.16); border-color: rgba(232,192,96,0.5); color: var(--accent, #d4a574); }
 
 .rlp-months { display: flex; flex-direction: column; gap: 6px; }
 .rlp-month { display: flex; align-items: center; gap: 10px; }
@@ -156,7 +156,7 @@ onMounted(() => { tick.value++ })
 
 .rlp-section-title { margin: 4px 0; font-size: 13px; color: var(--text-medium); }
 .rlp-recent-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.rlp-recent-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: var(--bg-surface, rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.07); }
+.rlp-recent-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; background: var(--bg-surface, rgba(255, 255, 255, 0.03)); border: 1px solid rgba(255,255,255,0.07); }
 .rlp-recent-icon { font-size: 15px; }
 .rlp-recent-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .rlp-recent-title { font-size: 13px; color: var(--text-high); }

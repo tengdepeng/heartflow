@@ -104,7 +104,7 @@ function go(path: string): void {
   max-width: 680px;
   margin: 0 auto;
   padding: 48px 20px 64px;
-  color: var(--text-primary, #e8e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .header-ornament {
@@ -146,7 +146,7 @@ function go(path: string): void {
   font-size: 28px;
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: var(--text-primary, #e8e0d0);
+  color: var(--text-primary, #e8e0d8);
   margin: 0;
 }
 

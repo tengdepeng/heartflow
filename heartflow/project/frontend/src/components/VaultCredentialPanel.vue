@@ -193,48 +193,48 @@ function strengthTone(password: string): string {
 .vcp {
   border-radius: 16px;
   padding: 18px 20px 20px;
-  background: linear-gradient(180deg, rgba(var(--accent-rgb, 124, 92, 252), 0.05), rgba(var(--accent-rgb, 124, 92, 252), 0.02));
-  border: 1px solid color-mix(in srgb, var(--accent, #7c5cfc) 22%, transparent);
+  background: linear-gradient(180deg, rgba(var(--accent-rgb, 212, 165, 116), 0.05), rgba(var(--accent-rgb, 212, 165, 116), 0.02));
+  border: 1px solid color-mix(in srgb, var(--accent, #d4a574) 22%, transparent);
 }
 .vcp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .vcp-head-titles { display: flex; flex-direction: column; }
 .vcp-title { font-size: 1.05rem; font-weight: 700; color: var(--text, #2b2b35); }
-.vcp-sub { font-size: 0.78rem; color: var(--text-dim, #9a9aab); margin-top: 2px; }
+.vcp-sub { font-size: 0.78rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); margin-top: 2px; }
 
 .vcp-ov { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
 .vcp-ov-box { display: flex; flex-direction: column; align-items: center; min-width: 56px; padding: 8px 10px; background: rgba(255,255,255,0.5); border-radius: 10px; }
-.vcp-ov-num { font-size: 1.15rem; font-weight: 700; color: var(--accent, #7c5cfc); }
-.vcp-ov-label { font-size: 0.72rem; color: var(--text-dim, #9a9aab); margin-top: 2px; }
+.vcp-ov-num { font-size: 1.15rem; font-weight: 700; color: var(--accent, #d4a574); }
+.vcp-ov-label { font-size: 0.72rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); margin-top: 2px; }
 .vcp-rate { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
-.vcp-chip, .vcp-score { font-size: 0.72rem; padding: 3px 8px; border-radius: 999px; background: rgba(var(--accent-rgb, 124,92,252), 0.1); color: var(--accent, #7c5cfc); }
+.vcp-chip, .vcp-score { font-size: 0.72rem; padding: 3px 8px; border-radius: 999px; background: rgba(var(--accent-rgb, 212, 165, 116), 0.1); color: var(--accent, #d4a574); }
 
 .vcp-insights { list-style: none; padding: 0; margin: 0 0 12px; display: flex; flex-direction: column; gap: 6px; }
-.vcp-insight { font-size: 0.8rem; color: var(--text-dim, #9a9aab); }
+.vcp-insight { font-size: 0.8rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); }
 
-.vcp-empty { font-size: 0.82rem; color: var(--text-dim, #9a9aab); padding: 8px 0; }
-.vcp-card { margin-top: 12px; padding: 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(var(--accent-rgb, 124,92,252), 0.12); }
+.vcp-empty { font-size: 0.82rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); padding: 8px 0; }
+.vcp-card { margin-top: 12px; padding: 14px; border-radius: 12px; background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.12); }
 .vcp-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
 .vcp-card-title { font-weight: 700; color: var(--text, #2b2b35); }
-.vcp-card-count { font-size: 0.74rem; color: var(--text-dim, #9a9aab); }
+.vcp-card-count { font-size: 0.74rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); }
 
 .vcp-add { display: flex; gap: 8px; flex-wrap: wrap; }
-.vcp-input, .vcp-select { padding: 7px 10px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb,124,92,252), 0.25); background: #fff; font-size: 0.82rem; color: var(--text, #2b2b35); }
+.vcp-input, .vcp-select { padding: 7px 10px; border-radius: 8px; border: 1px solid rgba(var(--accent-rgb, 212, 165, 116), 0.25); background: #fff; font-size: 0.82rem; color: var(--text, #2b2b35); }
 .vcp-input { flex: 1; min-width: 110px; }
 .vcp-input--wide { min-width: 180px; }
 .vcp-input--grow { flex: 1 1 auto; max-width: 260px; }
 .vcp-select { min-width: 120px; }
-.vcp-btn { padding: 7px 14px; border: none; border-radius: 8px; background: var(--accent, #7c5cfc); color: #fff; font-size: 0.82rem; cursor: pointer; }
-.vcp-mini { padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(var(--accent-rgb,124,92,252),0.25); background: transparent; font-size: 0.76rem; color: var(--accent, #7c5cfc); cursor: pointer; }
+.vcp-btn { padding: 7px 14px; border: none; border-radius: 8px; background: var(--accent, #d4a574); color: #fff; font-size: 0.82rem; cursor: pointer; }
+.vcp-mini { padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(var(--accent-rgb, 212, 165, 116),0.25); background: transparent; font-size: 0.76rem; color: var(--accent, #d4a574); cursor: pointer; }
 
 .vcp-group { margin-top: 10px; }
-.vcp-group-title { font-size: 0.78rem; font-weight: 600; color: var(--text-dim, #9a9aab); margin-bottom: 4px; }
+.vcp-group-title { font-size: 0.78rem; font-weight: 600; color: var(--text-dim, rgba(232, 224, 216, 0.48)); margin-bottom: 4px; }
 .vcp-cr-list { list-style: none; padding: 0; margin: 0; }
-.vcp-cr { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 6px; border-bottom: 1px dashed rgba(var(--accent-rgb,124,92,252),0.15); }
+.vcp-cr { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 6px; border-bottom: 1px dashed rgba(var(--accent-rgb, 212, 165, 116),0.15); }
 .vcp-cr:last-child { border-bottom: none; }
 .vcp-cr-main { min-width: 0; }
 .vcp-cr-name { display: flex; align-items: center; gap: 6px; }
 .vcp-cr-name strong { font-size: 0.86rem; color: var(--text, #2b2b35); }
-.vcp-cr-meta, .vcp-cr-note { font-size: 0.74rem; color: var(--text-dim, #9a9aab); }
+.vcp-cr-meta, .vcp-cr-note { font-size: 0.74rem; color: var(--text-dim, rgba(232, 224, 216, 0.48)); }
 .vcp-strength { font-size: 0.68rem; padding: 1px 6px; border-radius: 999px; }
 .vcp-strength--ok { background: #3aa06a22; color: #2f8a58; }
 .vcp-strength--weak { background: #c46a5a22; color: #b55544; }
@@ -243,7 +243,7 @@ function strengthTone(password: string): string {
 .vcp-cr-ops { display: flex; gap: 4px; }
 
 .vcp-audit-list { list-style: none; padding: 0; margin: 0; }
-.vcp-audit { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px dashed rgba(var(--accent-rgb,124,92,252),0.15); }
+.vcp-audit { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px dashed rgba(var(--accent-rgb, 212, 165, 116),0.15); }
 .vcp-audit:last-child { border-bottom: none; }
 .vcp-audit { align-items: center; }
 .vcp-audit-dot { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 50%; }

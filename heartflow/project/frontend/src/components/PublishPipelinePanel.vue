@@ -409,13 +409,13 @@ function formatDuration(ms: number) {
 .ppl-panel .panel-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e3);
+  color: var(--text-primary, #e8e0d8);
   margin: 0;
 }
 
 .ppl-panel .panel-desc {
   font-size: 12px;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 2px 0 0;
 }
 
@@ -437,12 +437,12 @@ function formatDuration(ms: number) {
 
 .ppl-stat b {
   font-size: 20px;
-  color: var(--text-primary, #e8e6e3);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .ppl-stat span {
   font-size: 11px;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-stage-bar {
@@ -460,7 +460,7 @@ function formatDuration(ms: number) {
   padding: 3px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-stage-chip i {
@@ -477,13 +477,13 @@ function formatDuration(ms: number) {
   margin: 14px 0 8px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e3);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .ppl-block-sub {
   font-size: 11px;
   font-weight: 400;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-list {
@@ -521,7 +521,7 @@ function formatDuration(ms: number) {
   padding: 2px 7px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text-secondary, #c8c6c0);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-stage-badge {
@@ -542,21 +542,21 @@ function formatDuration(ms: number) {
   padding: 1px 6px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.06);
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-toggle {
   margin-left: auto;
   background: none;
   border: none;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   cursor: pointer;
   font-size: 12px;
 }
 
 .ppl-content {
   font-size: 12px;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 6px 0 0;
   line-height: 1.5;
 }
@@ -574,7 +574,7 @@ function formatDuration(ms: number) {
   border-radius: 7px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.06);
-  color: var(--text-primary, #e8e6e3);
+  color: var(--text-primary, #e8e0d8);
   cursor: pointer;
 }
 
@@ -614,11 +614,11 @@ function formatDuration(ms: number) {
 
 .ppl-history-time,
 .ppl-history-duration {
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-history-comment {
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   font-style: italic;
 }
 
@@ -648,11 +648,11 @@ function formatDuration(ms: number) {
 }
 
 .ppl-version-top b {
-  color: var(--text-primary, #e8e6e3);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .ppl-version-note {
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-version-pct {
@@ -663,7 +663,7 @@ function formatDuration(ms: number) {
 .ppl-version-time {
   margin-left: auto;
   font-size: 11px;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-version-actions {
@@ -691,7 +691,7 @@ function formatDuration(ms: number) {
 .ppl-diff-meta {
   font-size: 11px;
   font-weight: 400;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-diff-block {
@@ -724,7 +724,7 @@ function formatDuration(ms: number) {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-all;
-  color: var(--text-secondary, #c8c6c0);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-stat-grid {
@@ -742,7 +742,7 @@ function formatDuration(ms: number) {
 .ppl-stat-label {
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-primary, #e8e6e3);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .ppl-stat-rows {
@@ -756,16 +756,16 @@ function formatDuration(ms: number) {
   display: flex;
   justify-content: space-between;
   font-size: 11px;
-  color: var(--text-secondary, #9a9a8f);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 
 .ppl-stat-row b {
-  color: var(--text-primary, #e8e6e3);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .ppl-empty-hint {
   font-size: 11px;
-  color: var(--text-secondary, #8a8a80);
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
   margin: 4px 0;
 }
 </style>

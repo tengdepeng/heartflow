@@ -125,7 +125,7 @@ function linkSuggestion(targetId: string) {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 1px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
 }
 .ksp-sub {
   font-size: 10px;
@@ -164,7 +164,7 @@ function linkSuggestion(targetId: string) {
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(18, 14, 11, 0.5);
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   font-size: 12px;
   font-family: inherit;
 }
@@ -214,7 +214,7 @@ function linkSuggestion(targetId: string) {
 }
 .ksp-suggest-title {
   font-size: 13px;
-  color: var(--text-high, #d8c3a5);
+  color: var(--text-high, rgba(232, 224, 216, 0.88));
   word-break: break-word;
 }
 .ksp-suggest-score {
@@ -241,7 +241,7 @@ function linkSuggestion(targetId: string) {
   border-radius: 8px;
   border: 1px solid rgba(240, 192, 64, 0.3);
   background: rgba(240, 192, 64, 0.1);
-  color: var(--accent, #d8c3a5);
+  color: var(--accent, #d4a574);
   font-size: 11px;
   font-family: inherit;
   cursor: pointer;

@@ -381,7 +381,7 @@ function patchMemory(patch: { maxRounds?: number; enableSummarization?: boolean 
   display: flex;
   flex-direction: column;
   gap: 20px;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 
 .ai-block {
@@ -531,7 +531,7 @@ function patchMemory(patch: { maxRounds?: number; enableSummarization?: boolean 
   font-size: 13px;
   cursor: pointer;
   background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -579,7 +579,7 @@ function patchMemory(patch: { maxRounds?: number; enableSummarization?: boolean 
   font-size: 13px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
 }
 .ai-input:disabled {
   opacity: 0.5;
@@ -624,7 +624,7 @@ function patchMemory(patch: { maxRounds?: number; enableSummarization?: boolean 
 .ai-x {
   background: none;
   border: none;
-  color: var(--text-primary, #e9e0d0);
+  color: var(--text-primary, #e8e0d8);
   opacity: 0.5;
   cursor: pointer;
   font-size: 16px;
