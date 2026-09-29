@@ -6,14 +6,12 @@
       <div class="dw-glow dw-glow--bottom"></div>
     </div>
 
-    <!-- 装饰性顶部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <div data-enter class="header-kicker">雕琢殿堂的每一寸肌理</div>
-    <h1 class="dw-title">殿堂装修工坊</h1>
+    <RoomLayout
+      title="殿堂装修工坊"
+      kicker="雕琢殿堂的每一寸肌理"
+      align="center"
+      data-enter
+    >
 
     <!-- 概览卡片 -->
     <div class="overview-cards">
@@ -145,6 +143,7 @@
         </button>
       </div>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
@@ -159,6 +158,7 @@ import { useDecorationHistory } from '../modules/decoration-history'
 import SceneSequencePanel from '../components/SceneSequencePanel.vue'
 import EnvironmentTemplatePanel from '../components/EnvironmentTemplatePanel.vue'
 import CarrierAnimationPanel from '../components/CarrierAnimationPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 import { formatDateTime as formatTime } from '../utils/time'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -301,7 +301,13 @@ function navTo(path: string) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 0 0 48px;
   background: transparent;
+}
+
+.decoration-workshop :deep(.room-layout__body) {
+  padding: 0;
+  gap: 0;
 }
 
 .decoration-workshop::before,
@@ -354,50 +360,6 @@ function navTo(path: string) {
   background: var(--accent);
 }
 
-/* ---- 装饰性顶部 ---- */
-.header-ornament {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px 32px 0;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.4);
-}
-
-.header-kicker {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
-  letter-spacing: 4px;
-  margin-top: 10px;
-}
-
-.dw-title {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-family: var(--font-heading-en);
-  font-size: 28px;
-  font-weight: 400;
-  color: rgba(var(--accent-rgb), 0.75);
-  letter-spacing: 6px;
-  margin-top: 6px;
-}
 
 /* ---- 概览卡片 ---- */
 .overview-cards {
