@@ -2532,7 +2532,7 @@ watch(() => nav.currentRoomId.value, () => {
     transform: translateY(-50%);
     background: #241d15;
     border: 1px solid var(--border-light, rgba(212, 165, 116, 0.16));
-    color: var(--txt);
+    color: var(--text-primary);
     font-size: 12px;
     padding: 4px 9px;
     border-radius: 7px;
