@@ -12,6 +12,7 @@ import { useHappyBox } from '../../modules/emotion/happy-box'
 import { storage } from '../../engine/storage'
 import { useDesktopWidget } from './index'
 import { composeWidgetSnapshot } from './snapshot'
+import { useTaskManager, buildQuadrantBoard } from '../tasks'
 import { invoke } from '@tauri-apps/api/core'
 
 /** 便签存储键（与 WidgetBox 原实现同键，迁移不改数据结构） */
@@ -26,7 +27,7 @@ export function readWidgetNote(): string {
 }
 
 /** 组合并推送一次快照（Android AppWidgetProvider 读的就是这份 JSON） */
-export function pushWidgetSnapshotNow(): void {
+export function pushWidgetSnapshotNow(throttled = false): void {
   const { pushSystemWidgetSnapshot } = useDesktopWidget()
   const wishAnchor = useWishAnchor()
   const happyBox = useHappyBox()
@@ -53,10 +54,12 @@ export function pushWidgetSnapshotNow(): void {
       },
       emotion: { todayCount: happyBox.todayCount.value, lastMood: '' },
       note: readWidgetNote(),
+      quadrant: buildQuadrantBoard(useTaskManager().tasks.value)
+        .map(c => ({ label: c.label, active: c.stats.active })),
     }),
   )
   // 写完快照立即触发 Android 原生 widget 即时刷新（桌面/web 端无对应命令，静默容错）
-  void refreshAndroidWidgets()
+  void refreshAndroidWidgets(throttled)
 }
 
 function formatClock(ms: number): string {
@@ -78,6 +81,12 @@ export function startWidgetSnapshotSync(): void {
   const todayMoodCount = computed(() => happyBox.todayCount.value)
   const season = computed(() => composeWidgetSnapshot.seasonOf())
   const quote = computed(() => composeWidgetSnapshot.quoteOfDay())
+  // 四象限：任务增删改时即时推送（签名变化即触发）
+  const quadrantSig = computed(() =>
+    buildQuadrantBoard(useTaskManager().tasks.value)
+      .map(c => `${c.label}:${c.stats.active}`)
+      .join('|'),
+  )
 
   watch(
     [
@@ -85,14 +94,22 @@ export function startWidgetSnapshotSync(): void {
       anchors,
       todayMoodCount,
       season,
+      quadrantSig,
       () => timer.isRunning,
       () => timer.elapsed,
       () => timer.session?.status,
     ],
-    () => pushWidgetSnapshotNow(),
+    // 自动监听走节流（番茄钟每秒 tick 不必每秒广播刷新）
+    () => pushWidgetSnapshotNow(true),
     { immediate: true },
   )
 }
+
+/** Android 广播刷新最小间隔（ms）：番茄钟每秒 tick 不必每秒广播刷新全部 widget */
+const REFRESH_MIN_INTERVAL = 5_000
+
+/** 上次广播刷新时间戳（模块级，节流用） */
+let lastRefreshAt = 0
 
 /**
  * 数据写入 widget_data.json 后，立即触发 Android 原生 widget 即时刷新。
@@ -100,7 +117,10 @@ export function startWidgetSnapshotSync(): void {
  * 对全部 7 个 Provider 广播 ACTION_APPWIDGET_UPDATE，跳过系统 30min 刷新周期。
  * 桌面 / web 端无对应命令，invoke 被 reject，静默忽略。
  */
-export async function refreshAndroidWidgets(): Promise<void> {
+export async function refreshAndroidWidgets(allowThrottle = false): Promise<void> {
+  const now = Date.now()
+  if (allowThrottle && now - lastRefreshAt < REFRESH_MIN_INTERVAL) return
+  lastRefreshAt = now
   try {
     await invoke('plugin:heartflowWidgets|refreshWidgets')
   } catch {

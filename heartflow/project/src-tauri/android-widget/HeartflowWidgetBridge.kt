@@ -30,9 +30,11 @@ object WidgetBridge {
     /**
      * 立即刷新所有已放置的心流小组件。
      * 仅对「当前确有实例」的 Provider 发广播，避免无谓刷新。
+     * @return 本次实际刷新的小组件实例数（便于真机排查与命令回执）
      */
-    fun refreshAll(context: Context) {
+    fun refreshAll(context: Context): Int {
         val mgr = AppWidgetManager.getInstance(context)
+        var count = 0
         for (clazz in PROVIDERS) {
             val ids = mgr.getAppWidgetIds(ComponentName(context, clazz))
             if (ids.isNullOrEmpty()) continue
@@ -41,6 +43,8 @@ object WidgetBridge {
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
             }
             context.sendBroadcast(intent)
+            count += ids.size
         }
+        return count
     }
 }

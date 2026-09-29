@@ -17,9 +17,17 @@ import app.tauri.plugin.Invoke
 @TauriPlugin
 class HeartflowWidgetsPlugin(private val activity: Activity) : Plugin(activity) {
 
+    init {
+        // 冷启动即刷新一次：App 重启后 widget 不必等系统 30min 周期才拿到最新快照。
+        // 失败静默（widget 尚未放置 / 服务未就绪），不阻断启动。
+        runCatching { WidgetBridge.refreshAll(activity) }
+    }
+
     @Command
     fun refreshWidgets(invoke: Invoke) {
-        WidgetBridge.refreshAll(activity)
-        invoke.resolve(JSObject())
+        val n = runCatching { WidgetBridge.refreshAll(activity) }.getOrDefault(0)
+        val ret = JSObject()
+        ret.put("refreshed", n)
+        invoke.resolve(ret)
     }
 }
