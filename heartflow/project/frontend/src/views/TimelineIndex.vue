@@ -6,14 +6,12 @@
       <div class="ti-glow ti-glow--mid"></div>
     </div>
 
-    <!-- 装饰性顶部 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <div data-enter class="header-kicker">在时间轴上俯瞰你的每一天</div>
-    <h1 class="ti-title">时间线索引</h1>
+    <RoomLayout
+      title="时间线索引"
+      kicker="在时间轴上俯瞰你的每一天"
+      align="center"
+      data-enter
+    >
 
     <!-- 快速导航 -->
     <div data-enter class="ti-nav">
@@ -189,6 +187,7 @@
 
     <!-- 叙事报告（INCR-255 补挂载孤儿组件：日·周·月·年叙事生成与导出） -->
     <NarrativeReportPanel />
+    </RoomLayout>
   </div>
 </template>
 
@@ -203,6 +202,7 @@ import AggregationPanel from '../components/AggregationPanel.vue'
 import FullTextSearchPanel from '../components/FullTextSearchPanel.vue'
 import EventLinkagePanel from '../components/EventLinkagePanel.vue'
 import NarrativeReportPanel from '../components/NarrativeReportPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -299,7 +299,13 @@ function percentage(count: number, total: number): number {
   display: flex;
   flex-direction: column;
   overflow: hidden auto;
+  padding: 0 0 48px;
   background: transparent;
+}
+
+.timeline-index :deep(.room-layout__body) {
+  padding: 0;
+  gap: 0;
 }
 
 /* ---- 氛围背景 ---- */
@@ -329,51 +335,6 @@ function percentage(count: number, total: number): number {
   bottom: -100px;
   right: -50px;
   background: var(--accent);
-}
-
-/* ---- 装饰性顶部 ---- */
-.header-ornament {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 40px 32px 0;
-}
-
-.orn-line {
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.25), transparent);
-}
-
-.orn-diamond {
-  font-size: 10px;
-  color: rgba(var(--accent-rgb), 0.4);
-}
-
-.header-kicker {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.3);
-  letter-spacing: 4px;
-  margin-top: 10px;
-}
-
-.ti-title {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  font-family: var(--font-heading-en);
-  font-size: 28px;
-  font-weight: 400;
-  color: rgba(var(--accent-rgb), 0.75);
-  letter-spacing: 6px;
-  margin-top: 6px;
 }
 
 /* ---- 快速导航 ---- */
