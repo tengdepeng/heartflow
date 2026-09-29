@@ -182,6 +182,11 @@ button {
      滚动容器与固定 CTA 据此避让（取 120px，留 ~6px 余量并叠加安全区），避免内容钮
      被底栏盖住/抢点。两行高度是 P0 为避让左右岛横向互压的既定设计，此处只预留其空间。 */
   :root { --nav-safe-bottom: 120px; }
+  /* 全局固定浮窗 mirror-self（position:fixed; right:32px; bottom:80px；约 54px 宽 →
+     右沿 x≈358、左沿 x≈304，y 区约 691–764）竖向占位令牌：移动端所有页面内容据此在
+     右侧预留安全区，避免右下角交互控件被浮窗盖住/抢点。值取 72px（叠加上各页自身 16px
+     左右内边距即可把内容右沿压到 x≈302，清掉浮窗），个别零右内边距的页面可再局部补。 */
+  :root { --mirror-self-clear: 76px; }
 
   /* 唯一滚动容器（.main-content）移动端扣掉底栏竖向占位：内容区整体抬到底栏之上，
      无论视图长短，最后一个交互钮都不会落到底栏横向带内被盖住/抢点。App.vue 的 scoped
@@ -192,6 +197,8 @@ button {
     height: auto !important;
     min-height: auto !important;
     max-height: calc(100dvh - var(--nav-safe-bottom, 120px) - env(safe-area-inset-bottom, 0px)) !important;
+    /* 右侧预留 mirror-self 浮窗安全区（仅 ≤639px 覆盖任何 scoped 基线右内边距） */
+    padding-right: var(--mirror-self-clear, 72px) !important;
   }
   button,
   a,
