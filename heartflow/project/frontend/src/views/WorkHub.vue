@@ -1,13 +1,12 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance wh">
     <!-- 装饰头 -->
-    <div data-enter class="header-ornament">
-      <span class="orn-line"></span>
-      <span class="orn-diamond">✦</span>
-      <span class="orn-line"></span>
-    </div>
-    <div data-enter class="header-kicker">把工作痕迹也放回自己这里</div>
-    <header><h1>工作中心</h1></header>
+    <RoomLayout
+      title="工作中心"
+      kicker="把工作痕迹也放回自己这里"
+      align="center"
+      data-enter
+    >
 
     <!-- 概览卡片 -->
     <div class="overview-cards">
@@ -304,6 +303,7 @@
         </div>
       </section>
     </div>
+    </RoomLayout>
   </div>
 </template>
 
@@ -311,6 +311,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useWorkHub } from '../modules/workhub'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const tab = ref('marks')
@@ -597,49 +598,10 @@ function removeBreak(id: string) {
 .wh {
   max-width: 520px;
   margin: 0 auto;
-  padding: 40px 32px 80px;
+  padding: 0 0 80px;
   min-height: 100%;
-  overflow-y: auto;
   background: transparent;
   color: var(--text-high);
-}
-
-/* ---- 装饰头 ---- */
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-.orn-line {
-  display: block;
-  width: 50px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.2), transparent);
-}
-.orn-diamond {
-  font-size: 8px;
-  color: var(--accent);
-  opacity: 0.35;
-}
-
-.header-kicker {
-  text-align: center;
-  font-size: 12px;
-  letter-spacing: 3px;
-  color: rgba(var(--accent-rgb), 0.35);
-  margin-bottom: 8px;
-}
-
-header h1 {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 500;
-  font-family: var(--font-heading-zh);
-  letter-spacing: 4px;
-  color: rgba(var(--text-primary-rgb), 0.92);
-  margin-bottom: 24px;
 }
 
 /* ---- 概览卡片 ---- */
@@ -954,7 +916,7 @@ section h3 {
 }
 
 @media (max-width: 860px) {
-  .wh { padding: 32px 20px 64px; }
+  .wh { padding: 0 0 64px; }
   .overview-cards { gap: 6px; }
   .overview-card { min-width: 0; }
   .tabs { overflow-x: auto; flex-wrap: nowrap; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
@@ -962,7 +924,7 @@ section h3 {
 }
 
 @media (max-width: 640px) {
-  .wh { padding: 24px 14px 56px; }
+  .wh { padding: 0 0 56px; }
   .overview-cards { flex-direction: column; gap: 6px; }
   .tab { font-size: 11px; padding: 4px 10px; }
   .add-row { flex-direction: column; }
