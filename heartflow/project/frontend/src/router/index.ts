@@ -231,6 +231,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '经略阁' },
   }),
   withRoomMeta({
+    path: '/knowledge-graph',
+    name: 'knowledge-graph',
+    component: () => import('../views/KnowledgeGraph.vue'),
+    meta: { title: '经略阁 · 关系图谱' },
+  }),
+  withRoomMeta({
     path: '/carrier-editor',
     name: 'carrier-editor',
     component: () => import('../views/CarrierEditor.vue'),

@@ -24,6 +24,8 @@ import { getRelations } from './relation'
 import { RELATION_TYPE_META } from './types'
 import type { KnowledgeRelation } from './types'
 import { useKnowledgeTower } from './knowledge-tower'
+import { applyEnhancedForceLayout } from './graph-visualization'
+import type { GraphNode, GraphEdge, EnhancedForceParams } from './graph-visualization'
 import { CATEGORY_PALETTE } from '../../theme/categoryColors'
 
 const tower = useKnowledgeTower()
@@ -298,100 +300,89 @@ export function useKnowledgeTowerUi() {
     return stars
   })
 
-  /** 力导向布局模拟 */
+  /** 力导向布局模拟（委托 graph-visualization 成熟引擎，消除内联重复实现） */
   function runForceSimulation() {
     const nodeList = nodes.value
     if (nodeList.length === 0) return
 
-    let changed = false
-    for (let i = 0; i < nodeList.length; i++) {
-      const n = nodeList[i]
-      if (!starPositions.value[n.id]) {
-        const angle = (i / nodeList.length) * Math.PI * 2 + Math.random() * 0.3
-        const dist = 40 + Math.random() * 80
-        starPositions.value[n.id] = {
-          x: Math.cos(angle) * dist,
-          y: Math.sin(angle) * dist,
-        }
-        changed = true
+    const graphNodes: GraphNode[] = nodeList.map((n, i) => {
+      const pos = starPositions.value[n.id]
+      const angle = (i / Math.max(1, nodeList.length)) * Math.PI * 2
+      return {
+        id: n.id,
+        label: n.title,
+        knowledgeId: n.id,
+        x: pos?.x ?? Math.cos(angle) * 120,
+        y: pos?.y ?? Math.sin(angle) * 120,
+        radius: 12,
+        color: catColor(n.cat),
+        category: n.cat,
+        tags: [],
+        importance: 0.5,
+        degree: n.links.length,
+        selected: false,
+        highlighted: false,
+        pinned: pos != null,
       }
-    }
-    if (!changed || nodeList.length < 2) return
-
-    const simNodes = nodeList.map((n) => {
-      const p = starPositions.value[n.id]!
-      return { id: n.id, cat: n.cat, x: p.x, y: p.y, vx: 0, vy: 0 }
     })
-    const relations = getRelations()
 
-    const REPULSION = 600
-    const ATTRACTION = 0.005
-    const CENTERING = 0.02
-    const SAME_CAT = 0.002
-    const DIFF_CAT_REP = 1.3
-    const DAMPING = 0.85
-    const MIN_DIST = 8
-    const ITERATIONS = 120
-
-    for (let iter = 0; iter < ITERATIONS; iter++) {
-      const cooling = 1 - iter / ITERATIONS
-
-      for (let i = 0; i < simNodes.length; i++) {
-        for (let j = i + 1; j < simNodes.length; j++) {
-          const a = simNodes[i]
-          const b = simNodes[j]
-          let dx = b.x - a.x
-          let dy = b.y - a.y
-          let dist = Math.sqrt(dx * dx + dy * dy)
-          if (dist < MIN_DIST) dist = MIN_DIST
-
-          const repForce = REPULSION / (dist * dist)
-          let fx = (dx / dist) * repForce
-          let fy = (dy / dist) * repForce
-
-          if (a.cat === b.cat) {
-            fx -= (dx / dist) * SAME_CAT * dist * cooling
-            fy -= (dy / dist) * SAME_CAT * dist * cooling
-          } else {
-            fx *= DIFF_CAT_REP
-            fy *= DIFF_CAT_REP
-          }
-
-          a.vx -= fx
-          a.vy -= fy
-          b.vx += fx
-          b.vy += fy
-        }
-      }
-
-      for (const r of relations) {
-        const a = simNodes.find((n) => n.id === r.sourceId)
-        const b = simNodes.find((n) => n.id === r.targetId)
-        if (!a || !b) continue
-        const dx = b.x - a.x
-        const dy = b.y - a.y
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1
-        const force = ATTRACTION * dist * cooling
-        a.vx += (dx / dist) * force
-        a.vy += (dy / dist) * force
-        b.vx -= (dx / dist) * force
-        b.vy -= (dy / dist) * force
-      }
-
-      for (const n of simNodes) {
-        n.vx *= DAMPING
-        n.vy *= DAMPING
-        n.x += n.vx
-        n.y += n.vy
-        n.x += -n.x * CENTERING * cooling
-        n.y += -n.y * CENTERING * cooling
-        n.x = Math.max(-180, Math.min(180, n.x))
-        n.y = Math.max(-180, Math.min(180, n.y))
+    const graphEdges: GraphEdge[] = []
+    for (const n of nodeList) {
+      for (const target of n.links) {
+        graphEdges.push({
+          id: `e-${n.id}-${target}`,
+          source: n.id,
+          target,
+          relationType: 'related',
+          label: '',
+          strength: 0.5,
+          color: '#9aa7b5',
+          highlighted: false,
+        })
       }
     }
 
-    for (const n of simNodes) {
-      starPositions.value[n.id] = { x: n.x, y: n.y }
+    const params: EnhancedForceParams = {
+      width: 800,
+      height: 600,
+      spacing: 100,
+      gravity: 0.1,
+      repulsion: 5000,
+      springLength: 150,
+      iterations: 100,
+      convergenceThreshold: 0.01,
+      maxIterations: 200,
+      minIterations: 10,
+      adaptiveCooling: true,
+    }
+
+    const result = applyEnhancedForceLayout(graphNodes, graphEdges, params)
+
+    // 成熟引擎输出落在 [0,width]×[0,height] 空间，而星图 SVG 的 viewBox 以原点为中心
+    // (±200)。这里把结果做「居中 + 等比收放进 ±180」，避免节点飞出可视星轨（原内联模拟
+    // 本就是绕原点布局，换引擎后必须补这一归位，否则布局整体偏到右下角）。
+    let minX = Infinity
+    let minY = Infinity
+    let maxX = -Infinity
+    let maxY = -Infinity
+    for (const gn of result.nodes) {
+      if (gn.x < minX) minX = gn.x
+      if (gn.y < minY) minY = gn.y
+      if (gn.x > maxX) maxX = gn.x
+      if (gn.y > maxY) maxY = gn.y
+    }
+    const bw = maxX - minX || 1
+    const bh = maxY - minY || 1
+    const fit = Math.min(360 / bw, 360 / bh, 2)
+    const ox = (minX + maxX) / 2
+    const oy = (minY + maxY) / 2
+    for (const gn of result.nodes) {
+      if (!starPositions.value[gn.knowledgeId]) {
+        starPositions.value[gn.knowledgeId] = {
+          x: (gn.x - ox) * fit,
+          y: (gn.y - oy) * fit,
+        }
+      }
     }
     saveStarPositions()
   }

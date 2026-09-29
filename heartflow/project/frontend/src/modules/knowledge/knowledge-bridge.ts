@@ -9,7 +9,6 @@
 
 import { ref, computed } from 'vue'
 import {
-  getNodes,
   createNode,
   updateNode,
   deleteNode,
@@ -18,6 +17,8 @@ import {
   deleteRelation,
   getNodeRelations,
 } from './relation'
+import { storage } from '../../engine/storage'
+import { KNOWLEDGE_NODES_KEY } from './knowledge-tower'
 import {
   suggestConnections,
   generateQuestions,
@@ -248,6 +249,24 @@ export interface ScenarioPlanSummary {
 // ============================================================
 // useKnowledgeBridge
 // ============================================================
+
+// 知识节点真源：经略阁 UI 通过 useKnowledgeTower 写入 `hf:knowledge`（KNOWLEDGE_NODES_KEY），
+// 而 relation.ts 的 `hf:knowledge_nodes` 是一份不被任何 UI 写入的孤儿库。
+// 这里直接读真源，使关系图谱对真实用户有数据（且不受 KnowledgeTower 挂载顺序影响）。
+function getNodes(): KnowledgeNode[] {
+  const raw = storage.getKV<
+    Array<{ id: string; title: string; desc: string; cat: string; links: string[] }>
+  >(KNOWLEDGE_NODES_KEY, [])
+  return raw.map((n) => ({
+    id: n.id,
+    title: n.title,
+    desc: n.desc,
+    cat: n.cat as KnowledgeCategory,
+    tags: [],
+    createdAt: '',
+    updatedAt: '',
+  }))
+}
 
 export function useKnowledgeBridge() {
   // ---- 子模块 ----
