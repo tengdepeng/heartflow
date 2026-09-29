@@ -177,6 +177,22 @@ button {
    排除 OS 惯例控件（range 滑块 / checkbox / radio / color / file / image / hidden），
    强制 36 会破坏其原生观感。宽度仍 <36 的极端项由各自组件补 min-width。 */
 @media (max-width: 639px) {
+  /* 固定底栏（FloatingNavBar）竖向占位令牌：移动端双浮岛贴底；左岛因按钮多会换行成
+     两行、整条约 94px 高（贴底 clamp + 44px 行×2 + 安全区），top 抵到 ~730px。
+     滚动容器与固定 CTA 据此避让（取 120px，留 ~6px 余量并叠加安全区），避免内容钮
+     被底栏盖住/抢点。两行高度是 P0 为避让左右岛横向互压的既定设计，此处只预留其空间。 */
+  :root { --nav-safe-bottom: 120px; }
+
+  /* 唯一滚动容器（.main-content）移动端扣掉底栏竖向占位：内容区整体抬到底栏之上，
+     无论视图长短，最后一个交互钮都不会落到底栏横向带内被盖住/抢点。App.vue 的 scoped
+     .main-content 基线（height/min-height:100dvh）特异性更高，故此处用 !important 仅在
+     ≤639px 覆盖；桌面走左侧 .nav-bar 轨道、无底栏遮挡，不受影响。max-height 扣高度（而非
+     padding-bottom）：短视图若不滚动，padding 落在折页下方、钮仍贴底，扣高度才能同时护住短视图。 */
+  .main-content {
+    height: auto !important;
+    min-height: auto !important;
+    max-height: calc(100dvh - var(--nav-safe-bottom, 120px) - env(safe-area-inset-bottom, 0px)) !important;
+  }
   button,
   a,
   select,

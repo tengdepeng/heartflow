@@ -1895,7 +1895,9 @@ onUnmounted(() => {
   }
 
   .note-trigger {
-    bottom: 20px;
+    /* P2 修复：原 bottom:20px 与右下浮岛（bar-back/bar-add）争角互压，被盖不可点。
+       上移到底栏竖向占位之上（--nav-safe-bottom≈86px + 安全区），与底栏错开。 */
+    bottom: calc(var(--nav-safe-bottom, 86px) + env(safe-area-inset-bottom, 0px));
     left: auto;
     right: 16px;
     margin-left: 0;
@@ -1903,7 +1905,7 @@ onUnmounted(() => {
   }
 
   .release-note {
-    bottom: 80px;
+    bottom: calc(var(--nav-safe-bottom, 86px) + env(safe-area-inset-bottom, 0px));
     width: calc(100vw - 32px);
   }
 
