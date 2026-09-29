@@ -4,7 +4,7 @@
 // ============================================================
 
 /** 桌面小组件类型 */
-export type WidgetType = 'pomodoro' | 'daily-anchor' | 'emotion-check' | 'quick-note' | 'weather' | 'quote'
+export type WidgetType = 'pomodoro' | 'daily-anchor' | 'emotion-check' | 'quick-note' | 'weather' | 'quote' | 'quadrant'
 
 /** 小组件尺寸预设 */
 export type WidgetSize = 'small' | 'medium' | 'large'
@@ -88,6 +88,14 @@ export const WIDGET_META: Record<WidgetType, WidgetMeta> = {
     description: '桌面展示一句哲思语录',
     defaultSize: 'small',
     icon: '💬',
+  },
+  quadrant: {
+    type: 'quadrant',
+    label: '四象限',
+    labelEn: 'Quadrant Board',
+    description: '紧急 × 重要 四象限任务分布概览（复用自律工坊任务池）',
+    defaultSize: 'medium',
+    icon: '🗂️',
   },
 }
 

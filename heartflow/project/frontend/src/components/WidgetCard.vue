@@ -55,6 +55,19 @@
       <p class="wqt-text">「{{ quote.text }}」</p>
       <span class="wqt-author">—— {{ quote.author }}</span>
     </template>
+
+    <!-- 四象限任务：复用 modules/tasks 的 quadrant-board 引擎（与自律工坊同源） -->
+    <template v-else-if="instance.type === 'quadrant'">
+      <p v-if="!quadrantTotal" class="wb-note-empty">任务池还空着，去自律工坊记下第一件要事。</p>
+      <div v-else class="wqd-grid">
+        <div v-for="col in quadrantBoard" :key="col.quadrant"
+          class="wqd-cell" :style="{ '--wqd-c': col.color }"
+          :title="`${col.label}：${col.stats.active} 件待推进 / 共 ${col.stats.total} 件`">
+          <span class="wqd-label">{{ compact ? shortQuadrant(col.label) : col.label }}</span>
+          <span class="wqd-count">{{ col.stats.active }}</span>
+        </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -74,6 +87,7 @@ import type { EmotionType } from '../modules/emotion'
 import { storage } from '../engine/storage'
 import { composeWidgetSnapshot } from '../modules/desktop-widget/snapshot'
 import { readWidgetNote, pushWidgetSnapshotNow, WIDGET_NOTE_KEY } from '../modules/desktop-widget/sync'
+import { useTaskManager, buildQuadrantBoard } from '../modules/tasks'
 
 const props = withDefaults(
   defineProps<{ instance: WidgetInstance; compact?: boolean }>(),
@@ -137,6 +151,15 @@ function saveNote() {
 // ---- 气象 / 一言（共享取词与季节推断） ----
 const season = computed(() => composeWidgetSnapshot.seasonOf())
 const quote = computed(() => composeWidgetSnapshot.quoteOfDay())
+
+// ---- 四象限（复用自律工坊同一任务池与 quadrant-board 引擎，不另造数据） ----
+const taskManager = useTaskManager()
+const quadrantBoard = computed(() => buildQuadrantBoard(taskManager.tasks.value))
+const quadrantTotal = computed(() => quadrantBoard.value.reduce((s, c) => s + c.stats.total, 0))
+/** 紧凑态缩短象限名，避免小窗 / Android 卡内换行 */
+function shortQuadrant(label: string): string {
+  return label.replace('且', '').slice(0, 6)
+}
 void props
 </script>
 
@@ -183,6 +206,12 @@ void props
 .wqt-text { margin: 0; font-size: 14px; line-height: 1.7; color: #e3e8f6; font-style: italic; }
 .wqt-author { align-self: flex-end; font-size: 11px; color: #7fa8d8; margin-top: 4px; }
 
+/* ---- 四象限 ---- */
+.wqd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.wqd-cell { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; padding: 5px 7px; border-radius: 8px; background: rgba(120, 140, 200, 0.1); border-left: 2px solid var(--wqd-c, #7fa8d8); font-size: 12px; color: #c6d0e8; }
+.wqd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wqd-count { font-weight: 600; color: var(--wqd-c, #7fa8d8); flex: none; }
+
 /* ---- 紧凑态（系统桌面小窗）：同源降密度，不另写一套 ---- */
 .wcard-compact { gap: 6px; }
 .wcard-compact .wfmt-clock { font-size: 26px; }
@@ -191,4 +220,5 @@ void props
 .wcard-compact .wqt-text { font-size: 13px; }
 .wcard-compact .wemod-opt { padding: 3px 7px; font-size: 13px; }
 .wcard-compact .wanc { padding: 4px 6px; font-size: 12px; }
+.wcard-compact .wqd-cell { padding: 3px 5px; font-size: 11px; }
 </style>

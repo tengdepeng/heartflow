@@ -77,7 +77,7 @@ const { pinned, togglePinned } = useDesktopWidget()
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 function togglePin() { togglePinned() }
 
-const widgetTypes: WidgetType[] = ['pomodoro', 'daily-anchor', 'emotion-check', 'quick-note', 'weather', 'quote']
+const widgetTypes: WidgetType[] = ['pomodoro', 'daily-anchor', 'emotion-check', 'quick-note', 'weather', 'quote', 'quadrant']
 const SIZES: { value: WidgetSize; label: string }[] = [
   { value: 'small', label: 'S' },
   { value: 'medium', label: 'M' },
