@@ -710,5 +710,10 @@ onUnmounted(() => document.removeEventListener('click', onDocClick, true))
   .bar-nav-cluster .bar-btn { min-width: var(--tap-target, 44px); min-height: var(--tap-target, 44px); }
   .bar-cluster { padding: 7px 8px; gap: 2px; }
   .bar-room { padding: 5px 6px; max-width: 72px; }
+  /* P0 修复：窄屏下两浮岛各自限宽 ≤ 半屏并允许换行，避免左岛（≡/房间/前后/星盘）越过中线
+     撞上右岛（形态/返回/新建）造成按钮互压；房间名收起只留图标，进一步腾出空间。
+     内容多时左岛按钮换行成两行、仍固定在左下角，不丢任何功能。 */
+  .bar-cluster { max-width: calc(50vw - 18px); flex-wrap: wrap; justify-content: flex-start; }
+  .bar-room-name { display: none; }
 }
 </style>

@@ -1246,8 +1246,12 @@ onUnmounted(() => {
    ================================================================ */
 .note-trigger {
   position: fixed;
-  bottom: 28px;
-  right: 28px;
+  bottom: 30px;
+  /* P1 修复：原 bottom:28 right:28 与右下角「访问记录」面板首条删除钮（visit-record-delete）争角互压，
+     删除钮被遮不可点。改到屏幕底部居中（与释放便签编辑器同锚点、语义一致），彻底避开记录面板。
+     居中用 margin-left 而非 transform，避免与 hover 的 transform:scale 冲突。 */
+  left: 50%;
+  margin-left: -12px;
   width: 24px;
   height: 24px;
   border: none;
@@ -1892,7 +1896,9 @@ onUnmounted(() => {
 
   .note-trigger {
     bottom: 20px;
+    left: auto;
     right: 16px;
+    margin-left: 0;
     font-size: 16px;
   }
 

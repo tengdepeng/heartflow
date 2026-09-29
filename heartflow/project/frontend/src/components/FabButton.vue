@@ -32,7 +32,9 @@ const emit = defineEmits<{ (e: 'click'): void }>()
 <style scoped>
 .hf-fab {
   position: fixed;
-  bottom: var(--spacing-xl);
+  /* P1 修复：FAB 默认贴底会与全局底部浮动导航（FloatingNavBar 双浮岛）争角、压住导航钮。
+     整体抬高一个底栏高度（+64px），使其悬浮在导航之上、完全可点，不再重叠。 */
+  bottom: calc(var(--spacing-xl, 24px) + 64px);
   z-index: var(--z-floating);
   display: inline-flex;
   align-items: center;
