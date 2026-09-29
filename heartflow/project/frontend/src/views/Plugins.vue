@@ -1,15 +1,11 @@
 <template>
   <div :class="entranceClass" ref="entranceRef" class="view-entrance pl">
-    <!-- Header -->
-    <header data-enter class="pl-header">
-      <div class="header-ornament">
-        <span class="orn-line"></span>
-        <span class="orn-diamond">✦</span>
-        <span class="orn-line"></span>
-      </div>
-      <p class="header-kicker">管理你的插件</p>
-      <h1 class="pl-title">插件管理</h1>
-    </header>
+    <RoomLayout
+      title="插件管理"
+      kicker="管理你的插件"
+      align="center"
+      data-enter
+    >
 
     <!-- Overview Cards -->
     <div data-enter class="pl-overview">
@@ -176,6 +172,7 @@
 
     <!-- 空状态 -->
     <EmptyState v-if="plugins.length === 0" icon="🔌" title="插件管理器尚未初始化" :glow="false" cta-label="" />
+    </RoomLayout>
   </div>
 </template>
 
@@ -192,6 +189,7 @@ import { PERMISSION_LABELS } from '../modules/plugin/types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import PluginEcosystemPanel from '../components/PluginEcosystemPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const pluginBridge = usePlugin()
@@ -271,6 +269,11 @@ function uninstall(id: string) {
   min-height: 100vh;
 }
 
+.pl :deep(.room-layout__body) {
+  padding: 0;
+  gap: 0;
+}
+
 /* Ambient glow pseudo-elements */
 .pl::before,
 .pl::after {
@@ -297,54 +300,11 @@ function uninstall(id: string) {
   right: -80px;
 }
 
-/* ===== Header ===== */
-.pl-header {
-  text-align: center;
-  margin-bottom: 36px;
-  position: relative;
-  z-index: 1;
-}
-
-.header-ornament {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.orn-line {
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.4), transparent);
-}
-
-.orn-diamond {
-  font-size: 12px;
-  color: var(--accent);
-  opacity: 0.7;
-}
-
-.header-kicker {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.55);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin: 0 0 8px 0;
-}
-
-.pl-title {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: 1px;
-}
-
 /* ===== Overview Cards ===== */
 .pl-overview {
   display: flex;
   gap: 12px;
+  margin-top: 36px;
   margin-bottom: 40px;
   position: relative;
   z-index: 1;
