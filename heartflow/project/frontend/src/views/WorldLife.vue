@@ -323,5 +323,8 @@ onUnmounted(() => {
   .wl-now { grid-template-columns: 1fr; }
   .wl-phases { grid-template-columns: repeat(3, 1fr); }
   .wl-weathers { grid-template-columns: repeat(4, 1fr); }
+  /* 面包屑行避让常驻顶左的 GlobalDropDrawer grip（fixed; left:12px; 约 104px 宽，右沿 x≈116）：
+     原居中布局在窄屏左端会压到 grip，改为左对齐并右移让位。 */
+  .breadcrumb-row { justify-content: flex-start; padding-left: calc(120px + env(safe-area-inset-left, 0px)); }
 }
 </style>

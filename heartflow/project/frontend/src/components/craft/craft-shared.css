@@ -1423,6 +1423,10 @@
 
   .breadcrumb-row {
     font-size: 11px;
+    /* 避让常驻顶左的 GlobalDropDrawer grip（position:fixed; left:12px; 约 104px 宽 → 右沿到 x≈116；
+       z-index:90）：原居中布局在窄屏下左端会压到 grip，改为左对齐并右移让位。 */
+    justify-content: flex-start;
+    padding-left: calc(120px + env(safe-area-inset-left, 0px));
   }
 
   .breadcrumb-link {

@@ -574,4 +574,13 @@ watch(adaptedRecords, () => {
 .fap-budget-row { display: flex; align-items: center; gap: 8px; }
 .fap-budget-label { width: 90px; font-size: 11px; color: rgba(255, 246, 224, 0.7); flex-shrink: 0; }
 .fap-budget-value { width: 120px; text-align: right; font-size: 10px; color: rgba(255, 246, 224, 0.5); font-variant-numeric: tabular-nums; }
+
+/* 移动端：面板右侧让位给常驻右下角的 mirror-self 浮窗
+   （position:fixed; right:32px; bottom:80px; 约 54px 宽，x≈304-358@390），
+   避免 .fap-select 等长控件被浮窗盖住无法点。 */
+@media (max-width: 640px) {
+  .fap {
+    padding-right: calc(72px + env(safe-area-inset-right, 0px));
+  }
+}
 </style>
