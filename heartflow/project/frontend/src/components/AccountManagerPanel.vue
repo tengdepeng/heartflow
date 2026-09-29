@@ -153,6 +153,13 @@ function doTransfer(): void {
 }
 .amp-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 .amp-btn-transfer { background: #6b9fc4; }
+/* 窄屏：账目表单栅格改为单列堆叠，输入框/按钮占满，消除 +60px 溢出 */
+@media (max-width: 640px) {
+  .amp-form { grid-template-columns: 1fr; }
+  .amp-input,
+  .amp-select,
+  .amp-btn { width: 100%; min-width: 0; box-sizing: border-box; }
+}
 .amp-list { list-style: none; padding: 0; margin: 8px 0; }
 .amp-row {
   display: flex;

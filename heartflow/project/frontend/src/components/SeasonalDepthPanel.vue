@@ -283,4 +283,17 @@ function onRemove(id: string) { emit('remove', id) }
 .sdp-review-theme { font-size: 12px; color: var(--text-low); }
 .sdp-review-rows { display: flex; gap: 10px; flex-wrap: wrap; }
 .sdp-review-season { display: flex; gap: 8px; font-size: 11px; color: var(--text-low); background: rgba(var(--accent-rgb), 0.04); padding: 3px 8px; border-radius: 6px; }
+/* 窄屏：光茧面板与表单行收敛到视口宽，消除 .sdp 整块 +31px 溢出 */
+@media (max-width: 640px) {
+  .sdp {
+    max-width: 100%;
+    margin: 16px auto 0;
+    padding: 16px;
+  }
+  .sdp-form { flex-wrap: wrap; }
+  .sdp-input,
+  .sdp-select,
+  .sdp-submit { min-width: 0; max-width: 100%; }
+  .sdp-select { flex: 1 1 100%; }
+}
 </style>

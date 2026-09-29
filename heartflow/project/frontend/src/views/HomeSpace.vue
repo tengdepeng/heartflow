@@ -1046,8 +1046,10 @@ onUnmounted(() => disable3D())
 .home-mantra {
   position: fixed;
   bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
+  /* 用 inset + 自动外边距居中（不依赖 transform），移动端几何探测不会被 transform:none 误伤 */
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   z-index: 10;
   display: flex;
   align-items: center;
@@ -1086,7 +1088,13 @@ onUnmounted(() => disable3D())
 @media (max-width: 639px) {
   .home-mantra {
     bottom: calc(var(--edge-bar-h, 56px) + 16px);
+    left: 16px;
+    right: 16px;
     max-width: calc(100vw - 32px);
+  }
+  .mantra-text {
+    min-width: 0;
+    max-width: 100%;
   }
 }
 

@@ -82,6 +82,8 @@ const effAlign = computed(() => props.align ?? shell.headerAlign.value)
   flex-direction: column;
   /* 视图根高用 min-height:100%（禁 HARD height:100vh），滚动交给壳层 .main-content */
   min-height: 100%;
+  /* 移动端关键：允许整房在交叉轴收缩到视口宽，避免被子项 min-content 撑爆（修 .room-layout__body 整房溢出） */
+  min-width: 0;
 }
 
 .room-layout__body {
@@ -91,6 +93,8 @@ const effAlign = computed(() => props.align ?? shell.headerAlign.value)
   gap: 20px;
   /* 统一内容内边距：所有房间一致。可用 --room-content-pad 在主题层整体覆盖 */
   padding: var(--room-content-pad, 24px);
+  /* 移动端关键：允许内容区在交叉轴收缩到视口宽，避免整房被子项 min-content 撑爆（修 .room-layout__body 溢出） */
+  min-width: 0;
 }
 
 .room-layout--bare .room-layout__body {

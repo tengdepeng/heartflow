@@ -381,6 +381,18 @@ function percentage(count: number, total: number): number {
   font-size: 10px;
   color: rgba(var(--accent-rgb), 0.3);
 }
+/* 窄屏：导航卡换行并弹性平分，避免四卡 min-width 把整行撑出视口（+63px） */
+@media (max-width: 640px) {
+  .ti-nav {
+    flex-wrap: wrap;
+    padding: 16px 12px 0;
+    gap: 8px;
+  }
+  .ti-nav-card {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+}
 
 /* ---- 统计卡片 ---- */
 .ti-stats {

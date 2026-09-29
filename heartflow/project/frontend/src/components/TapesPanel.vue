@@ -166,6 +166,8 @@ function remove(id: string) {
   background: rgba(20, 26, 38, 0.6);
   color: #c6d0e0;
   font-size: 13px;
+  min-width: 0;
+  max-width: 100%;
 }
 .tp-title { flex: 2; }
 .tp-participants { flex: 2; }
@@ -258,5 +260,18 @@ function remove(id: string) {
   font-size: 12px;
   color: #7a879c;
   margin: 8px 0 0;
+}
+@media (max-width: 640px) {
+  .tp-import-row {
+    flex-wrap: wrap;
+  }
+  .tp-title,
+  .tp-participants,
+  .tp-duration {
+    flex: 1 1 100%;
+  }
+  .tp-search {
+    width: 100%;
+  }
 }
 </style>

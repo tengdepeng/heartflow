@@ -404,6 +404,8 @@ section h3 {
   font-family: inherit;
   outline: none;
   cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
 }
 .mv-input {
   flex: 1;
@@ -416,6 +418,8 @@ section h3 {
   font-family: inherit;
   outline: none;
   transition: border-color 0.2s;
+  min-width: 0;
+  max-width: 100%;
 }
 .mv-input::placeholder, .mv-select::placeholder, .mv-textarea::placeholder {
   color: rgba(var(--accent-rgb), 0.2);

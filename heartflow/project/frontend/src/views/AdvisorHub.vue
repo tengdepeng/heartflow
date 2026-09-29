@@ -1443,5 +1443,10 @@ function onStickyPin(id: string) {
   .ah-action-row { flex-direction: column; }
   .ah-btn-new { width: 100%; }
   .ah-btn-affinity { width: 100%; }
+  /* 笔记栏在窄屏换行，避免「新建笔记 / 浮层」按钮被 min-content 撑出视口 */
+  .ah-notes-bar { flex-wrap: wrap; }
+  .ah-notes-bar :deep(.hf-search) { flex: 1 1 100%; min-width: 0; }
+  .ah-notes-new,
+  .ah-sticky-toggle { flex: 1 1 auto; min-width: 0; }
 }
 </style>
