@@ -387,10 +387,12 @@ export function useNoteAnalytics() {
     weekly.sort((a, b) => a.week.localeCompare(b.week))
 
     // 每月统计（最近 12 个月）
+    // 注意：必须用 new Date(year, month - i, 1) 把日归一为 1 号，
+    // 否则保留当前日(如 29) 跨 2 月时 setMonth 会把「2 月 29」滚成「3 月 1」，
+    // 导致 Feb 桶 key 与真实 3 月桶撞键 → 仅 11 个不同月份（p16-note 测试 12 vs 11 红灯根因）。
     const monthlyMap = new Map<string, { created: number; updated: number; days: Set<string>; chars: number }>()
     for (let i = 11; i >= 0; i--) {
-      const d = new Date(now)
-      d.setMonth(d.getMonth() - i)
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
       const monthKey = d.toISOString().slice(0, 7)
       monthlyMap.set(monthKey, { created: 0, updated: 0, days: new Set(), chars: 0 })
     }
