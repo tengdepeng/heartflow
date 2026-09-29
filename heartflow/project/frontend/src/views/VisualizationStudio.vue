@@ -15,6 +15,7 @@ import VisualizationCockpitPanel from '../components/VisualizationCockpitPanel.v
 import DimensionMappingPanel from '../components/DimensionMappingPanel.vue'
 import DataSourceConnectorPanel from '../components/DataSourceConnectorPanel.vue'
 import VisualChartPanel from '../components/VisualChartPanel.vue'
+import RoomLayout from '../components/RoomLayout.vue'
 
 useViewEntrance()
 
@@ -92,12 +93,11 @@ onMounted(renderToCanvas)
 
 <template>
   <div class="visualization-studio-room">
-    <header class="studio-header">
-      <h1 class="studio-title">数据视觉工坊</h1>
-      <p class="studio-subtitle">
-        用「数据视觉逻辑语言」把本地心流数据，转译成光点、光晕与排布
-      </p>
-    </header>
+    <RoomLayout
+      title="数据视觉工坊"
+      subtitle="用「数据视觉逻辑语言」把本地心流数据，转译成光点、光晕与排布"
+      data-enter
+    >
 
     <nav class="studio-tabs" role="tablist">
       <button
@@ -174,13 +174,14 @@ onMounted(renderToCanvas)
         {{ VIZ_SUBJECTS.find((s) => s.key === studio.activeSubject.value)?.hint }}
       </p>
     </section>
+    </RoomLayout>
   </div>
 </template>
 
 <style scoped>
 .visualization-studio-room {
   min-height: 100%;
-  padding: 28px 24px 48px;
+  padding: 0 0 48px;
   position: relative;
   background: transparent;
 }
@@ -191,26 +192,6 @@ onMounted(renderToCanvas)
   inset: 0;
   background: radial-gradient(circle at 30% 20%, rgba(212, 165, 116, 0.10), transparent 60%);
   pointer-events: none;
-}
-
-.studio-header {
-  position: relative;
-  margin-bottom: 20px;
-}
-
-.studio-title {
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--text-primary, #f0e8dc);
-  margin: 0 0 6px;
-}
-
-.studio-subtitle {
-  margin: 0;
-  font-size: 13px;
-  color: var(--text-secondary, #a89a88);
-  max-width: 560px;
-  line-height: 1.6;
 }
 
 .studio-tabs {
@@ -330,11 +311,7 @@ onMounted(renderToCanvas)
 
 @media (max-width: 639px) {
   .visualization-studio-room {
-    padding: 20px 14px 40px;
-  }
-
-  .studio-title {
-    font-size: 22px;
+    padding: 0 0 40px;
   }
 }
 </style>

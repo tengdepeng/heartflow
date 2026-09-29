@@ -124,7 +124,7 @@ describe('VisualizationStudio 视图', () => {
     const wrapper = mount(VisualizationStudio)
     expect(wrapper.find('[data-testid="studio-canvas"]').exists()).toBe(true)
     expect(wrapper.findAll('.studio-tab')).toHaveLength(4)
-    expect(wrapper.find('.studio-title').text()).toContain('数据视觉工坊')
+    expect(wrapper.text()).toContain('数据视觉工坊')
   })
 
   it('主题切换按钮可点击且不抛错（空数据下显示空态提示）', async () => {
