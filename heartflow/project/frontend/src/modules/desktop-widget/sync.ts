@@ -12,6 +12,7 @@ import { useHappyBox } from '../../modules/emotion/happy-box'
 import { storage } from '../../engine/storage'
 import { useDesktopWidget } from './index'
 import { composeWidgetSnapshot } from './snapshot'
+import { invoke } from '@tauri-apps/api/core'
 
 /** 便签存储键（与 WidgetBox 原实现同键，迁移不改数据结构） */
 export const WIDGET_NOTE_KEY = 'hf:touchpoints:newnote'
@@ -54,6 +55,8 @@ export function pushWidgetSnapshotNow(): void {
       note: readWidgetNote(),
     }),
   )
+  // 写完快照立即触发 Android 原生 widget 即时刷新（桌面/web 端无对应命令，静默容错）
+  void refreshAndroidWidgets()
 }
 
 function formatClock(ms: number): string {
@@ -89,4 +92,18 @@ export function startWidgetSnapshotSync(): void {
     () => pushWidgetSnapshotNow(),
     { immediate: true },
   )
+}
+
+/**
+ * 数据写入 widget_data.json 后，立即触发 Android 原生 widget 即时刷新。
+ * 机制：invoke Kotlin @TauriPlugin 命令（HeartflowWidgetsPlugin）→
+ * 对全部 7 个 Provider 广播 ACTION_APPWIDGET_UPDATE，跳过系统 30min 刷新周期。
+ * 桌面 / web 端无对应命令，invoke 被 reject，静默忽略。
+ */
+export async function refreshAndroidWidgets(): Promise<void> {
+  try {
+    await invoke('plugin:heartflowWidgets|refreshWidgets')
+  } catch {
+    /* 桌面 / web 端无原生命令，静默忽略 */
+  }
 }
