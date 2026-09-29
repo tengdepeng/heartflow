@@ -1251,9 +1251,9 @@ onUnmounted(() => {
      删除钮被遮不可点。改到屏幕底部居中（与释放便签编辑器同锚点、语义一致），彻底避开记录面板。
      居中用 margin-left 而非 transform，避免与 hover 的 transform:scale 冲突。 */
   left: 50%;
-  margin-left: -12px;
-  width: 24px;
-  height: 24px;
+  margin-left: -18px;
+  width: 36px;
+  height: 36px;
   border: none;
   background: transparent;
   color: var(--text-secondary);

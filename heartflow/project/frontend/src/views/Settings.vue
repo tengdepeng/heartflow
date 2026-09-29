@@ -2515,6 +2515,8 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
   }
   .settings-nav__item {
     white-space: nowrap;
+    /* !important：盖过同档 .settings * { min-width: 0 } 的重置 */
+    min-width: 36px !important;
   }
   .settings-filter {
     position: static;

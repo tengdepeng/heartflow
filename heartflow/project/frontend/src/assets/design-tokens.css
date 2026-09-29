@@ -169,6 +169,30 @@ button {
   font-family: inherit;
 }
 
+/* ---- 移动端触控目标下限（三端细节 P2 收口，2026-09-29）----
+   所有交互控件在 ≤639px 至少 36px 高：既满足 WCAG 2.2 AA(24px) 下限，
+   又贴近项目 --tap-target:44px 令牌哲学。用 min-height（非 height）仅抬下限、
+   不改已有更大控件；且 min-height 会压过组件 scoped 里写死的 height，
+   故一条规则即把约 340 个 24–35px 的 bespoke tab/chip/filter/input 抬到 ≥36。
+   排除 OS 惯例控件（range 滑块 / checkbox / radio / color / file / image / hidden），
+   强制 36 会破坏其原生观感。宽度仍 <36 的极端项由各自组件补 min-width。 */
+@media (max-width: 639px) {
+  button,
+  a,
+  select,
+  textarea,
+  /* 用 :not() 排除 OS 惯例控件，覆盖所有文本类输入——含无 type 属性的裸 <input>
+     （默认 text）以及 text/search/number/email/tel/url/date/datetime-local/month/time/
+     button/submit；逐条枚举会漏掉裸 input 导致其高度没被抬。 */
+  input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="file"]):not([type="image"]):not([type="hidden"]),
+  [role="button"] {
+    /* !important：组件 scoped 样式多带 data-v 属性（特异性 0,1,1）会覆写
+       类型选择器 button 的 min-height；用 !important 强制移动端下限。
+       仅作用在 ≤639px 媒体查询内，不影响桌面；min-height 恒钳制 height。 */
+    min-height: 36px !important;
+  }
+}
+
 /* ---- 全局滚动条风格 ---- */
 ::-webkit-scrollbar {
   width: 4px;

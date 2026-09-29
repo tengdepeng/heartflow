@@ -395,6 +395,11 @@ const resultTableColumns: string[] = ['date', 'domain', 'duration', 'score']
 .tpp-step-summary { flex: 1; color: var(--text-secondary, rgba(232, 224, 216, 0.55)); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tpp-step-toggle { border: none; background: transparent; color: var(--accent, #d4a574); cursor: pointer; font-size: 12px; }
 .tpp-step-remove { border: none; background: transparent; color: #c46a5a; cursor: pointer; font-size: 15px; line-height: 1; }
+/* 三端细节 P2：移动端把过窄的步骤启用/移除钮抬到可点宽度（高度由全局 min-height:36 兜底） */
+@media (max-width: 639px) {
+  .tpp-step-toggle { min-width: 48px !important; padding: 0 6px; display: inline-flex; align-items: center; justify-content: center; }
+  .tpp-step-remove { min-width: 30px !important; display: inline-flex; align-items: center; justify-content: center; }
+}
 
 .tpp-run { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .tpp-btn {
