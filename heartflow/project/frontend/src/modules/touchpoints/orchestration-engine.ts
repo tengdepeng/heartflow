@@ -314,6 +314,7 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       'quick-note': 'medium',
       weather: 'small',
       quote: 'small',
+      quadrant: 'medium',
     },
   },
   {
@@ -331,6 +332,7 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       'quick-note': 'large',
       weather: 'small',
       quote: 'small',
+      quadrant: 'medium',
     },
   },
   {
@@ -348,6 +350,7 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       'quick-note': 'large',
       weather: 'medium',
       quote: 'small',
+      quadrant: 'large',
     },
   },
   {
@@ -365,6 +368,7 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       'quick-note': 'large',
       weather: 'medium',
       quote: 'medium',
+      quadrant: 'large',
     },
   },
 ]

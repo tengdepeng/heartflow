@@ -24,7 +24,7 @@ const dry = process.argv.includes('--dry')
 
 const LAYOUTS = [
   'widget_heartflow', 'widget_anchors', 'widget_countdown', 'widget_focus',
-  'widget_calendar', 'widget_emotion', 'widget_note',
+  'widget_calendar', 'widget_emotion', 'widget_note', 'widget_quadrant',
 ]
 const DRAWABLES = ['widget_bg', 'widget_today_bg']
 
@@ -37,6 +37,7 @@ const RECEIVERS = [
   ['HeartflowCalendarWidgetProvider', 'widget_calendar_info', '心流 · 月历'],
   ['HeartflowEmotionWidgetProvider', 'widget_emotion_info', '心流 · 情绪'],
   ['HeartflowNoteWidgetProvider', 'widget_note_info', '心流 · 便签'],
+  ['HeartflowQuadrantWidgetProvider', 'widget_quadrant_info', '心流 · 四象限'],
 ]
 
 if (!fs.existsSync(SRC)) {

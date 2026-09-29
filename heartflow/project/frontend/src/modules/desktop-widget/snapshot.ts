@@ -50,6 +50,8 @@ function build(input: {
   timer: { status: string; clock: string; progress: number }
   emotion?: { todayCount: number; lastMood: string }
   note?: string
+  /** 四象限概览（调用侧由 modules/tasks 的 quadrant-board 引擎提供） */
+  quadrant?: { label: string; active: number }[]
 }): SystemWidgetSnapshot {
   const quote = quoteOfDay()
   const season = seasonOf()
@@ -69,6 +71,11 @@ function build(input: {
     },
     emotion: input.emotion ?? { todayCount: 0, lastMood: '' },
     note: { text: (input.note ?? '').trim() },
+    quadrant: {
+      // 四个象限「待推进」合计（total 语义：未完成数之和）
+      total: (input.quadrant ?? []).reduce((s, c) => s + c.active, 0),
+      cols: input.quadrant ?? [],
+    },
     updatedAt: Date.now(),
   }
 }
