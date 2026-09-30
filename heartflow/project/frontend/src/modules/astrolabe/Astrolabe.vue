@@ -830,9 +830,8 @@ watch(() => astrolabe.visibility.value.visible, (visible) => {
   pointer-events: auto;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   transition: transform 0.3s ease;
   animation: fade-in 0.5s ease-out backwards;
   animation-delay: 0.05s;
@@ -898,6 +897,11 @@ watch(() => astrolabe.visibility.value.visible, (visible) => {
 }
 
 .center-label {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
   font-size: calc(11px * var(--inv-scale, 1));
   color: rgba(var(--accent-rgb), 0.6);
   letter-spacing: 2px;
@@ -906,11 +910,14 @@ watch(() => astrolabe.visibility.value.visible, (visible) => {
 }
 
 .astrolabe-caption {
+  position: absolute;
+  top: calc(100% + 22px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
   font-size: calc(10px * var(--inv-scale, 1));
   color: rgba(var(--accent-rgb), 0.4);
   letter-spacing: 0.5px;
-  margin: 2px 0 0;
-  white-space: nowrap;
   font-family: var(--font-body, inherit);
 }
 
