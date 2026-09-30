@@ -581,9 +581,10 @@ const navBarFloatStyle = computed((): Record<string, string> => {
     br: 'none',
     free: 'none',
   }
-  // 隐藏态（用户主动收起 或 无操作超时）：就近滑出 + 完全淡出。
-  // rail 形态下不滑出：仅 hidden(完全隐藏) 才就近滑出+淡出，保持窄栏常驻。
-  if (appearance.value === 'hidden') {
+  // 隐藏态（用户主动收起 sidebarCollapsed 或 无操作超时 appearance==='hidden'）：就近滑出 + 完全淡出。
+  // 内联收起 transform 必须覆盖 CSS .nav-bar.float-edge-*.collapsed 类（内联优先级高于类），
+  // 否则用户点 ≡ 收起侧栏时显示态内联 transform 会盖掉收起位移，侧栏收不起来。
+  if (sidebarCollapsed.value || appearance.value === 'hidden') {
     return {
       ...normal,
       transform: slideOut[edge] ?? 'translateX(-110%)',
