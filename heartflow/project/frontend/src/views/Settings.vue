@@ -849,6 +849,22 @@
         </div>
       </div>
 
+      <!-- 桌面小组件（系统级 widget 的「选组件/排布」编辑面；首页不再渲染，见 /widgets） -->
+      <div class="sub-group" :class="{ 'is-collapsed': !openSections.widget }" :data-section="'widget'">
+        <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('widget')" @keydown.enter="toggleSection('widget')" @keydown.space.prevent="toggleSection('widget')">
+          <span class="sub-group__chevron">{{ openSections.widget ? '▾' : '▸' }}</span>
+          <div class="sub-group__heading">
+            <h3 class="sub-title">桌面小组件</h3>
+            <p class="sub-desc">配置安卓桌面 / 电脑桌面的系统级小组件（番茄钟、心锚、四象限等）；此处仅作编辑面，常驻展示发生在系统桌面。</p>
+          </div>
+        </div>
+
+        <div class="widget-entry">
+          <p class="sub-desc">在系统桌面添加的小组件，内容由这里统一编排并实时同步到安卓原生 widget 与 Tauri 置顶浮窗。</p>
+          <button class="bg-btn" type="button" @click="goWidgets">打开小组件管理</button>
+        </div>
+      </div>
+
       <!-- 数据整理（data:cleanup · 仅宪法显式启用后出现入口） -->
       <DataCleanupPanel />
 
@@ -868,6 +884,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useConfig } from '../resonance/bridges/config'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useAppearance } from '../modules/customization/useAppearance'
@@ -893,6 +910,7 @@ import type { GestureAction } from '../modules/gesture/contracts'
 import type { GestureType } from '../modules/gesture/types'
 
 const { entranceRef, entranceClass } = useViewEntrance()
+const router = useRouter()
 const configBridge = useConfig()
 const { config: configRef } = configBridge
 
@@ -957,6 +975,7 @@ const openSections = reactive<Record<string, boolean>>({
   taxonomy: false,
   rooms: false,
   appicon: false,
+  widget: false,
 })
 function toggleSection(key: string) {
   openSections[key] = !openSections[key]
@@ -979,6 +998,7 @@ const NAV_ITEMS = [
   { key: 'edgebar', label: '上下边栏' },
   { key: 'astrolabe', label: '星图主题' },
   { key: 'appicon', label: '应用图标' },
+  { key: 'widget', label: '桌面小组件' },
 ] as const
 const navItems = NAV_ITEMS
 
@@ -1003,6 +1023,11 @@ function onNavClick(key: string) {
   activeKey.value = key
   const el = document.querySelector(`[data-section="${key}"]`)
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+// 桌面小组件管理页入口（组件已从首页移出，仅在 /widgets 编辑，常驻展示在系统桌面）
+function goWidgets() {
+  router.push('/widgets')
 }
 
 let io: IntersectionObserver | null = null
@@ -1960,6 +1985,14 @@ const astrolabeSearchStyles = ASTROLABE_SEARCH_STYLES
 }
 .sub-group.is-collapsed > :not(.sub-group__head) {
   display: none;
+}
+
+/* ---- 桌面小组件入口 ---- */
+.widget-entry {
+  padding: 14px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 /* ---- 上下边栏透明度实时预览 ---- */
