@@ -190,6 +190,11 @@
       <ReadingReportPanel />
     </div>
 
+    <!-- ========== 阅读速度·洞察（补挂孤儿 API：reading-speed / reading-insights） ========== -->
+    <div data-enter v-if="activeTab === 'speed'" class="rh-panel rh-speed-panel">
+      <ReadingSpeedInsightPanel />
+    </div>
+
     <!-- 阅读总览仪表盘（INCR-160：已构建但从未接线的 reading-bridge + useReadingDashboard） -->
     <ReadingDashboardPanel />
 
@@ -267,6 +272,7 @@ import ReadingMemoPanel from '../components/ReadingMemoPanel.vue'
 import ReadingCalendarPanel from '../components/ReadingCalendarPanel.vue'
 import ReadingQuoteWallPanel from '../components/ReadingQuoteWallPanel.vue'
 import ReadingReportPanel from '../components/ReadingReportPanel.vue'
+import ReadingSpeedInsightPanel from '../components/ReadingSpeedInsightPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -283,8 +289,9 @@ const tabs = [
   { key: 'quote', label: '金句' },
   { key: 'report', label: '报告' },
   { key: 'memo', label: '读书便签' },
+  { key: 'speed', label: '速度·洞察' },
 ] as const
-const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'calendar' | 'quote' | 'report' | 'memo'>('book')
+const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'calendar' | 'quote' | 'report' | 'memo' | 'speed'>('book')
 
 // ---- 阅读文本 ----
 const reading = useReading()

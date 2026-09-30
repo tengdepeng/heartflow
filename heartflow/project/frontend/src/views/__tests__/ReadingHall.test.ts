@@ -76,10 +76,10 @@ describe('ReadingHall 阅览殿', () => {
     expect(wrapper.text()).toContain('结晶数')
   })
 
-  it('显示十个标签页（书卷/摘录集/回顾/待读箱/人生之书/书架/日历/金句/报告/读书便签）', async () => {
+  it('显示十一个标签页（书卷/摘录集/回顾/待读箱/人生之书/书架/日历/金句/报告/读书便签/速度·洞察）', async () => {
     const wrapper = await getWrapper()
     const tabs = wrapper.findAll('.rh-tab')
-    expect(tabs.length).toBe(10)
+    expect(tabs.length).toBe(11)
     expect(tabs[0].text()).toContain('书卷')
     expect(tabs[1].text()).toContain('摘录集')
     expect(tabs[2].text()).toContain('回顾')
@@ -90,6 +90,7 @@ describe('ReadingHall 阅览殿', () => {
     expect(tabs[7].text()).toContain('金句')
     expect(tabs[8].text()).toContain('报告')
     expect(tabs[9].text()).toContain('读书便签')
+    expect(tabs[10].text()).toContain('速度·洞察')
   })
 
   it('挂载读书便签面板 ReadingMemoPanel', async () => {
