@@ -81,7 +81,7 @@
           class="pd-corridor-item"
           @click="openViewer(p.date, p.index)"
         >
-          <img :src="p.thumb" class="pd-img" alt="照片" loading="lazy" draggable="false" />
+          <PhotoTile class="pd-img" :src="p.thumb" alt="照片" />
         </div>
         <p v-if="!corridorPhotos.length" class="pd-hint">还没有照片。</p>
       </div>
@@ -133,13 +133,10 @@
               @drop.prevent="onDrop(entry.date, i)"
               @dragend="onDragEnd"
             >
-              <img
-                :src="entry.thumbs[i] || img"
+              <PhotoTile
                 class="pd-img"
+                :src="entry.thumbs[i] || img"
                 alt="照片日记"
-                loading="lazy"
-                draggable="false"
-                @click="openViewer(entry.date, i)"
               />
               <span class="pd-img-order">{{ i + 1 }}</span>
               <button class="pd-img-remove" @click="removeImage(entry.date, i)">×</button>
@@ -166,7 +163,7 @@
             @click="openAlbum(a.id)"
           >
             <div class="pd-album-cover">
-              <img v-if="a.cover" :src="a.cover" class="pd-img" alt="封面" draggable="false" />
+              <PhotoTile v-if="a.cover" class="pd-img" :src="a.cover" alt="封面" rounded="md" />
               <span v-else class="pd-album-cover-empty">📷</span>
             </div>
             <div class="pd-album-meta">
@@ -224,6 +221,7 @@ import {
   type PhotoEntry,
 } from '../modules/anchor/photo-diary'
 import { fileToDownscaledDataUrl } from '../utils/image'
+import PhotoTile from './PhotoTile.vue'
 
 const props = defineProps<{
   /** 逐日心锚中「有心锚」的日期（YYYY-MM-DD），用于日期强绑定与快速跳转 */
@@ -738,7 +736,6 @@ async function onImport(e: Event) {
   border-radius: 8px;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: grab;
 }
 .pd-img-wrap.is-dragging { opacity: 0.45; }
