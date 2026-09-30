@@ -1,6 +1,6 @@
 <template>
   <UnlockGate v-if="showUnlock" />
-  <div v-else-if="!isAuraWindow" class="app-shell" :class="{
+  <div v-else-if="!isAuraWindow && !isDesktopWidgetWindow" class="app-shell" :class="{
         'sidebar-collapsed': appearance === 'hidden',
         'sidebar-rail': appearance === 'rail',
         'rail-flyout': sidebarCollapseMode === 'rail-flyout',
@@ -266,6 +266,9 @@
     />
   </div>
 
+  <!-- 系统桌面小组件窗内容：desktop-widget 透明窗（Tauri）下仅渲染此视图 -->
+  <DesktopWidgetView v-if="isDesktopWidgetWindow" />
+
   <!-- 桌面美化层 AuraLayer：透明常驻浮层 + 多元氛围主题。
        aura 窗（Tauri 透明窗）下主壳经 v-else-if 隐藏，仅渲染此层。 -->
   <AuraLayer />
@@ -316,6 +319,8 @@ import { clampSidebarFloat } from './modules/customization/floatReanchor'
 import BreathingLayer from './modules/breathing/BreathingLayer.vue'
 import AuraLayer from './modules/aura/AuraLayer.vue'
 import { useAura } from './modules/aura/auraLayer'
+import DesktopWidgetView from './views/DesktopWidgetView.vue'
+import { useDesktopWidget } from './modules/desktop-widget'
 import ToastContainer from './components/ToastContainer.vue'
 import PendingActionsTray from './components/PendingActionsTray.vue'
 import SkeletonLoader from './components/SkeletonLoader.vue'
@@ -353,6 +358,9 @@ useConstitutionStore()
 const { isNight } = useNightDim()
 const { isSabbath } = useDigitalSabbath()
 const { isAuraWindow } = useAura()
+// 系统桌面小组件窗识别：命中时主壳隐藏，仅渲染 DesktopWidgetView
+const { isDesktopWidgetWindow, detectDesktopWidgetWindow } = useDesktopWidget()
+void detectDesktopWidgetWindow()
 useLongDormancy()
 const styleStore = useStyleStore()
 const advisor = useAdvisorStore()
@@ -2313,6 +2321,14 @@ watch(() => nav.currentRoomId.value, () => {
 :global(html.aura-window),
 :global(html.aura-window body) {
   background: transparent !important;
+}
+
+/* ---- 系统桌面小组件窗：同 aura 口径去实底，透出桌面；禁滚动条外露 ----
+   仅对已加 .desktop-widget-window 类的文档生效（web 主窗不受影响）。 */
+:global(html.desktop-widget-window),
+:global(html.desktop-widget-window body) {
+  background: transparent !important;
+  overflow: hidden;
 }
 
 /* ---- 3D 正厅态：侧栏悬浮窗自动降级（2026-08-26 补） ----
