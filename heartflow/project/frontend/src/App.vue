@@ -65,7 +65,7 @@
       <button
         v-if="isMobileOrTablet"
         class="nav-drawer-close"
-        @click="setSidebarCollapsed(true)"
+        @click="setSidebarCollapsed(true); setSidebarPinned(false)"
         aria-label="收起导航"
         title="收起导航"
       >✕</button>
@@ -186,7 +186,7 @@
     </nav>
 
     <!-- 移动/平板端侧边栏遮罩：点击遮罩区域收起抽屉（仅覆盖式抽屉模式） -->
-    <div v-if="isMobileOrTablet && !sidebarCollapsed" class="sidebar-overlay" @click="setSidebarCollapsed(true)"></div>
+    <div v-if="isMobileOrTablet && !sidebarCollapsed" class="sidebar-overlay" @click="setSidebarCollapsed(true); setSidebarPinned(false)"></div>
 
     <!-- 主内容区（就地绑定单房间覆盖的 CSS 变量，不污染侧栏/壳层） -->
     <main class="main-content" :style="mainStyleVars">
@@ -462,7 +462,7 @@ const {
 // 侧边浮动窗的「无操作自动吸附最近边框并隐藏」由独立的 sidebarAutoHidden 控制
 // （侧栏显示时全局无操作超时 → 吸附边框滑出完全隐藏；对侧栏操作 → 原位置出现），
 // 与 chromeHidden 解耦、互不打架。
-const { chromeHidden, sidebarAutoHidden, autoHideChrome, poke, pokeSidebar, initChromeAutoHide } =
+const { chromeHidden, sidebarAutoHidden, autoHideChrome, poke, pokeSidebar, setSidebarPinned, initChromeAutoHide } =
   useChromeAutoHide()
 // 悬浮侧栏：自由位置（持久化） + 收缩时贴附的最近边（持久化）
 const { sidebarFloatEdge, setSidebarFloatEdge, sidebarFloatPos, setSidebarFloatPos } =
@@ -555,25 +555,54 @@ const navBarFloatStyle = computed((): Record<string, string> => {
     // pos 为 null（吸附态或从未拖动）：交给 CSS float-edge-* 类定位（严丝合缝贴边）
     normal = {}
   }
+  const edge = sidebarFloatEdge.value || 'left'
+  // 各吸附边的「滑出」位移（与 CSS .nav-bar.float-edge-*.collapsed 合并居中偏移一致），
+  // 以及「显示」位移（与 CSS .nav-bar.float-edge-* 居中偏移一致）。
+  // 用查表而非运行时拼字符串，确保与 CSS 完全对齐、不出错。
+  const slideOut: Record<string, string> = {
+    left: 'translate(-110%, -50%)',
+    right: 'translate(110%, -50%)',
+    top: 'translate(-50%, -110%)',
+    bottom: 'translate(-50%, 110%)',
+    tl: 'translate(-110%, -110%)',
+    tr: 'translate(110%, -110%)',
+    bl: 'translate(-110%, 110%)',
+    br: 'translate(110%, 110%)',
+    free: 'translateX(-110%)',
+  }
+  const showAt: Record<string, string> = {
+    left: 'translateY(-50%)',
+    right: 'translateY(-50%)',
+    top: 'translateX(-50%)',
+    bottom: 'translateX(-50%)',
+    tl: 'none',
+    tr: 'none',
+    bl: 'none',
+    br: 'none',
+    free: 'none',
+  }
   // 隐藏态（用户主动收起 或 无操作超时）：就近滑出 + 完全淡出。
-  // 就近方向由吸附边 edge 决定：贴右/右侧角 → 向右滑；其余（贴左/上/下/四角/free）→ 向左滑。
-  // - free 态（pos 有值）：内联 transform 覆盖 normal 的 none，就近滑出。
-  // - 吸附态（pos 为 null）：不写内联 transform，交还 CSS .nav-bar.collapsed / .float-edge-* 规则，
-  //   它已正确合并居中偏移（如 translate(-110%,-50%)），保证滑动轨迹贴边不卡中间。
   // rail 形态下不滑出：仅 hidden(完全隐藏) 才就近滑出+淡出，保持窄栏常驻。
   if (appearance.value === 'hidden') {
-    const edge = sidebarFloatEdge.value
-    const toRight = edge === 'right' || edge.endsWith('r')
-    const slide = toRight ? 'translateX(110%)' : 'translateX(-110%)'
     return {
       ...normal,
-      transform: slide,
+      transform: slideOut[edge] ?? 'translateX(-110%)',
       opacity: '0',
       pointerEvents: 'none',
       transition: 'transform 0.4s ease, opacity 0.4s ease',
     }
   }
-  return normal
+  // 显示态【必须】携带与 CSS float-edge-* 一致的居中 transform + opacity/pe/transition 内联值。
+  // 否则「隐藏内联 → 显示回退 CSS 类」会因内联 transform 被移除而触发过渡冻结
+  // （transition 卡在 0% 不前进），表现为点 ≡ 后侧栏逻辑已展开却仍停在屏外/透明，
+  // 房间链接落在屏外 → 点击不跳转。两条内联 transform 互切，过渡稳定可靠。
+  return {
+    ...normal,
+    transform: showAt[edge] ?? 'none',
+    opacity: '1',
+    pointerEvents: 'auto',
+    transition: 'transform 0.4s ease, opacity 0.4s ease',
+  }
 })
 
 let pendingDragTimer: number | null = null
@@ -1040,23 +1069,27 @@ function onToggleSidebar() {
   // 三态循环：展开 → 窄栏(rail) → 隐藏(hidden) → 展开
   if (sidebarCollapseMode.value === 'three-state') {
     if (!sidebarCollapsed.value) {
-      setSidebarCollapsed(true); railHidden.value = false
+      setSidebarCollapsed(true); railHidden.value = false; setSidebarPinned(false)
     } else if (!railHidden.value) {
       railHidden.value = true
     } else {
-      setSidebarCollapsed(false); railHidden.value = false
+      setSidebarCollapsed(false); railHidden.value = false; setSidebarPinned(true); poke(); pokeSidebar()
     }
     return
   }
   const next = !sidebarCollapsed.value
   setSidebarCollapsed(next)
   railHidden.value = false
-  if (!next) pokeSidebar() // 调出时唤醒无操作隐藏，确保不被自动隐藏遮挡
+  // 显式展开即 pinned：侧栏保持常驻，直至用户再次收起；同时唤醒沉浸态(chrome)与无操作隐藏，
+  // 确保「点 ≡ 展开后」侧栏稳定可见、房间链接可点（不被空闲自动隐藏吞掉点击）。
+  setSidebarPinned(!next)
+  if (!next) { poke(); pokeSidebar() }
+  else { pokeSidebar() }
 }
 
 // 移动/平板端：抽屉为覆盖层，点击其中导航项后自动收起，避免遮挡界面
 function closeMobileDrawer() {
-  if (isMobileOrTablet.value) setSidebarCollapsed(true)
+  if (isMobileOrTablet.value) { setSidebarCollapsed(true); setSidebarPinned(false) }
 }
 
 onMounted(() => {

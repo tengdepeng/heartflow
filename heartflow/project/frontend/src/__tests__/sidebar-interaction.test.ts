@@ -7,6 +7,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useChromeAutoHide } from '../modules/customization/useChromeAutoHide'
 import { useAppearance } from '../modules/customization/useAppearance'
 
+// 复位「显式展开常驻」标志（模块级单例，避免用例间串扰）
+const { setSidebarPinned: _resetPinned } = useChromeAutoHide()
+
 const {
   sidebarCollapsed,
   setSidebarCollapsed,
@@ -16,10 +19,11 @@ const {
   setSidebarFloatEdge,
 } = useAppearance()
 
-// 模拟 onToggleSidebar 的真实实现（见 App.vue:632）
-function onToggleSidebar(pokeSidebar: () => void) {
+// 模拟 onToggleSidebar 的真实实现（见 App.vue onToggleSidebar）
+function onToggleSidebar(pokeSidebar: () => void, setSidebarPinned?: (v: boolean) => void) {
   const next = !sidebarCollapsed.value
   setSidebarCollapsed(next)
+  if (setSidebarPinned) setSidebarPinned(!next) // 展开即 pinned，收起即 unpin
   if (!next) pokeSidebar() // 调出时唤醒无操作隐藏
 }
 
@@ -29,22 +33,23 @@ describe('底部悬浮栏 ≡ 与侧边悬浮窗交互链路', () => {
     setSidebarCollapsed(false)
     setSidebarFloatPos(null)
     setSidebarFloatEdge('left')
+    _resetPinned(false)
     vi.useRealTimers()
     localStorage.clear()
   })
 
   it('① 点 ≡ 调出、再点隐藏（toggle 侧栏显隐）', () => {
-    const { sidebarAutoHidden, pokeSidebar } = useChromeAutoHide()
+    const { sidebarAutoHidden, pokeSidebar, setSidebarPinned } = useChromeAutoHide()
     // 初始：显示态
     expect(sidebarCollapsed.value).toBe(false)
     expect(sidebarAutoHidden.value).toBe(false)
 
     // 第一次点击 ≡ → 隐藏（用户主动收起）
-    onToggleSidebar(pokeSidebar)
+    onToggleSidebar(pokeSidebar, setSidebarPinned)
     expect(sidebarCollapsed.value).toBe(true)
 
     // 第二次点击 ≡ → 调出（且 pokeSidebar 唤醒无操作隐藏）
-    onToggleSidebar(pokeSidebar)
+    onToggleSidebar(pokeSidebar, setSidebarPinned)
     expect(sidebarCollapsed.value).toBe(false)
     expect(sidebarAutoHidden.value).toBe(false)
   })
@@ -93,5 +98,23 @@ describe('底部悬浮栏 ≡ 与侧边悬浮窗交互链路', () => {
     setSidebarFloatPos(null) // 吸附态（无自由坐标）
     expect(sidebarFloatEdge.value).toBe('right')
     expect(sidebarFloatPos.value).toBeNull()
+  })
+
+  it('⑥ 显式展开（pinned）后不自动收起：空闲计时不再置 sidebarAutoHidden', async () => {
+    vi.useFakeTimers()
+    const { sidebarAutoHidden, pokeSidebar, setSidebarPinned } = useChromeAutoHide()
+    // 用户点 ≡ 展开 → pinned（侧栏保持常驻）
+    setSidebarPinned(true)
+    pokeSidebar()
+    expect(sidebarAutoHidden.value).toBe(false)
+    // 即使空闲超时，pinned 侧栏不自动收起
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(sidebarAutoHidden.value).toBe(false)
+    // 用户再次收起 → unpin → 恢复空闲自动隐藏
+    setSidebarPinned(false)
+    pokeSidebar()
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(sidebarAutoHidden.value).toBe(true)
+    vi.useRealTimers()
   })
 })

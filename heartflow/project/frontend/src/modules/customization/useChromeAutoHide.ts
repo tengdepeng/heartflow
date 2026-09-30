@@ -20,6 +20,11 @@ const chromeVisible = ref(true)
 /** 侧栏是否应处于自动隐藏态（侧栏显示后无操作超时 → 吸附最近边框滑出隐藏；与 chromeHidden 解耦） */
 const sidebarAutoHidden = ref(false)
 
+/** 侧栏是否处于「用户显式展开、保持常驻」态。
+ *  用户点 ≡ 展开后置 true：此后不自动收起（sidebarAutoHidden 不被空闲计时置真），
+ *  侧栏保持打开直到用户再次点 ≡ 收起。避免「打开侧栏后稍作停顿即被沉浸自动隐藏吞掉点击」。 */
+const sidebarPinned = ref(false)
+
 let idleTimer: ReturnType<typeof setTimeout> | null = null
 let sidebarIdleTimer: ReturnType<typeof setTimeout> | null = null
 let initialized = false
@@ -42,9 +47,21 @@ function poke(): void {
 function pokeSidebar(): void {
   if (sidebarAutoHidden.value) sidebarAutoHidden.value = false
   if (sidebarIdleTimer) clearTimeout(sidebarIdleTimer)
+  // 显式展开（pinned）后不启动自动收起计时：侧栏保持常驻，直至用户主动收起（setSidebarPinned(false)）
+  if (sidebarPinned.value) return
   sidebarIdleTimer = setTimeout(() => {
     if (autoHideChrome.value) sidebarAutoHidden.value = true
   }, Math.max(500, autoHideDelay.value))
+}
+
+/** 显式展开 / 收起侧栏时由 App.vue 调用：展开即 pinned（常驻、不自动收起），收起即 unpin（恢复空闲自动隐藏） */
+function setSidebarPinned(v: boolean): void {
+  sidebarPinned.value = v
+  if (v) {
+    // 展开：立即清掉可能的自动隐藏残留，保持可见
+    if (sidebarAutoHidden.value) sidebarAutoHidden.value = false
+    if (sidebarIdleTimer) clearTimeout(sidebarIdleTimer)
+  }
 }
 
 /** 启动全局活动监听（App.vue onMounted 调用一次） */
@@ -70,9 +87,11 @@ export function useChromeAutoHide() {
     chromeVisible,
     chromeHidden,
     sidebarAutoHidden,
+    sidebarPinned,
     autoHideChrome,
     poke,
     pokeSidebar,
+    setSidebarPinned,
     initChromeAutoHide,
   }
 }
