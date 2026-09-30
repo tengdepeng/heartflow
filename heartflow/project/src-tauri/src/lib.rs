@@ -193,6 +193,190 @@ fn generate_device_secret() -> String {
     (0..32).map(|_| format!("{:02x}", rng.gen::<u8>())).collect()
 }
 
+// ============================================================
+// 系统已安装应用枚举（桌面端）
+// 用于「桌面收纳空间」收纳 PC 上已安装的 App 图标（200+）。
+// 路线：纯 std 文件系统枚举，不引入新 crate（避免离线 cargo 下载受限）。
+//   - Windows：开始菜单 Programs 下 .lnk / .url（递归）
+//   - macOS：/Applications（及 ~/Applications）下 .app
+//   - Linux：/usr/share/applications 与 /usr/local/share/applications 下 .desktop
+// 移动端（#[cfg(not(desktop))]）返回空：Android 走 Kotlin 插件命令 enumSystemApps。
+// ============================================================
+
+#[derive(serde::Serialize, Clone)]
+struct SystemApp {
+    id: String,
+    name: String,
+    exec: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    icon: Option<String>,
+}
+
+#[cfg(any(target_os = "windows", target_os = "macos"))]
+fn walk_dir(dir: &std::path::Path, depth: usize, max_depth: usize, out: &mut Vec<std::path::PathBuf>) {
+    if depth > max_depth {
+        return;
+    }
+    let entries = match std::fs::read_dir(dir) {
+        Ok(e) => e,
+        Err(_) => return,
+    };
+    for entry in entries.flatten() {
+        let p = entry.path();
+        if p.is_dir() {
+            walk_dir(&p, depth + 1, max_depth, out);
+        } else {
+            out.push(p);
+        }
+    }
+}
+
+#[cfg(desktop)]
+fn enum_system_apps_impl() -> Vec<SystemApp> {
+    let mut out: Vec<SystemApp> = Vec::new();
+    let mut seen = std::collections::HashSet::new();
+
+    #[cfg(target_os = "windows")]
+    {
+        let mut dirs: Vec<std::path::PathBuf> = Vec::new();
+        if let Ok(p) = std::env::var("APPDATA") {
+            let mut d = std::path::PathBuf::from(p);
+            d.push("Microsoft\\Windows\\Start Menu\\Programs");
+            dirs.push(d);
+        }
+        if let Ok(p) = std::env::var("PROGRAMDATA") {
+            let mut d = std::path::PathBuf::from(p);
+            d.push("Microsoft\\Windows\\Start Menu\\Programs");
+            dirs.push(d);
+        }
+        for d in dirs {
+            let mut files = Vec::new();
+            walk_dir(&d, 0, 5, &mut files);
+            for f in files {
+                let ext = f
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("")
+                    .to_lowercase();
+                if ext != "lnk" && ext != "url" {
+                    continue;
+                }
+                let name = f.file_stem().and_then(|s| s.to_str()).unwrap_or("").to_string();
+                if name.is_empty() || !seen.insert(name.clone()) {
+                    continue;
+                }
+                out.push(SystemApp {
+                    id: format!("sys:{}", f.display()),
+                    name,
+                    exec: f.display().to_string(),
+                    icon: None,
+                });
+            }
+        }
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        let home = std::env::var("HOME").unwrap_or_default();
+        let roots = vec![
+            std::path::PathBuf::from("/Applications"),
+            std::path::PathBuf::from(format!("{home}/Applications")),
+        ];
+        for root in roots {
+            let mut files = Vec::new();
+            walk_dir(&root, 0, 4, &mut files);
+            for f in files {
+                if f.extension().and_then(|e| e.to_str()) != Some("app") {
+                    continue;
+                }
+                let name = f.file_stem().and_then(|s| s.to_str()).unwrap_or("").to_string();
+                if name.is_empty() || !seen.insert(name.clone()) {
+                    continue;
+                }
+                out.push(SystemApp {
+                    id: format!("sys:{}", f.display()),
+                    name,
+                    exec: f.display().to_string(),
+                    icon: None,
+                });
+            }
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let roots = vec![
+            std::path::PathBuf::from("/usr/share/applications"),
+            std::path::PathBuf::from("/usr/local/share/applications"),
+        ];
+        for root in roots {
+            if !root.exists() {
+                continue;
+            }
+            let entries = match std::fs::read_dir(&root) {
+                Ok(e) => e,
+                Err(_) => continue,
+            };
+            for entry in entries.flatten() {
+                let p = entry.path();
+                if p.extension().and_then(|e| e.to_str()) != Some("desktop") {
+                    continue;
+                }
+                let content = match std::fs::read_to_string(&p) {
+                    Ok(c) => c,
+                    Err(_) => continue,
+                };
+                let mut name = String::new();
+                let mut exec = String::new();
+                let mut hidden = false;
+                for line in content.lines() {
+                    let line = line.trim();
+                    if line.is_empty() || line.starts_with('#') || line.starts_with('[') {
+                        continue;
+                    }
+                    if let Some(v) = line.strip_prefix("Name=") {
+                        if name.is_empty() {
+                            name = v.trim().to_string();
+                        }
+                    } else if let Some(v) = line.strip_prefix("Exec=") {
+                        exec = v.trim().to_string();
+                    } else if line.starts_with("NoDisplay=") || line.starts_with("Hidden=") {
+                        if line.to_lowercase().contains("true") {
+                            hidden = true;
+                        }
+                    }
+                }
+                if hidden || name.is_empty() || !seen.insert(name.clone()) {
+                    continue;
+                }
+                out.push(SystemApp {
+                    id: format!("sys:{}", p.display()),
+                    name,
+                    exec: if exec.is_empty() {
+                        p.display().to_string()
+                    } else {
+                        exec
+                    },
+                    icon: None,
+                });
+            }
+        }
+    }
+
+    out.sort_by(|a, b| a.name.to_lowercase().cmp(&b.name.to_lowercase()));
+    out
+}
+
+#[cfg(not(desktop))]
+fn enum_system_apps_impl() -> Vec<SystemApp> {
+    Vec::new()
+}
+
+#[tauri::command]
+fn enum_system_apps() -> Vec<SystemApp> {
+    enum_system_apps_impl()
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default()
@@ -280,7 +464,8 @@ pub fn run() {
             hide_desktop_widget,
             toggle_desktop_widget,
             is_desktop_widget_visible,
-            sync_widget_data
+            sync_widget_data,
+            enum_system_apps
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

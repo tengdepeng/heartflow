@@ -46,6 +46,33 @@ export interface LaunchResult {
 }
 
 /**
+ * 直接以启动目标拉起应用（.lnk/.app 路径或安卓包名），不经过外部条目表单。
+ * 供「桌面收纳空间」点按已收纳的系统 App 图标直接启动。
+ * web 模式降级 window.open；失败一律 ok=false，不抛错卡死。
+ */
+export async function launchExec(exec: string): Promise<LaunchResult> {
+  if (!exec) return { ok: false, target: '' }
+
+  // web 模式：无 Tauri，降级为浏览器打开（仅用于验证交互，真实拉起在桌面端）
+  if (!isTauri()) {
+    try {
+      window.open(exec, '_blank', 'noopener')
+      return { ok: true, target: exec, degraded: true }
+    } catch {
+      return { ok: false, target: exec }
+    }
+  }
+
+  try {
+    const mod = await import('@tauri-apps/plugin-shell')
+    await mod.open(exec)
+    return { ok: true, target: exec }
+  } catch {
+    return { ok: false, target: exec }
+  }
+}
+
+/**
  * 启动一个外部应用条目。
  * @returns ok=false 表示完全无法打开（target 为空 / 异常），调用方据此提示。
  */

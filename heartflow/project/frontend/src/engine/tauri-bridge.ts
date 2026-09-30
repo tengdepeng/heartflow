@@ -5,7 +5,7 @@
 
 // 平台抽象：复用项目统一平台检测。hasCapability('tauriApi') 在非 Tauri 环境（Web/移动端）
 // 恒为 false，用于桌面专属命令的降级（不发起 invoke，返回安全默认值或明确错误）。
-import { hasCapability } from '../utils/platform'
+import { hasCapability, getPlatform } from '../utils/platform'
 
 // ---- 类型定义 ----
 
@@ -304,6 +304,35 @@ export async function getTouchpointStatus(): Promise<CommandResult<TouchpointSta
     return { success: true, data: { autoStart: false, shortcutCount: 0, overlayActive: false } }
   }
   return safeInvoke<TouchpointStatus>('cmd_get_touchpoint_status')
+}
+
+// ---- 系统已安装应用枚举（桌面收纳空间候选来源） ----
+
+/** 系统已安装应用 */
+export interface SystemApp {
+  id: string
+  name: string
+  exec: string
+  icon?: string
+}
+
+/**
+ * 枚举系统已安装应用（PC 开始菜单 / 应用程序；Android PackageManager）。
+ * 平台路由：Android → Kotlin 插件命令 enumSystemApps
+ *           (`plugin:heartflowWidgets|enumSystemApps`)；
+ *           桌面 Tauri → Rust 命令 enum_system_apps；
+ *           Web / 无能力 → 返回空（系统应用候选为空，不报错）。
+ * 失败（命令未注册 / 权限被拒）一律降级为空，不阻断收纳面板。
+ */
+export async function enumSystemApps(): Promise<CommandResult<SystemApp[]>> {
+  const plat = getPlatform()
+  if (plat.os === 'android') {
+    return safeInvoke<SystemApp[]>('plugin:heartflowWidgets|enumSystemApps')
+  }
+  if (hasCapability('tauriApi')) {
+    return safeInvoke<SystemApp[]>('enum_system_apps')
+  }
+  return { success: true, data: [] }
 }
 
 // ---- 感知层命令 (Perception) ----

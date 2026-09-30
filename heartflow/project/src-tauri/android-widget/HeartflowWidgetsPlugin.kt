@@ -8,8 +8,11 @@
 package com.heartflow.app
 
 import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
 import app.tauri.annotation.Command
 import app.tauri.annotation.TauriPlugin
+import app.tauri.plugin.JSArray
 import app.tauri.plugin.JSObject
 import app.tauri.plugin.Plugin
 import app.tauri.plugin.Invoke
@@ -29,5 +32,35 @@ class HeartflowWidgetsPlugin(private val activity: Activity) : Plugin(activity) 
         val ret = JSObject()
         ret.put("refreshed", n)
         invoke.resolve(ret)
+    }
+
+    /**
+     * 枚举系统已安装应用（供「桌面收纳空间」收纳安卓端 App 图标）。
+     * 路线：PackageManager 查 CATEGORY_LAUNCHER 的已安装应用，去重按包名，
+     * 回传 [{ id:"sys:<pkg>", name:<label>, exec:<pkg> }]。
+     * 失败（无包管理器）静默回空数组，不阻断收纳面板。
+     */
+    @Command
+    fun enumSystemApps(invoke: Invoke) {
+        val arr = JSArray()
+        runCatching {
+            val pm = activity.packageManager
+            val intent = Intent(Intent.ACTION_MAIN, null).apply {
+                addCategory(Intent.CATEGORY_LAUNCHER)
+            }
+            val resolve = pm.queryIntentActivities(intent, 0)
+            val seen = mutableSetOf<String>()
+            for (ri in resolve) {
+                val pkg = ri.activityInfo.packageName
+                if (!seen.add(pkg)) continue
+                val label = ri.loadLabel(pm).toString()
+                val obj = JSObject()
+                obj.put("id", "sys:$pkg")
+                obj.put("name", label)
+                obj.put("exec", pkg)
+                arr.put(obj)
+            }
+        }
+        invoke.resolve(arr)
     }
 }
