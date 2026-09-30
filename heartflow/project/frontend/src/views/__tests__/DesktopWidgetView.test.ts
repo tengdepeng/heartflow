@@ -10,13 +10,12 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 
-const { store, mockGetKV, mockSetKV, pushSnapshot, startSync } = vi.hoisted(() => {
+const { store, mockGetKV, mockSetKV, pushSnapshot } = vi.hoisted(() => {
   const store: Record<string, any> = {}
   const mockGetKV = vi.fn((k: string, d: any) => (k in store ? store[k] : d))
   const mockSetKV = vi.fn((k: string, v: any) => { store[k] = v })
   const pushSnapshot = vi.fn()
-  const startSync = vi.fn()
-  return { store, mockGetKV, mockSetKV, pushSnapshot, startSync }
+  return { store, mockGetKV, mockSetKV, pushSnapshot }
 })
 
 vi.mock('@/engine/storage', () => ({
@@ -28,7 +27,6 @@ vi.mock('@/engine/storage', () => ({
 
 // 快照同步出口：只关心「有没有在用户操作后立刻推一次（不节流）」
 vi.mock('@/modules/desktop-widget/sync', () => ({
-  startWidgetSnapshotSync: (...a: any[]) => (startSync as any)(...a),
   pushWidgetSnapshotNow: (...a: any[]) => (pushSnapshot as any)(...a),
   refreshAndroidWidgets: vi.fn(async () => {}),
   readWidgetNote: () => '',
@@ -56,11 +54,12 @@ describe('DesktopWidgetView · 系统桌面小窗', () => {
     vi.clearAllMocks()
   })
 
-  it('空窗态给出「点 ＋ 添加」引导，且挂载时开一次自动同步', async () => {
+  it('空窗态给出「点 ＋ 添加」引导', async () => {
     const w = await prepare()
     expect(w.find('.dw-empty').text()).toContain('＋')
     expect(w.find('.dw-card').exists()).toBe(false)
-    expect(startSync).toHaveBeenCalled()
+    // 自动同步已提升为全局启动（App.vue onMounted），小窗自身不再挂载，
+    // 此处仅校验空态引导与外壳编排。
   })
 
   it('点 ＋ 展开七类添加面板（与首页画布同源）', async () => {

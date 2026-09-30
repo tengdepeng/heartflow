@@ -115,9 +115,6 @@
 
     <!-- 桌面收纳空间（安卓桌面文件夹 / 游戏空间式：把常用房间收进一个空间图标） -->
     <DeskSpaces />
-
-    <!-- 桌面小组件（INCR-317 补挂载孤儿组件 WidgetBox：番茄钟/逐日心锚/情绪速记/便签/季节/一言 · 可拖动浮层画布） -->
-    <WidgetBox />
   </div>
 </template>
 
@@ -143,7 +140,6 @@ import type { useAstrolabe } from '../modules/astrolabe'
 import JadeBead from '../components/JadeBead.vue'
 import TimerControls from '../components/TimerControls.vue'
 import FocusStats from '../components/FocusStats.vue'
-import WidgetBox from '../components/WidgetBox.vue'
 import DeskSpaces from '../components/DeskSpaces.vue'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { useViewEntrance } from '../composables/useViewEntrance'

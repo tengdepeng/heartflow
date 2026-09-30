@@ -428,6 +428,14 @@ const routes: RouteRecordRaw[] = [
   // ================================================================
   // 工具与管理
   // ================================================================
+  // 桌面小组件管理页（从首页主窗移出：常驻展示只发生在系统桌面
+  // Tauri 浮窗 / 安卓原生 widget，此处仅作「选组件 / 排布」编辑面）
+  withRoomMeta({
+    path: '/widgets',
+    name: 'widgets',
+    component: () => import('../views/WidgetsManage.vue'),
+    meta: { title: '小组件管理' },
+  }),
   withRoomMeta({
     path: '/room-manager',
     name: 'room-manager',

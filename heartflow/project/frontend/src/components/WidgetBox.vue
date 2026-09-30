@@ -68,7 +68,6 @@ import { useWidgetManager, WIDGET_META } from '../modules/touchpoints'
 import type { WidgetType, WidgetSize, WidgetInstance } from '../modules/touchpoints'
 import WidgetCard from './WidgetCard.vue'
 import { useDesktopWidget } from '../modules/desktop-widget'
-import { startWidgetSnapshotSync } from '../modules/desktop-widget/sync'
 
 const manager = useWidgetManager()
 
@@ -126,8 +125,8 @@ onUnmounted(() => {
   window.removeEventListener('pointerup', onDragEnd)
 })
 
-// ---- 系统小组件快照同步（共享出口：首页画布 / 系统小窗 / Android 七卡同源） ----
-startWidgetSnapshotSync()
+// ---- 系统小组件快照同步已提升为全局启动（见 App.vue onMounted），
+//      此处不再挂载，保证离开首页/管理页时安卓与 Tauri 浮窗仍实时刷新 ----
 </script>
 
 <style scoped>

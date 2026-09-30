@@ -49,7 +49,7 @@ import { useWidgetManager, WIDGET_META } from '../modules/touchpoints'
 import type { WidgetType } from '../modules/touchpoints'
 import { useDesktopWidget } from '../modules/desktop-widget'
 import WidgetCard from '../components/WidgetCard.vue'
-import { startWidgetSnapshotSync, pushWidgetSnapshotNow } from '../modules/desktop-widget/sync'
+import { pushWidgetSnapshotNow } from '../modules/desktop-widget/sync'
 
 const manager = useWidgetManager()
 const { dismissWindow } = useDesktopWidget()
@@ -111,8 +111,7 @@ onUnmounted(() => {
   if (timer) window.clearInterval(timer)
 })
 
-// ---- 系统小组件快照同步（共享出口，与首页画布同一份逻辑） ----
-startWidgetSnapshotSync()
+// ---- 系统小组件快照同步已提升为全局启动（见 App.vue onMounted） ----
 </script>
 
 <style scoped>

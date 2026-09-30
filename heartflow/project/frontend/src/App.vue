@@ -321,6 +321,7 @@ import AuraLayer from './modules/aura/AuraLayer.vue'
 import { useAura } from './modules/aura/auraLayer'
 import DesktopWidgetView from './views/DesktopWidgetView.vue'
 import { useDesktopWidget } from './modules/desktop-widget'
+import { startWidgetSnapshotSync } from './modules/desktop-widget/sync'
 import ToastContainer from './components/ToastContainer.vue'
 import PendingActionsTray from './components/PendingActionsTray.vue'
 import SkeletonLoader from './components/SkeletonLoader.vue'
@@ -1079,6 +1080,11 @@ onMounted(() => {
 
   // 超级自定义 · 统一房间壳层外观初始化（内容内边距写入 :root，全局即时生效）
   applyRoomShellAppearance()
+
+  // 桌面小组件快照同步：从组件挂载提升为全局启动，
+  // 保证离开首页 / 未打开管理页时，安卓原生 widget 与 Tauri 浮窗仍实时刷新。
+  // （startWidgetSnapshotSync 有模块级 started 守卫，幂等只启一次）
+  startWidgetSnapshotSync()
 
   // 超级自定义 · 界面自动隐藏（沉浸模式）全局活动监听
   initChromeAutoHide()
