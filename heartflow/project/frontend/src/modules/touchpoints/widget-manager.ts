@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
-import type { WidgetInstance, WidgetType, WidgetSize } from './types'
+import type { WidgetInstance, WidgetType, WidgetSize, WidgetTheme } from './types'
 import { WIDGET_META, TOUCHPOINTS_STORAGE_KEYS } from './types'
 import { storage } from '../../engine/storage'
 
@@ -119,9 +119,19 @@ export function useWidgetManager() {
     return true
   }
 
-  /** 获取单个小组件 */
+  /** 更新单个小组件 */
   function getWidget(id: string): WidgetInstance | undefined {
     return widgets.value.find(w => w.id === id)
+  }
+
+  /** 更新小组件外观主题（部分更新，合并写回并持久化） */
+  function setWidgetTheme(id: string, patch: Partial<WidgetTheme>): boolean {
+    const widget = widgets.value.find(w => w.id === id)
+    if (!widget) return false
+    widget.theme = { ...(widget.theme || {}), ...patch }
+    widgets.value = [...widgets.value]
+    saveWidgets(widgets.value)
+    return true
   }
 
   /** 获取指定类型的小组件 */
@@ -202,6 +212,7 @@ export function useWidgetManager() {
     setWidgetEnabled,
     getWidget,
     getWidgetsByType,
+    setWidgetTheme,
     resetToDefault,
     suggestLayout,
   }

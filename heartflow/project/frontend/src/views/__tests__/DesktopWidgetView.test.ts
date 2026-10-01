@@ -67,7 +67,7 @@ describe('DesktopWidgetView · 系统桌面小窗', () => {
     expect(w.find('.dw-add').exists()).toBe(false)
     await w.findAll('.dw-act')[0].trigger('click')
     expect(w.find('.dw-add').exists()).toBe(true)
-    expect(w.findAll('.dw-chip').length).toBe(7)
+    expect(w.findAll('.dw-chip').length).toBe(9)
   })
 
   it('在面板里添加一类即入窗，并立即推一次快照（不节流）', async () => {

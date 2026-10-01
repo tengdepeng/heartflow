@@ -103,4 +103,28 @@ describe('WidgetCard · 卡片内容', () => {
     const quote = await prepare({ instance: inst('quote') })
     expect(quote.find('.wqt-text').text()).toContain('「')
   })
+
+  it('月历：渲染整月 42 格网格，含今日高亮与切换头', async () => {
+    const w = await prepare({ instance: inst('calendar') })
+    expect(w.find('.wcal').exists()).toBe(true)
+    expect(w.find('.wcal-grid').exists()).toBe(true)
+    expect(w.findAll('.wcal-cell').length).toBe(42)
+    expect(w.find('.wcal-title').text()).toContain('月')
+    // 紧凑态同源降密度
+    const compact = await prepare({ instance: inst('calendar'), compact: true })
+    expect(compact.find('.wcal-compact').exists()).toBe(true)
+  })
+
+  it('日历热力图：渲染 42 格热度阵与图例，未来格近乎透明', async () => {
+    const w = await prepare({ instance: inst('calendar-heatmap') })
+    expect(w.find('.wcal-heat').exists()).toBe(true)
+    expect(w.findAll('.wcal-heat-cell').length).toBe(42)
+    expect(w.find('.wcal-legend').exists()).toBe(true)
+  })
+
+  it('外观主题：默认 accent 变量注入卡片根，可被 theme 覆盖', async () => {
+    const w = await prepare({ instance: inst('quote') })
+    const style = (w.element as HTMLElement).style
+    expect(style.getPropertyValue('--ww-accent')).toBe('#d4a15a')
+  })
 })

@@ -193,6 +193,7 @@ describe('P20-7 触角编排引擎', () => {
         sizeMapping: {
           pomodoro: 'medium', 'daily-anchor': 'large', 'emotion-check': 'small',
           'quick-note': 'large', weather: 'medium', quote: 'small', quadrant: 'large',
+          calendar: 'medium', 'calendar-heatmap': 'medium',
         },
       })
       const layout = engine.selectLayout(1440, 900)
@@ -217,6 +218,7 @@ describe('P20-7 触角编排引擎', () => {
         sizeMapping: {
           pomodoro: 'small', 'daily-anchor': 'small', 'emotion-check': 'small',
           'quick-note': 'small', weather: 'small', quote: 'small', quadrant: 'small',
+          calendar: 'medium', 'calendar-heatmap': 'medium',
         },
       })
       expect(layout.id).toBeTruthy()

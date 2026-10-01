@@ -1,5 +1,5 @@
 <template>
-  <div class="wcard" :class="{ 'wcard-compact': compact }">
+  <div class="wcard" :class="{ 'wcard-compact': compact }" :style="themeVars">
     <!-- 番茄钟 -->
     <template v-if="instance.type === 'pomodoro'">
       <div class="wfmt-clock">{{ timerClock }}</div>
@@ -68,6 +68,16 @@
         </div>
       </div>
     </template>
+
+    <!-- 月历：整月 + 今日高亮 + 有纪录日标点（数据源 activityMarks 同源三端） -->
+    <template v-else-if="instance.type === 'calendar'">
+      <WidgetMiniCalendar variant="calendar" :marks="marks" :compact="compact" />
+    </template>
+
+    <!-- 日历热力图：滚动 N 周活跃度（GitHub 式格阵） -->
+    <template v-else-if="instance.type === 'calendar-heatmap'">
+      <WidgetMiniCalendar variant="heatmap" :marks="marks" :weeks="6" :compact="compact" />
+    </template>
   </div>
 </template>
 
@@ -88,6 +98,9 @@ import { storage } from '../engine/storage'
 import { composeWidgetSnapshot } from '../modules/desktop-widget/snapshot'
 import { readWidgetNote, pushWidgetSnapshotNow, WIDGET_NOTE_KEY } from '../modules/desktop-widget/sync'
 import { useTaskManager, buildQuadrantBoard } from '../modules/tasks'
+import { activityMarks } from '../modules/touchpoints/widget-calendar'
+import { widgetThemeVars } from '../modules/touchpoints'
+import WidgetMiniCalendar from './WidgetMiniCalendar.vue'
 
 const props = withDefaults(
   defineProps<{ instance: WidgetInstance; compact?: boolean }>(),
@@ -160,6 +173,11 @@ const quadrantTotal = computed(() => quadrantBoard.value.reduce((s, c) => s + c.
 function shortQuadrant(label: string): string {
   return label.replace('且', '').slice(0, 6)
 }
+
+// ---- 日历（月历 / 热力图）数据源：专注 + 速记，本地离线 ----
+const marks = computed(() => activityMarks())
+// ---- 外观主题：展开成卡片外壳 CSS 变量（accent/radius/alpha/bg 同源生效） ----
+const themeVars = computed(() => widgetThemeVars(props.instance.theme))
 void props
 </script>
 

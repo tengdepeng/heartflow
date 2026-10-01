@@ -26,6 +26,10 @@ export {
   DEFAULT_FLOATING_CONFIG,
   DEFAULT_GREETING_TEMPLATES,
   TOUCHPOINTS_STORAGE_KEYS,
+  WIDGET_ACCENT_PRESETS,
+  DEFAULT_WIDGET_THEME,
+  resolveWidgetTheme,
+  widgetThemeVars,
 } from './types'
 
 export type {
@@ -33,6 +37,7 @@ export type {
   WidgetSize,
   WidgetInstance,
   WidgetMeta,
+  WidgetTheme,
   GlowTheme,
   GlowThemeMeta,
   GlowConfig,

@@ -4,7 +4,16 @@
 // ============================================================
 
 /** 桌面小组件类型 */
-export type WidgetType = 'pomodoro' | 'daily-anchor' | 'emotion-check' | 'quick-note' | 'weather' | 'quote' | 'quadrant'
+export type WidgetType =
+  | 'pomodoro'
+  | 'daily-anchor'
+  | 'emotion-check'
+  | 'quick-note'
+  | 'weather'
+  | 'quote'
+  | 'quadrant'
+  | 'calendar'
+  | 'calendar-heatmap'
 
 /** 小组件尺寸预设 */
 export type WidgetSize = 'small' | 'medium' | 'large'
@@ -27,6 +36,60 @@ export interface WidgetInstance {
   createdAt: number
   /** 自定义标题 */
   customTitle?: string
+  /** 外观主题（颜色/圆角/透明/背景），对齐 136apk「2.130 小组件主题一键切换」 */
+  theme?: WidgetTheme
+}
+
+/** 小组件外观主题（每个实例可独立定制，经 CSS 变量在卡片外壳生效） */
+export interface WidgetTheme {
+  /** 强调色（今日高亮/热力着色），默认取品牌琥珀 */
+  accent?: string
+  /** 卡片圆角（px） */
+  radius?: number
+  /** 卡片背景透明度（0.4-1） */
+  alpha?: number
+  /** 卡片背景：空 = 玻璃拟态（跟随外壳），否则为具体色值 */
+  bg?: string
+}
+
+/** 强调色预设（与全局品牌琥珀系一致，另补几支常用色） */
+export const WIDGET_ACCENT_PRESETS: { id: string; label: string; value: string }[] = [
+  { id: 'amber', label: '暖琥珀', value: '#d4a15a' },
+  { id: 'azure', label: '天青', value: '#6b9fc4' },
+  { id: 'jade', label: '玉绿', value: '#5ab8a0' },
+  { id: 'rose', label: '霞绯', value: '#c46a5a' },
+  { id: 'violet', label: '紫晶', value: '#8a6cd8' },
+  { id: 'gold', label: '流金', value: '#e9c46a' },
+]
+
+/** 默认主题：玻璃拟态外壳 + 品牌琥珀强调 */
+export const DEFAULT_WIDGET_THEME: Required<WidgetTheme> = {
+  accent: '#d4a15a',
+  radius: 12,
+  alpha: 1,
+  bg: '',
+}
+
+/** 把实例主题补成完整对象（缺失字段回退默认） */
+export function resolveWidgetTheme(theme?: WidgetTheme): Required<WidgetTheme> {
+  return {
+    accent: theme?.accent || DEFAULT_WIDGET_THEME.accent,
+    radius: theme?.radius ?? DEFAULT_WIDGET_THEME.radius,
+    alpha: theme?.alpha ?? DEFAULT_WIDGET_THEME.alpha,
+    bg: theme?.bg ?? DEFAULT_WIDGET_THEME.bg,
+  }
+}
+
+/** 把主题展开成卡片外壳可用的 CSS 变量（accent/radius/alpha/bg） */
+export function widgetThemeVars(theme?: WidgetTheme): Record<string, string> {
+  const t = resolveWidgetTheme(theme)
+  const vars: Record<string, string> = {
+    '--ww-accent': t.accent,
+    '--ww-radius': `${t.radius}px`,
+    '--ww-alpha': String(t.alpha),
+  }
+  if (t.bg) vars['--ww-bg'] = t.bg
+  return vars
 }
 
 /** 小组件元数据 */
@@ -96,6 +159,22 @@ export const WIDGET_META: Record<WidgetType, WidgetMeta> = {
     description: '紧急 × 重要 四象限任务分布概览（复用自律工坊任务池）',
     defaultSize: 'medium',
     icon: '🗂️',
+  },
+  calendar: {
+    type: 'calendar',
+    label: '月历',
+    labelEn: 'Month Calendar',
+    description: '整月专注/速记活跃分布，今日高亮、有纪录日标点',
+    defaultSize: 'medium',
+    icon: '📅',
+  },
+  'calendar-heatmap': {
+    type: 'calendar-heatmap',
+    label: '日历热力',
+    labelEn: 'Activity Heatmap',
+    description: '滚动数周的专注/速记热度图（GitHub 式格阵）',
+    defaultSize: 'medium',
+    icon: '🔥',
   },
 }
 

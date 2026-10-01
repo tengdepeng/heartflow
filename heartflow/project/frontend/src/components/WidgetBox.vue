@@ -29,7 +29,7 @@
       <article v-for="w in enabledWidgets" :key="w.id"
         class="wb-item"
         :class="['wb-size-' + w.size, { 'wb-selected': selectedId === w.id }]"
-        :style="{ left: w.x + '%', top: w.y + '%' }"
+        :style="{ left: w.x + '%', top: w.y + '%', ...themeVars(w) }"
         @pointerdown.stop="dragStart($event, w)"
         @pointerup="maybeSelect(w.id)">
         <header class="wb-item-head">
@@ -56,6 +56,7 @@
               @click="manager.setWidgetEnabled(w.id, !w.enabled)">{{ w.enabled ? '👁' : '🚫' }}</button>
             <button class="wb-icon-btn wb-icon-danger" title="移除" @click="manager.removeWidget(w.id)">✕</button>
           </div>
+          <WidgetThemeControls :instance="w" />
         </footer>
       </article>
     </div>
@@ -64,9 +65,10 @@
 
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
-import { useWidgetManager, WIDGET_META } from '../modules/touchpoints'
+import { useWidgetManager, WIDGET_META, widgetThemeVars } from '../modules/touchpoints'
 import type { WidgetType, WidgetSize, WidgetInstance } from '../modules/touchpoints'
 import WidgetCard from './WidgetCard.vue'
+import WidgetThemeControls from './WidgetThemeControls.vue'
 import { useDesktopWidget } from '../modules/desktop-widget'
 
 const manager = useWidgetManager()
@@ -76,7 +78,7 @@ const { pinned, togglePinned } = useDesktopWidget()
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 function togglePin() { togglePinned() }
 
-const widgetTypes: WidgetType[] = ['pomodoro', 'daily-anchor', 'emotion-check', 'quick-note', 'weather', 'quote', 'quadrant']
+const widgetTypes: WidgetType[] = ['pomodoro', 'daily-anchor', 'emotion-check', 'quick-note', 'weather', 'quote', 'quadrant', 'calendar', 'calendar-heatmap']
 const SIZES: { value: WidgetSize; label: string }[] = [
   { value: 'small', label: 'S' },
   { value: 'medium', label: 'M' },
@@ -94,6 +96,9 @@ function bringTop(w: WidgetInstance) {
 }
 function setSize(w: WidgetInstance, size: WidgetSize) { manager.updateSize(w.id, size) }
 function resetLayout() { manager.resetToDefault() }
+
+/** 把实例主题展开为卡片外壳 CSS 变量（accent/radius/alpha/bg 同源生效） */
+function themeVars(w: WidgetInstance) { return widgetThemeVars(w.theme) }
 
 // ---- 拖拽移动 ----
 const canvasRef = ref<HTMLElement | null>(null)
@@ -149,7 +154,7 @@ onUnmounted(() => {
 .wb-canvas-empty { display: flex; align-items: center; justify-content: center; }
 .wb-empty { color: #7c86a0; font-size: 13px; text-align: center; }
 
-.wb-item { position: absolute; width: 240px; min-height: 120px; background: rgba(30, 38, 58, 0.92); border: 1px solid rgba(150, 170, 210, 0.16); border-radius: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32); cursor: grab; transition: box-shadow .15s, border-color .15s; display: flex; flex-direction: column; touch-action: none; }
+.wb-item { position: absolute; width: 240px; min-height: 120px; background: var(--ww-bg, rgba(30, 38, 58, var(--ww-alpha, 0.92))); border: 1px solid rgba(150, 170, 210, 0.16); border-radius: var(--ww-radius, 12px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32); cursor: grab; transition: box-shadow .15s, border-color .15s; display: flex; flex-direction: column; touch-action: none; }
 .wb-item:hover { border-color: rgba(130, 160, 235, 0.45); }
 .wb-item.wb-selected { border-color: #6b86d8; box-shadow: 0 0 0 2px rgba(107, 134, 216, 0.35), 0 10px 28px rgba(0, 0, 0, 0.4); }
 .wb-size-large { width: min(300px, 78vw); min-height: 200px; }

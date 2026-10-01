@@ -315,6 +315,8 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       weather: 'small',
       quote: 'small',
       quadrant: 'medium',
+      calendar: 'medium',
+      'calendar-heatmap': 'medium',
     },
   },
   {
@@ -333,6 +335,8 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       weather: 'small',
       quote: 'small',
       quadrant: 'medium',
+      calendar: 'medium',
+      'calendar-heatmap': 'medium',
     },
   },
   {
@@ -351,6 +355,8 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       weather: 'medium',
       quote: 'small',
       quadrant: 'large',
+      calendar: 'medium',
+      'calendar-heatmap': 'medium',
     },
   },
   {
@@ -369,6 +375,8 @@ export const ADAPTIVE_LAYOUTS: Omit<AdaptiveLayout, 'id'>[] = [
       weather: 'medium',
       quote: 'medium',
       quadrant: 'large',
+      calendar: 'medium',
+      'calendar-heatmap': 'medium',
     },
   },
 ]

@@ -28,7 +28,7 @@
       </p>
 
       <!-- 卡片内容：与首页画布同源（WidgetCard 紧凑态） -->
-      <section v-for="w in enabledWidgets" :key="w.id" class="dw-card">
+      <section v-for="w in enabledWidgets" :key="w.id" class="dw-card" :style="themeVars(w)">
         <header class="dw-card-head">
           <span class="dw-card-icon">{{ WIDGET_META[w.type].icon }}</span>
           <span class="dw-card-title">{{ WIDGET_META[w.type].label }}</span>
@@ -38,6 +38,7 @@
           </div>
         </header>
         <WidgetCard :instance="w" compact />
+        <WidgetThemeControls :instance="w" compact />
       </section>
     </main>
   </div>
@@ -45,10 +46,11 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { useWidgetManager, WIDGET_META } from '../modules/touchpoints'
-import type { WidgetType } from '../modules/touchpoints'
+import { useWidgetManager, WIDGET_META, widgetThemeVars } from '../modules/touchpoints'
+import type { WidgetType, WidgetInstance } from '../modules/touchpoints'
 import { useDesktopWidget } from '../modules/desktop-widget'
 import WidgetCard from '../components/WidgetCard.vue'
+import WidgetThemeControls from '../components/WidgetThemeControls.vue'
 import { pushWidgetSnapshotNow } from '../modules/desktop-widget/sync'
 
 const manager = useWidgetManager()
@@ -56,9 +58,12 @@ const { dismissWindow } = useDesktopWidget()
 
 const enabledWidgets = computed(() => manager.enabledWidgets.value)
 
-/** 小窗内可直接添加的七类（与首页画布 widgetTypes 同源） */
+/** 把实例主题展开为卡片外壳 CSS 变量（accent/radius/alpha/bg 同源生效） */
+function themeVars(w: WidgetInstance) { return widgetThemeVars(w.theme) }
+
+/** 小窗内可直接添加的九类（与首页画布 widgetTypes 同源） */
 const widgetTypes: WidgetType[] = [
-  'pomodoro', 'daily-anchor', 'emotion-check', 'quick-note', 'weather', 'quote', 'quadrant',
+  'pomodoro', 'daily-anchor', 'emotion-check', 'quick-note', 'weather', 'quote', 'quadrant', 'calendar', 'calendar-heatmap',
 ]
 
 const showAdd = ref(false)
@@ -162,9 +167,9 @@ onUnmounted(() => {
 .dw-empty { font-size: 12px; color: #8a94ad; text-align: center; line-height: 1.8; margin: 24px 0; }
 
 .dw-card {
-  background: rgba(24, 30, 48, .82);
+  background: var(--ww-bg, rgba(24, 30, 48, var(--ww-alpha, 0.82)));
   border: 1px solid rgba(150, 170, 210, .16);
-  border-radius: 12px; padding: 10px 12px;
+  border-radius: var(--ww-radius, 12px); padding: 10px 12px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .3);
   display: flex; flex-direction: column; gap: 6px;
   backdrop-filter: blur(10px);

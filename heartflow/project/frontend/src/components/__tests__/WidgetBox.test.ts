@@ -80,7 +80,7 @@ describe('WidgetBox · 桌面小组件', () => {
   it('空桌面渲染标题与七类添加项，并呈现空画布提示', async () => {
     const w = await prepare()
     expect(w.find('.wb-title').text()).toContain('桌面小组件')
-    expect(w.findAll('.wb-add-chip').length).toBe(7)
+    expect(w.findAll('.wb-add-chip').length).toBe(9)
     expect(w.find('.wb-empty').exists()).toBe(true)
     expect(w.find('.wb-empty').text()).toContain('还没有小组件')
     expect(w.find('.wb-item').exists()).toBe(false)
