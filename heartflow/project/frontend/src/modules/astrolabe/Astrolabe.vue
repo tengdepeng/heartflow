@@ -8,7 +8,7 @@
         </div>
 
         <!-- 星盘舞台：统一居中正方形，罗盘环/节点/连线同坐标系，整体等比缩放 —— 任意屏宽图表完整可见 -->
-        <div class="astrolabe-stage" :class="{ compact: astrolabe.compact.value }" :style="{ '--stage-scale': astrolabe.stageScale.value }">
+        <div class="astrolabe-stage" :class="{ compact: astrolabe.compact.value }" :style="{ '--stage-scale': astrolabe.stageScale.value, '--world-node-scale': astrolabe.worldNodeScale.value }">
           <!-- 星盘罗盘环（随舞台等比缩放） -->
           <div class="astrolabe-bg" aria-hidden="true">
             <!-- 缓慢自转的星盘刻度环（天体运行纵深感）；方位十字与 N/S/E/W 保持静止 -->
