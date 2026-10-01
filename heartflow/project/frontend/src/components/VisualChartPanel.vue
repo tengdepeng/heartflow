@@ -205,13 +205,20 @@ function tickCountFor(n: number): number {
 }
 
 /** 刻度：复用 generateAxisPaths 生成刻度短线，Y 轴标真实数值、X 轴标记录序号 */
-function buildTicks(pts: { value: number }[], minV: number, maxV: number, tickCount: number): string {
+function buildTicks(pts: { value: number }[], minV: number, maxV: number, tickCount: number, isBar: boolean): string {
   const n = pts.length
-  const { xTicks, yTicks } = generateAxisPaths(SIZE, { show: true, tickCount })
+  const { yTicks } = generateAxisPaths(SIZE, { show: true, tickCount })
   const yRange = maxV - minV || 1
   const dec = yRange >= 10 ? 0 : 1
+  const axisY = pad.top + plotH
+  // X 刻度落点：折线为连续轴，刻度等分（与垂直网格同源对齐）；
+  // 柱条为离散分类，刻度须落在各柱槽位中心，否则首尾序号会落到图宽两端、与柱错位。
+  const xIdx = (i: number): number => Math.round((i / (tickCount - 1)) * (n - 1))
+  const xPos = (i: number): number =>
+    isBar ? pad.left + ((xIdx(i) + 0.5) / Math.max(1, n)) * plotW : pad.left + (i / (tickCount - 1)) * plotW
+  const xTickPaths = n >= 2 ? Array.from({ length: tickCount }, (_, i) => `M ${xPos(i)} ${axisY} L ${xPos(i)} ${axisY + 5}`) : []
   // generateAxisPaths 返回的是路径数据字符串，须包进 <path> 才会渲染成刻度短线
-  let out = `<path class="vcp-tick" d="${[...xTicks, ...yTicks].join(' ')}" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1" />`
+  let out = `<path class="vcp-tick" d="${[...yTicks, ...xTickPaths].join(' ')}" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1" />`
   for (let i = 0; i < tickCount; i++) {
     const t = i / (tickCount - 1)
     const y = pad.top + plotH - t * plotH
@@ -219,9 +226,7 @@ function buildTicks(pts: { value: number }[], minV: number, maxV: number, tickCo
   }
   if (n >= 2) {
     for (let i = 0; i < tickCount; i++) {
-      const t = i / (tickCount - 1)
-      const x = pad.left + t * plotW
-      out += `<text x="${x}" y="${pad.top + plotH + 18}" text-anchor="middle" font-size="10" opacity="0.5" fill="currentColor">${Math.round(t * (n - 1))}</text>`
+      out += `<text x="${xPos(i)}" y="${pad.top + plotH + 18}" text-anchor="middle" font-size="10" opacity="0.5" fill="currentColor">${xIdx(i)}</text>`
     }
   }
   return out
@@ -236,8 +241,10 @@ function buildCartesianSvg(): string {
   const [minV, maxV] = domain
   const mapped = mapDataToPlot(pts, SIZE, domain)
   const tickCount = tickCountFor(pts.length)
-  const grid = generateGridLines(SIZE, tickCount, GRID_COLOR, '4,4').join('')
-  const ticks = buildTicks(pts, minV, maxV, tickCount)
+  const gridLines = generateGridLines(SIZE, tickCount, GRID_COLOR, '4,4')
+  // 柱条只保留水平网格：垂直网格线等分于图宽、无法与柱槽位对齐，反成噪声
+  const grid = (isBar ? gridLines.slice(0, tickCount) : gridLines).join('')
+  const ticks = buildTicks(pts, minV, maxV, tickCount, isBar)
   const axis = renderAxisAsString(
     SIZE,
     { show: true, tickCount, grid: { show: false }, label: fieldLabel(field.value) },

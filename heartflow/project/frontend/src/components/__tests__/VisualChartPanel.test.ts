@@ -150,6 +150,25 @@ describe('VisualChartPanel（INCR-413：图表渲染 svg.ts 零消费引擎薄�
     expect(svg).toContain('fill="#d4a574"')
   })
 
+  it('柱状图 X 刻度对齐柱槽位中心且不画垂直网格（首尾序号不落到图宽两端）', async () => {
+    const items = Array.from({ length: 12 }, (_, i) => makeItem({ id: `r${i}`, values: { value: 10 + i } }))
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const chips = wrapper.findAll('[data-testid="vcp-charttype"] .vcp-chip')
+    await chips[1].trigger('click') // 柱条
+    const svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    const xLabels = [...svg.matchAll(/<text x="([\d.]+)"[^>]*font-size="10"[^>]*>(\d+)<\/text>/g)]
+    expect(xLabels.map((m) => m[2])).toEqual(['0', '2', '4', '7', '9', '11'])
+    const xs = xLabels.map((m) => Number(m[1]))
+    // 首/末档落在第 0/11 柱槽位中心（62 + 0.5/12*552 = 85；62 + 11.5/12*552 = 591），而非图宽两端 62/614
+    expect(xs[0]).toBeCloseTo(85, 1)
+    expect(xs[5]).toBeCloseTo(591, 1)
+    // 柱条不画垂直网格线（垂直网格等分于图宽，无法与柱槽位对齐）
+    const gridVerticals = [
+      ...svg.matchAll(/<line x1="[\d.]+" y1="28" x2="[\d.]+" y2="272"[^>]*stroke="rgba\(212, 165, 116, 0\.18\)"/g),
+    ]
+    expect(gridVerticals.length).toBe(0)
+  })
+
   it('环影图例补数值与占比（可读出各段分量）', async () => {
     const items = [
       makeItem({ id: 'a', values: { value: 2 }, categories: { type: 'happy' } }),
