@@ -41,7 +41,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="empty-hint">暂时没有从留光阁或心锚漂来的光点</p>
+      <EmptyState v-else icon="✨" title="暂时没有从留光阁或心锚漂来的光点" :glow="false" cta-label="" />
     </section>
 
     <!-- 搁置的种子 -->
@@ -823,7 +823,7 @@ section h3 { font-size: 14px; color: var(--amber-text-secondary); margin-bottom:
 .dot-adopt:hover { background: rgba(232, 211, 162, 0.18); color: var(--amber-accent); }
 .dot-act:hover { background: rgba(var(--accent-rgb), 0.18); color: var(--amber-accent); border-color: rgba(var(--accent-rgb), 0.35); }
 
-.empty-hint { font-size: 12px; color: var(--amber-text-muted); padding: 12px 0; opacity: 0.7; font-style: italic; }
+/* 已迁共享 EmptyState */
 
 /* ========== 手动放入表单 ========== */
 

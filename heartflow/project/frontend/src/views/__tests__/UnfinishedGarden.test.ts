@@ -75,10 +75,11 @@ describe('UnfinishedGarden 未完成花园视图', () => {
   it('无数据时三个区域显示空状态提示', async () => {
     const wrapper = await createWrapper()
     const emptyTexts = wrapper.findAll('.hf-empty').filter((el) => !el.element.closest('.ufw-panel'))
-    expect(emptyTexts.length).toBe(3) // 种子、书籍、已完成
+    expect(emptyTexts.length).toBe(4) // 种子、书籍、已完成、光点
     expect(wrapper.text()).toContain('这里暂时没有搁置的种子')
     expect(wrapper.text()).toContain('还没有开了头的书')
     expect(wrapper.text()).toContain('还没有完成的项目')
+    expect(wrapper.text()).toContain('暂时没有从留光阁或心锚漂来的光点')
   })
 
   // ------- 渲染搁置种子列表 -------
