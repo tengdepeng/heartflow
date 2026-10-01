@@ -16,6 +16,7 @@ import DimensionMappingPanel from '../components/DimensionMappingPanel.vue'
 import DataSourceConnectorPanel from '../components/DataSourceConnectorPanel.vue'
 import VisualChartPanel from '../components/VisualChartPanel.vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 useViewEntrance()
 
@@ -166,13 +167,14 @@ onMounted(renderToCanvas)
 
     <section class="studio-canvas-wrap">
       <canvas ref="canvasRef" class="studio-canvas" data-testid="studio-canvas"></canvas>
-      <p
+      <EmptyState
         v-if="studio.isEmpty.value"
-        class="studio-empty"
         data-testid="studio-empty"
-      >
-        {{ VIZ_SUBJECTS.find((s) => s.key === studio.activeSubject.value)?.hint }}
-      </p>
+        icon="📊"
+        :title="VIZ_SUBJECTS.find((s) => s.key === studio.activeSubject.value)?.hint"
+        :glow="false"
+        cta-label=""
+      />
     </section>
     </RoomLayout>
   </div>
@@ -303,11 +305,7 @@ onMounted(renderToCanvas)
   background: transparent;
 }
 
-.studio-empty {
-  margin-top: 14px;
-  font-size: 13px;
-  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
-}
+/* 已迁共享 EmptyState */
 
 @media (max-width: 639px) {
   .visualization-studio-room {
