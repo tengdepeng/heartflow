@@ -97,7 +97,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="vs-none">还没有访客会话。创建一个，分享访问密钥。</p>
+      <EmptyState v-else icon="💬" title="还没有访客会话。" hint="创建一个，分享访问密钥。" :glow="false" cta-label="" />
     </section>
 
     <!-- 邀请码 -->
@@ -127,7 +127,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="vs-none">还没有邀请码。生成一个，分享给想邀请的人。</p>
+      <EmptyState v-else icon="✉️" title="还没有邀请码。" hint="生成一个，分享给想邀请的人。" :glow="false" cta-label="" />
     </section>
 
     <!-- 访问控制 -->
@@ -157,7 +157,7 @@
           </div>
         </div>
       </div>
-      <p v-else class="vs-none">还没有访问规则。添加规则，控制访客能进入哪些空间。</p>
+      <EmptyState v-else icon="🚪" title="还没有访问规则。" hint="添加规则，控制访客能进入哪些空间。" :glow="false" cta-label="" />
     </section>
 
     <!-- 访客足迹 -->
@@ -172,7 +172,7 @@
           <span class="vs-fp-time">{{ fmtTime(f.timestamp) }}</span>
         </div>
       </div>
-      <p v-else class="vs-none">还没有访客足迹。</p>
+      <EmptyState v-else icon="👣" title="还没有访客足迹。" :glow="false" cta-label="" />
     </section>
   </div>
 </template>
@@ -185,6 +185,7 @@ import { useVisitor } from '../modules/visitor'
 import { VISITOR_ROLE_LABELS } from '../modules/visitor'
 import type { VisitorRole } from '../modules/visitor'
 import VisitorBridgePanel from '../components/VisitorBridgePanel.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { getAllRooms, getRoom } from '../engine/room-graph'
 
 const { entranceClass, entranceRef } = useViewEntrance()
@@ -341,7 +342,7 @@ onMounted(() => {
 .vs-fp-action { color: rgba(232, 221, 208, 0.5); }
 .vs-fp-time { margin-left: auto; font-size: 10px; color: rgba(232, 221, 208, 0.35); }
 
-.vs-none { font-size: 12px; color: rgba(232, 221, 208, 0.45); text-align: center; padding: 16px 0; margin: 0; }
+/* 已迁共享 EmptyState */
 
 @media (max-width: 640px) {
   .vs { padding: 20px 14px 48px; }
