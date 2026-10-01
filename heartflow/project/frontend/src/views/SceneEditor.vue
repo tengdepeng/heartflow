@@ -13,9 +13,14 @@
           <h3 class="se-section-title">场景列表 ({{ scenes.length }})</h3>
           <button class="se-btn" @click="addScene">+ 新建场景</button>
         </div>
-        <div v-if="scenes.length === 0" class="se-empty">
-          <p>还没有场景，新建一个来定义空间氛围</p>
-        </div>
+        <EmptyState
+          v-if="scenes.length === 0"
+          icon="🎬"
+          title="还没有场景"
+          hint="新建一个来定义空间氛围"
+          :glow="false"
+          cta-label=""
+        />
         <div v-else class="se-scene-list">
           <div
             v-for="scene in scenes"
@@ -82,6 +87,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useScenes } from '../modules/scene'
 import { recordDecorationHistory } from '../modules/decoration-history'
 
@@ -171,7 +177,7 @@ function removeScene() {
 .se-section { margin-bottom: 24px; }
 .se-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .se-section-title { font-size: 15px; font-weight: 500; color: rgba(var(--text-primary-rgb), 0.8); margin: 0; }
-.se-empty { text-align: center; padding: 40px 0; color: var(--text-faint); font-size: 14px; }
+/* 已迁共享 EmptyState */
 .se-scene-list { display: flex; flex-direction: column; gap: 8px; }
 .se-scene-card { padding: 12px; border-radius: 10px; background: var(--card-bg); border: 1px solid rgba(var(--accent-rgb), 0.08); border-left: 3px solid rgba(var(--accent-rgb), 0.3); cursor: pointer; transition: all 0.2s; }
 .se-scene-card:hover { background: rgba(55,48,40,0.6); }
