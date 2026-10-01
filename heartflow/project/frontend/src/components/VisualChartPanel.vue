@@ -130,6 +130,8 @@ function fieldLabel(f: string): string {
 }
 
 const SIZE = { width: 640, height: 320, padding: { top: 28, right: 26, bottom: 48, left: 62 } }
+// 网格线：暖金淡描（默认的 rgba(255,255,255,0.06) 在深色画布上几乎不可见）
+const GRID_COLOR = 'rgba(212, 165, 116, 0.18)'
 const pad = SIZE.padding
 const plotW = SIZE.width - pad.left - pad.right
 const plotH = SIZE.height - pad.top - pad.bottom
@@ -231,7 +233,7 @@ function buildCartesianSvg(): string {
   const [minV, maxV] = domain
   const mapped = mapDataToPlot(pts, SIZE, domain)
   const tickCount = tickCountFor(pts.length)
-  const grid = generateGridLines(SIZE, tickCount).join('')
+  const grid = generateGridLines(SIZE, tickCount, GRID_COLOR, '4,4').join('')
   const ticks = buildTicks(pts, minV, maxV, tickCount)
   const axis = renderAxisAsString(
     SIZE,

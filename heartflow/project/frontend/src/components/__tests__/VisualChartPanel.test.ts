@@ -94,6 +94,23 @@ describe('VisualChartPanel（INCR-413：图表渲染 svg.ts 零消费引擎薄�
     expect(yLabels(svg)).toEqual(['0', '30', '60'])
   })
 
+  it('垂直/水平网格线以暖金淡描渲染（可见性，非近乎透明的默认白）', () => {
+    const items: SevenDimensionDataItem[] = [
+      makeItem({ id: 'a', values: { value: 3 } }),
+      makeItem({ id: 'b', values: { value: 5 } }),
+      makeItem({ id: 'c', values: { value: 2 } }),
+    ]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    // 垂直网格线须纵贯绘图区（y0=28 → y1=272）且用暖金描边
+    const verticals = [...svg.matchAll(/<line x1="([\d.]+)" y1="28" x2="([\d.]+)" y2="272"[^>]*stroke="([^"]+)"/g)]
+    expect(verticals.length).toBeGreaterThan(0)
+    expect(verticals[0][1]).toBe(verticals[0][2]) // 垂直线 x 首尾一致
+    expect(verticals[0][3]).toBe('rgba(212, 165, 116, 0.18)')
+    // 不得残留近乎不可见的默认白网格
+    expect(svg).not.toContain('rgba(255,255,255,0.06)')
+  })
+
   it('切换柱状图渲染柱条矩形', async () => {
     const items = [makeItem({ id: 'a', values: { value: 4 } }), makeItem({ id: 'b', values: { value: 7 } })]
     const wrapper = mount(VisualChartPanel, { props: { items } })
