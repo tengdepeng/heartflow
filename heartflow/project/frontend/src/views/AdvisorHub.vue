@@ -65,7 +65,14 @@
           </div>
         </div>
       </div>
-      <p v-else class="ah-command-empty">还没有调令。试着下达第一条，让管家动起来。</p>
+      <EmptyState
+        v-else
+        icon="📜"
+        title="还没有调令。"
+        hint="试着下达第一条，让管家动起来。"
+        :glow="false"
+        cta-label=""
+      />
     </section>
 
     <!-- 跨域任务拆解（INCR-372 补挂载孤儿引擎 advisor/task-decompose：跨域调令识别→分头收集真实统计→汇总） -->
@@ -177,7 +184,14 @@
           </div>
         </div>
       </div>
-      <p v-else class="ah-notes-empty">还没有笔记，点「+ 新建笔记」记录第一条。</p>
+      <EmptyState
+        v-else
+        icon="📝"
+        title="还没有笔记。"
+        hint="点「+ 新建笔记」记录第一条。"
+        :glow="false"
+        cta-label=""
+      />
       </section>
 
       <!-- 浮层便签（NoteSticky 真接入：📌 标记的便签以浮动便签显示，可拖动/置顶/编辑/关闭，事件回写 note 引擎） -->
@@ -227,7 +241,14 @@
       <AdvisorDailyLifePanel :advisors="advisors" />
     </section>
 
-    <div data-enter v-if="!advisors.length" class="ah-empty-hint"><span>🏛</span><p>幕僚大厅等待第一位居民</p></div>
+    <EmptyState
+      v-if="!advisors.length"
+      data-enter
+      icon="🏛"
+      title="幕僚大厅等待第一位居民"
+      :glow="false"
+      cta-label=""
+    />
 
     <!-- 编辑弹窗 -->
     <Teleport to="body"><Transition name="modal">
@@ -285,6 +306,7 @@ import DispatchPanel from '../components/DispatchPanel.vue'
 import SearchInput from '../components/SearchInput.vue'
 import NoteSticky from '../components/NoteSticky.vue'
 import FabButton from '../components/FabButton.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useCommandExecutor } from '../modules/advisor/commandExecutor'
 import { detectStrategy } from '../modules/dispatch'
 import type { DispatchStrategy } from '../modules/dispatch'
@@ -935,19 +957,7 @@ function onStickyPin(id: string) {
   cursor: default;
 }
 
-/* ---- Empty hint ---- */
-.ah-empty-hint {
-  text-align: center;
-  padding: 60px 0;
-  color: rgba(var(--accent-rgb), 0.18);
-  position: relative;
-  z-index: 1;
-}
-.ah-empty-hint span {
-  font-size: 40px;
-  display: block;
-  margin-bottom: 8px;
-}
+/* 已迁共享 EmptyState */
 
 /* ---- Dialog overlay ---- */
 .ah-dialog-overlay {
@@ -1232,12 +1242,7 @@ function onStickyPin(id: string) {
 .ah-note-del:hover {
   background: rgba(224, 49, 49, 0.18);
 }
-.ah-notes-empty {
-  color: rgba(var(--accent-rgb), 0.3);
-  font-size: 12px;
-  text-align: center;
-  padding: 20px 0;
-}
+/* 已迁共享 EmptyState */
 .ah-notes-bar :deep(.hf-search) {
   flex: 1;
   min-width: 0;
@@ -1383,12 +1388,7 @@ function onStickyPin(id: string) {
   margin: 6px 0 0;
   line-height: 1.5;
 }
-.ah-command-empty {
-  color: rgba(var(--accent-rgb), 0.3);
-  font-size: 12px;
-  text-align: center;
-  padding: 16px 0;
-}
+/* 已迁共享 EmptyState */
 
 /* ---- 执行策略判定（dispatch·detectStrategy 独有维度，INCR-360） ---- */
 .ah-cmd-strategy {
