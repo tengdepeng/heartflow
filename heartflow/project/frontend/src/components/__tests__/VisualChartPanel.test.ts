@@ -35,7 +35,7 @@ describe('VisualChartPanel（INCR-413：图表渲染 svg.ts 零消费引擎薄�
     expect(wrapper.text()).toContain('value')
   })
 
-  it('折线/柱状图渲染刻度数值标签（Y 轴真实值 + X 轴序号）', () => {
+  it('折线/柱状图渲染刻度数值标签（Y 轴真实值 + X 轴唯一序号）', () => {
     const items: SevenDimensionDataItem[] = [
       makeItem({ id: 'a', values: { value: 3 } }),
       makeItem({ id: 'b', values: { value: 5 } }),
@@ -43,13 +43,55 @@ describe('VisualChartPanel（INCR-413：图表渲染 svg.ts 零消费引擎薄�
     ]
     const wrapper = mount(VisualChartPanel, { props: { items } })
     const svg = wrapper.get('[data-testid="vcp-svg"]').html()
-    const textCount = (svg.match(/<text/g) || []).length
-    // 6 个 Y 数值 + 6 个 X 序号 + 2 个轴标题
-    expect(textCount).toBeGreaterThanOrEqual(12)
-    // Y 轴刻度含数据值域内的真实数值（数据 3/5/2 → yDomain [0,5]，值域<10 保留一位小数）
+    // Y 轴刻度含数据值域内的真实数值（默认边界适配开启：数据 3/5/2 → 值域 [2,5]，值域<10 保留一位小数）
     expect(svg).toContain('>5.0</text>')
-    // X 轴序号刻度
-    expect(svg).toContain('>2</text>')
+    expect(svg).toContain('>2.0</text>')
+    // X 轴序号刻度：3 个数据点逐点标注，序号唯一不重复（font-size="10" 标识 X 序号）
+    const xLabels = [...svg.matchAll(/font-size="10"[^>]*>(\d+)<\/text>/g)].map((m) => m[1])
+    expect(xLabels).toEqual(['0', '1', '2'])
+  })
+
+  it('图例包裹在 <svg> 内渲染（色块 swatch 可见）', () => {
+    const items = [makeItem({ id: 'a', values: { value: 3 } }), makeItem({ id: 'b', values: { value: 5 } })]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const html = wrapper.get('[data-testid="vcp-svg"]').html()
+    const legend = html.match(/<svg class="vcp-legend"[\s\S]*?<\/svg>/)?.[0] ?? ''
+    expect(legend).not.toBe('')
+    expect(legend).toContain('<line') // 折线 swatch
+    expect(legend).toContain('>value</text>')
+  })
+
+  it('刻度短线渲染为真实 path 元素（generateAxisPaths 返回路径数据须包进 <path>）', () => {
+    const items: SevenDimensionDataItem[] = [
+      makeItem({ id: 'a', values: { value: 3 } }),
+      makeItem({ id: 'b', values: { value: 5 } }),
+      makeItem({ id: 'c', values: { value: 2 } }),
+    ]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    // 刻度短线须为可渲染的 path 元素
+    expect(svg).toContain('class="vcp-tick"')
+    // 且不得把原始路径数据当作裸文本泄漏进 SVG
+    expect(svg).not.toMatch(/>\s*M [\d.]+ [\d.]+ L [\d.]+ [\d.]+M/)
+  })
+
+  it('边界适配开启时 Y 轴贴合数据值域，关闭时回到零基准，且折线始终铺满宽度', async () => {
+    const items = [
+      makeItem({ id: 'a', values: { value: 20 } }),
+      makeItem({ id: 'b', values: { value: 40 } }),
+      makeItem({ id: 'c', values: { value: 60 } }),
+    ]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const yLabels = (h: string) => [...h.matchAll(/font-size="11"[^>]*>([\d.]+)<\/text>/g)].map((m) => m[1])
+    // 默认开启：Y 轴贴合数据值域（20–60，非零基准）
+    let svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    expect(yLabels(svg)).toEqual(['20', '40', '60'])
+    // X 始终铺满宽度：末点落在绘图区右边界（pad.left + plotW = 62 + 552 = 614）
+    expect(svg).toContain('cx="614"')
+    // 关闭：回到零基准（0–60）
+    await wrapper.get('[data-testid="vcp-fit"]').setValue(false)
+    svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    expect(yLabels(svg)).toEqual(['0', '30', '60'])
   })
 
   it('切换柱状图渲染柱条矩形', async () => {

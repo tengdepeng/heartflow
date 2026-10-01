@@ -72,7 +72,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { SevenDimensionDataItem } from '../modules/visualization/dimension-mapping/seven-dimensions'
-import type { Point2D } from '../modules/visualization/types'
 import {
   getInterpolator,
   mapDataToPlot,
@@ -84,7 +83,6 @@ import {
   generateArcPath,
   generateAreaPath,
   generateLegend,
-  scalePointsToFit,
   getPointsBBox,
 } from '../modules/visualization/svg'
 
@@ -161,11 +159,17 @@ function yDomain(pts: { value: number }[]): [number, number] {
   return [min, max]
 }
 
-// ---- 自适应边界（scalePointsToFit + getPointsBBox） ----
-function fitPlotted(): Point2D[] {
-  const pts = series.value.map((p) => ({ x: p.x, y: p.value }))
-  const fitted = scalePointsToFit(pts, plotW, plotH, 8)
-  return fitted.map((pt) => ({ x: pt.x + pad.left, y: pt.y + pad.top }))
+// ---- 边界适配：Y 轴值域（关闭=零基准铺满高度；开启=贴合数据值域） ----
+function dataDomain(pts: { value: number }[]): [number, number] {
+  let min = Infinity
+  let max = -Infinity
+  for (const p of pts) {
+    if (p.value < min) min = p.value
+    if (p.value > max) max = p.value
+  }
+  if (!isFinite(min)) return [0, 1]
+  if (max === min) return [min - 0.5, max + 0.5]
+  return [min, max]
 }
 
 const bboxLabel = computed(() => {
@@ -176,43 +180,62 @@ const bboxLabel = computed(() => {
 })
 
 // ---- 图例 ----
+/** generateLegend 产出的是 SVG 片段，须包进 <svg> 才能渲染出色块与文字 */
+function wrapLegend(inner: string, itemCount: number, itemWidth: number, itemGap: number): string {
+  const totalW = itemCount * itemWidth + Math.max(0, itemCount - 1) * itemGap
+  return `<svg class="vcp-legend" viewBox="0 0 ${totalW} 18" role="img" aria-label="图例">${inner}</svg>`
+}
+
 function legendBlock(): string {
   if (chartType.value === 'donut') return donutLegend()
-  return generateLegend(
-    [{ label: fieldLabel(field.value), color: PALETTE[0], shape: chartType.value === 'line' ? 'line' : 'rect' }],
-    { show: true, position: 'bottom', itemWidth: 180, itemGap: 24 },
+  const items = [{ label: fieldLabel(field.value), color: PALETTE[0], shape: chartType.value === 'line' ? 'line' as const : 'rect' as const }]
+  return wrapLegend(
+    generateLegend(items, { show: true, position: 'bottom', itemWidth: 180, itemGap: 24 }),
+    1, 180, 24,
   )
 }
 
 // ---- 折线 / 柱条 ----
-/** 刻度标签：复用 generateAxisPaths 刻度线段，Y 轴标真实数值、X 轴标记录序号 */
-function buildTicks(pts: { value: number }[], minV: number, maxV: number): string {
-  const n = pts.length || 1
-  const tickCount = 6
+/** 刻度档数随数据点自适应（2–6 档）：点数少于刻度上限时逐点标注，避免序号重复 */
+function tickCountFor(n: number): number {
+  return Math.max(2, Math.min(6, n))
+}
+
+/** 刻度：复用 generateAxisPaths 生成刻度短线，Y 轴标真实数值、X 轴标记录序号 */
+function buildTicks(pts: { value: number }[], minV: number, maxV: number, tickCount: number): string {
+  const n = pts.length
   const { xTicks, yTicks } = generateAxisPaths(SIZE, { show: true, tickCount })
   const yRange = maxV - minV || 1
   const dec = yRange >= 10 ? 0 : 1
-  let out = xTicks.join('') + yTicks.join('')
+  // generateAxisPaths 返回的是路径数据字符串，须包进 <path> 才会渲染成刻度短线
+  let out = `<path class="vcp-tick" d="${[...xTicks, ...yTicks].join(' ')}" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1" />`
   for (let i = 0; i < tickCount; i++) {
     const t = i / (tickCount - 1)
     const y = pad.top + plotH - t * plotH
     out += `<text x="${pad.left - 8}" y="${y + 4}" text-anchor="end" font-size="11" opacity="0.6" fill="currentColor">${(minV + t * yRange).toFixed(dec)}</text>`
-    const idx = Math.round(t * (n - 1))
-    const x = pad.left + t * plotW
-    out += `<text x="${x}" y="${pad.top + plotH + 18}" text-anchor="middle" font-size="10" opacity="0.5" fill="currentColor">${idx}</text>`
+  }
+  if (n >= 2) {
+    for (let i = 0; i < tickCount; i++) {
+      const t = i / (tickCount - 1)
+      const x = pad.left + t * plotW
+      out += `<text x="${x}" y="${pad.top + plotH + 18}" text-anchor="middle" font-size="10" opacity="0.5" fill="currentColor">${Math.round(t * (n - 1))}</text>`
+    }
   }
   return out
 }
 
 function buildCartesianSvg(): string {
   const pts = series.value
-  const [minV, maxV] = yDomain(pts)
-  const mapped = fit.value ? fitPlotted() : mapDataToPlot(pts, SIZE, [minV, maxV])
-  const grid = generateGridLines(SIZE, 6).join('')
-  const ticks = buildTicks(pts, minV, maxV)
+  // 边界适配：X 始终铺满宽度；Y 关闭时以零为基准，开启时贴合数据值域
+  const domain = fit.value ? dataDomain(pts) : yDomain(pts)
+  const [minV, maxV] = domain
+  const mapped = mapDataToPlot(pts, SIZE, domain)
+  const tickCount = tickCountFor(pts.length)
+  const grid = generateGridLines(SIZE, tickCount).join('')
+  const ticks = buildTicks(pts, minV, maxV, tickCount)
   const axis = renderAxisAsString(
     SIZE,
-    { show: true, tickCount: 6, grid: { show: false }, label: fieldLabel(field.value) },
+    { show: true, tickCount, grid: { show: false }, label: fieldLabel(field.value) },
     fieldLabel(field.value),
     '数值',
   )
@@ -227,16 +250,15 @@ function buildCartesianSvg(): string {
   } else {
     const n = pts.length || 1
     const barW = (plotW / n) * 0.62
-    const [minV2, maxV2] = yDomain(pts)
-    const range = maxV2 - minV2 || 1
+    const range = maxV - minV || 1
     const bars = pts.map((p, i) => {
       const x = pad.left + (i / n) * plotW + (plotW / n - barW) / 2
-      const h = Math.max(1, ((p.value - minV2) / range) * plotH)
+      const h = Math.max(1, ((p.value - minV) / range) * plotH)
       return { x, y: pad.top + plotH - h, width: barW, height: h, color: p.color, radius: 2 }
     })
     body += generateBarRects(bars)
   }
-  return `<div class="vcp-legend">${legendBlock()}</div><svg viewBox="0 0 ${SIZE.width} ${SIZE.height}" role="img" aria-label="${chartType.value === 'line' ? '折线图' : '柱状图'}">${grid}${ticks}${axis}${body}</svg>`
+  return `${legendBlock()}<svg viewBox="0 0 ${SIZE.width} ${SIZE.height}" role="img" aria-label="${chartType.value === 'line' ? '折线图' : '柱状图'}">${grid}${ticks}${axis}${body}</svg>`
 }
 
 // ---- 环影（按类别字段归组汇总） ----
@@ -269,14 +291,17 @@ function buildDonutSvg(): string {
   const outline = `<path d="${generateArcPath(cx, cy, innerR - 3, outerR + 3, 0, 360)}" fill="none" stroke="${PALETTE[0]}" stroke-opacity="0.25" stroke-width="1" />`
   const center = `<text x="${cx}" y="${cy - 4}" text-anchor="middle" font-size="26" font-weight="600" fill="currentColor">${Math.round(total)}</text>`
   const centerSub = `<text x="${cx}" y="${cy + 18}" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.55">${fieldLabel(field.value)}</text>`
-  return `<div class="vcp-legend">${legendBlock()}</div><svg viewBox="0 0 ${SIZE.width} ${SIZE.height}" role="img" aria-label="环状图">${outline}${arcs}${center}${centerSub}</svg>`
+  return `${legendBlock()}<svg viewBox="0 0 ${SIZE.width} ${SIZE.height}" role="img" aria-label="环状图">${outline}${arcs}${center}${centerSub}</svg>`
 }
 
 function donutLegend(): string {
   const segs = donutSegments()
-  return generateLegend(
-    segs.map((g) => ({ label: g.key, color: g.color })),
-    { show: true, position: 'bottom', itemWidth: 140, itemGap: 18 },
+  return wrapLegend(
+    generateLegend(
+      segs.map((g) => ({ label: g.key, color: g.color })),
+      { show: true, position: 'bottom', itemWidth: 140, itemGap: 18 },
+    ),
+    segs.length, 140, 18,
   )
 }
 
@@ -417,6 +442,15 @@ const note = computed(() => {
   margin: 0 auto;
   border-radius: 10px;
   background: rgba(15, 12, 10, 0.5);
+}
+
+.vcp-canvas :deep(.vcp-legend) {
+  width: auto;
+  max-width: 100%;
+  height: 18px;
+  margin: 0 0 8px;
+  border-radius: 0;
+  background: none;
 }
 
 .vcp-note {
