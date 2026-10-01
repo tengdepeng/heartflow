@@ -150,6 +150,22 @@ describe('VisualChartPanel（INCR-413：图表渲染 svg.ts 零消费引擎薄�
     expect(svg).toContain('fill="#d4a574"')
   })
 
+  it('环影图例补数值与占比（可读出各段分量）', async () => {
+    const items = [
+      makeItem({ id: 'a', values: { value: 2 }, categories: { type: 'happy' } }),
+      makeItem({ id: 'b', values: { value: 3 }, categories: { type: 'happy' } }),
+      makeItem({ id: 'c', values: { value: 5 }, categories: { type: 'calm' } }),
+    ]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const chips = wrapper.findAll('[data-testid="vcp-charttype"] .vcp-chip')
+    await chips[2].trigger('click') // 环影
+    const svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    const legend = svg.match(/<svg class="vcp-legend"[\s\S]*?<\/svg>/)?.[0] ?? ''
+    // happy 汇总 2+3=5、calm 5，总数 10 → 各占 50%
+    expect(legend).toContain('happy 5 · 50%')
+    expect(legend).toContain('calm 5 · 50%')
+  })
+
   it('切换柱状图渲染柱条矩形', async () => {
     const items = [makeItem({ id: 'a', values: { value: 4 } }), makeItem({ id: 'b', values: { value: 7 } })]
     const wrapper = mount(VisualChartPanel, { props: { items } })

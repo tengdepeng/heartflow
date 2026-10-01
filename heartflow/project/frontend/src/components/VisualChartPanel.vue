@@ -302,12 +302,20 @@ function buildDonutSvg(): string {
 
 function donutLegend(): string {
   const segs = donutSegments()
+  const total = segs.reduce((s, g) => s + g.value, 0)
+  // 环影此前图例只有类别名，读者无法从图上读出各段分量——补数值与占比
+  const labels = segs.map((g) => {
+    const pct = total > 0 ? Math.round((g.value / total) * 100) : 0
+    return `${g.key} ${Math.round(g.value)} · ${pct}%`
+  })
+  // 条目宽度随最长标签自适应，避免长类别名被 SVG viewBox 裁切
+  const itemWidth = Math.max(140, 24 + Math.max(0, ...labels.map((l) => l.length)) * 7)
   return wrapLegend(
     generateLegend(
-      segs.map((g) => ({ label: g.key, color: g.color })),
-      { show: true, position: 'bottom', itemWidth: 140, itemGap: 18 },
+      segs.map((g, i) => ({ label: labels[i], color: g.color })),
+      { show: true, position: 'bottom', itemWidth, itemGap: 18 },
     ),
-    segs.length, 140, 18,
+    segs.length, itemWidth, 18,
   )
 }
 
