@@ -178,7 +178,14 @@
       <div v-if="narrative.length" class="wl-narrative">
         <p v-for="(line, i) in narrative" :key="i">{{ line }}</p>
       </div>
-      <p v-else class="wl-none">世界尚未开启传承。当第一位载体退休、新载体诞生时，世代将在此记录。</p>
+      <EmptyState
+        v-else
+        icon="🌱"
+        title="世界尚未开启传承"
+        hint="当第一位载体退休、新载体诞生时，世代将在此记录。"
+        :glow="false"
+        cta-label=""
+      />
     </section>
     </RoomLayout>
   </div>
@@ -189,6 +196,7 @@ import { computed, onMounted, onUnmounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomNavigation } from '../composables/useRoomNavigation'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { useDayNightCycle, useWeather, useWorldLegacy } from '../modules/world-life'
 import type { DayPhase } from '../modules/world-life'
 import type { WeatherType } from '../modules/world-life'
@@ -316,7 +324,7 @@ onUnmounted(() => {
 .wl-narrative p { font-size: 11px; color: rgba(232, 221, 208, 0.65); margin: 0 0 4px; line-height: 1.6; }
 .wl-narrative p:last-child { margin-bottom: 0; }
 
-.wl-none { font-size: 12px; color: rgba(232, 221, 208, 0.45); text-align: center; padding: 16px 0; margin: 0; }
+/* 已迁共享 EmptyState */
 
 @media (max-width: 640px) {
   .wl { padding: 0 0 48px; }
