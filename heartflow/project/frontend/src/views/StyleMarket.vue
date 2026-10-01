@@ -27,9 +27,13 @@
     <!-- 我的风格包 -->
     <section data-enter class="sm-section">
       <h2 class="sm-section-title">我的风格包</h2>
-      <div v-if="packs.length === 0" class="sm-empty-hint">
-        暂无风格包，创建一个吧
-      </div>
+      <EmptyState
+        v-if="packs.length === 0"
+        icon="🎨"
+        title="暂无风格包，创建一个吧"
+        :glow="false"
+        cta-label=""
+      />
       <div v-else class="sm-pack-grid">
         <article
           v-for="pack in packs"
@@ -145,6 +149,7 @@ import { useStyle } from '../resonance/bridges/style'
 import { importStylePack } from '../modules/style'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { CATEGORY_PALETTE } from '../theme/categoryColors'
 
 const { entranceRef, entranceClass } = useViewEntrance()
