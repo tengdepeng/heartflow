@@ -29,10 +29,27 @@ describe('VisualChartPanel（INCR-413：图表渲染 svg.ts 零消费引擎薄�
     const svg = wrapper.get('[data-testid="vcp-svg"]').html()
     expect(svg).toContain('<svg')
     expect(svg).toContain('stroke=') // 折线路径
-    expect(svg).toContain('<line') // 轴/网格
+    expect(svg).toContain('<line') // 轴/网格/刻度线
     expect(svg).toContain('fill') // 面积/图例
     // 数值字段自动取第一个，图例含字段名
     expect(wrapper.text()).toContain('value')
+  })
+
+  it('折线/柱状图渲染刻度数值标签（Y 轴真实值 + X 轴序号）', () => {
+    const items: SevenDimensionDataItem[] = [
+      makeItem({ id: 'a', values: { value: 3 } }),
+      makeItem({ id: 'b', values: { value: 5 } }),
+      makeItem({ id: 'c', values: { value: 2 } }),
+    ]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    const textCount = (svg.match(/<text/g) || []).length
+    // 6 个 Y 数值 + 6 个 X 序号 + 2 个轴标题
+    expect(textCount).toBeGreaterThanOrEqual(12)
+    // Y 轴刻度含数据值域内的真实数值（数据 3/5/2 → yDomain [0,5]，值域<10 保留一位小数）
+    expect(svg).toContain('>5.0</text>')
+    // X 轴序号刻度
+    expect(svg).toContain('>2</text>')
   })
 
   it('切换柱状图渲染柱条矩形', async () => {

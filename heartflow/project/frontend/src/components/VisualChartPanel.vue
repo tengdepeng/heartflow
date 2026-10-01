@@ -77,6 +77,7 @@ import {
   getInterpolator,
   mapDataToPlot,
   generateGridLines,
+  generateAxisPaths,
   renderAxisAsString,
   generateBarRects,
   generateRingSectors,
@@ -184,14 +185,34 @@ function legendBlock(): string {
 }
 
 // ---- 折线 / 柱条 ----
+/** 刻度标签：复用 generateAxisPaths 刻度线段，Y 轴标真实数值、X 轴标记录序号 */
+function buildTicks(pts: { value: number }[], minV: number, maxV: number): string {
+  const n = pts.length || 1
+  const tickCount = 6
+  const { xTicks, yTicks } = generateAxisPaths(SIZE, { show: true, tickCount })
+  const yRange = maxV - minV || 1
+  const dec = yRange >= 10 ? 0 : 1
+  let out = xTicks.join('') + yTicks.join('')
+  for (let i = 0; i < tickCount; i++) {
+    const t = i / (tickCount - 1)
+    const y = pad.top + plotH - t * plotH
+    out += `<text x="${pad.left - 8}" y="${y + 4}" text-anchor="end" font-size="11" opacity="0.6" fill="currentColor">${(minV + t * yRange).toFixed(dec)}</text>`
+    const idx = Math.round(t * (n - 1))
+    const x = pad.left + t * plotW
+    out += `<text x="${x}" y="${pad.top + plotH + 18}" text-anchor="middle" font-size="10" opacity="0.5" fill="currentColor">${idx}</text>`
+  }
+  return out
+}
+
 function buildCartesianSvg(): string {
   const pts = series.value
   const [minV, maxV] = yDomain(pts)
   const mapped = fit.value ? fitPlotted() : mapDataToPlot(pts, SIZE, [minV, maxV])
   const grid = generateGridLines(SIZE, 6).join('')
+  const ticks = buildTicks(pts, minV, maxV)
   const axis = renderAxisAsString(
     SIZE,
-    { show: true, tickCount: 6, grid: { show: false }, label: fieldLabel(field.value), tickFormat: (t) => t.toFixed(2) },
+    { show: true, tickCount: 6, grid: { show: false }, label: fieldLabel(field.value) },
     fieldLabel(field.value),
     '数值',
   )
@@ -215,7 +236,7 @@ function buildCartesianSvg(): string {
     })
     body += generateBarRects(bars)
   }
-  return `<div class="vcp-legend">${legendBlock()}</div><svg viewBox="0 0 ${SIZE.width} ${SIZE.height}" role="img" aria-label="${chartType.value === 'line' ? '折线图' : '柱状图'}">${grid}${axis}${body}</svg>`
+  return `<div class="vcp-legend">${legendBlock()}</div><svg viewBox="0 0 ${SIZE.width} ${SIZE.height}" role="img" aria-label="${chartType.value === 'line' ? '折线图' : '柱状图'}">${grid}${ticks}${axis}${body}</svg>`
 }
 
 // ---- 环影（按类别字段归组汇总） ----
