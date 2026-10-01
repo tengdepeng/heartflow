@@ -43,7 +43,7 @@ describe('NaturalLanguageCreate', () => {
     expect(goto.exists()).toBe(true)
 
     await goto.trigger('click')
-    expect(router.push).toHaveBeenCalledWith('/automation')
+    expect(router.push).toHaveBeenCalledWith('/discipline-workshop')
   })
 
   it('计划指令：创建并提示前往经略阁', async () => {

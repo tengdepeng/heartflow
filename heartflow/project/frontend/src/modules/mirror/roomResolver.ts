@@ -104,7 +104,9 @@ const ROOM_ALIASES: Record<string, string> = {
   '释光阁': '/cognition',
   '认知': '/cognition',
   '藏象阁': '/body-wisdom',
-  '自律工坊': '/automation',
+  '自律工坊': '/discipline-workshop',
+  '自律': '/discipline-workshop',
+  '习惯': '/discipline-workshop',
   '自动化': '/automation',
   '数据档案馆': '/archive',
   '档案馆': '/archive',
@@ -159,7 +161,7 @@ const ROOM_ALIASES: Record<string, string> = {
   '背包': '/bag',
   '息壤': '/rest',
   '休息': '/rest',
-  '自动化工坊': '/automation-workshop',
+  '自动化工坊': '/automation',
   '蜕变回廊': '/transform-gallery',
   '输出管理': '/output',
   '输出': '/output',
@@ -179,6 +181,11 @@ const ROOM_ALIASES: Record<string, string> = {
   '家1比1复刻': '/home-replica',
   '家复刻': '/home-replica',
   '1比1复刻': '/home-replica',
+  '关系图谱': '/knowledge-graph',
+  '知识图谱': '/knowledge-graph',
+  '图谱': '/knowledge-graph',
+  '荣休录': '/advisors/archive',
+  '退役幕僚': '/advisors/archive',
 }
 
 /** 规范化：去空格、转小写，用于匹配 */

@@ -352,7 +352,7 @@ describe('room-graph 房间图引擎', () => {
   // ------- 接入层收口：新注册功能空间 -------
   describe('接入层收口 · 新注册功能空间', () => {
     const newRooms = [
-      'automation-workshop',
+      'automation',
       'transform-gallery',
       'output',
       'study',

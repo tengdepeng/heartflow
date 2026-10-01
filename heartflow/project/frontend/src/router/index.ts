@@ -255,8 +255,8 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '藏象阁' },
   }),
   withRoomMeta({
-    path: '/automation',
-    name: 'automation',
+    path: '/discipline-workshop',
+    name: 'discipline-workshop',
     component: () => import('../views/DisciplineWorkshop.vue'),
     meta: { title: '自律工坊' },
   }),
@@ -324,7 +324,7 @@ const routes: RouteRecordRaw[] = [
     path: '/advisors/archive',
     name: 'advisor-archive',
     component: () => import('../views/AdvisorArchive.vue'),
-    meta: { title: '幕僚档案' },
+    meta: { title: '幕僚 · 荣休录' },
   }),
   withRoomMeta({
     path: '/style-market',
@@ -539,8 +539,8 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '成长庭院' },
   }),
   withRoomMeta({
-    path: '/automation-workshop',
-    name: 'automation-workshop',
+    path: '/automation',
+    name: 'automation',
     component: () => import('../views/AutomationWorkshop.vue'),
     meta: { title: '自动化工坊' },
   }),

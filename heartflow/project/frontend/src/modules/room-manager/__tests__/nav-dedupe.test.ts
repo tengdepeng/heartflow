@@ -25,7 +25,7 @@ const DEDUPED: Record<string, string> = {
   'visualization-studio': '时间线枢纽 / 星盘',
   'home-replica': '家（骨架占位）',
   'star-map': '经略阁（3D 视图）',
-  'automation-workshop': '自律工坊（自动化引擎）',
+  'automation': '自动化工坊 · 工作流编排（与自律工坊互不相干）',
   'transform-gallery': '成长庭院',
   'body-wisdom': '身体温室',
 }

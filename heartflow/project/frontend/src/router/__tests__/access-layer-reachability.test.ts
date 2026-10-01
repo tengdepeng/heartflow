@@ -9,7 +9,7 @@ import { getRoom } from '../../engine/room-graph'
 
 // 接入层收口新增/补注册的功能空间（含本轮回填的 4 个已路由未注册空间）
 const ACCESS_LAYER_ROOMS = [
-  'automation-workshop',
+  'automation',
   'transform-gallery',
   'output',
   'study',

@@ -5,7 +5,7 @@
 import { ref, computed } from 'vue'
 import type { RoomConfig } from './types'
 import { ROOM_CONFIG_STORAGE_KEY } from './types'
-import { getAllRooms, type RoomNode, type RoomGroup, type RoomSlot, type RoomDomain } from '../../engine/room-graph'
+import { getAllRooms, migrateRoomId, type RoomNode, type RoomGroup, type RoomSlot, type RoomDomain } from '../../engine/room-graph'
 import { storage } from '../../engine/storage'
 
 export type { RoomConfig, RoomNode, RoomGroup, RoomSlot, RoomDomain }
@@ -23,10 +23,19 @@ function defaultConfig(roomId: string): RoomConfig {
   }
 }
 
+/** 把存档里的旧房间 id 改写为新 id（一次成表，不做链式迭代） */
+function migrateRoomIds<T>(saved: Record<string, T>): Record<string, T> {
+  const out: Record<string, T> = {}
+  for (const [k, v] of Object.entries(saved)) out[migrateRoomId(k)] = v
+  return out
+}
+
 /** 加载所有房间配置（补齐缺失的房间） */
 function loadAllRoomConfigs(): RoomConfig[] {
   const rooms = getAllRooms()
-  const saved = storage.getKV<Record<string, Partial<RoomConfig>>>(ROOM_CONFIG_STORAGE_KEY, {})
+  const saved = migrateRoomIds(
+    storage.getKV<Record<string, Partial<RoomConfig>>>(ROOM_CONFIG_STORAGE_KEY, {}),
+  )
   return rooms.map(room => {
     const cfg = saved[room.id]
     if (!cfg) return defaultConfig(room.id)

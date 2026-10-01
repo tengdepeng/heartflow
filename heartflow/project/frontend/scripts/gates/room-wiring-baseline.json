@@ -1,0 +1,59 @@
+{
+  "$comment": "以下条目经 2026-10-01 静态审计确认：均已有其他可达路径，属有意不占侧边栏 / 不占路由。新增条目请先接线，确属例外才登记此处并写明理由。直接运行 --update-baseline 会重置本文件、丢失这些理由，请手工维护。",
+  "routesWithoutRoom": [
+    {
+      "path": "/advisors/chat/:id",
+      "note": "带 :id 参数的幕僚对话子页，由幕僚大厅按具体幕僚内链进入；静态房间图无法承载参数路由"
+    },
+    {
+      "path": "/advisors/witness/:id",
+      "note": "带 :id 参数的幕僚见证子页，同上"
+    },
+    {
+      "path": "/association-graph",
+      "note": "共鸣图谱，站内 3 处入口可达"
+    },
+    {
+      "path": "/constitution/editor",
+      "note": "宪法编辑器，站内 1 处入口可达（心流宪法页内）"
+    },
+    {
+      "path": "/dingyin-four-acts",
+      "note": "定音四幕，站内 1 处入口可达"
+    },
+    {
+      "path": "/environment-editor",
+      "note": "环境编辑器，站内 3 处入口可达"
+    },
+    {
+      "path": "/interaction-config",
+      "note": "交互配置，站内 3 处入口可达"
+    },
+    {
+      "path": "/room-manager",
+      "note": "房间管理器，站内 7 处入口可达（殿堂设置等管理入口）"
+    },
+    {
+      "path": "/scene-editor",
+      "note": "场景编辑器，站内 3 处入口可达"
+    },
+    {
+      "path": "/widgets",
+      "note": "小组件管理页，站内 1 处入口 + 命令面板收录；常驻展示在系统桌面而非本页"
+    }
+  ],
+  "viewsWithoutRoute": [
+    "DesktopWidgetView.vue",
+    "PluginDemoRoom.vue",
+    "PluginRoomShell.vue",
+    "RestRitualPanel.vue",
+    "RestSleepPanel.vue"
+  ],
+  "$viewsNote": {
+    "DesktopWidgetView.vue": "Tauri 桌面小组件专用浮窗，App.vue 以 v-if=isDesktopWidgetWindow 渲染，非路由页面",
+    "PluginDemoRoom.vue": "插件 demo-room 的动态加载目标（modules/plugin/room-registrar.ts）",
+    "PluginRoomShell.vue": "未注册自定义加载器的插件房间通用外壳回退",
+    "RestRitualPanel.vue": "Rest.vue 的子组件（休息仪式面板），非路由页面",
+    "RestSleepPanel.vue": "Rest.vue 的子组件（睡眠仪表盘面板），非路由页面"
+  }
+}

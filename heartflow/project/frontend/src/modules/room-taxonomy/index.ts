@@ -12,6 +12,7 @@
 import { ref, watch } from 'vue'
 import { storage } from '../../engine/storage'
 import type { RoomDomain, RoomGroup, RoomSlot } from '../../engine/room-graph'
+import { migrateRoomId } from '../../engine/room-graph'
 
 /** 分类体系类型 */
 export type NavTaxonomy = 'domain' | 'group' | 'slot' | 'custom'
@@ -109,9 +110,14 @@ export interface CustomGroup {
   roomIds: string[]
 }
 
+/** 自定义分组内的 roomIds 也可能引用已迁移的旧房间 id，一并改写 */
+function migrateCustomGroups(groups: CustomGroup[]): CustomGroup[] {
+  return groups.map((g) => ({ ...g, roomIds: g.roomIds.map(migrateRoomId) }))
+}
+
 const CUSTOM_GROUPS_KEY = 'hf:nav_custom_groups'
 const customGroups = ref<CustomGroup[]>(
-  storage.getKV<CustomGroup[]>(CUSTOM_GROUPS_KEY, []) || [],
+  migrateCustomGroups(storage.getKV<CustomGroup[]>(CUSTOM_GROUPS_KEY, []) || []),
 )
 watch(customGroups, (v) => storage.setKV(CUSTOM_GROUPS_KEY, v), { deep: true })
 

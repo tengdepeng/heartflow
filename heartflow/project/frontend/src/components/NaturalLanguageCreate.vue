@@ -148,7 +148,7 @@ const KIND_LABEL: Record<string, string> = {
 }
 
 const ROUTE_MAP: Record<string, string> = {
-  habit: '/automation',
+  habit: '/discipline-workshop',
   plan: '/knowledge',
   note: '/study',
   focus: '/worklog',
