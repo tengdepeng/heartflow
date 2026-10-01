@@ -143,7 +143,7 @@
         </div>
       </div>
     </section>
-    <p v-else class="tg-cocoon-hint">尚未从成长庭院的开花时刻记录光茧</p>
+    <EmptyState v-else icon="🌀" title="尚未从成长庭院的开花时刻记录光茧" :glow="false" cta-label="" />
 
     <!-- 5. 添加记录弹窗 -->
     <Teleport to="body">
@@ -851,12 +851,7 @@ input[type="number"].duration-input::-webkit-outer-spin-button {
 .cocoon-texture,
 .cocoon-related { font-size: 11px; color: rgba(var(--accent-rgb), 0.4); }
 .cocoon-date { font-size: 11px; color: rgba(var(--accent-rgb), 0.3); margin-top: 6px; }
-.tg-cocoon-hint {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.25);
-  margin-bottom: 32px;
-  font-style: italic;
-}
+/* 已迁共享 EmptyState */
 
 /* === Entrance Animation === */
 @keyframes fade-slide-up {
