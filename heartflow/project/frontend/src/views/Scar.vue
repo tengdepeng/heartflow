@@ -432,16 +432,22 @@
     </section>
 
     <!-- 空状态 -->
-    <div data-enter v-if="!marks.length" class="sc-empty">
-      <p>锻炉安静，尚无印记。</p>
-      <p class="sc-empty-hint">点击右上角砧板，或使用下方表单开始记录</p>
-    </div>
+    <EmptyState
+      v-if="!marks.length"
+      data-enter
+      icon="🔨"
+      title="锻炉安静，尚无印记。"
+      hint="点击右上角砧板，或使用下方表单开始记录"
+      :glow="false"
+      cta-label=""
+    />
   </RoomLayout>
   </div>
 </template>
 
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import { ref, computed, onMounted } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -1281,17 +1287,7 @@ function strikeAnvil() {
 }
 .sc-sev-btn:hover { border-color: rgba(196,138,106,0.3); }
 
-/* ---- Empty ---- */
-.sc-empty {
-  text-align: center; padding: 60px 20px;
-  font-size: 14px; line-height: 1.8;
-  color: rgba(196, 138, 106, 0.5);
-  border: 1px solid rgba(196,138,106,0.06);
-  border-radius: 16px;
-  background: rgba(196,138,106,0.02);
-  position: relative; z-index: 1;
-}
-.sc-empty-hint { font-size: 12px; color: rgba(196,138,106,0.45); margin-top: 4px; }
+/* ---- Empty（已迁共享 EmptyState，原 .sc-empty/.sc-empty-hint 死 CSS 删除） ---- */
 
 /* ---- Healing Journey ---- */
 .sc-journey-section {
