@@ -111,6 +111,45 @@ describe('VisualChartPanel（INCR-413：图表渲染 svg.ts 零消费引擎薄�
     expect(svg).not.toContain('rgba(255,255,255,0.06)')
   })
 
+  it('柱状图始终以零为基准（边界适配不扭曲柱长）', async () => {
+    const items = [
+      makeItem({ id: 'a', values: { value: 20 } }),
+      makeItem({ id: 'b', values: { value: 40 } }),
+      makeItem({ id: 'c', values: { value: 60 } }),
+    ]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    // 折线默认开启边界适配时值域贴合数据（20–60）
+    const yLabels = (h: string) => [...h.matchAll(/font-size="11"[^>]*>([\d.]+)<\/text>/g)].map((m) => m[1])
+    expect(yLabels(wrapper.get('[data-testid="vcp-svg"]').html())).toEqual(['20', '40', '60'])
+    const chips = wrapper.findAll('[data-testid="vcp-charttype"] .vcp-chip')
+    await chips[1].trigger('click') // 柱条
+    const svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    // 切柱条后回到零基准（0–60），柱长比例不被扭曲
+    expect(yLabels(svg)).toEqual(['0', '30', '60'])
+    // 柱条模式不提供边界适配开关（该开关仅对折线有意义）
+    expect(wrapper.find('[data-testid="vcp-fit"]').exists()).toBe(false)
+  })
+
+  it('柱状图单系列同色且与图例一致', async () => {
+    const items = [
+      makeItem({ id: 'a', values: { value: 4 } }),
+      makeItem({ id: 'b', values: { value: 7 } }),
+      makeItem({ id: 'c', values: { value: 5 } }),
+    ]
+    const wrapper = mount(VisualChartPanel, { props: { items } })
+    const chips = wrapper.findAll('[data-testid="vcp-charttype"] .vcp-chip')
+    await chips[1].trigger('click') // 柱条
+    const svg = wrapper.get('[data-testid="vcp-svg"]').html()
+    // 柱条路径（d 含圆角 Q 指令）填充色唯一（单系列），且与图例色块同色
+    const barFills = [...svg.matchAll(/<path d="([^"]*)" fill="(#[0-9a-f]{6})"/g)]
+      .filter((m) => m[1].includes('Q'))
+      .map((m) => m[2])
+    expect(barFills.length).toBe(3)
+    expect(new Set(barFills).size).toBe(1)
+    expect(barFills[0]).toBe('#d4a574')
+    expect(svg).toContain('fill="#d4a574"')
+  })
+
   it('切换柱状图渲染柱条矩形', async () => {
     const items = [makeItem({ id: 'a', values: { value: 4 } }), makeItem({ id: 'b', values: { value: 7 } })]
     const wrapper = mount(VisualChartPanel, { props: { items } })

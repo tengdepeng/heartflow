@@ -49,7 +49,8 @@
           </div>
         </div>
 
-        <label class="vcp-ctl vcp-ctl--auto">
+        <!-- 边界适配仅对折线有意义：柱条须零基准、环影无坐标轴 -->
+        <label v-if="chartType === 'line'" class="vcp-ctl vcp-ctl--auto">
           <input v-model="fit" type="checkbox" class="vcp-check" data-testid="vcp-fit" />
           <span class="vcp-ctl-label">边界适配</span>
         </label>
@@ -228,8 +229,10 @@ function buildTicks(pts: { value: number }[], minV: number, maxV: number, tickCo
 
 function buildCartesianSvg(): string {
   const pts = series.value
-  // 边界适配：X 始终铺满宽度；Y 关闭时以零为基准，开启时贴合数据值域
-  const domain = fit.value ? dataDomain(pts) : yDomain(pts)
+  const isBar = chartType.value === 'bar'
+  // X 始终铺满宽度。Y 轴：折线关闭边界适配时零基准、开启时贴合数据值域；
+  // 柱条一律零基准——非零基准会按比例扭曲柱长（值等于最小值时柱高趋近 0，误读为「无」）。
+  const domain = !isBar && fit.value ? dataDomain(pts) : yDomain(pts)
   const [minV, maxV] = domain
   const mapped = mapDataToPlot(pts, SIZE, domain)
   const tickCount = tickCountFor(pts.length)
@@ -256,7 +259,8 @@ function buildCartesianSvg(): string {
     const bars = pts.map((p, i) => {
       const x = pad.left + (i / n) * plotW + (plotW / n - barW) / 2
       const h = Math.max(1, ((p.value - minV) / range) * plotH)
-      return { x, y: pad.top + plotH - h, width: barW, height: h, color: p.color, radius: 2 }
+      // 单系列同色：与图例的单条目一致（彩虹色会暗示分类，而柱条只是同一字段的不同记录）
+      return { x, y: pad.top + plotH - h, width: barW, height: h, color: PALETTE[0], radius: 2 }
     })
     body += generateBarRects(bars)
   }
@@ -315,7 +319,11 @@ const svgMarkup = computed(() => {
 
 const note = computed(() => {
   const n = props.items.length
-  return `基于 ${n} 条记录 · 字段「${fieldLabel(field.value)}」 · ${chartTypes.find((c) => c.key === chartType.value)?.label}${chartType.value === 'line' ? ' · ' + interpModes.find((m) => m.key === interp.value)?.label : ''}${fit.value ? ' · 边界适配开' : ''}`
+  const typeLabel = chartTypes.find((c) => c.key === chartType.value)?.label
+  const interpLabel = chartType.value === 'line' ? ' · ' + interpModes.find((m) => m.key === interp.value)?.label : ''
+  // 仅折线受「边界适配」影响；柱条恒零基准，环影无坐标轴
+  const axisNote = chartType.value === 'bar' ? ' · 柱条零基准' : chartType.value === 'line' && fit.value ? ' · 边界适配开' : ''
+  return `基于 ${n} 条记录 · 字段「${fieldLabel(field.value)}」 · ${typeLabel}${interpLabel}${axisNote}`
 })
 </script>
 
