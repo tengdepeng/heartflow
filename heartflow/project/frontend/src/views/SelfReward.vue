@@ -162,11 +162,15 @@
       </div>
 
       <!-- 空态 -->
-      <div v-if="stats.total === 0" class="sr-empty">
-        <div class="sr-empty-icon">🎁</div>
-        <p class="sr-empty-text">还没有任何自我奖励。</p>
-        <p class="sr-empty-sub">为自己设第一份犒赏吧——可以是「连续早睡 7 天就去看场电影」。</p>
-      </div>
+      <EmptyState
+        v-if="stats.total === 0"
+        data-enter
+        icon="🎁"
+        title="还没有任何自我奖励。"
+        hint="为自己设第一份犒赏吧——可以是「连续早睡 7 天就去看场电影」。"
+        :glow="false"
+        cta-label=""
+      />
     </section>
 
     <!-- 犒赏账本（self-reward·reward-machine：兑现成本/节奏/里程碑/月度分布，INCR-165） -->
@@ -185,6 +189,7 @@ import { getHabits } from '../modules/discipline/workshop'
 import { useCraftBadges } from '../modules/craft/craft-badges'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import type { SelfReward, SelfRewardTriggerType } from '../modules/self-reward'
 
 const { stats, grouped, add, remove, redeem, unredeem, evaluate } = useSelfReward()
@@ -390,10 +395,7 @@ onMounted(() => { evaluate() })
 .sr-mini-btn--del { background: transparent; border-color: rgba(255,255,255,0.1); color: var(--text-muted, rgba(232, 224, 216, 0.44)); }
 .sr-mini-btn--del:hover { border-color: rgba(217,140,122,0.4); color: #d98c7a; }
 
-.sr-empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted, rgba(232, 224, 216, 0.44)); }
-.sr-empty-icon { font-size: 3rem; opacity: 0.4; margin-bottom: 1rem; }
-.sr-empty-text { font-size: 1rem; margin: 0 0 0.4rem; color: var(--text-primary, #e8e0d8); }
-.sr-empty-sub { font-size: 0.82rem; margin: 0 auto; max-width: 380px; line-height: 1.6; opacity: 0.8; }
+/* 空态已迁共享 EmptyState（原 .sr-empty/.sr-empty-icon/.sr-empty-text/.sr-empty-sub 死 CSS 删除） */
 
 .sr-slide-enter-active, .sr-slide-leave-active { transition: all 0.25s ease; overflow: hidden; }
 .sr-slide-enter-from, .sr-slide-leave-to { opacity: 0; max-height: 0; margin-top: 0; }

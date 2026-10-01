@@ -98,7 +98,7 @@ describe('SelfReward 视图', () => {
 
   it('空态提示出现', () => {
     const wrapper = mount(SelfRewardView, { global: { stubs: { 'router-link': true } } })
-    expect(wrapper.find('.sr-empty').exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'EmptyState' }).exists()).toBe(true)
   })
 
   it('填入名称与成本后提交，统计随之更新', async () => {
