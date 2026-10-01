@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import { useKnowledgeBridge } from '../modules/knowledge/knowledge-bridge'
 import type { GraphNode, GraphEdge } from '../modules/knowledge/graph-visualization'
+import EmptyState from '../components/EmptyState.vue'
 
 // 经略阁关系图谱：消费 knowledge-bridge（及其底层的 graph-visualization 成熟引擎）
 // 接上此前悬空的 useKnowledgeBridge(knowledge 侧) 孤儿链路。
@@ -73,9 +74,14 @@ const viewBox = computed(() => {
       <p class="kg-meta">节点 {{ display.nodes.length }} · 关系 {{ display.edges.length }}</p>
     </header>
 
-    <div v-if="display.nodes.length === 0" class="kg-empty">
-      还没有知识节点。去「知识塔」创建节点并建立关系，图谱会自动生长。
-    </div>
+    <EmptyState
+      v-if="display.nodes.length === 0"
+      icon="🕸"
+      title="还没有知识节点。"
+      hint="去「知识塔」创建节点并建立关系，图谱会自动生长。"
+      :glow="false"
+      cta-label=""
+    />
 
     <svg
       v-else
@@ -151,16 +157,7 @@ const viewBox = computed(() => {
   opacity: 0.6;
   font-size: 12px;
 }
-.kg-empty {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  opacity: 0.55;
-  padding: 40px;
-  line-height: 1.7;
-}
+/* ---- Empty（已迁共享 EmptyState，原 .kg-empty 死 CSS 删除） ---- */
 .kg-canvas {
   flex: 1;
   width: 100%;

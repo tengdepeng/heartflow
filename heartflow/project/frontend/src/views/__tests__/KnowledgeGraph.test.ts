@@ -23,7 +23,7 @@ vi.mock('../../modules/knowledge/knowledge-bridge', () => ({
 describe('KnowledgeGraph（经略阁关系图谱 · 上盘孤儿链路）', () => {
   it('渲染：消费 bridge 数据画出节点与关系边', () => {
     const wrapper = mount(KnowledgeGraph)
-    expect(wrapper.find('.kg-empty').exists()).toBe(false)
+    expect(wrapper.findComponent({ name: 'EmptyState' }).exists()).toBe(false)
     expect(wrapper.findAll('.kg-node').length).toBe(2)
     expect(wrapper.findAll('line').length).toBe(1)
   })
