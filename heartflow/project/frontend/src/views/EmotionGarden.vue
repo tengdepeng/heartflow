@@ -448,7 +448,7 @@
                 <span class="zf-dot" :style="{ background: EMOTION_FLOWERS[f.type].color }" />
               </div>
             </div>
-            <div v-else class="zone-empty">暂无花朵</div>
+            <EmptyState v-else icon="🌸" title="暂无花朵" :glow="false" cta-label="" />
           </div>
 
           <!-- 草甸区 -->
@@ -476,7 +476,7 @@
                 <span class="zf-dot" :style="{ background: EMOTION_FLOWERS[f.type].color }" />
               </div>
             </div>
-            <div v-else class="zone-empty">暂无花朵</div>
+            <EmptyState v-else icon="🌸" title="暂无花朵" :glow="false" cta-label="" />
           </div>
 
           <!-- 阴凉区 -->
@@ -504,7 +504,7 @@
                 <span class="zf-dot" :style="{ background: EMOTION_FLOWERS[f.type].color }" />
               </div>
             </div>
-            <div v-else class="zone-empty">暂无花朵</div>
+            <EmptyState v-else icon="🌸" title="暂无花朵" :glow="false" cta-label="" />
           </div>
         </div>
       </section>
@@ -2559,13 +2559,7 @@ function adjustParam(param: 'temperature' | 'humidity' | 'light', delta: number)
 }
 
 /* 区域空状态 */
-.zone-empty {
-  font-size: 11px;
-  color: rgba(var(--text-primary-rgb), 0.15);
-  text-align: center;
-  padding: 20px 0;
-  font-style: italic;
-}
+/* 已迁共享 EmptyState */
 
 /* ============================================================
    过渡动画
