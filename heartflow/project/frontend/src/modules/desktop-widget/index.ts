@@ -116,6 +116,8 @@ export interface SystemWidgetSnapshot {
   note: { text: string }
   /** 四象限概览（四象限卡用，与自律工坊同一任务池） */
   quadrant: { total: number; cols: { label: string; active: number }[] }
+  /** 日历热力图活跃度（42 日：6 周 × 7 天，周序在前；安卓热力图卡用，缺失时全 0） */
+  activityHeatmap: number[]
   updatedAt: number
 }
 

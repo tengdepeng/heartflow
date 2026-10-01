@@ -13,6 +13,7 @@ import { storage } from '../../engine/storage'
 import { useDesktopWidget } from './index'
 import { composeWidgetSnapshot } from './snapshot'
 import { useTaskManager, buildQuadrantBoard } from '../tasks'
+import { activityMarks, heatmapCells } from '../touchpoints/widget-calendar'
 import { invoke } from '@tauri-apps/api/core'
 
 /** 便签存储键（与 WidgetBox 原实现同键，迁移不改数据结构） */
@@ -56,6 +57,9 @@ export function pushWidgetSnapshotNow(throttled = false): void {
       note: readWidgetNote(),
       quadrant: buildQuadrantBoard(useTaskManager().tasks.value)
         .map(c => ({ label: c.label, active: c.stats.active })),
+      // 日历热力图：6 周 × 7 天 = 42 日活跃度（专注分钟 + 速记条数），周序在前，
+      // 与安卓 HeartflowHeatmapWidgetProvider 读 widget_data.json.activityHeatmap 一致。
+      activityHeatmap: heatmapCells(6, activityMarks()).map(c => c.count),
     }),
   )
   // 写完快照立即触发 Android 原生 widget 即时刷新（桌面/web 端无对应命令，静默容错）

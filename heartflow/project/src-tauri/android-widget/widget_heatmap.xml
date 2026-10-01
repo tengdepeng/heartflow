@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 日历热力图卡：标题 + 42 格（6 周 × 7 天，cell_0..cell_41，周序在前） -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/widget_bg">
+
+    <TextView
+        android:id="@+id/heat_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:textColor="#DBE3F7"
+        android:text="近 6 周活跃" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="7">
+            <View android:id="@+id/cell_0" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_1" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_2" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_3" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_4" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_5" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_6" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="7">
+            <View android:id="@+id/cell_7" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_8" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_9" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_10" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_11" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_12" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_13" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="7">
+            <View android:id="@+id/cell_14" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_15" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_16" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_17" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_18" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_19" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_20" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="7">
+            <View android:id="@+id/cell_21" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_22" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_23" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_24" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_25" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_26" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_27" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="7">
+            <View android:id="@+id/cell_28" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_29" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_30" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_31" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_32" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_33" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_34" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:weightSum="7">
+            <View android:id="@+id/cell_35" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_36" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_37" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_38" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_39" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_40" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+            <View android:id="@+id/cell_41" android:layout_width="0dp" android:layout_height="16dp" android:layout_weight="1" android:layout_margin="2dp" android:background="@drawable/widget_bg" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

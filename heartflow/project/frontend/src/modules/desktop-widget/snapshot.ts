@@ -52,6 +52,8 @@ function build(input: {
   note?: string
   /** 四象限概览（调用侧由 modules/tasks 的 quadrant-board 引擎提供） */
   quadrant?: { label: string; active: number }[]
+  /** 日历热力图活跃度（调用侧由 touchpoints/widget-calendar 计算，42 日计数） */
+  activityHeatmap?: number[]
 }): SystemWidgetSnapshot {
   const quote = quoteOfDay()
   const season = seasonOf()
@@ -76,6 +78,7 @@ function build(input: {
       total: (input.quadrant ?? []).reduce((s, c) => s + c.active, 0),
       cols: input.quadrant ?? [],
     },
+    activityHeatmap: input.activityHeatmap ?? [],
     updatedAt: Date.now(),
   }
 }
