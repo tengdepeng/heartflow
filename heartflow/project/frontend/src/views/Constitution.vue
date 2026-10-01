@@ -499,7 +499,7 @@
                 @click="removeExt(cat.key, w)"
               >×</button>
             </span>
-            <span v-if="extList[cat.key].length === 0" class="neutral-ext-empty">暂无本地词</span>
+            <EmptyState v-if="extList[cat.key].length === 0" icon="📝" title="暂无本地词" :glow="false" cta-label="" />
           </div>
           <form class="neutral-ext-add" @submit.prevent="addExt(cat.key)">
             <input
@@ -2424,12 +2424,7 @@ function onThresholdChange(e: Event): void {
   align-items: center;
 }
 
-.neutral-ext-empty {
-  font-size: 11px;
-  color: var(--text-secondary);
-  opacity: 0.7;
-  font-style: italic;
-}
+/* 已迁共享 EmptyState */
 
 .neutral-tag {
   display: inline-flex;
