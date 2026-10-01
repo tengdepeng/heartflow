@@ -152,7 +152,7 @@
                   <span class="ag-detail-link-reason">{{ l.reason }}</span>
                 </li>
               </ul>
-              <p v-if="!incidentLinks.length" class="ag-detail-empty">暂无关联（孤立节点）</p>
+              <EmptyState v-if="!incidentLinks.length" icon="🔗" title="暂无关联" hint="（孤立节点）" :glow="false" cta-label="" />
             </div>
           </aside>
         </transition>
@@ -747,10 +747,7 @@ onMounted(() => { /* 图数据在 setup 已计算；如需实时刷新可在此�
   line-height: 1.5;
   color: rgba(var(--text-primary), 0.7);
 }
-.ag-detail-empty {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.4);
-}
+/* 已迁共享 EmptyState */
 .ag-back-row {
   margin-top: 24px;
 }
