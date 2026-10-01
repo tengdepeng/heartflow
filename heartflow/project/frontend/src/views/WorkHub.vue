@@ -81,11 +81,15 @@
             </div>
           </div>
         </div>
-        <div v-else class="wh-empty">
-          <span class="wh-empty-icon">🦴</span>
-          <p class="wh-empty-title">还没有身体印记</p>
-          <p class="wh-empty-hint">记录工作给身体留下的痕迹，从颈、肩、腰开始</p>
-        </div>
+        <EmptyState
+          v-else
+          data-enter
+          icon="🦴"
+          title="还没有身体印记"
+          hint="记录工作给身体留下的痕迹，从颈、肩、腰开始"
+          :glow="false"
+          cta-label=""
+        />
         <!-- 添加工痕 -->
         <div class="add-row">
           <input v-model="markForm.part" placeholder="部位（颈/肩/腰…）" class="wh-input" />
@@ -136,11 +140,15 @@
             <button class="wh-del" @click="removeVal(v.id)">×</button>
           </div>
         </div>
-        <div v-else class="wh-empty">
-          <span class="wh-empty-icon">⚖️</span>
-          <p class="wh-empty-title">还没有工作价值记录</p>
-          <p class="wh-empty-hint">在这份工作中你获得了什么、失去了什么？</p>
-        </div>
+        <EmptyState
+          v-else
+          data-enter
+          icon="⚖️"
+          title="还没有工作价值记录"
+          hint="在这份工作中你获得了什么、失去了什么？"
+          :glow="false"
+          cta-label=""
+        />
         <!-- 添加劳酬 -->
         <div class="add-row">
           <input v-model="valForm.text" placeholder="这份工作让我学到了/失去了…" class="wh-input" style="flex:2" />
@@ -174,11 +182,15 @@
             </div>
           </div>
         </div>
-        <div v-else class="wh-empty">
-          <span class="wh-empty-icon">🏆</span>
-          <p class="wh-empty-title">还没有工作成果</p>
-          <p class="wh-empty-hint">完成的里程碑、项目、作品都可以记录在这里</p>
-        </div>
+        <EmptyState
+          v-else
+          data-enter
+          icon="🏆"
+          title="还没有工作成果"
+          hint="完成的里程碑、项目、作品都可以记录在这里"
+          :glow="false"
+          cta-label=""
+        />
         <!-- 添加成果 -->
         <div class="add-row">
           <input v-model="workForm.title" placeholder="成果名称" class="wh-input" />
@@ -212,11 +224,15 @@
             </div>
           </div>
         </div>
-        <div v-else class="wh-empty">
-          <span class="wh-empty-icon">🔗</span>
-          <p class="wh-empty-title">还没有职业关系</p>
-          <p class="wh-empty-hint">导师、同事、上级、客户——记录你的职业网络</p>
-        </div>
+        <EmptyState
+          v-else
+          data-enter
+          icon="🔗"
+          title="还没有职业关系"
+          hint="导师、同事、上级、客户——记录你的职业网络"
+          :glow="false"
+          cta-label=""
+        />
         <!-- 添加业脉 -->
         <div class="add-row">
           <input v-model="netForm.name" placeholder="姓名" class="wh-input" />
@@ -248,11 +264,15 @@
             </div>
           </div>
         </div>
-        <div v-else class="wh-empty">
-          <span class="wh-empty-icon">🎒</span>
-          <p class="wh-empty-title">还没有技能记录</p>
-          <p class="wh-empty-hint">记录你掌握的技能和工具，见证能力的成长</p>
-        </div>
+        <EmptyState
+          v-else
+          data-enter
+          icon="🎒"
+          title="还没有技能记录"
+          hint="记录你掌握的技能和工具，见证能力的成长"
+          :glow="false"
+          cta-label=""
+        />
         <!-- 添加行囊 -->
         <div class="add-row">
           <input v-model="skillForm.name" placeholder="技能/工具名" class="wh-input" />
@@ -284,11 +304,15 @@
             </div>
           </div>
         </div>
-        <div v-else class="wh-empty">
-          <span class="wh-empty-icon">☕</span>
-          <p class="wh-empty-title">还没有间歇记录</p>
-          <p class="wh-empty-hint">午休、茶歇、摸鱼、年假——工作间隙也是生活的一部分</p>
-        </div>
+        <EmptyState
+          v-else
+          data-enter
+          icon="☕"
+          title="还没有间歇记录"
+          hint="午休、茶歇、摸鱼、年假——工作间隙也是生活的一部分"
+          :glow="false"
+          cta-label=""
+        />
         <!-- 添加息壤 -->
         <div class="add-row">
           <input v-model="breakForm.text" placeholder="午休/茶歇/摸鱼/年假…" class="wh-input" />
@@ -312,6 +336,7 @@ import { ref, reactive, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useWorkHub } from '../modules/workhub'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const tab = ref('marks')
@@ -933,32 +958,5 @@ section h3 {
   .add-row .wh-select { width: 100%; }
 }
 
-/* ---- 空状态 ---- */
-.wh-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-  animation: fade-slide-up 0.4s ease-out;
-}
-.wh-empty-icon {
-  font-size: 28px;
-  opacity: 0.3;
-  margin-bottom: 12px;
-}
-.wh-empty-title {
-  font-size: 14px;
-  color: var(--text-dim);
-  margin: 0 0 6px;
-  font-weight: 500;
-}
-.wh-empty-hint {
-  font-size: 12px;
-  color: var(--text-faint);
-  margin: 0;
-  line-height: 1.5;
-  max-width: 240px;
-}
+/* ---- 空状态（已迁共享 EmptyState，原 .wh-empty/.wh-empty-icon/.wh-empty-title/.wh-empty-hint 死 CSS 删除） ---- */
 </style>
