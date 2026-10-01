@@ -263,12 +263,14 @@
           </div>
           <span class="rrc-mood">{{ entry.mood }}</span>
         </div>
-        <div v-if="recentBreaks.length === 0" class="rest-recent-empty">
-          <div class="rre-placeholder">
-            <span class="rre-icon">🌿</span>
-            <p class="rre-text">尚未记录休憩，试着在忙碌中给自己一个短暂的停顿。</p>
-          </div>
-        </div>
+        <EmptyState
+          v-if="recentBreaks.length === 0"
+          icon="🌿"
+          title="尚未记录休憩"
+          hint="试着在忙碌中给自己一个短暂的停顿。"
+          :glow="false"
+          cta-label=""
+        />
       </div>
     </section>
 
@@ -417,6 +419,7 @@ import RestQualityPanel from '../components/RestQualityPanel.vue'
 import RestArchivePanel from '../components/RestArchivePanel.vue'
 import RestAchievementTrendPanel from '../components/RestAchievementTrendPanel.vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 
 // ---- 标签导航 ----
 const activeTab = ref<'rest' | 'sleep' | 'ritual'>('rest')
@@ -1376,29 +1379,7 @@ const restTips: RestTip[] = [
   flex-shrink: 0;
 }
 
-.rest-recent-empty {
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.rre-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.rre-icon {
-  font-size: 36px;
-  opacity: 0.3;
-}
-
-.rre-text {
-  margin: 0;
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
+/* 已迁共享 EmptyState */
 
 /* ---- 休憩建议 ---- */
 .rest-tips {
