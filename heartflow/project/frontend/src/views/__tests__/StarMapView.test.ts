@@ -64,7 +64,7 @@ describe('StarMapView', () => {
   it('无知识节点时显示空态且不渲染 3D 节点', async () => {
     const wrapper = mount(StarMapView)
     await flushPromises()
-    expect(wrapper.find('.smv-empty').exists()).toBe(true)
+    expect(wrapper.findComponent({ name: 'EmptyState' }).exists()).toBe(true)
     expect(wrapper.find('.sm3d-node').exists()).toBe(false)
   })
 })

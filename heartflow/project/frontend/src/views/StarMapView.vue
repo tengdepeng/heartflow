@@ -12,9 +12,14 @@
             <p class="smv-detail-desc">{{ selected.desc || '（暂无描述）' }}</p>
           </aside>
         </template>
-        <p v-else class="smv-empty">
-          经略阁还没有知识节点。先去「语丝」或「经略阁」沉淀一些想法，星图会随之点亮。
-        </p>
+        <EmptyState
+          v-else
+          icon="🌟"
+          title="经略阁还没有知识节点。"
+          hint="先去「语丝」或「经略阁」沉淀一些想法，星图会随之点亮。"
+          :glow="false"
+          cta-label=""
+        />
       </main>
     </RoomLayout>
   </div>
@@ -23,6 +28,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import EmptyState from '../components/EmptyState.vue'
 import StarMap3D from '../components/knowledge/StarMap3D.vue'
 import { getNodes, getRelations } from '../modules/knowledge'
 import type { KnowledgeNode, KnowledgeCategory } from '../modules/knowledge/types'
@@ -107,14 +113,7 @@ onMounted(load)
   opacity: 0.82;
 }
 
-.smv-empty {
-  margin: auto;
-  max-width: 360px;
-  text-align: center;
-  font-size: 14px;
-  line-height: 1.7;
-  opacity: 0.6;
-}
+/* ---- Empty（已迁共享 EmptyState，原 .smv-empty 死 CSS 删除） ---- */
 
 /* 窄屏：详情列改为整行堆叠，避免 260px 固定列挤占星图场景 */
 @media (max-width: 640px) {
