@@ -202,7 +202,7 @@
               <button v-else class="wm-fav-btn active" @click.stop="toggleFavorite(item.id)" title="取消收藏">♥</button>
             </div>
           </div>
-          <div v-if="!group.items.length" class="empty-group">暂无词汇</div>
+          <EmptyState v-if="!group.items.length" icon="📖" title="暂无词汇" :glow="false" cta-label="" />
         </div>
       </div>
     </section>
@@ -1390,12 +1390,7 @@ section h3 {
 .wm-fav-btn.active {
   color: var(--accent);
 }
-.empty-group {
-  font-size: 12px;
-  color: rgba(var(--accent-rgb), 0.12);
-  padding: 12px 0;
-  text-align: center;
-}
+/* 已迁共享 EmptyState */
 
 /* === Entrance Animation === */
 @keyframes fade-slide-up {
