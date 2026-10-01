@@ -25,3 +25,11 @@ tauri-plugin-shell = "2"
 # 全局热键插件为桌面专用（移动端不支持该 API），仅非移动端拉取，避免 android/ios 编译失败
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 tauri-plugin-global-shortcut = "2"
+
+# 修复 Android 构建 E0107：schemars 0.8.22 依赖的 indexmap 1.9.3 其 build.rs 在 `std` feature
+# 未显式启用时只 emit `cfg(std)` 而非 `cfg(has_std)`，导致源码 `#[cfg(has_std)]` 的
+# `IndexMap<K,V,S=RandomState>`（带默认 S）不生效，android 交叉编译下 schemars 用
+# `indexmap::IndexMap<K,V>`（两参）报 E0107。此处 patch 到本地副本，build.rs 无条件 emit
+# `has_std`，宿主与 android 均安全（std 在两者均可用）。见 vendor/indexmap-1.9.3/build.rs。
+[patch.crates-io]
+indexmap = { path = "vendor/indexmap-1.9.3" }

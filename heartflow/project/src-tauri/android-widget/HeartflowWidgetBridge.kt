@@ -38,7 +38,7 @@ object WidgetBridge {
         var count = 0
         for (clazz in PROVIDERS) {
             val ids = mgr.getAppWidgetIds(ComponentName(context, clazz))
-            if (ids.isNullOrEmpty()) continue
+            if (ids.isEmpty()) continue
             val intent = Intent(context, clazz).apply {
                 action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
                 putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)

@@ -61,6 +61,6 @@ class HeartflowWidgetsPlugin(private val activity: Activity) : Plugin(activity) 
                 arr.put(obj)
             }
         }
-        invoke.resolve(arr)
+        invoke.resolveObject(arr)
     }
 }
