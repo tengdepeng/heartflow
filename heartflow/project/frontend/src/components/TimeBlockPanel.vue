@@ -167,7 +167,7 @@
     <!-- 周视图（周模式） -->
     <div v-else class="tbp-week-wrap">
       <div class="tbp-week-head">
-        <span>周视图 · 拖拽块改起止 · 跨列改日期 · 底部手柄拉时长</span>
+        <span>周视图 · 拖拽块改起止 · 跨列改日期 · 底部手柄拉时长 · 空白框选新建</span>
         <span class="tbp-coverage">本周已排 {{ Math.round(weekScheduledMin / 60 * 10) / 10 }}h · 覆盖率 {{ weekCoveragePct }}%</span>
         <span v-if="overlapCount > 0" class="tbp-overlap-note">⚠ {{ overlapCount }} 个时间块重叠</span>
         <button v-if="overlapCount > 0" type="button" class="tbp-btn tbp-btn--auto" @click="runResolveConflicts">🧹 消除冲突</button>
@@ -189,8 +189,8 @@
         </button>
       </div>
 
-      <!-- 周网格：7 列，块可拖动改起止 / 跨列改日期 / 底部手柄拉时长 -->
-      <div class="tbp-week-grid" ref="weekGridEl" :style="{ height: timelineHeight + 'px' }">
+      <!-- 周网格：7 列，块可拖动改起止 / 跨列改日期 / 底部手柄拉时长；空白处拖拽框选新建（INCR-422） -->
+      <div class="tbp-week-grid" ref="weekGridEl" :style="{ height: timelineHeight + 'px' }" @pointerdown="onWeekGridPointerDown">
         <div
           v-for="day in weekDays"
           :key="day"
@@ -233,6 +233,16 @@
             </div>
           </div>
 
+          <div
+            v-if="dragPreview && dragPreview.id === 'new' && dragPreview.date === day"
+            class="tbp-block tbp-block--week tbp-block--create"
+            :style="blockStyle(dragPreview)"
+          >
+            <div class="tbp-block-bar" :style="{ background: WORK_CATEGORY_META[mbCategory].color }"></div>
+            <div class="tbp-block-body">
+              <span class="tbp-block-title">新块</span>
+            </div>
+          </div>
           <p v-if="dayBlocksInWeek(day).length === 0" class="tbp-week-col-empty">·</p>
         </div>
       </div>
@@ -511,6 +521,39 @@ function onTimelinePointerDown(e: PointerEvent): void {
     colWidth: undefined,
   }
   dragPreview.value = { id: 'new', startMin, durationMin: 0, date: activeDate.value }
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+
+/**
+ * 周网格空白处拖拽框选新建时间块（仅周模式，INCR-422）。
+ * 按指针 X 落列确定目标日、Y 换算起始分钟；复用 create 拖拽分支（resolveFreeStart 避让）。
+ * 块自身的 onPointerdown 已 stopPropagation，不会冒泡触发此处。
+ */
+function onWeekGridPointerDown(e: PointerEvent): void {
+  if (viewMode.value !== 'week') return
+  if (e.button !== 0) return
+  e.preventDefault()
+  const el = weekGridEl.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const colWidth = rect.width / 7
+  const idx = Math.max(0, Math.min(6, Math.floor((e.clientX - rect.left) / colWidth)))
+  const date = weekDays.value[idx] ?? activeDate.value
+  const startMin = snap((e.clientY - rect.top) / PX_PER_MIN + DAY_START)
+  drag.value = {
+    id: 'new',
+    mode: 'create',
+    pointerId: e.pointerId,
+    startY: e.clientY,
+    startX: e.clientX,
+    origStartMin: startMin,
+    origDuration: 0,
+    origDate: date,
+    gridRect: undefined,
+    colWidth: undefined,
+  }
+  dragPreview.value = { id: 'new', startMin, durationMin: 0, date }
   window.addEventListener('pointermove', onPointerMove)
   window.addEventListener('pointerup', onPointerUp)
 }

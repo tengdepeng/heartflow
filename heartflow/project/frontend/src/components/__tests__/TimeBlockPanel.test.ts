@@ -698,3 +698,70 @@ describe('TimeBlockPanel 冲突智能避让/重排（INCR-421）', () => {
     expect(wrapper.find('.tbp-auto-note').text()).toContain('已紧凑重排')
   })
 })
+
+describe('TimeBlockPanel 周视图拖拽新建（INCR-422）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  it('周模式：网格空白处拖拽框选新建块落到对应列（经 addBlock 落库）', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = []
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click') // 周
+    await wrapper.vm.$nextTick()
+    const gridEl = wrapper.find('.tbp-week-grid').element as HTMLElement
+    gridEl.getBoundingClientRect = () => ({
+      left: 0, top: 0, width: 700, height: 672, right: 700, bottom: 672, x: 0, y: 0, toJSON() {},
+    } as DOMRect)
+    // 第 4 列（index 3）：clientX = 3*100 + 50 = 350
+    await wrapper.find('.tbp-week-grid').trigger('pointerdown', { button: 0, pointerId: 4, clientX: 350, clientY: 100 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 350, clientY: 170, pointerId: 4 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 350, clientY: 170, pointerId: 4 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])
+    expect(stored.length).toBe(1)
+    expect(stored[0].date).toBe(week[3]) // 落到第 4 列对应日
+    expect(stored[0].startMin).toBe(565) // snap(100/0.7 + 420) = 565
+    expect(stored[0].durationMin).toBe(100)
+    expect(stored[0].title).toBe('新块')
+  })
+
+  it('周模式：网格新建块与他块重叠 → 自动避让推到最近空隙', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'f', date: week[3], startMin: 565, durationMin: 60, category: 'project', title: '固定块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click') // 周
+    await wrapper.vm.$nextTick()
+    const gridEl = wrapper.find('.tbp-week-grid').element as HTMLElement
+    gridEl.getBoundingClientRect = () => ({
+      left: 0, top: 0, width: 700, height: 672, right: 700, bottom: 672, x: 0, y: 0, toJSON() {},
+    } as DOMRect)
+    // 第 4 列、clientY=100（startMin≈565，与 f[565,625] 重叠）→ 应避让到 625
+    await wrapper.find('.tbp-week-grid').trigger('pointerdown', { button: 0, pointerId: 5, clientX: 350, clientY: 100 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 350, clientY: 170, pointerId: 5 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 350, clientY: 170, pointerId: 5 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])
+    expect(stored.length).toBe(2) // 原固定块 f + 新建块
+    const created = stored.find(b => b.title === '新块')!
+    expect(created.date).toBe(week[3])
+    expect(created.startMin).toBe(625) // 避让到 f 之后
+  })
+})
