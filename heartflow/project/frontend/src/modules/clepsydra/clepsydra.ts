@@ -208,7 +208,9 @@ export function genId(): string {
 // ------------------------------------------------------------
 
 // 模块级单例：让「时间块完成联动」写入的记录能即时反映到工作光仪（ClepsydraPanel）。
-// 每次 useClepsydra() 调用都从存储重新载入，避免跨组件内存漂移，并兼容既有测试「先置 mock 再挂载」语义。
+// useClepsydra() 仅当存储内容变化时才重载（reloadIfChanged），既避免跨组件内存漂移、
+// 兼容测试「先置 mock 再挂载」，又消除在「计算属性里读 useClepsydra().records」造成的
+// 「读触发写 → computed 重算 → 再写」自触发递归。
 const records = ref<WorkRecord[]>(load())
 
 function load(): WorkRecord[] {
@@ -223,14 +225,27 @@ function save(): void {
   storage.setKV(STORAGE_KEY, records.value)
 }
 
+/**
+ * 仅当存储内容与当前内存态不一致时才重载并重新赋值 records.value。
+ * 避免 useClepsydra() 的「每次调用无条件 load() 重赋值新数组」在计算属性里
+ * 造成「读触发写 → computed 重算 → 再写」的自触发递归；同时保留
+ * 「存储变化即时反映到内存单例」（兼容测试「先置 mock 再挂载」与跨组件写入）。
+ */
+function reloadIfChanged(): void {
+  const fresh = load()
+  if (JSON.stringify(fresh) !== JSON.stringify(records.value)) {
+    records.value = fresh
+  }
+}
+
 /** 重置内存态（测试用：清 mock 后重新载入空态）。 */
 export function resetClepsydra(): void {
   records.value = load()
 }
 
 export function useClepsydra() {
-  // 重新载入，保证多组件共享同一份响应式记录且即时反映存储变更
-  records.value = load()
+  // 仅当存储内容变化时才重载，避免在计算属性里自触发递归（见 reloadIfChanged）
+  reloadIfChanged()
 
   /** 开始一段工作计时（微型光仪 start） */
   function startTimer(meta: { category?: WorkCategory; note?: string; intensity?: number } = {}): WorkRecord {

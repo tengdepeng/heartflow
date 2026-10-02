@@ -421,6 +421,97 @@ export function instantiateTemplate(
   return { tasks, blocks }
 }
 
+/**
+ * 计划 vs 实际报表的一行（按分类）。
+ * 计划 = 当日/当周落在时间轴上的排程时长；实际 = 同日更漏记录（手动专注 + 块完成联动）真实时长。
+ * 偏差 deltaMin = 实际 − 计划：负=计划未执行（滑期）、正=超额投入、零=匹配。
+ */
+export interface PlanActualCategoryRow {
+  category: WorkCategory
+  /** 计划分钟 */
+  plannedMin: number
+  /** 实际分钟 */
+  actualMin: number
+  /** 偏差分钟（实际 − 计划） */
+  deltaMin: number
+}
+
+/** 计划 vs 实际报表（日 / 周聚合通用） */
+export interface PlanActualReport {
+  /** 计划总分钟 */
+  plannedMin: number
+  /** 实际总分钟 */
+  actualMin: number
+  /** 偏差总分钟（实际 − 计划） */
+  deltaMin: number
+  /** 已完成块数（标记 done 的排程） */
+  doneBlocks: number
+  /** 排程总块数 */
+  totalBlocks: number
+  /** 完成率 0-1（done / total；无排程为 0） */
+  completionRate: number
+  /** 各分类对照（仅含计划或实际非零的分类） */
+  byCategory: PlanActualCategoryRow[]
+}
+
+/**
+ * 计算计划 vs 实际报表（纯函数，不修改入参）。
+ * inScope 决定统计窗口：日模式传 `d => d === date`；周模式传 `d => daysSet.has(d)`。
+ * - 计划：inScope 内的时间块，按 category 累计 durationMin。
+ * - 实际：inScope 内的更漏记录（按 startedAt 取本地日），按 category 累计 durationSeconds。
+ *   块完成联动写入的 'auto' 记录时长等于对应块计划，属「已执行」计入实际；
+ *   手动专注会话则带来真实偏差。
+ */
+export function computePlanActual(
+  blocks: TimeBlock[],
+  records: WorkRecord[],
+  inScope: (date: string) => boolean,
+): PlanActualReport {
+  const zeroCat = (): Record<WorkCategory, number> => ({ project: 0, daily: 0, study: 0, create: 0, custom: 0 })
+  const plannedByCat = zeroCat()
+  let plannedSec = 0
+  let doneBlocks = 0
+  let totalBlocks = 0
+  for (const b of blocks) {
+    if (!inScope(b.date)) continue
+    totalBlocks++
+    if (b.done) doneBlocks++
+    const sec = b.durationMin * 60
+    plannedByCat[b.category] += sec
+    plannedSec += sec
+  }
+
+  const actualByCat = zeroCat()
+  let actualSec = 0
+  for (const r of records) {
+    const d = localDateKey(new Date(r.startedAt))
+    if (!inScope(d)) continue
+    actualByCat[r.category] += r.durationSeconds
+    actualSec += r.durationSeconds
+  }
+
+  const order: WorkCategory[] = ['project', 'daily', 'study', 'create', 'custom']
+  const byCategory: PlanActualCategoryRow[] = []
+  for (const c of order) {
+    if (plannedByCat[c] === 0 && actualByCat[c] === 0) continue
+    const pm = Math.round(plannedByCat[c] / 60)
+    const am = Math.round(actualByCat[c] / 60)
+    byCategory.push({ category: c, plannedMin: pm, actualMin: am, deltaMin: am - pm })
+  }
+
+  const plannedMin = Math.round(plannedSec / 60)
+  const actualMin = Math.round(actualSec / 60)
+  return {
+    plannedMin,
+    actualMin,
+    deltaMin: actualMin - plannedMin,
+    doneBlocks,
+    totalBlocks,
+    completionRate: totalBlocks > 0 ? doneBlocks / totalBlocks : 0,
+    byCategory,
+  }
+}
+
 // ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------
@@ -677,6 +768,20 @@ export function useTimeBlock() {
     saveTemplates()
   }
 
+  // ---- 计划 vs 实际报表（INCR-419） ----
+  /** 某日的计划 vs 实际（计划=时间块排程，实际=更漏记录） */
+  function planActualForDate(date: string): PlanActualReport {
+    const recs = useClepsydra().records.value
+    return computePlanActual(blocks.value, recs, d => d === date)
+  }
+
+  /** 整周（days 为 7 个 localDateKey）的计划 vs 实际聚合 */
+  function planActualForWeek(days: string[]): PlanActualReport {
+    const set = new Set(days)
+    const recs = useClepsydra().records.value
+    return computePlanActual(blocks.value, recs, d => set.has(d))
+  }
+
   return {
     tasks: computed(() => tasks.value),
     blocks: computed(() => blocks.value),
@@ -699,6 +804,8 @@ export function useTimeBlock() {
     saveTemplateFromDate,
     applyTemplate,
     removeTemplate,
+    planActualForDate,
+    planActualForWeek,
     localDateKey,
     todayKey,
   }

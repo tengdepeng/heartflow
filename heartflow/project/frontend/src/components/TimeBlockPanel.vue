@@ -236,6 +236,41 @@
       </div>
       <p v-if="mbError" class="tbp-form-error">{{ mbError }}</p>
     </div>
+
+    <!-- 计划 vs 实际 复盘报表（INCR-419） -->
+    <div class="tbp-report">
+      <div class="tbp-report-head">
+        <span>📊 计划 vs 实际</span>
+        <span class="tbp-report-scope">{{ viewMode === 'week' ? '本周' : '今日' }}</span>
+      </div>
+      <div class="tbp-report-cards">
+        <div class="tbp-report-card">
+          <span class="tbp-report-card-val">{{ planActual.plannedMin }}′</span>
+          <span class="tbp-report-card-label">计划</span>
+        </div>
+        <div class="tbp-report-card">
+          <span class="tbp-report-card-val">{{ planActual.actualMin }}′</span>
+          <span class="tbp-report-card-label">实际</span>
+        </div>
+        <div class="tbp-report-card">
+          <span class="tbp-report-card-val" :class="deltaClass()">{{ signedDelta }}</span>
+          <span class="tbp-report-card-label">偏差</span>
+        </div>
+        <div class="tbp-report-card">
+          <span class="tbp-report-card-val">{{ Math.round(planActual.completionRate * 100) }}%</span>
+          <span class="tbp-report-card-label">完成率</span>
+        </div>
+      </div>
+      <div class="tbp-report-cats" v-if="planActual.byCategory.length">
+        <div v-for="row in planActual.byCategory" :key="row.category" class="tbp-report-cat">
+          <span class="tbp-report-cat-name">{{ WORK_CATEGORY_META[row.category].icon }} {{ WORK_CATEGORY_META[row.category].label }}</span>
+          <span class="tbp-report-cat-planned">{{ row.plannedMin }}′</span>
+          <span class="tbp-report-cat-actual">{{ row.actualMin }}′</span>
+          <span class="tbp-report-cat-delta" :class="deltaRowClass(row)">{{ signed(row.deltaMin) }}</span>
+        </div>
+      </div>
+      <p v-else class="tbp-empty">还没有排程可对照。先规划时间块，之后在这里看计划与实际的偏差。</p>
+    </div>
   </section>
 </template>
 
@@ -252,6 +287,8 @@ import {
   detectOverlapIds,
   type WorkCategory,
   type TimeBlock,
+  type PlanActualReport,
+  type PlanActualCategoryRow,
 } from '../modules/clepsydra'
 
 const DAY_START = 7 * 60
@@ -408,6 +445,28 @@ const coverage = computed(() => Math.min(1, scheduledMin.value / WINDOW_MIN))
 // ---- 重叠冲突检测（跨天不重叠，全量检测即可服务日 / 周两种视图）----
 const overlapIds = computed(() => detectOverlapIds(tb.blocks.value))
 const overlapCount = computed(() => overlapIds.value.size)
+
+// ---- 计划 vs 实际复盘报表（INCR-419，聚合日 / 周）----
+const planActual = computed<PlanActualReport>(() =>
+  viewMode.value === 'week' ? tb.planActualForWeek(weekDays.value) : tb.planActualForDate(activeDate.value),
+)
+function signed(min: number): string {
+  if (min > 0) return `+${min}′`
+  if (min < 0) return `${min}′`
+  return `0′`
+}
+const signedDelta = computed(() => signed(planActual.value.deltaMin))
+function deltaClass(): string {
+  const d = planActual.value.deltaMin
+  if (d > 0) return 'tbp-report-val--over'
+  if (d < 0) return 'tbp-report-val--under'
+  return 'tbp-report-val--even'
+}
+function deltaRowClass(row: PlanActualCategoryRow): string {
+  if (row.deltaMin > 0) return 'tbp-report-cat-delta--over'
+  if (row.deltaMin < 0) return 'tbp-report-cat-delta--under'
+  return 'tbp-report-cat-delta--even'
+}
 
 const dateLabel = computed(() => {
   const d = new Date(activeDate.value + 'T00:00:00')
@@ -668,6 +727,26 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 .tbp-manual-head { font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
 .tbp-manual-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .tbp-form-error { font-size: 11px; color: #c46a5a; }
+
+.tbp-report { display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(var(--accent-rgb), 0.12); }
+.tbp-report-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-primary); letter-spacing: 1px; }
+.tbp-report-scope { font-size: 11px; color: var(--text-secondary); }
+.tbp-report-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.tbp-report-card { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; border-radius: 9px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); }
+.tbp-report-card-val { font-size: 16px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.tbp-report-card-label { font-size: 10px; color: var(--text-secondary); letter-spacing: 1px; }
+.tbp-report-val--over { color: #8fc99a; }
+.tbp-report-val--under { color: #c46a5a; }
+.tbp-report-val--even { color: var(--text-secondary); }
+.tbp-report-cats { display: flex; flex-direction: column; gap: 4px; }
+.tbp-report-cat { display: grid; grid-template-columns: 1fr auto auto auto; align-items: center; gap: 10px; padding: 6px 8px; border-radius: 8px; background: rgba(255, 255, 255, 0.02); }
+.tbp-report-cat-name { font-size: 12px; color: var(--text-primary); }
+.tbp-report-cat-planned { font-size: 11px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tbp-report-cat-actual { font-size: 11px; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.tbp-report-cat-delta { font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.tbp-report-cat-delta--over { color: #8fc99a; }
+.tbp-report-cat-delta--under { color: #c46a5a; }
+.tbp-report-cat-delta--even { color: var(--text-secondary); }
 
 .tbp-templates { display: flex; flex-direction: column; gap: 8px; }
 .tbp-templates-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }

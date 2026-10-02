@@ -70,6 +70,7 @@ export {
   localDateKey,
   todayKey,
   blockToRecordInput,
+  computePlanActual,
   useTimeBlock,
 } from './time-block'
 export type {
@@ -78,4 +79,6 @@ export type {
   Interval,
   AutoScheduleOptions,
   BlockTemplate,
+  PlanActualReport,
+  PlanActualCategoryRow,
 } from './time-block'

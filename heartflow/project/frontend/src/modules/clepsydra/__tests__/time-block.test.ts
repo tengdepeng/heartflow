@@ -3,6 +3,7 @@
 // ============================================================
 
 import { describe, it, expect } from 'vitest'
+import type { WorkRecord } from '../clepsydra'
 import {
   minutesToLabel,
   labelToMinutes,
@@ -22,6 +23,7 @@ import {
   detectOverlapIds,
   buildTemplate,
   instantiateTemplate,
+  computePlanActual,
   type PlannedTask,
   type TimeBlock,
   type BlockTemplate,
@@ -364,5 +366,111 @@ describe('buildTemplate / instantiateTemplate（INCR-418 模板）', () => {
     const before = JSON.stringify(tpl)
     instantiateTemplate(tpl, '2026-10-09')
     expect(JSON.stringify(tpl)).toBe(before)
+  })
+})
+
+describe('computePlanActual（INCR-419 计划vs实际）', () => {
+  const date = '2026-10-02'
+
+  function makeRecord(
+    partial: Partial<WorkRecord> & { startedAt: string; durationSeconds: number; category: WorkRecord['category'] },
+  ): WorkRecord {
+    return {
+      id: partial.id ?? 'r-' + Math.random().toString(36).slice(2, 7),
+      startedAt: partial.startedAt,
+      endedAt: partial.endedAt ?? null,
+      durationSeconds: partial.durationSeconds,
+      category: partial.category,
+      sourceType: partial.sourceType ?? 'manual',
+      sourceAnchorId: partial.sourceAnchorId,
+      intensity: partial.intensity ?? 0.5,
+      note: partial.note ?? '',
+      createdAt: partial.createdAt ?? partial.startedAt,
+      zone: partial.zone,
+    }
+  }
+
+  it('仅有计划无记录：实际为 0、偏差为负、完成率 0', () => {
+    const blocks = [makeBlock({ id: 'b1', date, startMin: 420, durationMin: 60, category: 'project' })]
+    const rep = computePlanActual(blocks, [], d => d === date)
+    expect(rep.plannedMin).toBe(60)
+    expect(rep.actualMin).toBe(0)
+    expect(rep.deltaMin).toBe(-60)
+    expect(rep.totalBlocks).toBe(1)
+    expect(rep.doneBlocks).toBe(0)
+    expect(rep.completionRate).toBe(0)
+    expect(rep.byCategory).toHaveLength(1)
+    expect(rep.byCategory[0]).toEqual({ category: 'project', plannedMin: 60, actualMin: 0, deltaMin: -60 })
+  })
+
+  it('完成块联动的 auto 记录时长等于计划 → 该分类偏差 0、完成率 100%', () => {
+    const blocks = [makeBlock({ id: 'b1', date, startMin: 420, durationMin: 60, category: 'project', done: true })]
+    const records = [
+      makeRecord({ id: 'ra', startedAt: date + 'T09:00:00', durationSeconds: 3600, category: 'project', sourceType: 'auto', sourceAnchorId: 'b1' }),
+    ]
+    const rep = computePlanActual(blocks, records, d => d === date)
+    const row = rep.byCategory.find(r => r.category === 'project')!
+    expect(row.plannedMin).toBe(60)
+    expect(row.actualMin).toBe(60)
+    expect(row.deltaMin).toBe(0)
+    expect(rep.doneBlocks).toBe(1)
+    expect(rep.completionRate).toBe(1)
+  })
+
+  it('同分类额外手动记录 → 实际超出计划、偏差为正', () => {
+    const blocks = [makeBlock({ id: 'b1', date, startMin: 420, durationMin: 60, category: 'study' })]
+    const records = [
+      makeRecord({ id: 'r1', startedAt: date + 'T10:00:00', durationSeconds: 1800, category: 'study' }),
+      makeRecord({ id: 'r2', startedAt: date + 'T14:00:00', durationSeconds: 3600, category: 'study' }),
+    ]
+    const rep = computePlanActual(blocks, records, d => d === date)
+    const row = rep.byCategory.find(r => r.category === 'study')!
+    expect(row.plannedMin).toBe(60)
+    expect(row.actualMin).toBe(90)
+    expect(row.deltaMin).toBe(30)
+    expect(rep.deltaMin).toBe(30)
+  })
+
+  it('窗口按 date 过滤：其他日期的块与记录不计入', () => {
+    const blocks = [
+      makeBlock({ id: 'in', date, startMin: 420, durationMin: 60, category: 'project' }),
+      makeBlock({ id: 'out', date: '2026-10-03', startMin: 420, durationMin: 120, category: 'project' }),
+    ]
+    const records = [
+      makeRecord({ id: 'rin', startedAt: date + 'T09:00:00', durationSeconds: 3600, category: 'project' }),
+      makeRecord({ id: 'rout', startedAt: '2026-10-03T09:00:00', durationSeconds: 3600, category: 'project' }),
+    ]
+    const rep = computePlanActual(blocks, records, d => d === date)
+    expect(rep.plannedMin).toBe(60)
+    expect(rep.actualMin).toBe(60)
+    expect(rep.totalBlocks).toBe(1)
+  })
+
+  it('周窗口：按 days 集合聚合多日，周外忽略', () => {
+    const days = ['2026-10-01', '2026-10-02', '2026-10-03']
+    const blocks = [
+      makeBlock({ id: 'b1', date: '2026-10-02', startMin: 420, durationMin: 60, category: 'project' }),
+      makeBlock({ id: 'b2', date: '2026-10-03', startMin: 420, durationMin: 30, category: 'daily' }),
+      makeBlock({ id: 'b3', date: '2026-10-09', startMin: 420, durationMin: 999, category: 'study' }),
+    ]
+    const records = [
+      makeRecord({ id: 'r1', startedAt: '2026-10-02T09:00:00', durationSeconds: 3600, category: 'project' }),
+      makeRecord({ id: 'r2', startedAt: '2026-10-04T09:00:00', durationSeconds: 3600, category: 'daily' }),
+    ]
+    const set = new Set(days)
+    const rep = computePlanActual(blocks, records, d => set.has(d))
+    expect(rep.plannedMin).toBe(90) // 60 + 30
+    expect(rep.actualMin).toBe(60) // 仅 10-02 的 project
+    expect(rep.totalBlocks).toBe(2)
+  })
+
+  it('不修改入参', () => {
+    const blocks = [makeBlock({ id: 'b1', date, startMin: 420, durationMin: 60, category: 'project' })]
+    const records = [makeRecord({ id: 'r1', startedAt: date + 'T09:00:00', durationSeconds: 3600, category: 'project' })]
+    const beforeB = JSON.stringify(blocks)
+    const beforeR = JSON.stringify(records)
+    computePlanActual(blocks, records, d => d === date)
+    expect(JSON.stringify(blocks)).toBe(beforeB)
+    expect(JSON.stringify(records)).toBe(beforeR)
   })
 })

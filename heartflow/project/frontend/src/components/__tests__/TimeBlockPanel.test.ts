@@ -424,3 +424,70 @@ describe('TimeBlockPanel 时间块模板（INCR-418）', () => {
     expect((mockStore['hf:clepsydra_templates'] as any[]).length).toBe(0)
   })
 })
+
+describe('TimeBlockPanel 计划vs实际报表（INCR-419）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  it('日模式：渲染计划/实际/完成率卡片 + 分类对照行', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'b1', date: today, startMin: 420, durationMin: 60, category: 'project', title: '块A', taskId: null, done: false },
+      { id: 'b2', date: today, startMin: 540, durationMin: 30, category: 'study', title: '块B', taskId: null, done: true },
+    ]
+    // 块B 完成联动的 auto 记录（30 分钟 == 计划 30）
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'r1', startedAt: today + 'T09:30:00', endedAt: today + 'T10:00:00', durationSeconds: 1800, category: 'study', sourceType: 'auto', sourceAnchorId: 'b2', intensity: 0.5, note: '时间块·块B', createdAt: today + 'T09:30:00' },
+    ]
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.tbp-report').exists()).toBe(true)
+    const cards = wrapper.findAll('.tbp-report-card-val')
+    expect(cards).toHaveLength(4) // 计划 / 实际 / 偏差 / 完成率
+    expect(cards[0].text()).toContain('90′') // 计划 60+30
+    expect(cards[1].text()).toContain('30′') // 实际仅 study 的 30
+    expect(cards[3].text()).toContain('50%') // 完成率 1/2
+    // 分类对照：project(计划60/实际0) + study(计划30/实际30)
+    const cats = wrapper.findAll('.tbp-report-cat')
+    expect(cats).toHaveLength(2)
+  })
+
+  it('日模式：完成块联动 auto 记录时长＝计划 → 偏差 0、完成率 100%', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'b1', date: today, startMin: 420, durationMin: 60, category: 'project', title: '块A', taskId: null, done: true },
+    ]
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'r1', startedAt: today + 'T07:00:00', endedAt: today + 'T08:00:00', durationSeconds: 3600, category: 'project', sourceType: 'auto', sourceAnchorId: 'b1', intensity: 0.7, note: '时间块·块A', createdAt: today + 'T07:00:00' },
+    ]
+    const wrapper = await mountPanel()
+    const cards = wrapper.findAll('.tbp-report-card-val')
+    expect(cards[0].text()).toContain('60′') // 计划
+    expect(cards[1].text()).toContain('60′') // 实际
+    expect(cards[2].text()).toContain('0′') // 偏差
+    expect(cards[3].text()).toContain('100%') // 完成率
+  })
+
+  it('周模式：整周聚合（计划跨多日、实际仅周一有记录）', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'b1', date: week[0], startMin: 420, durationMin: 60, category: 'project', title: '周一块', taskId: null, done: false },
+      { id: 'b2', date: week[2], startMin: 420, durationMin: 45, category: 'daily', title: '周三块', taskId: null, done: false },
+    ]
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'r1', startedAt: week[0] + 'T09:00:00', endedAt: week[0] + 'T10:00:00', durationSeconds: 3600, category: 'project', sourceType: 'manual', intensity: 0.7, note: '', createdAt: week[0] + 'T09:00:00' },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click') // 周
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tbp-report-scope').text()).toContain('本周')
+    const cards = wrapper.findAll('.tbp-report-card-val')
+    expect(cards[0].text()).toContain('105′') // 计划 60+45
+    expect(cards[1].text()).toContain('60′') // 实际仅周一 project 60
+    expect(cards[3].text()).toContain('0%') // 完成率 0
+  })
+})
