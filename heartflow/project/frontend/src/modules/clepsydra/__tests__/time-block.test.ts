@@ -19,6 +19,7 @@ import {
   weekCoverage,
   blocksForWeek,
   WEEK_START_DOW,
+  detectOverlapIds,
   type PlannedTask,
   type TimeBlock,
 } from '../time-block'
@@ -245,5 +246,66 @@ describe('周视图纯函数', () => {
     // 全填满应封顶 1
     const full = days.map((d, i) => makeBlock({ id: 'f' + i, date: d, startMin: 420, durationMin: 960 }))
     expect(weekCoverage(full, days, 420, 1380)).toBe(1)
+  })
+})
+
+describe('detectOverlapIds', () => {
+  const date = '2026-10-02'
+
+  it('无重叠返回空集合', () => {
+    const blocks = [
+      makeBlock({ id: 'a', startMin: 420, durationMin: 60, date }),
+      makeBlock({ id: 'b', startMin: 540, durationMin: 60, date }),
+    ]
+    expect(detectOverlapIds(blocks, date).size).toBe(0)
+  })
+
+  it('相邻（端点相接）不算重叠', () => {
+    const blocks = [
+      makeBlock({ id: 'a', startMin: 420, durationMin: 60, date }), // 420–480
+      makeBlock({ id: 'b', startMin: 480, durationMin: 60, date }), // 480–540 相邻
+    ]
+    expect(detectOverlapIds(blocks, date).size).toBe(0)
+  })
+
+  it('严格相交标记双方 id', () => {
+    const blocks = [
+      makeBlock({ id: 'a', startMin: 420, durationMin: 120, date }), // 420–540
+      makeBlock({ id: 'b', startMin: 480, durationMin: 60, date }), // 480–540 重叠
+    ]
+    const ids = detectOverlapIds(blocks, date)
+    expect(ids.size).toBe(2)
+    expect(ids.has('a')).toBe(true)
+    expect(ids.has('b')).toBe(true)
+  })
+
+  it('链式重叠标记所有参与方', () => {
+    const blocks = [
+      makeBlock({ id: 'a', startMin: 420, durationMin: 60, date }), // 420–480
+      makeBlock({ id: 'b', startMin: 450, durationMin: 60, date }), // 450–510 与 a、c 重叠
+      makeBlock({ id: 'c', startMin: 500, durationMin: 60, date }), // 500–560 与 b 重叠，不与 a
+    ]
+    const ids = detectOverlapIds(blocks, date)
+    expect(ids.has('a')).toBe(true)
+    expect(ids.has('b')).toBe(true)
+    expect(ids.has('c')).toBe(true)
+  })
+
+  it('跨天不重叠（全量检测时不同 date 互不干扰）', () => {
+    const blocks = [
+      makeBlock({ id: 'a', startMin: 420, durationMin: 60, date: '2026-10-02' }),
+      makeBlock({ id: 'b', startMin: 420, durationMin: 60, date: '2026-10-03' }),
+    ]
+    expect(detectOverlapIds(blocks).size).toBe(0)
+  })
+
+  it('不修改入参', () => {
+    const blocks = [
+      makeBlock({ id: 'a', startMin: 420, durationMin: 120, date }),
+      makeBlock({ id: 'b', startMin: 480, durationMin: 60, date }),
+    ]
+    const before = JSON.stringify(blocks)
+    detectOverlapIds(blocks, date)
+    expect(JSON.stringify(blocks)).toBe(before)
   })
 })

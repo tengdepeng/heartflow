@@ -5,7 +5,7 @@
 // ============================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { weekDaysOf } from '../../modules/clepsydra'
+import { weekDaysOf, localDateKey } from '../../modules/clepsydra'
 
 const mockStore: Record<string, any> = {}
 
@@ -272,5 +272,66 @@ describe('TimeBlockPanel 周视图（INCR-416）', () => {
     // 60 + (70px / 0.7) = 160，snap 到 5
     expect(stored.durationMin).toBe(160)
     expect(stored.startMin).toBe(420) // 起点不变
+  })
+})
+
+describe('TimeBlockPanel 重叠冲突检测（INCR-417）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+  })
+
+  it('日模式：两个重叠块都标 --overlap 且头部提示出现', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'o1', date: today, startMin: 420, durationMin: 120, category: 'project', title: '块A', taskId: null, done: false },
+      { id: 'o2', date: today, startMin: 480, durationMin: 60, category: 'study', title: '块B', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const blocks = wrapper.findAll('.tbp-block')
+    expect(blocks.length).toBe(2)
+    expect(blocks[0].classes()).toContain('tbp-block--overlap')
+    expect(blocks[1].classes()).toContain('tbp-block--overlap')
+    // 头部提示文案含重叠数量
+    const note = wrapper.find('.tbp-overlap-note')
+    expect(note.exists()).toBe(true)
+    expect(note.text()).toContain('2')
+    // 每块带 ⚠ 角标
+    expect(wrapper.findAll('.tbp-block-warn').length).toBe(2)
+  })
+
+  it('日模式：端点相邻的块不标记重叠', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'a', date: today, startMin: 420, durationMin: 60, category: 'project', title: '相邻A', taskId: null, done: false },
+      { id: 'b', date: today, startMin: 480, durationMin: 60, category: 'study', title: '相邻B', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const blocks = wrapper.findAll('.tbp-block')
+    expect(blocks[0].classes()).not.toContain('tbp-block--overlap')
+    expect(blocks[1].classes()).not.toContain('tbp-block--overlap')
+    expect(wrapper.find('.tbp-overlap-note').exists()).toBe(false)
+  })
+
+  it('周模式：同一列内重叠块标记 --overlap 且周头部提示出现', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'o1', date: week[0], startMin: 420, durationMin: 120, category: 'project', title: '周一A', taskId: null, done: false },
+      { id: 'o2', date: week[0], startMin: 480, durationMin: 60, category: 'study', title: '周一B', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click') // 「周」
+    await wrapper.vm.$nextTick()
+    const col0 = wrapper.findAll('.tbp-week-col')[0]
+    const blocks = col0.findAll('.tbp-block--week')
+    expect(blocks.length).toBe(2)
+    expect(blocks[0].classes()).toContain('tbp-block--overlap')
+    expect(blocks[1].classes()).toContain('tbp-block--overlap')
+    // 周头部提示（日时间轴在周模式下不渲染，故全局唯一）
+    const note = wrapper.find('.tbp-overlap-note')
+    expect(note.exists()).toBe(true)
+    expect(note.text()).toContain('2')
   })
 })

@@ -308,6 +308,47 @@ export function blockToRecordInput(b: TimeBlock): {
   }
 }
 
+/**
+ * 检测时间块重叠（冲突）。
+ * 在指定日期（或全量）内，按区间 [startMin, startMin+durationMin) 排序后扫描：
+ * 相邻（a.end === b.start）不算重叠，严格相交才标记。
+ * 全量调用时按 date 分组独立扫描——跨天在物理时间轴上不重叠，避免误报。
+ * 返回所有参与重叠的块 id 集合（纯函数，不修改入参），用于面板派生「冲突告警」。
+ */
+export function detectOverlapIds(blocks: TimeBlock[], date?: string): Set<string> {
+  const list = date ? blocks.filter(b => b.date === date) : blocks
+  const ids = new Set<string>()
+  // 按 date 分组，组内独立扫描（跨天不重叠）
+  const byDate = new Map<string, TimeBlock[]>()
+  for (const b of list) {
+    const arr = byDate.get(b.date)
+    if (arr) arr.push(b)
+    else byDate.set(b.date, [b])
+  }
+  for (const group of byDate.values()) scanOverlaps(group, ids)
+  return ids
+}
+
+/** 单日组内扫描：相邻不重叠，严格相交标记双方 */
+function scanOverlaps(group: TimeBlock[], ids: Set<string>): void {
+  const sorted = group
+    .slice()
+    .sort((a, b) => a.startMin - b.startMin || a.durationMin - b.durationMin)
+  const active: TimeBlock[] = []
+  for (const b of sorted) {
+    // 移除已结束（含相邻：a.end <= b.start 视为不重叠）
+    for (let k = active.length - 1; k >= 0; k--) {
+      if (active[k].startMin + active[k].durationMin <= b.startMin) active.splice(k, 1)
+    }
+    // 仍活跃的即与 b 重叠（保留条件 a.end > b.start）
+    for (const a of active) {
+      ids.add(a.id)
+      ids.add(b.id)
+    }
+    active.push(b)
+  }
+}
+
 // ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------

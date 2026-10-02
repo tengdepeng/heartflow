@@ -63,6 +63,7 @@ export {
   weekDaysOf,
   blocksForWeek,
   WEEK_START_DOW,
+  detectOverlapIds,
   localDateKey,
   todayKey,
   blockToRecordInput,

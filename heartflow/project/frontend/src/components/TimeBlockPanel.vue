@@ -75,6 +75,7 @@
       <div class="tbp-timeline-head">
         <span>当日时间轴</span>
         <span class="tbp-coverage">已排 {{ Math.round(scheduledMin / 60 * 10) / 10 }}h · 覆盖率 {{ Math.round(coverage * 100) }}%</span>
+        <span v-if="overlapCount > 0" class="tbp-overlap-note">⚠ {{ overlapCount }} 个时间块重叠</span>
       </div>
 
       <div class="tbp-timeline" :style="{ height: timelineHeight + 'px' }">
@@ -93,13 +94,14 @@
           v-for="b in dayBlocks"
           :key="b.id"
           class="tbp-block"
-          :class="{ 'tbp-block--done': b.done }"
+          :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id) }"
           :style="blockStyle(b)"
         >
           <div class="tbp-block-bar" :style="{ background: WORK_CATEGORY_META[b.category].color }"></div>
           <div class="tbp-block-body">
             <div class="tbp-block-row">
               <span class="tbp-block-time">{{ blockTimeLabel(b) }}</span>
+              <span v-if="overlapIds.has(b.id)" class="tbp-block-warn" title="与其他时间块重叠">⚠</span>
               <span class="tbp-block-cat">{{ WORK_CATEGORY_META[b.category].icon }}</span>
             </div>
             <span class="tbp-block-title">{{ b.title }}</span>
@@ -123,6 +125,7 @@
       <div class="tbp-week-head">
         <span>周视图 · 拖拽块改起止 · 跨列改日期 · 底部手柄拉时长</span>
         <span class="tbp-coverage">本周已排 {{ Math.round(weekScheduledMin / 60 * 10) / 10 }}h · 覆盖率 {{ weekCoveragePct }}%</span>
+        <span v-if="overlapCount > 0" class="tbp-overlap-note">⚠ {{ overlapCount }} 个时间块重叠</span>
       </div>
 
       <!-- 周列头：点击切到该日，高亮今天 / 当前选中 -->
@@ -161,7 +164,7 @@
             v-for="b in dayBlocksInWeek(day)"
             :key="b.id"
             class="tbp-block tbp-block--week"
-            :class="{ 'tbp-block--done': b.done }"
+            :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id) }"
             :style="blockStyle(b)"
             @pointerdown="onBlockPointerDown($event, b)"
           >
@@ -169,6 +172,7 @@
             <div class="tbp-block-body">
               <div class="tbp-block-row">
                 <span class="tbp-block-time">{{ blockTimeLabel(b) }}</span>
+                <span v-if="overlapIds.has(b.id)" class="tbp-block-warn" title="与其他时间块重叠">⚠</span>
                 <span class="tbp-block-cat">{{ WORK_CATEGORY_META[b.category].icon }}</span>
               </div>
               <span class="tbp-block-title">{{ b.title }}</span>
@@ -215,6 +219,7 @@ import {
   freeGaps,
   weekDaysOf,
   weekCoverage,
+  detectOverlapIds,
   type WorkCategory,
   type TimeBlock,
 } from '../modules/clepsydra'
@@ -369,6 +374,10 @@ const dayBlocks = computed(() => tb.blocksForDate(activeDate.value))
 const unscheduled = computed(() => tb.unscheduledTasksForDate(activeDate.value))
 const scheduledMin = computed(() => dayBlocks.value.reduce((s, b) => s + b.durationMin, 0))
 const coverage = computed(() => Math.min(1, scheduledMin.value / WINDOW_MIN))
+
+// ---- 重叠冲突检测（跨天不重叠，全量检测即可服务日 / 周两种视图）----
+const overlapIds = computed(() => detectOverlapIds(tb.blocks.value))
+const overlapCount = computed(() => overlapIds.value.size)
 
 const dateLabel = computed(() => {
   const d = new Date(activeDate.value + 'T00:00:00')
@@ -564,8 +573,9 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 .tbp-btn--auto { color: var(--accent); border-color: rgba(var(--accent-rgb), 0.3); }
 
 .tbp-timeline-wrap { display: flex; flex-direction: column; gap: 8px; }
-.tbp-timeline-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
+.tbp-timeline-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
 .tbp-coverage { color: var(--accent); font-variant-numeric: tabular-nums; }
+.tbp-overlap-note { color: #c46a5a; font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums; }
 
 .tbp-timeline {
   position: relative; width: 100%;
@@ -616,7 +626,7 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 .tbp-mode--active { background: rgba(var(--accent-rgb), 0.16); color: var(--accent); border-color: rgba(var(--accent-rgb), 0.35); }
 
 .tbp-week-wrap { display: flex; flex-direction: column; gap: 8px; }
-.tbp-week-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
+.tbp-week-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
 .tbp-week-colheads { display: flex; }
 .tbp-week-colhead {
   flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px;
@@ -639,6 +649,11 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 
 .tbp-block--week { left: 3px; right: 3px; cursor: grab; touch-action: none; }
 .tbp-block--week:active { cursor: grabbing; }
+.tbp-block--overlap {
+  border-color: rgba(196, 106, 90, 0.85);
+  box-shadow: 0 0 0 1px rgba(196, 106, 90, 0.45), 0 0 10px rgba(196, 106, 90, 0.25);
+}
+.tbp-block-warn { font-size: 10px; color: #c46a5a; margin-left: 2px; flex-shrink: 0; }
 .tbp-block-resize {
   position: absolute; left: 0; right: 0; bottom: 0; height: 9px; cursor: ns-resize; touch-action: none;
   border-radius: 0 0 8px 8px; background: linear-gradient(to top, rgba(var(--accent-rgb), 0.45), transparent);
