@@ -155,7 +155,15 @@
               <span class="tbp-block-cat">{{ WORK_CATEGORY_META[b.category].icon }}</span>
             </div>
             <span class="tbp-block-title">{{ b.title }}</span>
+            <span v-if="blockFocus(b)" class="tbp-block-focus" :class="focusDeltaClass(blockFocus(b)!)">
+              <span class="tbp-block-focus-icon">🎯</span>
+              <span class="tbp-block-focus-val">{{ formatSeconds(blockFocus(b)!.actualSec) }}/{{ blockFocus(b)!.plannedMin }}′</span>
+              <span class="tbp-block-focus-delta">{{ signed(blockFocus(b)!.deltaMin) }}</span>
+            </span>
           </div>
+          <span v-if="blockFocus(b)" class="tbp-block-progress" :class="focusDeltaClass(blockFocus(b)!)">
+            <span class="tbp-block-progress-fill" :style="{ width: focusBarPct(blockFocus(b)!) + '%' }"></span>
+          </span>
           <div class="tbp-block-actions">
             <button
               type="button"
@@ -248,7 +256,15 @@
                 <span class="tbp-block-cat">{{ WORK_CATEGORY_META[b.category].icon }}</span>
               </div>
               <span class="tbp-block-title">{{ b.title }}</span>
+              <span v-if="blockFocus(b)" class="tbp-block-focus" :class="focusDeltaClass(blockFocus(b)!)">
+                <span class="tbp-block-focus-icon">🎯</span>
+                <span class="tbp-block-focus-val">{{ formatSeconds(blockFocus(b)!.actualSec) }}/{{ blockFocus(b)!.plannedMin }}′</span>
+                <span class="tbp-block-focus-delta">{{ signed(blockFocus(b)!.deltaMin) }}</span>
+              </span>
             </div>
+            <span v-if="blockFocus(b)" class="tbp-block-progress" :class="focusDeltaClass(blockFocus(b)!)">
+              <span class="tbp-block-progress-fill" :style="{ width: focusBarPct(blockFocus(b)!) + '%' }"></span>
+            </span>
             <div class="tbp-block-resize" title="拖拽改变时长" @pointerdown="onResizePointerDown($event, b)"></div>
             <div class="tbp-block-actions">
               <button
@@ -340,6 +356,7 @@ import {
   useTimeBlock,
   useClepsydra,
   formatSeconds,
+  aggregateFocusVsPlan,
   WORK_CATEGORY_META,
   minutesToLabel,
   labelToMinutes,
@@ -353,6 +370,7 @@ import {
   type TimeBlock,
   type PlanActualReport,
   type PlanActualCategoryRow,
+  type FocusVsPlanRow,
 } from '../modules/clepsydra'
 
 const DAY_START = 7 * 60
@@ -665,6 +683,29 @@ function endFocusSession(): void {
 const planActual = computed<PlanActualReport>(() =>
   viewMode.value === 'week' ? tb.planActualForWeek(weekDays.value) : tb.planActualForDate(activeDate.value),
 )
+
+// ---- 块侧专注实况（INCR-426）：复用 INCR-425 聚合，按 blockId 索引，在每个时间块上显示「实际专注/计划 + 偏差色」 ----
+// 纯展示：不写存储、不发提醒，与光仪 INCR-425 同源数据。inScope 传 () => true 纳入全部日期的块，
+// 由 blockId 索引取各自对照，避免漏显周视图中跨日块。
+const focusByBlock = computed(() => {
+  const rep = aggregateFocusVsPlan(tb.blocks.value, clepsydra.records.value, () => true)
+  const m = new Map<string, FocusVsPlanRow>()
+  for (const r of rep.rows) m.set(r.blockId, r)
+  return m
+})
+function blockFocus(b: { id: string }): FocusVsPlanRow | null {
+  return focusByBlock.value.get(b.id) ?? null
+}
+function focusDeltaClass(row: FocusVsPlanRow | null): string {
+  if (!row) return ''
+  if (row.deltaMin > 0) return 'tbp-block-focus--over'
+  if (row.deltaMin < 0) return 'tbp-block-focus--under'
+  return 'tbp-block-focus--even'
+}
+function focusBarPct(row: FocusVsPlanRow | null): number {
+  if (!row || row.plannedMin <= 0) return 0
+  return Math.min(100, Math.round((row.actualMin / row.plannedMin) * 100))
+}
 function signed(min: number): string {
   if (min > 0) return `+${min}′`
   if (min < 0) return `${min}′`
@@ -965,6 +1006,31 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
   font-size: 9px; color: #fff; background: rgba(var(--accent-rgb), 0.8);
   padding: 0 4px; border-radius: 4px; flex-shrink: 0; letter-spacing: 0.5px;
 }
+
+/* 块侧专注实况徽标（INCR-426）：实际专注/计划 + 偏差色 */
+.tbp-block-focus {
+  display: inline-flex; align-items: center; gap: 3px; margin-top: 2px;
+  font-size: 10px; line-height: 1.4; font-variant-numeric: tabular-nums;
+  padding: 0 5px; border-radius: 5px; flex-shrink: 0; max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tbp-block-focus--over { color: #8fc99a; background: rgba(143, 201, 154, 0.16); }
+.tbp-block-focus--under { color: #c46a5a; background: rgba(196, 106, 90, 0.16); }
+.tbp-block-focus--even { color: var(--accent); background: rgba(var(--accent-rgb), 0.16); }
+.tbp-block-focus-icon { font-size: 9px; line-height: 1; }
+.tbp-block-focus-val { font-weight: 600; }
+.tbp-block-focus-delta { font-weight: 600; }
+
+/* 块顶专注进度条（INCR-426）：实际/计划占比，偏差着色；绝对定位不挤占块内布局 */
+.tbp-block-progress {
+  position: absolute; left: 0; right: 0; top: 0; height: 3px;
+  background: rgba(255, 255, 255, 0.08); overflow: hidden;
+  border-radius: 8px 8px 0 0; pointer-events: none;
+}
+.tbp-block-progress-fill { display: block; height: 100%; transition: width 0.3s ease; }
+.tbp-block-focus--over .tbp-block-progress-fill { background: #8fc99a; }
+.tbp-block-focus--under .tbp-block-progress-fill { background: #c46a5a; }
+.tbp-block-focus--even .tbp-block-progress-fill { background: var(--accent); }
 
 .tbp-block--focusing {
   border-color: rgba(var(--accent-rgb), 0.9);

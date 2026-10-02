@@ -918,3 +918,67 @@ describe('TimeBlockPanel 专注期间屏护（INCR-424）', () => {
     expect((otherEl.element as HTMLElement).style.opacity).toBe('0.4')
   })
 })
+
+describe('TimeBlockPanel 块侧专注实况徽标（INCR-426）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  it('日模式：块绑定真实专注会话 → 块上显示「实际专注/计划 + 偏差」徽标与进度条（under 着色）', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'fb4', date: today, startMin: 540, durationMin: 60, category: 'project', title: '周报块', taskId: null, done: false },
+    ]
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'm2', startedAt: today + 'T09:30:00', endedAt: today + 'T10:15:00', durationSeconds: 2700, category: 'project', sourceType: 'manual', blockId: 'fb4', intensity: 0.7, note: '周报块', createdAt: today + 'T09:30:00' },
+    ]
+    const wrapper = await mountPanel()
+    const block = wrapper.find('.tbp-block')
+    expect(block.text()).toContain('周报块')
+    // 实际 45 分 / 计划 60 分，偏差 -15 分 → 徽标
+    expect(block.text()).toContain('45分/60′')
+    expect(block.text()).toContain('-15′')
+    // 进度条填充宽度 = 实际/计划 = 75%
+    const fill = block.find('.tbp-block-progress-fill')
+    expect(fill.exists()).toBe(true)
+    expect((fill.element as HTMLElement).style.width).toBe('75%')
+    // 偏差色：under（实际 < 计划）
+    expect(block.find('.tbp-block-focus').classes()).toContain('tbp-block-focus--under')
+  })
+
+  it('日模式：块无绑定专注会话 → 块上不显示专注实况徽标/进度条', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'fb5', date: today, startMin: 540, durationMin: 30, category: 'study', title: '无绑定块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const block = wrapper.find('.tbp-block')
+    expect(block.text()).toContain('无绑定块')
+    expect(block.find('.tbp-block-focus').exists()).toBe(false)
+    expect(block.find('.tbp-block-progress').exists()).toBe(false)
+  })
+
+  it('周模式：跨日块同样显示专注实况徽标（切到周视图）', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'fb6', date: week[2], startMin: 540, durationMin: 60, category: 'project', title: '周三轮报块', taskId: null, done: false },
+    ]
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'm3', startedAt: week[2] + 'T09:30:00', endedAt: week[2] + 'T10:15:00', durationSeconds: 2700, category: 'project', sourceType: 'manual', blockId: 'fb6', intensity: 0.7, note: '周三轮报块', createdAt: week[2] + 'T09:30:00' },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click') // 周
+    await wrapper.vm.$nextTick()
+    const col = wrapper.findAll('.tbp-week-col')[2]
+    const block = col.find('.tbp-block--week')
+    expect(block.exists()).toBe(true)
+    expect(block.text()).toContain('周三轮报块')
+    expect(block.text()).toContain('45分/60′')
+    expect(block.find('.tbp-block-focus').exists()).toBe(true)
+    expect(block.find('.tbp-block-progress-fill').exists()).toBe(true)
+  })
+})
