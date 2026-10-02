@@ -20,8 +20,11 @@ import {
   blocksForWeek,
   WEEK_START_DOW,
   detectOverlapIds,
+  buildTemplate,
+  instantiateTemplate,
   type PlannedTask,
   type TimeBlock,
+  type BlockTemplate,
 } from '../time-block'
 
 function makeTask(partial: Partial<PlannedTask> & { estimatedMinutes: number }): PlannedTask {
@@ -307,5 +310,59 @@ describe('detectOverlapIds', () => {
     const before = JSON.stringify(blocks)
     detectOverlapIds(blocks, date)
     expect(JSON.stringify(blocks)).toBe(before)
+  })
+})
+
+describe('buildTemplate / instantiateTemplate（INCR-418 模板）', () => {
+  it('buildTemplate 剥离 id/date，仅保留规划形状', () => {
+    const tasks = [
+      makeTask({ id: 't1', title: '深度工作', category: 'project', estimatedMinutes: 60, date: '2026-10-02' }),
+    ]
+    const blocks = [
+      makeBlock({ id: 'b1', date: '2026-10-02', startMin: 420, durationMin: 60, category: 'study', title: '晨练' }),
+    ]
+    const tpl = buildTemplate('工作日', tasks, blocks)
+    expect(tpl.name).toBe('工作日')
+    expect(tpl.tasks).toHaveLength(1)
+    expect(tpl.tasks[0]).toEqual({ title: '深度工作', category: 'project', estimatedMinutes: 60 })
+    expect(tpl.blocks).toHaveLength(1)
+    expect(tpl.blocks[0]).toEqual({ startMin: 420, durationMin: 60, category: 'study', title: '晨练' })
+    // 剥离了 id / date
+    expect((tpl.tasks[0] as Record<string, unknown>).id).toBeUndefined()
+    expect((tpl.blocks[0] as Record<string, unknown>).date).toBeUndefined()
+  })
+
+  it('buildTemplate 空名回退「未命名模板」', () => {
+    const tpl = buildTemplate('   ', [], [])
+    expect(tpl.name).toBe('未命名模板')
+  })
+
+  it('instantiateTemplate 生成新 id + 目标 date + done=false', () => {
+    const tpl: BlockTemplate = {
+      id: 'tp1', name: '工作日', createdAt: '2026-10-02T00:00:00.000Z',
+      tasks: [{ title: '深度工作', category: 'project', estimatedMinutes: 60 }],
+      blocks: [{ startMin: 420, durationMin: 60, category: 'study', title: '晨练' }],
+    }
+    const { tasks, blocks } = instantiateTemplate(tpl, '2026-10-09')
+    expect(tasks).toHaveLength(1)
+    expect(tasks[0].date).toBe('2026-10-09')
+    expect(tasks[0].done).toBe(false)
+    expect(tasks[0].id).not.toBe('t1')
+    expect(blocks).toHaveLength(1)
+    expect(blocks[0].date).toBe('2026-10-09')
+    expect(blocks[0].done).toBe(false)
+    expect(blocks[0].taskId).toBeNull()
+    expect(blocks[0].id).not.toBe('b1')
+  })
+
+  it('instantiateTemplate 不改入参（模板不被修改）', () => {
+    const tpl: BlockTemplate = {
+      id: 'tp1', name: 'x', createdAt: '2026-10-02T00:00:00.000Z',
+      tasks: [{ title: 'a', category: 'project', estimatedMinutes: 30 }],
+      blocks: [],
+    }
+    const before = JSON.stringify(tpl)
+    instantiateTemplate(tpl, '2026-10-09')
+    expect(JSON.stringify(tpl)).toBe(before)
   })
 })

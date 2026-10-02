@@ -79,10 +79,12 @@ describe('TimeBlockPanel 时间块日规划', () => {
 
   it('手动建块：合法时间生成时间块', async () => {
     const wrapper = await mountPanel()
-    await wrapper.find('.tbp-input--time').setValue('10:00')
-    await (wrapper.findAll('.tbp-input--num')[1]).setValue(45)
-    await (wrapper.findAll('.tbp-input')[4]).setValue('晨间复盘')
-    await (wrapper.findAll('.tbp-btn--primary')[1]).trigger('click')
+    const manual = wrapper.find('.tbp-manual')
+    await manual.find('.tbp-input--time').setValue('10:00')
+    await manual.find('.tbp-input--num').setValue(45)
+    const titleInput = manual.findAll('.tbp-input').find(i => !i.classes('tbp-input--time') && !i.classes('tbp-input--num'))
+    await titleInput!.setValue('晨间复盘')
+    await manual.find('.tbp-btn--primary').trigger('click')
     await wrapper.vm.$nextTick()
     const blocks = wrapper.findAll('.tbp-block')
     expect(blocks.length).toBe(1)
@@ -93,9 +95,11 @@ describe('TimeBlockPanel 时间块日规划', () => {
 
   it('手动建块：非法时间显示错误且不生成块', async () => {
     const wrapper = await mountPanel()
-    await wrapper.find('.tbp-input--time').setValue('99:99')
-    await (wrapper.findAll('.tbp-input')[4]).setValue('坏时间')
-    await (wrapper.findAll('.tbp-btn--primary')[1]).trigger('click')
+    const manual = wrapper.find('.tbp-manual')
+    await manual.find('.tbp-input--time').setValue('99:99')
+    const titleInput = manual.findAll('.tbp-input').find(i => !i.classes('tbp-input--time') && !i.classes('tbp-input--num'))
+    await titleInput!.setValue('坏时间')
+    await manual.find('.tbp-btn--primary').trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.tbp-form-error').exists()).toBe(true)
     expect(wrapper.find('.tbp-form-error').text()).toContain('HH:MM')
@@ -333,5 +337,90 @@ describe('TimeBlockPanel 重叠冲突检测（INCR-417）', () => {
     const note = wrapper.find('.tbp-overlap-note')
     expect(note.exists()).toBe(true)
     expect(note.text()).toContain('2')
+  })
+})
+
+describe('TimeBlockPanel 时间块模板（INCR-418）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  it('另存当前日为模板：列表出现 + 持久化 + 空内容拦截', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_plan_tasks'] = [
+      { id: 't1', title: '深度工作', category: 'project', estimatedMinutes: 60, date: today, done: false, createdAt: '2026-10-09T08:00:00.000Z' },
+    ]
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'b1', date: today, startMin: 420, durationMin: 60, category: 'study', title: '晨练', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    // 保存按钮初始 disabled（名称为空）
+    const saveBtn = wrapper.find('.tbp-template-save .tbp-btn--primary')
+    expect((saveBtn.element as HTMLButtonElement).disabled).toBe(true)
+    await wrapper.find('.tbp-input--tpl').setValue('工作日')
+    await wrapper.vm.$nextTick()
+    expect((saveBtn.element as HTMLButtonElement).disabled).toBe(false)
+    await saveBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    // 模板列表出现一项，名/数正确
+    const tplRow = wrapper.find('.tbp-template')
+    expect(tplRow.exists()).toBe(true)
+    expect(tplRow.text()).toContain('工作日')
+    expect(tplRow.text()).toContain('1 任务 · 1 块')
+    // 持久化
+    const stored = mockStore['hf:clepsydra_templates'] as any[]
+    expect(stored.length).toBe(1)
+    expect(stored[0].name).toBe('工作日')
+    expect(stored[0].tasks.length).toBe(1)
+    expect(stored[0].blocks.length).toBe(1)
+  })
+
+  it('空内容日另存被拦截（按钮保持 disabled，不生成模板）', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.find('.tbp-input--tpl').setValue('空模板')
+    await wrapper.vm.$nextTick()
+    // 当前日无 tasks/blocks → 按钮 disabled
+    const saveBtn = wrapper.find('.tbp-template-save .tbp-btn--primary')
+    expect((saveBtn.element as HTMLButtonElement).disabled).toBe(true)
+    expect(mockStore['hf:clepsydra_templates']).toHaveLength(0)
+  })
+
+  it('套用模板到今天：生成对应 tasks + blocks（带目标 date）', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_templates'] = [
+      {
+        id: 'tp1', name: '工作日', createdAt: '2026-10-09T00:00:00.000Z',
+        tasks: [{ title: '深度工作', category: 'project', estimatedMinutes: 60 }],
+        blocks: [{ startMin: 420, durationMin: 60, category: 'study', title: '晨练' }],
+      },
+    ]
+    const wrapper = await mountPanel()
+    const tplRow = wrapper.find('.tbp-template')
+    expect(tplRow.exists()).toBe(true)
+    await wrapper.find('.tbp-template-apply').trigger('click')
+    await wrapper.vm.$nextTick()
+    // 当天 tasks +1、blocks +1
+    expect((mockStore['hf:clepsydra_plan_tasks'] as any[]).length).toBe(1)
+    expect((mockStore['hf:clepsydra_time_blocks'] as any[]).length).toBe(1)
+    // 套用块带目标 date = today
+    expect((mockStore['hf:clepsydra_time_blocks'] as any[])[0].date).toBe(today)
+    // 提示文案
+    expect(wrapper.find('.tbp-auto-note').text()).toContain('已套用')
+  })
+
+  it('删除模板：列表清空并持久化', async () => {
+    mockStore['hf:clepsydra_templates'] = [
+      { id: 'tp1', name: '工作日', createdAt: '2026-10-09T00:00:00.000Z', tasks: [], blocks: [] },
+    ]
+    const wrapper = await mountPanel()
+    expect(wrapper.findAll('.tbp-template').length).toBe(1)
+    await wrapper.find('.tbp-template-del').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tbp-template').exists()).toBe(false)
+    expect((mockStore['hf:clepsydra_templates'] as any[]).length).toBe(0)
   })
 })

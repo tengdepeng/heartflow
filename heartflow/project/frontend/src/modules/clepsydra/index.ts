@@ -64,6 +64,9 @@ export {
   blocksForWeek,
   WEEK_START_DOW,
   detectOverlapIds,
+  buildTemplate,
+  instantiateTemplate,
+  TEMPLATE_STORAGE_KEY,
   localDateKey,
   todayKey,
   blockToRecordInput,
@@ -74,4 +77,5 @@ export type {
   TimeBlock,
   Interval,
   AutoScheduleOptions,
+  BlockTemplate,
 } from './time-block'

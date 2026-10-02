@@ -70,6 +70,36 @@
       <p v-if="lastScheduled !== null" class="tbp-auto-note">自动排程已放入 {{ lastScheduled }} 个时间块。</p>
     </div>
 
+    <!-- 时间块模板：复用每日规划 -->
+    <div class="tbp-templates">
+      <div class="tbp-templates-head">
+        <span>模板 · 复用每日规划</span>
+        <span v-if="lastTemplateMsg" class="tbp-auto-note">{{ lastTemplateMsg }}</span>
+      </div>
+      <div class="tbp-template-save">
+        <input v-model="tplName" class="tbp-input tbp-input--tpl" placeholder="模板名，如：工作日" />
+        <button
+          type="button"
+          class="tbp-btn tbp-btn--primary"
+          :disabled="!canSaveTemplate"
+          @click="saveCurrentAsTemplate"
+        >另存当前日为模板</button>
+      </div>
+      <div v-if="tb.templates.value.length" class="tbp-template-list">
+        <div v-for="tpl in tb.templates.value" :key="tpl.id" class="tbp-template">
+          <div class="tbp-template-info">
+            <span class="tbp-template-name">{{ tpl.name }}</span>
+            <span class="tbp-template-meta">{{ tpl.tasks.length }} 任务 · {{ tpl.blocks.length }} 块</span>
+          </div>
+          <div class="tbp-template-actions">
+            <button type="button" class="tbp-template-apply" @click="applyTpl(tpl.id)">套用到今天</button>
+            <button type="button" class="tbp-template-del" title="删除模板" @click="tb.removeTemplate(tpl.id)">✕</button>
+          </div>
+        </div>
+      </div>
+      <p v-else class="tbp-empty">还没有模板。规划好一天后，点「另存当前日为模板」，之后每天一键套用。</p>
+    </div>
+
     <!-- 当日时间轴（日模式） -->
     <div v-if="viewMode === 'day'" class="tbp-timeline-wrap">
       <div class="tbp-timeline-head">
@@ -475,6 +505,27 @@ function addManualBlock(): void {
   mbTitle.value = ''
 }
 
+// ---- 时间块模板：复用每日规划 ----
+const tplName = ref('')
+const lastTemplateMsg = ref('')
+const canSaveTemplate = computed(() => {
+  const d = activeDate.value
+  return tplName.value.trim().length > 0 && (tb.tasksForDate(d).length > 0 || tb.blocksForDate(d).length > 0)
+})
+function saveCurrentAsTemplate(): void {
+  const n = tb.saveTemplateFromDate(tplName.value.trim(), activeDate.value)
+  if (n < 0) {
+    lastTemplateMsg.value = '当前日无内容可存为模板'
+    return
+  }
+  lastTemplateMsg.value = `已存为「${tplName.value.trim()}」模板`
+  tplName.value = ''
+}
+function applyTpl(id: string): void {
+  const r = tb.applyTemplate(id, activeDate.value)
+  lastTemplateMsg.value = `已套用：${r.tasks} 任务 + ${r.blocks} 块`
+}
+
 // ---- 时间轴渲染 ----
 const timelineHeight = Math.round(WINDOW_MIN * PX_PER_MIN)
 
@@ -617,6 +668,30 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 .tbp-manual-head { font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
 .tbp-manual-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .tbp-form-error { font-size: 11px; color: #c46a5a; }
+
+.tbp-templates { display: flex; flex-direction: column; gap: 8px; }
+.tbp-templates-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
+.tbp-template-save { display: flex; gap: 6px; flex-wrap: wrap; }
+.tbp-input--tpl { flex: 1; min-width: 140px; }
+.tbp-template-list { display: flex; flex-direction: column; gap: 6px; }
+.tbp-template {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px;
+  border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.tbp-template-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.tbp-template-name { font-size: 13px; color: var(--text-primary); }
+.tbp-template-meta { font-size: 10px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.tbp-template-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.tbp-template-apply {
+  padding: 4px 10px; border-radius: 7px; font-size: 11px; cursor: pointer;
+  border: 1px solid rgba(var(--accent-rgb), 0.25); background: rgba(var(--accent-rgb), 0.1); color: var(--accent);
+}
+.tbp-template-apply:hover { background: rgba(var(--accent-rgb), 0.2); }
+.tbp-template-del {
+  width: 22px; height: 22px; border-radius: 6px; border: none; background: transparent;
+  color: rgba(196, 106, 90, 0.6); cursor: pointer; font-size: 13px;
+}
+.tbp-template-del:hover { color: #c46a5a; }
 
 .tbp-modebar { display: flex; gap: 6px; justify-content: center; }
 .tbp-mode {

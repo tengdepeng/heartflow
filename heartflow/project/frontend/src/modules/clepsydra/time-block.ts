@@ -19,6 +19,7 @@ import { genId, WORK_CATEGORY_META, useClepsydra } from './clepsydra'
 
 export const TASK_STORAGE_KEY = 'hf:clepsydra_plan_tasks'
 export const BLOCK_STORAGE_KEY = 'hf:clepsydra_time_blocks'
+export const TEMPLATE_STORAGE_KEY = 'hf:clepsydra_templates'
 
 // ------------------------------------------------------------
 // 类型
@@ -64,6 +65,19 @@ export interface TimeBlock {
 export interface Interval {
   startMin: number
   endMin: number
+}
+
+/** 时间块模板（某日规划的快照，套用时赋目标日期） */
+export interface BlockTemplate {
+  id: string
+  /** 模板名 */
+  name: string
+  /** 创建时间（ISO） */
+  createdAt: string
+  /** 模板包含的待办（剥离 id/date，套用时生成新实例） */
+  tasks: { title: string; category: WorkCategory; estimatedMinutes: number }[]
+  /** 模板包含的时间块（剥离 id/date，套用时生成新实例；保留起止与分类标题） */
+  blocks: { startMin: number; durationMin: number; category: WorkCategory; title: string }[]
 }
 
 // ------------------------------------------------------------
@@ -349,6 +363,64 @@ function scanOverlaps(group: TimeBlock[], ids: Set<string>): void {
   }
 }
 
+/**
+ * 从某日的 tasks + blocks 构建模板（剥离 id/date，仅保留规划形状）。
+ * 纯函数：不读存储、不改入参。
+ */
+export function buildTemplate(
+  name: string,
+  tasks: PlannedTask[],
+  blocks: TimeBlock[],
+): BlockTemplate {
+  return {
+    id: genId(),
+    name: name.trim() || '未命名模板',
+    createdAt: new Date().toISOString(),
+    tasks: tasks.map(t => ({
+      title: t.title,
+      category: t.category,
+      estimatedMinutes: t.estimatedMinutes,
+    })),
+    blocks: blocks.map(b => ({
+      startMin: b.startMin,
+      durationMin: b.durationMin,
+      category: b.category,
+      title: b.title,
+    })),
+  }
+}
+
+/**
+ * 把模板实例化为某目标日的 tasks + blocks（新 id、赋目标 date、done 重置 false）。
+ * 纯函数：不读存储、不改入参，返回新建数组，调用方负责并入持久化。
+ */
+export function instantiateTemplate(
+  tpl: BlockTemplate,
+  targetDate: string,
+): { tasks: PlannedTask[]; blocks: TimeBlock[] } {
+  const now = new Date().toISOString()
+  const tasks: PlannedTask[] = tpl.tasks.map(t => ({
+    id: genId(),
+    title: t.title,
+    category: t.category,
+    estimatedMinutes: t.estimatedMinutes,
+    date: targetDate,
+    done: false,
+    createdAt: now,
+  }))
+  const blocks: TimeBlock[] = tpl.blocks.map(b => ({
+    id: genId(),
+    date: targetDate,
+    startMin: b.startMin,
+    durationMin: b.durationMin,
+    category: b.category,
+    title: b.title,
+    taskId: null,
+    done: false,
+  }))
+  return { tasks, blocks }
+}
+
 // ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------
@@ -356,6 +428,7 @@ function scanOverlaps(group: TimeBlock[], ids: Set<string>): void {
 export function useTimeBlock() {
   const tasks = ref<PlannedTask[]>(loadTasks())
   const blocks = ref<TimeBlock[]>(loadBlocks())
+  const templates = ref<BlockTemplate[]>(loadTemplates())
 
   function loadTasks(): PlannedTask[] {
     try {
@@ -373,12 +446,24 @@ export function useTimeBlock() {
     }
   }
 
+  function loadTemplates(): BlockTemplate[] {
+    try {
+      return storage.getKV<BlockTemplate[]>(TEMPLATE_STORAGE_KEY, [])
+    } catch {
+      return []
+    }
+  }
+
   function saveTasks(): void {
     storage.setKV(TASK_STORAGE_KEY, tasks.value)
   }
 
   function saveBlocks(): void {
     storage.setKV(BLOCK_STORAGE_KEY, blocks.value)
+  }
+
+  function saveTemplates(): void {
+    storage.setKV(TEMPLATE_STORAGE_KEY, templates.value)
   }
 
   // ---- 待办 CRUD ----
@@ -560,6 +645,38 @@ export function useTimeBlock() {
     return newBlocks.length
   }
 
+  // ---- 时间块模板：复用每日规划 ----
+  /** 把某日的 tasks + blocks 存为模板（剥离 id/date）。空内容返回 -1。 */
+  function saveTemplateFromDate(name: string, date: string): number {
+    const tpl = buildTemplate(name, tasksForDate(date), blocksForDate(date))
+    if (tpl.tasks.length === 0 && tpl.blocks.length === 0) return -1
+    templates.value.push(tpl)
+    saveTemplates()
+    return templates.value.length
+  }
+
+  /** 套用模板到目标日：实例化 tasks + blocks 并并入持久化，返回新增数量 */
+  function applyTemplate(id: string, targetDate: string): { tasks: number; blocks: number } {
+    const tpl = templates.value.find(t => t.id === id)
+    if (!tpl) return { tasks: 0, blocks: 0 }
+    const { tasks: newTasks, blocks: newBlocks } = instantiateTemplate(tpl, targetDate)
+    if (newTasks.length) {
+      tasks.value.push(...newTasks)
+      saveTasks()
+    }
+    if (newBlocks.length) {
+      blocks.value.push(...newBlocks)
+      saveBlocks()
+    }
+    return { tasks: newTasks.length, blocks: newBlocks.length }
+  }
+
+  /** 删除模板 */
+  function removeTemplate(id: string): void {
+    templates.value = templates.value.filter(t => t.id !== id)
+    saveTemplates()
+  }
+
   return {
     tasks: computed(() => tasks.value),
     blocks: computed(() => blocks.value),
@@ -578,6 +695,10 @@ export function useTimeBlock() {
     blocksForDate,
     unscheduledTasksForDate,
     autoScheduleForDate,
+    templates: computed(() => templates.value),
+    saveTemplateFromDate,
+    applyTemplate,
+    removeTemplate,
     localDateKey,
     todayKey,
   }
