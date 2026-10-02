@@ -896,4 +896,25 @@ describe('TimeBlockPanel 专注期间屏护（INCR-424）', () => {
     expect(recs).toHaveLength(1)
     expect(recs[0].endedAt).not.toBeNull()
   })
+
+  it('专注态：时间轴非专注块内联透明度降为 0.4、专注块保持 1（内联覆盖 CSS 确保生效）', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'fb4', date: today, startMin: 420, durationMin: 60, category: 'project', title: '专注块', taskId: null, done: false },
+      { id: 'ob4', date: today, startMin: 600, durationMin: 60, category: 'study', title: '对照块', taskId: null, done: false },
+    ]
+    const iso = new Date(Date.now() - 8000).toISOString()
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'r-run', startedAt: iso, endedAt: null, durationSeconds: 8, category: 'project', sourceType: 'manual', sourceAnchorId: 'fb4', blockId: 'fb4', intensity: 0.7, note: '专注块', createdAt: iso },
+    ]
+    const wrapper = await mountPanel()
+    const blocks = wrapper.findAll('.tbp-block')
+    const focusEl = blocks.find(b => b.classes().includes('tbp-block--focusing'))!
+    const otherEl = blocks.find(b => !b.classes().includes('tbp-block--focusing'))!
+    expect(focusEl.exists()).toBe(true)
+    expect(otherEl.exists()).toBe(true)
+    // 内联透明度：专注块 1，非专注块 0.4（证明弱化真正生效，而非被 CSS 覆盖）
+    expect((focusEl.element as HTMLElement).style.opacity).toBe('1')
+    expect((otherEl.element as HTMLElement).style.opacity).toBe('0.4')
+  })
 })

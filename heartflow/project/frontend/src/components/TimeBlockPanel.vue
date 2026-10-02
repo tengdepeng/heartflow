@@ -826,13 +826,17 @@ const gridHours = computed(() => {
   return arr
 })
 
-function blockStyle(b: { startMin: number; durationMin: number; done?: boolean }) {
+function blockStyle(b: { id?: string; startMin: number; durationMin: number; done?: boolean }) {
   const top = Math.max(0, (b.startMin - DAY_START) * PX_PER_MIN)
   const height = Math.max(22, b.durationMin * PX_PER_MIN)
+  let opacity = b.done ? 0.55 : 1
+  // 专注态：除当前专注块外，时间轴其余块一并降透明度凸显当下。
+  // 必须走内联（CSS 规则会被块上内联 opacity 覆盖而失效），故在此派生。
+  if (anyRunning.value && b.id !== runningBlockId.value && b.id !== 'new') opacity = 0.4
   return {
     top: `${top}px`,
     height: `${height}px`,
-    opacity: b.done ? 0.55 : 1,
+    opacity,
   }
 }
 
@@ -1086,11 +1090,6 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
   pointer-events: none;
   user-select: none;
   transition: opacity 0.4s ease, filter 0.4s ease;
-}
-/* 时间轴中：除当前专注块外，其余块一并弱化，凸显当下 */
-.tbp--focus-mode .tbp-block:not(.tbp-block--focusing) {
-  opacity: 0.4;
-  transition: opacity 0.4s ease;
 }
 .tbp-focus-banner {
   display: flex; align-items: center; gap: 12px;
