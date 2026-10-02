@@ -4,7 +4,9 @@
 // 源  ：src-tauri/android-widget/   （受版本控制，唯一真源）
 // 目标：src-tauri/gen/android/app/src/main/（tauri android 生成，不入库）
 // 作用：复制 kt / 布局 / 描边 / widget 元数据，并按类名幂等补丁
-//       AndroidManifest 的 7 个 AppWidgetProvider receiver。
+//       AndroidManifest 的 9 个 AppWidgetProvider receiver。
+//       注：kotlin 全部动态复制（含 HeartflowWidgetBridge.kt / HeartflowWidgetsPlugin.kt），
+//       无需手维护清单——这两份曾靠手工拷贝进 gen，陈旧带 bug 直接炸安卓构建。
 // 用法：node scripts/android/sync-android-widget.mjs [--dry]
 // 说明：gen/android 不存在时默认不创建骨架（请先跑 tauri android），
 //       避免污染生成目录；--dry 仅枚举计划、不写盘。
@@ -25,6 +27,7 @@ const dry = process.argv.includes('--dry')
 const LAYOUTS = [
   'widget_heartflow', 'widget_anchors', 'widget_countdown', 'widget_focus',
   'widget_calendar', 'widget_emotion', 'widget_note', 'widget_quadrant',
+  'widget_heatmap',
 ]
 const DRAWABLES = ['widget_bg', 'widget_today_bg']
 
@@ -38,6 +41,7 @@ const RECEIVERS = [
   ['HeartflowEmotionWidgetProvider', 'widget_emotion_info', '心流 · 情绪'],
   ['HeartflowNoteWidgetProvider', 'widget_note_info', '心流 · 便签'],
   ['HeartflowQuadrantWidgetProvider', 'widget_quadrant_info', '心流 · 四象限'],
+  ['HeartflowHeatmapWidgetProvider', 'widget_heatmap_info', '心流 · 热力图'],
 ]
 
 if (!fs.existsSync(SRC)) {

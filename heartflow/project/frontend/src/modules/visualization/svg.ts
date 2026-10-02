@@ -300,9 +300,21 @@ export function generateArcPath(
   endAngle: number,
 ): string {
   if (endAngle - startAngle >= 360) {
-    // 完整圆环
-    const midR = outerR
-    return `M ${cx - midR} ${cy} A ${midR} ${midR} 0 1 1 ${cx + midR - 0.01} ${cy} A ${midR} ${midR} 0 1 1 ${cx - midR} ${cy}`
+    // 完整圆环：外圈顺时针 + 内圈逆时针（nonzero 填充自然挖出环心空洞）。
+    // 旧实现只取 outerR 画实心圆盘——既丢了 innerR（内圈描边被静默丢弃），
+    // 也会让 ≥360° 的扇区渲染成实心圆而非环，与「环影」设计不符。
+    const o = outerR
+    const i = innerR
+    return [
+      `M ${cx - o} ${cy}`,
+      `A ${o} ${o} 0 1 1 ${cx + o} ${cy}`,
+      `A ${o} ${o} 0 1 1 ${cx - o} ${cy}`,
+      'Z',
+      `M ${cx - i} ${cy}`,
+      `A ${i} ${i} 0 1 0 ${cx + i} ${cy}`,
+      `A ${i} ${i} 0 1 0 ${cx - i} ${cy}`,
+      'Z',
+    ].join(' ')
   }
 
   const sRad = (startAngle * Math.PI) / 180
@@ -337,8 +349,10 @@ export function generateRingSectors(
   outerR: number,
   gap = 0,
 ): { path: string; color: string; startAngle: number; endAngle: number }[] {
-  const total = data.reduce((s, d) => s + d.value, 0) || 1
-  if (total === 0) return []
+  // 先判零/非有限再赋值：旧写法 `|| 1` 在前，使下方 `if (total === 0)` 恒为假（死代码）。
+  const sum = data.reduce((s, d) => s + d.value, 0)
+  if (!Number.isFinite(sum) || sum === 0) return []
+  const total = sum
 
   const gapAngle = gap * (data.length / 360) // 每个扇区间隙角度
   let currentAngle = -90 // 从 12 点方向开始

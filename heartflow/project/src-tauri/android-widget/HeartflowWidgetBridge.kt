@@ -26,6 +26,7 @@ object WidgetBridge {
         HeartflowEmotionWidgetProvider::class.java,
         HeartflowNoteWidgetProvider::class.java,
         HeartflowHeatmapWidgetProvider::class.java,
+        HeartflowQuadrantWidgetProvider::class.java,
     )
 
     /**

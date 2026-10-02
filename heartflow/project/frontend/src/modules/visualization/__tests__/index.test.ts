@@ -251,6 +251,14 @@ describe('generateArcPath', () => {
     const path = generateArcPath(100, 100, 60, 80, 0, 360)
     expect(path).toContain('A')
   })
+
+  // 回归：旧实现整圈只取 outerR 画实心圆盘，内半径被静默丢弃
+  // （环影的外描边本应勾出内外双圈，实际只剩外圈；且 ≥360° 扇区会画成实心圆）。
+  it('should render full circle as a ring using both radii', () => {
+    const path = generateArcPath(100, 100, 60, 80, 0, 360)
+    expect(path).toContain('A 80 80') // 外圈
+    expect(path).toContain('A 60 60') // 内圈（挖出环心空洞）
+  })
 })
 
 describe('generateRingSectors', () => {
