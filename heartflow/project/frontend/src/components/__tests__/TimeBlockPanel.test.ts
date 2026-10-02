@@ -129,8 +129,9 @@ describe('TimeBlockPanel 时间块日规划', () => {
     await wrapper.vm.$nextTick()
 
     const block = wrapper.find('.tbp-block')
-    // 标记完成
-    await block.find('.tbp-block-btn').trigger('click')
+    // 标记完成（按标题定位「标记完成」按钮，避免位置索引受新增按钮影响）
+    const toggleBtn = block.findAll('.tbp-block-btn').find(b => (b.attributes('title') ?? '').includes('标记完成'))!
+    await toggleBtn.trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.tbp-block').classes()).toContain('tbp-block--done')
 
@@ -144,8 +145,8 @@ describe('TimeBlockPanel 时间块日规划', () => {
     expect(recs![0].note).toContain('运动')
     expect(recs![0].category).toBe('project')
 
-    // 移除块（最后一个按钮）→ 级联移除联动的更漏记录
-    const delBtn = wrapper.findAll('.tbp-block-btn')[3]
+    // 移除块（按标题定位「移除」按钮）→ 级联移除联动的更漏记录
+    const delBtn = block.findAll('.tbp-block-btn').find(b => (b.attributes('title') ?? '') === '移除')!
     await delBtn.trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.findAll('.tbp-block').length).toBe(0)
@@ -763,5 +764,74 @@ describe('TimeBlockPanel 周视图拖拽新建（INCR-422）', () => {
     const created = stored.find(b => b.title === '新块')!
     expect(created.date).toBe(week[3])
     expect(created.startMin).toBe(625) // 避让到 f 之后
+  })
+})
+
+describe('TimeBlockPanel 专注会话绑定（INCR-423）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  async function makeTodayBlock(wrapper: any): Promise<string> {
+    await wrapper.find('.tbp-input').setValue('专注任务')
+    await wrapper.find('.tbp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.tbp-task-place').trigger('click')
+    await wrapper.vm.$nextTick()
+    return (mockStore['hf:clepsydra_time_blocks'] as any[])[0].id
+  }
+
+  it('日模式：点「专注」开启绑定会话 → 写入 blockId 记录、块进入专注态', async () => {
+    const wrapper = await mountPanel()
+    const blockId = await makeTodayBlock(wrapper)
+    const block = wrapper.find('.tbp-block')
+    const focusBtn = block.find('.tbp-block-actions').findAll('.tbp-block-btn')[0]
+    await focusBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    const recs = mockStore['hf:clepsydra_records'] as any[]
+    expect(recs).toHaveLength(1)
+    expect(recs[0].blockId).toBe(blockId)
+    expect(recs[0].sourceType).toBe('manual')
+    expect(recs[0].endedAt).toBeNull() // 进行中
+    expect(block.classes()).toContain('tbp-block--focusing')
+    expect(focusBtn.text()).toBe('■')
+    expect(wrapper.find('.tbp-block-focus-tag').exists()).toBe(true)
+  })
+
+  it('日模式：再点「专注」（停止）→ 结束会话、标记完成、仅 1 条真实记录无 auto 代理', async () => {
+    const wrapper = await mountPanel()
+    await makeTodayBlock(wrapper)
+    const focusBtn = wrapper.find('.tbp-block').find('.tbp-block-actions').findAll('.tbp-block-btn')[0]
+    await focusBtn.trigger('click') // 开始
+    await wrapper.vm.$nextTick()
+    await focusBtn.trigger('click') // 停止
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tbp-block').classes()).toContain('tbp-block--done')
+    const recs = mockStore['hf:clepsydra_records'] as any[]
+    expect(recs).toHaveLength(1) // 真实专注会话，无 auto 计划代理
+    expect(recs[0].sourceType).toBe('manual')
+    expect(recs[0].endedAt).not.toBeNull()
+  })
+
+  it('日模式：一块进行中时，另一块的「专注」按钮被禁用（避免并行计时）', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'b1', date: today, startMin: 420, durationMin: 60, category: 'project', title: '块1', taskId: null, done: false },
+      { id: 'b2', date: today, startMin: 600, durationMin: 60, category: 'study', title: '块2', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const blocks = wrapper.findAll('.tbp-block')
+    const b1Focus = blocks[0].find('.tbp-block-actions').findAll('.tbp-block-btn')[0]
+    const b2Focus = blocks[1].find('.tbp-block-actions').findAll('.tbp-block-btn')[0]
+    await b1Focus.trigger('click') // 块1 进入专注
+    await wrapper.vm.$nextTick()
+    expect((b1Focus.element as HTMLButtonElement).disabled).toBe(false)
+    expect((b2Focus.element as HTMLButtonElement).disabled).toBe(true)
+    expect(b1Focus.text()).toBe('■')
+    expect(b2Focus.text()).toBe('🎯')
   })
 })

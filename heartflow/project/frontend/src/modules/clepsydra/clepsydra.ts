@@ -33,6 +33,8 @@ export interface WorkRecord {
   sourceType: 'manual' | 'anchor' | 'auto'
   /** 关联源头 id（锚点完成联动等，预留） */
   sourceAnchorId?: string
+  /** 关联的时间块 id（专注会话绑定到某计划块时使用，便于标记完成与级联移除） */
+  blockId?: string
   /** 强度 0-1（blueprint：深度0.9…浅层0.5…会议0.6…） */
   intensity: number
   note: string
@@ -248,7 +250,7 @@ export function useClepsydra() {
   reloadIfChanged()
 
   /** 开始一段工作计时（微型光仪 start） */
-  function startTimer(meta: { category?: WorkCategory; note?: string; intensity?: number } = {}): WorkRecord {
+  function startTimer(meta: { category?: WorkCategory; note?: string; intensity?: number; blockId?: string } = {}): WorkRecord {
     const running = records.value.find(r => r.endedAt === null)
     if (running) return running
     const now = new Date()
@@ -259,6 +261,8 @@ export function useClepsydra() {
       durationSeconds: 0,
       category: meta.category ?? 'project',
       sourceType: 'manual',
+      sourceAnchorId: meta.blockId,
+      blockId: meta.blockId,
       intensity: meta.intensity ?? WORK_CATEGORY_META[meta.category ?? 'project'].intensity,
       note: meta.note ?? '',
       createdAt: now.toISOString(),

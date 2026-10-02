@@ -2,7 +2,7 @@
 // 更漏 · 时间块引擎纯函数单测
 // ============================================================
 
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { WorkRecord } from '../clepsydra'
 import {
   minutesToLabel,
@@ -27,10 +27,25 @@ import {
   buildTemplate,
   instantiateTemplate,
   computePlanActual,
+  useTimeBlock,
   type PlannedTask,
   type TimeBlock,
   type BlockTemplate,
 } from '../time-block'
+import { useClepsydra, resetClepsydra } from '../clepsydra'
+
+// 仅供 INCR-423 专注绑定集成用例使用的存储 mock（纯函数用例不触碰 storage，无副作用）
+const { mockStorage, store } = vi.hoisted(() => {
+  const store: Record<string, any> = {}
+  return {
+    store,
+    mockStorage: {
+      getKV: (k: string, def: any) => (k in store ? store[k] : def),
+      setKV: (k: string, v: any) => { store[k] = v },
+    },
+  }
+})
+vi.mock('../../../engine/storage', () => ({ storage: mockStorage }))
 
 function makeTask(partial: Partial<PlannedTask> & { estimatedMinutes: number }): PlannedTask {
   return {
@@ -558,5 +573,68 @@ describe('冲突智能避让/重排（INCR-421）', () => {
       compactDayLayout(blocks, date, { windowStartMin: WS, windowEndMin: WE })
       expect(JSON.stringify(blocks)).toBe(before)
     })
+  })
+})
+
+describe('专注会话绑定（INCR-423）', () => {
+  beforeEach(() => {
+    for (const k of Object.keys(store)) delete store[k]
+    resetClepsydra()
+  })
+
+  it('startFocusOnBlock 写一条绑定 blockId 的手动记录，runningBlockId 反映该块', () => {
+    const tb = useTimeBlock()
+    const b = tb.addBlock({ date: '2026-10-02', startMin: 420, durationMin: 60, category: 'project', title: '专注块' })
+    tb.startFocusOnBlock(b.id)
+    const running = useClepsydra().running.value
+    expect(running).not.toBeNull()
+    expect(running!.blockId).toBe(b.id)
+    expect(running!.sourceType).toBe('manual')
+    expect(tb.runningBlockId.value).toBe(b.id)
+  })
+
+  it('stopFocusOnBlock 停止会话并标记完成；因已有真实会话，不补计划代理（仅 1 条记录）', () => {
+    const tb = useTimeBlock()
+    const b = tb.addBlock({ date: '2026-10-02', startMin: 420, durationMin: 60, category: 'study', title: '专注块2' })
+    tb.startFocusOnBlock(b.id)
+    tb.stopFocusOnBlock(b.id)
+    expect(useClepsydra().running.value).toBeNull()
+    const storedBlock = (store['hf:clepsydra_time_blocks'] as any[]).find(x => x.id === b.id)!
+    expect(storedBlock.done).toBe(true)
+    const recs = store['hf:clepsydra_records'] as any[]
+    expect(recs).toHaveLength(1)
+    expect(recs[0].blockId).toBe(b.id)
+    expect(recs[0].sourceType).toBe('manual')
+    expect(recs[0].endedAt).not.toBeNull()
+  })
+
+  it('已完成的块不允许再开专注会话（避免与 auto 代理重复计）', () => {
+    const tb = useTimeBlock()
+    const b = tb.addBlock({ date: '2026-10-02', startMin: 420, durationMin: 60, category: 'project', title: '已完成块' })
+    tb.toggleBlock(b.id) // 完成 → 写 auto 代理
+    const before = (store['hf:clepsydra_records'] as any[]).length
+    tb.startFocusOnBlock(b.id) // 已完成 → 拒绝开启
+    expect(useClepsydra().running.value).toBeNull()
+    expect((store['hf:clepsydra_records'] as any[]).length).toBe(before)
+  })
+
+  it('另一块进行中时，开新专注会话被拒（更漏单例仅允许一个进行中）', () => {
+    const tb = useTimeBlock()
+    const b1 = tb.addBlock({ date: '2026-10-02', startMin: 420, durationMin: 60, category: 'project', title: '块1' })
+    const b2 = tb.addBlock({ date: '2026-10-02', startMin: 600, durationMin: 60, category: 'study', title: '块2' })
+    tb.startFocusOnBlock(b1.id)
+    tb.startFocusOnBlock(b2.id) // 拒绝
+    expect(tb.runningBlockId.value).toBe(b1.id)
+    expect((store['hf:clepsydra_records'] as any[]).length).toBe(1)
+  })
+
+  it('stopFocusOnBlock 仅停绑定到该块的会话：块不匹配则不动', () => {
+    const tb = useTimeBlock()
+    const b1 = tb.addBlock({ date: '2026-10-02', startMin: 420, durationMin: 60, category: 'project', title: '块1' })
+    const b2 = tb.addBlock({ date: '2026-10-02', startMin: 600, durationMin: 60, category: 'study', title: '块2' })
+    tb.startFocusOnBlock(b1.id)
+    tb.stopFocusOnBlock(b2.id) // 进行中会话属 b1，不应停
+    expect(useClepsydra().running.value).not.toBeNull()
+    expect(tb.runningBlockId.value).toBe(b1.id)
   })
 })

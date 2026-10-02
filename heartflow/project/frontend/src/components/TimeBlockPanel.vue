@@ -126,7 +126,7 @@
           v-for="b in dayBlocks"
           :key="b.id"
           class="tbp-block"
-          :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id), 'tbp-block--dragging': dragPreview && dragPreview.id === b.id }"
+          :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id), 'tbp-block--dragging': dragPreview && dragPreview.id === b.id, 'tbp-block--focusing': isBlockRunning(b) }"
           :style="dragPreview && dragPreview.id === b.id ? blockStyle(dragPreview) : blockStyle(b)"
           @pointerdown="onBlockPointerDown($event, b)"
         >
@@ -134,12 +134,21 @@
           <div class="tbp-block-body">
             <div class="tbp-block-row">
               <span class="tbp-block-time">{{ blockTimeLabel(b) }}</span>
+              <span v-if="isBlockRunning(b)" class="tbp-block-focus-tag" title="专注会话进行中">专注中</span>
               <span v-if="overlapIds.has(b.id)" class="tbp-block-warn" title="与其他时间块重叠">⚠</span>
               <span class="tbp-block-cat">{{ WORK_CATEGORY_META[b.category].icon }}</span>
             </div>
             <span class="tbp-block-title">{{ b.title }}</span>
           </div>
           <div class="tbp-block-actions">
+            <button
+              type="button"
+              class="tbp-block-btn tbp-block-btn--focus"
+              :class="{ 'tbp-block-btn--focusing': isBlockRunning(b) }"
+              :title="isBlockRunning(b) ? '结束专注会话并标记完成' : '开始专注此时间块（计时将绑定此块）'"
+              :disabled="b.done || (anyRunning && !isBlockRunning(b))"
+              @click="toggleFocus(b)"
+            >{{ isBlockRunning(b) ? '■' : '🎯' }}</button>
             <button type="button" class="tbp-block-btn" :title="b.done ? '标记未完成（已移出更漏光仪）' : '标记完成并汇入更漏光仪'" @click="tb.toggleBlock(b.id)">
               {{ b.done ? '↺' : '✓' }}
             </button>
@@ -210,7 +219,7 @@
             v-for="b in dayBlocksInWeek(day)"
             :key="b.id"
             class="tbp-block tbp-block--week"
-            :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id) }"
+            :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id), 'tbp-block--focusing': isBlockRunning(b) }"
             :style="blockStyle(b)"
             @pointerdown="onBlockPointerDown($event, b)"
           >
@@ -218,6 +227,7 @@
             <div class="tbp-block-body">
               <div class="tbp-block-row">
                 <span class="tbp-block-time">{{ blockTimeLabel(b) }}</span>
+                <span v-if="isBlockRunning(b)" class="tbp-block-focus-tag" title="专注会话进行中">专注中</span>
                 <span v-if="overlapIds.has(b.id)" class="tbp-block-warn" title="与其他时间块重叠">⚠</span>
                 <span class="tbp-block-cat">{{ WORK_CATEGORY_META[b.category].icon }}</span>
               </div>
@@ -225,6 +235,14 @@
             </div>
             <div class="tbp-block-resize" title="拖拽改变时长" @pointerdown="onResizePointerDown($event, b)"></div>
             <div class="tbp-block-actions">
+              <button
+                type="button"
+                class="tbp-block-btn tbp-block-btn--focus"
+                :class="{ 'tbp-block-btn--focusing': isBlockRunning(b) }"
+                :title="isBlockRunning(b) ? '结束专注会话并标记完成' : '开始专注此时间块（计时将绑定此块）'"
+                :disabled="b.done || (anyRunning && !isBlockRunning(b))"
+                @click="toggleFocus(b)"
+              >{{ isBlockRunning(b) ? '■' : '🎯' }}</button>
               <button type="button" class="tbp-block-btn" :title="b.done ? '标记未完成（已移出更漏光仪）' : '标记完成并汇入更漏光仪'" @click="tb.toggleBlock(b.id)">{{ b.done ? '↺' : '✓' }}</button>
               <button type="button" class="tbp-block-btn tbp-block-btn--del" title="移除" @click="tb.removeBlock(b.id)">✕</button>
             </div>
@@ -575,6 +593,17 @@ const coverage = computed(() => Math.min(1, scheduledMin.value / WINDOW_MIN))
 const overlapIds = computed(() => detectOverlapIds(tb.blocks.value))
 const overlapCount = computed(() => overlapIds.value.size)
 
+// ---- 专注会话绑定（INCR-423）：块 ↔ 更漏专注会话 ----
+const runningBlockId = computed(() => tb.runningBlockId.value)
+const anyRunning = computed(() => runningBlockId.value !== null)
+function isBlockRunning(b: TimeBlock): boolean {
+  return runningBlockId.value === b.id
+}
+function toggleFocus(b: TimeBlock): void {
+  if (isBlockRunning(b)) tb.stopFocusOnBlock(b.id)
+  else tb.startFocusOnBlock(b.id)
+}
+
 // ---- 计划 vs 实际复盘报表（INCR-419，聚合日 / 周）----
 const planActual = computed<PlanActualReport>(() =>
   viewMode.value === 'week' ? tb.planActualForWeek(weekDays.value) : tb.planActualForDate(activeDate.value),
@@ -864,8 +893,26 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
   width: 20px; height: 18px; border-radius: 4px; border: none; cursor: pointer; font-size: 11px;
   background: rgba(255, 255, 255, 0.05); color: var(--text-secondary);
 }
-.tbp-block-btn:hover { background: rgba(var(--accent-rgb), 0.18); color: var(--text-primary); }
+.tbp-block-btn:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.18); color: var(--text-primary); }
+.tbp-block-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 .tbp-block-btn--del:hover { background: rgba(196, 106, 90, 0.25); color: #c46a5a; }
+.tbp-block-btn--focus { color: rgba(var(--accent-rgb), 0.85); }
+.tbp-block-btn--focus:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.22); color: var(--accent); }
+.tbp-block-btn--focusing { color: #fff; background: rgba(var(--accent-rgb), 0.85); }
+
+.tbp-block-focus-tag {
+  font-size: 9px; color: #fff; background: rgba(var(--accent-rgb), 0.8);
+  padding: 0 4px; border-radius: 4px; flex-shrink: 0; letter-spacing: 0.5px;
+}
+
+.tbp-block--focusing {
+  border-color: rgba(var(--accent-rgb), 0.9);
+  animation: tbp-focus-pulse 1.6s ease-in-out infinite;
+}
+@keyframes tbp-focus-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.55), 0 0 10px rgba(var(--accent-rgb), 0.3); }
+  50% { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.95), 0 0 18px rgba(var(--accent-rgb), 0.6); }
+}
 
 .tbp-manual { display: flex; flex-direction: column; gap: 8px; }
 .tbp-manual-head { font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }

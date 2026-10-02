@@ -780,6 +780,31 @@ export function useTimeBlock() {
     else unsyncBlockRecord(b.id)
   }
 
+  // ---- 专注会话绑定（INCR-423）：时间块 ↔ 更漏专注会话 ----
+  function startFocusOnBlock(blockId: string): void {
+    const b = blocks.value.find(x => x.id === blockId)
+    if (!b || b.done) return // 已完成块视作已结算，避免与 auto 代理重复计
+    const clepsydra = useClepsydra()
+    // 更漏单例仅允许一个进行中会话：已有则不再重复开（避免并行计时）
+    if (clepsydra.running.value) return
+    clepsydra.startTimer({ category: b.category, note: b.title, blockId })
+  }
+
+  function stopFocusOnBlock(blockId: string): void {
+    const b = blocks.value.find(x => x.id === blockId)
+    if (!b) return
+    const clepsydra = useClepsydra()
+    const running = clepsydra.running.value
+    // 仅当「当前进行中会话正是绑定到该块」时才停，避免误停其他会话
+    if (!running || running.blockId !== blockId) return
+    clepsydra.stopTimer()
+    // 结束后标记完成：因已有真实专注会话，syncBlockRecord 不会再补「计划时长」代理，避免重复计
+    if (!b.done) toggleBlock(b.id)
+  }
+
+  /** 当前进行中会话所绑定的时间块 id（无进行中会话则 null），供面板派生「专注中」态 */
+  const runningBlockId = computed(() => useClepsydra().running.value?.blockId ?? null)
+
   // ---- 完成态联动：时间块完成 → 写入更漏工作记录（汇入光仪编织） ----
   function linkedRecord(blockId: string): WorkRecord | undefined {
     return useClepsydra().records.value.find(r => r.sourceAnchorId === blockId && r.sourceType === 'auto')
@@ -798,6 +823,12 @@ export function useTimeBlock() {
         note: input.note,
       })
     } else {
+      // 若该块已有真实的专注会话记录（blockId 联动、非 auto 代理），以真实时长为实际，
+      // 不再补「计划时长」代理，避免重复计（INCR-423 专注会话绑定）。
+      const hasRealSession = clepsydra.records.value.some(
+        r => r.blockId === b.id && r.sourceType !== 'auto',
+      )
+      if (hasRealSession) return
       clepsydra.addRecord({ ...input })
     }
   }
@@ -914,6 +945,9 @@ export function useTimeBlock() {
     setBlockPlacement,
     removeBlock,
     toggleBlock,
+    startFocusOnBlock,
+    stopFocusOnBlock,
+    runningBlockId,
     tasksForDate,
     blocksForDate,
     unscheduledTasksForDate,
