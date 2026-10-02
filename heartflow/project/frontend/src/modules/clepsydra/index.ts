@@ -79,6 +79,10 @@ export {
   buildFocusHeatmap,
   buildFocusHourly,
   buildFocusCategoryBreakdown,
+  computeFocusGoalProgress,
+  computeFocusStreak,
+  buildFocusReview,
+  GOAL_STORAGE_KEY,
   useTimeBlock,
 } from './time-block'
 export type {
@@ -102,4 +106,8 @@ export type {
   FocusHourly,
   FocusCategorySlice,
   FocusCategoryBreakdown,
+  FocusGoalWindow,
+  FocusGoalProgress,
+  FocusStreak,
+  FocusReview,
 } from './time-block'

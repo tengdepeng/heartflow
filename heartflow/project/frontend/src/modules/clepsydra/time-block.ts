@@ -20,6 +20,7 @@ import { genId, WORK_CATEGORY_META, useClepsydra } from './clepsydra'
 export const TASK_STORAGE_KEY = 'hf:clepsydra_plan_tasks'
 export const BLOCK_STORAGE_KEY = 'hf:clepsydra_time_blocks'
 export const TEMPLATE_STORAGE_KEY = 'hf:clepsydra_templates'
+export const GOAL_STORAGE_KEY = 'hf:clepsydra_focus_goal'
 
 // ------------------------------------------------------------
 // 类型
@@ -1125,6 +1126,177 @@ export function buildFocusCategoryBreakdown(
 }
 
 // ------------------------------------------------------------
+// 专注目标达成率 / 连续天数 / 复盘报告（INCR-431 / 432 / 433）
+// ------------------------------------------------------------
+
+export type FocusGoalWindow = 'today' | 'week'
+export interface FocusGoalProgress {
+  window: FocusGoalWindow
+  /** 窗口目标分钟（周=日目标×7） */
+  goalMinutes: number
+  /** 窗口内实际专注分钟 */
+  actualMinutes: number
+  /** 还差多少达标（已达标为 0） */
+  remainingMinutes: number
+  /** 达成率（actual/goal） */
+  rate: number
+  /** 是否已达标 */
+  achieved: boolean
+  /** 是否设置了目标（goal>0） */
+  hasGoal: boolean
+}
+
+/**
+ * 专注目标达成率（INCR-431）：对照「日目标」看今日/本周实际专注的达成率与缺口。
+ * 周目标 = 日目标 × 7；排除 auto 代理；纯函数不改入参。
+ */
+export function computeFocusGoalProgress(
+  records: WorkRecord[],
+  goalMinutes: number,
+  win: FocusGoalWindow = 'today',
+  anchor: Date = new Date(),
+): FocusGoalProgress {
+  const days = win === 'today' ? 1 : 7
+  const anchorDay = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())
+  const start = localDateKey(addDaysLocal(anchorDay, -(days - 1)))
+  const end = localDateKey(anchorDay)
+
+  let actual = 0
+  for (const r of records) {
+    if (r.sourceType === 'auto') continue
+    const durSec = r.durationSeconds ?? 0
+    if (durSec <= 0) continue
+    const dayKey = localDateKey(new Date(r.startedAt))
+    if (dayKey < start || dayKey > end) continue
+    actual += durSec / 60
+  }
+
+  const goal = Math.max(0, Math.round(goalMinutes)) * (win === 'week' ? 7 : 1)
+  return {
+    window: win,
+    goalMinutes: goal,
+    actualMinutes: actual,
+    remainingMinutes: Math.max(0, goal - actual),
+    rate: goal > 0 ? actual / goal : 0,
+    achieved: goal > 0 && actual >= goal,
+    hasGoal: goal > 0,
+  }
+}
+
+export interface FocusStreak {
+  /** 当前连续专注天数（今日无记录则从昨日起算） */
+  current: number
+  /** 窗口内最长连续天数 */
+  longest: number
+  /** 最近一次有专注的日期（localDateKey），无则 null */
+  lastActiveDate: string | null
+  /** 窗口内有专注的天数 */
+  activeDays: number
+  hasData: boolean
+}
+
+/**
+ * 专注连续天数（INCR-432）：统计连续有 manual 专注记录的天数与最长连击。
+ * 排除 auto 代理；纯函数不改入参。
+ */
+export function computeFocusStreak(
+  records: WorkRecord[],
+  anchor: Date = new Date(),
+  days: number = 365,
+): FocusStreak {
+  const anchorDay = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())
+  const start = localDateKey(addDaysLocal(anchorDay, -(days - 1)))
+  const end = localDateKey(anchorDay)
+
+  const active = new Set<string>()
+  for (const r of records) {
+    if (r.sourceType === 'auto') continue
+    if ((r.durationSeconds ?? 0) <= 0) continue
+    const dayKey = localDateKey(new Date(r.startedAt))
+    if (dayKey < start || dayKey > end) continue
+    active.add(dayKey)
+  }
+
+  let longest = 0
+  let run = 0
+  for (let i = 0; i < days; i++) {
+    const k = localDateKey(addDaysLocal(anchorDay, -(days - 1 - i)))
+    if (active.has(k)) {
+      run += 1
+      if (run > longest) longest = run
+    } else {
+      run = 0
+    }
+  }
+
+  // 当前连击：今日有记录则从今日起算，否则从昨日起算（今天还没开始不算断）
+  let current = 0
+  let cursor = anchorDay
+  if (!active.has(localDateKey(cursor))) cursor = addDaysLocal(cursor, -1)
+  while (active.has(localDateKey(cursor))) {
+    current += 1
+    cursor = addDaysLocal(cursor, -1)
+  }
+
+  const sorted = [...active].sort()
+  return {
+    current,
+    longest,
+    lastActiveDate: sorted.length ? sorted[sorted.length - 1] : null,
+    activeDays: active.size,
+    hasData: active.size > 0,
+  }
+}
+
+export interface FocusReview {
+  windowLabel: string
+  days: number
+  /** 窗口内实际专注总分钟 */
+  totalMinutes: number
+  /** 有专注的天数 */
+  activeDays: number
+  /** 日均（按活跃天） */
+  avgMinutesPerActiveDay: number
+  /** 高峰小时 */
+  peakHour: number
+  /** 投入最多的领域 */
+  topCategory: WorkCategory | null
+  topCategoryLabel: string
+  topCategoryMinutes: number
+  /** 当前连续天数 */
+  streak: number
+  hasData: boolean
+}
+
+/**
+ * 周/月复盘报告（INCR-433）：把已有分析轴（时段/分类/连击）汇成一份复盘摘要。
+ * 复用 buildFocusHourly / buildFocusCategoryBreakdown / computeFocusStreak；纯函数不改入参。
+ */
+export function buildFocusReview(
+  records: WorkRecord[],
+  anchor: Date = new Date(),
+  days: number = 30,
+): FocusReview {
+  const hourly = buildFocusHourly(records, anchor, days)
+  const cat = buildFocusCategoryBreakdown(records, anchor, days)
+  const streak = computeFocusStreak(records, anchor, Math.max(days, 365))
+  const top = cat.slices[0] ?? null
+  return {
+    windowLabel: days <= 7 ? '本周' : days <= 31 ? '近一月' : '近一季',
+    days,
+    totalMinutes: hourly.totalMinutes,
+    activeDays: streak.activeDays,
+    avgMinutesPerActiveDay: streak.activeDays > 0 ? hourly.totalMinutes / streak.activeDays : 0,
+    peakHour: hourly.peakHour,
+    topCategory: top ? top.category : null,
+    topCategoryLabel: top ? top.label : '',
+    topCategoryMinutes: top ? top.minutes : 0,
+    streak: streak.current,
+    hasData: hourly.totalMinutes > 0,
+  }
+}
+
+// ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------
 
@@ -1132,6 +1304,7 @@ export function useTimeBlock() {
   const tasks = ref<PlannedTask[]>(loadTasks())
   const blocks = ref<TimeBlock[]>(loadBlocks())
   const templates = ref<BlockTemplate[]>(loadTemplates())
+  const focusGoal = ref<number>(loadGoal())
 
   function loadTasks(): PlannedTask[] {
     try {
@@ -1167,6 +1340,24 @@ export function useTimeBlock() {
 
   function saveTemplates(): void {
     storage.setKV(TEMPLATE_STORAGE_KEY, templates.value)
+  }
+
+  function loadGoal(): number {
+    try {
+      return storage.getKV<number>(GOAL_STORAGE_KEY, 0)
+    } catch {
+      return 0
+    }
+  }
+
+  function saveGoal(): void {
+    storage.setKV(GOAL_STORAGE_KEY, focusGoal.value)
+  }
+
+  /** 设置每日专注目标（分钟，0=未设目标） */
+  function setFocusGoal(min: number): void {
+    focusGoal.value = Math.max(0, Math.round(min))
+    saveGoal()
   }
 
   // ---- 待办 CRUD ----
@@ -1463,6 +1654,8 @@ export function useTimeBlock() {
     removeTemplate,
     planActualForDate,
     planActualForWeek,
+    focusGoal: computed(() => focusGoal.value),
+    setFocusGoal,
     localDateKey,
     todayKey,
   }

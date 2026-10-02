@@ -32,6 +32,9 @@ import {
   buildFocusHeatmap,
   buildFocusHourly,
   buildFocusCategoryBreakdown,
+  computeFocusGoalProgress,
+  computeFocusStreak,
+  buildFocusReview,
   useTimeBlock,
   type PlannedTask,
   type TimeBlock,
@@ -1077,5 +1080,163 @@ describe('buildFocusCategoryBreakdown（INCR-430 专注分类占比）', () => {
     const r0 = JSON.stringify(records)
     buildFocusCategoryBreakdown(records, anchor, 30)
     expect(JSON.stringify(records)).toBe(r0)
+  })
+})
+
+describe('computeFocusGoalProgress（INCR-431 专注目标达成率）', () => {
+  const anchor = new Date(2026, 9, 15) // 2026-10-15
+  function localIso(y: number, mo: number, d: number, h: number, mi: number, s = 0): string {
+    return new Date(y, mo - 1, d, h, mi, s, 0).toISOString()
+  }
+  function rec(partial: Partial<WorkRecord> & { durationSeconds: number; startedAt: string }): WorkRecord {
+    return {
+      id: partial.id ?? 'r', startedAt: partial.startedAt, endedAt: partial.endedAt,
+      durationSeconds: partial.durationSeconds, category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual', intensity: 0.5, note: '',
+      createdAt: partial.startedAt,
+    } as WorkRecord
+  }
+
+  it('实际 < 目标 → 未达标，remaining=15、rate=0.75', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 2700 })]
+    const p = computeFocusGoalProgress(records, 60, 'today', anchor)
+    expect(p.hasGoal).toBe(true)
+    expect(p.goalMinutes).toBe(60)
+    expect(p.actualMinutes).toBeCloseTo(45, 5)
+    expect(p.remainingMinutes).toBeCloseTo(15, 5)
+    expect(p.rate).toBeCloseTo(0.75, 5)
+    expect(p.achieved).toBe(false)
+  })
+
+  it('实际 == 目标 → 已达标，remaining=0、rate=1', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 3600 })]
+    const p = computeFocusGoalProgress(records, 60, 'today', anchor)
+    expect(p.achieved).toBe(true)
+    expect(p.remainingMinutes).toBeCloseTo(0, 5)
+    expect(p.rate).toBeCloseTo(1, 5)
+  })
+
+  it('周窗口目标 = 日目标 × 7（goal=420）', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 2700 })]
+    const p = computeFocusGoalProgress(records, 60, 'week', anchor)
+    expect(p.window).toBe('week')
+    expect(p.goalMinutes).toBe(420)
+    expect(p.actualMinutes).toBeCloseTo(45, 5)
+    expect(p.rate).toBeCloseTo(45 / 420, 5)
+  })
+
+  it('未设目标（goal=0）→ hasGoal=false、rate=0', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 3600 })]
+    const p = computeFocusGoalProgress(records, 0, 'today', anchor)
+    expect(p.hasGoal).toBe(false)
+    expect(p.rate).toBe(0)
+    expect(p.achieved).toBe(false)
+  })
+
+  it('排除 auto 代理', () => {
+    const records = [
+      rec({ id: 'a1', sourceType: 'auto', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 3600 }),
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 14, 0, 0), durationSeconds: 1800 }),
+    ]
+    const p = computeFocusGoalProgress(records, 60, 'today', anchor)
+    expect(p.actualMinutes).toBeCloseTo(30, 5)
+  })
+})
+
+describe('computeFocusStreak（INCR-432 专注连续天数）', () => {
+  const anchor = new Date(2026, 9, 15) // 2026-10-15
+  function localIso(y: number, mo: number, d: number, h = 9, mi = 0, s = 0): string {
+    return new Date(y, mo - 1, d, h, mi, s, 0).toISOString()
+  }
+  function rec(partial: Partial<WorkRecord> & { durationSeconds: number; startedAt: string }): WorkRecord {
+    return {
+      id: partial.id ?? 'r', startedAt: partial.startedAt, endedAt: partial.endedAt,
+      durationSeconds: partial.durationSeconds, category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual', intensity: 0.5, note: '',
+      createdAt: partial.startedAt,
+    } as WorkRecord
+  }
+
+  it('连续三天 → current=3、longest=3、activeDays=3', () => {
+    const records = [
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 13), durationSeconds: 1800 }),
+      rec({ id: 'm2', startedAt: localIso(2026, 10, 14), durationSeconds: 1800 }),
+      rec({ id: 'm3', startedAt: localIso(2026, 10, 15), durationSeconds: 1800 }),
+    ]
+    const s = computeFocusStreak(records, anchor)
+    expect(s.current).toBe(3)
+    expect(s.longest).toBe(3)
+    expect(s.activeDays).toBe(3)
+    expect(s.lastActiveDate).toBe('2026-10-15')
+    expect(s.hasData).toBe(true)
+  })
+
+  it('中间断档 → longest 取最大连续段、current 取尾部', () => {
+    const records = [
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 10), durationSeconds: 1800 }),
+      rec({ id: 'm2', startedAt: localIso(2026, 10, 11), durationSeconds: 1800 }),
+      rec({ id: 'm3', startedAt: localIso(2026, 10, 14), durationSeconds: 1800 }),
+      rec({ id: 'm4', startedAt: localIso(2026, 10, 15), durationSeconds: 1800 }),
+    ]
+    const s = computeFocusStreak(records, anchor)
+    expect(s.longest).toBe(2)
+    expect(s.current).toBe(2)
+  })
+
+  it('今日无记录 → 从昨日起算（不断连）', () => {
+    const records = [
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 13), durationSeconds: 1800 }),
+      rec({ id: 'm2', startedAt: localIso(2026, 10, 14), durationSeconds: 1800 }),
+    ]
+    const s = computeFocusStreak(records, anchor)
+    expect(s.current).toBe(2)
+    expect(s.lastActiveDate).toBe('2026-10-14')
+  })
+
+  it('无记录 → hasData=false、current=0', () => {
+    const s = computeFocusStreak([], anchor)
+    expect(s.hasData).toBe(false)
+    expect(s.current).toBe(0)
+    expect(s.lastActiveDate).toBe(null)
+  })
+})
+
+describe('buildFocusReview（INCR-433 周/月复盘）', () => {
+  const anchor = new Date(2026, 9, 15) // 2026-10-15
+  function localIso(y: number, mo: number, d: number, h: number, mi = 0, s = 0): string {
+    return new Date(y, mo - 1, d, h, mi, s, 0).toISOString()
+  }
+  function rec(partial: Partial<WorkRecord> & { durationSeconds: number; startedAt: string }): WorkRecord {
+    return {
+      id: partial.id ?? 'r', startedAt: partial.startedAt, endedAt: partial.endedAt,
+      durationSeconds: partial.durationSeconds, category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual', intensity: 0.5, note: '',
+      createdAt: partial.startedAt,
+    } as WorkRecord
+  }
+
+  it('汇总正确：总90分/活跃1天/日均90/高峰9点/主领域项目60分', () => {
+    const records = [
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 9), durationSeconds: 3600, category: 'project' }),
+      rec({ id: 'm2', startedAt: localIso(2026, 10, 15, 14), durationSeconds: 1800, category: 'study' }),
+    ]
+    const r = buildFocusReview(records, anchor, 30)
+    expect(r.hasData).toBe(true)
+    expect(r.totalMinutes).toBeCloseTo(90, 5)
+    expect(r.activeDays).toBe(1)
+    expect(r.avgMinutesPerActiveDay).toBeCloseTo(90, 5)
+    expect(r.peakHour).toBe(9)
+    expect(r.topCategory).toBe('project')
+    expect(r.topCategoryLabel).toBe('项目')
+    expect(r.topCategoryMinutes).toBeCloseTo(60, 5)
+    expect(r.streak).toBe(1)
+    expect(r.windowLabel).toBe('近一月')
+  })
+
+  it('无数据 → hasData=false、主领域为空', () => {
+    const r = buildFocusReview([], anchor, 30)
+    expect(r.hasData).toBe(false)
+    expect(r.topCategory).toBe(null)
+    expect(r.totalMinutes).toBeCloseTo(0, 5)
   })
 })

@@ -268,6 +268,94 @@
       </div>
     </div>
 
+    <!-- 专注目标达成率（INCR-431） -->
+    <div class="clp-block">
+      <div class="clp-trend-head">
+        <span class="clp-block-label">专注目标达成率 · {{ goalWindow === 'today' ? '今日' : '本周' }}</span>
+        <div class="clp-tabs">
+          <button
+            v-for="g in goalWindows"
+            :key="g.key"
+            type="button"
+            class="clp-tab"
+            :class="{ active: goalWindow === g.key }"
+            @click="goalWindow = g.key"
+          >{{ g.label }}</button>
+        </div>
+      </div>
+      <div class="clp-goal-set">
+        <span class="clp-goal-set-label">每日目标</span>
+        <input v-model.number="goalDraft" type="number" min="0" class="clp-input clp-input--num" placeholder="分钟" />
+        <button type="button" class="clp-btn clp-btn--primary" @click="saveFocusGoal">保存</button>
+      </div>
+      <div class="clp-goal-body" v-if="focusGoalProgress.hasGoal">
+        <div class="clp-goal-track">
+          <div
+            class="clp-goal-fill"
+            :class="{ 'clp-goal--done': focusGoalProgress.achieved }"
+            :style="{ width: goalBarPct(focusGoalProgress) + '%' }"
+          ></div>
+        </div>
+        <div class="clp-goal-summary">
+          <span>实际 <b>{{ Math.round(focusGoalProgress.actualMinutes) }}</b> / 目标 <b>{{ focusGoalProgress.goalMinutes }}</b> 分</span>
+          <span>达成率 <b>{{ Math.round(focusGoalProgress.rate * 100) }}%</b></span>
+          <span>{{ goalHint(focusGoalProgress) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 专注连续天数（INCR-432） -->
+    <div class="clp-block" v-if="focusStreak.hasData">
+      <span class="clp-block-label">专注连续天数</span>
+      <div class="clp-streak-body">
+        <div class="clp-streak-item">
+          <span class="clp-streak-num">🔥 {{ focusStreak.current }}</span>
+          <span class="clp-streak-cap">当前连击（天）</span>
+        </div>
+        <div class="clp-streak-item">
+          <span class="clp-streak-num">{{ focusStreak.longest }}</span>
+          <span class="clp-streak-cap">最长连击（天）</span>
+        </div>
+        <div class="clp-streak-item">
+          <span class="clp-streak-num">{{ focusStreak.activeDays }}</span>
+          <span class="clp-streak-cap">活跃天数</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 周/月复盘报告（INCR-433） -->
+    <div class="clp-block" v-if="focusReview.hasData">
+      <div class="clp-trend-head">
+        <span class="clp-block-label">专注复盘 · {{ focusReview.windowLabel }}</span>
+      </div>
+      <div class="clp-review-grid">
+        <div class="clp-review-cell">
+          <span class="clp-review-cap">总专注</span>
+          <span class="clp-review-val">{{ Math.round((focusReview.totalMinutes / 60) * 10) / 10 }} 小时</span>
+        </div>
+        <div class="clp-review-cell">
+          <span class="clp-review-cap">活跃天数</span>
+          <span class="clp-review-val">{{ focusReview.activeDays }} 天</span>
+        </div>
+        <div class="clp-review-cell">
+          <span class="clp-review-cap">日均（活跃天）</span>
+          <span class="clp-review-val">{{ Math.round(focusReview.avgMinutesPerActiveDay) }} 分</span>
+        </div>
+        <div class="clp-review-cell">
+          <span class="clp-review-cap">高峰时段</span>
+          <span class="clp-review-val">{{ String(focusReview.peakHour).padStart(2, '0') }}:00</span>
+        </div>
+        <div class="clp-review-cell">
+          <span class="clp-review-cap">主领域</span>
+          <span class="clp-review-val">{{ focusReview.topCategoryLabel || '—' }}</span>
+        </div>
+        <div class="clp-review-cell">
+          <span class="clp-review-cap">当前连击</span>
+          <span class="clp-review-val">{{ focusReview.streak }} 天</span>
+        </div>
+      </div>
+    </div>
+
     <!-- 时间哨塔（倒计时） -->
     <div class="clp-block">
       <span class="clp-block-label">时间哨塔 · {{ timers.length }}</span>
@@ -339,6 +427,9 @@ import {
   buildFocusHeatmap,
   buildFocusHourly,
   buildFocusCategoryBreakdown,
+  computeFocusGoalProgress,
+  computeFocusStreak,
+  buildFocusReview,
   weekDaysOf,
   todayKey,
   WORK_CATEGORY_META,
@@ -349,7 +440,7 @@ import {
   countdownRepeatLabel,
   countdownRemaining,
 } from '../modules/clepsydra'
-import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod, FocusHeatmap, HeatRange, HeatDay, FocusHourly, HourWindow, FocusCategoryBreakdown } from '../modules/clepsydra'
+import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod, FocusHeatmap, HeatRange, HeatDay, FocusHourly, HourWindow, FocusCategoryBreakdown, FocusGoalWindow, FocusGoalProgress, FocusStreak, FocusReview } from '../modules/clepsydra'
 
 const clepsydra = useClepsydra()
 const countdown = useClepsydraCountdown()
@@ -478,6 +569,40 @@ function catDonutStyle(b: FocusCategoryBreakdown): Record<string, string> {
   }
   return { background: `conic-gradient(${stops.join(', ')})` }
 }
+
+/**
+ * 专注目标达成率（INCR-431）：对照日目标看今日/本周达成率与缺口。
+ * 目标值走轻量 KV 存储（hf:clepsydra_focus_goal），其余纯展示、不发提醒。
+ */
+const goalWindow = ref<FocusGoalWindow>('today')
+const goalDraft = ref<number>(tb.focusGoal.value)
+const focusGoalProgress = computed<FocusGoalProgress>(() =>
+  computeFocusGoalProgress(clepsydra.records.value, tb.focusGoal.value, goalWindow.value, now.value),
+)
+const goalWindows = [
+  { key: 'today' as const, label: '今日' },
+  { key: 'week' as const, label: '本周' },
+]
+function saveFocusGoal(): void {
+  tb.setFocusGoal(goalDraft.value)
+}
+function goalBarPct(p: FocusGoalProgress): number {
+  if (!p.hasGoal) return 0
+  return Math.min(100, Math.max(0, p.rate * 100))
+}
+function goalHint(p: FocusGoalProgress): string {
+  if (!p.hasGoal) return '未设目标'
+  if (p.achieved) return `已达标（超额 ${Math.round(p.actualMinutes - p.goalMinutes)} 分）`
+  return `还差 ${Math.round(p.remainingMinutes)} 分达标`
+}
+
+/** 专注连续天数（INCR-432）：当前连击 / 最长连击 / 活跃天数，纯展示、不写存储。 */
+const focusStreak = computed<FocusStreak>(() => computeFocusStreak(clepsydra.records.value, now.value))
+
+/** 周/月复盘报告（INCR-433）：汇总已有分析轴，纯展示、不写存储。 */
+const focusReview = computed<FocusReview>(() =>
+  buildFocusReview(clepsydra.records.value, now.value, hourWindowDays.value),
+)
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
   key: k,
@@ -818,6 +943,25 @@ onUnmounted(() => {
 .clp-cat-name { color: var(--text-primary); font-weight: 600; }
 .clp-cat-min { margin-left: auto; color: var(--text-secondary); }
 .clp-cat-pct { color: var(--text-primary); font-weight: 600; min-width: 42px; text-align: right; }
+
+.clp-goal-set { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.clp-goal-set-label { font-size: 12px; color: var(--text-secondary); flex: 0 0 auto; }
+.clp-goal-body { margin-top: 10px; }
+.clp-goal-track { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; }
+.clp-goal-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, rgba(240,185,90,0.85), rgba(196,106,90,0.85)); transition: width 0.3s ease; }
+.clp-goal-fill.clp-goal--done { background: linear-gradient(90deg, rgba(143,201,154,0.85), rgba(143,201,154,0.6)); }
+.clp-goal-summary { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+.clp-goal-summary b { color: var(--text-primary); font-weight: 600; }
+
+.clp-streak-body { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+.clp-streak-item { flex: 1 1 90px; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+.clp-streak-num { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+.clp-streak-cap { font-size: 11px; color: var(--text-secondary); }
+
+.clp-review-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-top: 8px; }
+.clp-review-cell { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); }
+.clp-review-cap { font-size: 11px; color: var(--text-secondary); }
+.clp-review-val { font-size: 13px; font-weight: 600; color: var(--text-primary); }
 
 @keyframes clp-spin {
   from { transform: rotate(0deg); }

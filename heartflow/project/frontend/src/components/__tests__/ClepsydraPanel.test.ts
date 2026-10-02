@@ -67,7 +67,8 @@ describe('ClepsydraPanel 工作光仪', () => {
 
   it('添加倒计时哨塔并展示', async () => {
     const wrapper = await mountPanel()
-    const labelInput = wrapper.find('input.clp-input')
+    // 作用域定位：全局首个 .clp-input 现为 INCR-431 目标输入框，故限定到倒计时新增区
+    const labelInput = wrapper.find('.clp-countdown-add .clp-input')
     await labelInput.setValue('番茄专注')
     const addBtn = wrapper.findAll('button').find(b => b.text() === '添加')
     await addBtn!.trigger('click')
@@ -291,5 +292,61 @@ describe('ClepsydraPanel 专注分类占比（INCR-430）', () => {
     await wrapper.vm.$nextTick()
     expect(catLabel(wrapper)).toContain('近一季')
     expect(wrapper.find('.clp-cat-donut').exists()).toBe(true)
+  })
+})
+
+describe('ClepsydraPanel 目标达成率 / 连续天数 / 复盘（INCR-431/432/433）', () => {
+  const mkRec = (id: string, startMin: number, durSec: number, cat: string) => ({
+    id,
+    startedAt: iso(startMin),
+    endedAt: iso(startMin + durSec / 60),
+    durationSeconds: durSec,
+    category: cat,
+    sourceType: 'manual',
+    intensity: 0.7,
+    note: cat,
+    createdAt: iso(startMin),
+  })
+
+  it('设目标后 → 渲染达成率进度条 + 「还差 X 分达标」', async () => {
+    const wrapper = await mountPanel([mkRec('g1', -180, 2700, 'project')]) // 今日 45 分
+    const input = wrapper.find('.clp-goal-set .clp-input--num')
+    await input.setValue(60)
+    const saveBtn = wrapper.findAll('button').find((b) => b.text() === '保存')
+    expect(saveBtn).toBeTruthy()
+    await saveBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.clp-goal-track').exists()).toBe(true)
+    expect(wrapper.text()).toContain('达成率')
+    expect(wrapper.text()).toContain('还差')
+    expect(wrapper.text()).toContain('75%')
+  })
+
+  it('未设目标 → 进度条不渲染', async () => {
+    const wrapper = await mountPanel([mkRec('g2', -120, 3600, 'study')])
+    expect(wrapper.find('.clp-goal-track').exists()).toBe(false)
+  })
+
+  it('有记录 → 渲染连续天数（当前/最长连击）', async () => {
+    const wrapper = await mountPanel([mkRec('s1', -120, 3600, 'study')])
+    expect(wrapper.find('.clp-streak-body').exists()).toBe(true)
+    expect(wrapper.text()).toContain('当前连击')
+    expect(wrapper.text()).toContain('最长连击')
+  })
+
+  it('有记录 → 渲染复盘卡片（总专注 / 主领域）', async () => {
+    const wrapper = await mountPanel([
+      mkRec('r1', -240, 3600, 'project'),
+      mkRec('r2', -120, 1800, 'study'),
+    ])
+    expect(wrapper.find('.clp-review-grid').exists()).toBe(true)
+    expect(wrapper.text()).toContain('总专注')
+    expect(wrapper.text()).toContain('项目')
+  })
+
+  it('无记录 → 连续天数与复盘节均不渲染', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.clp-streak-body').exists()).toBe(false)
+    expect(wrapper.find('.clp-review-grid').exists()).toBe(false)
   })
 })
