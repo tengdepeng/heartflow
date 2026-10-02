@@ -106,7 +106,9 @@
         <span>当日时间轴</span>
         <span class="tbp-coverage">已排 {{ Math.round(scheduledMin / 60 * 10) / 10 }}h · 覆盖率 {{ Math.round(coverage * 100) }}%</span>
         <span v-if="overlapCount > 0" class="tbp-overlap-note">⚠ {{ overlapCount }} 个时间块重叠</span>
+        <button v-if="overlapCount > 0" type="button" class="tbp-btn tbp-btn--auto" @click="runResolveConflicts">🧹 消除冲突</button>
       </div>
+      <p v-if="lastResolvedMsg" class="tbp-auto-note">{{ lastResolvedMsg }}</p>
 
       <div class="tbp-timeline" ref="timelineEl" :style="{ height: timelineHeight + 'px' }" @pointerdown="onTimelinePointerDown">
         <!-- 小时网格 -->
@@ -168,7 +170,9 @@
         <span>周视图 · 拖拽块改起止 · 跨列改日期 · 底部手柄拉时长</span>
         <span class="tbp-coverage">本周已排 {{ Math.round(weekScheduledMin / 60 * 10) / 10 }}h · 覆盖率 {{ weekCoveragePct }}%</span>
         <span v-if="overlapCount > 0" class="tbp-overlap-note">⚠ {{ overlapCount }} 个时间块重叠</span>
+        <button v-if="overlapCount > 0" type="button" class="tbp-btn tbp-btn--auto" @click="runResolveConflicts">🧹 消除冲突</button>
       </div>
+      <p v-if="lastResolvedMsg" class="tbp-auto-note">{{ lastResolvedMsg }}</p>
 
       <!-- 周列头：点击切到该日，高亮今天 / 当前选中 -->
       <div class="tbp-week-colheads">
@@ -297,6 +301,8 @@ import {
   weekDaysOf,
   weekCoverage,
   detectOverlapIds,
+  resolveFreeStart,
+  maxDurationInGap,
   type WorkCategory,
   type TimeBlock,
   type PlanActualReport,
@@ -421,7 +427,12 @@ function onPointerMove(e: PointerEvent): void {
     const curMin = d.origStartMin + dy / PX_PER_MIN
     const s = snap(Math.min(d.origStartMin, curMin))
     const dur = snap(Math.max(SNAP_MIN, Math.abs(curMin - d.origStartMin)))
-    dragPreview.value = { id: 'new', startMin: s, durationMin: dur, date: d.origDate }
+    // 智能避让：新建块也躲开当日已有块（落在最近空隙）
+    const resolved = resolveFreeStart(tb.blocks.value, d.origDate, s, dur, {
+      windowStartMin: DAY_START,
+      windowEndMin: DAY_END,
+    })
+    dragPreview.value = { id: 'new', startMin: resolved, durationMin: dur, date: d.origDate }
     return
   }
   if (d.mode === 'move') {
@@ -431,10 +442,22 @@ function onPointerMove(e: PointerEvent): void {
       const idx = Math.max(0, Math.min(6, Math.floor((e.clientX - d.gridRect.left) / d.colWidth)))
       newDate = weekDays.value[idx] ?? d.origDate
     }
-    dragPreview.value = { id: d.id, startMin: newStart, durationMin: d.origDuration, date: newDate }
+    // 智能避让：移动时躲开目标日其他块（排除自身），落点取最近空隙
+    const resolved = resolveFreeStart(tb.blocks.value, newDate, newStart, d.origDuration, {
+      excludeId: d.id,
+      windowStartMin: DAY_START,
+      windowEndMin: DAY_END,
+    })
+    dragPreview.value = { id: d.id, startMin: resolved, durationMin: d.origDuration, date: newDate }
   } else {
     const newDur = snap(d.origDuration + dy / PX_PER_MIN)
-    dragPreview.value = { id: d.id, startMin: d.origStartMin, durationMin: newDur, date: d.origDate }
+    // 智能避让：拉伸时 clamp 到当前空隙可容纳的最大时长，避免挤压他块
+    const maxDur = maxDurationInGap(tb.blocks.value, d.origDate, d.id, d.origStartMin, {
+      windowStartMin: DAY_START,
+      windowEndMin: DAY_END,
+    })
+    const clamped = Math.max(SNAP_MIN, Math.min(newDur, maxDur))
+    dragPreview.value = { id: d.id, startMin: d.origStartMin, durationMin: clamped, date: d.origDate }
   }
 }
 function onPointerUp(): void {
@@ -569,6 +592,21 @@ const lastScheduled = ref<number | null>(null)
 function runAutoSchedule(): void {
   const n = tb.autoScheduleForDate(activeDate.value)
   lastScheduled.value = n
+}
+
+// ---- 一键消除冲突（紧凑重排，INCR-421） ----
+const lastResolvedMsg = ref('')
+function runResolveConflicts(): void {
+  const opts = { dayStartMin: DAY_START, dayEndMin: DAY_END }
+  let total = 0
+  if (viewMode.value === 'day') {
+    total = tb.resolveConflictsForDate(activeDate.value, opts)
+  } else {
+    for (const day of weekDays.value) {
+      total += tb.resolveConflictsForDate(day, opts)
+    }
+  }
+  lastResolvedMsg.value = total > 0 ? `已紧凑重排 ${total} 个时间块，冲突已消解` : '当前没有可消解的时间块冲突'
 }
 
 // ---- 把单个待办排入下一空档 ----

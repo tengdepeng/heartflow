@@ -364,6 +364,114 @@ function scanOverlaps(group: TimeBlock[], ids: Set<string>): void {
 }
 
 /**
+ * 冲突智能避让 / 重排（INCR-421）。
+ * 把 detectOverlapIds 的「只标红」升级为「可消解」：拖拽落点自动避让，
+ * 以及一键紧凑重排消解存量冲突。纯函数，不修改入参，可单测。
+ */
+
+/** 避让 / 重排的窗口与排除选项 */
+export interface AvoidanceOptions {
+  /** 忽略某个块的当前占位（拖拽该块时排除自身） */
+  excludeId?: string
+  /** 工作窗口起点（距零点分钟），默认 0 */
+  windowStartMin?: number
+  /** 工作窗口终点（距零点分钟），默认 24*60 */
+  windowEndMin?: number
+}
+
+const AVOID_MIN = 5
+
+/**
+ * 求一个块在指定日期「不与其他块重叠」的起始分钟。
+ * 策略：① desired 能完整落在某空隙内 → 保持 desired（最小移动）；
+ * ② 否则取离 desired 最近、且能容纳 duration 的空隙起点；
+ * ③ 当日无任何空隙容纳 → 退化为 clamp 到窗口（尽力，仍可能重叠）。
+ * others 默认排除 excludeId 自身，使「移动正在拖的块」不会避让自己。
+ */
+export function resolveFreeStart(
+  blocks: TimeBlock[],
+  date: string,
+  desiredStart: number,
+  duration: number,
+  opts: AvoidanceOptions = {},
+): number {
+  const ws = opts.windowStartMin ?? 0
+  const we = opts.windowEndMin ?? 24 * 60
+  const dur = Math.max(AVOID_MIN, duration)
+  const others = blocks
+    .filter(b => b.date === date && b.id !== opts.excludeId)
+    .map(b => ({ startMin: b.startMin, endMin: b.startMin + b.durationMin }))
+  const gaps = freeGaps(others, ws, we)
+  for (const g of gaps) {
+    if (desiredStart >= g.startMin && desiredStart + dur <= g.endMin) return desiredStart
+  }
+  let best = -1
+  let bestDist = Infinity
+  for (const g of gaps) {
+    if (g.endMin - g.startMin < dur) continue
+    const dist = Math.abs(g.startMin - desiredStart)
+    if (dist < bestDist) {
+      bestDist = dist
+      best = g.startMin
+    }
+  }
+  if (best >= 0) return best
+  return Math.max(ws, Math.min(desiredStart, we - dur))
+}
+
+/**
+ * 给定块起点，求其在当前空隙内还能向后拉伸的最大时长（不挤压其他块）。
+ * 用于在拉伸拖拽时 clamp 时长，避免引入新重叠。返回 0 表示起点已落在他块内（异常）。
+ */
+export function maxDurationInGap(
+  blocks: TimeBlock[],
+  date: string,
+  excludeId: string,
+  startMin: number,
+  opts: AvoidanceOptions = {},
+): number {
+  const ws = opts.windowStartMin ?? 0
+  const we = opts.windowEndMin ?? 24 * 60
+  const others = blocks
+    .filter(b => b.date === date && b.id !== excludeId)
+    .map(b => ({ startMin: b.startMin, endMin: b.startMin + b.durationMin }))
+  const gaps = freeGaps(others, ws, we)
+  for (const g of gaps) {
+    if (startMin >= g.startMin && startMin < g.endMin) return g.endMin - startMin
+  }
+  return 0
+}
+
+/**
+ * 一键紧凑重排：把某日所有重叠块向右推挤消解冲突（贪心、保序、最小位移）。
+ * 返回需要移动的 {id, startMin}；窗口不足以容纳时退化为 clamp（仍可能重叠）。
+ * 纯函数，不修改入参；调用方负责并入持久化（见 useTimeBlock.resolveConflictsForDate）。
+ */
+export function compactDayLayout(
+  blocks: TimeBlock[],
+  date: string,
+  opts: AvoidanceOptions = {},
+): { id: string; startMin: number }[] {
+  const ws = opts.windowStartMin ?? 0
+  const we = opts.windowEndMin ?? 24 * 60
+  const day = blocks
+    .filter(b => b.date === date)
+    .sort((a, b) => a.startMin - b.startMin || a.durationMin - b.durationMin)
+  const moves: { id: string; startMin: number }[] = []
+  let lastEnd = ws
+  for (const b of day) {
+    let s = b.startMin
+    if (s < lastEnd) s = lastEnd
+    if (s + b.durationMin > we) {
+      s = Math.max(ws, Math.min(b.startMin, we - b.durationMin))
+    }
+    if (s !== b.startMin) moves.push({ id: b.id, startMin: s })
+    lastEnd = s + b.durationMin
+  }
+  return moves
+}
+
+/**
  * 从某日的 tasks + blocks 构建模板（剥离 id/date，仅保留规划形状）。
  * 纯函数：不读存储、不改入参。
  */
@@ -736,6 +844,16 @@ export function useTimeBlock() {
     return newBlocks.length
   }
 
+  /** 一键紧凑重排消解某日冲突（INCR-421）：把重叠块向右推挤，返回移动块数 */
+  function resolveConflictsForDate(date: string, opts: AutoScheduleOptions = {}): number {
+    const moves = compactDayLayout(blocks.value, date, {
+      windowStartMin: opts.dayStartMin ?? 0,
+      windowEndMin: opts.dayEndMin ?? 24 * 60,
+    })
+    for (const m of moves) updateBlock(m.id, { startMin: m.startMin })
+    return moves.length
+  }
+
   // ---- 时间块模板：复用每日规划 ----
   /** 把某日的 tasks + blocks 存为模板（剥离 id/date）。空内容返回 -1。 */
   function saveTemplateFromDate(name: string, date: string): number {
@@ -800,6 +918,7 @@ export function useTimeBlock() {
     blocksForDate,
     unscheduledTasksForDate,
     autoScheduleForDate,
+    resolveConflictsForDate,
     templates: computed(() => templates.value),
     saveTemplateFromDate,
     applyTemplate,

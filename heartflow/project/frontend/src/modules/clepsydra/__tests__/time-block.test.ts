@@ -21,6 +21,9 @@ import {
   blocksForWeek,
   WEEK_START_DOW,
   detectOverlapIds,
+  resolveFreeStart,
+  maxDurationInGap,
+  compactDayLayout,
   buildTemplate,
   instantiateTemplate,
   computePlanActual,
@@ -472,5 +475,88 @@ describe('computePlanActual（INCR-419 计划vs实际）', () => {
     computePlanActual(blocks, records, d => d === date)
     expect(JSON.stringify(blocks)).toBe(beforeB)
     expect(JSON.stringify(records)).toBe(beforeR)
+  })
+})
+
+describe('冲突智能避让/重排（INCR-421）', () => {
+  const date = '2026-10-02'
+  const WS = 420
+  const WE = 1380
+
+  describe('resolveFreeStart', () => {
+    it('desired 完整落在空隙内 → 保持 desired（最小移动）', () => {
+      const blocks = [makeBlock({ id: 'a', date, startMin: 420, durationMin: 60 })]
+      // 空隙 [480, 1380]，desired=600 容纳 60 → 保持 600
+      expect(resolveFreeStart(blocks, date, 600, 60, { windowStartMin: WS, windowEndMin: WE })).toBe(600)
+    })
+
+    it('desired 与他块重叠 → 推到最近空隙起点', () => {
+      const blocks = [makeBlock({ id: 'a', date, startMin: 420, durationMin: 60 })]
+      // 空隙只有 [480, 1380]；desired=450 落在 [420,480] 内 → 推到 480
+      expect(resolveFreeStart(blocks, date, 450, 60, { windowStartMin: WS, windowEndMin: WE })).toBe(480)
+    })
+
+    it('excludeId：移动正在拖的块时排除自身 → 不避让自己原槽', () => {
+      const blocks = [
+        makeBlock({ id: 'm', date, startMin: 450, durationMin: 60 }),
+        makeBlock({ id: 'a', date, startMin: 600, durationMin: 60 }),
+      ]
+      // 排除 m 后，m 原槽 [450,510] 是自由空隙，desired=450 应被保留
+      expect(resolveFreeStart(blocks, date, 450, 60, { excludeId: 'm', windowStartMin: WS, windowEndMin: WE })).toBe(450)
+      // 不排外则 m 也成障碍，desired=450 被推到 510
+      expect(resolveFreeStart(blocks, date, 450, 60, { windowStartMin: WS, windowEndMin: WE })).toBe(510)
+    })
+
+    it('当日无任何空隙容纳 → 退化 clamp 到窗口（尽力）', () => {
+      const blocks = [makeBlock({ id: 'a', date, startMin: WS, durationMin: WE - WS })]
+      // 整窗被占满，desired=700 → clamp(700, WS, WE-60) = 700
+      expect(resolveFreeStart(blocks, date, 700, 60, { windowStartMin: WS, windowEndMin: WE })).toBe(700)
+    })
+  })
+
+  describe('maxDurationInGap', () => {
+    it('块后方有空隙 → 返回可拉伸的最大时长', () => {
+      const blocks = [
+        makeBlock({ id: 'm', date, startMin: 420, durationMin: 60 }),
+        makeBlock({ id: 'a', date, startMin: 600, durationMin: 60 }),
+      ]
+      // 排除 m 后，含 420 的空隙为 [420,600] → 可拉伸 180
+      expect(maxDurationInGap(blocks, date, 'm', 420, { windowStartMin: WS, windowEndMin: WE })).toBe(180)
+    })
+
+    it('当日仅此一块（排除自身）→ 返回整窗剩余', () => {
+      const blocks = [makeBlock({ id: 'm', date, startMin: 420, durationMin: 60 })]
+      expect(maxDurationInGap(blocks, date, 'm', 420, { windowStartMin: WS, windowEndMin: WE })).toBe(WE - 420)
+    })
+  })
+
+  describe('compactDayLayout', () => {
+    it('两个重叠块 → 后者被向右推挤消解冲突', () => {
+      const blocks = [
+        makeBlock({ id: 'a', date, startMin: 420, durationMin: 120 }),
+        makeBlock({ id: 'b', date, startMin: 480, durationMin: 60 }),
+      ]
+      const moves = compactDayLayout(blocks, date, { windowStartMin: WS, windowEndMin: WE })
+      expect(moves).toHaveLength(1)
+      expect(moves[0]).toEqual({ id: 'b', startMin: 540 })
+    })
+
+    it('端点相邻不重叠 → 无移动', () => {
+      const blocks = [
+        makeBlock({ id: 'a', date, startMin: 420, durationMin: 60 }),
+        makeBlock({ id: 'b', date, startMin: 480, durationMin: 60 }),
+      ]
+      expect(compactDayLayout(blocks, date, { windowStartMin: WS, windowEndMin: WE })).toHaveLength(0)
+    })
+
+    it('不修改入参', () => {
+      const blocks = [
+        makeBlock({ id: 'a', date, startMin: 420, durationMin: 120 }),
+        makeBlock({ id: 'b', date, startMin: 480, durationMin: 60 }),
+      ]
+      const before = JSON.stringify(blocks)
+      compactDayLayout(blocks, date, { windowStartMin: WS, windowEndMin: WE })
+      expect(JSON.stringify(blocks)).toBe(before)
+    })
   })
 })

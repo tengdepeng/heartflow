@@ -586,3 +586,115 @@ describe('TimeBlockPanel 日时间轴拖拽（INCR-420）', () => {
     expect((mockStore['hf:clepsydra_time_blocks'] as any[]).length).toBe(0)
   })
 })
+
+describe('TimeBlockPanel 冲突智能避让/重排（INCR-421）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  it('日模式：拖拽移动块到与他块重叠 → 自动避让推到最近空隙', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'f', date: today, startMin: 420, durationMin: 60, category: 'project', title: '固定块', taskId: null, done: false },
+      { id: 'm', date: today, startMin: 600, durationMin: 60, category: 'study', title: '拖动块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    // 按起始排序：f(420) 在前，m(600) 在后
+    const blocks = wrapper.findAll('.tbp-block')
+    const mEl = blocks[1]
+    await mEl.trigger('pointerdown', { button: 0, pointerId: 1, clientX: 50, clientY: 200 })
+    const mv = new Event('pointermove') as any
+    // 向上拖 105px → 欲落到 600-150=450（与 f[420,480] 重叠），应被避让到 480
+    Object.assign(mv, { clientX: 50, clientY: 95, pointerId: 1 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 95, pointerId: 1 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])
+    const m = stored.find(b => b.id === 'm')!
+    expect(m.startMin).toBe(480) // 避让后落点，而非 450
+    expect(stored.find(b => b.id === 'f')!.startMin).toBe(420) // 固定块不动
+    // 避让后 m[480,540] 与 f[420,480] 相邻，无重叠 → 头部提示消失
+    expect(wrapper.find('.tbp-overlap-note').exists()).toBe(false)
+  })
+
+  it('日模式：时间轴框选新建块与他块重叠 → 自动避让推到最近空隙', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'f', date: today, startMin: 420, durationMin: 60, category: 'project', title: '固定块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const tl = wrapper.find('.tbp-timeline').element as HTMLElement
+    tl.getBoundingClientRect = () => ({
+      left: 0, top: 0, width: 400, height: 672, right: 400, bottom: 672, x: 0, y: 0, toJSON() {},
+    } as DOMRect)
+    // 起点落在 f[420,480] 区间内（clientY≈10 → startMin≈435），拖动生成区间 [435,535] 与 f 重叠
+    await wrapper.find('.tbp-timeline').trigger('pointerdown', { button: 0, pointerId: 4, clientX: 50, clientY: 10 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 50, clientY: 80, pointerId: 4 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 80, pointerId: 4 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])
+    expect(stored.length).toBe(2) // 原固定块 f + 新建块
+    // 避让到 f 之后：480
+    const created = stored.find(b => b.title === '新块')!
+    expect(created.startMin).toBe(480)
+    expect(wrapper.find('.tbp-overlap-note').exists()).toBe(false)
+  })
+
+  it('日模式：拉伸块到与他块重叠 → 时长被 clamp 到空隙上限', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'm', date: today, startMin: 420, durationMin: 60, category: 'project', title: '拉伸块', taskId: null, done: false },
+      { id: 'f', date: today, startMin: 600, durationMin: 60, category: 'study', title: '固定块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const resizeEl = wrapper.find('.tbp-block-resize') // 第一块（420 起点）的手柄
+    const downY = 300
+    await resizeEl.trigger('pointerdown', { button: 0, pointerId: 3, clientX: 50, clientY: downY })
+    const mv = new Event('pointermove') as any
+    // 大幅向下拖 → 欲拉伸远超空隙（含 f 前最多 180 分钟），应被 clamp 到 180
+    Object.assign(mv, { clientX: 50, clientY: downY + 300, pointerId: 3 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: downY + 300, pointerId: 3 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[]).find(b => b.id === 'm')!
+    expect(stored.durationMin).toBe(180) // clamp 到 m[420] 到 f[600] 的空隙
+    expect(stored.startMin).toBe(420) // 起点不变
+    expect(wrapper.find('.tbp-overlap-note').exists()).toBe(false)
+  })
+
+  it('日模式：点「消除冲突」一键紧凑重排，消解存量重叠', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'a', date: today, startMin: 420, durationMin: 120, category: 'project', title: '块A', taskId: null, done: false },
+      { id: 'b', date: today, startMin: 480, durationMin: 60, category: 'study', title: '块B', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    // 初始重叠 → 头部提示 + 消除冲突按钮可见
+    expect(wrapper.find('.tbp-overlap-note').exists()).toBe(true)
+    const resolveBtn = wrapper.find('.tbp-timeline-head .tbp-btn--auto')
+    expect(resolveBtn.exists()).toBe(true)
+    await resolveBtn.trigger('click')
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])
+    expect(stored.find(b => b.id === 'a')!.startMin).toBe(420) // 不动
+    expect(stored.find(b => b.id === 'b')!.startMin).toBe(540) // 推到 a 之后
+    // 消除后无重叠 → 提示消失，已重排信息出现
+    expect(wrapper.find('.tbp-overlap-note').exists()).toBe(false)
+    expect(wrapper.find('.tbp-auto-note').text()).toContain('已紧凑重排')
+  })
+})
