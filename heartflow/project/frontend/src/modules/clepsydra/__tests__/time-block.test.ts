@@ -14,6 +14,7 @@ import {
   scheduledMinutes,
   dayCoverage,
   localDateKey,
+  blockToRecordInput,
   type PlannedTask,
   type TimeBlock,
 } from '../time-block'
@@ -183,5 +184,19 @@ describe('localDateKey', () => {
 describe('blockEndMin', () => {
   it('returns start plus duration', () => {
     expect(blockEndMin({ startMin: 420, durationMin: 90 })).toBe(510)
+  })
+})
+
+describe('blockToRecordInput', () => {
+  it('把时间块映射为 auto 工作记录输入（按 date+startMin 算起止）', () => {
+    const b = makeBlock({ id: 'blk-x', date: '2026-10-02', startMin: 9 * 60, durationMin: 45, category: 'study', title: '晨间复盘' })
+    const input = blockToRecordInput(b)
+    expect(input.sourceType).toBe('auto')
+    expect(input.sourceAnchorId).toBe('blk-x')
+    expect(input.category).toBe('study')
+    expect(input.note).toBe('时间块·晨间复盘')
+    // 09:00 + 45min = 09:45（本地时区）
+    expect(input.startedAt.toISOString()).toBe(new Date('2026-10-02T09:00:00').toISOString())
+    expect(input.endedAt.toISOString()).toBe(new Date('2026-10-02T09:45:00').toISOString())
   })
 })

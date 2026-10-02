@@ -158,6 +158,42 @@ describe('useClepsydra 组合式', () => {
   })
 })
 
+describe('addRecord 联动字段 / 级联移除 / 更新', () => {
+  it('addRecord 接受 sourceType 与 sourceAnchorId', () => {
+    const { addRecord, records } = useClepsydra()
+    const r = addRecord({
+      startedAt: new Date('2026-08-21T01:00:00Z'),
+      endedAt: new Date('2026-08-21T02:00:00Z'),
+      category: 'study',
+      sourceType: 'auto',
+      sourceAnchorId: 'blk-1',
+    })
+    expect(r.sourceType).toBe('auto')
+    expect(r.sourceAnchorId).toBe('blk-1')
+    expect(records.value[0]!.sourceAnchorId).toBe('blk-1')
+  })
+
+  it('removeRecordByAnchor 仅移除对应锚记录', () => {
+    const { addRecord, removeRecordByAnchor, records } = useClepsydra()
+    addRecord({ startedAt: new Date('2026-08-21T01:00:00Z'), endedAt: new Date('2026-08-21T02:00:00Z'), sourceAnchorId: 'a' })
+    addRecord({ startedAt: new Date('2026-08-21T02:00:00Z'), endedAt: new Date('2026-08-21T03:00:00Z'), sourceAnchorId: 'b' })
+    removeRecordByAnchor('a')
+    expect(records.value).toHaveLength(1)
+    expect(records.value[0]!.sourceAnchorId).toBe('b')
+  })
+
+  it('updateRecord 同步起止与字段并重算时长', () => {
+    const { addRecord, updateRecord, records } = useClepsydra()
+    const r = addRecord({ startedAt: new Date('2026-08-21T01:00:00Z'), endedAt: new Date('2026-08-21T02:00:00Z'), sourceAnchorId: 'a' })
+    updateRecord(r.id, { startedAt: '2026-08-21T01:30:00Z', endedAt: '2026-08-21T02:00:00Z', category: 'create', note: '改' })
+    const updated = records.value.find(x => x.id === r.id)!
+    expect(updated.category).toBe('create')
+    expect(updated.note).toBe('改')
+    // 30 分钟 = 1800 秒
+    expect(updated.durationSeconds).toBe(1800)
+  })
+})
+
 describe('分类类型完备性', () => {
   it('sum 中分类键齐全', () => {
     const s = computeSummary([rec({ category: 'custom' })], windowStart(NOW, 'all'), NOW)

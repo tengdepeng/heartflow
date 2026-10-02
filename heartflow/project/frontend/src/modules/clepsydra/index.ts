@@ -13,6 +13,7 @@ export {
   formatSeconds,
   genId,
   useClepsydra,
+  resetClepsydra,
   STORAGE_KEY,
 } from './clepsydra'
 export type {
@@ -60,6 +61,7 @@ export {
   dayCoverage,
   localDateKey,
   todayKey,
+  blockToRecordInput,
   useTimeBlock,
 } from './time-block'
 export type {

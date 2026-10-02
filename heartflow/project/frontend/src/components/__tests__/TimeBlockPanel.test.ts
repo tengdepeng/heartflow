@@ -128,10 +128,21 @@ describe('TimeBlockPanel 时间块日规划', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.find('.tbp-block').classes()).toContain('tbp-block--done')
 
-    // 移除块（最后一个按钮）
+    // 完成态联动：写入更漏工作记录（sourceType=auto），汇入光仪编织
+    const blockId = (mockStore['hf:clepsydra_time_blocks'] as any[])[0].id
+    const recs = mockStore['hf:clepsydra_records'] as any[] | undefined
+    expect(Array.isArray(recs)).toBe(true)
+    expect(recs!.length).toBe(1)
+    expect(recs![0].sourceType).toBe('auto')
+    expect(recs![0].sourceAnchorId).toBe(blockId)
+    expect(recs![0].note).toContain('运动')
+    expect(recs![0].category).toBe('project')
+
+    // 移除块（最后一个按钮）→ 级联移除联动的更漏记录
     const delBtn = wrapper.findAll('.tbp-block-btn')[3]
     await delBtn.trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.findAll('.tbp-block').length).toBe(0)
+    expect((mockStore['hf:clepsydra_records'] as any[]).length).toBe(0)
   })
 })

@@ -10,8 +10,8 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
-import type { WorkCategory } from './clepsydra'
-import { genId } from './clepsydra'
+import type { WorkCategory, WorkRecord } from './clepsydra'
+import { genId, WORK_CATEGORY_META, useClepsydra } from './clepsydra'
 
 // ------------------------------------------------------------
 // 持久化键
@@ -244,6 +244,34 @@ export function todayKey(): string {
   return localDateKey(new Date())
 }
 
+/**
+ * 把时间块（完成态）映射为更漏工作记录输入。
+ * 仅用时间块自身携带的 date/startMin/durationMin/category/title，无需回溯待办。
+ * sourceType='auto' + sourceAnchorId=block.id 可追溯、可级联移除。
+ */
+export function blockToRecordInput(b: TimeBlock): {
+  startedAt: Date
+  endedAt: Date
+  category: WorkCategory
+  intensity: number
+  note: string
+  sourceType: 'auto'
+  sourceAnchorId: string
+} {
+  const base = new Date(`${b.date}T00:00:00`)
+  const start = new Date(base.getTime() + b.startMin * 60000)
+  const end = new Date(start.getTime() + b.durationMin * 60000)
+  return {
+    startedAt: start,
+    endedAt: end,
+    category: b.category,
+    intensity: WORK_CATEGORY_META[b.category].intensity,
+    note: `时间块·${b.title}`,
+    sourceType: 'auto',
+    sourceAnchorId: b.id,
+  }
+}
+
 // ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------
@@ -348,6 +376,8 @@ export function useTimeBlock() {
     if (!b) return
     Object.assign(b, patch)
     saveBlocks()
+    // 已完成的块若调整了起止/分类/标题，联动同步更漏工作记录
+    if (b.done) syncBlockRecord(b)
   }
 
   /** 移动块到新起始分钟（保持时长） */
@@ -358,6 +388,8 @@ export function useTimeBlock() {
   function removeBlock(id: string): void {
     blocks.value = blocks.value.filter(b => b.id !== id)
     saveBlocks()
+    // 级联移除联动写入的更漏记录，避免孤儿
+    unsyncBlockRecord(id)
   }
 
   function toggleBlock(id: string): void {
@@ -365,6 +397,35 @@ export function useTimeBlock() {
     if (!b) return
     b.done = !b.done
     saveBlocks()
+    // 完成态联动：完成 → 写入更漏工作记录；取消完成 → 移除对应记录
+    if (b.done) syncBlockRecord(b)
+    else unsyncBlockRecord(b.id)
+  }
+
+  // ---- 完成态联动：时间块完成 → 写入更漏工作记录（汇入光仪编织） ----
+  function linkedRecord(blockId: string): WorkRecord | undefined {
+    return useClepsydra().records.value.find(r => r.sourceAnchorId === blockId && r.sourceType === 'auto')
+  }
+
+  function syncBlockRecord(b: TimeBlock): void {
+    const clepsydra = useClepsydra()
+    const input = blockToRecordInput(b)
+    const existing = linkedRecord(b.id)
+    if (existing) {
+      clepsydra.updateRecord(existing.id, {
+        startedAt: input.startedAt.toISOString(),
+        endedAt: input.endedAt.toISOString(),
+        category: input.category,
+        intensity: input.intensity,
+        note: input.note,
+      })
+    } else {
+      clepsydra.addRecord({ ...input })
+    }
+  }
+
+  function unsyncBlockRecord(blockId: string): void {
+    useClepsydra().removeRecordByAnchor(blockId)
   }
 
   // ---- 派生：按日期 ----

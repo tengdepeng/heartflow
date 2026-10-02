@@ -82,7 +82,7 @@
             <span class="tbp-block-title">{{ b.title }}</span>
           </div>
           <div class="tbp-block-actions">
-            <button type="button" class="tbp-block-btn" :title="b.done ? '标记未完成' : '标记完成'" @click="tb.toggleBlock(b.id)">
+            <button type="button" class="tbp-block-btn" :title="b.done ? '标记未完成（已移出更漏光仪）' : '标记完成并汇入更漏光仪'" @click="tb.toggleBlock(b.id)">
               {{ b.done ? '↺' : '✓' }}
             </button>
             <button type="button" class="tbp-block-btn" title="前移 15 分钟" @click="tb.moveBlock(b.id, b.startMin - 15)">−</button>

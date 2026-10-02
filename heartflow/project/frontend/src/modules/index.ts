@@ -571,6 +571,7 @@ export {
   formatSeconds,
   genId,
   useClepsydra,
+  resetClepsydra,
   STORAGE_KEY,
   createCountdown,
   countdownRemaining,

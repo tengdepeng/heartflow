@@ -207,20 +207,30 @@ export function genId(): string {
 // 组合式 API
 // ------------------------------------------------------------
 
+// 模块级单例：让「时间块完成联动」写入的记录能即时反映到工作光仪（ClepsydraPanel）。
+// 每次 useClepsydra() 调用都从存储重新载入，避免跨组件内存漂移，并兼容既有测试「先置 mock 再挂载」语义。
+const records = ref<WorkRecord[]>(load())
+
+function load(): WorkRecord[] {
+  try {
+    return storage.getKV<WorkRecord[]>(STORAGE_KEY, [])
+  } catch {
+    return []
+  }
+}
+
+function save(): void {
+  storage.setKV(STORAGE_KEY, records.value)
+}
+
+/** 重置内存态（测试用：清 mock 后重新载入空态）。 */
+export function resetClepsydra(): void {
+  records.value = load()
+}
+
 export function useClepsydra() {
-  const records = ref<WorkRecord[]>(load())
-
-  function load(): WorkRecord[] {
-    try {
-      return storage.getKV<WorkRecord[]>(STORAGE_KEY, [])
-    } catch {
-      return []
-    }
-  }
-
-  function save(): void {
-    storage.setKV(STORAGE_KEY, records.value)
-  }
+  // 重新载入，保证多组件共享同一份响应式记录且即时反映存储变更
+  records.value = load()
 
   /** 开始一段工作计时（微型光仪 start） */
   function startTimer(meta: { category?: WorkCategory; note?: string; intensity?: number } = {}): WorkRecord {
@@ -262,6 +272,10 @@ export function useClepsydra() {
     category?: WorkCategory
     intensity?: number
     note?: string
+    /** 来源类型，默认手动；联动（时间块完成）写入为 'auto' */
+    sourceType?: WorkRecord['sourceType']
+    /** 关联源头 id（如联动时间块 id），用于可追溯与级联移除 */
+    sourceAnchorId?: string
   }): WorkRecord {
     const record: WorkRecord = {
       id: genId(),
@@ -269,7 +283,8 @@ export function useClepsydra() {
       endedAt: input.endedAt.toISOString(),
       durationSeconds: Math.max(0, Math.round((input.endedAt.getTime() - input.startedAt.getTime()) / 1000)),
       category: input.category ?? 'project',
-      sourceType: 'manual',
+      sourceType: input.sourceType ?? 'manual',
+      sourceAnchorId: input.sourceAnchorId,
       intensity: input.intensity ?? WORK_CATEGORY_META[input.category ?? 'project'].intensity,
       note: input.note ?? '',
       createdAt: new Date().toISOString(),
@@ -278,6 +293,29 @@ export function useClepsydra() {
     records.value.sort((a, b) => b.startedAt.localeCompare(a.startedAt))
     save()
     return record
+  }
+
+  /** 更新一条记录的字段（主要用于联动记录的起止/分类同步） */
+  function updateRecord(
+    id: string,
+    patch: Partial<Pick<WorkRecord, 'startedAt' | 'endedAt' | 'category' | 'intensity' | 'note'>>,
+  ): void {
+    const r = records.value.find(x => x.id === id)
+    if (!r) return
+    Object.assign(r, patch)
+    if (patch.startedAt || patch.endedAt) {
+      const s = new Date(r.startedAt).getTime()
+      const e = r.endedAt ? new Date(r.endedAt).getTime() : Date.now()
+      r.durationSeconds = Math.max(0, Math.round((e - s) / 1000))
+    }
+    save()
+  }
+
+  /** 按关联源头 id 移除记录（级联移除联动写入的时间块记录） */
+  function removeRecordByAnchor(anchorId: string): void {
+    const before = records.value.length
+    records.value = records.value.filter(r => r.sourceAnchorId !== anchorId)
+    if (records.value.length !== before) save()
   }
 
   function removeRecord(id: string): void {
@@ -324,7 +362,9 @@ export function useClepsydra() {
     startTimer,
     stopTimer,
     addRecord,
+    updateRecord,
     removeRecord,
+    removeRecordByAnchor,
     setNote,
     summary,
     state,
