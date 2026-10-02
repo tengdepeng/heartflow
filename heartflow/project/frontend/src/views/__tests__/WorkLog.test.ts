@@ -852,3 +852,43 @@ describe('集成：工作光仪面板', () => {
     expect(wrapper.text()).toContain('待开始')
   })
 })
+
+// ============================================================
+// 集成：时间块日规划面板 TimeBlockPanel（INCR-414 新能力）
+// 衔接更漏"时间织机"主题：待办按预估时长排入当日时间轴空闲隙，薄委托面板直驱 useTimeBlock。
+// 经 mocked storage 读 hf:clepsydra_plan_tasks / hf:clepsydra_time_blocks（空默认）。
+// ============================================================
+describe('集成：时间块日规划面板', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['heartflow:shifts'] = []
+    mockStore['heartflow:hourly_rate'] = 0
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+  })
+
+  it('挂载时间块面板并渲染标题与空态', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.tbp').exists()).toBe(true)
+    expect(wrapper.find('.wl-timeblock-section').exists()).toBe(true)
+    expect(wrapper.text()).toContain('时间块日规划')
+    expect(wrapper.text()).toContain('当天的待办都已排上时间轴')
+  })
+
+  it('在视图内新增待办并自动排程生成时间块', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.find('.tbp-input').setValue('撰写蓝图归档')
+    await wrapper.find('.tbp-btn--primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    // 待规划池出现该待办
+    expect(wrapper.find('.tbp-task').text()).toContain('撰写蓝图归档')
+    // 自动排程
+    await wrapper.find('.tbp-btn--auto').trigger('click')
+    await wrapper.vm.$nextTick()
+    // 时间轴出现块
+    expect(wrapper.find('.tbp-block').exists()).toBe(true)
+    expect(wrapper.find('.tbp-block').text()).toContain('撰写蓝图归档')
+    // 覆盖率文本出现
+    expect(wrapper.text()).toContain('覆盖率')
+  })
+})

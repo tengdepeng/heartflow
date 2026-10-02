@@ -59,6 +59,11 @@
       <ClepsydraPanel />
     </section>
 
+    <!-- ===== 时间块日规划（INCR-414 新能力：useTimeBlock 把待办按预估时长排入当日时间轴空闲隙，薄委托面板直驱引擎，衔接更漏"时间织机"主题） ===== -->
+    <section data-enter class="wl-timeblock-section">
+      <TimeBlockPanel />
+    </section>
+
     <!-- 快速记录 -->
     <section data-enter class="wl-quick-section">
       <div class="wl-quick-record">
@@ -405,6 +410,7 @@ import WorkRhythmPanel from '../components/WorkRhythmPanel.vue'
 import TaskDecomposerPanel from '../components/TaskDecomposerPanel.vue'
 import WorklogBridgePanel from '../components/WorklogBridgePanel.vue'
 import ClepsydraPanel from '../components/ClepsydraPanel.vue'
+import TimeBlockPanel from '../components/TimeBlockPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -1238,6 +1244,9 @@ function navigateToRoom(key: string) {
 @media (max-width: 480px) { .wl-stats-section { grid-template-columns: repeat(2, 1fr); gap: 6px; } .wl-stat-card { padding: 8px; } .wl-summary-header, .wl-summary-row { font-size: 10px; } }
 /* ===== 工作光仪（ClepsydraPanel） ===== */
 .wl-clepsydra-section { margin-bottom: 24px; position: relative; z-index: 1; }
+
+/* ===== 时间块日规划（TimeBlockPanel） ===== */
+.wl-timeblock-section { margin-bottom: 24px; position: relative; z-index: 1; }
 
 /* ===== 工作日志分析（模块集成） ===== */
 .wl-analytics-section { margin-bottom: 24px; position: relative; z-index: 1; }

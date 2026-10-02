@@ -44,3 +44,27 @@ export type { CountdownStatus, CountdownTimer, CountdownRepeat } from './countdo
 // ---- 自然语言任务解析 ----
 export { parseTaskText, TASK_CATEGORY_KEYWORDS } from './task-parse'
 export type { ParsedTask } from './task-parse'
+
+// ---- 时间块日规划 ----
+export {
+  TASK_STORAGE_KEY,
+  BLOCK_STORAGE_KEY,
+  minutesToLabel,
+  labelToMinutes,
+  blockEndMin,
+  mergeIntervals,
+  freeGaps,
+  sortTasksForSchedule,
+  autoSchedule,
+  scheduledMinutes,
+  dayCoverage,
+  localDateKey,
+  todayKey,
+  useTimeBlock,
+} from './time-block'
+export type {
+  PlannedTask,
+  TimeBlock,
+  Interval,
+  AutoScheduleOptions,
+} from './time-block'
