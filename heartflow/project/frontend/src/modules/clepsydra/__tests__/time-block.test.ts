@@ -28,10 +28,12 @@ import {
   instantiateTemplate,
   computePlanActual,
   aggregateFocusVsPlan,
+  buildFocusTrend,
   useTimeBlock,
   type PlannedTask,
   type TimeBlock,
   type BlockTemplate,
+  type FocusTrend,
 } from '../time-block'
 import { useClepsydra, resetClepsydra } from '../clepsydra'
 
@@ -732,6 +734,93 @@ describe('aggregateFocusVsPlan（INCR-425 专注时长聚合入光仪）', () =>
     const b0 = JSON.stringify(blocks)
     const r0 = JSON.stringify(records)
     aggregateFocusVsPlan(blocks, records, d => d === date)
+    expect(JSON.stringify(blocks)).toBe(b0)
+    expect(JSON.stringify(records)).toBe(r0)
+  })
+})
+
+describe('buildFocusTrend（INCR-427 月/季专注趋势）', () => {
+  const anchor = new Date(2026, 9, 15) // 2026-10-15（本地 0 点）
+  function rec(partial: Partial<WorkRecord> & { durationSeconds: number }): WorkRecord {
+    return {
+      id: partial.id ?? 'r-' + Math.random().toString(36).slice(2, 7),
+      startedAt: partial.startedAt ?? '2026-10-15T09:00:00.000Z',
+      endedAt: partial.endedAt ?? '2026-10-15T10:00:00.000Z',
+      category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual',
+      intensity: partial.intensity ?? 0.7,
+      note: partial.note ?? '',
+      createdAt: partial.createdAt ?? '2026-10-15T09:00:00.000Z',
+      ...partial,
+    }
+  }
+
+  it('月视图：当日桶精确聚合「计划 vs 实际专注」（Oct5 计划60/实际45）', () => {
+    const blocks = [makeBlock({ id: 'b1', date: '2026-10-05', startMin: 540, durationMin: 60, title: '写文档' })]
+    const records = [rec({ id: 'm1', startedAt: '2026-10-05T09:30:00.000Z', durationSeconds: 2700 })] // 45 分
+    const t: FocusTrend = buildFocusTrend(blocks, records, 'month', anchor)
+    const bk = t.buckets.find(b => b.key === '2026-10-05')!
+    expect(bk).toBeTruthy()
+    expect(bk.plannedMin).toBe(60)
+    expect(bk.actualMin).toBe(45)
+    expect(bk.deltaMin).toBe(-15)
+    expect(bk.rate).toBeCloseTo(0.75, 5)
+    expect(t.totalPlannedMin).toBe(60)
+    expect(t.totalActualMin).toBe(45)
+    expect(t.totalRate).toBeCloseTo(0.75, 5)
+    expect(t.chartMax).toBe(60)
+    expect(t.hasData).toBe(true)
+  })
+
+  it('月视图：窗口内无任何数据 → hasData=false，仍生成当月逐日桶', () => {
+    const t: FocusTrend = buildFocusTrend([], [], 'month', anchor)
+    expect(t.hasData).toBe(false)
+    expect(t.buckets.length).toBe(15) // 10-01 .. 10-15
+    expect(t.totalPlannedMin).toBe(0)
+  })
+
+  it('月视图：仅 auto 代理记录不计入实际（与 INCR-423/425 口径一致）', () => {
+    const blocks = [makeBlock({ id: 'b1', date: '2026-10-05', startMin: 540, durationMin: 60 })]
+    const records = [rec({ id: 'a1', sourceType: 'auto', startedAt: '2026-10-05T09:30:00.000Z', durationSeconds: 3600 })]
+    const t: FocusTrend = buildFocusTrend(blocks, records, 'month', anchor)
+    const bk = t.buckets.find(b => b.key === '2026-10-05')!
+    expect(bk.actualMin).toBe(0)
+    expect(bk.rate).toBe(0)
+    expect(t.totalActualMin).toBe(0)
+  })
+
+  it('季视图：周桶按当周周一归并（Oct6 + Oct7 的块落入同一周桶，合计 90 计划 / 60 实际）', () => {
+    // anchor=2026-10-15，季首周周一对齐；Oct6 与 Oct7 必属同一周
+    const blocks = [
+      makeBlock({ id: 'b1', date: '2026-10-06', startMin: 540, durationMin: 60 }),
+      makeBlock({ id: 'b2', date: '2026-10-07', startMin: 600, durationMin: 30 }),
+    ]
+    const records = [rec({ id: 'm1', startedAt: '2026-10-06T09:30:00.000Z', durationSeconds: 3600 })]
+    const t: FocusTrend = buildFocusTrend(blocks, records, 'quarter', anchor)
+    const withData = t.buckets.filter(b => b.plannedMin > 0)
+    expect(withData.length).toBe(1) // 两天的块归并到同一周桶
+    expect(withData[0].plannedMin).toBe(90)
+    expect(withData[0].actualMin).toBe(60)
+    expect(withData[0].rate).toBeCloseTo(60 / 90, 5)
+    expect(t.totalPlannedMin).toBe(90)
+    expect(t.totalActualMin).toBe(60)
+  })
+
+  it('窗口外的块/记录被排除（月视图：2025-01-01 不在 2026-10 窗口）', () => {
+    const blocks = [makeBlock({ id: 'bx', date: '2025-01-01', startMin: 540, durationMin: 120 })]
+    const records = [rec({ id: 'mx', startedAt: '2025-01-01T09:30:00.000Z', durationSeconds: 7200 })]
+    const t: FocusTrend = buildFocusTrend(blocks, records, 'month', anchor)
+    expect(t.totalPlannedMin).toBe(0)
+    expect(t.totalActualMin).toBe(0)
+    expect(t.hasData).toBe(false)
+  })
+
+  it('纯函数：不改入参（块与记录对象保持原值）', () => {
+    const blocks = [makeBlock({ id: 'b1', date: '2026-10-05', startMin: 540, durationMin: 60 })]
+    const records = [rec({ id: 'm1', startedAt: '2026-10-05T09:30:00.000Z', durationSeconds: 2700 })]
+    const b0 = JSON.stringify(blocks)
+    const r0 = JSON.stringify(records)
+    buildFocusTrend(blocks, records, 'month', anchor)
     expect(JSON.stringify(blocks)).toBe(b0)
     expect(JSON.stringify(records)).toBe(r0)
   })

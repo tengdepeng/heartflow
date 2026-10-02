@@ -133,6 +133,42 @@
       </div>
     </div>
 
+    <!-- 专注趋势 · 月/季（INCR-427） -->
+    <div class="clp-block" v-if="focusTrend.hasData">
+      <div class="clp-trend-head">
+        <span class="clp-block-label">专注趋势 · {{ trendPeriod === 'month' ? '近一月' : '近一季' }}</span>
+        <div class="clp-tabs">
+          <button
+            v-for="m in trendPeriods"
+            :key="m.key"
+            type="button"
+            class="clp-tab"
+            :class="{ active: trendPeriod === m.key }"
+            @click="trendPeriod = m.key"
+          >{{ m.label }}</button>
+        </div>
+      </div>
+      <div class="clp-trend-summary">
+        <span>计划 {{ focusTrend.totalPlannedMin }}<i>分</i></span>
+        <span>实际 {{ focusTrend.totalActualMin }}<i>分</i></span>
+        <span class="clp-trend-rate" :class="rateClass(focusTrend.totalRate)">执行率 {{ Math.round(focusTrend.totalRate * 100) }}%</span>
+      </div>
+      <div class="clp-trend-chart">
+        <div
+          v-for="b in focusTrend.buckets"
+          :key="b.key"
+          class="clp-trend-col"
+          :title="`${b.label} 计划${b.plannedMin}分 · 实际${b.actualMin}分 · 执行${Math.round(b.rate * 100)}%`"
+        >
+          <div class="clp-trend-track">
+            <div class="clp-trend-goal" :style="{ bottom: trendPct(b.plannedMin) + '%' }"></div>
+            <div class="clp-trend-actual" :class="rateClass(b.rate)" :style="{ height: trendPct(b.actualMin) + '%' }"></div>
+          </div>
+          <span class="clp-trend-label">{{ b.label }}</span>
+        </div>
+      </div>
+    </div>
+
     <!-- 时间哨塔（倒计时） -->
     <div class="clp-block">
       <span class="clp-block-label">时间哨塔 · {{ timers.length }}</span>
@@ -200,6 +236,7 @@ import {
   useClepsydraCountdown,
   useTimeBlock,
   aggregateFocusVsPlan,
+  buildFocusTrend,
   weekDaysOf,
   todayKey,
   WORK_CATEGORY_META,
@@ -210,7 +247,7 @@ import {
   countdownRepeatLabel,
   countdownRemaining,
 } from '../modules/clepsydra'
-import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport } from '../modules/clepsydra'
+import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod } from '../modules/clepsydra'
 
 const clepsydra = useClepsydra()
 const countdown = useClepsydraCountdown()
@@ -240,6 +277,26 @@ const focusReport = computed<FocusVsPlanReport>(() => {
   const days = new Set(weekDaysOf(now.value))
   return aggregateFocusVsPlan(tb.blocks.value, recs, d => days.has(d))
 })
+
+/**
+ * 专注趋势（INCR-427）：月/季时间窗内「计划 vs 实际专注」时间序列。
+ * 复用 buildFocusTrend，随趋势周期（月/季）聚合，纯展示、不写存储、不发提醒。
+ */
+const trendPeriod = ref<TrendPeriod>('month')
+const focusTrend = computed<FocusTrend>(() =>
+  buildFocusTrend(tb.blocks.value, clepsydra.records.value, trendPeriod.value, now.value),
+)
+const trendPeriods = [
+  { key: 'month' as const, label: '月' },
+  { key: 'quarter' as const, label: '季' },
+]
+function trendPct(min: number): number {
+  if (focusTrend.value.chartMax <= 0) return 0
+  return Math.min(100, Math.round((min / focusTrend.value.chartMax) * 100))
+}
+function rateClass(rate: number): string {
+  return rate >= 1 ? 'clp-trend--over' : 'clp-trend--under'
+}
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
   key: k,
@@ -498,6 +555,31 @@ onUnmounted(() => {
 }
 .clp-fvp-total span { white-space: nowrap; }
 .clp-fvp-total-delta { font-weight: 600; }
+
+/* ---- 专注趋势 · 月/季（INCR-427） ---- */
+.clp-trend-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.clp-trend-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 11px; color: var(--text-secondary); }
+.clp-trend-summary i { font-style: normal; font-size: 10px; margin-left: 1px; }
+.clp-trend-rate { font-weight: 600; }
+.clp-trend-rate.clp-trend--over { color: rgb(143, 201, 154); }
+.clp-trend-rate.clp-trend--under { color: rgb(196, 132, 120); }
+.clp-trend-chart {
+  display: flex; align-items: flex-end; gap: 3px; overflow-x: auto;
+  padding-bottom: 2px; scrollbar-width: thin;
+}
+.clp-trend-col { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 0 0 auto; min-width: 11px; }
+.clp-trend-track {
+  position: relative; width: 11px; height: 64px;
+  background: rgba(255, 255, 255, 0.04); border-radius: 3px; overflow: hidden;
+}
+.clp-trend-actual {
+  position: absolute; left: 0; right: 0; bottom: 0; border-radius: 3px 3px 0 0;
+  background: var(--accent); transition: height 0.3s ease;
+}
+.clp-trend-actual.clp-trend--over { background: rgb(143, 201, 154); }
+.clp-trend-actual.clp-trend--under { background: rgb(196, 132, 120); }
+.clp-trend-goal { position: absolute; left: -1px; right: -1px; height: 2px; background: rgba(255, 255, 255, 0.42); }
+.clp-trend-label { font-size: 9px; color: var(--text-secondary); white-space: nowrap; }
 
 @keyframes clp-spin {
   from { transform: rotate(0deg); }

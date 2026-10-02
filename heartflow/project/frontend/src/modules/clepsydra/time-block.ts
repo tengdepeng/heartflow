@@ -717,6 +717,140 @@ export function aggregateFocusVsPlan(
 }
 
 // ------------------------------------------------------------
+// 专注趋势（INCR-427）：月/季时间窗内「计划 vs 实际专注」时间序列
+// ------------------------------------------------------------
+
+export type TrendPeriod = 'month' | 'quarter'
+
+export interface TrendBucket {
+  /** 桶起点 localDateKey（日桶=当天；周桶=当周周一） */
+  key: string
+  /** 展示标签（日桶=日号；周桶=M/D） */
+  label: string
+  /** 桶内计划分钟（时间块 durationMin 之和） */
+  plannedMin: number
+  /** 桶内实际专注分钟（manual 记录 durationSeconds 之和，排除 auto 代理） */
+  actualMin: number
+  /** 执行率 = 实际/计划（计划为 0 且实际>0 记为 1） */
+  rate: number
+  /** 偏差 = 实际 − 计划（分钟） */
+  deltaMin: number
+}
+
+export interface FocusTrend {
+  period: TrendPeriod
+  buckets: TrendBucket[]
+  totalPlannedMin: number
+  totalActualMin: number
+  /** 整体执行率 = 总实际/总计划 */
+  totalRate: number
+  /** 桶内最大分钟（用于归一化柱高） */
+  chartMax: number
+  /** 窗口内是否有任何计划或实际数据 */
+  hasData: boolean
+}
+
+function parseKeyToDate(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y, m - 1, d)
+}
+
+function weekStartOf(d: Date): Date {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  const dow = (x.getDay() + 6) % 7 // 周一=0
+  x.setDate(x.getDate() - dow)
+  return x
+}
+
+function addDaysLocal(d: Date, n: number): Date {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  x.setDate(x.getDate() + n)
+  return x
+}
+
+/** 某日期落到哪个桶（返回桶起点 key）：日桶按日精确匹配，周桶按当周周一匹配 */
+function bucketKeyFor(dateKey: string, bucketDays: number): string {
+  const d = parseKeyToDate(dateKey)
+  const ref = bucketDays === 1 ? d : weekStartOf(d)
+  return localDateKey(ref)
+}
+
+/**
+ * 构建专注趋势时间序列（纯函数，不读存储、不改入参）。
+ * period='month' → 当月 1 日至锚点逐日桶；period='quarter' → 当季首周周一至锚点逐周桶。
+ * 计划取时间块 durationMin，实际取 manual 专注会话（排除 auto 代理，与 INCR-423/425 口径一致）。
+ * 仅展示增强、不写存储、不触发提醒。
+ */
+export function buildFocusTrend(
+  blocks: TimeBlock[],
+  records: WorkRecord[],
+  period: TrendPeriod,
+  anchor: Date = new Date(),
+): FocusTrend {
+  const anchorDay = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())
+  const qFirst = new Date(anchorDay.getFullYear(), Math.floor(anchorDay.getMonth() / 3) * 3, 1)
+  const start = period === 'month'
+    ? new Date(anchorDay.getFullYear(), anchorDay.getMonth(), 1)
+    : weekStartOf(qFirst) // 周桶对齐到周一
+  const bucketDays = period === 'month' ? 1 : 7
+
+  // 生成桶起点序列（含锚点当天），日桶逐日、周桶逐周（周一）
+  const bucketStarts: Date[] = []
+  let cursor = new Date(start)
+  while (cursor <= anchorDay) {
+    bucketStarts.push(new Date(cursor))
+    cursor = addDaysLocal(cursor, bucketDays)
+  }
+
+  const buckets: TrendBucket[] = bucketStarts.map(bStart => ({
+    key: localDateKey(bStart),
+    label: bucketDays === 1 ? `${bStart.getDate()}` : `${bStart.getMonth() + 1}/${bStart.getDate()}`,
+    plannedMin: 0,
+    actualMin: 0,
+    rate: 0,
+    deltaMin: 0,
+  }))
+
+  const keyIndex = new Map<string, number>()
+  buckets.forEach((b, i) => keyIndex.set(b.key, i))
+
+  // 计划：块 date → 所属桶
+  for (const b of blocks) {
+    const idx = keyIndex.get(bucketKeyFor(b.date, bucketDays))
+    if (idx === undefined) continue
+    buckets[idx].plannedMin += b.durationMin
+  }
+  // 实际：manual 记录（排除 auto）按其 startedAt 日期 → 所属桶
+  for (const r of records) {
+    if (r.sourceType === 'auto') continue
+    const idx = keyIndex.get(bucketKeyFor(localDateKey(new Date(r.startedAt)), bucketDays))
+    if (idx === undefined) continue
+    buckets[idx].actualMin += Math.round((r.durationSeconds ?? 0) / 60)
+  }
+
+  let totalPlanned = 0
+  let totalActual = 0
+  let chartMax = 0
+  for (const b of buckets) {
+    b.deltaMin = b.actualMin - b.plannedMin
+    b.rate = b.plannedMin > 0 ? b.actualMin / b.plannedMin : (b.actualMin > 0 ? 1 : 0)
+    totalPlanned += b.plannedMin
+    totalActual += b.actualMin
+    chartMax = Math.max(chartMax, b.plannedMin, b.actualMin)
+  }
+
+  return {
+    period,
+    buckets,
+    totalPlannedMin: totalPlanned,
+    totalActualMin: totalActual,
+    totalRate: totalPlanned > 0 ? totalActual / totalPlanned : 0,
+    chartMax,
+    hasData: totalPlanned > 0 || totalActual > 0,
+  }
+}
+
+// ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------
 

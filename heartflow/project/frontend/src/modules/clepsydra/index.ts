@@ -75,6 +75,7 @@ export {
   blockToRecordInput,
   computePlanActual,
   aggregateFocusVsPlan,
+  buildFocusTrend,
   useTimeBlock,
 } from './time-block'
 export type {
@@ -87,4 +88,7 @@ export type {
   PlanActualCategoryRow,
   FocusVsPlanRow,
   FocusVsPlanReport,
+  TrendPeriod,
+  TrendBucket,
+  FocusTrend,
 } from './time-block'

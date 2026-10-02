@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
 import { invalidateCache } from '../../engine/storage/core'
+import { localDateKey } from '../../modules/clepsydra'
 
 async function mountPanel(records: unknown[] = [], countdowns: unknown[] = [], blocks: unknown[] = []) {
   vi.resetModules()
@@ -126,5 +127,50 @@ describe('ClepsydraPanel 工作光仪', () => {
     ]
     const wrapper = await mountPanel(records, [], [block])
     expect(wrapper.text()).not.toContain('专注块 · 计划 vs 实际专注')
+  })
+
+  it('月视图趋势：块绑定真实专注会话 → 渲染「专注趋势」节（执行率 75%、偏差 under 柱高 75%）', async () => {
+    const today = localDateKey(new Date())
+    const block = {
+      id: 'tr1', date: today, startMin: 540, durationMin: 60, category: 'project',
+      title: '周报块', taskId: null, done: false,
+    }
+    const records = [
+      { id: 'm1', startedAt: today + 'T09:30:00', endedAt: today + 'T10:15:00', durationSeconds: 2700, category: 'project', sourceType: 'manual', intensity: 0.7, note: '周报块', createdAt: today + 'T09:30:00' },
+    ]
+    const wrapper = await mountPanel(records, [], [block])
+    expect(wrapper.find('.clp-trend-summary').exists()).toBe(true)
+    // 计划 60 分 / 实际 45 分 → 执行率 75%
+    expect(wrapper.find('.clp-trend-summary').text()).toContain('执行率 75%')
+    // 实际柱高度 = 45/60 = 75%，偏差 under 着色
+    const bars = wrapper.findAll('.clp-trend-actual')
+    const hit = bars.find(b => (b.element as HTMLElement).style.height === '75%')
+    expect(hit).toBeTruthy()
+    expect(hit!.classes()).toContain('clp-trend--under')
+    // 计划目标线存在
+    expect(wrapper.find('.clp-trend-goal').exists()).toBe(true)
+  })
+
+  it('月视图趋势：窗口内无数据 → 趋势节不渲染', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.clp-trend-chart').exists()).toBe(false)
+  })
+
+  it('季视图趋势：切到「季」标签 → 趋势节显示「近一季」且仍有柱', async () => {
+    const today = localDateKey(new Date())
+    const block = {
+      id: 'tr2', date: today, startMin: 540, durationMin: 60, category: 'project',
+      title: '季块', taskId: null, done: false,
+    }
+    const records = [
+      { id: 'm2', startedAt: today + 'T09:30:00', endedAt: today + 'T10:15:00', durationSeconds: 2700, category: 'project', sourceType: 'manual', intensity: 0.7, note: '季块', createdAt: today + 'T09:30:00' },
+    ]
+    const wrapper = await mountPanel(records, [], [block])
+    const quarterBtn = wrapper.findAll('button').find(b => b.text() === '季')
+    expect(quarterBtn).toBeTruthy()
+    await quarterBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.clp-trend-head').text()).toContain('近一季')
+    expect(wrapper.find('.clp-trend-chart').exists()).toBe(true)
   })
 })
