@@ -17,6 +17,7 @@ import {
   useHabitSuggestions,
   useHabitFailureAnalysis,
   useHabitBundles,
+  STREAK_LEVELS,
   type StreakRecord,
   type AchievementBadge,
   type HabitSuggestion,
@@ -641,6 +642,10 @@ export function useDisciplineBridge() {
     // 组合操作
     isBundleComplete: bundleSystem.isBundleComplete,
     calculateBundleBonus: bundleSystem.calculateBundleBonus,
+
+    // 连击操作（INCR-434：段位与排行榜上盘）
+    getTopStreaks: streakTracker.getTopStreaks,
+    STREAK_LEVELS,
 
     // 预设库
     HABIT_TEMPLATES,

@@ -265,6 +265,52 @@
           </div>
         </div>
       </div>
+
+      <!-- 连击段位 · 排行榜（INCR-434） -->
+      <div class="dw-streak-board" v-if="topStreaks.length > 0">
+        <div class="dw-streak-board-head">
+          <span class="dw-streak-board-title">🔥 连击排行榜</span>
+          <span class="dw-streak-board-sub">按当前连续天数排序</span>
+        </div>
+        <div
+          v-for="s in topStreaks"
+          :key="s.habitId"
+          class="dw-streak-row"
+        >
+          <span class="dw-streak-emoji">{{ streakLevelMeta(s.level).emoji }}</span>
+          <div class="dw-streak-main">
+            <div class="dw-streak-line">
+              <span class="dw-streak-name">{{ s.habitName }}</span>
+              <span
+                class="dw-streak-level"
+                :style="{
+                  color: streakLevelMeta(s.level).color,
+                  borderColor: streakLevelMeta(s.level).color + '55',
+                  background: streakLevelMeta(s.level).color + '14',
+                }"
+              >{{ streakLevelMeta(s.level).label }}</span>
+            </div>
+            <div class="dw-streak-meta">
+              <span>当前 <b>{{ s.currentStreak }}</b> 天</span>
+              <span>最长 <b>{{ s.longestStreak }}</b> 天</span>
+              <span>累计打卡 <b>{{ s.totalCheckins }}</b> 次</span>
+              <span v-if="s.daysToNextLevel > 0">距下一级 <b>{{ s.daysToNextLevel }}</b> 天</span>
+              <span v-else>已达最高段位</span>
+            </div>
+          </div>
+          <span class="dw-streak-days">{{ s.currentStreak }}</span>
+        </div>
+        <div class="dw-streak-ladder">
+          <span
+            v-for="lv in streakLadder"
+            :key="lv.key"
+            class="dw-ladder-step"
+            :class="{ 'dw-ladder--reached': maxStreakCount >= lv.minDays }"
+            :style="{ color: lv.color, borderColor: lv.color + '55' }"
+            :title="`${lv.label} · 连续 ${lv.minDays} 天`"
+          >{{ lv.emoji }} {{ lv.label }} {{ lv.minDays }}天</span>
+        </div>
+      </div>
     </section>
     <!-- 番茄树园 -->
     <section v-if="activeTab === 'forest'" data-enter class="dw-section">
@@ -294,6 +340,8 @@ import HabitSuggestionPanel from '../components/HabitSuggestionPanel.vue'
 import HabitBundlePanel from '../components/HabitBundlePanel.vue'
 import HabitPredictorPanel from '../components/HabitPredictorPanel.vue'
 import type { Habit, DisciplineChallenge, HabitDifficulty } from '../modules/discipline/types'
+import { STREAK_LEVELS } from '../modules/discipline'
+import type { StreakLevel } from '../modules/discipline'
 import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
 import PomodoroForestPanel from '../components/discipline/PomodoroForestPanel.vue'
@@ -395,6 +443,21 @@ const topStreakCount = computed(() => {
   if (bridge.streaks.value.length === 0) return 0
   return Math.max(...bridge.streaks.value.map(s => s.currentStreak))
 })
+
+/**
+ * 连击段位与排行榜（INCR-434）：把已在引擎算出、但从未上盘的
+ * 「段位（STREAK_LEVELS）+ 距下一级天数 + 连击排行」挂到统计页。
+ * 纯展示：不写存储、不发提醒。
+ */
+const topStreaks = computed(() => bridge.getTopStreaks(5))
+function streakLevelMeta(level: StreakLevel) {
+  return STREAK_LEVELS[level] ?? STREAK_LEVELS.bronze
+}
+const streakLadder = (Object.keys(STREAK_LEVELS) as StreakLevel[]).map(k => ({
+  key: k,
+  ...STREAK_LEVELS[k],
+}))
+const maxStreakCount = computed(() => topStreaks.value[0]?.currentStreak ?? 0)
 
 const topStreakHabit = computed(() => {
   if (bridge.streaks.value.length === 0) return '—'
@@ -724,6 +787,39 @@ onMounted(() => {
 .dist-count { width: 20px; font-size: 0.75rem; color: var(--text-muted, rgba(232, 224, 216, 0.44)); text-align: left; }
 
 /* 完成率 */
+/* 连击段位 · 排行榜（INCR-434） */
+.dw-streak-board { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.07); }
+.dw-streak-board-head { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.6rem; }
+.dw-streak-board-title { font-size: 0.98rem; font-weight: 600; color: var(--text-primary, #e8e0d8); }
+.dw-streak-board-sub { font-size: 0.75rem; color: var(--text-secondary, #9a9088); }
+.dw-streak-row {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.5rem 0.65rem; margin-bottom: 0.4rem;
+  border-radius: 0.6rem; background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.dw-streak-emoji { font-size: 1.25rem; flex: 0 0 auto; }
+.dw-streak-main { flex: 1; min-width: 0; }
+.dw-streak-line { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; }
+.dw-streak-name { font-size: 0.9rem; font-weight: 600; color: var(--text-primary, #e8e0d8); }
+.dw-streak-level {
+  font-size: 0.7rem; padding: 0.1rem 0.42rem; border-radius: 0.5rem;
+  border: 1px solid transparent;
+}
+.dw-streak-meta { display: flex; flex-wrap: wrap; gap: 0.2rem 0.75rem; font-size: 0.72rem; color: var(--text-secondary, #9a9088); margin-top: 0.15rem; }
+.dw-streak-meta b { color: var(--text-primary, #e8e0d8); font-weight: 600; }
+.dw-streak-days {
+  flex: 0 0 auto; font-size: 1.35rem; font-weight: 700;
+  color: var(--accent, #d9a05b);
+}
+.dw-streak-ladder { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.6rem; }
+.dw-ladder-step {
+  font-size: 0.68rem; padding: 0.15rem 0.45rem; border-radius: 0.5rem;
+  border: 1px solid transparent; opacity: 0.45;
+  background: rgba(255,255,255,0.03);
+}
+.dw-ladder-step.dw-ladder--reached { opacity: 1; background: rgba(255,255,255,0.06); }
+
 .completion-rate { margin: 0.5rem 0; }
 .rate-number { font-size: 2.5rem; font-weight: 700; color: var(--text-primary, #e8e0d8); display: block; }
 .rate-label { font-size: 0.8rem; color: var(--text-muted, rgba(232, 224, 216, 0.44)); }

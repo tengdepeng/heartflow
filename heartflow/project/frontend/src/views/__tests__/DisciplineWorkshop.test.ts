@@ -34,6 +34,8 @@ const mockAdoptSuggestion = vi.fn()
 const mockBundles = ref<any[]>([])
 const mockCreateBundleFromPreset = vi.fn()
 const mockCreateChallenge = vi.fn()
+const mockStreaks = ref<any[]>([])
+const mockGetTopStreaks = vi.fn((_limit: number = 10) => mockStreaks.value)
 vi.mock('../../modules/discipline/workshop-bridge', () => ({
   useDisciplineBridge: () => ({
     init: vi.fn(),
@@ -48,8 +50,10 @@ vi.mock('../../modules/discipline/workshop-bridge', () => ({
     badges: ref([]),
     HABIT_TEMPLATES: [],
     CHALLENGE_TEMPLATES: [],
-    streaks: ref([]),
+    streaks: mockStreaks,
     habits: mockHabits,
+    // INCR-434 连击段位与排行榜
+    getTopStreaks: mockGetTopStreaks,
     failures: mockFailures,
     suggestions: mockGenerateSuggestions(),
     generateSuggestions: mockGenerateSuggestions,
@@ -401,5 +405,63 @@ describe('集成：四象限任务看板', () => {
     expect(wrapper.text()).toContain('重要不紧急')
     // 两件任务进入两格，看板总览徽章显示 2 件
     expect(wrapper.text()).toContain('2 件任务')
+  })
+})
+
+describe('DisciplineWorkshop 连击段位与排行榜（INCR-434）', () => {
+  async function switchToStats(wrapper: any) {
+    const tab = wrapper.findAll('.dw-tab').find((t: any) => t.text().includes('统计'))
+    expect(tab).toBeTruthy()
+    await tab!.trigger('click')
+    await wrapper.vm.$nextTick()
+  }
+
+  const mkStreak = (id: string, name: string, cur: number, longest: number, level: string, toNext: number) => ({
+    habitId: id,
+    habitName: name,
+    currentStreak: cur,
+    longestStreak: longest,
+    totalCheckins: cur + 3,
+    monthlyCheckins: cur,
+    weeklyCheckins: 5,
+    lastCheckinDate: '2026-10-02',
+    streakHistory: [],
+    completionRate: 0.8,
+    level,
+    daysToNextLevel: toNext,
+  })
+
+  it('有连击记录 → 渲染排行榜（段位标签 + 当前/最长/距下一级）', async () => {
+    mockStreaks.value = [
+      mkStreak('h1', '晨间阅读', 25, 40, 'gold', 41),
+      mkStreak('h2', '每日站桩', 8, 12, 'silver', 13),
+    ]
+    const wrapper = await getWrapper()
+    await switchToStats(wrapper)
+    expect(wrapper.find('.dw-streak-board').exists()).toBe(true)
+    expect(wrapper.findAll('.dw-streak-row')).toHaveLength(2)
+    const text = wrapper.text()
+    expect(text).toContain('晨间阅读')
+    expect(text).toContain('黄金')
+    expect(text).toContain('白银')
+    expect(text).toContain('距下一级')
+    // 段位阶梯 6 级全渲染
+    expect(wrapper.findAll('.dw-ladder-step')).toHaveLength(6)
+  })
+
+  it('最高段位（传说）→ 显示「已达最高段位」而非距下一级', async () => {
+    mockStreaks.value = [mkStreak('h3', '十年日记', 400, 400, 'legendary', 0)]
+    const wrapper = await getWrapper()
+    await switchToStats(wrapper)
+    expect(wrapper.text()).toContain('十年日记')
+    expect(wrapper.text()).toContain('传说')
+    expect(wrapper.text()).toContain('已达最高段位')
+  })
+
+  it('无连击记录 → 排行榜不渲染', async () => {
+    mockStreaks.value = []
+    const wrapper = await getWrapper()
+    await switchToStats(wrapper)
+    expect(wrapper.find('.dw-streak-board').exists()).toBe(false)
   })
 })
