@@ -29,6 +29,7 @@ import {
   computePlanActual,
   aggregateFocusVsPlan,
   buildFocusTrend,
+  buildFocusHeatmap,
   useTimeBlock,
   type PlannedTask,
   type TimeBlock,
@@ -821,6 +822,95 @@ describe('buildFocusTrend（INCR-427 月/季专注趋势）', () => {
     const b0 = JSON.stringify(blocks)
     const r0 = JSON.stringify(records)
     buildFocusTrend(blocks, records, 'month', anchor)
+    expect(JSON.stringify(blocks)).toBe(b0)
+    expect(JSON.stringify(records)).toBe(r0)
+  })
+})
+
+describe('buildFocusHeatmap（INCR-428 专注日历热力图）', () => {
+  const anchor = new Date(2026, 9, 15) // 2026-10-15（本地 0 点）
+  function rec(partial: Partial<WorkRecord> & { durationSeconds: number }): WorkRecord {
+    return {
+      id: partial.id ?? 'r-' + Math.random().toString(36).slice(2, 7),
+      startedAt: partial.startedAt ?? '2026-10-15T09:00:00.000Z',
+      endedAt: partial.endedAt ?? '2026-10-15T10:00:00.000Z',
+      category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual',
+      intensity: partial.intensity ?? 0.7,
+      note: partial.note ?? '',
+      createdAt: partial.createdAt ?? '2026-10-15T09:00:00.000Z',
+      ...partial,
+    }
+  }
+
+  it('季窗口：指定日格精确聚合（Oct5 计划60/实际45 → rate 0.75，hasData=true）', () => {
+    const blocks = [makeBlock({ id: 'b1', date: '2026-10-05', startMin: 540, durationMin: 60 })]
+    const records = [rec({ id: 'm1', startedAt: '2026-10-05T09:30:00.000Z', durationSeconds: 2700 })]
+    const h = buildFocusHeatmap(blocks, records, anchor, 91)
+    const day = h.days.find(d => d.key === '2026-10-05')!
+    expect(day).toBeTruthy()
+    expect(day.plannedMin).toBe(60)
+    expect(day.actualMin).toBe(45)
+    expect(day.deltaMin).toBe(-15)
+    expect(day.rate).toBeCloseTo(0.75, 5)
+    expect(day.hasData).toBe(true)
+    expect(day.isFuture).toBe(false)
+    expect(h.hasData).toBe(true)
+  })
+
+  it('网格：周一对齐 + 日格数为 7 的倍数（矩形网格）', () => {
+    const h = buildFocusHeatmap([], [], anchor, 91)
+    expect(h.days.length % 7).toBe(0)
+    expect(h.weeks).toBe(h.days.length / 7)
+    const first = new Date(h.days[0].key + 'T00:00:00')
+    expect(first.getDay()).toBe(1) // 周一
+  })
+
+  it('仅 auto 代理记录不计入实际（与 INCR-423/425/427 口径一致）', () => {
+    const blocks = [makeBlock({ id: 'b1', date: '2026-10-05', startMin: 540, durationMin: 60 })]
+    const records = [rec({ id: 'a1', sourceType: 'auto', startedAt: '2026-10-05T09:30:00.000Z', durationSeconds: 3600 })]
+    const h = buildFocusHeatmap(blocks, records, anchor, 91)
+    const day = h.days.find(d => d.key === '2026-10-05')!
+    expect(day.actualMin).toBe(0)
+    expect(day.rate).toBe(0)
+    expect(day.hasData).toBe(true) // 计划侧仍有数据
+    expect(h.totalActualMin).toBe(0)
+  })
+
+  it('窗口外（2025-01-01）的块/记录被排除', () => {
+    const blocks = [makeBlock({ id: 'bx', date: '2025-01-01', startMin: 540, durationMin: 120 })]
+    const records = [rec({ id: 'mx', startedAt: '2025-01-01T09:30:00.000Z', durationSeconds: 7200 })]
+    const h = buildFocusHeatmap(blocks, records, anchor, 91)
+    expect(h.totalPlannedMin).toBe(0)
+    expect(h.totalActualMin).toBe(0)
+    expect(h.hasData).toBe(false)
+  })
+
+  it('未来 padding 单元格：isFuture=true、hasData=false、不计入窗口统计', () => {
+    const blocks = [makeBlock({ id: 'b1', date: '2026-10-05', startMin: 540, durationMin: 60 })]
+    const records = [rec({ id: 'm1', startedAt: '2026-10-05T09:30:00.000Z', durationSeconds: 2700 })]
+    const h = buildFocusHeatmap(blocks, records, anchor, 91)
+    const futureCells = h.days.filter(d => d.isFuture)
+    expect(futureCells.length).toBeGreaterThan(0)
+    expect(futureCells.every(d => d.hasData === false)).toBe(true)
+    const nonFuturePlanned = h.days.filter(d => !d.isFuture).reduce((s, d) => s + d.plannedMin, 0)
+    expect(nonFuturePlanned).toBe(60)
+    expect(h.totalPlannedMin).toBe(60)
+    expect(h.totalActualMin).toBe(45)
+  })
+
+  it('年窗口：日格数仍为 7 的倍数，覆盖 ≥52 周', () => {
+    const h = buildFocusHeatmap([], [], anchor, 364)
+    expect(h.days.length % 7).toBe(0)
+    expect(h.weeks).toBeGreaterThanOrEqual(52)
+  })
+
+  it('纯函数：不改入参（块与记录对象保持原值）', () => {
+    const blocks = [makeBlock({ id: 'b1', date: '2026-10-05', startMin: 540, durationMin: 60 })]
+    const records = [rec({ id: 'm1', startedAt: '2026-10-05T09:30:00.000Z', durationSeconds: 2700 })]
+    const b0 = JSON.stringify(blocks)
+    const r0 = JSON.stringify(records)
+    buildFocusHeatmap(blocks, records, anchor, 91)
     expect(JSON.stringify(blocks)).toBe(b0)
     expect(JSON.stringify(records)).toBe(r0)
   })

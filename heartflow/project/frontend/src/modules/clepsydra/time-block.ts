@@ -851,6 +851,123 @@ export function buildFocusTrend(
 }
 
 // ------------------------------------------------------------
+// 专注日历热力图（INCR-428）：更长周期（季/年）逐日「计划 vs 实际专注」强度网格
+// ------------------------------------------------------------
+
+export type HeatRange = 'quarter' | 'year'
+
+export interface HeatDay {
+  /** 本地日期 key（YYYY-MM-DD） */
+  key: string
+  /** 展示标签（M/D） */
+  label: string
+  /** 当日计划分钟（时间块 durationMin 之和） */
+  plannedMin: number
+  /** 当日实际专注分钟（manual 记录 durationSeconds 之和，排除 auto 代理） */
+  actualMin: number
+  /** 执行率 = 实际/计划（计划为 0 且实际>0 记为 1） */
+  rate: number
+  /** 偏差 = 实际 − 计划（分钟） */
+  deltaMin: number
+  /** 当日是否有计划或实际数据 */
+  hasData: boolean
+  /** 是否为锚点之后的未来日期（仅作网格补全 padding，不计入统计） */
+  isFuture: boolean
+}
+
+export interface FocusHeatmap {
+  /** 周一对齐的逐日网格（含未来 padding） */
+  days: HeatDay[]
+  totalPlannedMin: number
+  totalActualMin: number
+  /** 整体执行率 = 总实际/总计划（仅统计非未来日） */
+  totalRate: number
+  /** 窗口内（非未来）是否有任何计划或实际数据 */
+  hasData: boolean
+  /** 网格起点 key（周一） */
+  startDate: string
+  /** 网格终点 key（周日，含未来 padding） */
+  endDate: string
+  /** 周列数（days.length / 7） */
+  weeks: number
+}
+
+/**
+ * 构建专注日历热力图（纯函数，不读存储、不改入参）。
+ * 窗口起点 = 锚点往前 (days-1) 天再对齐到周一，终点 = 锚点所在周周日（含未来 padding 补全矩形网格）。
+ * 每格聚合与 buildFocusTrend 同口径：计划取块 durationMin，实际取 manual 记录（排除 auto 代理）。
+ * 仅展示增强、不写存储、不触发提醒。
+ */
+export function buildFocusHeatmap(
+  blocks: TimeBlock[],
+  records: WorkRecord[],
+  anchor: Date = new Date(),
+  days: number = 91,
+): FocusHeatmap {
+  const anchorDay = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())
+  const rawStart = addDaysLocal(anchorDay, -(days - 1))
+  const start = weekStartOf(rawStart) // 对齐周一
+  const end = addDaysLocal(weekStartOf(anchorDay), 6) // 锚点所在周周日
+
+  const cells: HeatDay[] = []
+  let cursor = new Date(start)
+  while (cursor <= end) {
+    const isFuture = cursor > anchorDay
+    cells.push({
+      key: localDateKey(cursor),
+      label: `${cursor.getMonth() + 1}/${cursor.getDate()}`,
+      plannedMin: 0,
+      actualMin: 0,
+      rate: 0,
+      deltaMin: 0,
+      hasData: false,
+      isFuture,
+    })
+    cursor = addDaysLocal(cursor, 1)
+  }
+
+  const keyIndex = new Map<string, number>()
+  cells.forEach((d, i) => keyIndex.set(d.key, i))
+
+  // 计划：块 date → 所属日格
+  for (const b of blocks) {
+    const idx = keyIndex.get(b.date)
+    if (idx === undefined) continue
+    cells[idx].plannedMin += b.durationMin
+  }
+  // 实际：manual 记录（排除 auto）按 startedAt 日期 → 所属日格
+  for (const r of records) {
+    if (r.sourceType === 'auto') continue
+    const idx = keyIndex.get(localDateKey(new Date(r.startedAt)))
+    if (idx === undefined) continue
+    cells[idx].actualMin += Math.round((r.durationSeconds ?? 0) / 60)
+  }
+
+  let totalPlanned = 0
+  let totalActual = 0
+  for (const d of cells) {
+    d.deltaMin = d.actualMin - d.plannedMin
+    d.rate = d.plannedMin > 0 ? d.actualMin / d.plannedMin : (d.actualMin > 0 ? 1 : 0)
+    if (!d.isFuture) {
+      totalPlanned += d.plannedMin
+      totalActual += d.actualMin
+      if (d.plannedMin > 0 || d.actualMin > 0) d.hasData = true
+    }
+  }
+
+  return {
+    days: cells,
+    totalPlannedMin: totalPlanned,
+    totalActualMin: totalActual,
+    totalRate: totalPlanned > 0 ? totalActual / totalPlanned : 0,
+    hasData: totalPlanned > 0 || totalActual > 0,
+    startDate: cells[0].key,
+    endDate: cells[cells.length - 1].key,
+    weeks: cells.length / 7,
+  }
+}
+
+// ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------
 

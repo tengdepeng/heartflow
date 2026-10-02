@@ -169,6 +169,45 @@
       </div>
     </div>
 
+    <!-- 专注日历热力图（INCR-428） -->
+    <div class="clp-block" v-if="focusHeatmap.hasData">
+      <div class="clp-trend-head">
+        <span class="clp-block-label">专注日历热力图 · {{ heatRange === 'year' ? '近一年' : '近一季' }}</span>
+        <div class="clp-tabs">
+          <button
+            v-for="m in heatRanges"
+            :key="m.key"
+            type="button"
+            class="clp-tab"
+            :class="{ active: heatRange === m.key }"
+            @click="heatRange = m.key"
+          >{{ m.label }}</button>
+        </div>
+      </div>
+      <div class="clp-heat-wrap">
+        <div class="clp-heat-weekdays">
+          <span>一</span><span></span><span>三</span><span></span><span>五</span><span></span><span>日</span>
+        </div>
+        <div class="clp-heatmap">
+          <div
+            v-for="d in focusHeatmap.days"
+            :key="d.key"
+            class="clp-heat-cell"
+            :class="heatCellClass(d)"
+            :style="heatCellStyle(d)"
+            :title="heatTitle(d)"
+          ></div>
+        </div>
+      </div>
+      <div class="clp-heat-legend">
+        <span class="clp-heat-legend-cell clp-heat--empty"></span><span>无数据</span>
+        <span class="clp-heat-legend-cell" style="background: rgba(196, 106, 90, 0.3)"></span><span>偏低</span>
+        <span class="clp-heat-legend-cell" style="background: rgba(196, 106, 90, 0.7)"></span><span>欠计划</span>
+        <span class="clp-heat-legend-cell" style="background: rgba(143, 201, 154, 0.7)"></span><span>达标</span>
+        <span class="clp-heat-legend-cell" style="background: rgba(143, 201, 154, 0.95)"></span><span>超额</span>
+      </div>
+    </div>
+
     <!-- 时间哨塔（倒计时） -->
     <div class="clp-block">
       <span class="clp-block-label">时间哨塔 · {{ timers.length }}</span>
@@ -237,6 +276,7 @@ import {
   useTimeBlock,
   aggregateFocusVsPlan,
   buildFocusTrend,
+  buildFocusHeatmap,
   weekDaysOf,
   todayKey,
   WORK_CATEGORY_META,
@@ -247,7 +287,7 @@ import {
   countdownRepeatLabel,
   countdownRemaining,
 } from '../modules/clepsydra'
-import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod } from '../modules/clepsydra'
+import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod, FocusHeatmap, HeatRange, HeatDay } from '../modules/clepsydra'
 
 const clepsydra = useClepsydra()
 const countdown = useClepsydraCountdown()
@@ -296,6 +336,40 @@ function trendPct(min: number): number {
 }
 function rateClass(rate: number): string {
   return rate >= 1 ? 'clp-trend--over' : 'clp-trend--under'
+}
+
+/**
+ * 专注日历热力图（INCR-428）：季/年窗口内逐日「计划 vs 实际专注」强度网格。
+ * 复用 buildFocusHeatmap，纯展示、不写存储、不发提醒。
+ */
+const heatRange = ref<HeatRange>('quarter')
+const heatWindowDays = computed(() => (heatRange.value === 'year' ? 364 : 91))
+const focusHeatmap = computed<FocusHeatmap>(() =>
+  buildFocusHeatmap(tb.blocks.value, clepsydra.records.value, now.value, heatWindowDays.value),
+)
+const heatRanges = [
+  { key: 'quarter' as const, label: '季' },
+  { key: 'year' as const, label: '年' },
+]
+function heatCellClass(d: HeatDay): string {
+  if (d.isFuture) return 'clp-heat--future'
+  if (!d.hasData) return 'clp-heat--empty'
+  return d.rate >= 1 ? 'clp-heat--over' : 'clp-heat--under'
+}
+function heatCellStyle(d: HeatDay): Record<string, string> {
+  if (d.isFuture) return { background: 'rgba(255, 255, 255, 0.02)' }
+  if (!d.hasData) return { background: 'rgba(255, 255, 255, 0.05)' }
+  const over = d.rate >= 1
+  const rgb = over ? '143, 201, 154' : '196, 106, 90'
+  const alpha = over
+    ? Math.min(0.55 + 0.4 * Math.min(Math.max(d.rate - 1, 0), 0.5) / 0.5, 0.95)
+    : 0.25 + 0.6 * d.rate
+  return { background: `rgba(${rgb}, ${alpha.toFixed(2)})` }
+}
+function heatTitle(d: HeatDay): string {
+  if (d.isFuture) return `${d.label}（未来）`
+  if (!d.hasData) return `${d.label} 无数据`
+  return `${d.label} 计划${d.plannedMin}分 · 实际${d.actualMin}分 · 执行${Math.round(d.rate * 100)}%`
 }
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
@@ -580,6 +654,24 @@ onUnmounted(() => {
 .clp-trend-actual.clp-trend--under { background: rgb(196, 132, 120); }
 .clp-trend-goal { position: absolute; left: -1px; right: -1px; height: 2px; background: rgba(255, 255, 255, 0.42); }
 .clp-trend-label { font-size: 9px; color: var(--text-secondary); white-space: nowrap; }
+
+/* ---- 专注日历热力图（INCR-428） ---- */
+.clp-heat-wrap { display: flex; gap: 6px; }
+.clp-heat-weekdays {
+  display: grid; grid-template-rows: repeat(7, 12px); gap: 3px;
+  font-size: 9px; color: var(--text-secondary); align-items: center;
+}
+.clp-heat-weekdays span { display: flex; align-items: center; height: 12px; }
+.clp-heatmap {
+  display: grid; grid-template-rows: repeat(7, 12px); grid-auto-flow: column;
+  grid-auto-columns: 12px; gap: 3px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin;
+}
+.clp-heat-cell { width: 12px; height: 12px; border-radius: 3px; background: rgba(255, 255, 255, 0.05); transition: background 0.2s ease; }
+.clp-heat-cell.clp-heat--future { opacity: 0.4; }
+.clp-heat-cell.clp-heat--empty { background: rgba(255, 255, 255, 0.05); }
+.clp-heat-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: 10px; color: var(--text-secondary); }
+.clp-heat-legend-cell { width: 11px; height: 11px; border-radius: 3px; background: rgba(255, 255, 255, 0.05); }
+.clp-heat-legend-cell.clp-heat--empty { background: rgba(255, 255, 255, 0.05); }
 
 @keyframes clp-spin {
   from { transform: rotate(0deg); }

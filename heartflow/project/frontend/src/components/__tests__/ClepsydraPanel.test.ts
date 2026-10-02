@@ -174,3 +174,48 @@ describe('ClepsydraPanel 工作光仪', () => {
     expect(wrapper.find('.clp-trend-chart').exists()).toBe(true)
   })
 })
+
+describe('ClepsydraPanel 专注日历热力图（INCR-428）', () => {
+  it('有数据 → 渲染热力图节 + 日格 + 当日格 tooltip 含计划/实际/执行率', async () => {
+    const today = localDateKey(new Date())
+    const block = {
+      id: 'hm1', date: today, startMin: 540, durationMin: 60, category: 'project',
+      title: '热力块', taskId: null, done: false,
+    }
+    const records = [
+      { id: 'm1', startedAt: today + 'T09:30:00', endedAt: today + 'T10:15:00', durationSeconds: 2700, category: 'project', sourceType: 'manual', intensity: 0.7, note: '热力块', createdAt: today + 'T09:30:00' },
+    ]
+    const wrapper = await mountPanel(records, [], [block])
+    expect(wrapper.find('.clp-heatmap').exists()).toBe(true)
+    const cells = wrapper.findAll('.clp-heat-cell')
+    expect(cells.length).toBeGreaterThan(0)
+    expect(cells.length % 7).toBe(0) // 矩形网格（周列 × 7 行）
+    const titles = cells.map(c => (c.element as HTMLElement).getAttribute('title') || '')
+    expect(titles.some(t => t.includes('计划60分') && t.includes('实际45分') && t.includes('执行75%'))).toBe(true)
+    expect(wrapper.text()).toContain('专注日历热力图')
+    expect(wrapper.text()).toContain('近一季') // 默认季窗口
+  })
+
+  it('无数据 → 热力图节不渲染', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.clp-heatmap').exists()).toBe(false)
+  })
+
+  it('切「年」标签 → 头部显示「近一年」且日格仍渲染', async () => {
+    const today = localDateKey(new Date())
+    const block = {
+      id: 'hm2', date: today, startMin: 540, durationMin: 30, category: 'study',
+      title: '年块', taskId: null, done: false,
+    }
+    const records = [
+      { id: 'm2', startedAt: today + 'T09:30:00', endedAt: today + 'T09:45:00', durationSeconds: 900, category: 'study', sourceType: 'manual', intensity: 0.5, note: '年块', createdAt: today + 'T09:30:00' },
+    ]
+    const wrapper = await mountPanel(records, [], [block])
+    const yearBtn = wrapper.findAll('button').find(b => b.text() === '年')
+    expect(yearBtn).toBeTruthy()
+    await yearBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.text()).toContain('近一年')
+    expect(wrapper.find('.clp-heatmap').exists()).toBe(true)
+  })
+})

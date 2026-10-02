@@ -76,6 +76,7 @@ export {
   computePlanActual,
   aggregateFocusVsPlan,
   buildFocusTrend,
+  buildFocusHeatmap,
   useTimeBlock,
 } from './time-block'
 export type {
@@ -91,4 +92,7 @@ export type {
   TrendPeriod,
   TrendBucket,
   FocusTrend,
+  HeatRange,
+  HeatDay,
+  FocusHeatmap,
 } from './time-block'
