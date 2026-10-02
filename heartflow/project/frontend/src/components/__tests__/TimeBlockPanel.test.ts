@@ -491,3 +491,98 @@ describe('TimeBlockPanel 计划vs实际报表（INCR-419）', () => {
     expect(cards[3].text()).toContain('0%') // 完成率 0
   })
 })
+
+describe('TimeBlockPanel 日时间轴拖拽（INCR-420）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  it('日模式：竖向拖拽块改起始（经 setBlockPlacement 落库）', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'bd', date: today, startMin: 420, durationMin: 60, category: 'project', title: '拖动块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const blockEl = wrapper.find('.tbp-block')
+    await blockEl.trigger('pointerdown', { button: 0, pointerId: 1, clientX: 50, clientY: 100 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 50, clientY: 170, pointerId: 1 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 170, pointerId: 1 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])[0]
+    // 420 + (70px / 0.7) = 520
+    expect(stored.startMin).toBe(520)
+    expect(stored.date).toBe(today)
+  })
+
+  it('日模式：底部手柄拖拽改时长（经 resizeBlock 落库）', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'br', date: today, startMin: 420, durationMin: 60, category: 'project', title: '拉伸块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    const resizeEl = wrapper.find('.tbp-block-resize')
+    await resizeEl.trigger('pointerdown', { button: 0, pointerId: 3, clientX: 50, clientY: 300 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 50, clientY: 370, pointerId: 3 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 370, pointerId: 3 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])[0]
+    // 60 + (70px / 0.7) = 160
+    expect(stored.durationMin).toBe(160)
+    expect(stored.startMin).toBe(420) // 起点不变
+  })
+
+  it('日模式：时间轴拖拽框选新建时间块（经 addBlock 落库）', async () => {
+    const today = localDateKey(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = []
+    const wrapper = await mountPanel()
+    const tl = wrapper.find('.tbp-timeline').element as HTMLElement
+    tl.getBoundingClientRect = () => ({
+      left: 0, top: 0, width: 400, height: 672, right: 400, bottom: 672, x: 0, y: 0, toJSON() {},
+    } as DOMRect)
+    await wrapper.find('.tbp-timeline').trigger('pointerdown', { button: 0, pointerId: 4, clientX: 50, clientY: 100 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 50, clientY: 170, pointerId: 4 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 170, pointerId: 4 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])
+    expect(stored.length).toBe(1)
+    // 起点 100/0.7+420≈565（snap 5）；拖动 70px→ +100 → 末点 665；区间 [565,665] dur 100
+    expect(stored[0].startMin).toBe(565)
+    expect(stored[0].durationMin).toBe(100)
+    expect(stored[0].title).toBe('新块')
+    expect(stored[0].date).toBe(today)
+  })
+
+  it('日模式：时间轴点击（未拖拽）不新建时间块', async () => {
+    mockStore['hf:clepsydra_time_blocks'] = []
+    const wrapper = await mountPanel()
+    const tl = wrapper.find('.tbp-timeline').element as HTMLElement
+    tl.getBoundingClientRect = () => ({
+      left: 0, top: 0, width: 400, height: 672, right: 400, bottom: 672, x: 0, y: 0, toJSON() {},
+    } as DOMRect)
+    await wrapper.find('.tbp-timeline').trigger('pointerdown', { button: 0, pointerId: 5, clientX: 50, clientY: 100 })
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 100, pointerId: 5 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+    expect((mockStore['hf:clepsydra_time_blocks'] as any[]).length).toBe(0)
+  })
+})

@@ -108,7 +108,7 @@
         <span v-if="overlapCount > 0" class="tbp-overlap-note">⚠ {{ overlapCount }} 个时间块重叠</span>
       </div>
 
-      <div class="tbp-timeline" :style="{ height: timelineHeight + 'px' }">
+      <div class="tbp-timeline" ref="timelineEl" :style="{ height: timelineHeight + 'px' }" @pointerdown="onTimelinePointerDown">
         <!-- 小时网格 -->
         <div
           v-for="g in gridHours"
@@ -124,8 +124,9 @@
           v-for="b in dayBlocks"
           :key="b.id"
           class="tbp-block"
-          :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id) }"
-          :style="blockStyle(b)"
+          :class="{ 'tbp-block--done': b.done, 'tbp-block--overlap': overlapIds.has(b.id), 'tbp-block--dragging': dragPreview && dragPreview.id === b.id }"
+          :style="dragPreview && dragPreview.id === b.id ? blockStyle(dragPreview) : blockStyle(b)"
+          @pointerdown="onBlockPointerDown($event, b)"
         >
           <div class="tbp-block-bar" :style="{ background: WORK_CATEGORY_META[b.category].color }"></div>
           <div class="tbp-block-body">
@@ -144,9 +145,20 @@
             <button type="button" class="tbp-block-btn" title="后移 15 分钟" @click="tb.moveBlock(b.id, b.startMin + 15)">+</button>
             <button type="button" class="tbp-block-btn tbp-block-btn--del" title="移除" @click="tb.removeBlock(b.id)">✕</button>
           </div>
+          <div class="tbp-block-resize" title="拖拽改变时长" @pointerdown="onResizePointerDown($event, b)"></div>
         </div>
 
-        <p v-if="dayBlocks.length === 0" class="tbp-timeline-empty">时间轴还空着。添加待办后点「自动排程」，或下方手动建块。</p>
+        <p v-if="dayBlocks.length === 0" class="tbp-timeline-empty">时间轴还空着。添加待办后点「自动排程」，或下方手动建块，或在此直接拖拽框选新建时间块。</p>
+        <div
+          v-if="dragPreview && dragPreview.id === 'new'"
+          class="tbp-block tbp-block--create"
+          :style="blockStyle(dragPreview)"
+        >
+          <div class="tbp-block-bar" :style="{ background: WORK_CATEGORY_META[mbCategory].color }"></div>
+          <div class="tbp-block-body">
+            <span class="tbp-block-title">新块</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -349,7 +361,7 @@ function dayBlocksInWeek(dateKey: string): TimeBlock[] {
 // ---- 拖拽：移动 / 拉伸（指针事件统一鼠标 + 触摸） ----
 interface DragState {
   id: string
-  mode: 'move' | 'resize'
+  mode: 'move' | 'resize' | 'create'
   pointerId: number
   startY: number
   startX: number
@@ -362,10 +374,12 @@ interface DragState {
 const drag = ref<DragState | null>(null)
 const dragPreview = ref<{ id: string; startMin: number; durationMin: number; date: string } | null>(null)
 const weekGridEl = ref<HTMLElement | null>(null)
+const timelineEl = ref<HTMLElement | null>(null)
 
 function onBlockPointerDown(e: PointerEvent, b: TimeBlock): void {
   if (e.button !== 0) return
   e.preventDefault()
+  e.stopPropagation()
   const rect = viewMode.value === 'week' && weekGridEl.value ? weekGridEl.value.getBoundingClientRect() : undefined
   drag.value = {
     id: b.id,
@@ -403,6 +417,13 @@ function onPointerMove(e: PointerEvent): void {
   const d = drag.value
   if (!d) return
   const dy = e.clientY - d.startY
+  if (d.mode === 'create') {
+    const curMin = d.origStartMin + dy / PX_PER_MIN
+    const s = snap(Math.min(d.origStartMin, curMin))
+    const dur = snap(Math.max(SNAP_MIN, Math.abs(curMin - d.origStartMin)))
+    dragPreview.value = { id: 'new', startMin: s, durationMin: dur, date: d.origDate }
+    return
+  }
   if (d.mode === 'move') {
     const newStart = snap(d.origStartMin + dy / PX_PER_MIN)
     let newDate = d.origDate
@@ -422,11 +443,53 @@ function onPointerUp(): void {
   window.removeEventListener('pointermove', onPointerMove)
   window.removeEventListener('pointerup', onPointerUp)
   if (d && p) {
-    if (d.mode === 'move') tb.setBlockPlacement(d.id, p.date, p.startMin)
-    else tb.resizeBlock(d.id, p.durationMin)
+    if (d.mode === 'create') {
+      if (p.durationMin >= SNAP_MIN) {
+        tb.addBlock({
+          date: p.date,
+          startMin: p.startMin,
+          durationMin: p.durationMin,
+          category: mbCategory.value,
+          title: '新块',
+        })
+      }
+    } else if (d.mode === 'move') {
+      tb.setBlockPlacement(d.id, p.date, p.startMin)
+    } else {
+      tb.resizeBlock(d.id, p.durationMin)
+    }
   }
   drag.value = null
   dragPreview.value = null
+}
+
+/**
+ * 时间轴空白处拖拽框选新建时间块（仅日模式）。
+ * 起点按指针 Y 换算成距零点分钟，拖动方向任意：向上/向下都生成从起点到当前点的区间。
+ */
+function onTimelinePointerDown(e: PointerEvent): void {
+  if (viewMode.value !== 'day') return
+  if (e.button !== 0) return
+  e.preventDefault()
+  const el = timelineEl.value
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const startMin = snap((e.clientY - rect.top) / PX_PER_MIN + DAY_START)
+  drag.value = {
+    id: 'new',
+    mode: 'create',
+    pointerId: e.pointerId,
+    startY: e.clientY,
+    startX: e.clientX,
+    origStartMin: startMin,
+    origDuration: 0,
+    origDate: activeDate.value,
+    gridRect: rect,
+    colWidth: undefined,
+  }
+  dragPreview.value = { id: 'new', startMin, durationMin: 0, date: activeDate.value }
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
 }
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
@@ -596,7 +659,7 @@ const gridHours = computed(() => {
   return arr
 })
 
-function blockStyle(b: { startMin: number; durationMin: number; category: WorkCategory; done: boolean }) {
+function blockStyle(b: { startMin: number; durationMin: number; done?: boolean }) {
   const top = Math.max(0, (b.startMin - DAY_START) * PX_PER_MIN)
   const height = Math.max(22, b.durationMin * PX_PER_MIN)
   return {
@@ -703,7 +766,7 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 }
 .tbp-block {
   position: absolute; left: 46px; right: 8px; display: flex; align-items: stretch; gap: 6px;
-  border-radius: 8px; padding: 2px 6px 2px 0; overflow: hidden;
+  border-radius:8px; padding: 2px 6px 2px 0; overflow: hidden; touch-action: none;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
@@ -811,6 +874,12 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 .tbp-block-resize {
   position: absolute; left: 0; right: 0; bottom: 0; height: 9px; cursor: ns-resize; touch-action: none;
   border-radius: 0 0 8px 8px; background: linear-gradient(to top, rgba(var(--accent-rgb), 0.45), transparent);
+}
+.tbp-block--create {
+  border-color: rgba(var(--accent-rgb), 0.7);
+  border-style: dashed;
+  background: rgba(var(--accent-rgb), 0.12);
+  pointer-events: none;
 }
 .tbp-block-preview {
   position: absolute; top: -16px; left: 0; right: 0; font-size: 9px; text-align: center;
