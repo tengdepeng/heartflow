@@ -208,6 +208,42 @@
       </div>
     </div>
 
+    <!-- 专注时段分布（INCR-429） -->
+    <div class="clp-block" v-if="focusHourly.hasData">
+      <div class="clp-trend-head">
+        <span class="clp-block-label">专注时段分布 · {{ hourWindowLabel }}</span>
+        <div class="clp-tabs">
+          <button
+            v-for="m in hourWindows"
+            :key="m.key"
+            type="button"
+            class="clp-tab"
+            :class="{ active: hourWindow === m.key }"
+            @click="hourWindow = m.key"
+          >{{ m.label }}</button>
+        </div>
+      </div>
+      <div class="clp-hourly-chart">
+        <div
+          v-for="b in focusHourly.buckets"
+          :key="b.hour"
+          class="clp-hour-col"
+        >
+          <div
+            class="clp-hour-bar"
+            :class="{ 'clp-hour--peak': b.hour === focusHourly.peakHour }"
+            :style="hourBarHeight(b.minutes)"
+            :title="`${String(b.hour).padStart(2, '0')}:00 专注 ${Math.round(b.minutes)} 分`"
+          ></div>
+          <span class="clp-hour-tick" v-if="b.hour % 6 === 0">{{ b.hour }}</span>
+        </div>
+      </div>
+      <div class="clp-hourly-summary">
+        <span>高峰时段 <b>{{ String(focusHourly.peakHour).padStart(2, '0') }}:00</b>（约 {{ Math.round(focusHourly.peakMinutes) }} 分）</span>
+        <span>窗口内共专注 <b>{{ Math.round((focusHourly.totalMinutes / 60) * 10) / 10 }}</b> 小时</span>
+      </div>
+    </div>
+
     <!-- 时间哨塔（倒计时） -->
     <div class="clp-block">
       <span class="clp-block-label">时间哨塔 · {{ timers.length }}</span>
@@ -277,6 +313,7 @@ import {
   aggregateFocusVsPlan,
   buildFocusTrend,
   buildFocusHeatmap,
+  buildFocusHourly,
   weekDaysOf,
   todayKey,
   WORK_CATEGORY_META,
@@ -287,7 +324,7 @@ import {
   countdownRepeatLabel,
   countdownRemaining,
 } from '../modules/clepsydra'
-import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod, FocusHeatmap, HeatRange, HeatDay } from '../modules/clepsydra'
+import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod, FocusHeatmap, HeatRange, HeatDay, FocusHourly, HourWindow } from '../modules/clepsydra'
 
 const clepsydra = useClepsydra()
 const countdown = useClepsydraCountdown()
@@ -370,6 +407,32 @@ function heatTitle(d: HeatDay): string {
   if (d.isFuture) return `${d.label}（未来）`
   if (!d.hasData) return `${d.label} 无数据`
   return `${d.label} 计划${d.plannedMin}分 · 实际${d.actualMin}分 · 执行${Math.round(d.rate * 100)}%`
+}
+
+/**
+ * 专注时段分布（INCR-429）：按小时聚合实际专注分钟，看一天内专注高峰/低谷。
+ * 复用 buildFocusHourly，纯展示、不写存储、不发提醒。
+ */
+const hourWindow = ref<HourWindow>('month')
+const hourWindowDays = computed(() =>
+  hourWindow.value === 'week' ? 7 : hourWindow.value === 'month' ? 30 : 91,
+)
+const focusHourly = computed<FocusHourly>(() =>
+  buildFocusHourly(clepsydra.records.value, now.value, hourWindowDays.value),
+)
+const hourWindows = [
+  { key: 'week' as const, label: '本周' },
+  { key: 'month' as const, label: '近一月' },
+  { key: 'quarter' as const, label: '近一季' },
+]
+const hourWindowLabel = computed(() =>
+  hourWindow.value === 'week' ? '本周' : hourWindow.value === 'month' ? '近一月' : '近一季',
+)
+const HOUR_CHART_MAX = 64
+function hourBarHeight(min: number): Record<string, string> {
+  const max = focusHourly.value.peakMinutes
+  const h = max > 0 ? Math.max(2, (min / max) * HOUR_CHART_MAX) : 2
+  return { height: `${h}px` }
 }
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
@@ -672,6 +735,24 @@ onUnmounted(() => {
 .clp-heat-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: 10px; color: var(--text-secondary); }
 .clp-heat-legend-cell { width: 11px; height: 11px; border-radius: 3px; background: rgba(255, 255, 255, 0.05); }
 .clp-heat-legend-cell.clp-heat--empty { background: rgba(255, 255, 255, 0.05); }
+
+/* ---- 专注时段分布（INCR-429） ---- */
+.clp-hourly-chart {
+  display: flex; align-items: flex-end; gap: 2px; height: 64px;
+  padding: 4px 0 2px; overflow-x: auto; scrollbar-width: thin;
+}
+.clp-hour-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-width: 9px; height: 100%; }
+.clp-hour-bar {
+  width: 7px; border-radius: 2px 2px 0 0;
+  background: linear-gradient(to top, rgba(196, 106, 90, 0.55), rgba(196, 106, 90, 0.85));
+  transition: height 0.25s ease;
+}
+.clp-hour-bar.clp-hour--peak {
+  background: linear-gradient(to top, rgba(143, 201, 154, 0.65), rgba(143, 201, 154, 0.95));
+}
+.clp-hour-tick { font-size: 9px; color: var(--text-secondary); margin-top: 2px; line-height: 1; }
+.clp-hourly-summary { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
+.clp-hourly-summary b { color: var(--text-primary); font-weight: 600; }
 
 @keyframes clp-spin {
   from { transform: rotate(0deg); }

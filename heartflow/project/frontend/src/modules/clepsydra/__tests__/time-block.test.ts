@@ -30,6 +30,7 @@ import {
   aggregateFocusVsPlan,
   buildFocusTrend,
   buildFocusHeatmap,
+  buildFocusHourly,
   useTimeBlock,
   type PlannedTask,
   type TimeBlock,
@@ -912,6 +913,90 @@ describe('buildFocusHeatmap（INCR-428 专注日历热力图）', () => {
     const r0 = JSON.stringify(records)
     buildFocusHeatmap(blocks, records, anchor, 91)
     expect(JSON.stringify(blocks)).toBe(b0)
+    expect(JSON.stringify(records)).toBe(r0)
+  })
+})
+
+describe('buildFocusHourly（INCR-429 专注时段分布）', () => {
+  const anchor = new Date(2026, 9, 15) // 2026-10-15（本地 0 点）
+  function localIso(y: number, mo: number, d: number, h: number, mi: number, s = 0): string {
+    return new Date(y, mo - 1, d, h, mi, s).toISOString()
+  }
+  function rec(partial: Partial<WorkRecord> & { durationSeconds: number; startedAt: string }): WorkRecord {
+    return {
+      id: partial.id ?? 'r-' + Math.random().toString(36).slice(2, 7),
+      startedAt: partial.startedAt,
+      endedAt: partial.endedAt ?? null,
+      durationSeconds: partial.durationSeconds,
+      category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual',
+      sourceAnchorId: partial.sourceAnchorId,
+      intensity: partial.intensity ?? 0.7,
+      note: partial.note ?? '',
+      createdAt: partial.createdAt ?? partial.startedAt,
+      zone: partial.zone,
+      blockId: partial.blockId,
+    }
+  }
+
+  it('整点单段会话：聚到起始小时，其余小时为 0，峰值正确', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 10, 0, 0), durationSeconds: 3600 })]
+    const h = buildFocusHourly(records, anchor, 30)
+    expect(h.buckets[10].minutes).toBeCloseTo(60, 5)
+    expect(h.buckets.filter(b => b.hour !== 10).every(b => b.minutes === 0)).toBe(true)
+    expect(h.peakHour).toBe(10)
+    expect(h.peakMinutes).toBeCloseTo(60, 5)
+    expect(h.totalMinutes).toBeCloseTo(60, 5)
+    expect(h.hasData).toBe(true)
+  })
+
+  it('跨小时会话按比例拆分到相邻两小时（10:30 起 60 分 → 10 点 30 + 11 点 30）', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 10, 30, 0), durationSeconds: 3600 })]
+    const h = buildFocusHourly(records, anchor, 30)
+    expect(h.buckets[10].minutes).toBeCloseTo(30, 5)
+    expect(h.buckets[11].minutes).toBeCloseTo(30, 5)
+    expect(h.peakMinutes).toBeCloseTo(30, 5)
+    expect([10, 11]).toContain(h.peakHour)
+    expect(h.totalMinutes).toBeCloseTo(60, 5)
+  })
+
+  it('仅 auto 代理记录不计入（与 INCR-423/425/427/428 口径一致）', () => {
+    const records = [rec({ id: 'a1', sourceType: 'auto', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 3600 })]
+    const h = buildFocusHourly(records, anchor, 30)
+    expect(h.totalMinutes).toBe(0)
+    expect(h.hasData).toBe(false)
+    expect(h.peakHour).toBe(-1)
+  })
+
+  it('窗口外（2026-09-10）的记录被排除', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 9, 10, 14, 0, 0), durationSeconds: 3600 })]
+    const h = buildFocusHourly(records, anchor, 30) // 窗口 2026-09-16..2026-10-15
+    expect(h.totalMinutes).toBe(0)
+    expect(h.hasData).toBe(false)
+  })
+
+  it('窗口起始日（2026-09-16）计入、窗口前一日（09-15）排除', () => {
+    const inWin = [rec({ id: 'm1', startedAt: localIso(2026, 9, 16, 8, 0, 0), durationSeconds: 1800 })]
+    expect(buildFocusHourly(inWin, anchor, 30).totalMinutes).toBeCloseTo(30, 5)
+    const outWin = [rec({ id: 'm2', startedAt: localIso(2026, 9, 15, 8, 0, 0), durationSeconds: 1800 })]
+    expect(buildFocusHourly(outWin, anchor, 30).totalMinutes).toBe(0)
+  })
+
+  it('同一小时多段累加，峰值取最大', () => {
+    const records = [
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 1800 }),
+      rec({ id: 'm2', startedAt: localIso(2026, 10, 15, 9, 30, 0), durationSeconds: 1800 }),
+    ]
+    const h = buildFocusHourly(records, anchor, 30)
+    expect(h.buckets[9].minutes).toBeCloseTo(60, 5)
+    expect(h.peakHour).toBe(9)
+    expect(h.totalMinutes).toBeCloseTo(60, 5)
+  })
+
+  it('纯函数：不改入参（记录对象保持原值）', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 10, 0, 0), durationSeconds: 3600 })]
+    const r0 = JSON.stringify(records)
+    buildFocusHourly(records, anchor, 30)
     expect(JSON.stringify(records)).toBe(r0)
   })
 })

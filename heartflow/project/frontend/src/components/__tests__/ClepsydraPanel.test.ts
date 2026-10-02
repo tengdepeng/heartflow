@@ -219,3 +219,40 @@ describe('ClepsydraPanel 专注日历热力图（INCR-428）', () => {
     expect(wrapper.find('.clp-heatmap').exists()).toBe(true)
   })
 })
+
+describe('ClepsydraPanel 专注时段分布（INCR-429）', () => {
+  function hourlyLabel(wrapper: any): string {
+    const el = wrapper.findAll('.clp-block-label').find((n: any) => n.text().includes('专注时段分布'))
+    return el ? el.text() : ''
+  }
+
+  it('有数据 → 渲染时段分布节 + 24 根小时柱 + 默认「近一月」', async () => {
+    const records = [
+      { id: 'r1', startedAt: iso(-180), endedAt: iso(-120), durationSeconds: 3600, category: 'project', sourceType: 'manual', intensity: 0.7, note: '上午专注', createdAt: iso(-180) },
+    ]
+    const wrapper = await mountPanel(records)
+    expect(wrapper.find('.clp-hourly-chart').exists()).toBe(true)
+    expect(wrapper.findAll('.clp-hour-col').length).toBe(24)
+    expect(wrapper.text()).toContain('专注时段分布')
+    expect(wrapper.text()).toContain('高峰时段')
+    expect(hourlyLabel(wrapper)).toContain('近一月')
+  })
+
+  it('无数据 → 时段分布节不渲染', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.clp-hourly-chart').exists()).toBe(false)
+  })
+
+  it('切「近一季」标签 → 时段分布头部显示「近一季」且柱仍渲染', async () => {
+    const records = [
+      { id: 'r2', startedAt: iso(-90), endedAt: iso(-30), durationSeconds: 3600, category: 'study', sourceType: 'manual', intensity: 0.5, note: '专注', createdAt: iso(-90) },
+    ]
+    const wrapper = await mountPanel(records)
+    const quarterBtn = wrapper.findAll('button').find(b => b.text() === '近一季')
+    expect(quarterBtn).toBeTruthy()
+    await quarterBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(hourlyLabel(wrapper)).toContain('近一季')
+    expect(wrapper.find('.clp-hourly-chart').exists()).toBe(true)
+  })
+})

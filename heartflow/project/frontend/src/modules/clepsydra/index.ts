@@ -77,6 +77,7 @@ export {
   aggregateFocusVsPlan,
   buildFocusTrend,
   buildFocusHeatmap,
+  buildFocusHourly,
   useTimeBlock,
 } from './time-block'
 export type {
@@ -95,4 +96,7 @@ export type {
   HeatRange,
   HeatDay,
   FocusHeatmap,
+  HourWindow,
+  HourFocus,
+  FocusHourly,
 } from './time-block'

@@ -968,6 +968,87 @@ export function buildFocusHeatmap(
 }
 
 // ------------------------------------------------------------
+// 专注时段分布（INCR-429）：按起始小时聚合实际专注分钟，看一天内的专注高峰/低谷
+// 复用 buildFocusHeatmap 的口径（排除 auto 代理），纯函数、不改入参。
+// ------------------------------------------------------------
+
+export type HourWindow = 'week' | 'month' | 'quarter'
+export interface HourFocus {
+  /** 小时 0-23 */
+  hour: number
+  /** 该小时累计实际专注分钟（跨小时会话按比例拆分到各小时） */
+  minutes: number
+}
+export interface FocusHourly {
+  /** 24 个小时桶（0-23） */
+  buckets: HourFocus[]
+  /** 窗口内实际专注总分钟 */
+  totalMinutes: number
+  /** 高峰小时（分钟最多的小时），无数据时为 -1 */
+  peakHour: number
+  /** 高峰小时分钟 */
+  peakMinutes: number
+  hasData: boolean
+  windowDays: number
+  startDate: string
+  endDate: string
+}
+export function buildFocusHourly(
+  records: WorkRecord[],
+  anchor: Date = new Date(),
+  days: number = 30,
+): FocusHourly {
+  const anchorDay = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())
+  const start = localDateKey(addDaysLocal(anchorDay, -(days - 1)))
+  const end = localDateKey(anchorDay)
+
+  const buckets: HourFocus[] = Array.from({ length: 24 }, (_, h) => ({ hour: h, minutes: 0 }))
+  let total = 0
+
+  for (const r of records) {
+    if (r.sourceType === 'auto') continue
+    const durSec = r.durationSeconds ?? 0
+    if (durSec <= 0) continue
+    const dt = new Date(r.startedAt)
+    const dayKey = localDateKey(dt)
+    if (dayKey < start || dayKey > end) continue
+    // 跨小时会话按比例拆分到各小时（精确精力曲线）
+    let cursorMs = dt.getTime()
+    const endMs = cursorMs + durSec * 1000
+    while (cursorMs < endMs) {
+      const cur = new Date(cursorMs)
+      const hour = cur.getHours()
+      const hourEndMs = new Date(cur.getFullYear(), cur.getMonth(), cur.getDate(), hour + 1, 0, 0, 0).getTime()
+      const segEnd = Math.min(endMs, hourEndMs)
+      const segMin = (segEnd - cursorMs) / 60000
+      buckets[hour].minutes += segMin
+      total += segMin
+      cursorMs = segEnd
+    }
+  }
+
+  let peakHour = -1
+  let peakMinutes = 0
+  for (const b of buckets) {
+    if (b.minutes > peakMinutes) {
+      peakMinutes = b.minutes
+      peakHour = b.hour
+    }
+  }
+
+  return {
+    buckets,
+    totalMinutes: total,
+    peakHour,
+    peakMinutes,
+    hasData: total > 0,
+    windowDays: days,
+    startDate: start,
+    endDate: end,
+  }
+}
+
+// ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------
 
