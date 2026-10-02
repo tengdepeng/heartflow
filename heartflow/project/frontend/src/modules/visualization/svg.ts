@@ -354,12 +354,16 @@ export function generateRingSectors(
   if (!Number.isFinite(sum) || sum === 0) return []
   const total = sum
 
-  const gapAngle = gap * (data.length / 360) // 每个扇区间隙角度
+  // gap 为相邻扇区之间的角度间隙（度）。旧式 `gap * (data.length / 360)` 令间隙随 n 反向收缩
+  // （n=2 时 1.2° 仅余 0.0067°），扇区实际紧贴、间隔不可见；单个扇区无相邻扇区，不施加间隙，
+  // 整圈交由 generateArcPath 的环分支渲染（而非退化成实心圆盘）。
+  const gapAngle = data.length > 1 ? gap : 0
   let currentAngle = -90 // 从 12 点方向开始
 
   return data.map(d => {
     const sliceAngle = (d.value / total) * 360
-    const adjustedSlice = sliceAngle - gapAngle
+    // 间隙不得吞掉整个扇区（n 很大或 gap 过大时），下限归零
+    const adjustedSlice = Math.max(0, sliceAngle - gapAngle)
     const startAngle = currentAngle
     const endAngle = currentAngle + adjustedSlice
     currentAngle += sliceAngle

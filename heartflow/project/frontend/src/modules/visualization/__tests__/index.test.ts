@@ -273,6 +273,27 @@ describe('generateRingSectors', () => {
   it('should handle empty data', () => {
     expect(generateRingSectors([], 100, 100, 60, 80)).toEqual([])
   })
+
+  // 回归：旧式 `gap * (data.length / 360)` 令间隙随 n 反向收缩（n=2 时 1.2° 仅余 0.0067°），
+  // 扇区紧贴、间隔不可见。gap 现按「每扇区角度间隙（度）」直接生效。
+  it('should leave a visible per-sector angular gap', () => {
+    const data = [{ value: 50, color: '#ff0000' }, { value: 50, color: '#0000ff' }]
+    const sectors = generateRingSectors(data, 100, 100, 60, 80, 2)
+    // 每段 180° 减去 2° 间隙 → 178°（旧公式下为 179.9889°）
+    expect(sectors[0].endAngle - sectors[0].startAngle).toBeCloseTo(178, 6)
+    expect(sectors[1].endAngle - sectors[1].startAngle).toBeCloseTo(178, 6)
+    // 扇区起点仍按整段推进（间隙不累积漂移）：第 2 段自 90° 起
+    expect(sectors[1].startAngle).toBeCloseTo(90, 6)
+  })
+
+  it('should not gap a single sector and render it as a full ring', () => {
+    const sectors = generateRingSectors([{ value: 10, color: '#ffffff' }], 100, 100, 60, 80, 2)
+    expect(sectors).toHaveLength(1)
+    // 无相邻扇区 → 不施加间隙，整圈走环分支（内外双径，而非实心圆盘）
+    expect(sectors[0].endAngle - sectors[0].startAngle).toBeCloseTo(360, 6)
+    expect(sectors[0].path).toContain('A 80 80')
+    expect(sectors[0].path).toContain('A 60 60')
+  })
 })
 
 describe('mapDataToPlot', () => {
