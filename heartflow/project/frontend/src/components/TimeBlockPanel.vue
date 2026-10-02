@@ -1,8 +1,24 @@
 <template>
-  <section class="tbp" aria-label="更漏 · 时间块日规划">
+  <section class="tbp" :class="{ 'tbp--focus-mode': anyRunning }" aria-label="更漏 · 时间块日规划">
     <div class="tbp-head">
       <span class="tbp-title">🗓 时间块日规划</span>
       <span class="tbp-sub">待办排入时间轴 · 轻量自动排程</span>
+    </div>
+
+    <!-- 专注屏护横幅（INCR-424）：专注期间常驻顶部，弱化其余规划区，实时计时 -->
+    <div v-if="anyRunning" class="tbp-focus-banner">
+      <span class="tbp-focus-dot" aria-hidden="true"></span>
+      <div class="tbp-focus-info">
+        <span class="tbp-focus-kicker">专注中</span>
+        <span class="tbp-focus-title">{{ focusBlockTitle }}</span>
+      </div>
+      <span class="tbp-focus-timer">{{ formatSeconds(focusElapsedSec) }}</span>
+      <button
+        type="button"
+        class="tbp-btn tbp-btn--focus-end"
+        title="结束专注会话并标记完成"
+        @click="endFocusSession"
+      >结束</button>
     </div>
 
     <!-- 视图模式切换：日 / 周 -->
@@ -46,7 +62,7 @@
     </div>
 
     <!-- 待规划池 -->
-    <div class="tbp-pool">
+    <div class="tbp-pool" :class="{ 'tbp-dim': anyRunning }">
       <div class="tbp-pool-head">
         <span>待规划 · {{ unscheduled.length }}</span>
         <button
@@ -71,7 +87,7 @@
     </div>
 
     <!-- 时间块模板：复用每日规划 -->
-    <div class="tbp-templates">
+    <div class="tbp-templates" :class="{ 'tbp-dim': anyRunning }">
       <div class="tbp-templates-head">
         <span>模板 · 复用每日规划</span>
         <span v-if="lastTemplateMsg" class="tbp-auto-note">{{ lastTemplateMsg }}</span>
@@ -267,7 +283,7 @@
     </div>
 
     <!-- 手动建块 -->
-    <div class="tbp-manual">
+    <div class="tbp-manual" :class="{ 'tbp-dim': anyRunning }">
       <div class="tbp-manual-head">手动建块</div>
       <div class="tbp-manual-row">
         <input v-model="mbStart" class="tbp-input tbp-input--time" placeholder="09:00" />
@@ -282,7 +298,7 @@
     </div>
 
     <!-- 计划 vs 实际 复盘报表（INCR-419） -->
-    <div class="tbp-report">
+    <div class="tbp-report" :class="{ 'tbp-dim': anyRunning }">
       <div class="tbp-report-head">
         <span>📊 计划 vs 实际</span>
         <span class="tbp-report-scope">{{ viewMode === 'week' ? '本周' : '今日' }}</span>
@@ -319,9 +335,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch, onUnmounted } from 'vue'
 import {
   useTimeBlock,
+  useClepsydra,
+  formatSeconds,
   WORK_CATEGORY_META,
   minutesToLabel,
   labelToMinutes,
@@ -602,6 +620,45 @@ function isBlockRunning(b: TimeBlock): boolean {
 function toggleFocus(b: TimeBlock): void {
   if (isBlockRunning(b)) tb.stopFocusOnBlock(b.id)
   else tb.startFocusOnBlock(b.id)
+}
+
+// ---- 专注期间屏护（INCR-424）：规划区弱化 + 实时计时横幅 ----
+const clepsydra = useClepsydra()
+// 实时秒数：仅在专注态时由定时器刷新 nowTs，避免常驻轮询；
+// 读 running.startedAt 计算已用时长，不写任何 state，不会触发读写递归。
+const nowTs = ref(Date.now())
+let focusTick: ReturnType<typeof setInterval> | null = null
+function stopFocusTick(): void {
+  if (focusTick !== null) {
+    clearInterval(focusTick)
+    focusTick = null
+  }
+}
+function startFocusTick(): void {
+  stopFocusTick()
+  nowTs.value = Date.now()
+  focusTick = setInterval(() => { nowTs.value = Date.now() }, 1000)
+}
+watch(anyRunning, (v) => { if (v) startFocusTick(); else stopFocusTick() })
+onUnmounted(stopFocusTick)
+
+const focusElapsedSec = computed(() => {
+  const r = clepsydra.running.value
+  if (!r) return 0
+  return Math.max(0, Math.round((nowTs.value - new Date(r.startedAt).getTime()) / 1000))
+})
+const focusBlock = computed(() => {
+  const id = runningBlockId.value
+  if (!id) return null
+  return tb.blocks.value.find(b => b.id === id) ?? null
+})
+// 优先取绑定时间块标题，退化为更漏会话备注
+const focusBlockTitle = computed(() => focusBlock.value?.title ?? clepsydra.running.value?.note ?? '')
+
+/** 结束当前专注会话（横幅「结束」按钮） */
+function endFocusSession(): void {
+  const id = runningBlockId.value
+  if (id) tb.stopFocusOnBlock(id)
 }
 
 // ---- 计划 vs 实际复盘报表（INCR-419，聚合日 / 周）----
@@ -1015,4 +1072,56 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
   font-variant-numeric: tabular-nums; pointer-events: none; white-space: nowrap; overflow: hidden;
 }
 .tbp-week-col-empty { position: absolute; top: 50%; left: 0; right: 0; text-align: center; color: rgba(var(--accent-rgb), 0.22); font-size: 10px; transform: translateY(-50%); }
+
+/* 专注期间屏护（INCR-424） */
+.tbp--focus-mode {
+  border-color: rgba(var(--accent-rgb), 0.35);
+  box-shadow: 0 0 0 1px rgba(var(--accent-rgb), 0.18), 0 8px 30px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+/* 规划区弱化：降透明度 + 灰度 + 轻微模糊，并屏蔽交互（屏护） */
+.tbp-dim {
+  opacity: 0.32;
+  filter: grayscale(0.55) blur(0.4px);
+  pointer-events: none;
+  user-select: none;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+/* 时间轴中：除当前专注块外，其余块一并弱化，凸显当下 */
+.tbp--focus-mode .tbp-block:not(.tbp-block--focusing) {
+  opacity: 0.4;
+  transition: opacity 0.4s ease;
+}
+.tbp-focus-banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: 14px;
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 0 18px rgba(var(--accent-rgb), 0.22);
+}
+.tbp-focus-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent);
+  animation: tbp-focus-dot-pulse 1.4s ease-in-out infinite;
+}
+@keyframes tbp-focus-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-rgb), 0.6); }
+  50% { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), 0); }
+}
+.tbp-focus-info { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1; }
+.tbp-focus-kicker { font-size: 10px; letter-spacing: 2px; color: var(--accent); font-weight: 600; }
+.tbp-focus-title {
+  font-size: 15px; font-weight: 600; color: var(--text-primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tbp-focus-timer {
+  font-size: 22px; font-weight: 700; color: var(--accent);
+  font-variant-numeric: tabular-nums; letter-spacing: 1px; flex-shrink: 0;
+}
+.tbp-btn--focus-end {
+  flex-shrink: 0; color: #fff;
+  background: rgba(var(--accent-rgb), 0.85);
+  border-color: rgba(var(--accent-rgb), 0.9);
+}
+.tbp-btn--focus-end:hover:not(:disabled) { background: var(--accent); }
 </style>

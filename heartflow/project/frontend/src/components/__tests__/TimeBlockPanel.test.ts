@@ -835,3 +835,65 @@ describe('TimeBlockPanel 专注会话绑定（INCR-423）', () => {
     expect(b2Focus.text()).toBe('🎯')
   })
 })
+
+describe('TimeBlockPanel 专注期间屏护（INCR-424）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+    mockStore['hf:clepsydra_templates'] = []
+  })
+
+  function seedRunning(today: string, blockId: string, secondsAgo: number): void {
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: blockId, date: today, startMin: 420, durationMin: 60, category: 'project', title: '屏护块', taskId: null, done: false },
+    ]
+    const iso = new Date(Date.now() - secondsAgo * 1000).toISOString()
+    mockStore['hf:clepsydra_records'] = [
+      { id: 'r-run', startedAt: iso, endedAt: null, durationSeconds: secondsAgo, category: 'project', sourceType: 'manual', sourceAnchorId: blockId, blockId, intensity: 0.7, note: '屏护块', createdAt: iso },
+    ]
+  }
+
+  it('专注态：根节点加 tbp--focus-mode，规划四区加 tbp-dim', async () => {
+    const today = localDateKey(new Date())
+    seedRunning(today, 'fb1', 8)
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.tbp').classes()).toContain('tbp--focus-mode')
+    expect(wrapper.find('.tbp-pool').classes()).toContain('tbp-dim')
+    expect(wrapper.find('.tbp-templates').classes()).toContain('tbp-dim')
+    expect(wrapper.find('.tbp-manual').classes()).toContain('tbp-dim')
+    expect(wrapper.find('.tbp-report').classes()).toContain('tbp-dim')
+  })
+
+  it('专注态：屏护横幅渲染标题 + 实时计时 + 结束按钮', async () => {
+    const today = localDateKey(new Date())
+    seedRunning(today, 'fb2', 8)
+    const wrapper = await mountPanel()
+    const banner = wrapper.find('.tbp-focus-banner')
+    expect(banner.exists()).toBe(true)
+    expect(wrapper.find('.tbp-focus-title').text()).toContain('屏护块')
+    expect(wrapper.find('.tbp-focus-kicker').text()).toContain('专注中')
+    // 实时计时：格式为人类可读时长（秒/分/时）
+    expect(wrapper.find('.tbp-focus-timer').text()).toMatch(/\d+[秒分时]/)
+    const endBtn = wrapper.find('.tbp-btn--focus-end')
+    expect(endBtn.exists()).toBe(true)
+    expect(endBtn.text()).toBe('结束')
+  })
+
+  it('结束专注会话：横幅消失、focus-mode 与 dim 移除、会话结束', async () => {
+    const today = localDateKey(new Date())
+    seedRunning(today, 'fb3', 8)
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.tbp-focus-banner').exists()).toBe(true)
+    await wrapper.find('.tbp-btn--focus-end').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tbp-focus-banner').exists()).toBe(false)
+    expect(wrapper.find('.tbp').classes()).not.toContain('tbp--focus-mode')
+    expect(wrapper.find('.tbp-pool').classes()).not.toContain('tbp-dim')
+    // 更漏进行中记录已结束
+    const recs = mockStore['hf:clepsydra_records'] as any[]
+    expect(recs).toHaveLength(1)
+    expect(recs[0].endedAt).not.toBeNull()
+  })
+})
