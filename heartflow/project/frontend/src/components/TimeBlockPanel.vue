@@ -5,11 +5,34 @@
       <span class="tbp-sub">待办排入时间轴 · 轻量自动排程</span>
     </div>
 
-    <!-- 日期导航 -->
-    <div class="tbp-datebar">
+    <!-- 视图模式切换：日 / 周 -->
+    <div class="tbp-modebar">
+      <button
+        type="button"
+        class="tbp-mode"
+        :class="{ 'tbp-mode--active': viewMode === 'day' }"
+        @click="viewMode = 'day'"
+      >日</button>
+      <button
+        type="button"
+        class="tbp-mode"
+        :class="{ 'tbp-mode--active': viewMode === 'week' }"
+        @click="viewMode = 'week'"
+      >周</button>
+    </div>
+
+    <!-- 日期导航（日模式） -->
+    <div v-if="viewMode === 'day'" class="tbp-datebar">
       <button type="button" class="tbp-nav" @click="shiftDate(-1)">‹</button>
       <button type="button" class="tbp-today" @click="goToday">{{ dateLabel }}</button>
       <button type="button" class="tbp-nav" @click="shiftDate(1)">›</button>
+    </div>
+
+    <!-- 周导航（周模式） -->
+    <div v-else class="tbp-datebar">
+      <button type="button" class="tbp-nav" @click="shiftWeek(-1)">‹</button>
+      <button type="button" class="tbp-today" @click="goThisWeek">本周 · {{ weekRangeLabel }}</button>
+      <button type="button" class="tbp-nav" @click="shiftWeek(1)">›</button>
     </div>
 
     <!-- 新增待办 -->
@@ -47,8 +70,8 @@
       <p v-if="lastScheduled !== null" class="tbp-auto-note">自动排程已放入 {{ lastScheduled }} 个时间块。</p>
     </div>
 
-    <!-- 当日时间轴 -->
-    <div class="tbp-timeline-wrap">
+    <!-- 当日时间轴（日模式） -->
+    <div v-if="viewMode === 'day'" class="tbp-timeline-wrap">
       <div class="tbp-timeline-head">
         <span>当日时间轴</span>
         <span class="tbp-coverage">已排 {{ Math.round(scheduledMin / 60 * 10) / 10 }}h · 覆盖率 {{ Math.round(coverage * 100) }}%</span>
@@ -95,6 +118,76 @@
       </div>
     </div>
 
+    <!-- 周视图（周模式） -->
+    <div v-else class="tbp-week-wrap">
+      <div class="tbp-week-head">
+        <span>周视图 · 拖拽块改起止 · 跨列改日期 · 底部手柄拉时长</span>
+        <span class="tbp-coverage">本周已排 {{ Math.round(weekScheduledMin / 60 * 10) / 10 }}h · 覆盖率 {{ weekCoveragePct }}%</span>
+      </div>
+
+      <!-- 周列头：点击切到该日，高亮今天 / 当前选中 -->
+      <div class="tbp-week-colheads">
+        <button
+          v-for="day in weekDays"
+          :key="day"
+          type="button"
+          class="tbp-week-colhead"
+          :class="{ 'tbp-week-colhead--today': isToday(day), 'tbp-week-colhead--active': activeDate === day }"
+          @click="selectDay(day)"
+        >
+          <span class="tbp-week-colhead-dow">周{{ weekdayLabel(day) }}</span>
+          <span class="tbp-week-colhead-date">{{ day.slice(5) }}</span>
+        </button>
+      </div>
+
+      <!-- 周网格：7 列，块可拖动改起止 / 跨列改日期 / 底部手柄拉时长 -->
+      <div class="tbp-week-grid" ref="weekGridEl" :style="{ height: timelineHeight + 'px' }">
+        <div
+          v-for="day in weekDays"
+          :key="day"
+          class="tbp-week-col"
+          :class="{ 'tbp-week-col--today': isToday(day), 'tbp-week-col--active': activeDate === day }"
+        >
+          <div
+            v-for="g in gridHours"
+            :key="g.min"
+            class="tbp-gridline"
+            :style="{ top: ((g.min - DAY_START) * PX_PER_MIN) + 'px' }"
+          >
+            <span class="tbp-gridlabel">{{ g.label }}</span>
+          </div>
+
+          <div
+            v-for="b in dayBlocksInWeek(day)"
+            :key="b.id"
+            class="tbp-block tbp-block--week"
+            :class="{ 'tbp-block--done': b.done }"
+            :style="blockStyle(b)"
+            @pointerdown="onBlockPointerDown($event, b)"
+          >
+            <div class="tbp-block-bar" :style="{ background: WORK_CATEGORY_META[b.category].color }"></div>
+            <div class="tbp-block-body">
+              <div class="tbp-block-row">
+                <span class="tbp-block-time">{{ blockTimeLabel(b) }}</span>
+                <span class="tbp-block-cat">{{ WORK_CATEGORY_META[b.category].icon }}</span>
+              </div>
+              <span class="tbp-block-title">{{ b.title }}</span>
+            </div>
+            <div class="tbp-block-resize" title="拖拽改变时长" @pointerdown="onResizePointerDown($event, b)"></div>
+            <div class="tbp-block-actions">
+              <button type="button" class="tbp-block-btn" :title="b.done ? '标记未完成（已移出更漏光仪）' : '标记完成并汇入更漏光仪'" @click="tb.toggleBlock(b.id)">{{ b.done ? '↺' : '✓' }}</button>
+              <button type="button" class="tbp-block-btn tbp-block-btn--del" title="移除" @click="tb.removeBlock(b.id)">✕</button>
+            </div>
+            <div v-if="dragPreview && dragPreview.id === b.id" class="tbp-block-preview">
+              周{{ weekdayLabel(dragPreview.date) }} {{ minutesToLabel(dragPreview.startMin) }}·{{ dragPreview.durationMin }}′
+            </div>
+          </div>
+
+          <p v-if="dayBlocksInWeek(day).length === 0" class="tbp-week-col-empty">·</p>
+        </div>
+      </div>
+    </div>
+
     <!-- 手动建块 -->
     <div class="tbp-manual">
       <div class="tbp-manual-head">手动建块</div>
@@ -120,7 +213,10 @@ import {
   minutesToLabel,
   labelToMinutes,
   freeGaps,
+  weekDaysOf,
+  weekCoverage,
   type WorkCategory,
+  type TimeBlock,
 } from '../modules/clepsydra'
 
 const DAY_START = 7 * 60
@@ -130,6 +226,136 @@ const WINDOW_MIN = DAY_END - DAY_START
 
 const tb = useTimeBlock()
 const activeDate = ref(tb.todayKey())
+
+// ---- 视图模式（日 / 周） ----
+const viewMode = ref<'day' | 'week'>('day')
+const SNAP_MIN = 5
+const WEEKDAY_LABELS = ['一', '二', '三', '四', '五', '六', '日']
+
+function snap(v: number): number {
+  return Math.max(0, Math.round(v / SNAP_MIN) * SNAP_MIN)
+}
+
+const weekDays = computed(() => weekDaysOf(new Date(activeDate.value + 'T00:00:00')))
+const weekCoveragePct = computed(() => Math.round(weekCoverage(tb.blocks.value, weekDays.value) * 100))
+const weekScheduledMin = computed(() =>
+  weekDays.value.reduce(
+    (s, day) => s + tb.blocks.value.filter(b => b.date === day).reduce((x, b) => x + b.durationMin, 0),
+    0,
+  ),
+)
+const weekRangeLabel = computed(() => {
+  const days = weekDays.value
+  if (!days.length) return ''
+  return `${days[0].slice(5)} – ${days[6].slice(5)}`
+})
+
+function shiftWeek(delta: number): void {
+  const d = new Date(activeDate.value + 'T00:00:00')
+  d.setDate(d.getDate() + delta * 7)
+  activeDate.value = tb.localDateKey(d)
+}
+function goThisWeek(): void {
+  activeDate.value = tb.todayKey()
+}
+function selectDay(dateKey: string): void {
+  activeDate.value = dateKey
+}
+function weekdayLabel(dateKey: string): string {
+  const d = new Date(dateKey + 'T00:00:00')
+  return WEEKDAY_LABELS[(d.getDay() + 6) % 7]
+}
+function isToday(dateKey: string): boolean {
+  return dateKey === tb.todayKey()
+}
+function dayBlocksInWeek(dateKey: string): TimeBlock[] {
+  return tb.blocks.value
+    .filter(b => b.date === dateKey)
+    .sort((a, b) => a.startMin - b.startMin)
+}
+
+// ---- 拖拽：移动 / 拉伸（指针事件统一鼠标 + 触摸） ----
+interface DragState {
+  id: string
+  mode: 'move' | 'resize'
+  pointerId: number
+  startY: number
+  startX: number
+  origStartMin: number
+  origDuration: number
+  origDate: string
+  gridRect?: DOMRect
+  colWidth?: number
+}
+const drag = ref<DragState | null>(null)
+const dragPreview = ref<{ id: string; startMin: number; durationMin: number; date: string } | null>(null)
+const weekGridEl = ref<HTMLElement | null>(null)
+
+function onBlockPointerDown(e: PointerEvent, b: TimeBlock): void {
+  if (e.button !== 0) return
+  e.preventDefault()
+  const rect = viewMode.value === 'week' && weekGridEl.value ? weekGridEl.value.getBoundingClientRect() : undefined
+  drag.value = {
+    id: b.id,
+    mode: 'move',
+    pointerId: e.pointerId,
+    startY: e.clientY,
+    startX: e.clientX,
+    origStartMin: b.startMin,
+    origDuration: b.durationMin,
+    origDate: b.date,
+    gridRect: rect,
+    colWidth: rect ? rect.width / 7 : undefined,
+  }
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+function onResizePointerDown(e: PointerEvent, b: TimeBlock): void {
+  if (e.button !== 0) return
+  e.preventDefault()
+  e.stopPropagation()
+  drag.value = {
+    id: b.id,
+    mode: 'resize',
+    pointerId: e.pointerId,
+    startY: e.clientY,
+    startX: e.clientX,
+    origStartMin: b.startMin,
+    origDuration: b.durationMin,
+    origDate: b.date,
+  }
+  window.addEventListener('pointermove', onPointerMove)
+  window.addEventListener('pointerup', onPointerUp)
+}
+function onPointerMove(e: PointerEvent): void {
+  const d = drag.value
+  if (!d) return
+  const dy = e.clientY - d.startY
+  if (d.mode === 'move') {
+    const newStart = snap(d.origStartMin + dy / PX_PER_MIN)
+    let newDate = d.origDate
+    if (d.gridRect && d.colWidth) {
+      const idx = Math.max(0, Math.min(6, Math.floor((e.clientX - d.gridRect.left) / d.colWidth)))
+      newDate = weekDays.value[idx] ?? d.origDate
+    }
+    dragPreview.value = { id: d.id, startMin: newStart, durationMin: d.origDuration, date: newDate }
+  } else {
+    const newDur = snap(d.origDuration + dy / PX_PER_MIN)
+    dragPreview.value = { id: d.id, startMin: d.origStartMin, durationMin: newDur, date: d.origDate }
+  }
+}
+function onPointerUp(): void {
+  const d = drag.value
+  const p = dragPreview.value
+  window.removeEventListener('pointermove', onPointerMove)
+  window.removeEventListener('pointerup', onPointerUp)
+  if (d && p) {
+    if (d.mode === 'move') tb.setBlockPlacement(d.id, p.date, p.startMin)
+    else tb.resizeBlock(d.id, p.durationMin)
+  }
+  drag.value = null
+  dragPreview.value = null
+}
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
   key: k,
@@ -381,4 +607,46 @@ function blockTimeLabel(b: { startMin: number; durationMin: number }): string {
 .tbp-manual-head { font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
 .tbp-manual-row { display: flex; gap: 6px; flex-wrap: wrap; }
 .tbp-form-error { font-size: 11px; color: #c46a5a; }
+
+.tbp-modebar { display: flex; gap: 6px; justify-content: center; }
+.tbp-mode {
+  padding: 5px 20px; border-radius: 999px; cursor: pointer; font-size: 13px; letter-spacing: 1px;
+  border: 1px solid rgba(var(--accent-rgb), 0.15); background: rgba(255, 255, 255, 0.04); color: var(--text-secondary);
+}
+.tbp-mode--active { background: rgba(var(--accent-rgb), 0.16); color: var(--accent); border-color: rgba(var(--accent-rgb), 0.35); }
+
+.tbp-week-wrap { display: flex; flex-direction: column; gap: 8px; }
+.tbp-week-head { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--text-secondary); letter-spacing: 1px; }
+.tbp-week-colheads { display: flex; }
+.tbp-week-colhead {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  padding: 6px 0; cursor: pointer; font-size: 11px; color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.05); border-right: none; background: rgba(255, 255, 255, 0.02);
+}
+.tbp-week-colhead:last-child { border-right: 1px solid rgba(255, 255, 255, 0.05); }
+.tbp-week-colhead--today { color: var(--accent); }
+.tbp-week-colhead--active { background: rgba(var(--accent-rgb), 0.14); color: var(--text-primary); }
+.tbp-week-colhead-dow { font-weight: 600; }
+.tbp-week-colhead-date { font-size: 10px; font-variant-numeric: tabular-nums; opacity: 0.8; }
+
+.tbp-week-grid {
+  display: flex; width: 100%; border-radius: 12px; overflow: hidden;
+  background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.tbp-week-col { position: relative; flex: 1; min-width: 0; border-right: 1px solid rgba(255, 255, 255, 0.04); }
+.tbp-week-col:last-child { border-right: none; }
+.tbp-week-col--today { background: rgba(var(--accent-rgb), 0.04); }
+
+.tbp-block--week { left: 3px; right: 3px; cursor: grab; touch-action: none; }
+.tbp-block--week:active { cursor: grabbing; }
+.tbp-block-resize {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 9px; cursor: ns-resize; touch-action: none;
+  border-radius: 0 0 8px 8px; background: linear-gradient(to top, rgba(var(--accent-rgb), 0.45), transparent);
+}
+.tbp-block-preview {
+  position: absolute; top: -16px; left: 0; right: 0; font-size: 9px; text-align: center;
+  color: var(--accent); background: rgba(0, 0, 0, 0.65); border-radius: 4px; padding: 1px 0;
+  font-variant-numeric: tabular-nums; pointer-events: none; white-space: nowrap; overflow: hidden;
+}
+.tbp-week-col-empty { position: absolute; top: 50%; left: 0; right: 0; text-align: center; color: rgba(var(--accent-rgb), 0.22); font-size: 10px; transform: translateY(-50%); }
 </style>

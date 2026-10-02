@@ -1,9 +1,11 @@
 // ============================================================
 // 时间块日规划面板测试（INCR-414 · TimeBlockPanel.vue）
 // 空态 · 新增待办 · 自动排程 · 手动建块校验 · 排入下一空档 · 移除/完成
+// 周视图（INCR-416）：模式切换 · 跨天列渲染 · 拖拽改起止 / 跨列改日期 / 拉时长
 // ============================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { weekDaysOf } from '../../modules/clepsydra'
 
 const mockStore: Record<string, any> = {}
 
@@ -144,5 +146,131 @@ describe('TimeBlockPanel 时间块日规划', () => {
     await wrapper.vm.$nextTick()
     expect(wrapper.findAll('.tbp-block').length).toBe(0)
     expect((mockStore['hf:clepsydra_records'] as any[]).length).toBe(0)
+  })
+})
+
+describe('TimeBlockPanel 周视图（INCR-416）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockStore['hf:clepsydra_plan_tasks'] = []
+    mockStore['hf:clepsydra_time_blocks'] = []
+    mockStore['hf:clepsydra_records'] = []
+  })
+
+  it('切换到周模式：渲染 7 列 + 周列头（周一→周日），日时间轴隐藏', async () => {
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click') // 「周」
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tbp-week-grid').exists()).toBe(true)
+    const cols = wrapper.findAll('.tbp-week-col')
+    expect(cols.length).toBe(7)
+    const heads = wrapper.findAll('.tbp-week-colhead')
+    expect(heads.length).toBe(7)
+    expect(heads[0].text()).toContain('周一')
+    expect(heads[6].text()).toContain('周日')
+    // 日时间轴（仅日模式渲染）不应存在
+    expect(wrapper.find('.tbp-timeline').exists()).toBe(false)
+  })
+
+  it('周模式：跨天块落在对应列', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'b1', date: week[0], startMin: 420, durationMin: 60, category: 'project', title: '周一块', taskId: null, done: false },
+      { id: 'b2', date: week[6], startMin: 540, durationMin: 60, category: 'study', title: '周日块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+    const cols = wrapper.findAll('.tbp-week-col')
+    const col0 = cols[0].findAll('.tbp-block--week')
+    const col6 = cols[6].findAll('.tbp-block--week')
+    expect(col0.length).toBe(1)
+    expect(col0[0].text()).toContain('周一块')
+    expect(col6.length).toBe(1)
+    expect(col6[0].text()).toContain('周日块')
+  })
+
+  it('周模式：竖向拖拽块改起始（经 setBlockPlacement 落库）', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'bd', date: week[0], startMin: 420, durationMin: 60, category: 'project', title: '拖动块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const blockEl = wrapper.find('.tbp-block--week')
+    await blockEl.trigger('pointerdown', { button: 0, pointerId: 1, clientX: 50, clientY: 200 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 50, clientY: 270, pointerId: 1 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 270, pointerId: 1 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])[0]
+    // 420 + (70px / 0.7) = 520，snap 到 5
+    expect(stored.startMin).toBe(520)
+    expect(stored.date).toBe(week[0]) // 同列，日期不变
+  })
+
+  it('周模式：横向跨列拖拽改日期（经 setBlockPlacement 落库）', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'bd2', date: week[0], startMin: 420, durationMin: 60, category: 'project', title: '跨列块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // mock 周网格几何，使列宽 = 100px
+    const gridEl = wrapper.find('.tbp-week-grid').element as HTMLElement
+    gridEl.getBoundingClientRect = () => ({
+      left: 0, top: 0, width: 700, height: 600, right: 700, bottom: 600, x: 0, y: 0, toJSON() {},
+    } as DOMRect)
+
+    const blockEl = wrapper.find('.tbp-block--week')
+    await blockEl.trigger('pointerdown', { button: 0, pointerId: 2, clientX: 10, clientY: 200 })
+    const mv = new Event('pointermove') as any
+    // 第 4 列（index 3）：clientX = 3*100 + 10
+    Object.assign(mv, { clientX: 310, clientY: 200, pointerId: 2 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 310, clientY: 200, pointerId: 2 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])[0]
+    expect(stored.date).toBe(week[3]) // 跨到第 4 列对应日期
+    expect(stored.startMin).toBe(420) // 起始不变
+  })
+
+  it('周模式：底部手柄拖拽改时长（经 resizeBlock 落库）', async () => {
+    const week = weekDaysOf(new Date())
+    mockStore['hf:clepsydra_time_blocks'] = [
+      { id: 'br', date: week[0], startMin: 420, durationMin: 60, category: 'project', title: '拉伸块', taskId: null, done: false },
+    ]
+    const wrapper = await mountPanel()
+    await wrapper.findAll('.tbp-mode')[1].trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const resizeEl = wrapper.find('.tbp-block-resize')
+    await resizeEl.trigger('pointerdown', { button: 0, pointerId: 3, clientX: 50, clientY: 300 })
+    const mv = new Event('pointermove') as any
+    Object.assign(mv, { clientX: 50, clientY: 370, pointerId: 3 })
+    window.dispatchEvent(mv)
+    await wrapper.vm.$nextTick()
+    const up = new Event('pointerup') as any
+    Object.assign(up, { clientX: 50, clientY: 370, pointerId: 3 })
+    window.dispatchEvent(up)
+    await wrapper.vm.$nextTick()
+
+    const stored = (mockStore['hf:clepsydra_time_blocks'] as any[])[0]
+    // 60 + (70px / 0.7) = 160，snap 到 5
+    expect(stored.durationMin).toBe(160)
+    expect(stored.startMin).toBe(420) // 起点不变
   })
 })

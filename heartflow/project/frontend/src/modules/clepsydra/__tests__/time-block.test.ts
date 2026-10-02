@@ -15,6 +15,10 @@ import {
   dayCoverage,
   localDateKey,
   blockToRecordInput,
+  weekDaysOf,
+  weekCoverage,
+  blocksForWeek,
+  WEEK_START_DOW,
   type PlannedTask,
   type TimeBlock,
 } from '../time-block'
@@ -198,5 +202,48 @@ describe('blockToRecordInput', () => {
     // 09:00 + 45min = 09:45（本地时区）
     expect(input.startedAt.toISOString()).toBe(new Date('2026-10-02T09:00:00').toISOString())
     expect(input.endedAt.toISOString()).toBe(new Date('2026-10-02T09:45:00').toISOString())
+  })
+})
+
+describe('周视图纯函数', () => {
+  it('WEEK_START_DOW 为周一(1)', () => {
+    expect(WEEK_START_DOW).toBe(1)
+  })
+
+  it('weekDaysOf 返回含 anchor 的那一周 7 个周一→周日 localDateKey', () => {
+    // 2026-10-02 是周五；所在周应为 2026-09-28(周一) → 2026-10-04(周日)
+    const days = weekDaysOf(new Date(2026, 9, 2, 12, 0))
+    expect(days).toHaveLength(7)
+    expect(days[0]).toBe('2026-09-28')
+    expect(days[6]).toBe('2026-10-04')
+    // 严格周一→周日递增
+    const parsed = days.map(d => new Date(d + 'T00:00:00').getDay())
+    expect(parsed).toEqual([1, 2, 3, 4, 5, 6, 0])
+  })
+
+  it('weekDaysOf 对周一 anchor 也返回该周', () => {
+    const days = weekDaysOf(new Date(2026, 9, 5, 9, 0)) // 周一
+    expect(days[0]).toBe('2026-10-05')
+    expect(days[6]).toBe('2026-10-11')
+  })
+
+  it('blocksForWeek 仅保留属于该周的块', () => {
+    const days = weekDaysOf(new Date(2026, 9, 2, 12, 0))
+    const blocks = [
+      makeBlock({ id: 'in', date: '2026-09-29', startMin: 420, durationMin: 60 }),
+      makeBlock({ id: 'out', date: '2026-10-05', startMin: 420, durationMin: 60 }),
+    ]
+    const wk = blocksForWeek(blocks, days)
+    expect(wk.map(b => b.id)).toEqual(['in'])
+  })
+
+  it('weekCoverage 为 7 天已排总分钟 / (7 × 工作窗口)，封顶 1', () => {
+    const days = weekDaysOf(new Date(2026, 9, 2, 12, 0))
+    // 每天排 1 小时（60 分钟），窗口 07:00-23:00 = 960 分钟
+    const blocks = days.map((d, i) => makeBlock({ id: 'd' + i, date: d, startMin: 420, durationMin: 60 }))
+    expect(weekCoverage(blocks, days, 420, 1380)).toBeCloseTo(60 / 960, 5)
+    // 全填满应封顶 1
+    const full = days.map((d, i) => makeBlock({ id: 'f' + i, date: d, startMin: 420, durationMin: 960 }))
+    expect(weekCoverage(full, days, 420, 1380)).toBe(1)
   })
 })

@@ -244,6 +244,42 @@ export function todayKey(): string {
   return localDateKey(new Date())
 }
 
+/** 一周起点（周一=1） */
+export const WEEK_START_DOW = 1
+
+/** 返回包含 anchor 的那一周的 7 个 localDateKey（周一→周日） */
+export function weekDaysOf(anchor: Date): string[] {
+  const d = new Date(anchor)
+  d.setHours(0, 0, 0, 0)
+  const dow = (d.getDay() + 6) % 7 // 周一=0
+  d.setDate(d.getDate() - dow)
+  const days: string[] = []
+  for (let i = 0; i < 7; i++) {
+    days.push(localDateKey(d))
+    d.setDate(d.getDate() + 1)
+  }
+  return days
+}
+
+/** 周内的块（按 days 过滤） */
+export function blocksForWeek(blocks: TimeBlock[], days: string[]): TimeBlock[] {
+  const set = new Set(days)
+  return blocks.filter(b => set.has(b.date))
+}
+
+/** 周覆盖率：7 天已排程总分钟 / (7 × 工作窗口分钟)，封顶 1 */
+export function weekCoverage(
+  blocks: TimeBlock[],
+  days: string[],
+  dayStartMin = 7 * 60,
+  dayEndMin = 23 * 60,
+): number {
+  const dayWin = Math.max(0, dayEndMin - dayStartMin)
+  if (dayWin <= 0 || days.length === 0) return 0
+  const total = days.reduce((s, day) => s + scheduledMinutes(blocks, day), 0)
+  return Math.min(1, total / (days.length * dayWin))
+}
+
 /**
  * 把时间块（完成态）映射为更漏工作记录输入。
  * 仅用时间块自身携带的 date/startMin/durationMin/category/title，无需回溯待办。
@@ -371,7 +407,7 @@ export function useTimeBlock() {
     return b
   }
 
-  function updateBlock(id: string, patch: Partial<Omit<TimeBlock, 'id' | 'date'>>): void {
+  function updateBlock(id: string, patch: Partial<Omit<TimeBlock, 'id'>>): void {
     const b = blocks.value.find(x => x.id === id)
     if (!b) return
     Object.assign(b, patch)
@@ -383,6 +419,23 @@ export function useTimeBlock() {
   /** 移动块到新起始分钟（保持时长） */
   function moveBlock(id: string, startMin: number): void {
     updateBlock(id, { startMin: Math.max(0, Math.round(startMin)) })
+  }
+
+  /** 改变块时长（保持起点，clamp 到 [5, 当日剩余]） */
+  function resizeBlock(id: string, durationMin: number): void {
+    const b = blocks.value.find(x => x.id === id)
+    if (!b) return
+    const max = 24 * 60 - b.startMin
+    const dur = Math.max(5, Math.min(Math.round(durationMin), max))
+    updateBlock(id, { durationMin: dur })
+  }
+
+  /** 跨天 / 改起点放置块（保持时长，clamp 起点到 [0, 1440-时长]） */
+  function setBlockPlacement(id: string, date: string, startMin: number): void {
+    const b = blocks.value.find(x => x.id === id)
+    if (!b) return
+    const clampedStart = Math.max(0, Math.min(Math.round(startMin), 24 * 60 - b.durationMin))
+    updateBlock(id, { date, startMin: clampedStart })
   }
 
   function removeBlock(id: string): void {
@@ -476,6 +529,8 @@ export function useTimeBlock() {
     addBlock,
     updateBlock,
     moveBlock,
+    resizeBlock,
+    setBlockPlacement,
     removeBlock,
     toggleBlock,
     tasksForDate,
