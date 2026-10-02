@@ -3,7 +3,7 @@ import { mount } from '@vue/test-utils'
 import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
 import { invalidateCache } from '../../engine/storage/core'
 
-async function mountPanel(records: unknown[] = [], countdowns: unknown[] = []) {
+async function mountPanel(records: unknown[] = [], countdowns: unknown[] = [], blocks: unknown[] = []) {
   vi.resetModules()
   const storageMock = createMockStorage()
   storageMock.setItem('heartflow:storage', JSON.stringify({
@@ -11,6 +11,7 @@ async function mountPanel(records: unknown[] = [], countdowns: unknown[] = []) {
     kvStore: {
       'hf:clepsydra_records': records,
       'hf:clepsydra_countdowns': countdowns,
+      'hf:clepsydra_time_blocks': blocks,
     },
     sessions: [],
     crystals: [],
@@ -25,6 +26,11 @@ async function mountPanel(records: unknown[] = [], countdowns: unknown[] = []) {
 
 const now = new Date()
 const iso = (offsetMin: number) => new Date(now.getTime() + offsetMin * 60000).toISOString()
+const todayKey = (() => {
+  const d = new Date()
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`
+})()
 
 describe('ClepsydraPanel 工作光仪', () => {
   it('空状态展示标题与提示', async () => {
@@ -79,5 +85,46 @@ describe('ClepsydraPanel 工作光仪', () => {
     await delBtn!.trigger('click')
     await wrapper.vm.$nextTick()
     expect(wrapper.text()).not.toContain('待删除记录')
+  })
+
+  it('专注块绑定真实专注会话 → 渲染「专注块 · 计划 vs 实际专注」节（INCR-425）', async () => {
+    const block = {
+      id: 'fb1', date: todayKey, startMin: 540, durationMin: 60, category: 'project',
+      title: '写周报', taskId: null, done: false,
+    }
+    const records = [
+      { id: 'm1', startedAt: iso(-120), endedAt: iso(-60), durationSeconds: 2700, category: 'project', sourceType: 'manual', intensity: 0.7, note: '写周报', createdAt: iso(-120), blockId: 'fb1' },
+    ]
+    const wrapper = await mountPanel(records, [], [block])
+    expect(wrapper.text()).toContain('专注块 · 计划 vs 实际专注')
+    expect(wrapper.text()).toContain('写周报')
+    expect(wrapper.text()).toContain('计划')
+    expect(wrapper.text()).toContain('实际专注')
+    // 计划 60 分 vs 实际 45 分（2700s）→ 偏差 +(-15) 分
+    expect(wrapper.text()).toContain('60')
+    expect(wrapper.text()).toContain('45分')
+    expect(wrapper.text()).toContain('偏差')
+  })
+
+  it('无绑定专注会话 → 该节不渲染（INCR-425）', async () => {
+    const block = {
+      id: 'fb2', date: todayKey, startMin: 540, durationMin: 30, category: 'study',
+      title: '读书', taskId: null, done: false,
+    }
+    const wrapper = await mountPanel([], [], [block])
+    expect(wrapper.text()).not.toContain('专注块 · 计划 vs 实际专注')
+  })
+
+  it('块完成联动的 auto 代理记录不计入实际专注（INCR-425 排除 auto）', async () => {
+    const block = {
+      id: 'fb3', date: todayKey, startMin: 540, durationMin: 45, category: 'study',
+      title: '仅联动', taskId: null, done: true,
+    }
+    // 仅 auto 代理，无 manual 真实专注会话 → 不聚合
+    const records = [
+      { id: 'a1', startedAt: iso(-120), endedAt: iso(-75), durationSeconds: 2700, category: 'study', sourceType: 'auto', intensity: 0.5, note: '时间块·仅联动', createdAt: iso(-120), sourceAnchorId: 'fb3' },
+    ]
+    const wrapper = await mountPanel(records, [], [block])
+    expect(wrapper.text()).not.toContain('专注块 · 计划 vs 实际专注')
   })
 })

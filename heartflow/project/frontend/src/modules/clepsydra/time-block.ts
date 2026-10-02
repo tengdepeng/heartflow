@@ -620,6 +620,102 @@ export function computePlanActual(
   }
 }
 
+/**
+ * 单个专注块的「计划 vs 实际专注」对照（INCR-425 专注时长聚合入光仪）。
+ * 计划 = 块的 durationMin（分钟）；实际专注 = 绑定到该块的真实专注会话
+ * （`r.blockId === b.id && r.sourceType !== 'auto'`）的 durationSeconds 之和。
+ */
+export interface FocusVsPlanRow {
+  /** 时间块 id */
+  blockId: string
+  /** 块标题 */
+  title: string
+  /** 块分类 */
+  category: WorkCategory
+  /** 块所属日期（localDateKey） */
+  date: string
+  /** 计划时长（分钟，来自块 durationMin） */
+  plannedMin: number
+  /** 实际专注总时长（秒，绑定会话时长之和） */
+  actualSec: number
+  /** 实际专注时长（分钟，四舍五入） */
+  actualMin: number
+  /** 偏差（分钟，实际 − 计划）：负=未达计划、正=超额、零=匹配 */
+  deltaMin: number
+  /** 绑定到该块的专注会话数 */
+  sessionCount: number
+  /** 块是否已完成（done） */
+  done: boolean
+}
+
+/** 专注块聚合报表（INCR-425） */
+export interface FocusVsPlanReport {
+  /** 参与聚合的专注块对照（仅含确有绑定专注会话的块，按日期→id 排序） */
+  rows: FocusVsPlanRow[]
+  /** 计划总分钟 */
+  totalPlannedMin: number
+  /** 实际专注总分钟 */
+  totalActualMin: number
+  /** 偏差总分钟（实际 − 计划） */
+  totalDeltaMin: number
+  /** 绑定专注会话总数 */
+  totalSessions: number
+}
+
+/**
+ * 聚合「专注块 · 计划 vs 实际专注」（纯函数，不读存储、不改入参）。
+ * 对每个时间块累加其绑定的真实专注会话时长，仅纳入「确有专注会话」的块，
+ * 避免稀释；排除 'auto' 代理记录（块完成联动写入的计划时长代理），
+ * 与 INCR-423「真实专注会话优先、不补代理」口径一致。
+ * inScope 决定统计窗口（日/周），与 computePlanActual 同范式。
+ */
+export function aggregateFocusVsPlan(
+  blocks: TimeBlock[],
+  records: WorkRecord[],
+  inScope: (date: string) => boolean,
+): FocusVsPlanReport {
+  const rows: FocusVsPlanRow[] = []
+  let totalPlannedMin = 0
+  let totalActualSec = 0
+  let totalSessions = 0
+
+  for (const b of blocks) {
+    if (!inScope(b.date)) continue
+    // 该块绑定的真实专注会话（排除 auto 代理，避免与计划时长代理重复计）
+    const sessions = records.filter(r => r.blockId === b.id && r.sourceType !== 'auto')
+    if (sessions.length === 0) continue
+    const actualSec = sessions.reduce((s, r) => s + r.durationSeconds, 0)
+    const plannedMin = b.durationMin
+    const actualMin = Math.round(actualSec / 60)
+    rows.push({
+      blockId: b.id,
+      title: b.title,
+      category: b.category,
+      date: b.date,
+      plannedMin,
+      actualSec,
+      actualMin,
+      deltaMin: actualMin - plannedMin,
+      sessionCount: sessions.length,
+      done: b.done,
+    })
+    totalPlannedMin += plannedMin
+    totalActualSec += actualSec
+    totalSessions += sessions.length
+  }
+
+  rows.sort((a, b) => a.date.localeCompare(b.date) || a.blockId.localeCompare(b.blockId))
+
+  const totalActualMin = Math.round(totalActualSec / 60)
+  return {
+    rows,
+    totalPlannedMin,
+    totalActualMin,
+    totalDeltaMin: totalActualMin - totalPlannedMin,
+    totalSessions,
+  }
+}
+
 // ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------

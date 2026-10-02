@@ -74,6 +74,7 @@ export {
   todayKey,
   blockToRecordInput,
   computePlanActual,
+  aggregateFocusVsPlan,
   useTimeBlock,
 } from './time-block'
 export type {
@@ -84,4 +85,6 @@ export type {
   BlockTemplate,
   PlanActualReport,
   PlanActualCategoryRow,
+  FocusVsPlanRow,
+  FocusVsPlanReport,
 } from './time-block'

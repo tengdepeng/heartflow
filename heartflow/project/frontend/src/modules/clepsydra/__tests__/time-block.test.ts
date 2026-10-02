@@ -27,6 +27,7 @@ import {
   buildTemplate,
   instantiateTemplate,
   computePlanActual,
+  aggregateFocusVsPlan,
   useTimeBlock,
   type PlannedTask,
   type TimeBlock,
@@ -636,5 +637,102 @@ describe('专注会话绑定（INCR-423）', () => {
     tb.stopFocusOnBlock(b2.id) // 进行中会话属 b1，不应停
     expect(useClepsydra().running.value).not.toBeNull()
     expect(tb.runningBlockId.value).toBe(b1.id)
+  })
+})
+
+describe('aggregateFocusVsPlan（INCR-425 专注时长聚合入光仪）', () => {
+  const date = '2026-10-02'
+  function rec(partial: Partial<WorkRecord> & { blockId: string; durationSeconds: number }): WorkRecord {
+    return {
+      id: partial.id ?? 'r-' + Math.random().toString(36).slice(2, 7),
+      startedAt: partial.startedAt ?? '2026-10-02T00:00:00.000Z',
+      endedAt: partial.endedAt ?? '2026-10-02T01:00:00.000Z',
+      category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual',
+      intensity: partial.intensity ?? 0.7,
+      note: partial.note ?? '',
+      createdAt: partial.createdAt ?? '2026-10-02T00:00:00.000Z',
+      ...partial,
+    }
+  }
+
+  it('块有绑定 manual 专注会话 → 聚合出该行，排除 auto 代理', () => {
+    const blocks = [makeBlock({ id: 'b1', date, startMin: 540, durationMin: 60, title: '写文档', category: 'project' })]
+    const records = [
+      rec({ id: 'm1', blockId: 'b1', durationSeconds: 2700, category: 'project' }), // 45 分真实专注
+      rec({ id: 'a1', blockId: 'b1', durationSeconds: 3600, sourceType: 'auto' }), // 计划代理不计
+    ]
+    const rep = aggregateFocusVsPlan(blocks, records, d => d === date)
+    expect(rep.rows).toHaveLength(1)
+    const row = rep.rows[0]
+    expect(row.blockId).toBe('b1')
+    expect(row.plannedMin).toBe(60)
+    expect(row.actualSec).toBe(2700)
+    expect(row.actualMin).toBe(45)
+    expect(row.deltaMin).toBe(-15)
+    expect(row.sessionCount).toBe(1)
+  })
+
+  it('块无绑定专注会话 → 不进入 rows', () => {
+    const blocks = [
+      makeBlock({ id: 'b1', date, startMin: 540, durationMin: 60, title: '有专注' }),
+      makeBlock({ id: 'b2', date, startMin: 600, durationMin: 30, title: '无专注' }),
+    ]
+    const records = [rec({ id: 'm1', blockId: 'b1', durationSeconds: 1800 })]
+    const rep = aggregateFocusVsPlan(blocks, records, d => d === date)
+    expect(rep.rows.map(r => r.blockId)).toEqual(['b1'])
+  })
+
+  it('同块多段真实专注会话 → 时长累加、sessionCount 计多', () => {
+    const blocks = [makeBlock({ id: 'b1', date, startMin: 540, durationMin: 120, title: '长专注' })]
+    const records = [
+      rec({ id: 'm1', blockId: 'b1', durationSeconds: 3000 }),
+      rec({ id: 'm2', blockId: 'b1', durationSeconds: 2400 }),
+    ]
+    const rep = aggregateFocusVsPlan(blocks, records, d => d === date)
+    expect(rep.rows[0].actualSec).toBe(5400)
+    expect(rep.rows[0].actualMin).toBe(90)
+    expect(rep.rows[0].sessionCount).toBe(2)
+    expect(rep.rows[0].deltaMin).toBe(-30)
+  })
+
+  it('窗口按 date 过滤：其他日期的块与绑定记录不计入', () => {
+    const blocks = [
+      makeBlock({ id: 'b1', date, startMin: 540, durationMin: 60, title: '今日' }),
+      makeBlock({ id: 'b2', date: '2026-10-03', startMin: 600, durationMin: 60, title: '明日' }),
+    ]
+    const records = [
+      rec({ id: 'm1', blockId: 'b1', durationSeconds: 3600 }),
+      rec({ id: 'm2', blockId: 'b2', durationSeconds: 3600 }),
+    ]
+    const rep = aggregateFocusVsPlan(blocks, records, d => d === date)
+    expect(rep.rows.map(r => r.blockId)).toEqual(['b1'])
+    expect(rep.totalSessions).toBe(1)
+  })
+
+  it('总聚合值随多块累加正确', () => {
+    const blocks = [
+      makeBlock({ id: 'b1', date, startMin: 540, durationMin: 60, title: '块A' }),
+      makeBlock({ id: 'b2', date, startMin: 600, durationMin: 30, title: '块B' }),
+    ]
+    const records = [
+      rec({ id: 'm1', blockId: 'b1', durationSeconds: 3600 }), // +0
+      rec({ id: 'm2', blockId: 'b2', durationSeconds: 1500 }), // -15
+    ]
+    const rep = aggregateFocusVsPlan(blocks, records, d => d === date)
+    expect(rep.totalPlannedMin).toBe(90)
+    expect(rep.totalActualMin).toBe(85)
+    expect(rep.totalDeltaMin).toBe(-5)
+    expect(rep.totalSessions).toBe(2)
+  })
+
+  it('不修改入参（blocks / records 数组与元素）', () => {
+    const blocks = [makeBlock({ id: 'b1', date, startMin: 540, durationMin: 60, title: '块' })]
+    const records = [rec({ id: 'm1', blockId: 'b1', durationSeconds: 1800 })]
+    const b0 = JSON.stringify(blocks)
+    const r0 = JSON.stringify(records)
+    aggregateFocusVsPlan(blocks, records, d => d === date)
+    expect(JSON.stringify(blocks)).toBe(b0)
+    expect(JSON.stringify(records)).toBe(r0)
   })
 })

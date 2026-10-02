@@ -87,6 +87,52 @@
       </div>
     </div>
 
+    <!-- 专注块 · 计划 vs 实际专注（INCR-425） -->
+    <div class="clp-block" v-if="focusReport.rows.length">
+      <span class="clp-block-label">专注块 · 计划 vs 实际专注</span>
+      <div class="clp-fvp-rows">
+        <div
+          v-for="row in focusReport.rows"
+          :key="row.blockId"
+          class="clp-fvp"
+          :class="{ 'clp-fvp--over': row.deltaMin > 0, 'clp-fvp--under': row.deltaMin < 0 }"
+        >
+          <div class="clp-fvp-head">
+            <span class="clp-fvp-icon">{{ WORK_CATEGORY_META[row.category].icon }}</span>
+            <strong class="clp-fvp-title">{{ row.title }}</strong>
+            <span class="clp-fvp-sessions">×{{ row.sessionCount }}</span>
+          </div>
+          <div class="clp-fvp-body">
+            <span class="clp-fvp-cell">
+              <span class="clp-fvp-num">{{ row.plannedMin }}<i>分</i></span>
+              <span class="clp-fvp-cap">计划</span>
+            </span>
+            <span class="clp-fvp-arrow">→</span>
+            <span class="clp-fvp-cell">
+              <span class="clp-fvp-num">{{ formatSeconds(row.actualSec) }}</span>
+              <span class="clp-fvp-cap">实际专注</span>
+            </span>
+            <span
+              class="clp-fvp-delta"
+              :class="row.deltaMin >= 0 ? 'clp-fvp-delta--pos' : 'clp-fvp-delta--neg'"
+            >
+              {{ row.deltaMin >= 0 ? '+' : '' }}{{ row.deltaMin }}<i>分</i>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="clp-fvp-total">
+        <span>合计</span>
+        <span>计划 {{ focusReport.totalPlannedMin }}<i>分</i></span>
+        <span>实际 {{ formatSeconds(focusReport.totalActualMin * 60) }}</span>
+        <span
+          class="clp-fvp-total-delta"
+          :class="focusReport.totalDeltaMin >= 0 ? 'clp-fvp-delta--pos' : 'clp-fvp-delta--neg'"
+        >偏差 {{ focusReport.totalDeltaMin >= 0 ? '+' : '' }}{{ focusReport.totalDeltaMin }}<i>分</i></span>
+        <span>{{ focusReport.totalSessions }} 段</span>
+      </div>
+    </div>
+
     <!-- 时间哨塔（倒计时） -->
     <div class="clp-block">
       <span class="clp-block-label">时间哨塔 · {{ timers.length }}</span>
@@ -152,6 +198,10 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import {
   useClepsydra,
   useClepsydraCountdown,
+  useTimeBlock,
+  aggregateFocusVsPlan,
+  weekDaysOf,
+  todayKey,
   WORK_CATEGORY_META,
   intensityLabel,
   formatSeconds,
@@ -160,10 +210,11 @@ import {
   countdownRepeatLabel,
   countdownRemaining,
 } from '../modules/clepsydra'
-import type { WorkCategory, CountdownRepeat, CountdownTimer } from '../modules/clepsydra'
+import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport } from '../modules/clepsydra'
 
 const clepsydra = useClepsydra()
 const countdown = useClepsydraCountdown()
+const tb = useTimeBlock()
 
 const records = computed(() => clepsydra.records.value)
 const running = computed(() => clepsydra.running.value)
@@ -175,6 +226,20 @@ const now = ref(new Date())
 const summary = computed(() => clepsydra.summary(summaryMode.value, now.value))
 const state = computed(() => clepsydra.state(now.value))
 const recordsByDate = computed(() => clepsydra.recordsByDate())
+
+/**
+ * 专注块 · 计划 vs 实际专注（INCR-425）：复用时间块排程与更漏专注会话，
+ * 随 summaryMode 在「今日 / 本周」窗口内聚合。仅展示、不写存储、不发提醒。
+ */
+const focusReport = computed<FocusVsPlanReport>(() => {
+  const recs = clepsydra.records.value
+  if (summaryMode.value === 'day') {
+    const today = todayKey()
+    return aggregateFocusVsPlan(tb.blocks.value, recs, d => d === today)
+  }
+  const days = new Set(weekDaysOf(now.value))
+  return aggregateFocusVsPlan(tb.blocks.value, recs, d => days.has(d))
+})
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
   key: k,
@@ -402,6 +467,37 @@ onUnmounted(() => {
 .clp-record-note { font-size: 11px; color: var(--text-secondary); }
 
 .clp-empty { font-size: 12px; color: var(--text-secondary); text-align: center; padding: 12px 0; }
+
+/* ---- 专注块 · 计划 vs 实际专注（INCR-425） ---- */
+.clp-fvp-rows { display: flex; flex-direction: column; gap: 8px; }
+.clp-fvp {
+  display: flex; flex-direction: column; gap: 6px; padding: 10px 12px;
+  border-radius: 12px; background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-left: 3px solid rgba(var(--accent-rgb), 0.35);
+}
+.clp-fvp--over { border-left-color: rgba(143, 201, 154, 0.55); }
+.clp-fvp--under { border-left-color: rgba(196, 106, 90, 0.5); }
+.clp-fvp-head { display: flex; align-items: center; gap: 8px; }
+.clp-fvp-icon { font-size: 16px; }
+.clp-fvp-title { flex: 1; font-size: 13px; color: var(--text-primary); }
+.clp-fvp-sessions { font-size: 10px; padding: 1px 8px; border-radius: 999px; background: rgba(var(--accent-rgb), 0.1); color: var(--accent); }
+.clp-fvp-body { display: flex; align-items: center; gap: 10px; }
+.clp-fvp-cell { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.clp-fvp-num { font-size: 15px; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.clp-fvp-num i { font-size: 10px; font-style: normal; color: var(--text-secondary); margin-left: 1px; }
+.clp-fvp-cap { font-size: 10px; color: var(--text-secondary); }
+.clp-fvp-arrow { font-size: 14px; color: var(--text-secondary); }
+.clp-fvp-delta { margin-left: auto; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.clp-fvp-delta--pos { color: rgb(143, 201, 154); }
+.clp-fvp-delta--neg { color: rgb(196, 132, 120); }
+.clp-fvp-total {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px;
+  padding: 8px 12px; border-radius: 10px; font-size: 11px; color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.clp-fvp-total span { white-space: nowrap; }
+.clp-fvp-total-delta { font-weight: 600; }
 
 @keyframes clp-spin {
   from { transform: rotate(0deg); }
