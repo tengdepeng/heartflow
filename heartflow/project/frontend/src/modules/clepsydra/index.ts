@@ -78,6 +78,7 @@ export {
   buildFocusTrend,
   buildFocusHeatmap,
   buildFocusHourly,
+  buildFocusCategoryBreakdown,
   useTimeBlock,
 } from './time-block'
 export type {
@@ -99,4 +100,6 @@ export type {
   HourWindow,
   HourFocus,
   FocusHourly,
+  FocusCategorySlice,
+  FocusCategoryBreakdown,
 } from './time-block'

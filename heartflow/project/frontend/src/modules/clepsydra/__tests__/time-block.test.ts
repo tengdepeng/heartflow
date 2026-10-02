@@ -31,6 +31,7 @@ import {
   buildFocusTrend,
   buildFocusHeatmap,
   buildFocusHourly,
+  buildFocusCategoryBreakdown,
   useTimeBlock,
   type PlannedTask,
   type TimeBlock,
@@ -997,6 +998,84 @@ describe('buildFocusHourly（INCR-429 专注时段分布）', () => {
     const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 10, 0, 0), durationSeconds: 3600 })]
     const r0 = JSON.stringify(records)
     buildFocusHourly(records, anchor, 30)
+    expect(JSON.stringify(records)).toBe(r0)
+  })
+})
+
+describe('buildFocusCategoryBreakdown（INCR-430 专注分类占比）', () => {
+  const anchor = new Date(2026, 9, 15) // 2026-10-15（本地 0 点），窗口 2026-09-16..2026-10-15
+  function localIso(y: number, mo: number, d: number, h: number, mi: number, s = 0): string {
+    return new Date(y, mo - 1, d, h, mi, s, 0).toISOString()
+  }
+  function rec(partial: Partial<WorkRecord> & { durationSeconds: number; startedAt: string }): WorkRecord {
+    return {
+      id: partial.id ?? 'r',
+      startedAt: partial.startedAt,
+      endedAt: partial.endedAt,
+      durationSeconds: partial.durationSeconds,
+      category: partial.category ?? 'project',
+      sourceType: partial.sourceType ?? 'manual',
+      intensity: partial.intensity ?? 0.5,
+      note: partial.note ?? '',
+      createdAt: partial.startedAt,
+    } as WorkRecord
+  }
+
+  it('单分类聚合正确：totalMinutes=60、pct=100、hasData=true', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 10, 0, 0), durationSeconds: 3600, category: 'project' })]
+    const b = buildFocusCategoryBreakdown(records, anchor, 30)
+    expect(b.hasData).toBe(true)
+    expect(b.totalMinutes).toBeCloseTo(60, 5)
+    expect(b.slices.length).toBe(1)
+    expect(b.slices[0].category).toBe('project')
+    expect(b.slices[0].pct).toBe(100)
+    expect(b.slices[0].label).toBe('项目')
+    expect(b.slices[0].color).toBe('#f0b95a')
+  })
+
+  it('多分类按分钟降序 + pct 合计≈100', () => {
+    const records = [
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 3600, category: 'project' }),
+      rec({ id: 'm2', startedAt: localIso(2026, 10, 15, 14, 0, 0), durationSeconds: 1800, category: 'study' }),
+    ]
+    const b = buildFocusCategoryBreakdown(records, anchor, 30)
+    expect(b.totalMinutes).toBeCloseTo(90, 5)
+    expect(b.slices.length).toBe(2)
+    expect(b.slices[0].category).toBe('project')
+    expect(b.slices[1].category).toBe('study')
+    const sum = b.slices.reduce((acc, s) => acc + s.pct, 0)
+    expect(sum).toBeCloseTo(100, 1)
+  })
+
+  it('仅 auto 代理不计入（manual 才计，total=30、category=study）', () => {
+    const records = [
+      rec({ id: 'a1', sourceType: 'auto', startedAt: localIso(2026, 10, 15, 9, 0, 0), durationSeconds: 3600, category: 'project' }),
+      rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 14, 0, 0), durationSeconds: 1800, category: 'study' }),
+    ]
+    const b = buildFocusCategoryBreakdown(records, anchor, 30)
+    expect(b.totalMinutes).toBeCloseTo(30, 5)
+    expect(b.slices.length).toBe(1)
+    expect(b.slices[0].category).toBe('study')
+  })
+
+  it('窗口外记录排除（2026-09-10 在窗口 09-16..10-15 外）', () => {
+    const records = [rec({ id: 'mx', startedAt: localIso(2026, 9, 10, 14, 0, 0), durationSeconds: 7200, category: 'create' })]
+    const b = buildFocusCategoryBreakdown(records, anchor, 30)
+    expect(b.hasData).toBe(false)
+    expect(b.totalMinutes).toBeCloseTo(0, 5)
+    expect(b.slices.length).toBe(0)
+  })
+
+  it('空记录 → hasData=false、slices 为空', () => {
+    const b = buildFocusCategoryBreakdown([], anchor, 30)
+    expect(b.hasData).toBe(false)
+    expect(b.slices.length).toBe(0)
+  })
+
+  it('纯函数：不改入参', () => {
+    const records = [rec({ id: 'm1', startedAt: localIso(2026, 10, 15, 10, 0, 0), durationSeconds: 3600, category: 'project' })]
+    const r0 = JSON.stringify(records)
+    buildFocusCategoryBreakdown(records, anchor, 30)
     expect(JSON.stringify(records)).toBe(r0)
   })
 })

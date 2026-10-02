@@ -1048,6 +1048,82 @@ export function buildFocusHourly(
   }
 }
 
+export type FocusCategorySlice = {
+  /** 分类 */
+  category: WorkCategory
+  /** 分类标签（来自 WORK_CATEGORY_META） */
+  label: string
+  /** 分类色（来自 WORK_CATEGORY_META） */
+  color: string
+  /** 分类图标（来自 WORK_CATEGORY_META） */
+  icon: string
+  /** 该分类实际专注分钟 */
+  minutes: number
+  /** 占比（0-100，1 位小数） */
+  pct: number
+}
+export interface FocusCategoryBreakdown {
+  /** 仅含分钟 > 0 的分类，按分钟降序 */
+  slices: FocusCategorySlice[]
+  /** 窗口内实际专注总分钟 */
+  totalMinutes: number
+  /** 是否有数据 */
+  hasData: boolean
+  windowDays: number
+  startDate: string
+  endDate: string
+}
+
+/**
+ * 专注分类占比（INCR-430）：按五色领域聚合窗口内 manual 实际专注分钟，看时间花在哪。
+ * 排除 auto 代理（与 buildFocusHourly / aggregateFocusVsPlan 口径一致）；纯函数不改入参。
+ */
+export function buildFocusCategoryBreakdown(
+  records: WorkRecord[],
+  anchor: Date = new Date(),
+  days: number = 30,
+): FocusCategoryBreakdown {
+  const anchorDay = new Date(anchor.getFullYear(), anchor.getMonth(), anchor.getDate())
+  const start = localDateKey(addDaysLocal(anchorDay, -(days - 1)))
+  const end = localDateKey(anchorDay)
+
+  const byCat: Record<WorkCategory, number> = {
+    project: 0, daily: 0, study: 0, create: 0, custom: 0,
+  }
+  let total = 0
+  for (const r of records) {
+    if (r.sourceType === 'auto') continue
+    const durSec = r.durationSeconds ?? 0
+    if (durSec <= 0) continue
+    const dayKey = localDateKey(new Date(r.startedAt))
+    if (dayKey < start || dayKey > end) continue
+    const min = durSec / 60
+    byCat[r.category] += min
+    total += min
+  }
+
+  const slices: FocusCategorySlice[] = (Object.keys(byCat) as WorkCategory[])
+    .filter(c => byCat[c] > 0)
+    .map(c => ({
+      category: c,
+      label: WORK_CATEGORY_META[c].label,
+      color: WORK_CATEGORY_META[c].color,
+      icon: WORK_CATEGORY_META[c].icon,
+      minutes: byCat[c],
+      pct: total > 0 ? Math.round((byCat[c] / total) * 1000) / 10 : 0,
+    }))
+    .sort((a, b) => b.minutes - a.minutes)
+
+  return {
+    slices,
+    totalMinutes: total,
+    hasData: total > 0,
+    windowDays: days,
+    startDate: start,
+    endDate: end,
+  }
+}
+
 // ------------------------------------------------------------
 // 组合式 API
 // ------------------------------------------------------------

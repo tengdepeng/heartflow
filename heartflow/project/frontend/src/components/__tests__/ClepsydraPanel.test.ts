@@ -256,3 +256,40 @@ describe('ClepsydraPanel 专注时段分布（INCR-429）', () => {
     expect(wrapper.find('.clp-hourly-chart').exists()).toBe(true)
   })
 })
+
+describe('ClepsydraPanel 专注分类占比（INCR-430）', () => {
+  function catLabel(wrapper: any): string {
+    const el = wrapper.findAll('.clp-block-label').find((n: any) => n.text().includes('专注分类占比'))
+    return el ? el.text() : ''
+  }
+
+  it('有数据 → 渲染分类占比节（环形 + 图例）+ 默认「近一月」', async () => {
+    const records = [
+      { id: 'r1', startedAt: iso(-180), endedAt: iso(-120), durationSeconds: 3600, category: 'project', sourceType: 'manual', intensity: 0.7, note: '项目专注', createdAt: iso(-180) },
+      { id: 'r2', startedAt: iso(-90), endedAt: iso(-30), durationSeconds: 1800, category: 'study', sourceType: 'manual', intensity: 0.5, note: '学习专注', createdAt: iso(-90) },
+    ]
+    const wrapper = await mountPanel(records)
+    expect(wrapper.find('.clp-cat-donut').exists()).toBe(true)
+    expect(wrapper.findAll('.clp-cat-legend-item').length).toBeGreaterThanOrEqual(2)
+    expect(wrapper.text()).toContain('专注分类占比')
+    expect(catLabel(wrapper)).toContain('近一月')
+  })
+
+  it('无数据 → 分类占比节不渲染', async () => {
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.clp-cat-donut').exists()).toBe(false)
+  })
+
+  it('切「近一季」标签 → 头部显示「近一季」且环形仍渲染', async () => {
+    const records = [
+      { id: 'r3', startedAt: iso(-60), endedAt: iso(-30), durationSeconds: 2400, category: 'create', sourceType: 'manual', intensity: 0.8, note: '创造专注', createdAt: iso(-60) },
+    ]
+    const wrapper = await mountPanel(records)
+    const quarterBtn = wrapper.findAll('button').find(b => b.text() === '近一季')
+    expect(quarterBtn).toBeTruthy()
+    await quarterBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(catLabel(wrapper)).toContain('近一季')
+    expect(wrapper.find('.clp-cat-donut').exists()).toBe(true)
+  })
+})

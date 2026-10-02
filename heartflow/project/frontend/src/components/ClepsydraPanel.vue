@@ -244,6 +244,30 @@
       </div>
     </div>
 
+    <!-- 专注分类占比（INCR-430） -->
+    <div class="clp-block" v-if="focusCategory.hasData">
+      <div class="clp-trend-head">
+        <span class="clp-block-label">专注分类占比 · {{ hourWindowLabel }}</span>
+      </div>
+      <div class="clp-cat-body">
+        <div class="clp-cat-donut" :style="catDonutStyle(focusCategory)">
+          <div class="clp-cat-hole">
+            <span class="clp-cat-hole-num">{{ Math.round((focusCategory.totalMinutes / 60) * 10) / 10 }}</span>
+            <span class="clp-cat-hole-unit">小时</span>
+          </div>
+        </div>
+        <ul class="clp-cat-legend">
+          <li v-for="s in focusCategory.slices" :key="s.category" class="clp-cat-legend-item">
+            <span class="clp-cat-dot" :style="{ background: s.color }"></span>
+            <span class="clp-cat-icon">{{ s.icon }}</span>
+            <span class="clp-cat-name">{{ s.label }}</span>
+            <span class="clp-cat-min">{{ Math.round(s.minutes) }} 分</span>
+            <span class="clp-cat-pct">{{ s.pct }}%</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
     <!-- 时间哨塔（倒计时） -->
     <div class="clp-block">
       <span class="clp-block-label">时间哨塔 · {{ timers.length }}</span>
@@ -314,6 +338,7 @@ import {
   buildFocusTrend,
   buildFocusHeatmap,
   buildFocusHourly,
+  buildFocusCategoryBreakdown,
   weekDaysOf,
   todayKey,
   WORK_CATEGORY_META,
@@ -324,7 +349,7 @@ import {
   countdownRepeatLabel,
   countdownRemaining,
 } from '../modules/clepsydra'
-import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod, FocusHeatmap, HeatRange, HeatDay, FocusHourly, HourWindow } from '../modules/clepsydra'
+import type { WorkCategory, CountdownRepeat, CountdownTimer, FocusVsPlanReport, FocusTrend, TrendPeriod, FocusHeatmap, HeatRange, HeatDay, FocusHourly, HourWindow, FocusCategoryBreakdown } from '../modules/clepsydra'
 
 const clepsydra = useClepsydra()
 const countdown = useClepsydraCountdown()
@@ -433,6 +458,25 @@ function hourBarHeight(min: number): Record<string, string> {
   const max = focusHourly.value.peakMinutes
   const h = max > 0 ? Math.max(2, (min / max) * HOUR_CHART_MAX) : 2
   return { height: `${h}px` }
+}
+
+/**
+ * 专注分类占比（INCR-430）：按五色领域聚合实际专注分钟占比，看时间花在哪。
+ * 复用 buildFocusCategoryBreakdown，纯展示、不写存储、不发提醒；窗口跟随 hourWindow。
+ */
+const focusCategory = computed<FocusCategoryBreakdown>(() =>
+  buildFocusCategoryBreakdown(clepsydra.records.value, now.value, hourWindowDays.value),
+)
+function catDonutStyle(b: FocusCategoryBreakdown): Record<string, string> {
+  if (!b.hasData) return {}
+  let acc = 0
+  const stops: string[] = []
+  for (const s of b.slices) {
+    const deg = (s.minutes / b.totalMinutes) * 360
+    stops.push(`${s.color} ${acc}deg ${acc + deg}deg`)
+    acc += deg
+  }
+  return { background: `conic-gradient(${stops.join(', ')})` }
 }
 
 const categoryOptions = (Object.keys(WORK_CATEGORY_META) as WorkCategory[]).map(k => ({
@@ -753,6 +797,27 @@ onUnmounted(() => {
 .clp-hour-tick { font-size: 9px; color: var(--text-secondary); margin-top: 2px; line-height: 1; }
 .clp-hourly-summary { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--text-secondary); margin-top: 6px; }
 .clp-hourly-summary b { color: var(--text-primary); font-weight: 600; }
+
+.clp-cat-body { display: flex; align-items: center; gap: 18px; margin-top: 10px; flex-wrap: wrap; }
+.clp-cat-donut {
+  position: relative; width: 132px; height: 132px; border-radius: 50%; flex: 0 0 auto;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.28), inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+.clp-cat-hole {
+  position: absolute; inset: 26px; border-radius: 50%;
+  background: var(--glass-bg, rgba(28,22,18,0.82));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+.clp-cat-hole-num { font-size: 22px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+.clp-cat-hole-unit { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.clp-cat-legend { list-style: none; margin: 0; padding: 0; flex: 1 1 180px; display: flex; flex-direction: column; gap: 7px; }
+.clp-cat-legend-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+.clp-cat-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; }
+.clp-cat-icon { width: 16px; text-align: center; }
+.clp-cat-name { color: var(--text-primary); font-weight: 600; }
+.clp-cat-min { margin-left: auto; color: var(--text-secondary); }
+.clp-cat-pct { color: var(--text-primary); font-weight: 600; min-width: 42px; text-align: right; }
 
 @keyframes clp-spin {
   from { transform: rotate(0deg); }
