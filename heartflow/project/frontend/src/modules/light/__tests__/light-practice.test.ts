@@ -15,8 +15,33 @@
 // ⚠️ 关键：MEDITATION_SEQUENCES 必须从**动态 import 出来的同一个模块实例**取，
 // 不能文件顶部静态 import —— 静态 import 会拿到被 vi.resetModules() 丢弃的旧实例，
 // 预设常量与引擎实际使用的不是同一批对象，断言 ① 会变成永远为真的空测。
+//
+// ============================================================
+// ⚠️⚠️ 断引用断言为什么必须包 toRaw()（INCR-460）
+// ============================================================
+// 本文件里所有「返回的必须是独立副本」类断言，比的都是**引用**，因此对写法极其敏感：
+//
+//   sequences 是 ref ⇒ sequences.value 读出来**一律是 reactive Proxy**。
+//   而 Proxy 与它所代理的原始对象**永远不是同一引用**（Vue 按 target 缓存 Proxy，
+//   但缓存命中拿到的是「代理同一个 target 的那个 Proxy」，仍不等于 target 本身）。
+//   所以直接写expect(v[0]).not.toBe(MEDITATION_SEQUENCES[0]) 会**恒为 true**——
+//   无论 loadSequences 返回的是深拷贝、浅拷贝还是零拷贝，测试都绿。
+//   这种断言挡不住任何东西：INCR-458 修好深拷贝后，同型断言被补进来，却因 Proxy
+//   遮蔽而一直是空测，直到 INCR-460 用变异测试（把 structuredClone 改回
+//   [...MEDITATION_SEQUENCES] / 直接 return MEDITATION_SEQUENCES）才暴露出来。
+//
+//   深层访问同理：Vue 的 reactive 是**递归包装**的，v[0].steps、v[0].steps[0]
+//   每次读取都现造一个新的 Proxy，所以嵌套层的 not.toBe 一样恒真。
+//
+//   正解：一律经 rawOf()（即 toRaw）剥掉代理层后再比引用。toRaw 只脱一层，
+//   所以数组 / 元素 / 嵌套 steps / 嵌套 step 各层都要分别包一次。
+//   经此改法：真源（structuredClone）全绿，浅拷贝变异体与零拷贝变异体均转红。
+//
+//   反例（不要改）：`expect(a.sequences).not.toBe(b.sequences)` 比的是两个 ref
+//   本身，不经 .value 元素访问，是真断言，无需包 toRaw。
 // ============================================================
 import { describe, it, expect, vi } from 'vitest'
+import { toRaw } from 'vue'
 import { createMockStorage } from '../../../engine/storage/__tests__/test-utils'
 import { invalidateCache } from '../../../engine/storage/core'
 
@@ -59,6 +84,21 @@ function makeRecord(overrides: Partial<Record<string, unknown>> = {}) {
 function readKv(storageMock: Record<string, any>, key: string) {
   const raw = storageMock.getItem('heartflow:storage')
   return raw ? JSON.parse(raw).kvStore?.[key] : undefined
+}
+
+/**
+ * 取「未被 reactive 代理包裹的真实对象」，用于让断引用断言真正有牙齿。
+ *
+ * ⚠️ 这层 toRaw 是断言有牙齿的关键，不是装饰：sequences 是 ref，
+ * sequences.value 里的元素读出来一律是 reactive Proxy，而 Proxy 与它代理的原始对象
+ * **永远不是同一引用**。若不剥代理直接写 `expect(v[0]).not.toBe(MEDITATION_SEQUENCES[0])`，
+ * 无论 loadSequences 返深拷贝、浅拷贝还是零拷贝都会通过 —— 恒真空测，挡不住任何东西。
+ * 详见文件头「断引用断言为什么必须包 toRaw()」。
+ *
+ * 注意 toRaw 只脱一层代理，所以嵌套的 steps / steps[0] 也要各自再包一次。
+ */
+function rawOf<T>(value: T): T {
+  return toRaw(value)
 }
 
 // ============================================================
@@ -122,10 +162,14 @@ describe('light-practice · 预设常量不被写穿（INCR-458）', () => {
     const b = useLightPractice()
 
     // 两个实例各自持有独立的 sequences ref 与独立副本
+    // :126-:128 的元素级比较一律经 rawOf 剥代理，否则恒真（见文件头说明）
     expect(a.sequences).not.toBe(b.sequences)
-    expect(a.sequences.value[0]).not.toBe(MEDITATION_SEQUENCES[0])
-    expect(b.sequences.value[0]).not.toBe(MEDITATION_SEQUENCES[0])
-    expect(a.sequences.value[0]).not.toBe(b.sequences.value[0])
+    expect(rawOf(a.sequences.value[0]), 'A 实例第 0 条不应是预设对象本身')
+      .not.toBe(MEDITATION_SEQUENCES[0])
+    expect(rawOf(b.sequences.value[0]), 'B 实例第 0 条不应是预设对象本身')
+      .not.toBe(MEDITATION_SEQUENCES[0])
+    expect(rawOf(a.sequences.value[0]), 'A/B 实例第 0 条元素应互不相同')
+      .not.toBe(rawOf(b.sequences.value[0]))
 
     expect(a.useSequence(presetId, makeRecord({ id: 'med-a' }))).toBe(true)
 
@@ -150,12 +194,17 @@ describe('light-practice · loadSequences 兜底分支', () => {
     // 内容与预设一致
     expect(result.length).toBe(MEDITATION_SEQUENCES.length)
     expect(result.map(s => s.id)).toEqual(MEDITATION_SEQUENCES.map(s => s.id))
-    // 关键：数组与元素都不是预设本身（浅拷贝会在这里露馅）
-    expect(result).not.toBe(MEDITATION_SEQUENCES)
-    expect(result[0]).not.toBe(MEDITATION_SEQUENCES[0])
+    // 关键：数组、元素、嵌套 steps、嵌套 step 四层引用都必须与预设不同。
+    // 四层全部经 rawOf 剥掉 reactive 代理 —— sequences.value 及其深层访问读出的都是
+    // Proxy，不剥则 not.toBe 恒真，浅拷贝/零拷贝都能蒙混过关（见文件头说明）。
+    const rawList = rawOf(result)
+    expect(rawList, '数组引用应与预设不同').not.toBe(MEDITATION_SEQUENCES)
+    expect(rawOf(rawList[0]), '第0 条元素引用应与预设不同').not.toBe(MEDITATION_SEQUENCES[0])
     // 嵌套的 steps 数组同样必须是独立副本
-    expect(result[0].steps).not.toBe(MEDITATION_SEQUENCES[0].steps)
-    expect(result[0].steps[0]).not.toBe(MEDITATION_SEQUENCES[0].steps[0])
+    expect(rawOf(rawList[0].steps), '第 0 条的 steps 数组引用应与预设不同')
+      .not.toBe(MEDITATION_SEQUENCES[0].steps)
+    expect(rawOf(rawList[0].steps[0]), '第 0 条 steps[0] 的引用应与预设不同')
+      .not.toBe(MEDITATION_SEQUENCES[0].steps[0])
   })
 
   it('② 变体：向实例副本写入不影响预设的深层字段', async () => {
@@ -196,8 +245,9 @@ describe('light-practice · loadSequences 兜底分支', () => {
     expect(() => { practice = useLightPractice() }).not.toThrow()
 
     expect(practice.sequences.value.map(s => s.id)).toEqual(MEDITATION_SEQUENCES.map(s => s.id))
-    // catch 分支同样必须给独立副本，不能退回浅拷贝
-    expect(practice.sequences.value[0]).not.toBe(MEDITATION_SEQUENCES[0])
+    // catch 分支同样必须给独立副本，不能退回浅拷贝（经 rawOf 剥代理，否则恒真）
+    expect(rawOf(practice.sequences.value[0]), 'catch 分支未给独立副本')
+      .not.toBe(MEDITATION_SEQUENCES[0])
   })
 
   it('③ 变体：用户落盘空数组时 sequences 为空（面板据此渲染空态）', async () => {
