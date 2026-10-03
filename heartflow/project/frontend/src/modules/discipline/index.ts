@@ -29,7 +29,6 @@ export type {
 export {
   useDisciplineBridge,
   getHabitTemplatesByCategory,
-  getHabitTemplatesByTag,
   getChallengeTemplatesByDifficulty,
 } from './workshop-bridge'
 export type {

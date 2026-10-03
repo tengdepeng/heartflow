@@ -13,7 +13,6 @@ import {
   RITUAL_TEMPLATES,
   BUNDLE_PRESETS,
   getHabitTemplatesByCategory,
-  getHabitTemplatesByTag,
   getChallengeTemplatesByDifficulty,
 } from '../index'
 import type { Habit } from '../types'
@@ -96,11 +95,6 @@ describe('预设库', () => {
 
       const learningTemplates = getHabitTemplatesByCategory('learning')
       learningTemplates.forEach(t => expect(t.category).toBe('learning'))
-    })
-
-    it('getHabitTemplatesByTag 应正确筛选', () => {
-      const sportTemplates = getHabitTemplatesByTag('运动')
-      sportTemplates.forEach(t => expect(t.tags).toContain('运动'))
     })
   })
 

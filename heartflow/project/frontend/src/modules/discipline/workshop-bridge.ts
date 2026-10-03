@@ -670,13 +670,6 @@ export function getHabitTemplatesByCategory(
 }
 
 /**
- * 按标签筛选习惯模板
- */
-export function getHabitTemplatesByTag(tag: string): HabitTemplate[] {
-  return HABIT_TEMPLATES.filter(t => t.tags.includes(tag))
-}
-
-/**
  * 按难度筛选挑战模板
  */
 export function getChallengeTemplatesByDifficulty(
