@@ -391,32 +391,3 @@ export function calculateGardenHealth(
 
   return { coverage, diversity, bloomRate, recentActivity, score, description }
 }
-
-// ---- LOD 降级 ----
-
-export type LODLevel = 'high' | 'medium' | 'low'
-
-/**
- * 根据花朵数量决定 LOD 等级
- */
-export function getLODLevel(flowerCount: number): LODLevel {
-  if (flowerCount <= 10) return 'high'
-  if (flowerCount <= 25) return 'medium'
-  return 'low'
-}
-
-/**
- * LOD 降级：减少渲染的花朵数量
- */
-export function applyLOD(flowers: FlowerPosition[], level: LODLevel): FlowerPosition[] {
-  switch (level) {
-    case 'high':
-      return flowers
-    case 'medium':
-      // 保留深度 > 0.3 的花朵（前景花），减少远景花
-      return flowers.filter(f => f.depth > 0.3 || f.bloomed)
-    case 'low':
-      // 只保留盛开的花朵和最近的花
-      return flowers.filter(f => f.bloomed || f.depth > 0.6)
-  }
-}

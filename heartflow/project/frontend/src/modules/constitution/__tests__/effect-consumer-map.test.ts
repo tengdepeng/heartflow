@@ -9,7 +9,6 @@ import {
   EFFECT_CONSUMER_MAP,
   CONSUMED_TARGET_SET,
   getEffectConsumer,
-  getPendingTargets,
 } from '../effect-consumer-map'
 import { CONSUMED_TARGETS, DEFAULT_EFFECT_MAP } from '../../../engine/constitution-effects'
 
@@ -42,7 +41,8 @@ describe('与 CONSUMED_TARGETS 的真实消费语义一致', () => {
   it('已解析 45 个、待接线 0 个（32 运行时真实消费 + 13 诚实声明式 declared）', () => {
     const resolved = EFFECT_CONSUMER_MAP.filter(c => c.consumed)
     expect(resolved.length).toBe(45)
-    expect(getPendingTargets().length).toBe(0)
+    // 无待接线目标（全部 consumed:true，pending 计数归零，由账本头注释诚实声明）
+    expect(EFFECT_CONSUMER_MAP.filter(c => !c.consumed)).toHaveLength(0)
     const declared = EFFECT_CONSUMER_MAP.filter(c => c.mechanism === 'declared')
     expect(declared.length).toBe(13)
     const runtime = EFFECT_CONSUMER_MAP.filter(c => c.consumed && c.mechanism !== 'declared')

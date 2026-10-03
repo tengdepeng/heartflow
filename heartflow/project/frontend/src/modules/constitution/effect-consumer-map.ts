@@ -138,8 +138,3 @@ export const CONSUMED_TARGET_SET: ReadonlySet<EffectTarget> = new Set(
 export function getEffectConsumer(target: EffectTarget): EffectConsumer | undefined {
   return EFFECT_CONSUMER_MAP.find(c => c.target === target)
 }
-
-/** 未接线目标（声明式·不影响运行时），供进度跟踪 */
-export function getPendingTargets(): EffectConsumer[] {
-  return EFFECT_CONSUMER_MAP.filter(c => !c.consumed)
-}

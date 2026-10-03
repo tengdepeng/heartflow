@@ -9,8 +9,6 @@ import {
   generateFlowerLayout,
   getFlowerClusters,
   calculateGardenHealth,
-  getLODLevel,
-  applyLOD,
   DEFAULT_GARDEN_CONFIG,
 } from '../garden-environment'
 import type { FlowerPosition } from '../garden-environment'
@@ -286,58 +284,5 @@ describe('calculateGardenHealth', () => {
     const health = calculateGardenHealth(flowers, records)
     expect(health.score).toBeGreaterThanOrEqual(0)
     expect(health.score).toBeLessThanOrEqual(100)
-  })
-})
-
-// ============================================================
-// LOD
-// ============================================================
-
-describe('LOD 降级', () => {
-  it('少量花朵使用 high LOD', () => {
-    expect(getLODLevel(5)).toBe('high')
-    expect(getLODLevel(10)).toBe('high')
-  })
-
-  it('中等数量使用 medium LOD', () => {
-    expect(getLODLevel(15)).toBe('medium')
-    expect(getLODLevel(25)).toBe('medium')
-  })
-
-  it('大量花朵使用 low LOD', () => {
-    expect(getLODLevel(30)).toBe('low')
-    expect(getLODLevel(100)).toBe('low')
-  })
-
-  it('high LOD 保留所有花朵', () => {
-    const flowers: FlowerPosition[] = [
-      { id: 'f1', recordId: 'r1', type: 'happy', x: 0, y: 0, scale: 1, rotation: 0, bloomed: false, opacity: 1, depth: 0.2, createdAt: '' },
-      { id: 'f2', recordId: 'r2', type: 'sad', x: 0, y: 0, scale: 1, rotation: 0, bloomed: true, opacity: 1, depth: 0.8, createdAt: '' },
-    ]
-    const result = applyLOD(flowers, 'high')
-    expect(result).toHaveLength(2)
-  })
-
-  it('medium LOD 过滤远景非盛开花朵', () => {
-    const flowers: FlowerPosition[] = [
-      { id: 'f1', recordId: 'r1', type: 'happy', x: 0, y: 0, scale: 1, rotation: 0, bloomed: false, opacity: 1, depth: 0.2, createdAt: '' },
-      { id: 'f2', recordId: 'r2', type: 'sad', x: 0, y: 0, scale: 1, rotation: 0, bloomed: true, opacity: 1, depth: 0.2, createdAt: '' },
-      { id: 'f3', recordId: 'r3', type: 'calm', x: 0, y: 0, scale: 1, rotation: 0, bloomed: false, opacity: 1, depth: 0.8, createdAt: '' },
-    ]
-    const result = applyLOD(flowers, 'medium')
-    // f1 被过滤（非盛开 + 深度低），f2 保留（盛开），f3 保留（深度高）
-    expect(result).toHaveLength(2)
-    expect(result.map(f => f.id)).toEqual(['f2', 'f3'])
-  })
-
-  it('low LOD 只保留盛开或前景花朵', () => {
-    const flowers: FlowerPosition[] = [
-      { id: 'f1', recordId: 'r1', type: 'happy', x: 0, y: 0, scale: 1, rotation: 0, bloomed: false, opacity: 1, depth: 0.2, createdAt: '' },
-      { id: 'f2', recordId: 'r2', type: 'sad', x: 0, y: 0, scale: 1, rotation: 0, bloomed: true, opacity: 1, depth: 0.3, createdAt: '' },
-      { id: 'f3', recordId: 'r3', type: 'calm', x: 0, y: 0, scale: 1, rotation: 0, bloomed: false, opacity: 1, depth: 0.7, createdAt: '' },
-    ]
-    const result = applyLOD(flowers, 'low')
-    expect(result).toHaveLength(2)
-    expect(result.map(f => f.id)).toEqual(['f2', 'f3'])
   })
 })
