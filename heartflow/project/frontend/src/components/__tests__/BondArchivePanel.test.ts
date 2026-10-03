@@ -146,4 +146,27 @@ describe('BondArchivePanel', () => {
     expect(wrapper.text()).toContain('温和洞察')
     expect(wrapper.text()).toContain('💡')
   })
+
+  it('INCR-446 揭示最久未联系的人及其天数', async () => {
+    const past = new Date(Date.now() - 60 * 86400000).toISOString()
+    const wrapper = mountPanel(
+      [person({ id: 'p1', name: '王五' })],
+      [interaction({ personId: 'p1', date: past })],
+    )
+    // loadInteractions 在 onMounted 同步读 storage 后触发重渲染，需冲刷 nextTick 才入 DOM
+    await wrapper.vm.$nextTick()
+    const neg = wrapper.find('.bap-neglected')
+    expect(neg.exists()).toBe(true)
+    expect(neg.text()).toContain('最久未联系')
+    expect(neg.text()).toContain('王五')
+    expect(neg.text()).toContain('60 天')
+  })
+
+  it('INCR-446 无互动记录时不展示最久未联系（避免噪音）', () => {
+    const wrapper = mountPanel(
+      [person({ id: 'p1', name: '王五' })],
+      [],
+    )
+    expect(wrapper.find('.bap-neglected').exists()).toBe(false)
+  })
 })
