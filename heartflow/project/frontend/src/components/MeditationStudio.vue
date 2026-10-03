@@ -185,6 +185,11 @@
       </div>
       <p v-else class="ms-empty">暂无数据，先完成一场冥想或释怀吧。</p>
     </section>
+
+    <!-- ── 冥想序列（INCR-457：light-practice 引擎的多步课程，此前无任何 UI 消费） ── -->
+    <section v-if="tab === 'sequence'" class="ms-card">
+      <MeditationSequencePanel />
+    </section>
   </div>
 </template>
 
@@ -194,11 +199,13 @@ import { useLightPavilion, useGuidedMeditation, useReleaseRituals, useClarityDas
 import { MEDITATION_TYPE_META, RELEASE_METHOD_META, CLARITY_LEVEL_META } from '../modules/light/types'
 import type { MeditationType } from '../modules/light/types'
 import type { GuidedMeditation, ReleaseRitual, ClarityStats } from '../modules/light'
+import MeditationSequencePanel from './MeditationSequencePanel.vue'
 
 const TABS = [
   { key: 'meditate', icon: '🧘', label: '引导冥想' },
   { key: 'release', icon: '🕊️', label: '释怀仪式' },
   { key: 'clarity', icon: '💎', label: '澄明仪表' },
+  { key: 'sequence', icon: '🧭', label: '冥想序列' },
 ] as const
 type TabKey = typeof TABS[number]['key']
 
