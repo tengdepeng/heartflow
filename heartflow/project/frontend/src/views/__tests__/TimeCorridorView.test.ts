@@ -204,3 +204,66 @@ describe('集成：今夜观测计划', () => {
     expect(wrapper.find('.opp').exists()).toBe(true)
   })
 })
+
+// =============================================================
+// INCR-436：专注节奏 · 接线 timer 统计孤儿
+// getTodayFocusTime/getWeekFocusTime/getMonthFocusTime/
+// getTodayCompletedCount/getStreakDays/isLongBreakDue
+// =============================================================
+
+describe('专注节奏 · timer 统计接线 (INCR-436)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockSessions.length = 0
+    Object.keys(mockKV).forEach((k) => delete mockKV[k])
+  })
+
+  function seedTodayAndYesterday() {
+    const tStr = new Date().toISOString()
+    const yStr = new Date(Date.now() - 86400000).toISOString()
+    mockSessions.push(
+      { id: 's1', status: 'completed', mode: 'focus', plannedDuration: 600000, elapsed: 600000, startedAt: tStr, pausedDuration: 0, pausedAt: null, completedAt: tStr, tags: [], note: '', carrierId: null },
+      { id: 's2', status: 'completed', mode: 'focus', plannedDuration: 600000, elapsed: 600000, startedAt: yStr, pausedDuration: 0, pausedAt: null, completedAt: yStr, tags: [], note: '', carrierId: null },
+    )
+  }
+
+  it('渲染专注节奏区块与五项统计标签', async () => {
+    seedTodayAndYesterday()
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tcv-focus').exists()).toBe(true)
+    expect(wrapper.text()).toContain('专注节奏')
+    expect(wrapper.text()).toContain('今日专注')
+    expect(wrapper.text()).toContain('本周专注')
+    expect(wrapper.text()).toContain('本月专注')
+    expect(wrapper.text()).toContain('今日完成')
+    expect(wrapper.text()).toContain('连续天数')
+  })
+
+  it('今日专注时长正确（单个完成会话 600000ms = 10min）', async () => {
+    seedTodayAndYesterday()
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    const cards = wrapper.findAll('.tcv-focus-card')
+    const todayCard = cards.find((c) => c.text().includes('今日专注'))!
+    expect(todayCard.exists()).toBe(true)
+    expect(todayCard.text()).toContain('10')
+  })
+
+  it('今日完成=1、连续天数=2（今+昨连续）', async () => {
+    seedTodayAndYesterday()
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    const cards = wrapper.findAll('.tcv-focus-card')
+    const completedCard = cards.find((c) => c.text().includes('今日完成'))!
+    const streakCard = cards.find((c) => c.text().includes('连续天数'))!
+    expect(completedCard.find('.tcv-focus-value').text()).toBe('1')
+    expect(streakCard.find('.tcv-focus-value').text()).toBe('2')
+  })
+
+  it('无数据时仍渲染区块（数值为 0 不崩溃）', async () => {
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.tcv-focus').exists()).toBe(true)
+  })
+})

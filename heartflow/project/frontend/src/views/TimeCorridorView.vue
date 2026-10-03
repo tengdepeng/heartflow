@@ -55,6 +55,34 @@
       </div>
     </div>
 
+    <!-- 专注节奏 · 接线 timer 统计孤儿 (INCR-436：今日/本周/本月专注 + 今日完成 + 连续天数) -->
+    <div data-enter class="tcv-focus" v-if="focusStats">
+      <div class="tcv-focus-head">专注节奏</div>
+      <div class="tcv-focus-grid">
+        <div class="tcv-focus-card">
+          <span class="tcv-focus-value">{{ focusStats.todayMinutes }}<small>min</small></span>
+          <span class="tcv-focus-label">今日专注</span>
+        </div>
+        <div class="tcv-focus-card">
+          <span class="tcv-focus-value">{{ focusStats.weekHours }}<small>h</small></span>
+          <span class="tcv-focus-label">本周专注</span>
+        </div>
+        <div class="tcv-focus-card">
+          <span class="tcv-focus-value">{{ focusStats.monthHours }}<small>h</small></span>
+          <span class="tcv-focus-label">本月专注</span>
+        </div>
+        <div class="tcv-focus-card">
+          <span class="tcv-focus-value">{{ focusStats.todayCompleted }}</span>
+          <span class="tcv-focus-label">今日完成</span>
+        </div>
+        <div class="tcv-focus-card">
+          <span class="tcv-focus-value">{{ focusStats.streak }}</span>
+          <span class="tcv-focus-label">连续天数</span>
+        </div>
+      </div>
+      <p class="tcv-focus-tip" v-if="focusStats.longBreakDue">✦ 今日已完成 {{ focusStats.todayCompleted }} 个番茄，建议来一场长休息</p>
+    </div>
+
     <!-- 天文日历 · 观星时节（INCR-05：让时间/星空看得见，纯本地计算） -->
     <div data-enter class="tcv-astro">
       <AstronomyPanel />
@@ -130,6 +158,15 @@ import LifeEpochPanel from '../components/LifeEpochPanel.vue'
 import ObservationPlanPanel from '../components/ObservationPlanPanel.vue'
 import type { FocusSession } from '../types'
 import { useTimeCapsule } from '../modules/capsule'
+// 接线 timer 统计孤儿（INCR-436）：今日/本周/本月专注、今日完成、连续天数、长休提醒
+import {
+  getTodayFocusTime,
+  getWeekFocusTime,
+  getMonthFocusTime,
+  getTodayCompletedCount,
+  getStreakDays,
+  isLongBreakDue,
+} from '../modules/timer'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -146,7 +183,18 @@ interface CorridorStats {
   avgCrystalsPerDay: number
 }
 
+// 专注节奏（INCR-436：接线 timer 模块统计孤儿）
+interface FocusRhythm {
+  todayMinutes: number
+  weekHours: number
+  monthHours: number
+  todayCompleted: number
+  streak: number
+  longBreakDue: boolean
+}
+
 const stats = ref<CorridorStats | null>(null)
+const focusStats = ref<FocusRhythm | null>(null)
 
 onMounted(() => {
   const crystals = storage.getCrystals()
@@ -164,6 +212,16 @@ onMounted(() => {
     uniqueDays: days.size || 1,
     totalFocusHours: Math.round(totalFocusMs / 3600000),
     avgCrystalsPerDay: days.size > 0 ? Math.round((crystals.length / days.size) * 10) / 10 : 0,
+  }
+
+  // INCR-436：用模块统计函数替换/补足专注节奏展示，接线 timer 孤儿
+  focusStats.value = {
+    todayMinutes: Math.round(getTodayFocusTime() / 60000),
+    weekHours: Math.round((getWeekFocusTime() / 3600000) * 10) / 10,
+    monthHours: Math.round((getMonthFocusTime() / 3600000) * 10) / 10,
+    todayCompleted: getTodayCompletedCount(),
+    streak: getStreakDays(),
+    longBreakDue: isLongBreakDue(),
   }
 })
 
@@ -348,6 +406,70 @@ function navTo(path: string) {
   font-size: 10px;
   color: rgba(var(--accent-rgb), 0.35);
   letter-spacing: 1px;
+}
+
+/* ---- 专注节奏（INCR-436） ---- */
+.tcv-focus {
+  position: relative;
+  z-index: 1;
+  margin: 16px 24px 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+  flex-shrink: 0;
+}
+
+.tcv-focus-head {
+  font-size: 13px;
+  color: rgba(var(--accent-rgb), 0.6);
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.tcv-focus-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tcv-focus-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--card-bg);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+  min-width: 64px;
+}
+
+.tcv-focus-value {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+.tcv-focus-value small {
+  font-size: 10px;
+  color: rgba(var(--accent-rgb), 0.4);
+  margin-left: 2px;
+}
+
+.tcv-focus-label {
+  font-size: 10px;
+  color: rgba(var(--accent-rgb), 0.35);
+  letter-spacing: 1px;
+}
+
+.tcv-focus-tip {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.45);
+  text-align: center;
 }
 
 /* ---- 时间长廊容器 ---- */
