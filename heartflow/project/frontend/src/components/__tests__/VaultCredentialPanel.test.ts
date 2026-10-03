@@ -127,4 +127,60 @@ describe('VaultCredentialPanel 凭证保险箱（INCR-371）', () => {
     expect(wrapper.find('[data-test="vcp-cr-k1"]').exists()).toBe(true)
     expect(wrapper.find('.vcp-ov-num').text()).toContain('1') // 剩 1 条
   })
+
+  // ============================================================
+  // INCR-449：接线 vault-entries 的 updateCredential（此前引擎已实现
+  // 但面板零消费 → 密码改了只能删了重录）。每条凭证加「编辑」，
+  // 回填表单进入编辑态，保存走 updateCredential（字段级 patch + 刷 updatedAt）。
+  // ============================================================
+  it('INCR-449 点编辑回填表单并进入编辑态', async () => {
+    const wrapper = await mountPanel([credential({ id: 'e1', title: '旧标题', username: 'old@x.com', password: WEAK })])
+    expect(wrapper.find('[data-test="vcp-editing-hint"]').exists()).toBe(false)
+    await wrapper.find('[data-test="vcp-edit-e1"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-test="vcp-editing-hint"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="vcp-editing-hint"]').text()).toContain('旧标题')
+    // 标题/账号/密码已回填
+    expect((wrapper.find('[data-test="vcp-title"]').element as HTMLInputElement).value).toBe('旧标题')
+    expect((wrapper.find('[data-test="vcp-username"]').element as HTMLInputElement).value).toBe('old@x.com')
+    expect((wrapper.find('[data-test="vcp-password"]').element as HTMLInputElement).value).toBe(WEAK)
+    // 按钮文案切到编辑态
+    expect(wrapper.find('[data-test="vcp-create"]').text()).toContain('保存修改')
+  })
+
+  it('INCR-449 编辑保存后就地更新条目而非新增，且退出编辑态', async () => {
+    const wrapper = await mountPanel([credential({ id: 'e1', title: '旧标题', password: WEAK })])
+    await wrapper.find('[data-test="vcp-edit-e1"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-test="vcp-title"]').setValue('新标题')
+    await wrapper.find('[data-test="vcp-password"]').setValue(STRONG)
+    await wrapper.find('[data-test="vcp-create"]').trigger('submit')
+    await wrapper.vm.$nextTick()
+    // 条目数仍为 1（更新而非新增）
+    expect(wrapper.find('.vcp-ov-num').text()).toContain('1')
+    expect(wrapper.find('[data-test="vcp-cr-e1"]').text()).toContain('新标题')
+    expect(wrapper.find('[data-test="vcp-cr-e1"]').text()).not.toContain('旧标题')
+    // 弱密审计随之消失（密码已改强）
+    expect(wrapper.find('[data-test="vcp-card-weak"]').exists()).toBe(false)
+    // 退出编辑态
+    expect(wrapper.find('[data-test="vcp-editing-hint"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="vcp-create"]').text()).toContain('存入')
+  })
+
+  it('INCR-449 取消编辑与删除正在编辑的条目都回到新增态', async () => {
+    const wrapper = await mountPanel([credential({ id: 'e1' }), credential({ id: 'e2', title: '另一条' })])
+    await wrapper.find('[data-test="vcp-edit-e1"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-test="vcp-editing-hint"]').exists()).toBe(true)
+    await wrapper.find('[data-test="vcp-cancel-edit"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-test="vcp-editing-hint"]').exists()).toBe(false)
+    // 编辑 e2 后直接删除它，应自动回到新增态
+    await wrapper.find('[data-test="vcp-edit-e2"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('[data-test="vcp-remove-e2"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-test="vcp-editing-hint"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="vcp-cr-e2"]').exists()).toBe(false)
+  })
 })
