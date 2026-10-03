@@ -139,6 +139,9 @@
       <CoordinatorSettingsPanel />
     </section>
 
+    <!-- 幕僚的克制（INCR-444 补挂载治理可视化：宪法第44条全局开关，消费 isAdvisorRestrained + RESTRICTED_ADVISOR_ACTIONS，此前 AdvisorHub 缺此治理视图；零 props 自持读桥） -->
+    <AdvisorRestraintPanel />
+
     <!-- 氛围主题（原右下角常驻浮层：迁至此处与设置页两入口） -->
     <section data-enter class="ah-aura-section">
       <h3 class="ah-scheduler-heading">🌌 氛围主题</h3>
@@ -293,6 +296,7 @@ import { advisorCarrierStageOf, carrierGlyph, carrierIsImage } from '../types'
 import AdvisorScheduler from '../components/AdvisorScheduler.vue'
 import DialogueSessionList from '../components/DialogueSessionList.vue'
 import CoordinatorSettingsPanel from '../components/CoordinatorSettingsPanel.vue'
+import AdvisorRestraintPanel from '../components/AdvisorRestraintPanel.vue'
 import AdvisorCarrierEditor from '../components/AdvisorCarrierEditor.vue'
 import AdvisorInteractionPanel from '../components/AdvisorInteractionPanel.vue'
 import AdvisorWitnessPanel from '../components/AdvisorWitnessPanel.vue'
