@@ -200,9 +200,18 @@ export function useNotificationEngine() {
   function loadRules(): NotificationRule[] {
     try {
       const raw = storage.getKV<string>(NOTIFICATION_RULES_KEY, '')
-      if (!raw) return [...DEFAULT_NOTIFICATION_RULES]
+      // 兜底必须返回 structuredClone 深拷贝，不能用 [...DEFAULT_NOTIFICATION_RULES]：
+      // 展开语法只新建数组，元素仍是 DEFAULT_NOTIFICATION_RULES 的那批对象本身。
+      // rules 是 ref，读取时会包一层 reactive 代理，但其 set 陷阱写穿到原始对象，
+      // 于是 toggleRule 的 `rule.enabled = !rule.enabled` 与updateRule 的
+      // `Object.assign(rule, updates)`（含嵌套 rule.template）会直接改写模块级常量。
+      // 后果是「幽灵启用」：用户本次会话 toggle 过某条规则后即便清空落盘，
+      // 同一模块实例内新加载的兜底规则仍带着上次遗留的 enabled: true，
+      // 而用户从未开启过它。深拷贝切断别名，预设常量自此不可被写穿。
+      // （同型先例 useHomeReplica.ts readManifest / engine/storage/core.ts createDefaultSchema）
+      if (!raw) return DEFAULT_NOTIFICATION_RULES.map(r => ({ ...r }))
       return JSON.parse(raw)
-    } catch { return [...DEFAULT_NOTIFICATION_RULES] }
+    } catch { return structuredClone(DEFAULT_NOTIFICATION_RULES) }
   }
 
   function saveRules() {
