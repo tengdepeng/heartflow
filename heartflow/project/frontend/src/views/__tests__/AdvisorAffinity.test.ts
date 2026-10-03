@@ -107,4 +107,67 @@ describe('AdvisorAffinity 幕僚好感', () => {
     await backBtn.trigger('click')
     expect(mockPush).toHaveBeenCalledWith('/advisors')
   })
+
+  it('INCR-443：好感度层级分布条渲染（复用 tierInfo）', async () => {
+    mockAdvisors = [
+      { id: 'a1', name: '墨染', role: 'mentor', personality: 'calm', affinity: 45, totalInteractions: 30 },
+    ]
+    const wrapper = await getWrapper()
+    const dist = wrapper.find('[data-test="affinity-tier-dist"]')
+    expect(dist.exists()).toBe(true)
+    // 45 好感 + 30 交互 → AFFINITY_TIERS index 2「熟稔」应计数 1
+    expect(dist.text()).toContain('熟稔')
+  })
+
+  it('INCR-443：每卡旅程元数据（最近互动 / 结识时长 / 见证次数）', async () => {
+    const now = new Date().toISOString()
+    const past = new Date(Date.now() - 5 * 86400000).toISOString()
+    mockAdvisors = [
+      {
+        id: 'a1', name: '墨染', role: 'mentor', personality: 'calm', affinity: 45, totalInteractions: 30,
+        createdAt: past, lastActiveAt: now,
+        witnessLog: [
+          { id: 'w1', advisorId: 'a1', eventType: 'milestone', title: '初次长谈', timestamp: now },
+          { id: 'w2', advisorId: 'a1', eventType: 'accompany', title: '并肩赶工', timestamp: now },
+        ],
+      },
+    ]
+    const wrapper = await getWrapper()
+    const journey = wrapper.find('[data-test="affinity-journey"]')
+    expect(journey.exists()).toBe(true)
+    expect(journey.text()).toContain('见证 2')
+    expect(journey.text()).toContain('相识')
+  })
+
+  it('INCR-443：见证之光聚合渲染', async () => {
+    const now = new Date().toISOString()
+    mockAdvisors = [
+      {
+        id: 'a1', name: '墨染', role: 'mentor', personality: 'calm', affinity: 45, totalInteractions: 30,
+        createdAt: now, lastActiveAt: now,
+        witnessLog: [{ at: now, eventType: 'milestone', advisorId: 'a1' }],
+      },
+    ]
+    const wrapper = await getWrapper()
+    const witness = wrapper.find('[data-test="affinity-witness"]')
+    expect(witness.exists()).toBe(true)
+    expect(witness.text()).toContain('墨染')
+    expect(witness.text()).toContain('milestone')
+  })
+
+  it('INCR-443：好感里程碑时间线渲染', async () => {
+    const now = new Date().toISOString()
+    mockAdvisors = [
+      {
+        id: 'a1', name: '墨染', role: 'mentor', personality: 'calm', affinity: 45, totalInteractions: 30,
+        createdAt: now, lastActiveAt: now,
+        affinityMilestones: [{ tier: 2, title: '熟稔', reachedAt: now }],
+      },
+    ]
+    const wrapper = await getWrapper()
+    const tl = wrapper.find('[data-test="affinity-milestones"]')
+    expect(tl.exists()).toBe(true)
+    expect(tl.text()).toContain('熟稔')
+    expect(tl.text()).toContain('墨染')
+  })
 })
