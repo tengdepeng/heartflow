@@ -6,7 +6,12 @@
 // 因为引擎在 setup 期同步读 localStorage，必须在装组件前把 localStorage 换掉。
 // 另注：mountPanel 里的 vi.resetModules() 会让本文件静态 import 的 MEDITATION_SEQUENCES
 // 与组件内useLightPractice 拿到的是**不同模块实例**，故本文件的预设常量不会被组件污染；
-// 但真实 App 单实例下浅拷贝会穿透（见「启动序列」用例内注释），断言仍按字面量基准写。
+// 但真实 App 单实例下浅拷贝会穿透（见「播放完整条序列后」用例内注释），断言仍按字面量基准写。
+//
+//INCR-462 更新：面板的「启动序列」改为「播放序列」= 发起真播放器
+// （MeditationSequencePlayer），**播完才落盘**。原「点一下就落盘」的用例契约
+// 已被有意替换为「走完全部步骤才落盘 + 未播完不落盘」，
+// 播放态/ 倒计时 / 退出不落盘等细粒度断言在 MeditationSequencePlayer.test.ts。
 // ============================================================
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
@@ -86,7 +91,7 @@ describe('MeditationSequencePanel · 冥想序列预设（INCR-457）', () => {
     expect(wrapper.text()).not.toContain(target.steps[0].instruction)
   })
 
-  it('启动序列：调用引擎 useSequence 并真实落盘（useCount+1 / 练习入冥想记录 / 澄明时长累加）', async () => {
+  it('播放完整条序列后：调用引擎 useSequence 并真实落盘（useCount+1 / 练习入冥想记录 / 澄明时长累加）', async () => {
     const { wrapper, storageMock } = await mountPanel()
     const target = MEDITATION_SEQUENCES[0]
 
@@ -100,9 +105,27 @@ describe('MeditationSequencePanel · 冥想序列预设（INCR-457）', () => {
     await wrapper.find(`[data-testid="msq-start-${target.id}"]`).trigger('click')
     await wrapper.vm.$nextTick()
 
+    // ── INCR-462 语义变更 ──
+    // 「启动序列」不再是「点一下就记一次练习」，而是发起**真播放**
+    // （逐步倒计时 + 步骤推进 + 进度条，播放器由 MeditationSequencePlayer 承载）。
+    // 因此本用例必须**走完全部步骤**才谈得上落盘 —— 这正是「播完才记」的产品要求。
+    // （INCR-457 时这条用例点一下按钮就断言落盘；那个契约已被本增量有意替换。）
+    expect(wrapper.find('.msql-player').exists(), '未进入播放态').toBe(true)
+    // 关键反向断言：进入播放但没播完 ⇒ 三个 key 一个都不该落盘
+    expect(readKv(storageMock, PRACTICE_KEY), '未播完却落盘了序列').toBeUndefined()
+    expect(readKv(storageMock, MEDITATIONS_KEY), '未播完却落了冥想记录').toBeUndefined()
+
+    // 走完 N 步：逐步点「下一步」直到最后一步的「完成」
+    for (let guard = 0; guard < 20; guard++) {
+      const next = wrapper.find('[data-testid="msql-next"]')
+      if (!next.exists()) break
+      await next.trigger('click')
+      await wrapper.vm.$nextTick()
+    }
+
     // ① useSequence 的副作用：序列被写回且 useCount 由 0 递增为 1
     //    （pavilion 不写这个 key，故它的变化只能来自 useSequence → saveSequences）
-    //    先断言 key 存在再 parse：若 useSequence 未被调用则该 key 缺失，
+    //    先断言 key 存在再 parse：若 useSequence 未被调用则该 key缺失，
     //    直接 JSON.parse(undefined) 会抛 SyntaxError 而掩盖真正的失败原因。
     const rawSequences = readKv(storageMock, PRACTICE_KEY)
     expect(rawSequences, 'useSequence 未被调用：hf:light:practice 未落盘').toBeTruthy()
@@ -115,13 +138,14 @@ describe('MeditationSequencePanel · 冥想序列预设（INCR-457）', () => {
     const clarity = JSON.parse(rawClarity)
     expect(clarity.totalMinutes).toBe(target.totalDuration)
 
-    // ③ 面板经 pavilion 落的真实冥想记录（总时长 = 序列总时长）
+    // ③ 面板经 pavilion 落的真实冥想记录（总时长 = 序列各步之和）
     const meditations = JSON.parse(readKv(storageMock, MEDITATIONS_KEY))
     expect(meditations.length).toBe(1)
     expect(meditations[0].duration).toBe(target.totalDuration)
     expect(meditations[0].insight).toBe(`冥想序列：${target.name}`)
 
-    // ④ UI 回读：使用次数与完成提示都更新
+    // ④ UI 回读：使用次数与完成提示都更新，且已退出播放态回到列表
+    expect(wrapper.find('.msql-player').exists()).toBe(false)
     expect(wrapper.text()).toContain('已用 1 次')
     expect(wrapper.text()).toContain('已记录一次练习')
   })
