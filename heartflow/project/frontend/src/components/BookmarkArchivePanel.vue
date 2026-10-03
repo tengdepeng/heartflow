@@ -35,6 +35,18 @@
       <div class="bap-metric"><b>{{ ov.total }}</b><span>全部</span></div>
     </div>
 
+    <!-- 收藏节奏（collectionRhythm 此前已计算却从未渲染） -->
+    <div class="bap-rhythm">
+      <p class="bap-subkicker">收藏节奏（近 7 天）</p>
+      <div class="bap-metrics">
+        <div class="bap-metric"><b>{{ rh.addedThisWeek }}</b><span>本周新收</span></div>
+        <div class="bap-metric"><b>{{ rh.visitedThisWeek }}</b><span>本周回访</span></div>
+        <div class="bap-metric"><b>{{ rh.dormantCount }}</b><span>蒙尘</span></div>
+        <div class="bap-metric"><b>{{ rh.avgAgeDays }}</b><span>均龄(天)</span></div>
+        <div class="bap-metric"><b>{{ topContentTypeLabel }}</b><span>常收</span></div>
+      </div>
+    </div>
+
     <!-- 内容类型分布 -->
     <div v-if="hasContent" class="bap-types">
       <div v-for="ct in typeRows" :key="ct.key" class="bap-type">
@@ -108,6 +120,11 @@ const typeRows = computed(() =>
   }))
 )
 
+const topContentTypeLabel = computed(() => {
+  const t = rh.value.topContentType
+  return t ? (typeLabel[t] || t) : '—'
+})
+
 function iconFor(b: Bookmark): string {
   if (b.preview_image) return '🗂'
   if (b.favicon && b.favicon !== '📎') return b.favicon
@@ -158,6 +175,9 @@ refresh()
 .bap-metric { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; border-radius: 8px; background: rgba(var(--accent-rgb), 0.04); }
 .bap-metric b { font-size: 15px; font-weight: 600; color: var(--accent); }
 .bap-metric span { font-size: 9px; color: var(--text-secondary); }
+
+.bap-rhythm { margin-bottom: 12px; }
+.bap-subkicker { font-size: 11px; color: var(--text-secondary); margin: 0 0 8px; letter-spacing: 0.5px; }
 
 .bap-types { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .bap-type { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-secondary); }
