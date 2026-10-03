@@ -54,6 +54,20 @@
             <span>{{ exp.variants.length }} 个变体</span>
             <span>样本 {{ totalSamples(exp) }}</span>
           </div>
+          <div class="abp-sample-need">
+            <span class="abp-sample-need-required">
+              样本进度 {{ sampleProgress(exp).collected }} / 需 {{ sampleProgress(exp).required }}
+            </span>
+            <span
+              class="abp-sample-need-state"
+              :class="sampleProgress(exp).reached ? 'is-reached' : 'is-pending'"
+            >{{ sampleProgress(exp).reached ? '已达标' : `还差 ${sampleProgress(exp).remaining}` }}</span>
+            <span class="abp-sample-need-stat">
+              {{ sampleProgress(exp).recommended === null
+                ? `统计推荐 —（${metricLabel(exp.targetMetric)}非比例指标，按模板下限计）`
+                : `统计推荐 ${sampleProgress(exp).recommended}（α ${(exp.significanceLevel * 100).toFixed(0)}% · MDE ${(DEFAULT_MDE * 100).toFixed(0)}pt · 功效 ${(DEFAULT_POWER * 100).toFixed(0)}%）` }}
+            </span>
+          </div>
           <div v-if="exp.resultSummary" class="abp-exp-result">{{ exp.resultSummary }}</div>
           <div class="abp-exp-actions">
             <button v-if="exp.status === 'draft'" class="abp-btn--small" @click="handleStart(exp.id)">开始</button>
@@ -133,6 +147,7 @@ import {
   useABTestEngine,
   EXPERIMENT_TEMPLATES,
   METRIC_LABELS,
+  estimateSampleSize,
 } from '../modules/touchpoints/ab-test-engine'
 import type { ABExperiment } from '../modules/touchpoints/ab-test-engine'
 
@@ -150,6 +165,7 @@ const {
   testSignificance,
   autoDetermineWinner,
   generateReport,
+  getVariantPrimaryMetric,
 } = useABTestEngine()
 
 const tab = ref<'experiments' | 'analysis' | 'reports'>('experiments')
@@ -195,6 +211,89 @@ function metricLabel(metric: string): string {
 
 function totalSamples(exp: ABExperiment): number {
   return Object.values(exp.variantMetrics).reduce((sum, m) => sum + m.deliveries, 0)
+}
+
+// ---- 样本量估算（INCR-464）----
+//
+// 入参口径说明（引擎 estimateSampleSize 有 4 个入参，ABExperiment 类型只带得动其中 1 个）：
+//   baselineRate            -> 对照组实时指标值，见 baselineRateOf()
+//   significanceLevel       -> exp.significanceLevel（类型真字段，ab-test-engine.ts:44）
+//   minimumDetectableEffect -> DEFAULT_MDE
+//   power                   -> DEFAULT_POWER
+
+/**
+ * 统计功效默认值。ABExperiment 无 power 字段，取值 0.8 是统计惯例：
+ * Cohen(1988) 提议的 β=0.20（即 II 类错误容忍度是 I 类 0.05 的 4 倍），
+ * 也是绝大多数 A/B 工具的出厂默认。
+ */
+const DEFAULT_POWER = 0.8
+
+/**
+ * 最小可检测效应（MDE）默认值，按「绝对比例差 5 个百分点」计。
+ * 选择理由：引擎 targetMetric 的四个比例指标（点击率/打开率/转化率/关闭率）
+ * 日常量级在 10%~30%，5pt 的绝对提升大致对应 20%~50% 的相对提升，
+ * 是「值得改一次触达策略」的下限；再小则所需样本量会平方级膨胀（见 estimateSampleSize 分母 mde²）。
+ */
+const DEFAULT_MDE = 0.05
+
+/** 实验指标是否为 [0,1] 比例；responseTime 是以毫秒为单位的均值，不属于比例，喂进比例公式会出 NaN */
+function isProportionMetric(exp: ABExperiment): boolean {
+  return exp.targetMetric !== 'responseTime'
+}
+
+/**
+ * 对照组基线率。对照组的选取与引擎 testSignificance 的默认行为一致（取 variants[0]），
+ * 指标值走引擎自己的 getVariantPrimaryMetric，不在面板另算一套口径。
+ * 不用 variantMetrics.primaryMetric —— 那是 updateVariantMetrics() 才刷的快照，实验刚创建时恒为 0。
+ */
+function baselineRateOf(exp: ABExperiment): number | null {
+  if (!isProportionMetric(exp)) return null
+  const control = exp.variants[0]
+  if (!control) return null
+  const metrics = exp.variantMetrics[control.id]
+  if (!metrics) return null
+  return getVariantPrimaryMetric(metrics, exp.targetMetric)
+}
+
+/**
+ * 按统计功效推荐的样本量。比例指标不成立（或估算出非有限值）时返回 null —— 不编造基线。
+ */
+function recommendedSampleSize(exp: ABExperiment): number | null {
+  const baseline = baselineRateOf(exp)
+  if (baseline === null) return null
+  const need = estimateSampleSize(baseline, DEFAULT_MDE, exp.significanceLevel, DEFAULT_POWER)
+  // 基线接近 1 时 baseline+MDE 会越过 1，合并方差开根号得 NaN，此处挡掉
+  return Number.isFinite(need) && need > 0 ? need : null
+}
+
+interface SampleProgress {
+  /** 已收集样本数（口径与既有 totalSamples 一致） */
+  collected: number
+  /** 达标线 */
+  required: number
+  /** 还差多少；已达标时为 0 */
+  remaining: number
+  reached: boolean
+  /** 统计功效推荐值；非比例指标时为 null */
+  recommended: number | null
+}
+
+/**
+ * 样本量进度。达标线取 max(exp.minSampleSize, 统计推荐)：
+ * 引擎 determineWinner 以 exp.minSampleSize 为硬门槛，只按统计推荐判「已达标」会出现
+ * 「面板说达标、判定胜者却说样本量不足」的自相矛盾，故两者取较严者。
+ */
+function sampleProgress(exp: ABExperiment): SampleProgress {
+  const collected = totalSamples(exp)
+  const recommended = recommendedSampleSize(exp)
+  const required = Math.max(exp.minSampleSize, recommended ?? 0)
+  return {
+    collected,
+    required,
+    remaining: Math.max(0, required - collected),
+    reached: collected >= required,
+    recommended,
+  }
 }
 
 function fmtMetric(v: number): string {
@@ -413,6 +512,32 @@ function formatTime(ts: string): string {
   gap: 12px;
   flex-wrap: wrap;
   font-size: 11px;
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
+}
+.abp-sample-need {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-secondary, rgba(232, 224, 216, 0.55));
+}
+.abp-sample-need-state {
+  padding: 1px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.abp-sample-need-state.is-reached {
+  background: rgba(138, 154, 122, 0.14);
+  color: #8a9a7a;
+}
+.abp-sample-need-state.is-pending {
+  background: rgba(240, 192, 64, 0.12);
+  color: #f0c040;
+}
+.abp-sample-need-stat {
+  flex-basis: 100%;
   color: var(--text-secondary, rgba(232, 224, 216, 0.55));
 }
 .abp-exp-result {
