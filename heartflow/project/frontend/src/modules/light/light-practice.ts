@@ -202,9 +202,14 @@ export function useLightPractice() {
   function loadSequences(): MeditationSequence[] {
     try {
       const raw = storage.getKV<string>(LIGHT_PRACTICE_KEY, '')
-      if (!raw) return [...MEDITATION_SEQUENCES]
+      // 兜底返回预设的**深拷贝**：MEDITATION_SEQUENCES 是模块级共享常量，
+      // 浅拷贝（[...MEDITATION_SEQUENCES]）只换新数组、元素仍是同一批对象，
+      // 而 useSequence 的 useCount++ / addStepToSequence 的 steps.push 会经reactive
+      // 代理写穿到这些原始对象上，永久抬高面板展示的「已用 N 次」。
+      // 同 useHomeReplica.readManifest() 的处理：深拷贝切断别名。
+      if (!raw) return structuredClone(MEDITATION_SEQUENCES)
       return JSON.parse(raw)
-    } catch { return [...MEDITATION_SEQUENCES] }
+    } catch { return structuredClone(MEDITATION_SEQUENCES) }
   }
 
   function saveSequences() {
