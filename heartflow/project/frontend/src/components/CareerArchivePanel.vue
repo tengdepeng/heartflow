@@ -89,6 +89,18 @@
       </div>
     </div>
 
+    <!-- 连接类型 -->
+    <div v-if="connections.length" class="cap-block">
+      <span class="cap-block-label">连接类型</span>
+      <div v-for="c in connRows" :key="c.key" class="cap-row">
+        <span class="cap-row-label">{{ c.icon }} {{ c.label }}</span>
+        <div class="cap-row-bar">
+          <i :style="{ width: c.pct + '%', background: c.color }"></i>
+        </div>
+        <span class="cap-row-count">{{ c.count }}</span>
+      </div>
+    </div>
+
     <!-- 温和洞察 -->
     <ul v-if="insights.length" class="cap-insights">
       <li v-for="(s, i) in insights" :key="i">{{ s }}</li>
@@ -105,6 +117,7 @@ import {
   careerNodeRows,
   affinityBuckets,
   careerStatusRows,
+  careerConnRows,
   careerHealth,
   careerInsights,
 } from '../modules/career/career-analytics'
@@ -116,6 +129,7 @@ const tiers = ref(careerTierRows([]))
 const nodes = ref(careerNodeRows([]))
 const buckets = ref(affinityBuckets([]))
 const statuses = ref(careerStatusRows([]))
+const connRows = ref(careerConnRows([]))
 const health = ref(careerHealth([], [], []))
 const insights = ref<string[]>([])
 
@@ -125,6 +139,7 @@ function refresh() {
   nodes.value = careerNodeRows(props.contacts, 8)
   buckets.value = affinityBuckets(props.contacts)
   statuses.value = careerStatusRows(props.projects)
+  connRows.value = careerConnRows(props.connections)
   health.value = careerHealth(props.contacts, props.projects, props.connections)
   insights.value = careerInsights(props.contacts, props.projects, props.connections, 4)
 }
