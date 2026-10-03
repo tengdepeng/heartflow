@@ -314,9 +314,23 @@ function normalCDF(x: number): number {
 }
 
 /**
- * 计算标准正态分布的逆 CDF（分位数函数）
+ * Acklam 有理逼近的分段断点：p < P_LOW 走下尾，p > P_HIGH 走上尾，中间走中央区。
+ * 断点必须配对使用 —— 系数 a/b/c/d 是各自区间内的极小化相对误差拟合结果，
+ * 把中央区缩到 |q| <= 0.425（Wichura AS241 的断点）会让尾区在 p≈0.075 处误差放大到 4e-7。
  */
-function normalQuantile(p: number): number {
+const ACKLAM_P_LOW = 0.02425
+const ACKLAM_P_HIGH = 1 - ACKLAM_P_LOW
+
+/**
+ * 计算标准正态分布的逆 CDF（分位数函数）
+ *
+ * Acklam 有理逼近（Peter J. Acklam）：相对误差 < 1.15e-9，无需迭代。
+ * 四组系数均按降幂存放，Horner 求值必须从 a[0] / b[0] / c[0] / d[0] 起步。
+ * 中央区的自变量是 r = q²（不是 0.180625 - q²，那是 Wichura AS241 的口径）。
+ *
+ * 导出以便单测直接钉标准分位数值；estimateSampleSize / testSignificance 的 z 值都走这里。
+ */
+export function normalQuantile(p: number): number {
   if (p <= 0) return -Infinity
   if (p >= 1) return Infinity
 
@@ -350,19 +364,21 @@ function normalQuantile(p: number): number {
     3.754408661907416e+0,
   ]
 
-  const q = p - 0.5
-  let r: number
-  if (Math.abs(q) <= 0.425) {
-    r = 0.180625 - q * q
-    return q * (((((a[5] * r + a[4]) * r + a[3]) * r + a[2]) * r + a[1]) * r + a[0]) /
-      (((((b[4] * r + b[3]) * r + b[2]) * r + b[1]) * r + b[0]) * r + 1)
-  } else {
-    r = q < 0 ? p : 1 - p
-    r = Math.sqrt(-Math.log(r))
-    let val = ((((c[5] * r + c[4]) * r + c[3]) * r + c[2]) * r + c[1]) * r + c[0]
-    val /= ((d[3] * r + d[2]) * r + d[1]) * r + 1
-    return q < 0 ? -val : val
+  // 中央区：p ∈ [0.02425, 0.97575]，r = q²
+  if (p >= ACKLAM_P_LOW && p <= ACKLAM_P_HIGH) {
+    const q = p - 0.5
+    const r = q * q
+    const numerator = (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5])
+    const denominator = (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1)
+    return (q * numerator) / denominator
   }
+
+  // 尾区：r = sqrt(-2·ln(p)) 或 sqrt(-2·ln(1-p))，因子 2 不能省
+  const q = p - 0.5
+  const r = Math.sqrt(-2 * Math.log(q < 0 ? p : 1 - p))
+  const val = (((((c[0] * r + c[1]) * r + c[2]) * r + c[3]) * r + c[4]) * r + c[5]) /
+    ((((d[0] * r + d[1]) * r + d[2]) * r + d[3]) * r + 1)
+  return q < 0 ? val : -val
 }
 
 /**
