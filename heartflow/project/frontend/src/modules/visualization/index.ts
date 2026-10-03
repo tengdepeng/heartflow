@@ -254,6 +254,10 @@ export type {
   ComponentUpdates,
 } from './component-market'
 
+// 组件市场组合式（INCR-435：响应式 + 持久化桥接）
+export { useComponentMarket, MARKET_STORAGE_KEY } from './component-market/useComponentMarket'
+export type { ComponentOverrides, ComponentCategoryTab, ComponentCategoryKey } from './component-market/useComponentMarket'
+
 // ---- 图表交互增强引擎（P15-3） ----
 export {
   useChartInteraction,

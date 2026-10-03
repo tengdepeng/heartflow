@@ -10,11 +10,11 @@
         <!-- Overview cards -->
         <div data-enter class="cm-overview">
       <div class="cm-overview-card">
-        <div class="cm-overview-value">{{ components.length }}</div>
+        <div class="cm-overview-value">{{ totalCount }}</div>
         <div class="cm-overview-label">组件总数</div>
       </div>
       <div class="cm-overview-card">
-        <div class="cm-overview-value">{{ activeCount }}</div>
+        <div class="cm-overview-value">{{ installedCount }}</div>
         <div class="cm-overview-label">已启用</div>
       </div>
       <div class="cm-overview-card">
@@ -161,6 +161,33 @@
               <line x1="75" y1="20" x2="75" y2="30" stroke="currentColor" stroke-width="1" opacity="0.4" />
               <line x1="75" y1="55" x2="75" y2="65" stroke="currentColor" stroke-width="1" opacity="0.4" />
             </template>
+            <!-- 桑基图 -->
+            <template v-else-if="comp.type === 'sankey'">
+              <path d="M8,22 L38,22 L38,58 L8,58 Z" fill="currentColor" opacity="0.5" />
+              <path d="M38,24 C58,24 58,14 82,14 L112,14 L112,30 L82,30 C58,30 58,36 38,36 Z" fill="currentColor" opacity="0.28" />
+              <path d="M38,40 C60,40 60,52 82,52 L112,52 L112,68 L82,68 C60,68 60,56 38,56 Z" fill="currentColor" opacity="0.22" />
+              <rect x="8" y="22" width="30" height="36" rx="2" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.3" />
+            </template>
+            <!-- 时间线 -->
+            <template v-else-if="comp.type === 'timeline'">
+              <line x1="10" y1="40" x2="110" y2="40" stroke="currentColor" stroke-width="1" opacity="0.3" />
+              <circle cx="28" cy="40" r="3.5" fill="currentColor" opacity="0.7" />
+              <circle cx="60" cy="40" r="3.5" fill="currentColor" opacity="0.5" />
+              <circle cx="92" cy="40" r="3.5" fill="currentColor" opacity="0.35" />
+              <rect x="20" y="20" width="16" height="9" rx="2" fill="currentColor" opacity="0.45" />
+              <rect x="52" y="51" width="16" height="9" rx="2" fill="currentColor" opacity="0.32" />
+              <rect x="84" y="20" width="16" height="9" rx="2" fill="currentColor" opacity="0.22" />
+              <line x1="28" y1="29" x2="28" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.3" />
+              <line x1="60" y1="44" x2="60" y2="51" stroke="currentColor" stroke-width="0.8" opacity="0.3" />
+              <line x1="92" y1="29" x2="92" y2="36" stroke="currentColor" stroke-width="0.8" opacity="0.3" />
+            </template>
+            <!-- 统计卡片 -->
+            <template v-else-if="comp.type === 'stats-card'">
+              <rect x="18" y="18" width="84" height="44" rx="5" fill="currentColor" opacity="0.1" stroke="currentColor" stroke-width="1" />
+              <rect x="26" y="26" width="30" height="5" rx="2" fill="currentColor" opacity="0.35" />
+              <rect x="26" y="37" width="44" height="12" rx="2" fill="currentColor" opacity="0.62" />
+              <polyline points="74,50 82,44 88,47 96,38" fill="none" stroke="currentColor" stroke-width="1.4" opacity="0.75" stroke-linecap="round" />
+            </template>
             <!-- 默认：折线图 -->
             <template v-else>
               <polyline points="10,65 30,40 50,55 70,20 90,35 110,15" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.7" />
@@ -202,7 +229,11 @@
             <div class="cm-modal-config">
               <div class="cm-config-row">
                 <label class="cm-config-label">组件尺寸</label>
-                <select v-model="configComp.size" class="cm-config-select">
+                <select
+                  :value="configComp.size"
+                  @change="onSizeChange"
+                  class="cm-config-select"
+                >
                   <option value="small">小</option>
                   <option value="medium">中</option>
                   <option value="large">大</option>
@@ -255,7 +286,7 @@
               </div>
             </div>
             <div class="cm-modal-actions">
-              <button class="cm-modal-btn cm-modal-btn--primary" @click="configComp = null">
+              <button class="cm-modal-btn cm-modal-btn--primary" @click="saveConfig()">
                 完成
               </button>
             </div>
@@ -272,185 +303,53 @@ import { ref, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
+import { useComponentMarket, type ComponentMarketItem } from '../modules/visualization'
 
-// ---- 组件类型定义 ----
 const { entranceRef, entranceClass } = useViewEntrance()
-interface ComponentItem {
-  id: string
-  type: string
-  name: string
-  description: string
-  category: string
-  color: string
-  size: string
-  enabled: boolean
-  showLegend: boolean
-  showGrid: boolean
-  animated: boolean
-}
 
-const categories = [
-  { key: 'all', icon: '◈', label: '全部' },
-  { key: 'chart', icon: '📊', label: '图表' },
-  { key: 'diagram', icon: '🔷', label: '示意图' },
-  { key: 'widget', icon: '🧩', label: '小部件' },
-]
+// INCR-435：改接真实组件注册表。此前 categories / components 均为视图内
+// 硬编码的假数据——引擎 13 个内置组件里的 sankey / timeline / stats-card
+// 从未露面，启用态与配置弹窗的改动也只写本地 ref，刷新即丢。
+const market = useComponentMarket()
+const { categories, totalCount, installedCount } = market
 
 const activeCategory = ref('all')
 
-// ---- 组件列表 ----
-const components = ref<ComponentItem[]>([
-  {
-    id: 'line-chart',
-    type: 'line',
-    name: '折线图',
-    description: '展示数据随时间或顺序的变化趋势',
-    category: 'chart',
-    color: '#d4a574',
-    size: 'medium',
-    enabled: true,
-    showLegend: true,
-    showGrid: true,
-    animated: true,
-  },
-  {
-    id: 'bar-chart',
-    type: 'bar',
-    name: '柱状图',
-    description: '比较不同类别之间的数值差异',
-    category: 'chart',
-    color: '#e8c49a',
-    size: 'medium',
-    enabled: true,
-    showLegend: true,
-    showGrid: true,
-    animated: true,
-  },
-  {
-    id: 'ring-chart',
-    type: 'ring',
-    name: '环状图',
-    description: '展示各部分占整体的比例关系',
-    category: 'chart',
-    color: '#f0d6b0',
-    size: 'medium',
-    enabled: false,
-    showLegend: true,
-    showGrid: false,
-    animated: true,
-  },
-  {
-    id: 'scatter-plot',
-    type: 'scatter',
-    name: '散点图',
-    description: '探索两个变量之间的相关性',
-    category: 'chart',
-    color: '#7a9ec8',
-    size: 'medium',
-    enabled: false,
-    showLegend: false,
-    showGrid: true,
-    animated: false,
-  },
-  {
-    id: 'area-chart',
-    type: 'area',
-    name: '面积图',
-    description: '强调数量随时间变化的幅度',
-    category: 'chart',
-    color: '#7aa87a',
-    size: 'medium',
-    enabled: false,
-    showLegend: true,
-    showGrid: true,
-    animated: true,
-  },
-  {
-    id: 'heatmap',
-    type: 'heatmap',
-    name: '热力图',
-    description: '用颜色密度展示数据分布',
-    category: 'diagram',
-    color: '#c87a6a',
-    size: 'large',
-    enabled: false,
-    showLegend: true,
-    showGrid: false,
-    animated: false,
-  },
-  {
-    id: 'radar-chart',
-    type: 'radar',
-    name: '雷达图',
-    description: '多维度对比不同实体的表现',
-    category: 'diagram',
-    color: '#a090e0',
-    size: 'medium',
-    enabled: false,
-    showLegend: true,
-    showGrid: true,
-    animated: true,
-  },
-  {
-    id: 'gauge',
-    type: 'gauge',
-    name: '仪表盘',
-    description: '直观展示关键指标的当前状态',
-    category: 'widget',
-    color: '#5ab0d8',
-    size: 'small',
-    enabled: false,
-    showLegend: false,
-    showGrid: false,
-    animated: true,
-  },
-  {
-    id: 'waterfall',
-    type: 'waterfall',
-    name: '瀑布图',
-    description: '展示数据的逐步增减变化过程',
-    category: 'chart',
-    color: '#b8a080',
-    size: 'medium',
-    enabled: false,
-    showLegend: true,
-    showGrid: true,
-    animated: false,
-  },
-  {
-    id: 'boxplot',
-    type: 'boxplot',
-    name: '箱线图',
-    description: '展示数据分布的统计特征',
-    category: 'diagram',
-    color: '#8ab88a',
-    size: 'medium',
-    enabled: false,
-    showLegend: false,
-    showGrid: true,
-    animated: false,
-  },
-])
 
 // ---- 计算属性 ----
-const filteredComponents = computed(() => {
-  if (activeCategory.value === 'all') return components.value
-  return components.value.filter(c => c.category === activeCategory.value)
-})
-
-const activeCount = computed(() => components.value.filter(c => c.enabled).length)
+const filteredComponents = computed(() => market.listByCategory(activeCategory.value))
 
 // ---- 方法 ----
+/** 启用/停用：写注册表 + 落盘 */
 function toggleComponent(id: string) {
-  const comp = components.value.find(c => c.id === id)
-  if (comp) comp.enabled = !comp.enabled
+  market.toggle(id)
 }
 
-const configComp = ref<ComponentItem | null>(null)
+const configComp = ref<ComponentMarketItem | null>(null)
 
 function openConfig(id: string) {
-  const comp = components.value.find(c => c.id === id)
+  // 取快照副本编辑，未保存前不污染注册表
+  const comp = market.find(id)
   if (comp) configComp.value = { ...comp }
+}
+
+/** 尺寸下拉变更：把原生 string 收敛为联合类型后写入快照 */
+function onSizeChange(e: Event) {
+  const v = (e.target as HTMLSelectElement).value
+  if (configComp.value) configComp.value.size = v as ComponentMarketItem['size']
+}
+
+/** 保存配置改动（此前「完成」按钮只关闭弹窗，改动从未回流） */
+function saveConfig() {
+  const c = configComp.value
+  if (!c) return
+  market.update(c.id, {
+    size: c.size,
+    showLegend: c.showLegend,
+    showGrid: c.showGrid,
+    animated: c.animated,
+  })
+  configComp.value = null
 }
 </script>
 
