@@ -254,6 +254,7 @@ import {
   EASING_LABELS,
   generateAnimationKeyframes,
   generateAnimationCSS,
+  createAnimationConfig,
   blendMaterials,
   generateBlendCSS,
   MORPH_TRANSITIONS,
@@ -323,19 +324,31 @@ function swatchStyle(mat: CarrierMaterial): Record<string, string> {
   return { background: c.bg, border: `1px solid ${c.border}`, backgroundImage: c.overlay }
 }
 
+/** 由预设推导动画配置：走引擎构造器，统一默认值兜底口径 */
+function presetToConfig(p: AnimationPreset): CarrierAnimationConfig {
+  const c = p.config
+  return createAnimationConfig(c.morph, c.glow, c.material, c.primaryColor, {
+    secondaryColor: c.secondaryColor,
+    duration: c.duration,
+    easing: c.easing,
+    loop: c.loop,
+  })
+}
+
 function applyPreset(p: AnimationPreset) {
-  config.value = { ...p.config }
+  config.value = presetToConfig(p)
 }
 
 function presetIsActive(p: AnimationPreset): boolean {
   const c = config.value
-  return c.morph === p.config.morph
-    && c.glow === p.config.glow
-    && c.material === p.config.material
-    && c.primaryColor === p.config.primaryColor
-    && c.secondaryColor === p.config.secondaryColor
-    && c.duration === p.config.duration
-    && c.easing === p.config.easing
+  const t = presetToConfig(p)
+  return c.morph === t.morph
+    && c.glow === t.glow
+    && c.material === t.material
+    && c.primaryColor === t.primaryColor
+    && c.secondaryColor === t.secondaryColor
+    && c.duration === t.duration
+    && c.easing === t.easing
 }
 
 // ---- 复制 ----
