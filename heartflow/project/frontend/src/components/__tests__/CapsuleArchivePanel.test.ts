@@ -143,4 +143,41 @@ describe('CapsuleArchivePanel 胶囊档案面板', () => {
     expect(wrapper.text()).toContain('1 封今日可开启')
     expect(wrapper.text()).toContain('已到开启日，正静候你拆开')
   })
+
+  it('每封装载分布按条数分桶渲染并归一化条形宽度', async () => {
+    const wrapper = await mountPanel([
+      capsule({ items: [{ type: 'note', id: 'n1', title: 'a' }, { type: 'note', id: 'n2', title: 'b' }] }),
+      capsule({ items: [{ type: 'crystal', id: 'c1', title: 'c' }, { type: 'crystal', id: 'c2', title: 'd' }] }),
+      capsule({ items: [{ type: 'note', id: 'n3', title: 'e' }] }),
+    ])
+    expect(wrapper.find('.caparch-load').exists()).toBe(true)
+    const rows = wrapper.findAll('.caparch-load-row')
+    expect(rows.length).toBe(2)
+    // 按 capsules 数降序：2 条 → 2 封（满格），1 条 → 1 封（一半）
+    expect(rows[0].find('.caparch-load-bucket').text()).toBe('2 条')
+    expect(rows[0].find('.caparch-load-count').text()).toBe('2 封')
+    expect(rows[1].find('.caparch-load-bucket').text()).toBe('1 条')
+    expect(rows[1].find('.caparch-load-count').text()).toBe('1 封')
+    const bars = wrapper.findAll('.caparch-load-bar i')
+    expect(bars.length).toBe(2)
+    expect(bars[0].attributes('style')).toContain('width: 100%')
+    expect(bars[1].attributes('style')).toContain('width: 50%')
+  })
+
+  it('空胶囊数组时不渲染每封装载区块', async () => {
+    const wrapper = await mountPanel([])
+    expect(wrapper.find('.caparch-load').exists()).toBe(false)
+  })
+
+  it('仅有一档时条形为满格，空内容胶囊计入 0 条档', async () => {
+    const wrapper = await mountPanel([
+      capsule({ items: [] }),
+      capsule({ items: [] }),
+    ])
+    const rows = wrapper.findAll('.caparch-load-row')
+    expect(rows.length).toBe(1)
+    expect(rows[0].find('.caparch-load-bucket').text()).toBe('0 条')
+    expect(rows[0].find('.caparch-load-count').text()).toBe('2 封')
+    expect(wrapper.find('.caparch-load-bar i').attributes('style')).toContain('width: 100%')
+  })
 })
