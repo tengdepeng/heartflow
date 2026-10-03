@@ -51,6 +51,16 @@
       </div>
     </div>
 
+    <!-- 每封装载分布 -->
+    <div v-if="countRows.length" class="caparch-load">
+      <span class="caparch-load-title">每封装载</span>
+      <div v-for="r in countRows" :key="r.count" class="caparch-load-row">
+        <span class="caparch-load-bucket">{{ r.count }} 条</span>
+        <div class="caparch-load-bar"><i :style="{ width: loadWidth(r.capsules) + '%' }"></i></div>
+        <span class="caparch-load-count">{{ r.capsules }} 封</span>
+      </div>
+    </div>
+
     <!-- 等待分布 -->
     <div v-if="waitRows.length" class="caparch-wait">
       <span class="caparch-wait-title">待开启的远近</span>
@@ -81,6 +91,7 @@ import type { TimeCapsule } from '../modules/capsule'
 import {
   capsuleArchiveOverview,
   capsuleItemTypeRows,
+  capsuleItemCountRows,
   capsuleWaitRows,
   capsuleRhythm,
   capsuleArchiveHealth,
@@ -91,21 +102,25 @@ const props = defineProps<{ capsules: TimeCapsule[] }>()
 
 const ov = ref(capsuleArchiveOverview([], new Date()))
 const typeRows = ref(capsuleItemTypeRows([]))
+const countRows = ref(capsuleItemCountRows([]))
 const waitRows = ref(capsuleWaitRows([], new Date()))
 const rhy = ref(capsuleRhythm([], new Date()))
 const health = ref(capsuleArchiveHealth([], new Date()))
 const insights = ref(capsuleInsights([], new Date()))
 
 const maxWait = ref(1)
+const maxCapsules = ref(1)
 
 function refresh(now = new Date()) {
   ov.value = capsuleArchiveOverview(props.capsules, now)
   typeRows.value = capsuleItemTypeRows(props.capsules)
+  countRows.value = capsuleItemCountRows(props.capsules)
   waitRows.value = capsuleWaitRows(props.capsules, now)
   rhy.value = capsuleRhythm(props.capsules, now)
   health.value = capsuleArchiveHealth(props.capsules, now)
   insights.value = capsuleInsights(props.capsules, now)
   maxWait.value = Math.max(1, ...waitRows.value.map(w => w.count))
+  maxCapsules.value = Math.max(1, ...countRows.value.map(r => r.capsules))
 }
 
 watch(() => props.capsules, () => refresh(), { deep: true })
@@ -119,6 +134,10 @@ const ringStyle = computed(() => {
 
 function waitWidth(count: number): number {
   return maxWait.value > 0 ? Math.round((count / maxWait.value) * 100) : 0
+}
+
+function loadWidth(capsules: number): number {
+  return maxCapsules.value > 0 ? Math.round((capsules / maxCapsules.value) * 100) : 0
 }
 
 refresh()
@@ -168,6 +187,14 @@ refresh()
 .caparch-type-bar { flex: 1; height: 7px; border-radius: 999px; background: var(--bg-card, rgba(255,255,255,0.05)); overflow: hidden; }
 .caparch-type-bar i { display: block; height: 100%; border-radius: 999px; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); background: linear-gradient(90deg, hsl(272 46% 58%), hsl(252 46% 55%)); }
 .caparch-type-count { width: 44px; text-align: right; font-size: 11px; color: rgba(226, 220, 240, 0.5); }
+
+.caparch-load { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.caparch-load-title { font-size: 11px; color: rgba(226, 220, 240, 0.5); margin-bottom: 2px; }
+.caparch-load-row { display: flex; align-items: center; gap: 10px; }
+.caparch-load-bucket { width: 64px; font-size: 11px; color: rgba(226, 220, 240, 0.55); flex-shrink: 0; }
+.caparch-load-bar { flex: 1; height: 5px; border-radius: 999px; background: var(--bg-card, rgba(255,255,255,0.05)); overflow: hidden; }
+.caparch-load-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, hsl(272 46% 58%), hsl(40 46% 55%)); }
+.caparch-load-count { width: 34px; text-align: right; font-size: 11px; color: rgba(226, 220, 240, 0.5); }
 
 .caparch-wait { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
 .caparch-wait-title { font-size: 11px; color: rgba(226, 220, 240, 0.5); margin-bottom: 2px; }
