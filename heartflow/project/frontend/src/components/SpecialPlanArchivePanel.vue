@@ -74,6 +74,17 @@
         </ul>
       </div>
 
+      <!-- 专项提示（INCR-453：planSuggestion 此前引擎已实现却零 UI 消费） -->
+      <div class="spp-block" v-if="planHints.length">
+        <h3 class="spp-block-title">专项提示</h3>
+        <ul class="spp-hints">
+          <li v-for="h in planHints" :key="h.id" class="spp-hint">
+            <span class="spp-hint-title">{{ h.title }}</span>
+            <span class="spp-hint-text">{{ h.text }}</span>
+          </li>
+        </ul>
+      </div>
+
       <!-- 温和洞察 -->
       <ul class="spp-insights">
         <li v-for="ins in archive.insights" :key="ins" class="spp-insight">
@@ -92,6 +103,7 @@ import {
   computeSpecialPlanOverview,
   computePlanProgress,
   orphanPlans,
+  planSuggestion,
 } from '../modules/goal/special-plan-analytics'
 
 const props = defineProps<{ plans: SpecialPlan[] }>()
@@ -105,8 +117,14 @@ const archive = computed(() => {
   }
 })
 
-const badge = computed(() => {
-  const ov = archive.value.overview
+/** INCR-453：逐条专项的具名提示（planSuggestion 为 null 表示无需提示） */
+const planHints = computed(() =>
+  props.plans
+    .map((p) => ({ id: p.id, title: p.title, text: planSuggestion(p) }))
+    .filter((x): x is { id: string; title: string; text: string } => Boolean(x.text)),
+)
+
+const badge = computed(() => {  const ov = archive.value.overview
   if (ov.overallProgress === 100 && ov.totalMilestones > 0) return { text: '全部点亮' }
   if (ov.overallProgress > 0) return { text: '推进中' }
   return { text: '规划起步' }
@@ -296,6 +314,40 @@ function buildInsights(plans: SpecialPlan[], now: number): string[] {
 .spp-orphan-progress {
   color: #e8c060;
   flex: 0 0 auto;
+}
+
+/* 专项提示（INCR-453） */
+.spp-hints {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spp-hint {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(232, 192, 96, 0.06);
+  font-size: 12px;
+}
+
+.spp-hint-title {
+  color: #e8c060;
+  flex: 0 0 auto;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.spp-hint-text {
+  color: rgba(216, 200, 168, 0.85);
+  line-height: 1.6;
 }
 
 .spp-insights {
