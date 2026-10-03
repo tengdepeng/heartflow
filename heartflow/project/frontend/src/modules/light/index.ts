@@ -17,6 +17,18 @@ export type {
   ClarityTracker,
 } from './light-practice'
 
+// ---- 冥想序列播放器适配层（INCR-462）----
+export {
+  SEQUENCE_TYPE_PHASE,
+  FALLBACK_PLAYER_PHASE,
+  SECONDS_PER_MINUTE,
+  phaseForMeditationType,
+  toPlayerStep,
+  toPlayerSteps,
+  sequenceTotalMinutes,
+} from './sequence-adapter'
+export type { PlayerPhase, SequencePlayerStep } from './sequence-adapter'
+
 // ---- P21-3: 视图桥接层 ----
 export { useLightBridge } from './light-bridge'
 export type { LightBridgeState } from './light-bridge'
