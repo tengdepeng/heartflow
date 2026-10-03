@@ -26,6 +26,15 @@ vi.mock('../../engine/storage', () => ({
   },
 }))
 
+// INCR-442：光之脉络 / 成就路线 薄委托面板在集成测试中 stub，避免 goal-visualization 引擎单例串扰
+// 注意：本测试文件位于 src/views/__tests__/，组件在 src/components/，故路径为 ../../components/...
+vi.mock('../../components/LightVeinPanel.vue', () => ({
+  default: { template: '<section data-test="light-vein-panel" />' },
+}))
+vi.mock('../../components/LightMilestoneTrail.vue', () => ({
+  default: { template: '<section data-test="light-milestone-trail" />' },
+}))
+
 async function getWrapper() {
   const { default: LightPavilion } = await import('../LightPavilion.vue')
   return mount(LightPavilion, {
@@ -530,5 +539,24 @@ describe('集成：专项档案面板', () => {
     expect(spp.find('.spp-badge').text()).toBe('全部点亮')
     expect(spp.find('.spp-progress-meta').text()).toContain('2 / 2 里程碑')
     expect(spp.find('.spp-progress-meta').text()).toContain('100%')
+  })
+})
+
+// ============================================================
+// 集成：光之脉络 + 成就路线（INCR-442 新挂载面板）
+// 两个薄委托面板在 LightPavilion 内真实挂载（组件本身在各自单测中以真实引擎覆盖），
+// 此处仅验证接线存在性，避免与 goal-visualization 引擎单例串扰。
+// ============================================================
+describe('集成：光之脉络 + 成就路线（INCR-442）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    savedGoals = []
+    Object.keys(kvStore).forEach(k => delete kvStore[k])
+  })
+
+  it('光之脉络与成就路线面板均挂载于留光阁', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('[data-test="light-vein-panel"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="light-milestone-trail"]').exists()).toBe(true)
   })
 })
