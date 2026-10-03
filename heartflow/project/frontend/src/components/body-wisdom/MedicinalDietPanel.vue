@@ -30,6 +30,11 @@
           <option value="">全部功效</option>
           <option v-for="(meta, e) in effectMeta" :key="e" :value="e">{{ meta.icon }} {{ e }}</option>
         </select>
+        <!-- INCR-452：接线 recipesByConstitution（按体质筛选，此前引擎已实现却零 UI 消费） -->
+        <select v-model="constitutionFilter" class="mdp-select">
+          <option value="">全部体质</option>
+          <option v-for="c in allConstitutions" :key="c" :value="c">{{ c }}</option>
+        </select>
       </div>
       <div class="mdp-recipe-list">
         <div v-for="r in filtered" :key="r.id" class="mdp-recipe" :class="{ open: expanded === r.id }">
@@ -87,7 +92,9 @@ import {
   recipeOfTheDay,
   searchRecipes,
   recipesByEffect,
+  recipesByConstitution,
   effectStats,
+  MEDICINAL_RECIPES,
 } from '../../modules/body-wisdom/medicinal-diet'
 import type { RecipeEffect } from '../../modules/body-wisdom/medicinal-diet'
 
@@ -97,11 +104,21 @@ const effectMeta = RECIPE_EFFECT_META
 
 const keyword = ref('')
 const effectFilter = ref<RecipeEffect | ''>('')
+/** INCR-452：体质筛选（体质清单取自食谱的 constitutions 并集，非硬编码） */
+const constitutionFilter = ref('')
 const expanded = ref('')
+
+/** 全部可选体质 = MEDICINAL_RECIPES 中 constitutions 的去重并集 */
+const allConstitutions = computed(() => {
+  const set = new Set<string>()
+  for (const r of MEDICINAL_RECIPES) for (const c of r.constitutions) set.add(c)
+  return [...set].sort((a, b) => a.localeCompare(b, 'zh'))
+})
 
 const filtered = computed(() => {
   let list = searchRecipes(keyword.value)
   if (effectFilter.value) list = recipesByEffect(effectFilter.value)
+  if (constitutionFilter.value) list = recipesByConstitution(constitutionFilter.value).filter(r => list.includes(r))
   return list
 })
 
