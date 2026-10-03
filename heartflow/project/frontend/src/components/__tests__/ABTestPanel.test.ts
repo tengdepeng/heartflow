@@ -4,6 +4,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick, ref, computed } from 'vue'
+import { estimateSampleSize } from '../../modules/touchpoints/ab-test-engine'
 
 const mockExperiments = ref<any[]>([])
 const mockReports = ref<any[]>([])
@@ -20,34 +21,46 @@ const mockTestSignificance = vi.fn()
 const mockAutoDetermineWinner = vi.fn()
 const mockGenerateReport = vi.fn()
 
-vi.mock('../../modules/touchpoints/ab-test-engine', () => ({
-  useABTestEngine: () => ({
-    experiments: mockExperiments,
-    reports: mockReports,
-    runningExperiments: mockRunning,
-    completedExperiments: mockCompleted,
-    createFromTemplate: mockCreateFromTemplate,
-    startExperiment: mockStartExperiment,
-    stopExperiment: mockStopExperiment,
-    completeExperiment: mockCompleteExperiment,
-    archiveExperiment: mockArchiveExperiment,
-    deleteExperiment: mockDeleteExperiment,
-    testSignificance: mockTestSignificance,
-    autoDetermineWinner: mockAutoDetermineWinner,
-    generateReport: mockGenerateReport,
-  }),
-  EXPERIMENT_TEMPLATES: [
-    { id: 'template_timing', name: '触达时段实验', description: '测试不同推送时段对点击率的影响' },
-    { id: 'template_channel', name: '渠道组合实验', description: '测试不同推送渠道组合对转化率的影响' },
-  ],
-  METRIC_LABELS: {
-    clickRate: '点击率',
-    openRate: '打开率',
-    conversionRate: '转化率',
-    responseTime: '响应时间',
-    dismissRate: '关闭率',
-  },
-}))
+vi.mock('../../modules/touchpoints/ab-test-engine', async (importOriginal) => {
+  // INCR-464：面板开始消费 estimateSampleSize / getVariantPrimaryMetric，
+  // 原有工厂只返回 useABTestEngine 的桩，会把这两个真函数吞成 undefined。
+  // 这里透传真模块，只替换与存储相关的部分。
+  const actual = await importOriginal<typeof import('../../modules/touchpoints/ab-test-engine')>()
+  // getVariantPrimaryMetric 没有模块级导出（只在 useABTestEngine() 的返回值里），
+  // 因此从真实 composable 实例上取，避免测试另写一份口径。
+  const realEngine = actual.useABTestEngine()
+  return {
+    ...actual,
+    useABTestEngine: () => ({
+      experiments: mockExperiments,
+      reports: mockReports,
+      runningExperiments: mockRunning,
+      completedExperiments: mockCompleted,
+      createFromTemplate: mockCreateFromTemplate,
+      startExperiment: mockStartExperiment,
+      stopExperiment: mockStopExperiment,
+      completeExperiment: mockCompleteExperiment,
+      archiveExperiment: mockArchiveExperiment,
+      deleteExperiment: mockDeleteExperiment,
+      testSignificance: mockTestSignificance,
+      autoDetermineWinner: mockAutoDetermineWinner,
+      generateReport: mockGenerateReport,
+      getVariantPrimaryMetric: realEngine.getVariantPrimaryMetric,
+    }),
+    // 以下两项沿用本文件既定夹具，避免改动既有用例的预期
+    EXPERIMENT_TEMPLATES: [
+      { id: 'template_timing', name: '触达时段实验', description: '测试不同推送时段对点击率的影响' },
+      { id: 'template_channel', name: '渠道组合实验', description: '测试不同推送渠道组合对转化率的影响' },
+    ],
+    METRIC_LABELS: {
+      clickRate: '点击率',
+      openRate: '打开率',
+      conversionRate: '转化率',
+      responseTime: '响应时间',
+      dismissRate: '关闭率',
+    },
+  }
+})
 
 import ABTestPanel from '../ABTestPanel.vue'
 
@@ -219,5 +232,160 @@ describe('ABTestPanel A/B 测试', () => {
     await wrapper.findAll('.abp-tab')[2].trigger('click')
     await nextTick()
     expect(wrapper.text()).toContain('暂无实验报告')
+  })
+})
+
+// ============================================================
+// INCR-464 · 样本量估算上盘（实验卡片「样本进度」行）
+// ============================================================
+
+interface ProgressFixture {
+  /** 对照组投递数 */
+  deliveriesA?: number
+  /** 对照组点击数（clickRate 指标下 clicks/deliveries 即基线率） */
+  clicksA?: number
+  /** 实验组投递数 */
+  deliveriesB?: number
+  minSampleSize?: number
+  significanceLevel?: number
+  targetMetric?: string
+}
+
+function makeProgressExperiment(f: ProgressFixture = {}) {
+  const {
+    deliveriesA = 60,
+    clicksA = 12,
+    deliveriesB = 60,
+    minSampleSize = 100,
+    significanceLevel = 0.05,
+    targetMetric = 'clickRate',
+  } = f
+  return {
+    id: 'exp_progress',
+    name: '样本量进度实验',
+    description: '验证样本量进度行',
+    status: 'running',
+    startedAt: '2026-08-01T08:00:00Z',
+    endedAt: null,
+    targetMetric,
+    minSampleSize,
+    minDurationDays: 7,
+    significanceLevel,
+    variants: [
+      { id: 'var_a', name: '对照组', weight: 1 },
+      { id: 'var_b', name: '实验组', weight: 1 },
+    ],
+    variantMetrics: {
+      var_a: {
+        deliveries: deliveriesA, opens: 0, clicks: clicksA, conversions: 0, dismissals: 0,
+        responseTimes: [], primaryMetric: 0, lift: null, ciLower: null, ciUpper: null,
+        pValue: null, isSignificant: false,
+      },
+      var_b: {
+        deliveries: deliveriesB, opens: 0, clicks: 0, conversions: 0, dismissals: 0,
+        responseTimes: [], primaryMetric: 0, lift: null, ciLower: null, ciUpper: null,
+        pValue: null, isSignificant: false,
+      },
+    },
+    winnerId: null,
+    winnerConfidence: 0,
+    resultSummary: null,
+    createdAt: '2026-08-01T08:00:00Z',
+    updatedAt: '2026-08-02T08:00:00Z',
+  }
+}
+
+describe('ABTestPanel 样本量估算（INCR-464）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockExperiments.value = []
+    mockReports.value = []
+  })
+
+  it('未达标：显示「还差 N」且状态为 pending', async () => {
+    // 基线 12/60 = 0.2，α=0.05、MDE=0.05、功效 0.8 => 统计推荐 3955；模板下限 100 => 达标线 3955
+    mockExperiments.value = [makeProgressExperiment()]
+    const wrapper = await mountPanel()
+    const state = wrapper.find('.abp-sample-need-state')
+    expect(state.text()).toBe('还差 3835')
+    expect(state.classes()).toContain('is-pending')
+    expect(state.classes()).not.toContain('is-reached')
+    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 120 / 需 3955')
+  })
+
+  it('已达标：已收集 >= 达标线时显示「已达标」且不再显示还差', async () => {
+    // 基线仍为 0.2（400/2000），达标线 3955，已收集 4000
+    mockExperiments.value = [makeProgressExperiment({ deliveriesA: 2000, clicksA: 400, deliveriesB: 2000 })]
+    const wrapper = await mountPanel()
+    const state = wrapper.find('.abp-sample-need-state')
+    expect(state.text()).toBe('已达标')
+    expect(state.classes()).toContain('is-reached')
+    expect(wrapper.find('.abp-sample-need').text()).not.toContain('还差')
+  })
+
+  it('计数口径：已收集 = 所有变体 deliveries 之和，而非只看第一个变体', async () => {
+    mockExperiments.value = [makeProgressExperiment({ deliveriesA: 60, deliveriesB: 100 })]
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.abp-sample-need-required').text()).toContain('样本进度 160')
+    // 只看第一个变体的话会显示 60；「样本进度 60 /」不得出现（160 不含该子串）
+    expect(wrapper.find('.abp-sample-need-required').text()).not.toContain('样本进度 60 /')
+  })
+
+  it('未开始实验（deliveries 全 0）：还差等于全部所需，且不出现 NaN/负数/Infinity', async () => {
+    mockExperiments.value = [makeProgressExperiment({ deliveriesA: 0, clicksA: 0, deliveriesB: 0 })]
+    const wrapper = await mountPanel()
+    const needRow = wrapper.find('.abp-sample-need')
+    // 基线 0 => 统计推荐 548，达标线 max(100, 548) = 548，已收集 0 => 还差 548（即全部所需）
+    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 0 / 需 548')
+    expect(wrapper.find('.abp-sample-need-state').text()).toBe('还差 548')
+    expect(needRow.text()).not.toContain('NaN')
+    expect(needRow.text()).not.toContain('Infinity')
+    expect(needRow.text()).not.toContain('还差 -')
+  })
+
+  it('significanceLevel 走实验自带字段：不同显著性水平给出不同推荐值（未写死 0.05）', async () => {
+    mockExperiments.value = [makeProgressExperiment({ significanceLevel: 0.05 })]
+    const wrapper05 = await mountPanel()
+    const stat05 = wrapper05.find('.abp-sample-need-stat').text()
+    expect(stat05).toContain('统计推荐 3955')
+    wrapper05.unmount()
+
+    mockExperiments.value = [makeProgressExperiment({ significanceLevel: 0.01 })]
+    const wrapper01 = await mountPanel()
+    const stat01 = wrapper01.find('.abp-sample-need-stat').text()
+    // α=0.01 更严，推荐值必须更大（6519），且不得仍是 0.05 那一档的 3955
+    expect(stat01).toContain('统计推荐 6519')
+    expect(stat01).not.toContain('3955')
+    expect(stat01).not.toBe(stat05)
+  })
+
+  it('UI 显示的统计推荐值 === 直接调用 estimateSampleSize 的返回值', async () => {
+    mockExperiments.value = [makeProgressExperiment({ minSampleSize: 1 })]
+    const wrapper = await mountPanel()
+    // 同入参：baseline = 12/60 = 0.2，MDE = 0.05，α = exp.significanceLevel = 0.05，power = 0.8
+    const expected = estimateSampleSize(0.2, 0.05, 0.05, 0.8)
+    expect(expected).toBe(3955)
+    expect(wrapper.find('.abp-sample-need-stat').text()).toContain(`统计推荐 ${expected}`)
+    // minSampleSize 设为 1 时达标线即统计推荐值本身
+    expect(wrapper.find('.abp-sample-need-required').text()).toBe(`样本进度 120 / 需 ${expected}`)
+  })
+
+  it('达标线 = max(模板下限, 统计推荐)：模板下限更高时以模板下限为准', async () => {
+    mockExperiments.value = [makeProgressExperiment({ minSampleSize: 9999 })]
+    const wrapper = await mountPanel()
+    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 120 / 需 9999')
+    // 统计推荐值仍单独列出，两者都显示
+    expect(wrapper.find('.abp-sample-need-stat').text()).toContain('统计推荐 3955')
+  })
+
+  it('responseTime 非比例指标：不编造基线，达标线退化为模板下限且不出现 NaN', async () => {
+    mockExperiments.value = [makeProgressExperiment({ targetMetric: 'responseTime', minSampleSize: 100 })]
+    const wrapper = await mountPanel()
+    const needRow = wrapper.find('.abp-sample-need')
+    expect(needRow.text()).not.toContain('NaN')
+    expect(needRow.text()).not.toContain('Infinity')
+    expect(wrapper.find('.abp-sample-need-stat').text()).toContain('非比例指标')
+    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 120 / 需 100')
+    expect(wrapper.find('.abp-sample-need-state').text()).toBe('已达标')
   })
 })
