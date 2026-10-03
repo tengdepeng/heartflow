@@ -144,4 +144,70 @@ describe('CarrierAnimationPanel 载体动画与材质混合', () => {
     await wrapper.find('[data-testid="cva-copy-css"]').trigger('click')
     expect(wrapper.find('.cva-copy-hint').exists()).toBe(true)
   })
+
+  // ---- INCR-456：预设应用走引擎构造器 createAnimationConfig ----
+
+  it('应用预设后 7 个配置字段逐一等于该预设值（引擎构造器全链路）', async () => {
+    const wrapper = mountPanel()
+    await flushPromises()
+    const preset = CARRIER_ANIMATION_PRESETS.find(p => p.id === 'anim_crystal_bloom')!
+    await wrapper.find('[data-testid="cva-preset-anim_crystal_bloom"]').trigger('click')
+
+    // 四个身份字段：形态/光效/材质/主色
+    expect(wrapper.find('[data-testid="cva-morph-crystal"]').classes()).toContain('cva-chip--active')
+    expect(wrapper.find('[data-testid="cva-glow-sparkle"]').classes()).toContain('cva-chip--active')
+    expect(wrapper.find('[data-testid="cva-material-crystal"]').classes()).toContain('cva-chip--active')
+    expect((wrapper.find('[data-testid="cva-primary"]').element as HTMLInputElement).value).toBe(preset.config.primaryColor)
+    // 三个调整字段：辅色/时长/缓动（loop 走checkbox，单独断言）
+    expect((wrapper.find('[data-testid="cva-secondary"]').element as HTMLInputElement).value).toBe(preset.config.secondaryColor)
+    expect((wrapper.find('[data-testid="cva-duration"]').element as HTMLInputElement).value).toBe(String(preset.config.duration))
+    expect(wrapper.find('[data-testid="cva-easing-spring"]').classes()).toContain('cva-chip--active')
+    expect((wrapper.find('[data-testid="cva-loop"]').element as HTMLInputElement).checked).toBe(preset.config.loop)
+    // 锁的是引擎默认语义（createAnimationConfig 硬编码 enabled: true），非预设语义
+    expect((wrapper.find('[data-testid="cva-enabled"]').element as HTMLInputElement).checked).toBe(true)
+  })
+
+  it('预设状态一致性：应用某预设后该预设呈选中态（applyPreset 与 presetIsActive 同源）', async () => {
+    const wrapper = mountPanel()
+    await flushPromises()
+    for (const p of CARRIER_ANIMATION_PRESETS) {
+      const btn = wrapper.find(`[data-testid="cva-preset-${p.id}"]`)
+      expect(btn.classes()).not.toContain('cva-preset--active')
+      await btn.trigger('click')
+      // 刚点完立刻回读：引擎构造结果必须被 presetIsActive 判为命中
+      expect(wrapper.find(`[data-testid="cva-preset-${p.id}"]`).classes()).toContain('cva-preset--active')
+    }
+  })
+
+  it('另一预设不误判：应用预设 A 后预设 B 仍为未选中', async () => {
+    const wrapper = mountPanel()
+    await flushPromises()
+    const a = CARRIER_ANIMATION_PRESETS.find(p => p.id === 'anim_gentle_pulse')!
+    const b = CARRIER_ANIMATION_PRESETS.find(p => p.id === 'anim_nebula_drift')!
+    await wrapper.find(`[data-testid="cva-preset-${a.id}"]`).trigger('click')
+    expect(wrapper.find(`[data-testid="cva-preset-${a.id}"]`).classes()).toContain('cva-preset--active')
+    expect(wrapper.find(`[data-testid="cva-preset-${b.id}"]`).classes()).not.toContain('cva-preset--active')
+  })
+
+  // ---- INCR-456 补修：给 presetIsActive 的 duration 比对装上牙齿 ----
+  // 本例只改 duration 这一个字段，其余 6 个比对字段保持与预设一致，
+  // 因此它能精准证明「&& c.duration === t.duration」这一行确实生效。
+  // 若顺带改了别的字段，本例会退化成「另一预设不误判」而挡不住变异。
+  it('仅调整时长后该预设不再呈选中态', async () => {
+    const wrapper = mountPanel()
+    await flushPromises()
+    const a = CARRIER_ANIMATION_PRESETS.find(p => p.id === 'anim_gentle_pulse')!
+    await wrapper.find(`[data-testid="cva-preset-${a.id}"]`).trigger('click')
+    // 前置确认：刚应用时该预设确实呈选中态
+    expect(wrapper.find(`[data-testid="cva-preset-${a.id}"]`).classes()).toContain('cva-preset--active')
+
+    // 只动 duration，其余 6 个比对字段不动
+    const nextDuration = a.config.duration + 1500
+    expect(nextDuration).not.toBe(a.config.duration)
+    await wrapper.find('[data-testid="cva-duration"]').setValue(nextDuration)
+    expect((wrapper.find('[data-testid="cva-duration"]').element as HTMLInputElement).value).toBe(String(nextDuration))
+
+    // 时长已与预设不同 → 该预设不再算「已应用」，高亮必须消失
+    expect(wrapper.find(`[data-testid="cva-preset-${a.id}"]`).classes()).not.toContain('cva-preset--active')
+  })
 })
