@@ -291,6 +291,13 @@ export const useAdvisorStore = defineStore('advisor', () => {
 
     if (currentTier.index > prevIndex) {
       lastAffinityTierIndex.value.set(advisorId, currentTier.index)
+      // 落库好感度里程碑（层级达成时刻），随 saveAffinity 一并持久化
+      if (!advisor.affinityMilestones) advisor.affinityMilestones = []
+      advisor.affinityMilestones.push({
+        tier: currentTier.index,
+        title: currentTier.title,
+        reachedAt: new Date().toISOString(),
+      })
       saveAffinity()
     }
   }

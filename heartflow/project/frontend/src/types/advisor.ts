@@ -370,6 +370,8 @@ export interface AdvisorProfile {
   retiredAt?: string | null
   /** 见证记录（上限 500 条，自动滚动清除） */
   witnessLog?: WitnessEntry[]
+  /** 好感度里程碑（层级达成时刻，由 onAffinityMilestone 落库；仅记录新层级跨越，非全量历史） */
+  affinityMilestones?: AdvisorAffinityMilestone[]
   /** 对话上下文（最近 5 轮） */
   conversationContext?: {
     /** 最近一条幕僚消息 */
@@ -382,6 +384,16 @@ export interface AdvisorProfile {
   /** 专属知识库范围（蓝图第四部分·三）：默认全殿堂，可在幕僚设置中收窄。
    *  经 knowledge-scope.collectHallKnowledge 消费，注入幕僚回答链路。 */
   knowledgeScope?: KnowledgeScope
+}
+
+/** 好感度里程碑记录：幕僚好感度跨越 AFFINITY_TIERS 某一层时落库一条 */
+export interface AdvisorAffinityMilestone {
+  /** 达成的层级索引（0-5，对应 AFFINITY_TIERS 下标） */
+  tier: number
+  /** 层级标题快照（落库时拷贝，避免 AFFINITY_TIERS 改名导致历史失配） */
+  title: string
+  /** 达成时刻 ISO 字符串 */
+  reachedAt: string
 }
 
 // ---- 幕僚消息 ----

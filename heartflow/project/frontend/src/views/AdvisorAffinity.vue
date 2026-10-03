@@ -27,6 +27,21 @@
       </div>
     </div>
 
+    <!-- INCR-443：好感度层级分布 -->
+    <div data-enter v-if="advisors.length" class="af-dist" data-test="affinity-tier-dist">
+      <div
+        v-for="t in tierDistribution"
+        :key="t.index"
+        class="af-dist-seg"
+        :class="{ 'af-dist-empty': t.count === 0 }"
+        :style="{ background: t.color, color: t.textColor }"
+        :title="`${t.title}：${t.count} 位`"
+      >
+        <span v-if="t.count > 0" class="af-dist-n">{{ t.count }}</span>
+        <span class="af-dist-label">{{ t.title }}</span>
+      </div>
+    </div>
+
     <!-- Advisor grid -->
     <div data-enter v-if="advisors.length" class="af-grid">
       <div
@@ -61,6 +76,13 @@
             <span class="af-stat">好感度 {{ Math.round(tierInfo(a.id).affinity) }} / 100</span>
             <span class="af-stat">交互 {{ tierInfo(a.id).interactions }} 次</span>
           </div>
+
+          <div class="af-card-meta-row" data-test="affinity-journey">
+            <span class="af-meta">🕊 最近 {{ fmtAgo(a.lastActiveAt) }}</span>
+            <span class="af-meta">🌱 {{ bondedDays(a.createdAt) }}</span>
+            <span class="af-meta">👁 见证 {{ witnessCount(a) }}</span>
+            <span class="af-meta" v-if="milestoneCount(a) > 0">✦ 里程碑 {{ milestoneCount(a) }}</span>
+          </div>
         </div>
 
         <div v-if="tierInfo(a.id).index >= 5" class="af-card-bonded">
@@ -71,6 +93,39 @@
 
     <!-- Empty state -->
     <EmptyState v-else icon="🏛" title="暂无幕僚数据" hint="请在幕僚大厅创建幕僚后查看好感度" :glow="false" cta-label="" />
+
+    <!-- INCR-443：见证之光 -->
+    <div data-enter v-if="recentWitnesses.length" class="af-section" data-test="affinity-witness">
+      <div class="af-section-hd">
+        <span class="orn-diamond">✦</span>
+        <h2 class="af-section-title">见证之光</h2>
+        <span class="af-section-sub">幕僚与你共同见证的瞬间</span>
+      </div>
+      <div class="af-witness-list">
+        <div v-for="w in recentWitnesses" :key="w.advisorId + w.at" class="af-witness-item">
+          <span class="af-witness-who">{{ w.advisorName }}</span>
+          <span class="af-witness-tag">{{ w.eventType }}</span>
+          <span class="af-witness-time">{{ fmtAgo(w.at) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- INCR-443：好感里程碑时间线 -->
+    <div data-enter v-if="milestoneTimeline.length" class="af-section" data-test="affinity-milestones">
+      <div class="af-section-hd">
+        <span class="orn-diamond">✦</span>
+        <h2 class="af-section-title">好感里程碑</h2>
+        <span class="af-section-sub">羁绊层级的每一级跨越</span>
+      </div>
+      <div class="af-timeline">
+        <div v-for="m in milestoneTimeline" :key="m.advisorName + m.reachedAt" class="af-tl-item">
+          <span class="af-tl-dot" :style="{ background: tierBadgeStyle(m.tier).background }" />
+          <span class="af-tl-who">{{ m.advisorName }}</span>
+          <span class="af-tl-tier">{{ m.title }}</span>
+          <span class="af-tl-time">{{ fmtDate(m.reachedAt) }}</span>
+        </div>
+      </div>
+    </div>
 
     <button class="af-btn-back" @click="$router.push('/advisors')">← 返回幕僚大厅</button>
   </div>
@@ -90,6 +145,83 @@ const $router = useRouter()
 const advisor = useAdvisor()
 
 const advisors = computed(() => advisor.advisors)
+
+// ---- INCR-443：好感度层级分布（复用 tierInfo） ----
+const tierDistribution = computed(() => {
+  const counts = AFFINITY_TIERS.map(() => 0)
+  for (const a of advisors.value) {
+    const idx = tierInfo(a.id).index
+    if (idx >= 0 && idx < counts.length) counts[idx]++
+  }
+  return AFFINITY_TIERS.map((t, i) => ({
+    index: i,
+    title: t.title,
+    count: counts[i],
+    color: tierBadgeStyle(i).background,
+    textColor: tierBadgeStyle(i).color,
+  }))
+})
+
+// ---- INCR-443：见证之光（聚合近期见证） ----
+const recentWitnesses = computed(() => {
+  const items: { advisorId: string; advisorName: string; eventType: string; at: string }[] = []
+  for (const a of advisors.value) {
+    for (const w of a.witnessLog ?? []) {
+      items.push({ advisorId: a.id, advisorName: a.name, eventType: w.eventType, at: w.at })
+    }
+  }
+  items.sort((x, y) => new Date(y.at).getTime() - new Date(x.at).getTime())
+  return items.slice(0, 12)
+})
+
+// ---- INCR-443：好感里程碑时间线（聚合各幕僚层级达成） ----
+const milestoneTimeline = computed(() => {
+  const items: { advisorName: string; tier: number; title: string; reachedAt: string }[] = []
+  for (const a of advisors.value) {
+    for (const m of a.affinityMilestones ?? []) {
+      items.push({ advisorName: a.name, tier: m.tier, title: m.title, reachedAt: m.reachedAt })
+    }
+  }
+  items.sort((x, y) => new Date(y.reachedAt).getTime() - new Date(x.reachedAt).getTime())
+  return items.slice(0, 12)
+})
+
+// ---- INCR-443：工具函数 ----
+function fmtAgo(iso: string | null | undefined): string {
+  if (!iso) return '尚未互动'
+  const diff = Date.now() - new Date(iso).getTime()
+  if (diff < 0) return '即将'
+  const day = Math.floor(diff / 86400000)
+  if (day <= 0) {
+    const hr = Math.floor(diff / 3600000)
+    return hr <= 0 ? '刚刚' : `约 ${hr} 小时前`
+  }
+  if (day === 1) return '昨天'
+  if (day < 30) return `${day} 天前`
+  const mo = Math.floor(day / 30)
+  return `${mo} 个月前`
+}
+
+function fmtDate(iso: string | null | undefined): string {
+  if (!iso) return '—'
+  const d = new Date(iso)
+  return `${d.getMonth() + 1}月${d.getDate()}日`
+}
+
+function bondedDays(iso: string | null | undefined): string {
+  if (!iso) return '新生'
+  const day = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)
+  if (day <= 0) return '今日结契'
+  return `相识 ${day} 天`
+}
+
+function witnessCount(a: AdvisorProfile): number {
+  return a.witnessLog?.length ?? 0
+}
+
+function milestoneCount(a: AdvisorProfile): number {
+  return a.affinityMilestones?.length ?? 0
+}
 
 function roleIcon(role: string): string {
   const def = ADVISOR_ROLES.find(r => r.key === role)
@@ -485,6 +617,136 @@ function progressStyle(affinity: number): Record<string, string> {
   background: rgba(var(--accent-rgb), 0.06);
   border-color: rgba(var(--accent-rgb), 0.2);
 }
+
+/* ---- INCR-443：层级分布条 ---- */
+.af-dist {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+.af-dist-seg {
+  flex: 1;
+  min-height: 56px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+  transition: transform 0.2s, border-color 0.2s;
+}
+.af-dist-seg:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb), 0.25);
+}
+.af-dist-seg.af-dist-empty { opacity: 0.4; }
+.af-dist-n { font-size: 18px; font-weight: 700; }
+.af-dist-label { font-size: 10px; letter-spacing: 1px; opacity: 0.85; }
+
+/* ---- INCR-443：每卡旅程元数据 ---- */
+.af-card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+.af-meta {
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.04);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+/* ---- INCR-443：区块通用 ---- */
+.af-section {
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+.af-section-hd {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.af-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+.af-section-sub {
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.4);
+  letter-spacing: 1px;
+}
+
+/* ---- INCR-443：见证之光 ---- */
+.af-witness-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.af-witness-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb), 0.03);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+}
+.af-witness-who {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+.af-witness-tag {
+  flex: 1;
+  font-size: 12px;
+  color: rgba(var(--accent-rgb), 0.65);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.af-witness-time {
+  font-size: 11px;
+  color: rgba(var(--accent-rgb), 0.35);
+  flex-shrink: 0;
+}
+
+/* ---- INCR-443：里程碑时间线 ---- */
+.af-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.af-tl-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb), 0.03);
+  border: 1px solid rgba(var(--accent-rgb), 0.08);
+}
+.af-tl-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 8px currentColor;
+}
+.af-tl-who { font-size:13px; font-weight: 600; color: var(--text-primary); flex-shrink: 0; }
+.af-tl-tier { font-size: 13px; color: var(--accent); flex-shrink: 0; }
+.af-tl-time { font-size: 11px; color: rgba(var(--accent-rgb), 0.4); margin-left: auto; flex-shrink: 0; }
 
 /* === Entrance Animation === */
 @keyframes fade-slide-up {
