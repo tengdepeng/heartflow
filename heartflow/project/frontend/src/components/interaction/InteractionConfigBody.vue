@@ -2,6 +2,8 @@
 import { computed, defineProps, defineEmits } from 'vue'
 import {
   detectConflicts,
+  sortRulesByPriority,
+  removeRuleFromConfig,
   INTERACTION_LABELS,
   ACTION_LABELS,
 } from '../../modules/customization/interaction-engine'
@@ -14,16 +16,20 @@ import { useInteractionConfigs } from '../../modules/interaction'
 import { BaseCard, BaseButton } from '../ui'
 
 // 从 InteractionConfig 抽取的自包含「配置展开体」：全局设置 + 规则列表 + 冲突检测。
-// config 为 store 同一对象引用，可直接改嵌套属性后由 bridge 的 save() 落盘。
+// 多数操作直接改 props 上的嵌套属性（config 与 store 同一对象引用）后由 save() 落盘；
+// removeRule 例外——它走引擎的不可变 removeRuleFromConfig，故需显式写回 store 数组下标。
 const { config } = defineProps<{ config: InteractionConfig }>()
 const emit = defineEmits<{
   addRule: []
   editRule: [rule: InteractionRule]
 }>()
 
-const { save } = useInteractionConfigs()
+const { configs, save } = useInteractionConfigs()
 
 const conflicts = computed<RuleConflict[]>(() => detectConflicts(config.rules))
+// 展示顺序按 priority 降序；sortRulesByPriority 内部为 [...rules].sort()，
+// 不改原数组，故存储顺序仍是用户的添加序。
+const sortedRules = computed<InteractionRule[]>(() => sortRulesByPriority(config.rules))
 
 function toggleSetting(key: string) {
   const settings = config.settings as any
@@ -41,8 +47,10 @@ function toggleRule(ruleId: string) {
 }
 
 function removeRule(ruleId: string) {
-  config.rules = config.rules.filter(r => r.id !== ruleId)
-  config.updatedAt = new Date().toISOString()
+  // removeRuleFromConfig 返回新 config 对象，需写回 store 数组对应下标才能落盘
+  const idx = configs.value.findIndex(c => c.id === config.id)
+  if (idx < 0) return
+  configs.value[idx] = removeRuleFromConfig(configs.value[idx], ruleId)
   save()
 }
 </script>
@@ -97,7 +105,7 @@ function removeRule(ruleId: string) {
       </div>
 
       <div
-        v-for="rule in config.rules"
+        v-for="rule in sortedRules"
         :key="rule.id"
         :class="['rule-item', { disabled: !rule.enabled }]"
       >
