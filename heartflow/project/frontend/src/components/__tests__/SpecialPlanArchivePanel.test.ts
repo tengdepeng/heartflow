@@ -137,4 +137,37 @@ describe('SpecialPlanArchivePanel 专项档案', () => {
     expect(wrapper.text()).not.toContain('专项未立')
     expect(wrapper.text()).toContain('档案概览')
   })
+
+  // ============================================================
+  // INCR-453：接线 planSuggestion（引擎已实现却零 UI 消费）——
+  // per-plan 具名提示，与面板既有「聚合洞察」互补不重复。
+  // ============================================================
+  it('INCR-453 无里程碑的专项显示具名提示', () => {
+    const plans = [
+      mk({ title: '写作计划', milestones: [] }),
+      // 部分完成 → planSuggestion 返回 null，不出现
+      mk({ title: '健身计划', milestones: [{ label: '深蹲', done: true }, { label: '硬拉', done: false }] }),
+    ]
+    const wrapper = mountPanel(plans)
+    const hints = wrapper.findAll('.spp-hint')
+    expect(hints.length).toBe(1)
+    expect(hints[0].text()).toContain('写作计划')
+    expect(hints[0].text()).toContain('还未设定里程碑')
+  })
+
+  it('INCR-453 单里程碑即全部完成的专项也算「已全部点亮」', () => {
+    const plans = [
+      mk({ title: '完成的项目', milestones: [{ label: 'a', done: true }, { label: 'b', done: true }] }),
+    ]
+    const wrapper = mountPanel(plans)
+    const hints = wrapper.findAll('.spp-hint')
+    expect(hints.length).toBe(1)
+    expect(hints[0].text()).toContain('里程碑已全部点亮')
+  })
+
+  it('INCR-453 无提示需求时不渲染该区块', () => {
+    const plans = [mk({ title: '进行中', milestones: [{ label: 'a', done: true }, { label: 'b', done: false }] })]
+    const wrapper = mountPanel(plans)
+    expect(wrapper.text()).not.toContain('专项提示')
+  })
 })
