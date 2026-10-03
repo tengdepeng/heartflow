@@ -24,6 +24,14 @@
       <span class="bap-closest-val">{{ Math.round(ov.avgCloseness * 100) }}%</span>
     </div>
 
+    <!-- 最久未联系（INCR-446） -->
+    <div v-if="mostNeglected && mostNeglected.days >= 30" class="bap-neglected">
+      <span class="bap-neglected-label">最久未联系</span>
+      <span class="bap-neglected-name">{{ mostNeglected.p.name }}</span>
+      <span class="bap-neglected-sep">·</span>
+      <span class="bap-neglected-val">已 {{ mostNeglected.days }} 天</span>
+    </div>
+
     <!-- 羁绊健康 -->
     <div class="bap-health">
       <div class="bap-health-main">
@@ -94,6 +102,7 @@ import {
   relationRhythm,
   relationHealth,
   relationInsights,
+  daysSinceLast,
 } from '../modules/relation/relation-analytics'
 
 const props = defineProps<{ persons: Person[] }>()
@@ -115,6 +124,19 @@ const typeRows = computed(() =>
   relationTypeRows(props.persons).filter((r) => r.count > 0),
 )
 const insights = computed(() => relationInsights(props.persons, interactions.value))
+
+// INCR-446: 揭示「最久未联系的人」——洞察只给沉寂计数不给具体人，这里补上具名提醒。
+// daysSinceLast 此前是 relation-analytics 唯一未被任何 UI 消费的纯函数（仅 relationHealth 内部用 + 测试）。
+const mostNeglected = computed<{ p: Person; days: number } | null>(() => {
+  const now = new Date()
+  const candidates = props.persons
+    .filter((p) => !p.deceased && !p.isSeat)
+    .map((p) => ({ p, days: daysSinceLast(p, interactions.value, now) }))
+    .filter((x): x is { p: Person; days: number } => x.days !== null)
+  if (!candidates.length) return null
+  candidates.sort((a, b) => b.days - a.days)
+  return candidates[0]
+})
 
 const healthColor = computed(() =>
   health.value.score >= 70 ? '#8aca70' : health.value.score >= 45 ? '#e8c060' : health.value.score >= 20 ? '#e0a96d' : '#c46a5a',
@@ -141,6 +163,12 @@ const healthRing = computed(() =>
 .bap-closest-name { color: #e8c060; font-weight: 600; }
 .bap-closest-val { color: #d9decf; font-variant-numeric: tabular-nums; }
 .bap-closest-sep { color: #4a4f44; }
+
+.bap-neglected { display: flex; align-items: baseline; gap: 7px; background: #161a15; border-radius: 10px; padding: 9px 11px; margin-bottom: 8px; font-size: 12px; flex-wrap: wrap; border: 1px solid rgba(196, 106, 90, 0.2); }
+.bap-neglected-label { color: #c46a5a; }
+.bap-neglected-name { color: #e8c060; font-weight: 600; }
+.bap-neglected-sep { color: #4a4f44; }
+.bap-neglected-val { color: #d9decf; font-variant-numeric: tabular-nums; }
 
 .bap-health { background: #161a15; border-radius: 10px; padding: 11px; margin-bottom: 8px; display: flex; gap: 16px; align-items: center; }
 .bap-health-main { display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 64px; }
