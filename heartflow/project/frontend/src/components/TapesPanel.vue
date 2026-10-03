@@ -24,6 +24,11 @@
           <span class="tp-stat-num">{{ overview.transcriptWords }}</span>
           <span class="tp-stat-label">转录字数</span>
         </div>
+        <!-- INCR-451：recentTapes 此前引擎已算好却零 UI 消费 -->
+        <div class="tp-stat">
+          <span class="tp-stat-num">{{ recentCount }}</span>
+          <span class="tp-stat-label">近30天新增</span>
+        </div>
       </div>
     </div>
 
@@ -67,7 +72,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useTapes, tapeOverview, searchTapes, formatTapeDuration } from '../modules/study/tapes'
+import { useTapes, tapeOverview, searchTapes, formatTapeDuration, recentTapes } from '../modules/study/tapes'
 
 const tapesApi = useTapes()
 
@@ -79,6 +84,7 @@ const query = ref('')
 const expandedId = ref<string | null>(null)
 
 const overview = computed(() => tapeOverview(tapesApi.tapes.value))
+const recentCount = computed(() => recentTapes(tapesApi.tapes.value))
 const filteredTapes = computed(() => searchTapes(tapesApi.tapes.value, query.value))
 
 function importTape() {
