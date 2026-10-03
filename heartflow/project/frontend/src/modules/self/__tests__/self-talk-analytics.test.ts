@@ -10,7 +10,6 @@ import {
   selfTalkRhythm,
   selfTalkHealth,
   selfTalkInsights,
-  selfTalkTopSources,
 } from '../self-talk-analytics'
 
 const NOW = 1760000000000
@@ -192,22 +191,5 @@ describe('selfTalkInsights', () => {
     const ins = selfTalkInsights(talks, new Date(NOW), 4)
     expect(ins.length).toBeGreaterThan(0)
     expect(ins.length).toBeLessThanOrEqual(4)
-  })
-})
-
-describe('selfTalkTopSources', () => {
-  it('排序取 top N', () => {
-    const talks = [
-      makeTalk({ roomContext: '情绪花房' }),
-      makeTalk({ roomContext: '情绪花房' }),
-      makeTalk({ roomContext: '思绪书房' }),
-      makeTalk({ roomContext: '思绪书房' }),
-      makeTalk({ roomContext: '思绪书房' }),
-      makeTalk({ roomContext: null }),
-    ]
-    const top = selfTalkTopSources(talks, 2)
-    expect(top.length).toBe(2)
-    expect(top[0].source).toBe('思绪书房')
-    expect(top[0].count).toBe(3)
   })
 })

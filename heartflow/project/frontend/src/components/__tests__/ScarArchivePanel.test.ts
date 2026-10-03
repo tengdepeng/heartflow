@@ -113,4 +113,50 @@ describe('ScarArchivePanel 铸造档案', () => {
     expect(insights.length).toBeGreaterThan(0)
     expect(insights.length).toBeLessThanOrEqual(4)
   })
+
+  // ============================================================
+  // INCR-450：接线 scar-analytics 的 scarTypeRows / scarBodyRows
+  // （此前引擎已算好但面板零 UI 消费 —— 面板只有 概览/节律/健康/洞察 四块）
+  // ============================================================
+  it('INCR-450 印记类型分布：按 scarType 聚合并渲染计数', () => {
+    const marks = [
+      mk('腰', 3, 'wear', 5),
+      mk('肩', 4, 'impact', 6),
+      mk('手', 2, 'cut', 7),
+      mk('脚', 1, 'burn', 8),
+    ]
+    const wrapper = mountPanel(marks)
+    expect(wrapper.text()).toContain('印记类型分布')
+    // 四种类型各 1 条
+    expect(wrapper.find('[data-test="scap-type-wear"]').text()).toContain('1')
+    expect(wrapper.find('[data-test="scap-type-impact"]').text()).toContain('1')
+    expect(wrapper.find('[data-test="scap-type-cut"]').text()).toContain('1')
+    expect(wrapper.find('[data-test="scap-type-burn"]').text()).toContain('1')
+    // 占比条按 100/4 = 25%
+    const bar = wrapper.find('[data-test="scap-type-wear"] .scap-dist-bar i')
+    expect((bar.attributes('style') || '')).toContain('width: 25%')
+  })
+
+  it('INCR-450 身体部位分布：按 bodyPart 降序聚合，重复部位计数叠加', () => {
+    const marks = [
+      mk('腰', 3, 'wear', 5),
+      mk('腰', 2, 'cut', 6),
+      mk('肩', 4, 'impact', 7),
+    ]
+    const wrapper = mountPanel(marks)
+    expect(wrapper.text()).toContain('身体部位分布')
+    // 腰 2 条（50%），肩 1 条（25%），且腰应排在前面
+    const rows = wrapper.findAll('[data-test^="scap-body-"]')
+    expect(rows.length).toBe(2)
+    expect(rows[0].attributes('data-test')).toBe('scap-body-腰')
+    expect(rows[0].text()).toContain('2')
+    expect(rows[1].attributes('data-test')).toBe('scap-body-肩')
+    expect(rows[1].text()).toContain('1')
+  })
+
+  it('INCR-450 空态不渲染部位分布（无印记时无部位可分）', () => {
+    const wrapper = mountPanel([])
+    expect(wrapper.text()).not.toContain('身体部位分布')
+    expect(wrapper.text()).not.toContain('印记类型分布')
+  })
 })
