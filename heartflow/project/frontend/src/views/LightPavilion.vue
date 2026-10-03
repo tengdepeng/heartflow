@@ -104,6 +104,9 @@
       </div>
     </section>
 
+    <!-- 光之脉络（INCR-442：复用 goal-visualization 引擎 buildRadialLayout/getDomainProgress/getTierStats，暖琥珀径向总览） -->
+    <LightVeinPanel :goals="goal.goals.value" />
+
     <!-- 穹顶星光（愿景） -->
     <section data-enter class="dome-section">
       <div class="tier-header vision-header"><span>✨ 愿景 · 穹顶星光</span><button class="btn-add-sm" @click="openCreate('vision')">+</button></div>
@@ -267,6 +270,9 @@
       <GoalGrowthArchivePanel :goals="goal.goals.value" />
     </section>
 
+    <!-- 成就路线（INCR-442：复用 goal-visualization 引擎 useGoalMilestones/useProgressHistory，long-term 目标发光轨迹 + 进度快照趋势） -->
+    <LightMilestoneTrail :goals="goal.goals.value" />
+
     <!-- 专项档案（INCR-286 补挂载孤儿组件 SpecialPlanArchivePanel：档案概览/里程碑进度/游离专项/温和洞察，消费 goal/special-plan-analytics 纯函数，引擎应用内唯一） -->
     <SpecialPlanArchivePanel :plans="specialPlans" />
 
@@ -342,6 +348,8 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useLightPavilionData } from '../modules/light/pavilion-data'
 import GoalGrowthArchivePanel from '../components/GoalGrowthArchivePanel.vue'
 import SpecialPlanArchivePanel from '../components/SpecialPlanArchivePanel.vue'
+import LightVeinPanel from '../components/LightVeinPanel.vue'
+import LightMilestoneTrail from '../components/LightMilestoneTrail.vue'
 import OldDreamPanel from '../components/OldDreamPanel.vue'
 import { useRoomResonance } from '../modules/room-resonance'
 
