@@ -56,11 +56,6 @@ export function registerPluginCapability(
   impls.set(implKey(pluginId, capabilityId), impl)
 }
 
-/** 已注册实现的键集合（测试/调试用） */
-export function getRegisteredCapabilityKeys(): string[] {
-  return [...impls.keys()]
-}
-
 /** 查找内置插件的 manifest */
 function findManifest(pluginId: string): PluginManifest | undefined {
   return CORE_PLUGINS.find(p => p.meta.id === pluginId)
