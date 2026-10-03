@@ -87,4 +87,38 @@ describe('MedicinalDietPanel 药膳食谱', () => {
     expect(wrapper.text()).toContain('功效分布')
     expect(wrapper.text()).toContain('健脾')
   })
+
+  // ============================================================
+  // INCR-452：接线 recipesByConstitution（按体质筛选）——引擎早已实现，
+  // 但面板零 UI 消费。体质清单取自 MEDICINAL_RECIPES 的 constitutions 并集。
+  // ============================================================
+  it('INCR-452 体质筛选器列出全部体质并可筛选食谱', async () => {
+    const wrapper = await mountPanel({})
+    const selects = wrapper.findAll('.mdp-select')
+    const constitutionSelect = selects[selects.length - 1]
+    const values = constitutionSelect.findAll('option').map(o => o.attributes('value'))
+    expect(values).toContain('')            // 全部体质
+    expect(values).toContain('痰湿质')
+    expect(values).toContain('气虚质')
+    // 未选体质时仍是全部 18 条
+    expect(wrapper.findAll('.mdp-recipe').length).toBe(18)
+    // 选「阳虚质」后应只剩对应食谱（<= 18 且不含不适用者）
+    await constitutionSelect.setValue('阳虚质')
+    await wrapper.vm.$nextTick()
+    const names = wrapper.findAll('.mdp-recipe-name').map(n => n.text())
+    expect(names.length).toBeGreaterThan(0)
+    expect(names.length).toBeLessThan(18)
+    expect(names).toContain('当归生姜羊肉汤')  // 阳虚质专属
+  })
+
+  it('INCR-452 体质与功效筛选可叠加', async () => {
+    const wrapper = await mountPanel({})
+    const selects = wrapper.findAll('.mdp-select')
+    await selects[0].setValue('安神')                 // 功效
+    await selects[selects.length - 1].setValue('阳虚质') // 体质
+    await wrapper.vm.$nextTick()
+    const names = wrapper.findAll('.mdp-recipe-name').map(n => n.text())
+    // 阳虚质 ∩ 安神 —— 当归生姜羊肉汤为阳虚质，其功效未必为安神，故结果应更少
+    expect(names.length).toBeLessThanOrEqual(2)
+  })
 })
