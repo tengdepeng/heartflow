@@ -209,7 +209,7 @@ export function useNotificationEngine() {
       // 同一模块实例内新加载的兜底规则仍带着上次遗留的 enabled: true，
       // 而用户从未开启过它。深拷贝切断别名，预设常量自此不可被写穿。
       // （同型先例 useHomeReplica.ts readManifest / engine/storage/core.ts createDefaultSchema）
-      if (!raw) return DEFAULT_NOTIFICATION_RULES.map(r => ({ ...r }))
+      if (!raw) return structuredClone(DEFAULT_NOTIFICATION_RULES)
       return JSON.parse(raw)
     } catch { return structuredClone(DEFAULT_NOTIFICATION_RULES) }
   }
