@@ -134,6 +134,22 @@ describe('CrystalDetail', () => {
     wrapper.unmount()
   })
 
+  it('显示繁度信息（接线 getCrystalVisuals）', async () => {
+    const wrapper = await getWrapper({ crystal: mockCrystal, session: mockSession })
+    const infoRows = document.querySelectorAll('.info-row')
+    let found = false
+    infoRows.forEach(row => {
+      const label = row.querySelector('.info-label')
+      const value = row.querySelector('.info-value')
+      if (label && label.textContent === '繁度' && value) {
+        expect(value.textContent).toBe('4')
+        found = true
+      }
+    })
+    expect(found).toBe(true)
+    wrapper.unmount()
+  })
+
   it('显示标签', async () => {
     const wrapper = await getWrapper({ crystal: mockCrystal, session: mockSession })
     const tags = document.querySelectorAll('.tag')

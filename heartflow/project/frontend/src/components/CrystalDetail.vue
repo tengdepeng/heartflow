@@ -62,6 +62,10 @@
               <span class="info-label">专注状态</span>
               <span class="info-value" :class="sessionStatusClass">{{ sessionStatusLabel }}</span>
             </div>
+            <div class="info-row">
+              <span class="info-label">繁度</span>
+              <span class="info-value">{{ visuals?.complexity ?? '--' }}</span>
+            </div>
             <div v-if="crystal.tags.length" class="info-row tags-row">
               <span class="info-label">标签</span>
               <span class="tags-list">
@@ -129,6 +133,8 @@ import { computed, ref } from 'vue'
 import type { TimeCrystal, FocusSession } from '../types'
 import { formatDate, formatDuration } from '../utils/time'
 import { updateCrystal } from '../engine/storage/crystal'
+// 接线结晶视觉孤儿 getCrystalVisuals（INCR-437：详情弹窗暴露 complexity 繁度）
+import { getCrystalVisuals } from '../modules/crystal'
 import {
   MOTIFS,
   PIXELS,
@@ -145,6 +151,11 @@ defineEmits<{ close: [] }>()
 
 const crystal = computed(() => props.crystal)
 const session = computed(() => props.session)
+
+// INCR-437：接线结晶视觉孤儿 getCrystalVisuals（详情弹窗暴露 complexity 繁度）
+// 仅取 complexity（基因派生·标签维度繁度 1-4）；color 与 crystal.color 等价、shape/glowIntensity
+// 因与弹窗实际渲染口径不兼容（基因 shape 非展示 shape、glow 硬编码紫）故不接入渲染，避免回归。
+const visuals = computed(() => (crystal.value ? getCrystalVisuals(crystal.value) : null))
 
 /** 生成结晶 SVG 多边形点 */
 const shapePoints = computed(() => {
