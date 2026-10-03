@@ -106,6 +106,7 @@
         <RecordList v-else-if="activeSubTab==='records'" key="records"/>
         <TimeCorridor v-else-if="activeSubTab==='corridor'" key="corridor" :sessionMap="sessionMap"/>
         <TimelineRadarPanel v-else-if="activeSubTab==='radar'" key="radar"/>
+        <TimelineSearchPanel v-else-if="activeSubTab==='search'" key="search"/>
         <TimelineExportPanel v-else-if="activeSubTab==='export'" key="export"/>
       </Transition>
     </div>
@@ -123,6 +124,7 @@ import TimelineFragment from '../components/TimelineFragment.vue'
 import TimeCorridor from '../components/TimeCorridor.vue'
 import TimeLensPanel from '../components/TimeLensPanel.vue'
 import TimelineRadarPanel from '../components/TimelineRadarPanel.vue'
+import TimelineSearchPanel from '../components/TimelineSearchPanel.vue'
 import TimelineExportPanel from '../components/TimelineExportPanel.vue'
 import { storage, storageVersion } from '../engine/storage'
 import { useDataPort } from '../composables/useDataPort'
@@ -137,7 +139,7 @@ const { entranceClass } = useViewEntrance()
 
 const router=useRouter();const dataPort=useDataPort()
 const activeSubTab=ref<string>('river')
-const subTabs=[{id:'river',label:'时间之河',icon:'≋'},{id:'calendar',label:'日历',icon:'📅'},{id:'stats',label:'统计',icon:'📊'},{id:'radar',label:'数据雷达',icon:'📡'},{id:'export',label:'导出',icon:'📤'},{id:'lens',label:'透视',icon:'🔭'},{id:'archive',label:'时光档案',icon:'🗓️'},{id:'records',label:'记录',icon:'📋'},{id:'corridor',label:'时间长廊',icon:'◈'}]
+const subTabs=[{id:'river',label:'时间之河',icon:'≋'},{id:'calendar',label:'日历',icon:'📅'},{id:'stats',label:'统计',icon:'📊'},{id:'radar',label:'数据雷达',icon:'📡'},{id:'search',label:'检索',icon:'🔎'},{id:'export',label:'导出',icon:'📤'},{id:'lens',label:'透视',icon:'🔭'},{id:'archive',label:'时光档案',icon:'🗓️'},{id:'records',label:'记录',icon:'📋'},{id:'corridor',label:'时间长廊',icon:'◈'}]
 const activeFilters=ref<RiverItemType[]>(['crystal','note','emotion','session','anchor','body','habit','movement','rest','dialogue','photo'])
 const typeFilters:{key:RiverItemType;label:string;icon:string}[]=[{key:'crystal',label:'结晶',icon:'💎'},{key:'note',label:'笔记',icon:'📝'},{key:'emotion',label:'情绪',icon:'🌷'},{key:'session',label:'专注',icon:'⏱️'},{key:'anchor',label:'心锚',icon:'⚓'},{key:'body',label:'身体',icon:'🌿'},{key:'habit',label:'习惯',icon:'🎯'},{key:'movement',label:'运动',icon:'🏃'},{key:'rest',label:'休息',icon:'🍃'},{key:'dialogue',label:'对话',icon:'💬'},{key:'photo',label:'照片',icon:'📷'}]
 function toggleFilter(k:RiverItemType){const i=activeFilters.value.indexOf(k);i>=0&&activeFilters.value.length>1?activeFilters.value.splice(i,1):activeFilters.value.push(k)}
