@@ -196,6 +196,8 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import {
   createConfig,
   createRule,
+  addRuleToConfig,
+  updateRule,
   detectConflicts,
   exportConfig,
   importConfig,
@@ -395,8 +397,9 @@ function saveRule() {
   const configId = editingRule.value?.configId || activeConfigId.value
   if (!configId) return
 
-  const config = configs.value.find(c => c.id === configId)
-  if (!config) return
+  const configIdx = configs.value.findIndex(c => c.id === configId)
+  if (configIdx < 0) return
+  const config = configs.value[configIdx]
 
   const scenes = ruleForm.scenesStr.split(',').map(s => s.trim()).filter(Boolean)
 
@@ -404,24 +407,23 @@ function saveRule() {
     // 编辑现有规则
     const idx = config.rules.findIndex(r => r.id === editingRule.value!.rule.id)
     if (idx >= 0) {
-      config.rules[idx] = {
-        ...config.rules[idx],
+      config.rules[idx] = updateRule(config.rules[idx], {
         name: ruleForm.name,
         type: ruleForm.type,
         action: ruleForm.action,
         target: ruleForm.target,
         priority: ruleForm.priority,
         scenes: scenes.length > 0 ? scenes : ['*'],
-        updatedAt: new Date().toISOString(),
-      }
+      })
     }
   } else {
     // 添加新规则
     const rule = createRule(ruleForm.name, ruleForm.type, ruleForm.action, ruleForm.target, {}, ruleForm.priority, scenes.length > 0 ? scenes : ['*'])
-    config.rules.push(rule)
+    configs.value[configIdx] = addRuleToConfig(config, rule)
   }
 
-  config.updatedAt = new Date().toISOString()
+  // 不可变 API 返回新对象，updatedAt 需打在数组当前元素上而非局部旧引用
+  configs.value[configIdx].updatedAt = new Date().toISOString()
   save()
   closeRuleEditor()
 }
