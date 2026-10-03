@@ -26,10 +26,13 @@
       保险库还空着。把常用账号的登录信息收进来，解锁后即可一键复制密码。
     </p>
 
-    <!-- 新增凭证 -->
+    <!-- 新增 / 编辑凭证 -->
     <div class="vcp-card" data-test="vcp-card-new">
-      <div class="vcp-card-head"><span class="vcp-card-title">✏️ 新增凭证</span></div>
-      <form class="vcp-add" @submit.prevent="doCreate">
+      <div class="vcp-card-head">
+        <span class="vcp-card-title">{{ editingId ? '✏️ 编辑凭证' : '✏️ 新增凭证' }}</span>
+        <button v-if="editingId" class="vcp-mini" data-test="vcp-cancel-edit" type="button" @click="cancelEdit">取消编辑</button>
+      </div>
+      <form class="vcp-add" @submit.prevent="doSave">
         <input v-model="form.title" class="vcp-input" data-test="vcp-title" placeholder="标题（如 邮箱）" required />
         <input v-model="form.username" class="vcp-input" data-test="vcp-username" placeholder="账号" required />
         <input v-model="form.password" class="vcp-input" data-test="vcp-password" placeholder="密码" required />
@@ -38,8 +41,9 @@
           <option v-for="c in CATEGORIES" :key="c.id" :value="c.id">{{ c.icon }} {{ c.name }}</option>
         </select>
         <input v-model="form.notes" class="vcp-input vcp-input--wide" data-test="vcp-notes" placeholder="备注（可选）" />
-        <button class="vcp-btn" data-test="vcp-create" type="submit">存入</button>
+        <button class="vcp-btn" data-test="vcp-create" type="submit">{{ editingId ? '保存修改' : '存入' }}</button>
       </form>
+      <p v-if="editingId" class="vcp-editing-hint" data-test="vcp-editing-hint">正在编辑「{{ editingTitle }}」，保存后将刷新更新时间。</p>
     </div>
 
     <!-- 凭证分组列表 -->
@@ -72,6 +76,7 @@
               <div v-if="c.notes" class="vcp-cr-note">{{ c.notes }}</div>
             </div>
             <div class="vcp-cr-ops">
+              <button class="vcp-mini" :data-test="`vcp-edit-${c.id}`" type="button" @click="startEdit(c)">编辑</button>
               <button class="vcp-mini" :data-test="`vcp-remove-${c.id}`" type="button" @click="removeCredential(c.id)">删除</button>
             </div>
           </li>
@@ -107,7 +112,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { storage } from '../engine/storage'
-import { createCredential, searchCredentials, credentialsByCategory, maskPassword, DEFAULT_VAULT_CATEGORIES } from '../modules/vault/vault-entries'
+import { createCredential, updateCredential, searchCredentials, credentialsByCategory, maskPassword, DEFAULT_VAULT_CATEGORIES } from '../modules/vault/vault-entries'
 import type { Credential, CredentialInput, VaultCategory } from '../modules/vault/vault-entries'
 import { vaultOverview, weakPasswords, reusedPasswords, vaultInsights } from '../modules/vault/vault-analytics'
 import { evaluatePasswordStrength } from '../modules/vault/password-generator'
@@ -118,6 +123,9 @@ const CATEGORIES: VaultCategory[] = DEFAULT_VAULT_CATEGORIES
 const credentials = ref<Credential[]>([])
 const query = ref('')
 const revealId = ref('')
+/** INCR-449：正在编辑的凭证 id（空 = 新增态） */
+const editingId = ref('')
+const editingTitle = ref('')
 
 const form = ref<CredentialInput>({
   title: '',
@@ -143,23 +151,56 @@ const weakList = computed(() => weakPasswords(credentials.value))
 const reusedList = computed(() => reusedPasswords(credentials.value))
 const grouped = computed(() => credentialsByCategory(searchCredentials(credentials.value, query.value), CATEGORIES))
 
-function doCreate(): void {
-  const t = form.value.title.trim()
-  const u = form.value.username.trim()
-  const pw = form.value.password
-  if (!t || !u || !pw) return
-  credentials.value = [...credentials.value, createCredential({ ...form.value })]
-  persist()
+function resetForm(): void {
   form.value.title = ''
   form.value.username = ''
   form.value.password = ''
   form.value.url = ''
   form.value.notes = ''
   form.value.category = 'login'
+  editingId.value = ''
+  editingTitle.value = ''
+}
+
+/** INCR-449：新增 / 编辑共用入口（编辑态走 updateCredential） */
+function doSave(): void {
+  const t = form.value.title.trim()
+  const u = form.value.username.trim()
+  const pw = form.value.password
+  if (!t || !u || !pw) return
+  if (editingId.value) {
+    credentials.value = credentials.value.map(c =>
+      c.id === editingId.value ? updateCredential(c, { ...form.value }) : c,
+    )
+    persist()
+    resetForm()
+    return
+  }
+  credentials.value = [...credentials.value, createCredential({ ...form.value })]
+  persist()
+  resetForm()
+}
+
+/** INCR-449：把已有凭证回填进表单进入编辑态 */
+function startEdit(c: Credential): void {
+  editingId.value = c.id
+  editingTitle.value = c.title || c.username
+  form.value.title = c.title
+  form.value.username = c.username
+  form.value.password = c.password
+  form.value.url = c.url
+  form.value.notes = c.notes
+  form.value.category = c.category
+  revealId.value = ''
+}
+
+function cancelEdit(): void {
+  resetForm()
 }
 
 function removeCredential(id: string): void {
   credentials.value = credentials.value.filter(c => c.id !== id)
+  if (editingId.value === id) resetForm()
   persist()
 }
 
@@ -241,6 +282,7 @@ function strengthTone(password: string): string {
 .vcp-strength--empty { background: #9a9aab22; color: #8a8a9a; }
 .vcp-pwd { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--text, #2b2b35); margin-top: 2px; flex-wrap: wrap; }
 .vcp-cr-ops { display: flex; gap: 4px; }
+.vcp-editing-hint { margin: 8px 0 0; font-size: 0.76rem; color: var(--accent, #d4a574); }
 
 .vcp-audit-list { list-style: none; padding: 0; margin: 0; }
 .vcp-audit { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-bottom: 1px dashed rgba(var(--accent-rgb, 212, 165, 116),0.15); }
