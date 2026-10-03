@@ -232,7 +232,10 @@
             </svg>
             <span class="score-value">{{ healthScore }}</span>
           </div>
-          <span class="health-label">{{ healthAssessment }}</span>
+          <span class="health-label">{{ habitHealth.label }}</span>
+          <ul class="health-suggestions">
+            <li v-for="(s, i) in habitHealth.suggestions" :key="i">{{ s }}</li>
+          </ul>
         </div>
         <div class="stat-card">
           <span class="stat-label">连续打卡</span>
@@ -326,6 +329,11 @@
     <section v-if="activeTab === 'tasks'" data-enter class="dw-section">
       <QuadrantBoardPanel />
     </section>
+
+    <!-- 每日仪式（discipline/workshop 引擎：DailyRitual 模型 + RITUAL_TEMPLATES 预设 + completeRitual 累计，INCR-441） -->
+    <section v-if="activeTab === 'rituals'" data-enter class="dw-section">
+      <DailyRitualPanel />
+    </section>
     </RoomLayout>
   </div>
 </template>
@@ -345,6 +353,7 @@ import type { StreakLevel } from '../modules/discipline'
 import { getHabitTemplatesByCategory, getChallengeTemplatesByDifficulty } from '../modules/discipline/workshop-bridge'
 import type { HabitTemplate, ChallengeTemplate } from '../modules/discipline/preset-library'
 import PomodoroForestPanel from '../components/discipline/PomodoroForestPanel.vue'
+import DailyRitualPanel from '../components/discipline/DailyRitualPanel.vue'
 import MeditationStudio from '../components/MeditationStudio.vue'
 import ChallengeAdvisorPanel from '../components/ChallengeAdvisorPanel.vue'
 import type { ChallengeRecommendation } from '../modules/discipline/challenge-recommender'
@@ -370,6 +379,7 @@ const tabs = [
   { key: 'forest', icon: '🌳', label: '番茄树园' },
   { key: 'meditation', icon: '🧘', label: '冥想工坊' },
   { key: 'tasks', icon: '🗂️', label: '任务看板' },
+  { key: 'rituals', icon: '🕯️', label: '每日仪式' },
 ]
 const activeTab = ref('checkin')
 
@@ -424,14 +434,8 @@ const challengeTemplates = computed(() => {
 // 数据
 const stats = ref(bridge.getStats())
 const healthScore = computed(() => bridge.getHabitHealthScore())
-const healthAssessment = computed(() => {
-  const s = healthScore.value
-  if (s >= 90) return '优秀'
-  if (s >= 75) return '良好'
-  if (s >= 60) return '一般'
-  if (s >= 40) return '需关注'
-  return '需改善'
-})
+// 健康度评估（INCR-441）：以桥引擎单一真源（含 label + suggestions），替换原视图侧自算阈值文案
+const habitHealth = computed(() => bridge.getHabitHealthAssessment())
 
 const todayHabits = ref<Habit[]>([])
 const activeChallenges = ref<DisciplineChallenge[]>([])
@@ -771,6 +775,17 @@ onMounted(() => {
 }
 .score-value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem; font-weight: 700; color: var(--text-primary, #e8e0d8); }
 .health-label { display: block; font-size: 0.85rem; color: var(--accent, #d4a574); margin-top: 0.4rem; }
+.health-suggestions {
+  list-style: none; margin: 0.5rem 0 0; padding: 0;
+  display: flex; flex-direction: column; gap: 0.25rem; text-align: left;
+}
+.health-suggestions li {
+  font-size: 0.76rem; color: var(--text-secondary, #9a9088);
+  padding-left: 0.9rem; position: relative; line-height: 1.4;
+}
+.health-suggestions li::before {
+  content: '💡'; position: absolute; left: 0; font-size: 0.7rem;
+}
 
 /* 连续打卡 */
 .streak-display { margin: 0.5rem 0; }

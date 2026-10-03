@@ -18,6 +18,11 @@ vi.mock('../../components/MeditationStudio.vue', () => ({
   default: { template: '<div data-test="meditation-studio" />' },
 }))
 
+// ---- 模拟 DailyRitualPanel（INCR-441） ----
+vi.mock('../../components/discipline/DailyRitualPanel.vue', () => ({
+  default: { template: '<div data-test="daily-ritual-panel" />' },
+}))
+
 // ---- 模拟 useViewEntrance ----
 vi.mock('../../composables/useViewEntrance', () => ({
   useViewEntrance: () => ({
@@ -35,6 +40,7 @@ const mockBundles = ref<any[]>([])
 const mockCreateBundleFromPreset = vi.fn()
 const mockCreateChallenge = vi.fn()
 const mockStreaks = ref<any[]>([])
+const mockRituals = ref<any[]>([])
 const mockGetTopStreaks = vi.fn((_limit: number = 10) => mockStreaks.value)
 vi.mock('../../modules/discipline/workshop-bridge', () => ({
   useDisciplineBridge: () => ({
@@ -65,6 +71,23 @@ vi.mock('../../modules/discipline/workshop-bridge', () => ({
     createHabitFromTemplate: vi.fn(),
     createChallengeFromTemplate: vi.fn(),
     createChallenge: mockCreateChallenge,
+    // INCR-441：每日仪式上盘 + 健康度建议接入
+    rituals: mockRituals,
+    RITUAL_TEMPLATES: [
+      { title: '晨间启动仪式', description: '用 15 分钟开启高效的一天', icon: '🌅', steps: ['喝一杯温水', '做 5 分钟拉伸'], estimatedDuration: 15, triggerTime: 'morning' },
+      { title: '午间充电', description: '用 10 分钟恢复精力', icon: '☀️', steps: ['离开座位走动 5 分钟'], estimatedDuration: 10, triggerTime: 'afternoon' },
+      { title: '晚间放松仪式', description: '用 20 分钟优雅结束一天', icon: '🌙', steps: ['写下感恩的事'], estimatedDuration: 20, triggerTime: 'evening' },
+      { title: '周末回顾', description: '用 30 分钟回顾一周', icon: '📊', steps: ['回顾本周'], estimatedDuration: 30, triggerTime: 'anytime' },
+      { title: '深度专注仪式', description: '进入深度工作前的准备', icon: '🎯', steps: ['清理桌面'], estimatedDuration: 5, triggerTime: 'anytime' },
+    ],
+    createRitualFromTemplate: vi.fn(),
+    completeRitual: vi.fn(),
+    getHabitHealthAssessment: () => ({
+      score: 85,
+      grade: 'excellent',
+      label: '自律大师',
+      suggestions: ['继续保持，你已经是自律的榜样', '可以尝试挑战更高难度的习惯'],
+    }),
   }),
   getHabitTemplatesByCategory: () => [],
   getChallengeTemplatesByDifficulty: () => [],
@@ -463,5 +486,45 @@ describe('DisciplineWorkshop 连击段位与排行榜（INCR-434）', () => {
     const wrapper = await getWrapper()
     await switchToStats(wrapper)
     expect(wrapper.find('.dw-streak-board').exists()).toBe(false)
+  })
+})
+
+// =============================================================
+// 集成：每日仪式面板（INCR-441：补挂载 DailyRitualPanel → 每日仪式 tab）+ 健康度建议接入
+// =============================================================
+
+describe('集成：每日仪式 + 健康度建议（INCR-441）', () => {
+  async function switchToRituals(wrapper: any) {
+    const tab = wrapper.findAll('.dw-tab').find((t: any) => t.text().includes('每日仪式'))
+    expect(tab).toBeTruthy()
+    await tab!.trigger('click')
+    await wrapper.vm.$nextTick()
+  }
+
+  async function switchToStats(wrapper: any) {
+    const tab = wrapper.findAll('.dw-tab').find((t: any) => t.text().includes('统计'))
+    expect(tab).toBeTruthy()
+    await tab!.trigger('click')
+    await wrapper.vm.$nextTick()
+  }
+
+  it('标签导航包含每日仪式', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.findAll('.dw-tab').some((t: any) => t.text().includes('每日仪式'))).toBe(true)
+  })
+
+  it('默认页不渲染面板，切至每日仪式后显示 DailyRitualPanel', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('[data-test="daily-ritual-panel"]').exists()).toBe(false)
+    await switchToRituals(wrapper)
+    expect(wrapper.find('[data-test="daily-ritual-panel"]').exists()).toBe(true)
+  })
+
+  it('统计页渲染健康度评估标签与建议（接入桥引擎 suggestions，替换原视图侧自算阈值）', async () => {
+    const wrapper = await getWrapper()
+    await switchToStats(wrapper)
+    expect(wrapper.text()).toContain('自律大师')
+    expect(wrapper.text()).toContain('继续保持，你已经是自律的榜样')
+    expect(wrapper.find('.health-suggestions').exists()).toBe(true)
   })
 })
