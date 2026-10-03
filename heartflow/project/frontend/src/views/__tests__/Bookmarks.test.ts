@@ -246,5 +246,30 @@ describe('Bookmarks 视图 (v2)', () => {
       expect(labels).toContain('视频')
       expect(labels).toContain('图片')
     })
+
+    // INCR-447：收藏节奏区块（collectionRhythm 此前已计算却从未渲染），
+    // 渲染 本周新收/本周回访/蒙尘/均龄(天)/常收类型 五项。
+    it('收藏节奏区块渲染五项并反映近期数据（本周新收 1 / 蒙尘 1 / 常收 文章）', async () => {
+      const recent = new Date(Date.now() - 1000).toISOString()
+      mockStore[K] = [
+        mkbm({ bookmark_id: 'a', title: 'A', content_type: 'article', is_read: false, created_at: recent }),
+      ]
+      const wrapper = await getWrapper()
+      await nextTick()
+      const bap = wrapper.find('.bap')
+      const rhythm = bap.find('.bap-rhythm')
+      expect(rhythm.exists()).toBe(true)
+      const cells = rhythm.findAll('.bap-metric').map(c => ({ label: c.find('span').text(), value: c.find('b').text() }))
+      const labels = cells.map(c => c.label)
+      expect(labels).toContain('本周新收')
+      expect(labels).toContain('本周回访')
+      expect(labels).toContain('蒙尘')
+      expect(labels).toContain('均龄(天)')
+      expect(labels).toContain('常收')
+      const rv = (l: string) => cells.find(x => x.label === l)?.value
+      expect(rv('本周新收')).toBe('1')
+      expect(rv('蒙尘')).toBe('1')
+      expect(rv('常收')).toBe('文章')
+    })
   })
 })
