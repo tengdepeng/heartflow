@@ -303,18 +303,19 @@ describe('ABTestPanel 样本量估算（INCR-464）', () => {
   })
 
   it('未达标：显示「还差 N」且状态为 pending', async () => {
-    // 基线 12/60 = 0.2，α=0.05、MDE=0.05、功效 0.8 => 统计推荐 3955；模板下限 100 => 达标线 3955
+    // 基线 12/60 = 0.2，α=0.05、MDE=0.05、功效 0.8 => 统计推荐 1094；模板下限 100 => 达标线 1094
+    // （INCR-465：normalQuantile 修正前是 3955，偏高 3.6 倍；还差 = 1094 - 已收集 120 = 974）
     mockExperiments.value = [makeProgressExperiment()]
     const wrapper = await mountPanel()
     const state = wrapper.find('.abp-sample-need-state')
-    expect(state.text()).toBe('还差 3835')
+    expect(state.text()).toBe('还差 974')
     expect(state.classes()).toContain('is-pending')
     expect(state.classes()).not.toContain('is-reached')
-    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 120 / 需 3955')
+    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 120 / 需 1094')
   })
 
   it('已达标：已收集 >= 达标线时显示「已达标」且不再显示还差', async () => {
-    // 基线仍为 0.2（400/2000），达标线 3955，已收集 4000
+    // 基线仍为 0.2（400/2000），达标线 1094，已收集 4000
     mockExperiments.value = [makeProgressExperiment({ deliveriesA: 2000, clicksA: 400, deliveriesB: 2000 })]
     const wrapper = await mountPanel()
     const state = wrapper.find('.abp-sample-need-state')
@@ -335,9 +336,11 @@ describe('ABTestPanel 样本量估算（INCR-464）', () => {
     mockExperiments.value = [makeProgressExperiment({ deliveriesA: 0, clicksA: 0, deliveriesB: 0 })]
     const wrapper = await mountPanel()
     const needRow = wrapper.find('.abp-sample-need')
-    // 基线 0 => 统计推荐 548，达标线 max(100, 548) = 548，已收集 0 => 还差 548（即全部所需）
-    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 0 / 需 548')
-    expect(wrapper.find('.abp-sample-need-state').text()).toBe('还差 548')
+    // 基线 0 => 统计推荐 152，达标线 max(100, 152) = 152，已收集 0 => 还差 152（即全部所需）
+    // 算：p1=0、p2=0.05、p̄=0.025，n=(1.959964·√(2·0.025·0.975)+0.841621·√(0·1+0.05·0.95))²/0.0025
+    //    =(0.432746+0.183404)²/0.0025 = 151.86 => 152（修正前 z 值偏大给出 548）
+    expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 0 / 需 152')
+    expect(wrapper.find('.abp-sample-need-state').text()).toBe('还差 152')
     expect(needRow.text()).not.toContain('NaN')
     expect(needRow.text()).not.toContain('Infinity')
     expect(needRow.text()).not.toContain('还差 -')
@@ -347,15 +350,17 @@ describe('ABTestPanel 样本量估算（INCR-464）', () => {
     mockExperiments.value = [makeProgressExperiment({ significanceLevel: 0.05 })]
     const wrapper05 = await mountPanel()
     const stat05 = wrapper05.find('.abp-sample-need-stat').text()
-    expect(stat05).toContain('统计推荐 3955')
+    expect(stat05).toContain('统计推荐 1094')
     wrapper05.unmount()
 
     mockExperiments.value = [makeProgressExperiment({ significanceLevel: 0.01 })]
     const wrapper01 = await mountPanel()
     const stat01 = wrapper01.find('.abp-sample-need-stat').text()
-    // α=0.01 更严，推荐值必须更大（6519），且不得仍是 0.05 那一档的 3955
-    expect(stat01).toContain('统计推荐 6519')
-    expect(stat01).not.toContain('3955')
+    // α=0.01 更严，推荐值必须更大（1628），且不得仍是 0.05 那一档的 1094
+    // 算：z(0.995)=2.575829 换掉 z(0.975)=1.959964，
+    //     n=(2.575829·0.590550+0.841621·0.589491)²/0.0025 = (1.521340+0.496073)²/0.0025 = 1628.0
+    expect(stat01).toContain('统计推荐 1628')
+    expect(stat01).not.toContain('1094')
     expect(stat01).not.toBe(stat05)
   })
 
@@ -364,7 +369,7 @@ describe('ABTestPanel 样本量估算（INCR-464）', () => {
     const wrapper = await mountPanel()
     // 同入参：baseline = 12/60 = 0.2，MDE = 0.05，α = exp.significanceLevel = 0.05，power = 0.8
     const expected = estimateSampleSize(0.2, 0.05, 0.05, 0.8)
-    expect(expected).toBe(3955)
+    expect(expected).toBe(1094)
     expect(wrapper.find('.abp-sample-need-stat').text()).toContain(`统计推荐 ${expected}`)
     // minSampleSize 设为 1 时达标线即统计推荐值本身
     expect(wrapper.find('.abp-sample-need-required').text()).toBe(`样本进度 120 / 需 ${expected}`)
@@ -375,7 +380,7 @@ describe('ABTestPanel 样本量估算（INCR-464）', () => {
     const wrapper = await mountPanel()
     expect(wrapper.find('.abp-sample-need-required').text()).toBe('样本进度 120 / 需 9999')
     // 统计推荐值仍单独列出，两者都显示
-    expect(wrapper.find('.abp-sample-need-stat').text()).toContain('统计推荐 3955')
+    expect(wrapper.find('.abp-sample-need-stat').text()).toContain('统计推荐 1094')
   })
 
   it('responseTime 非比例指标：不编造基线，达标线退化为模板下限且不出现 NaN', async () => {

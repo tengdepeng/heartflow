@@ -545,6 +545,14 @@ describe('P20-6 A/B 测试引擎', () => {
       expect(size).toBeLessThan(10000)
     })
 
+    it('基准值：0.2 基线 / MDE 0.05 / α 0.05 / 功效 0.8 => 1094', () => {
+      // INCR-465：normalQuantile 修正前这里返回 3955（偏高 3.6 倍）。
+      // 手算：z(0.975)=1.9599639845、z(0.8)=0.8416212336，p1=0.2、p2=0.25、p̄=0.225
+      // n = (1.9599639845·√(2·0.225·0.775) + 0.8416212336·√(0.2·0.8+0.25·0.75))² / 0.05²
+      //   = (1.157437 + 0.496073)² / 0.0025 = 1093.64 => ceil = 1094
+      expect(estimateSampleSize(0.2, 0.05, 0.05, 0.8)).toBe(1094)
+    })
+
     it('较小效应量需要更大样本', () => {
       const smallEffect = estimateSampleSize(0.1, 0.02)
       const largeEffect = estimateSampleSize(0.1, 0.1)
@@ -557,8 +565,12 @@ describe('P20-6 A/B 测试引擎', () => {
       // 两者都应返回正数，功效越高样本量越大
       expect(lowPower).toBeGreaterThan(0)
       expect(highPower).toBeGreaterThan(0)
-      // 由于近似精度限制，允许一定误差
-      expect(highPower).toBeGreaterThanOrEqual(lowPower - 500)
+      // INCR-465：去掉了原先的 500 容差。那个容差恰好掩盖了引擎的非单调 ——
+      // 修正前 power 0.95 算出 3731 < power 0.8 的 3955（功效越高样本越少，统计上不可能）。
+      // 修正后 686 → 1135，单调性真实成立，此处必须是严格大于。
+      expect(lowPower).toBe(686)
+      expect(highPower).toBe(1135)
+      expect(highPower).toBeGreaterThan(lowPower)
     })
   })
 
