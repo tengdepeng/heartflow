@@ -77,4 +77,28 @@ describe('TapesPanel 通话磁带', () => {
     await wrapper.find('.tp-btn-danger').trigger('click')
     expect(wrapper.text()).toContain('还没有磁带')
   })
+
+  // ============================================================
+  // INCR-451：接线 study/tapes 的 recentTapes（近 30 天导入数）——
+  // 引擎早已算好，但面板概览 4 格（磁带/总时长/参与人/转录字数）独缺此项。
+  // ============================================================
+  it('INCR-451 概览展示「近30天新增」计数', async () => {
+    const now = Date.now()
+    const day = 86_400_000
+    const iso = (daysAgo: number) => new Date(now - daysAgo * day).toISOString()
+    const wrapper = await mountPanel({
+      'hf:study_tapes': [
+        { id: 't1', title: '近期A', participants: ['我'], durationSeconds: 60, importDate: iso(3), transcript: '' },
+        { id: 't2', title: '近期B', participants: ['我'], durationSeconds: 60, importDate: iso(20), transcript: '' },
+        { id: 't3', title: '陈旧C', participants: ['我'], durationSeconds: 60, importDate: iso(90), transcript: '' },
+      ],
+    })
+    const stat = wrapper.findAll('.tp-stat').find((s) => s.text().includes('近30天新增'))
+    expect(stat).toBeTruthy()
+    // 3 条中 2 条在 30 天内
+    expect(stat!.find('.tp-stat-num').text()).toBe('2')
+    // 磁带总数仍是 3（不受近 30 天过滤影响）
+    const total = wrapper.findAll('.tp-stat').find((s) => s.text().includes('磁带') && !s.text().includes('近30天'))
+    expect(total!.find('.tp-stat-num').text()).toBe('3')
+  })
 })
