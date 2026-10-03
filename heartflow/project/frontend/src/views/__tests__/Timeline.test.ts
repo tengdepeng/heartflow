@@ -74,6 +74,9 @@ vi.mock('../../components/TimelineRadarPanel.vue', () => ({
 vi.mock('../../components/TimelineExportPanel.vue', () => ({
   default: { name: 'TimelineExportPanel', template: '<div class="timeline-export-stub" data-test="timeline-export-stub">时光导出</div>' },
 }))
+vi.mock('../../components/TimelineSearchPanel.vue', () => ({
+  default: { name: 'TimelineSearchPanel', template: '<div class="timeline-search-stub" data-test="timeline-search-stub">时光检索</div>' },
+}))
 
 async function getWrapper() {
   const { default: Timeline } = await import('../Timeline.vue')
@@ -154,6 +157,19 @@ describe('Timeline 时间长廊', () => {
     const exportPanel = wrapper.find('[data-test="timeline-export-stub"]')
     expect(exportPanel.exists()).toBe(true)
     expect(exportPanel.text()).toContain('时光导出')
+  })
+
+  it('切换至检索子标签时挂载时光检索面板（INCR-466）', async () => {
+    const wrapper = await getWrapper()
+    // 初始处于时间之河子标签，检索面板不应渲染
+    expect(wrapper.find('[data-test="timeline-search-stub"]').exists()).toBe(false)
+    const searchBtn = wrapper.findAll('.sub-tab').find(b => b.text().includes('检索'))
+    expect(searchBtn).toBeTruthy()
+    await searchBtn!.trigger('click')
+    await wrapper.vm.$nextTick()
+    const searchPanel = wrapper.find('[data-test="timeline-search-stub"]')
+    expect(searchPanel.exists()).toBe(true)
+    expect(searchPanel.text()).toContain('时光检索')
   })
 
   it('渲染标签导航 - 记录', async () => {
