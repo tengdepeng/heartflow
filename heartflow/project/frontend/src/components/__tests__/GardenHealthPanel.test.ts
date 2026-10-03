@@ -47,4 +47,16 @@ describe('GardenHealthPanel · 接线闭环', () => {
     // happy 行已绽放：恰好 1 个品种名展示（非「尚未绽放」）
     expect(wrapper.findAll('.ghp-var-name')).toHaveLength(1)
   })
+
+  it('接线 getVarietySize：已绽放行展示成熟尺寸（×N.N），未绽放行无尺寸标签', async () => {
+    await seed(['happy'])
+    const wrapper = mount(GardenHealthPanel)
+    // 仅 happy 行有品种，故恰好 1 个尺寸标签
+    const sizes = wrapper.findAll('.ghp-var-size')
+    expect(sizes).toHaveLength(1)
+    // 格式为 ×小数（成熟尺寸取 sizeRange 上限）
+    expect(sizes[0].text()).toMatch(/^×\d\.\d$/)
+    // 4 个未绽放行不应出现尺寸标签（已用 v-if 守卫）
+    expect(wrapper.findAll('.ghp-var-empty')).toHaveLength(4)
+  })
 })

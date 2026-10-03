@@ -39,6 +39,7 @@
           <i class="ghp-rarity-tag">{{ rarityLabel(item.variety.rarity) }}</i>
         </span>
         <span v-else class="ghp-var-empty">尚未绽放</span>
+        <span v-if="item.variety" class="ghp-var-size">{{ sizeLabel(item.variety) }}</span>
       </li>
     </ul>
   </section>
@@ -51,6 +52,7 @@ import {
   EMOTION_OPTIONS,
 } from '../modules/emotion/emotion-bridge'
 import type { EmotionType, FlowerVariety } from '../modules/emotion/emotion-bridge'
+import { getVarietySize } from '../modules/emotion/flower-variety'
 
 const bridge = useEmotionBridge()
 const gardenState = bridge.gardenState
@@ -85,6 +87,11 @@ function emotionMeta(type: EmotionType): { icon: string; label: string } {
 function dotStyle(variety: FlowerVariety | null): Record<string, string> {
   if (!variety) return { background: 'transparent', border: '1px dashed rgba(255,255,255,0.25)' }
   return { background: variety.petalColor }
+}
+// 品种成熟尺寸（growthProgress=1 取 sizeRange 上限），在品种目录展示
+function sizeLabel(variety: FlowerVariety | null): string {
+  if (!variety) return '—'
+  return `×${getVarietySize(variety, 1).toFixed(1)}`
 }
 </script>
 
@@ -216,5 +223,12 @@ function dotStyle(variety: FlowerVariety | null): Record<string, string> {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.35);
   font-style: italic;
+}
+.ghp-var-size {
+  margin-left: auto;
+  padding-left: 10px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
 }
 </style>
