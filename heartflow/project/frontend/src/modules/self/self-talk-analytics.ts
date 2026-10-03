@@ -304,22 +304,3 @@ export function selfTalkInsights(talks: SelfTalk[], now = new Date(), limit = 4)
   out.push(`当前镜中的对话沉淀为「${health.label}」。`)
   return out.slice(0, limit)
 }
-
-// ---- 高频来源 ----
-
-export interface SelfTalkSource {
-  source: string
-  count: number
-}
-
-export function selfTalkTopSources(talks: SelfTalk[], top = 5): SelfTalkSource[] {
-  const map = new Map<string, number>()
-  for (const t of talks) {
-    const key = t.roomContext || '(自主)'
-    map.set(key, (map.get(key) || 0) + 1)
-  }
-  return Array.from(map.entries())
-    .map(([source, count]) => ({ source, count }))
-    .sort((a, b) => b.count - a.count)
-    .slice(0, top)
-}

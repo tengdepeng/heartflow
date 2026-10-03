@@ -97,6 +97,31 @@
         </div>
       </div>
 
+      <!-- 印记类型分布（INCR-450：scarTypeRows 此前零 UI 消费） -->
+      <div class="scap-block">
+        <h3 class="scap-block-title">印记类型分布</h3>
+        <div class="scap-dist">
+          <div v-for="t in archive.typeRows" :key="t.type" class="scap-dist-row" :data-test="`scap-type-${t.type}`">
+            <span class="scap-dist-icon">{{ t.icon }}</span>
+            <span class="scap-dist-label">{{ t.label }}</span>
+            <span class="scap-dist-bar"><i :style="{ width: t.pct + '%', background: t.color }"></i></span>
+            <span class="scap-dist-num">{{ t.count }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 身体部位分布（INCR-450：scarBodyRows 此前零 UI 消费） -->
+      <div v-if="archive.bodyRows.length" class="scap-block">
+        <h3 class="scap-block-title">身体部位分布</h3>
+        <div class="scap-dist">
+          <div v-for="b in archive.bodyRows" :key="b.bodyPart" class="scap-dist-row" :data-test="`scap-body-${b.bodyPart}`">
+            <span class="scap-dist-label scap-dist-label--wide">{{ b.bodyPart }}</span>
+            <span class="scap-dist-bar"><i :style="{ width: b.pct + '%' }"></i></span>
+            <span class="scap-dist-num">{{ b.count }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 温和洞察 -->
       <ul class="scap-insights">
         <li v-for="ins in archive.insights" :key="ins" class="scap-insight">
@@ -117,6 +142,8 @@ import {
   scarRhythm,
   scarHealth,
   scarInsights,
+  scarTypeRows,
+  scarBodyRows,
 } from '../modules/scar/scar-analytics'
 
 const props = defineProps<{ marks: ScarMark[] }>()
@@ -128,6 +155,8 @@ const archive = computed(() => {
     rhythm: scarRhythm(props.marks, now),
     health: scarHealth(props.marks, now),
     insights: scarInsights(props.marks, now),
+    typeRows: scarTypeRows(props.marks),
+    bodyRows: scarBodyRows(props.marks),
   }
 })
 
@@ -316,6 +345,59 @@ const lastActiveLabel = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* 分布条（类型 / 部位） */
+.scap-dist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scap-dist-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: rgba(220, 208, 196, 0.72);
+}
+
+.scap-dist-icon {
+  width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.scap-dist-label {
+  width: 56px;
+  flex-shrink: 0;
+}
+
+.scap-dist-label--wide {
+  width: 72px;
+}
+
+.scap-dist-bar {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(196, 138, 106, 0.14);
+  overflow: hidden;
+}
+
+.scap-dist-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #c48a6a, #e8c060);
+  transition: width 0.4s ease;
+}
+
+.scap-dist-num {
+  width: 24px;
+  text-align: right;
+  color: #d4a574;
+  flex-shrink: 0;
 }
 
 .scap-insight {
