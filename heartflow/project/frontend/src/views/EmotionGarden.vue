@@ -524,6 +524,9 @@
 
     <!-- 电子水族箱（INCR-513，借鉴 96 APK 组件岛 ocean_fish/ocean_4_feeding：纯本地放养·投食·成长，零 props 直驱） -->
     <AquariumPanel />
+
+    <!-- 漂流瓶（INCR-514，借鉴 96 APK 生辰 ic_drift_bottle / 小组件盒子 ic_fishbowl_ship_bottle：投递·漂浮·随机捞取，零 props 直驱） -->
+    <DriftBottlePanel />
   </div>
 </template>
 
@@ -542,6 +545,7 @@ import EmotionTrendsPanel from '../components/EmotionTrendsPanel.vue'
 import VisitorFootprintsPanel from '../components/VisitorFootprintsPanel.vue'
 import FlowerHybridPanel from '../components/FlowerHybridPanel.vue'
 import AquariumPanel from '../components/AquariumPanel.vue'
+import DriftBottlePanel from '../components/DriftBottlePanel.vue'
 import FlowerClusterArchivePanel from '../components/FlowerClusterArchivePanel.vue'
 import GardenNarrativePanel from '../components/GardenNarrativePanel.vue'
 import GardenSocialPanel from '../components/GardenSocialPanel.vue'

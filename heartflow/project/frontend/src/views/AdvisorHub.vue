@@ -91,6 +91,11 @@
       <FeatureSearchPanel />
     </section>
 
+    <!-- 决定转盘（INCR-507，借鉴 96 APK 组件岛 decision/decision_name：纠结时转一转给随机决定并留痕，零 props 直驱） -->
+    <section data-enter class="ah-command-section">
+      <DecisionWheelPanel />
+    </section>
+
     <!-- 幕僚卡片 -->
     <div data-enter class="ah-advisor-grid" v-if="advisors.length">
       <div v-for="a in advisors" :key="a.id" class="ah-advisor-card" :class="{ dormant: a.state === 'slumber' }" role="button" tabindex="0" :aria-label="'编辑幕僚 ' + a.name" @click="editAdvisor(a)" @keydown.enter.prevent="editAdvisor(a)" @keydown.space.prevent="editAdvisor(a)">
@@ -305,6 +310,7 @@ import AdvisorDailyLifePanel from '../components/AdvisorDailyLifePanel.vue'
 import AdvisorOverviewPanel from '../components/AdvisorOverviewPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import FeatureSearchPanel from '../components/FeatureSearchPanel.vue'
+import DecisionWheelPanel from '../components/DecisionWheelPanel.vue'
 import CommandDecomposePanel from '../components/CommandDecomposePanel.vue'
 import DispatchPanel from '../components/DispatchPanel.vue'
 import SearchInput from '../components/SearchInput.vue'

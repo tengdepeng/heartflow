@@ -467,6 +467,14 @@ export type { CompanionState, CompanionForm } from './desktop-companion'
 export { useAquarium, reloadAquarium, speciesById, growthStage, FISH_SPECIES, MAX_FISH } from './aquarium'
 export type { AquariumState, Fish, FishSpecies, GrowthStage } from './aquarium'
 
+// ---- decision-wheel（幕僚 · 决定转盘）----
+export { useDecisionWheel, reloadWheel, DEFAULT_OPTIONS, MAX_HISTORY } from './decision-wheel'
+export type { WheelState, WheelOption, SpinRecord } from './decision-wheel'
+
+// ---- drift-bottle（情绪花房 · 漂流瓶）----
+export { useDriftBottle, reloadBottles, BOTTLE_MOODS } from './drift-bottle'
+export type { BottleState, DriftBottle, BottleMood, BottleStatus } from './drift-bottle'
+
 // ---- career ----
 export { useCareerPath, useSkillMap, useTransitionAnalysis, useInteractionTracker, useCareerMilestones } from './career'
 export { useCareer } from './career'
