@@ -505,6 +505,20 @@ export type { MeritState } from './merit-wooden-fish'
 export { useDesktopCompanion, COMPANION_FORMS, xpToNext, homeLevelFor } from './desktop-companion'
 export type { CompanionState, CompanionForm } from './desktop-companion'
 
+// ---- pet-hatch（家·宠物屋 · 蛋→孵化 + 材料建造 + 升级奖励）----
+export {
+  usePetHatch,
+  EGG_FORMS,
+  MATERIAL_META,
+  hatchMsFor,
+  hatchProgress,
+  incubatedMs,
+  materialsForHouseLevel,
+  totalMaterialsForHouseLevel,
+  rewardForHouseLevel,
+} from './pet-hatch'
+export type { PetHatchState, EggForm, EggStage, MaterialKey, EggFormMeta } from './pet-hatch'
+
 // ---- aquarium（情绪花房 · 电子水族箱）----
 export { useAquarium, reloadAquarium, speciesById, growthStage, FISH_SPECIES, MAX_FISH } from './aquarium'
 export type { AquariumState, Fish, FishSpecies, GrowthStage } from './aquarium'

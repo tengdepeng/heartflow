@@ -168,6 +168,9 @@
     <!-- 家·陪伴精灵（桌面宠物养成闭环 · INCR-488，落点家/殿堂触角） -->
     <DesktopCompanionPanel />
 
+    <!-- 家·宠物屋（蛋→孵化 + 材料建造 + 升级奖励 · INCR-497，补 488 养成闭环前置与后置） -->
+    <PetHatchPanel />
+
     <!-- 今日 · 跨房间聚合 -->
     <section data-enter class="spatial-section">
       <h3 class="section-label">今日</h3>
@@ -264,6 +267,7 @@ import { aggregateTodayRoomStats } from '../modules/home/today-room-stats'
 import type { TodayRoomStats } from '../modules/home/today-room-stats'
 import HomeBridgePanel from '../components/HomeBridgePanel.vue'
 import DesktopCompanionPanel from '../components/DesktopCompanionPanel.vue'
+import PetHatchPanel from '../components/PetHatchPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
