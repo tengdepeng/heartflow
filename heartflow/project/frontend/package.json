@@ -15,7 +15,9 @@
     "check:circular": "node scripts/gates/check-circular-deps.mjs",
     "check:circular:update": "node scripts/gates/check-circular-deps.mjs --update-baseline",
     "check:room-wiring": "node scripts/gates/check-room-wiring.mjs",
-    "guard": "vue-tsc --noEmit && eslint . --quiet && node scripts/gates/check-circular-deps.mjs && node scripts/gates/check-room-wiring.mjs && vitest run --no-file-parallelism && vite build --outDir node_modules/.hf-guard-dist",
+    "check:no-bare-utcdates": "node scripts/gates/check-no-bare-utcdates.mjs",
+    "check:no-bare-utcdates:update": "node scripts/gates/check-no-bare-utcdates.mjs --update-baseline",
+    "guard": "vue-tsc --noEmit && eslint . --quiet && node scripts/gates/check-circular-deps.mjs && node scripts/gates/check-room-wiring.mjs && node scripts/gates/check-no-bare-utcdates.mjs && vitest run --no-file-parallelism && vite build --outDir node_modules/.hf-guard-dist",
     "tauri": "cd ../ && tauri",
     "tauri:dev": "node ../scripts/tauri-dev.mjs",
     "tauri:build": "cd ../ && tauri build"

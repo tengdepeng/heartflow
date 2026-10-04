@@ -1,0 +1,476 @@
+{
+  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点确认共 0 处，均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。",
+  "violations": {
+    "src/components/BudgetPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/ConstitutionStatusPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/crystal/CrystalGalleryPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/data-sovereignty/CrossDevicePanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/discipline/DailyRitualPanel.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/components/external-room/CloudSync.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/guard-room/GovernPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/guard-room/HealthPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/HealthGoalsPanel.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/components/home/Balcony.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/home/Courtyard.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/home/DiningRoom.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/home/EntranceHall.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/home/KitchenDining.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/home/LivingRoom.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/knowledge-tower/SpacedReviewPanel.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/components/MindMapPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/MirrorSelf.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/MovementAnalyticsPanel.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/components/NarrativeReportPanel.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/components/RecurringPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/SavingPlanPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/StatsPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/TimeCorridor.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/components/WorklogExportPanel.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/engine/automation.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/engine/data-port.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/advisor/celebration.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/anchor/anchor-review.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/anchor/celebration.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/attention/attention-model.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/bag/bag-analytics.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/bag/bag-store.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/body/exercise-tracker.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/greenhouse.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/health-anomaly.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/health-dashboard.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/health-report.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/meal-nutrition.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/metric-trends.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/nutrition-engine.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/nutrition-scoring.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body/rings.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/body-wisdom/body-wisdom-bridge.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/body-wisdom/meridian-visualization.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/body-wisdom/meridians.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/body-wisdom/passive-health-imagery.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/career/skill-gap-visualization.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/cognition/meditation-analytics.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/craft/craft-badges.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/craft/craft-habits.ts": [
+      ".split('T')[0]"
+    ],
+    "src/modules/discipline/habit-correlation.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/discipline/habit-predictor.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/discipline/pomodoro-forest.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/discipline/streak-system.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/discipline/workshop-bridge.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/discipline/workshop.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/emotion/emotion-bridge.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/emotion/emotion-trends.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/emotion/garden-narrative.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/emotion/garden-social.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/emotion/happy-box.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/garden/index.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/home/home-atmosphere-engine.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/home/home-bridge.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/home/home-interaction-engine.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/home/today-room-stats.ts": [
+      "toISOString().slice(0,10)",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/home/useRoomActivity.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/knowledge/graph-visualization.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/knowledge/scenario-planner.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/knowledge/useKnowledgeTowerUi.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/light/guided-meditation.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/light/light-bridge.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/light/light-practice.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/light/pavilion.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/mirror/personality-model.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/mirror/personality-portrait-analytics.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/movement/achievements.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/movement/recovery-optimizer.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/note/markdown-export.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/note/note-analytics.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/output/advanced.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/output/publish-pipeline.ts": [
+      ".split('T')[0]"
+    ],
+    "src/modules/reading/hall.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/reading/reading-export.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/reading/reading-habits.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/reading/reading-speed.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/rest/notification-bridge.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/rest/quality.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/rest/sleep-quality.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/reward/daily-reminder.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/reward/finance-analysis.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/reward/saving-plan.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/reward/worklog-bridge.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/safety/audit-timeline.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/safety/backup-recovery.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/safety/composables/useDataSecurity.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/sanctuary/sanctuary-bridge.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/scar/healing-journey.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/scar/healing-predict.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/scar/healing.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/scar/narrative-template.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/timeline/annual-review.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/timeline/emotion-curve.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/timeline/export-enhance.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/timeline/narrative-generator.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/timeline/timeline-bridge.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/timeline/timeline-filters.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/timeline/timeline-patterns.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/timeline-index/aggregation.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/timeline-index/index.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/timer/index.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/touchpoints/notification-strategy.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/touchpoints/orchestration-engine.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/touchpoints/push-channel.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/touchpoints/touch-analytics.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/wisdom/poetry.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/word-mirror/daily-recommendation.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/word-mirror/personal-vocabulary.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/word-mirror/text-analysis.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/word-mirror/writing-enhance.ts": [
+      ".split('T')[0]",
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/worklog/entries.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/worklog/productivity-prediction.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/worklog/worklog-analytics.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/worklog/worklog-export.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/worklog/worklog-habits.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/modules/worklog/worklog-module-bridge.ts": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/stores/advisor.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/stores/health.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/stores/stats.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/stores/timer.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/AppSpace.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/BodyGreenhouse.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/BodyWisdom.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/Bookmarks.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/Constitution.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/DataAsset.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/Dictionary.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/DisciplineWorkshop.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/views/DreamNook.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/GrowthGarden.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/Home.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/InteractionConfig.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/Output.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/Rest.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/views/RestRitualPanel.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/views/RestSleepPanel.vue": [
+      "toISOString().split('T')[0]"
+    ],
+    "src/views/Reward.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/SeasonalRituals.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/Study.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/TimeCorridorView.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/TimelineIndex.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/WisdomPavilion.vue": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/views/WorkLog.vue": [
+      "toISOString().slice(0,10)"
+    ]
+  }
+}
