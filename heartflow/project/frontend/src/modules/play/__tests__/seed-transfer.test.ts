@@ -31,7 +31,7 @@ vi.mock('../../../engine/constitution-effect', () => ({
 import {
   seedTransferType,
   defaultAuthorization,
-  buildTransferPreview,
+  buildInvestmentPreview,
   recordTransfer,
   getTransferLogs,
   getTransferLog,
@@ -41,6 +41,7 @@ import {
   isSeedScopeEnabled,
   isSeedRevokeEnabled,
   TRANSFER_TYPE_LABELS,
+  type TimeInvestmentRecord,
 } from '../seed-transfer'
 import { isTargetActive } from '../../../engine/constitution-effect'
 import type { TimeSeed } from '../time-seed'
@@ -69,6 +70,20 @@ function makeSeed(over: Partial<TimeSeed> = {}): TimeSeed {
   }
 }
 
+function makeRecord(over: Partial<TimeInvestmentRecord> = {}): TimeInvestmentRecord {
+  return {
+    id: `rec_${Math.random()}`,
+    category: 'game',
+    name: '测试记录',
+    description: '完整描述：玩了100小时',
+    tags: ['游戏'],
+    rarity: 'rare',
+    timestamp: '2026-01-01T00:00:00.000Z',
+    originalId: 'src_1',
+    ...over,
+  }
+}
+
 describe('seed-transfer · 类型映射', () => {
   it('seedTransferType — 逸趣阁种子统一归为「游戏记录」', () => {
     expect(seedTransferType(makeSeed({ source: 'game' }))).toBe('game')
@@ -82,31 +97,31 @@ describe('seed-transfer · 类型映射', () => {
   })
 })
 
-describe('seed-transfer · 发送前预览（第47条）', () => {
-  const seeds = [
-    makeSeed({ id: 'a', name: 'A', description: '完整A', tags: ['游戏', 'RPG'] }),
-    makeSeed({ id: 'b', name: 'B', description: '完整B', tags: ['游戏'] }),
+describe('seed-transfer · 发送前预览（第47条·统一时间投入模型）', () => {
+  const records = [
+    makeRecord({ id: 'a', name: 'A', description: '完整A', tags: ['游戏', 'RPG'] }),
+    makeRecord({ id: 'b', name: 'B', description: '完整B', tags: ['游戏'] }),
   ]
 
-  it('buildTransferPreview — 仅含授权类型，其余过滤', () => {
-    const preview = buildTransferPreview(seeds, { types: ['game'], granularity: 'highlight', permanent: false })
+  it('buildInvestmentPreview — 仅含授权类型，其余过滤', () => {
+    const preview = buildInvestmentPreview(records, { types: ['game'], granularity: 'highlight', permanent: false })
     expect(preview.itemCount).toBe(2)
     expect(preview.authorizedTypes).toEqual([{ key: 'game', label: '游戏记录' }])
   })
 
-  it('buildTransferPreview — 全细节粒度展示完整描述', () => {
-    const preview = buildTransferPreview(seeds, { types: ['game'], granularity: 'full', permanent: false })
+  it('buildInvestmentPreview — 全细节粒度展示完整描述', () => {
+    const preview = buildInvestmentPreview(records, { types: ['game'], granularity: 'full', permanent: false })
     expect(preview.granularityLabel).toBe('全部细节')
     expect(preview.items[0].content).toBe('完整A')
   })
 
-  it('buildTransferPreview — 高亮摘要粒度裁剪为「名称/标签」', () => {
-    const preview = buildTransferPreview(seeds, { types: ['game'], granularity: 'highlight', permanent: false })
+  it('buildInvestmentPreview — 高亮摘要粒度裁剪为「名称/标签」', () => {
+    const preview = buildInvestmentPreview(records, { types: ['game'], granularity: 'highlight', permanent: false })
     expect(preview.items[0].content).toBe('「A」游戏/RPG')
   })
 
-  it('buildTransferPreview — 永久赠予标记透传', () => {
-    const preview = buildTransferPreview(seeds, { types: ['game'], granularity: 'highlight', permanent: true })
+  it('buildInvestmentPreview — 永久赠予标记透传', () => {
+    const preview = buildInvestmentPreview(records, { types: ['game'], granularity: 'highlight', permanent: true })
     expect(preview.permanent).toBe(true)
   })
 })
