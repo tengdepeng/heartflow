@@ -68,6 +68,13 @@ describe('tts · useReadingTts 状态机', () => {
     expect(tts.state.value).toBe('idle')
   })
 
+  it('speak 暴露句块列表供逐句滚动高亮（INCR-515）', () => {
+    const tts = useReadingTts()
+    expect(tts.sentences.value).toEqual([])
+    tts.speak('甲。乙。丙。')
+    expect(tts.sentences.value).toEqual(['甲。', '乙。', '丙。'])
+  })
+
   it('setRate 钳制在 0.5 ~ 2.0', () => {
     const tts = useReadingTts()
     tts.setRate(5)

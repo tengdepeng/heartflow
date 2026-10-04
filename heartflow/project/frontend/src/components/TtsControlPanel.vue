@@ -24,18 +24,46 @@
           <div class="ttp-progress-fill" :style="{ width: progressPct }"></div>
         </div>
       </div>
+
+      <!-- 逐句滚动跟读高亮（INCR-515，借鉴 96 APK 组件岛 lyrics_scrolling 滚动+缩放联动） -->
+      <div v-if="sentences.length" ref="scrollBox" class="ttp-sentences" aria-label="逐句跟读">
+        <p
+          v-for="(s, i) in sentences"
+          :key="i"
+          class="ttp-sentence"
+          :class="{ 'is-active': i === activeIndex, 'is-read': activeIndex >= 0 && i < activeIndex }"
+        >{{ s }}</p>
+      </div>
     </template>
   </section>
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useReadingTts } from '../modules/reading/tts'
 
 const props = defineProps<{ text: string }>()
 
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2] as const
-const { state, rate, progress, supported, speak, pause, resume, stop, setRate } = useReadingTts()
+const { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate } = useReadingTts()
+
+const scrollBox = ref<HTMLElement | null>(null)
+
+// 当前正在朗读/暂停停留的句块下标（待机时为 -1，不显示高亮）
+const activeIndex = computed(() => {
+  if (state.value === 'idle' || progress.value.total === 0) return -1
+  return Math.min(progress.value.index, progress.value.total - 1)
+})
+
+// 句块推进时把当前句滚动到可视区，形成「跟读」效果
+watch(activeIndex, async (i) => {
+  if (i < 0) return
+  await nextTick()
+  const el = scrollBox.value?.querySelector('.ttp-sentence.is-active') as HTMLElement | null
+  if (el && typeof el.scrollIntoView === 'function') {
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }
+})
 
 const toggleLabel = computed(() => {
   if (state.value === 'playing') return '⏸ 暂停'
@@ -209,6 +237,37 @@ onBeforeUnmount(() => {
   border-radius: 2px;
   background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.5), var(--accent));
   transition: width 0.3s;
+}
+
+.ttp-sentences {
+  margin-top: 12px;
+  max-height: 168px;
+  overflow-y: auto;
+  padding: 6px 4px 6px 10px;
+  border-left: 2px solid rgba(var(--accent-rgb), 0.18);
+  scroll-behavior: smooth;
+}
+
+.ttp-sentence {
+  margin: 0 0 6px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(var(--text-primary-rgb), 0.42);
+  transition: color 0.25s, background 0.25s, transform 0.25s;
+}
+
+.ttp-sentence.is-read {
+  color: rgba(var(--text-primary-rgb), 0.3);
+}
+
+.ttp-sentence.is-active {
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.1);
+  font-weight: 500;
+  transform: scale(1.015);
+  transform-origin: left center;
 }
 
 @media (max-width: 480px) {

@@ -111,4 +111,34 @@ describe('TtsControlPanel 听书控制', () => {
     expect(synth.cancel).toHaveBeenCalled()
     expect(wrapper.text()).toContain('朗读')
   })
+
+  it('朗读时渲染句块列表并高亮当前句（INCR-515）', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('第一句。第二句。第三句。')
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    const items = wrapper.findAll('.ttp-sentence')
+    expect(items.length).toBe(3)
+    expect(items[0].classes()).toContain('is-active')
+    expect(items[1].classes()).not.toContain('is-active')
+  })
+
+  it('句块读完推进高亮到下一句', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('第一句。第二句。')
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    endHandlers.shift()?.()
+    await wrapper.vm.$nextTick()
+    const items = wrapper.findAll('.ttp-sentence')
+    expect(items[0].classes()).toContain('is-read')
+    expect(items[1].classes()).toContain('is-active')
+  })
+
+  it('停止后取消逐句高亮', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('第一句。第二句。')
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    await wrapper.find('.ttp-btn-stop').trigger('click')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('.ttp-sentence.is-active').exists()).toBe(false)
+  })
 })

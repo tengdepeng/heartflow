@@ -56,6 +56,8 @@ export function useReadingTts() {
   const rate = ref(1)
   /** 当前朗读进度：第几块 / 共几块（供 UI 展示） */
   const progress = ref({ index: 0, total: 0 })
+  /** 当前朗读文本切分出的句块列表（供逐句滚动跟读高亮，INCR-515） */
+  const sentences = ref<string[]>([])
 
   const supported = computed(isTtsSupported)
 
@@ -96,6 +98,7 @@ export function useReadingTts() {
     chunks = list
     cursor = 0
     stopped = false
+    sentences.value = list
     state.value = 'playing'
     progress.value = { index: 0, total: chunks.length }
     speakCurrent()
@@ -130,5 +133,5 @@ export function useReadingTts() {
     }
   }
 
-  return { state, rate, progress, supported, speak, pause, resume, stop, setRate }
+  return { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate }
 }
