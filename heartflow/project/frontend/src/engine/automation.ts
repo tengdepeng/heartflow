@@ -7,6 +7,7 @@
 import { storage } from '../engine/storage'
 import { emitOsNotification } from './os-notification'
 import { decideForProactive, emitOperationGate } from '../modules/operation-mode/gate'
+import { getLocalDateKey } from '../utils/time'
 import type { FocusSession } from '../types'
 
 // 共享类型统一收口到 src/types/automation，避免与 modules/operation-mode/gate 互相 import 成环
@@ -35,8 +36,8 @@ export type {
 
 // ---- 条件评估 ----
 
-/** 评估一个条件节点 */
-function evaluateCondition(condition: FlowCondition): boolean {
+/** 评估一个条件节点（导出纯函数以便时区口径回归测试直接覆盖） */
+export function evaluateCondition(condition: FlowCondition): boolean {
   const { type, left, operator, right } = condition
   switch (type) {
     case 'time': {
@@ -47,22 +48,23 @@ function evaluateCondition(condition: FlowCondition): boolean {
     }
     case 'tag': {
       // 比较标签（用于检查今日专注标签）
-      const today = new Date().toISOString().slice(0, 10)
+      // completedAt/startedAt 为 UTC ISO 时间戳，今日边界与记录边界须同取本地日历日键
+      const today = getLocalDateKey()
       const allSessions = storage.getSessions()
       const todaySessions = allSessions.filter((s: FocusSession) => {
-        const d = s.completedAt?.slice(0, 10) || s.startedAt?.slice(0, 10)
-        return d === today
+        const raw = s.completedAt || s.startedAt
+        return !!raw && getLocalDateKey(new Date(raw)) === today
       })
       const tags = new Set(todaySessions.flatMap((s: FocusSession) => s.tags || []))
       return tags.has(right)
     }
     case 'count': {
-      // 比较今日专注次数
-      const today = new Date().toISOString().slice(0, 10)
+      // 比较今日专注次数（同上：本地日历日口径）
+      const today = getLocalDateKey()
       const allSessions = storage.getSessions()
       const todayCount = allSessions.filter((s: FocusSession) => {
-        const d = s.completedAt?.slice(0, 10) || s.startedAt?.slice(0, 10)
-        return d === today && s.status === 'completed'
+        const raw = s.completedAt || s.startedAt
+        return !!raw && getLocalDateKey(new Date(raw)) === today && s.status === 'completed'
       }).length
       return compare(String(todayCount), operator, right)
     }
