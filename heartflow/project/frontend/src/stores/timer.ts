@@ -12,6 +12,7 @@ import { completeWithCrystal } from '../modules/crystal'
 import { autoCheckInFocusHabits } from '../modules/discipline/focus-habit-bridge'
 import { useConfigStore } from './config'
 import { triggerHaptic } from '../utils/platform'
+import { getLocalDateKey } from '../utils/time'
 
 /** 触觉反馈是否启用（受宪法合规覆盖 control） */
 function hapticEnabled(): boolean {
@@ -37,10 +38,12 @@ export const useTimerStore = defineStore('timer', () => {
   const sanctuaryResumeMode = ref<'focusing' | 'paused' | null>(null)
 
   // 今日完成的专注次数
+  // 口径：completedAt 存的是 UTC ISO 时间戳（engine/timer.ts createSession/completeSession），
+  // 故「今日边界」与「记录边界」须同取本地日历日键，否则东八区 00:00–08:00 会将本地今日误判为 UTC 昨日。
   const todayCompletedCount = computed(() => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey(new Date())
     return storage.getSessions().filter(s =>
-      s.status === 'completed' && s.completedAt?.startsWith(today)
+      s.status === 'completed' && s.completedAt && getLocalDateKey(new Date(s.completedAt)) === today
     ).length
   })
 
