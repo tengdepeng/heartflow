@@ -196,6 +196,8 @@
           <SkeletonLoader v-else :variant="currentSkeletonVariant" />
         </transition>
       </router-view>
+      <!-- 房间级锁 · 进入遮罩（INCR-469）：当前房间上锁且本会话未解锁时覆盖全屏 -->
+      <RoomLockGate v-if="!showUnlock" :room-id="currentRoomId" />
     </main>
 
     <!-- 全局介质呼吸层 -->
@@ -312,6 +314,7 @@ import CanvasRoom from './modules/canvas/CanvasRoom.vue'
 import SurfaceStage from './modules/canvas/SurfaceStage.vue'
 import NoteLayer from './components/NoteLayer.vue'
 import MirrorSelf from './components/MirrorSelf.vue'
+import RoomLockGate from './components/RoomLockGate.vue'
 import GlobalDropDrawer from './components/GlobalDropDrawer.vue'
 import FloatingNavBar from './components/FloatingNavBar.vue'
 // ① 窗口缩放重锚：侧栏自由浮动位置钳回视口（接回 floatReanchor 规划好的重锚逻辑）

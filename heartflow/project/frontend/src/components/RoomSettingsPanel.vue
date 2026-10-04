@@ -71,6 +71,12 @@
               {{ groupLabels[entry.room.group] || entry.room.group }}
             </span>
             <span class="rm-room-color-dot" :style="{ background: displayColor(entry) }"></span>
+            <span
+              v-if="lock.isConfigured(entry.room.id)"
+              class="rm-room-lock"
+              :class="{ 'rm-room-lock--locked': lock.isLocked(entry.room.id) }"
+              :title="lock.isLocked(entry.room.id) ? '已上锁' : '本会话已解锁'"
+            >{{ lock.isLocked(entry.room.id) ? '🔒' : '🔓' }}</span>
             <div class="rm-room-order" @click.stop>
               <button
                 class="rm-order-btn"
@@ -153,6 +159,94 @@
               </select>
             </div>
 
+            <!-- 房间锁（INCR-469）：与全局隐私锁独立，按房间粒度守护内容 -->
+            <div class="rm-detail-field rm-lock">
+              <label class="rm-detail-label">房间锁</label>
+
+              <!-- 未启用：设置密码 -->
+              <template v-if="!lock.isConfigured(entry.room.id)">
+                <p class="rm-lock-desc">设置密码后，进入本房间需先解锁（与全局隐私锁相互独立）。</p>
+                <div class="rm-lock-row">
+                  <input
+                    v-model="lockPwd"
+                    type="password"
+                    class="rm-detail-input"
+                    placeholder="设置房间密码"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    class="rm-lock-btn"
+                    type="button"
+                    :disabled="!lockPwd"
+                    @click="onSetupLock(entry.room.id)"
+                  >启用房间锁</button>
+                </div>
+                <input
+                  v-model="lockHint"
+                  class="rm-detail-input rm-lock-hintinput"
+                  placeholder="提示（可选，忘记密码时展示）"
+                />
+              </template>
+
+              <!-- 已启用：状态 + 改密 + 关闭 -->
+              <template v-else>
+                <div class="rm-lock-status">
+                  <span class="rm-lock-state">
+                    {{ lock.isLocked(entry.room.id) ? '🔒 已上锁' : '🔓 本会话已解锁' }}
+                  </span>
+                  <button
+                    v-if="!lock.isLocked(entry.room.id)"
+                    class="rm-lock-btn rm-lock-btn--mini"
+                    type="button"
+                    @click="lock.lock(entry.room.id)"
+                  >立即锁定</button>
+                </div>
+
+                <div class="rm-lock-row">
+                  <input
+                    v-model="lockChangeOld"
+                    type="password"
+                    class="rm-detail-input"
+                    placeholder="当前密码"
+                    autocomplete="off"
+                  />
+                  <input
+                    v-model="lockChangeNew"
+                    type="password"
+                    class="rm-detail-input"
+                    placeholder="新密码"
+                    autocomplete="new-password"
+                  />
+                  <button
+                    class="rm-lock-btn"
+                    type="button"
+                    :disabled="!lockChangeOld || !lockChangeNew"
+                    @click="onChangeLock(entry.room.id)"
+                  >改密码</button>
+                </div>
+
+                <div class="rm-lock-row">
+                  <input
+                    v-model="lockDisablePwd"
+                    type="password"
+                    class="rm-detail-input"
+                    placeholder="输入密码以关闭"
+                    autocomplete="off"
+                  />
+                  <button
+                    class="rm-lock-btn rm-lock-btn--danger"
+                    type="button"
+                    :disabled="!lockDisablePwd"
+                    @click="onDisableLock(entry.room.id)"
+                  >关闭</button>
+                </div>
+              </template>
+
+              <p v-if="lockMsg" class="rm-lock-msg" :class="{ 'rm-lock-msg--err': lockErr }">
+                {{ lockMsg }}
+              </p>
+            </div>
+
             <button
               class="rm-reset-btn"
               type="button"
@@ -178,15 +272,64 @@
 import { ref, computed } from 'vue'
 import { useRoomManager } from '../modules/room-manager'
 import type { RoomNode, RoomConfig } from '../modules/room-manager'
+import { useRoomLock } from '../modules/room-lock'
 import IconPicker from './IconPicker.vue'
 import { DOMAIN_LABELS, SLOT_LABELS } from '../modules/room-taxonomy'
 import type { RoomDomain, RoomSlot } from '../engine/room-graph'
 
 const rm = useRoomManager()
 const { stats } = rm
+const lock = useRoomLock()
 
 const searchQuery = ref('')
 const expandedId = ref<string | null>(null)
+
+// 房间锁表单（同一时刻仅一个房间展开，故用单组字段，切换展开时清空）
+const lockPwd = ref('')
+const lockHint = ref('')
+const lockChangeOld = ref('')
+const lockChangeNew = ref('')
+const lockDisablePwd = ref('')
+const lockMsg = ref('')
+const lockErr = ref(false)
+
+function clearLockForm() {
+  lockPwd.value = ''
+  lockHint.value = ''
+  lockChangeOld.value = ''
+  lockChangeNew.value = ''
+  lockDisablePwd.value = ''
+  lockMsg.value = ''
+  lockErr.value = false
+}
+
+function onSetupLock(roomId: string) {
+  if (!lockPwd.value) return
+  const ok = lock.setup(roomId, lockPwd.value, lockHint.value.trim() || undefined)
+  lockErr.value = !ok
+  lockMsg.value = ok ? '房间锁已启用' : '启用失败'
+  lockPwd.value = ''
+  lockHint.value = ''
+}
+
+function onChangeLock(roomId: string) {
+  if (!lockChangeOld.value || !lockChangeNew.value) return
+  const ok = lock.changePassword(roomId, lockChangeOld.value, lockChangeNew.value)
+  lockErr.value = !ok
+  lockMsg.value = ok ? '密码已修改' : '当前密码不正确'
+  if (ok) {
+    lockChangeOld.value = ''
+    lockChangeNew.value = ''
+  }
+}
+
+function onDisableLock(roomId: string) {
+  if (!lockDisablePwd.value) return
+  const ok = lock.disable(roomId, lockDisablePwd.value)
+  lockErr.value = !ok
+  lockMsg.value = ok ? '房间锁已关闭' : '密码不正确，无法关闭'
+  if (ok) lockDisablePwd.value = ''
+}
 
 const groupKeys = ['gravity', 'main-path', 'world', 'work', 'system'] as const
 
@@ -227,7 +370,12 @@ function displayColor(entry: { room: RoomNode; config: RoomConfig }): string {
 }
 
 function toggleExpand(id: string) {
-  expandedId.value = expandedId.value === id ? null : id
+  if (expandedId.value === id) {
+    expandedId.value = null
+    return
+  }
+  expandedId.value = id
+  clearLockForm()
 }
 
 function onSearchInput() {
@@ -735,6 +883,102 @@ function onPinSlotChange(roomId: string, value: string) {
   font-size: 12px;
   font-family: monospace;
   color: var(--text-medium);
+}
+
+/* ---- 房间锁（INCR-469） ---- */
+.rm-room-lock {
+  font-size: 12px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0.65;
+}
+
+.rm-room-lock--locked {
+  opacity: 1;
+  filter: drop-shadow(0 0 5px rgba(196, 122, 106, 0.5));
+}
+
+.rm-lock-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  line-height: 1.5;
+}
+
+.rm-lock-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.rm-lock-row .rm-detail-input {
+  flex: 1;
+  min-width: 0;
+  width: auto;
+}
+
+.rm-lock-hintinput {
+  margin-top: 8px;
+}
+
+.rm-lock-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.rm-lock-state {
+  font-size: 12px;
+  color: var(--text-medium);
+}
+
+.rm-lock-btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(138, 154, 122, 0.3);
+  background: rgba(138, 154, 122, 0.1);
+  color: #8a9a7a;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+}
+
+.rm-lock-btn:hover:not(:disabled) {
+  background: rgba(138, 154, 122, 0.18);
+}
+
+.rm-lock-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.rm-lock-btn--mini {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+
+.rm-lock-btn--danger {
+  border-color: rgba(196, 122, 106, 0.3);
+  background: rgba(196, 122, 106, 0.08);
+  color: #c47a6a;
+}
+
+.rm-lock-btn--danger:hover:not(:disabled) {
+  background: rgba(196, 122, 106, 0.16);
+}
+
+.rm-lock-msg {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: #8a9a7a;
+}
+
+.rm-lock-msg--err {
+  color: #c47a6a;
 }
 
 .rm-reset-btn {

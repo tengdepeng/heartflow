@@ -90,6 +90,9 @@ export type { OutputRecord, OutputRecordType, OutputState, OutputEvent, CreateRe
 export { useRoomManager } from './room-manager'
 export type { RoomConfig, RoomNode, RoomGroup } from './room-manager'
 
+export { useRoomLock, fingerprintRoomPassword, verifyRoomPassword, isRoomLockConfigured, resetRoomLockStore } from './room-lock'
+export type { RoomLockConfig, RoomLockMap } from './room-lock'
+
 export { useDataSecurity, usePsychologicalSafety, usePropertySafety, usePersonalSafety, getSafetyScore, getSafetyConfig, updateSafetyConfig, resetSafetyConfig } from './safety'
 export type { SafetyScore, SafetyConfig, DataSecurityConfig, PropertySecurityConfig, PersonalSafetyConfig, PsychologicalSafetyConfig } from './safety'
 
