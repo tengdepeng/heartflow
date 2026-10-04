@@ -42,6 +42,19 @@ vi.mock('../../components/DynamicIslandPanel.vue', () => ({
   default: { template: '<div data-test="dynamic-island-panel" />' },
 }))
 
+// ---- 模拟触角动态微交互组件簇（INCR-494/495/498） ----
+vi.mock('../../components/VerticalMarqueePanel.vue', () => ({
+  default: { template: '<div data-test="vertical-marquee-panel" />' },
+}))
+
+vi.mock('../../components/FlipClockPanel.vue', () => ({
+  default: { template: '<div data-test="flip-clock-panel" />' },
+}))
+
+vi.mock('../../components/StandbyScenePanel.vue', () => ({
+  default: { template: '<div data-test="standby-scene-panel" />' },
+}))
+
 // ---- 辅助函数 ----
 async function createWrapper() {
   const { default: Touchpoints } = await import('../Touchpoints.vue')
@@ -246,6 +259,22 @@ describe('Touchpoints 殿堂触角视图', () => {
   it('渲染 DynamicIslandPanel 动态岛状态胶囊', async () => {
     const wrapper = await createWrapper()
     expect(wrapper.find('[data-test="dynamic-island-panel"]').exists()).toBe(true)
+  })
+
+  // ------- 触角动态微交互组件簇（INCR-494/495/498） -------
+  it('渲染 VerticalMarqueePanel 垂直跑马灯', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="vertical-marquee-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 FlipClockPanel 翻页数字时钟', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="flip-clock-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 StandbyScenePanel 空闲待机氛围场景', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="standby-scene-panel"]').exists()).toBe(true)
   })
 
   // ============================================================

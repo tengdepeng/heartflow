@@ -38,8 +38,8 @@
 
 | INCR | 借鉴点 | 来源 App | 第二层证据 | 落到房间 | 复核结论 |
 |---|---|---|---|---|---|
-| **494** | **垂直跑马灯**（Vertical Marquee） | 知源中医 | anim `vertical_marquee_in`/`vertical_marquee_out` | 触角 / 公告位 | **窄缺口**：全 src `跑马灯`/`marquee`/`ticker` 零命中 |
-| **495** | **翻页数字时钟组件**（Flip / Tick Clock） | 生辰 | anim `widget_digital_clock_tick_animation`/`_controller`/`_interpolator` | 触角 `touchpoints` | **窄缺口**：全 src `数字时钟`/`digitalClock`/`flipClock` 零命中；`touchpoints` 无时钟类组件 |
+| **494** | **垂直跑马灯**（Vertical Marquee） | 知源中医 | anim `vertical_marquee_in`/`vertical_marquee_out` | 触角 / 公告位 | **窄缺口**：全 src `跑马灯`/`marquee`/`ticker` 零命中。**【已落地 2026-10-04: `modules/vertical-marquee` + `components/VerticalMarqueePanel.vue` 挂 `Touchpoints.vue` 触角, 纵向上/下滚轮播 + 条目增删 + 间隔/暂停, 存 `hf:vertical_marquee`, 零网络】** |
+| **495** | **翻页数字时钟组件**（Flip / Tick Clock） | 生辰 | anim `widget_digital_clock_tick_animation`/`_controller`/`_interpolator` | 触角 `touchpoints` | **窄缺口**：全 src `数字时钟`/`digitalClock`/`flipClock` 零命中；`touchpoints` 无时钟类组件。**【已落地 2026-10-04: `modules/flip-clock` + `components/FlipClockPanel.vue` 挂 `Touchpoints.vue` 触角, 时分秒翻页卡片(rotateX) + 12/24 制式 + 秒/日期开关, 存 `hf:flip_clock`, 零网络】** |
 | **496** | **角落缩放展开转场**（Corner-origin Grow / Shrink Modal） | 微信读书、知源中医 | anim `grow_from_bottomleft_to_topright`、`grow_from_topright_to_bottomleft`、`shrink_from_*`（8 向）、`scale_in_center`/`scale_out_center` | 全局 UI（弹层转场） | **窄缺口**：全 src 有 `TransitionGroup` 与 CSS `transform-origin`（`WorkLog.vue:799` 等用于装饰动画），但无「弹层从被点元素角落生长展开」的共享位置转场 |
 
 ### 2.3 对第二层候选的动效强化（INCR-487 / 488）
@@ -98,7 +98,7 @@
 | INCR | 借鉴点 | 来源 App | 证据（真实资源名 / 文案） | 落到房间 | 复核结论 |
 |---|---|---|---|---|---|
 | **497** | **桌面宠物养成系统**（Adopt→Name→Feed→Level→House） | 组件岛 | drawable `player_bg_pet_adoption_inner`（领养）、`player_bg_pet_naming_input`（命名）、`player_bg_pet_level_up_reward_item`（升级奖励）、`player_bg_pet_house_material`/`_selected`/`_panel`（宠物屋材质/面板）、`player_bg_pet_item_insufficient_*`（喂食不足提示）、`player_bg_pet_house_badge`/`_done`、`desktop_pet_zoom_*`（缩放互动） | 触角 / 情绪花房 | **真缺口**：全 src `宠物/养成/petHouse/petLevel/领养` 零命中（`adopt` 仅 `UnfinishedGarden.vue:38` 收为卡片、`DisciplineWorkshop.vue:163` 采纳建议，语义无关）。INCR-488 仅「桌面宠物」动作，本项补**养成闭环**（领养→命名→喂食→升级→建屋） |
-| **498** | **空闲待机氛围场景**（Idle Standby Scene） | 生辰 | drawable `ill_standby_brown_cat_*`/`ill_standby_christmas_cat_*`（1~10）/`ill_standby_keyboard_cat_*`/`ill_standby_purple_cat_*`、`ill_standby_*` 系列 | 触角 / 全局 UI | **窄缺口**：全 src `screensaver/屏保/standby/待机场景` 零命中；`App.vue:38 ambient-layer` 仅被动光晕/尘埃/光痕，**无空闲触发的全屏插画场景**（季节主题可换） |
+| **498** | **空闲待机氛围场景**（Idle Standby Scene） | 生辰 | drawable `ill_standby_brown_cat_*`/`ill_standby_christmas_cat_*`（1~10）/`ill_standby_keyboard_cat_*`/`ill_standby_purple_cat_*`、`ill_standby_*` 系列 | 触角 / 全局 UI | **窄缺口**：全 src `screensaver/屏保/standby/待机场景` 零命中；`App.vue:38 ambient-layer` 仅被动光晕/尘埃/光痕，**无空闲触发的全屏插画场景**（季节主题可换）。**【已落地 2026-10-04: `modules/standby-scene` + `components/StandbyScenePanel.vue` 挂 `Touchpoints.vue` 触角, 夜猫/落雪/键盘/极光/呼吸五场景 + 静置阈值 + 全屏遮罩预览, 存 `hf:standby_scene`, 零网络】** |
 | **499** | **长按变速**（Long-press to Accelerate） | 识典古籍 | drawable `familiar_long_press_speed_guide_bg`、`familiar_long_press_speed_ripple_left`/`_right`、`familiar_long_press_speed_2x`、`familiar_press_speed_text_container`、`finger_long_presspress_speed_guide`、`common_feed_long_press_fast_speed` | 阅览殿 `reading` | **窄缺口**：全 src `倍速` 仅用于 TTS（`reading/tts.ts:124` 0.5~2.0x）、视频速率守卫（`useVideoRateGuard.ts`）、回放（`branch-replay.ts`）；**无「长按内容区加速」手势**（涟漪 + 2x 引导） |
 
 ### 5.3 对既有候选的补强

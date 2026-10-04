@@ -416,6 +416,23 @@
       <DynamicIslandPanel />
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 触角·动态微交互簇（INCR-494/495/498，借鉴 96 APK：           -->
+    <!-- 知源中医 vertical_marquee / 生辰 digital_clock_tick +       -->
+    <!-- ill_standby_* 插画场景，纯本地零网络）                        -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <VerticalMarqueePanel />
+    </section>
+
+    <section data-enter class="tp-section">
+      <FlipClockPanel />
+    </section>
+
+    <section data-enter class="tp-section">
+      <StandbyScenePanel />
+    </section>
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
     </RoomLayout>
   </div>
@@ -434,6 +451,9 @@ import ChannelOptimizerPanel from '../components/ChannelOptimizerPanel.vue'
 import RadialMenuPanel from '../components/RadialMenuPanel.vue'
 import RotaryPickerPanel from '../components/RotaryPickerPanel.vue'
 import DynamicIslandPanel from '../components/DynamicIslandPanel.vue'
+import VerticalMarqueePanel from '../components/VerticalMarqueePanel.vue'
+import FlipClockPanel from '../components/FlipClockPanel.vue'
+import StandbyScenePanel from '../components/StandbyScenePanel.vue'
 import EmptyState from '../components/EmptyState.vue'
 import RoomLayout from '../components/RoomLayout.vue'
 import {

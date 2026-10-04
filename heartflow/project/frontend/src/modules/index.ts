@@ -487,6 +487,34 @@ export type { RotaryPreset, RotaryState } from './rotary-picker'
 export { useDynamicIsland, reloadIsland, ISLAND_MODES, ISLAND_MODE_META, DEFAULT_ISLAND } from './dynamic-island'
 export type { IslandMode, DynamicIslandState } from './dynamic-island'
 
+// ---- vertical-marquee（触角 · 垂直跑马灯）----
+export {
+  useVerticalMarquee,
+  reloadMarquee,
+  DEFAULT_MARQUEE,
+  DEFAULT_MARQUEE_ITEMS,
+  MIN_INTERVAL_MS as MARQUEE_MIN_INTERVAL_MS,
+  MAX_INTERVAL_MS as MARQUEE_MAX_INTERVAL_MS,
+  MAX_ITEMS as MARQUEE_MAX_ITEMS,
+} from './vertical-marquee'
+export type { VerticalMarqueeState, MarqueeDirection } from './vertical-marquee'
+
+// ---- flip-clock（触角 · 翻页数字时钟）----
+export { useFlipClock, reloadFlipClock, formatClock, DEFAULT_FLIP_CLOCK } from './flip-clock'
+export type { FlipClockState, ClockFormat, ClockParts } from './flip-clock'
+
+// ---- standby-scene（触角 · 空闲待机氛围场景）----
+export {
+  useStandbyScene,
+  reloadStandbyScene,
+  SCENES as STANDBY_SCENES,
+  SCENE_META as STANDBY_SCENE_META,
+  DEFAULT_STANDBY,
+  MIN_IDLE_SECONDS,
+  MAX_IDLE_SECONDS,
+} from './standby-scene'
+export type { StandbySceneState, SceneId } from './standby-scene'
+
 // ---- career ----
 export { useCareerPath, useSkillMap, useTransitionAnalysis, useInteractionTracker, useCareerMilestones } from './career'
 export { useCareer } from './career'
