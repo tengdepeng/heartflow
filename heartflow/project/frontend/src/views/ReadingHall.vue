@@ -190,6 +190,9 @@
           </div>
         </div>
       </div>
+
+      <!-- 记忆回廊 · 每日回顾 + 随机漫游（P2 市面对标 flomo） -->
+      <RecallPanel />
     </div>
 
     <!-- ========== 书架（接 hall 引擎：增书/改状态/记会话/评分/目标） ========== -->
@@ -333,6 +336,7 @@ import ReadingCalendarPanel from '../components/ReadingCalendarPanel.vue'
 import ReadingQuoteWallPanel from '../components/ReadingQuoteWallPanel.vue'
 import ReadingReportPanel from '../components/ReadingReportPanel.vue'
 import ReadingNarrativePanel from '../components/ReadingNarrativePanel.vue'
+import RecallPanel from '../components/RecallPanel.vue'
 import ReadingSpeedInsightPanel from '../components/ReadingSpeedInsightPanel.vue'
 
 // ---- 选项卡 ----

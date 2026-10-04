@@ -303,6 +303,23 @@ export type { VoicePreset, VoiceGender, VoiceLibraryState } from './reading'
 export { useMiniPlayer, DEFAULT_MINI_PLAYER } from './reading'
 export type { MiniPlayerPrefs, MiniPlayerControls } from './reading'
 
+// ---- recall（记忆回廊 · 每日回顾 + 随机漫游，P2 市面对标 flomo） ----
+export {
+  useRecall,
+  collectMemories,
+  excerptToMemory,
+  photoToMemory,
+  pastMemories,
+  ageLabel,
+  hashSeed,
+  seededShuffle,
+  pickDailyReview,
+  pickRoam,
+  recallStats,
+  DAILY_REVIEW_COUNT,
+} from './recall'
+export type { RecallKind, RecallMemory, RecallStats } from './recall'
+
 // ---- guide-tour（全局 UI · 分步引导蒙层，INCR-500） ----
 export { useGuideTour, reloadGuideTour, computeTooltip, clampTooltip, GUIDE_TOURS, DEFAULT_GUIDE_TOUR } from './guide-tour'
 export type { TourStep, TourDef, TourPlacement, GuideTourState, Rect, Size, Point } from './guide-tour'
