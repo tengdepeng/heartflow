@@ -107,6 +107,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 const emit = defineEmits<{
   (e: 'navigate', roomId: string): void
@@ -145,7 +146,7 @@ const todayStats = ref<TodayStats>({
 })
 
 function getTodayDateStr(): string {
-  return new Date().toISOString().slice(0, 10)
+  return getLocalDateKey(new Date())
 }
 
 function computeTodayStats() {
@@ -154,7 +155,7 @@ function computeTodayStats() {
   // 专注会话统计
   const sessions = storage.getSessions()
   const todaySessions = sessions.filter((s) => {
-    const sDate = s.startedAt ? s.startedAt.slice(0, 10) : ''
+    const sDate = s.startedAt ? getLocalDateKey(new Date(s.startedAt)) : ''
     return sDate === today
   })
   const focusSessions = todaySessions.length
@@ -166,14 +167,14 @@ function computeTodayStats() {
   // 笔记统计
   const notes = storage.getNotes()
   const todayNotes = notes.filter((n) => {
-    const nDate = n.createdAt ? n.createdAt.slice(0, 10) : ''
+    const nDate = n.createdAt ? getLocalDateKey(new Date(n.createdAt)) : ''
     return nDate === today
   })
 
   // 目标完成统计
   const goals = storage.getGoals()
   const todayGoals = goals.filter((g) => {
-    const completedDate = g.completedAt ? g.completedAt.slice(0, 10) : ''
+    const completedDate = g.completedAt ? getLocalDateKey(new Date(g.completedAt)) : ''
     return completedDate === today && g.status === 'bloom'
   })
 
