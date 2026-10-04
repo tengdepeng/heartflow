@@ -285,6 +285,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { storage } from '../../engine/storage'
 import { useBodyBridge } from '../../modules/body'
+import { getLocalDateKey } from '../../utils/time'
 
 const emit = defineEmits<{
   (e: 'navigate', roomId: string): void
@@ -325,10 +326,10 @@ const habitProgress = computed(() => {
 function loadHabitStats() {
   const goals = storage.getGoals?.() ?? []
   const active = goals.filter((g: any) => g.status === 'active' || g.status === 'in_progress')
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalDateKey(new Date())
   const completedToday = goals.filter((g: any) => {
     if (g.status !== 'completed') return false
-    const updatedAt = g.updatedAt ? g.updatedAt.slice(0, 10) : ''
+    const updatedAt = g.updatedAt ? getLocalDateKey(new Date(g.updatedAt)) : ''
     return updatedAt === today
   })
 
