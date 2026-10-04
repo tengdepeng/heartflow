@@ -6,6 +6,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { storage } from '../engine/storage'
+import { getLocalDateKey } from '../utils/time'
 
 // ---- 类型定义 ----
 
@@ -124,7 +125,9 @@ export const useHealthStore = defineStore('health', () => {
   function persistMeridianLogs() { saveKV(MERIDIAN_KEY, meridianLogs.value) }
 
   function recordMeridianFeeling(hour: number, feeling: string, extra?: { organ?: string; name?: string }) {
-    const today = new Date().toISOString().slice(0, 10)
+    // 经络日志的 date 是「日键」：写入 today / 读取 targetDate 配对使用，
+    // 与 at（UTC 序列化）无关；东八区 00:00–08:00 须按本地日历日归属当日。
+    const today = getLocalDateKey(new Date())
     // 更新同一天同时辰的已有记录
     const idx = meridianLogs.value.findIndex(m => m.hour === hour && m.date === today)
     const entry: MeridianLog = { hour, feeling, at: new Date().toISOString(), date: today, ...extra }
@@ -134,7 +137,7 @@ export const useHealthStore = defineStore('health', () => {
   }
 
   function getMeridianFeeling(hour: number, date?: string): string | undefined {
-    const targetDate = date || new Date().toISOString().slice(0, 10)
+    const targetDate = date || getLocalDateKey(new Date())
     return meridianLogs.value.find(m => m.hour === hour && m.date === targetDate)?.feeling
   }
 
