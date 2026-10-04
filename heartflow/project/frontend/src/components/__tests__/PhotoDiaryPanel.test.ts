@@ -465,3 +465,65 @@ describe('PhotoDiaryPanel 日历视图', () => {
     expect(otd.text()).toContain('去年的今天')
   })
 })
+
+// ============================================================
+describe('PhotoDiaryPanel 地图视图', () => {
+  const A = 'data:image/png;base64,AAA'
+  const B = 'data:image/png;base64,BBB'
+  const D = '2026-10-01'
+
+  const place = (over: Record<string, any> = {}) => ({
+    id: 'pl1',
+    name: '西湖',
+    city: '杭州',
+    type: 'travel',
+    note: '',
+    visitCount: 1,
+    at: D,
+    lng: 120.15,
+    lat: 30.25,
+    ...over,
+  })
+
+  it('照片日期匹配地点到访日期 → 渲染地球落点与统计', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ id: 'p1', date: D, images: [A, B] })],
+      'hf:map_places_v2': [place()],
+    })
+    expect(wrapper.find('[data-test="pd-map"]').exists()).toBe(false)
+
+    await wrapper.find('[data-test="pd-mode-map"]').trigger('click')
+    expect(wrapper.find('[data-test="pd-map"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pd-map-place-count"]').text()).toBe('1')
+    expect(wrapper.find('[data-test="pgb"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pgb-pin-pl1"]').exists()).toBe(true)
+  })
+
+  it('点落点展开当日照片，点缩略图打开灯箱', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ id: 'p1', date: D, images: [A, B] })],
+      'hf:map_places_v2': [place()],
+    })
+    await wrapper.find('[data-test="pd-mode-map"]').trigger('click')
+    expect(wrapper.find('[data-test="pd-map-detail"]').exists()).toBe(false)
+
+    await wrapper.find('[data-test="pgb-pin-pl1"]').trigger('click')
+    const detail = wrapper.find('[data-test="pd-map-detail"]')
+    expect(detail.exists()).toBe(true)
+    expect(detail.text()).toContain('西湖')
+    expect(detail.text()).toContain('2 张')
+
+    await wrapper.find('.pd-map-thumb').trigger('click')
+    expect(wrapper.find('.pd-viewer').exists()).toBe(true)
+  })
+
+  it('无地点数据 → 地图空态引导', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ id: 'p1', date: D, images: [A] })],
+    })
+    await wrapper.find('[data-test="pd-mode-map"]').trigger('click')
+    expect(wrapper.find('[data-test="pd-map-empty"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pd-map-place-count"]').text()).toBe('0')
+    expect(wrapper.find('[data-test="pgb"]').exists()).toBe(false)
+  })
+})

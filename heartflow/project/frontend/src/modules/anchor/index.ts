@@ -141,6 +141,17 @@ export type {
   SuggestionPriority,
 } from './journal-context'
 
+// ---- 照片地图 · 照片按日期匹配地图室地点落点（P2 市面对标 Day One 照片地图） ----
+export {
+  usePhotoMap,
+  buildPhotoMapPins,
+  photoMapStats,
+  placeVisitDate,
+  expandEntry,
+  pinsCentroid,
+} from './photo-map'
+export type { PhotoMapPhoto, PhotoMapPin, PhotoMapStats } from './photo-map'
+
 function loadAll(): Anchor[] {
   return storage.getAnchors()
 }

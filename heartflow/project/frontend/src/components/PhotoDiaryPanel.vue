@@ -71,6 +71,7 @@
         <button class="pd-mode" :class="{ active: viewMode === 'corridor' }" data-test="pd-mode-corridor" @click="viewMode = 'corridor'">长廊</button>
         <button class="pd-mode" :class="{ active: viewMode === 'month' }" data-test="pd-mode-month" @click="viewMode = 'month'">按月</button>
         <button class="pd-mode" :class="{ active: viewMode === 'calendar' }" data-test="pd-mode-calendar" @click="viewMode = 'calendar'">日历</button>
+        <button class="pd-mode" :class="{ active: viewMode === 'map' }" data-test="pd-mode-map" @click="viewMode = 'map'">地图</button>
         <button class="pd-mode" :class="{ active: viewMode === 'album' }" data-test="pd-mode-album" @click="viewMode = 'album'">收藏册</button>
       </div>
 
@@ -184,6 +185,53 @@
               <PhotoTile class="pd-otd-thumb" :src="o.entry.thumbs[0] || o.entry.images[0]" alt="那年今日" />
               <span class="pd-otd-meta">{{ o.yearsAgo }} 年前 · {{ o.date }}</span>
               <span v-if="o.entry.caption" class="pd-otd-cap">{{ o.entry.caption }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 地图：照片按拍摄日期匹配地图室地点，落到本地正射地球（对标 Day One 照片地图） -->
+      <div v-else-if="viewMode === 'map'" class="pd-map" data-test="pd-map">
+        <div class="pd-streak" data-test="pd-map-stats">
+          <div class="pd-streak-item">
+            <span class="pd-streak-num" data-test="pd-map-place-count">{{ mapStats.placeCount }}</span>
+            <span class="pd-streak-label">落点 · 地点</span>
+          </div>
+          <div class="pd-streak-item">
+            <span class="pd-streak-num">{{ mapStats.cityCount }}</span>
+            <span class="pd-streak-label">城市</span>
+          </div>
+          <div class="pd-streak-item">
+            <span class="pd-streak-num">{{ mapStats.photoCount }}</span>
+            <span class="pd-streak-label">照片</span>
+          </div>
+        </div>
+
+        <PhotoGlobe
+          v-if="mapPins.length"
+          :pins="mapPins"
+          :selected-id="selectedPinId"
+          @select="onSelectPin"
+        />
+        <p v-else class="pd-hint" data-test="pd-map-empty">
+          还没有可落点的照片 —— 在地图室记录「地点」的到访日期，与照片拍摄日期一致时即可在地球上看到。
+        </p>
+
+        <div v-if="selectedPin" class="pd-map-detail" data-test="pd-map-detail">
+          <div class="pd-map-detail-head">
+            <span class="pd-map-detail-name">{{ selectedPin.name }}</span>
+            <span class="pd-map-detail-meta">
+              {{ selectedPin.city }} · {{ selectedPin.visitDate }} · {{ selectedPin.photos.length }} 张
+            </span>
+          </div>
+          <div class="pd-map-strip">
+            <button
+              v-for="(ph, i) in selectedPin.photos"
+              :key="`${ph.entryId}-${i}`"
+              class="pd-map-thumb"
+              @click="openViewer(ph.date, ph.index)"
+            >
+              <PhotoTile class="pd-img" :src="ph.thumb" alt="照片" />
             </button>
           </div>
         </div>
@@ -333,7 +381,9 @@ import {
   type PhotoDayCell,
 } from '../modules/anchor/photo-diary-analytics'
 import { fileToDownscaledDataUrl } from '../utils/image'
+import { usePhotoMap, type PhotoMapPin } from '../modules/anchor/photo-map'
 import PhotoTile from './PhotoTile.vue'
+import PhotoGlobe from './PhotoGlobe.vue'
 
 const props = defineProps<{
   /** 逐日心锚中「有心锚」的日期（YYYY-MM-DD），用于日期强绑定与快速跳转 */
@@ -387,11 +437,25 @@ function formatMonthLabel(ym: string): string {
 }
 
 // ---- 相册（收藏册）视图状态 ----
-const viewMode = ref<'corridor' | 'month' | 'calendar' | 'album'>('month')
+const viewMode = ref<'corridor' | 'month' | 'calendar' | 'map' | 'album'>('month')
 const selectedAlbumId = ref<string | null>(null)
 const newAlbumName = ref('')
 const renameAlbumName = ref('')
 const albums = diary.albums
+
+// ---- 地图视图状态（照片按拍摄日期匹配地图室地点，落到本地正射地球）----
+const photoMap = usePhotoMap()
+photoMap.refresh()
+const mapPins = photoMap.pins
+const mapStats = photoMap.stats
+const selectedPinId = ref<string | null>(null)
+const selectedPin = computed<PhotoMapPin | null>(
+  () => mapPins.value.find(p => p.placeId === selectedPinId.value) ?? null,
+)
+
+function onSelectPin(placeId: string): void {
+  selectedPinId.value = selectedPinId.value === placeId ? null : placeId
+}
 
 // 长廊：全部照片扁平画廊（相册长廊），点击开灯箱
 const corridorPhotos = computed(() => {
@@ -1263,6 +1327,54 @@ async function onImport(e: Event) {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.pd-map {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pd-map-detail {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  padding: 10px;
+}
+.pd-map-detail-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.pd-map-detail-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #dce4f0;
+}
+.pd-map-detail-meta {
+  font-size: 12px;
+  color: #8a97ad;
+}
+.pd-map-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pd-map-thumb {
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  width: 72px;
+  height: 72px;
+}
+.pd-map-thumb .pd-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 @media (max-width: 640px) {

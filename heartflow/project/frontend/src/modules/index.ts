@@ -46,6 +46,17 @@ export type {
   SuggestionPriority,
 } from './anchor'
 
+// ---- 逐日心锚 · 照片地图（照片按日期匹配地图室地点，P2 市面对标 Day One 照片地图） ----
+export {
+  usePhotoMap,
+  buildPhotoMapPins,
+  photoMapStats,
+  placeVisitDate,
+  expandEntry,
+  pinsCentroid,
+} from './anchor'
+export type { PhotoMapPhoto, PhotoMapPin, PhotoMapStats } from './anchor'
+
 export { useCarrier } from './carrier'
 export type { JadeBeadCarrier, CarrierState, BeadCountMode } from './carrier'
 
