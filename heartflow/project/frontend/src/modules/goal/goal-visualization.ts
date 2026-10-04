@@ -617,8 +617,3 @@ export function useGoalMilestones(getGoals: () => Goal[]) {
 }
 
 // ---- 存储键 ----
-
-export const GOAL_VISUALIZATION_STORAGE_KEYS = {
-  PROGRESS_HISTORY: 'hf:goal_progress_history',
-  MILESTONES: 'hf:goal_milestones',
-} as const

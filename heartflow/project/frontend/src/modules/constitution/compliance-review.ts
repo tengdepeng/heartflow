@@ -764,12 +764,3 @@ export const REVIEW_STATUS_LABELS: Record<ReviewStatus, string> = {
   rejected: '已驳回',
   needs_revision: '需修订',
 }
-
-export const REVIEW_STATUS_COLORS: Record<ReviewStatus, string> = {
-  draft: '#94a3b8',
-  submitted: '#6b9fc4',
-  in_review: '#f0c040',
-  approved: '#34d399',
-  rejected: '#ef4444',
-  needs_revision: '#f59e0b',
-}

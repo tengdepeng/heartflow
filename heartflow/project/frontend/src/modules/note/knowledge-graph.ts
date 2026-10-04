@@ -533,8 +533,3 @@ export function useMindMap(getNotes: () => Note[]) {
 }
 
 // ---- 存储键 ----
-
-export const KNOWLEDGE_GRAPH_STORAGE_KEYS = {
-  GRAPH_CACHE: 'hf:note_knowledge_graph',
-  MIND_MAP_CACHE: 'hf:note_mind_map',
-} as const

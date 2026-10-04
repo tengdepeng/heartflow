@@ -14,13 +14,6 @@ import type { SavedFlow } from '../../types/automation'
 /** 决策结果 */
 export type GateDecision = 'execute' | 'confirm' | 'suggest'
 
-/** 操作模式元信息（供 UI 展示） */
-export const OPERATION_MODE_META: Record<OperationMode, { label: string; description: string }> = {
-  silent: { label: '静默执行', description: '系统安静地自动完成，不打扰你' },
-  confirm: { label: '执行前确认', description: '自动动作先待你确认，点头才执行' },
-  suggest: { label: '仅建议', description: '只提示建议，从不自动执行' },
-}
-
 /** 读取当前操作模式（缺省视为 silent，fail-safe） */
 export function getOperationMode(): OperationMode {
   const mode = (storage.getConfig() as { operationMode?: OperationMode }).operationMode

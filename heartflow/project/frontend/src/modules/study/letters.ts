@@ -43,11 +43,6 @@ function persist() {
   setKV(LETTERS_KEY, letters.value)
 }
 
-/** 测试隔离用：清空内存引用 */
-export function resetLettersState() {
-  letters.value = []
-}
-
 // ---- 纯函数：分束与统计 ----
 
 export interface LetterBundleStat {

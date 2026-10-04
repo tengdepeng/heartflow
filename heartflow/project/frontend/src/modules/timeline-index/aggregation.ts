@@ -785,9 +785,3 @@ export function useEventLinkage(getEntries: (start: string, end: string) => Inde
 }
 
 // ---- 存储键 ----
-
-export const AGGREGATION_STORAGE_KEYS = {
-  SEARCH_INDEX: 'hf:timeline_search_index',
-  CHAINS: 'hf:timeline_chains',
-  CLUSTERS: 'hf:timeline_clusters',
-} as const

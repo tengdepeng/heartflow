@@ -17,7 +17,7 @@ import type {
 } from './types'
 import { SANDBOX_TIER_DESCRIPTIONS } from './types'
 import { sandboxIsolator } from './isolator'
-import { runtimeGuard, DEFAULT_GUARD_CONFIG } from './guard'
+import { runtimeGuard } from './guard'
 import type { PluginRuntime, PluginManifest, PluginPermission } from '../types'
 
 // ---- 映射：插件分级 → 推荐沙箱等级 ----
@@ -285,6 +285,3 @@ export class PluginSandboxRuntime {
     return pluginPermissionsToSandbox((rt.granted ?? rt.manifest.permissions) as PluginPermission[]).length
   }
 }
-
-/** 重置守卫配置为默认（供测试确定配置快照） */
-export const RESET_GUARD_CONFIG = { ...DEFAULT_GUARD_CONFIG }

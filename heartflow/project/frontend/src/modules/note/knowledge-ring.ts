@@ -218,11 +218,6 @@ export function needsReview(ring: KnowledgeRing): boolean {
   return now >= nextReview
 }
 
-/** 距今多久需要回顾（天），负数表示已过期 */
-export function daysUntilReview(ring: KnowledgeRing): number {
-  return daysBetween(new Date().toISOString(), ring.nextReviewAt)
-}
-
 // ---- 年轮统计 ----
 
 export interface RingStats {

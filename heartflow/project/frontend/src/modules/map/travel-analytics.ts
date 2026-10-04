@@ -23,9 +23,6 @@ export const TRAVEL_TYPES: TravelTypeMeta[] = [
   { type: 'abroad', label: '境外', icon: '✈', color: '#a07c8c' },
 ]
 
-export const TRAVEL_TYPE_MAP: Record<Place['type'], TravelTypeMeta> =
-  Object.fromEntries(TRAVEL_TYPES.map(t => [t.type, t])) as Record<Place['type'], TravelTypeMeta>
-
 // ---- 概览 ----
 
 export interface TravelOverview {

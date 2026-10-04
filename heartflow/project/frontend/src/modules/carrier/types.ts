@@ -36,15 +36,6 @@ export const LIFECYCLE_STAGES: LifecycleStageDef[] = [
   { value: 'retired', label: '退休', description: '已完成使命，存入档案', color: '#666666' },
 ]
 
-/** 生命周期默认阈值（珠数比例） */
-export const LIFECYCLE_THRESHOLDS = {
-  newborn: 0,        // 0%
-  growing: 0.25,     // 25%
-  mature: 0.75,      // 75%
-  aging: 0,          // 由使用频率决定
-  retired: 0,        // 用户主动退休
-} as const
-
 /** 默认颜色方案 */
 export const DEFAULT_CARRIER_COLORS = {
   primary: '#a07c8c',

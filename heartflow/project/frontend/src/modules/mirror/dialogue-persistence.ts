@@ -669,10 +669,3 @@ export function useIntentFeedbackLearning() {
 export function getDialogueSessions(): DialogueSession[] {
   return storage.getKV<DialogueSession[]>(SESSIONS_KEY, [])
 }
-
-export const DIALOGUE_PERSISTENCE_STORAGE_KEYS = {
-  SESSIONS: 'hf:mirror_sessions',
-  TEMPLATES: 'hf:mirror_templates',
-  FEEDBACK: 'hf:mirror_intent_feedback',
-  LEARNING_MODEL: 'hf:mirror_learning_model',
-} as const

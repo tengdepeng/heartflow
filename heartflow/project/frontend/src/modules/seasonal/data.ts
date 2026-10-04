@@ -73,16 +73,6 @@ export const SEASON_META: SeasonMeta[] = [
   { key: 'winter', label: '冬', icon: '❄️' },
 ]
 
-/** 生命仪礼类型映射 */
-export const LIFE_RITUAL_TYPE_ICONS: Record<string, string> = {
-  '诞生': '👶',
-  '成人礼': '🎓',
-  '毕业': '📜',
-  '婚礼': '💒',
-  '葬礼': '🕊',
-  'other': '✨',
-}
-
 /** 获取节气民俗 */
 export function getTermCustoms(name: string): string {
   return TERM_CUSTOMS[name] || `${name}是二十四节气之一。传统上人们会根据节气安排农事和养生。`

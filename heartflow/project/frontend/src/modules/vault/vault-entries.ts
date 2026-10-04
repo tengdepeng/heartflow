@@ -109,12 +109,3 @@ export function categoryName(categories: VaultCategory[], id: string): string {
 export function categoryIcon(categories: VaultCategory[], id: string): string {
   return categories.find(c => c.id === id)?.icon || '📋'
 }
-
-/** 生成不重复的分类 id */
-export function nextCategoryId(categories: VaultCategory[]): string {
-  let id = `cat${Date.now()}${Math.random().toString(36).slice(2, 5)}`
-  while (categories.some(c => c.id === id)) {
-    id = `cat${Date.now()}${Math.random().toString(36).slice(2, 5)}`
-  }
-  return id
-}

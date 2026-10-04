@@ -135,20 +135,3 @@ export class PerfGovernor {
   }
 }
 
-/** 宅院 3D 性能档位：DPR 三档 + 阴影两档 */
-export const COURTYARD_PERF_SPEC: PerfTierSpec = {
-  dpr: [1, 0.75, 0.5],
-  shadow: [2048, 1024],
-  lowFps: 45,
-  highFps: 57,
-  evalWindowMs: 1000,
-}
-
-/** 星辰 3D 性能档位：仅 DPR 三档（星辰无阴影贴图） */
-export const STARS_PERF_SPEC: PerfTierSpec = {
-  dpr: [1, 0.75, 0.5],
-  shadow: [],
-  lowFps: 45,
-  highFps: 57,
-  evalWindowMs: 1000,
-}

@@ -30,11 +30,3 @@ export function initAutoArchiveScheduler(intervalMs: number = DAY_MS): void {
   // 启动即跑一次（若条款已启用）
   runAutoArchiveIfEnabled()
 }
-
-/** 停止巡检（测试或卸载时用） */
-export function stopAutoArchiveScheduler(): void {
-  if (schedulerTimer !== null) {
-    clearInterval(schedulerTimer)
-    schedulerTimer = null
-  }
-}

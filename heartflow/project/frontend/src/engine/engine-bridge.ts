@@ -471,30 +471,6 @@ export function refreshAll(): void {
 }
 
 /**
- * 检查 AI 连接状态
- * @param providerId 可选：指定提供商 ID，默认使用当前激活的
- * @returns 连接是否成功
- */
-export async function checkAIConnection(providerId?: string): Promise<boolean> {
-  const config = getAIEngineConfig()
-  const targetId = providerId ?? config.activeProviderId
-
-  if (!config.enabled) {
-    console.warn('[EngineBridge] AI 引擎未启用，无法检查连接')
-    return false
-  }
-
-  try {
-    const ok = await aiEngine.checkConnection(targetId)
-    refreshAll()
-    return ok
-  } catch (err) {
-    console.error('[EngineBridge] AI 连接检查失败:', err)
-    return false
-  }
-}
-
-/**
  * 获取存储统计信息
  * @returns 包含 key 数量和体积的统计对象
  */

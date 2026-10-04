@@ -37,11 +37,6 @@ function persist() {
   setKV(TAPES_KEY, tapes.value)
 }
 
-/** 测试隔离用 */
-export function resetTapesState() {
-  tapes.value = []
-}
-
 // ---- 纯函数 ----
 
 /** 格式化时长 sec → mm:ss */

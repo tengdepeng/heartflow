@@ -47,11 +47,3 @@ export interface BagOverview {
   avgProficiency: number
   masteredItems: number
 }
-
-/** 等级映射 */
-export const LEVEL_CLASS_MAP: Record<string, string> = {
-  '精通': 'master',
-  '进阶': 'advanced',
-  '入门': 'beginner',
-  '新增': 'new',
-}
