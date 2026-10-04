@@ -82,4 +82,27 @@ describe('CrystalGalleryPanel 结晶画廊', () => {
     expect(storedCrystals().length).toBe(0)
     expect(wrapper.text()).toContain('尚无结晶')
   })
+
+  it('今日结晶按本地日历日统计（东八区跨 UTC 日界）', async () => {
+    // 守卫：本机须为东八区，否则「本地 00:30 / UTC 归前一天」样本对不具判别力
+    const zone = Intl.DateTimeFormat().resolvedOptions().timeZone
+    expect(zone).toMatch(/Asia\/(Shanghai|Macau|Hong_Kong)|\+08:00/)
+    process.env.TZ = 'Asia/Shanghai'
+    // 钉死「现在」为本地 2026-03-15 10:00（= UTC 2026-03-15T02:00:00.000Z）
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 2, 15, 10, 0, 0))
+
+    // 本地 03-15 00:30 → UTC 归 03-14；缺陷写法（startsWith UTC 日期）会错算到「昨天」，
+    // 修复写法（两侧都取本地键）应正确计入「今日」。
+    const earlyToday = crystal({ id: 'c_early', createdAt: '2026-03-14T16:30:00.000Z' })
+    // 本地 03-14 23:00 → 确属昨天，两侧写法都不计入
+    const yesterday = crystal({ id: 'c_yest', createdAt: '2026-03-14T15:00:00.000Z' })
+
+    const wrapper = await mountPanel([earlyToday, yesterday])
+    const todayStat = wrapper.findAll('.cry-stat')
+      .find(s => s.find('.cry-stat-label').text() === '今日')!
+    expect(todayStat.find('.cry-stat-num').text()).toBe('1')
+
+    vi.useRealTimers()
+  })
 })

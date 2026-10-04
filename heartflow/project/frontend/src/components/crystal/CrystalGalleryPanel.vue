@@ -42,6 +42,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { storage } from '../../engine/storage'
 import { remove } from '../../modules/crystal'
+import { getLocalDateKey } from '../../utils/time'
 import type { TimeCrystal, CrystalShape } from '../../types'
 
 const crystals = ref<TimeCrystal[]>([])
@@ -55,9 +56,11 @@ const SHAPE_META: Record<CrystalShape, { label: string; icon: string }> = {
 }
 
 const perfectCount = computed(() => crystals.value.filter(c => c.shape === 'sphere').length)
+// 今日结晶：按「本地日历日」统计。createdAt 是 UTC ISO 时间戳，必须两边都取本地键，
+// 否则东八区 00:00–08:00 的记录会被算到「昨天」（UTC 日期比本地早一天）。
 const todayCount = computed(() => {
-  const today = new Date().toISOString().slice(0, 10)
-  return crystals.value.filter(c => c.createdAt.startsWith(today)).length
+  const today = getLocalDateKey(new Date())
+  return crystals.value.filter(c => getLocalDateKey(new Date(c.createdAt)) === today).length
 })
 const avgIntensity = computed(() => {
   if (!crystals.value.length) return 0
