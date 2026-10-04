@@ -47,12 +47,12 @@ describe('item2 房间自适应排版基底接入', () => {
     expect(cardsInGrid).toBe(allCards)
   })
 
-  it('Settings：默认仅展开首个分组（bg），其余 13 个折叠', () => {
+  it('Settings：默认仅展开首个分组（bg），其余 14 个折叠', () => {
     const wrapper = shallowMount(Settings)
     const groups = wrapper.findAll('.sub-group')
-    expect(groups.length).toBe(14)
+    expect(groups.length).toBe(15)
     const collapsed = groups.filter((g) => g.classes().includes('is-collapsed'))
-    expect(collapsed.length).toBe(13)
+    expect(collapsed.length).toBe(14)
     expect(groups[0].classes()).not.toContain('is-collapsed')
   })
 

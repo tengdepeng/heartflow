@@ -383,6 +383,7 @@ describe('PhotoDiaryPanel 相册（长廊 + 收藏册）', () => {
     await wrapper.find('[data-test="pd-album-back"]').trigger('click')
     await wrapper.vm.$nextTick()
     const cardImg = wrapper.find('[data-test="pd-album-card"] .pd-album-cover .pd-img')
-    expect(cardImg.attributes('src')).toBe('B')
+    // PhotoTile 根为 <figure>，src 落在其内部 <img> 上，故查内层 img
+    expect(cardImg.find('img').attributes('src')).toBe('B')
   })
 })

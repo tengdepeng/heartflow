@@ -17,20 +17,20 @@ beforeEach(() => {
   setActivePinia(createPinia())
 })
 
-// navItems 顺序须与模板 sub-group 出现顺序一致：bg/aura/taxonomy/rooms/operation/
-// gesture/anim/visual/chrome/sidebar/edgebar/astrolabe
+// navItems 顺序须与模板 sub-group 出现顺序一致：bg/roombg/aura/taxonomy/rooms/
+// operation/gesture/anim/visual/chrome/sidebar/edgebar/astrolabe/appicon/widget
 const SIDEBAR_IDX = 9
 
 describe('Settings 两栏导航 + 搜索过滤（② 自适应）', () => {
-  // 14 = 原有 12 个 + 「应用图标」+ 并发新增「房间背景」分区
-  it('渲染 14 个分组导航锚点', () => {
+  // 15 = NAV_ITEMS 实际条目（含合法新增的「应用图标」+「桌面小组件」+「房间背景」）
+  it('渲染 15 个分组导航锚点', () => {
     const wrapper = shallowMount(Settings)
-    expect(wrapper.findAll('.settings-nav__item').length).toBe(14)
+    expect(wrapper.findAll('.settings-nav__item').length).toBe(15)
   })
 
-  it('渲染 14 个可折叠子分组', () => {
+  it('渲染 15 个可折叠子分组', () => {
     const wrapper = shallowMount(Settings)
-    expect(wrapper.findAll('.sub-group').length).toBe(14)
+    expect(wrapper.findAll('.sub-group').length).toBe(15)
   })
 
   it('点击导航锚点展开对应分组', async () => {
