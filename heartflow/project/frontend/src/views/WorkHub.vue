@@ -44,6 +44,9 @@
       </div>
     </div>
 
+    <!-- 摸鱼计算机 · 下班倒计时（INCR-489） -->
+    <SlackingPanel />
+
     <div class="tabs">
       <button v-for="t in tabs" :key="t.key" :class="['tab',{active:tab===t.key}]" @click="tab=t.key">{{t.icon}} {{t.label}}</button>
     </div>
@@ -337,6 +340,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import { useWorkHub } from '../modules/workhub'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
+import SlackingPanel from '../components/SlackingPanel.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const tab = ref('marks')

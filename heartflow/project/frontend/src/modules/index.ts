@@ -681,6 +681,10 @@ export type { Asset, Archive, VaultData, AutoLockSettings } from './vault'
 // ---- workhub（工作台）----
 export { useWorkHub } from './workhub'
 
+// ---- slacking（摸鱼计算机 / 下班倒计时）----
+export { useSlackingWage } from './slacking'
+export type { SlackingConfig, SlackingState } from './slacking'
+
 // ---- unfinished（未竟之园）----
 export { useUnfinished } from './unfinished'
 
