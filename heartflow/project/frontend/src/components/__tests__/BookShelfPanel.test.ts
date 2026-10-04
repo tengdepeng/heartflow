@@ -2,6 +2,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import BookShelfPanel from '../BookShelfPanel.vue'
 import { useReadingBridge } from '../../modules/reading/reading-bridge'
+import { useShelfOrganizer } from '../../modules/reading/shelf-organizer'
 
 describe('BookShelfPanel 书架录入（接 hall 引擎）', () => {
   let bridge: ReturnType<typeof useReadingBridge>
@@ -11,6 +12,8 @@ describe('BookShelfPanel 书架录入（接 hall 引擎）', () => {
     // 模块单例在首次加载时已读入 storage；测试间直接重置内存态，保证彼此独立
     bridge.books.value = []
     bridge.readingGoal.value = { yearlyTarget: 12, yearlyCompleted: 0, dailyTarget: 30, streak: 0 }
+    // 书架整理偏好/集合同样为模块单例，重置以避免测试间串扰
+    useShelfOrganizer().reset()
   })
 
   it('挂载后空书架显示提示', () => {
@@ -112,9 +115,52 @@ describe('BookShelfPanel 书架录入（接 hall 引擎）', () => {
     expect(w.emitted('open-reading')![0]).toEqual([created.id])
   })
 
-  it('无导入正文的书籍（仅录入元数据）不显示「打开阅读」', async () => {
+  it('无导入正文的书籍（仅录入元数据）不显示「打开阅读」', () => {
     bridge.addBook('只有书名的书', '某作者', 200, ['测试'])
     const w = mount(BookShelfPanel)
     expect(w.find('.bsf-read').exists()).toBe(false)
+  })
+
+  it('默认列表视图，切到「网格」渲染封面网格', async () => {
+    bridge.addBook('三体', '刘慈欣', 300, ['科幻'])
+    const w = mount(BookShelfPanel)
+    expect(w.find('.bsf-shelf').exists()).toBe(true)
+    expect(w.find('.sgp').exists()).toBe(false)
+
+    const viewBtns = w.findAll('.bsf-view-btn')
+    expect(viewBtns).toHaveLength(2)
+    await viewBtns[1].trigger('click') // 网格
+    await w.vm.$nextTick()
+
+    expect(w.find('.sgp').exists()).toBe(true)
+    expect(w.find('.bsf-shelf').exists()).toBe(false)
+    expect(w.find('.sgp-card').text()).toContain('三体')
+  })
+
+  it('列表态点击置顶写入引擎并显示标记', async () => {
+    const book = bridge.addBook('三体', '刘慈欣', 300, [])
+    const w = mount(BookShelfPanel)
+    await w.find('.bsf-pin').trigger('click')
+    await w.vm.$nextTick()
+
+    const shelf = useShelfOrganizer()
+    expect(shelf.isPinned(book.id)).toBe(true)
+    expect(w.find('.bsf-pin-flag').exists()).toBe(true)
+  })
+
+  it('私密书默认隐藏，勾选「显示私密」后出现', async () => {
+    bridge.addBook('秘藏', '某作者', 200, [])
+    const w = mount(BookShelfPanel)
+    await w.find('.bsf-priv').trigger('click')
+    await w.vm.$nextTick()
+
+    // 默认隐藏：书名消失、出现隐藏提示
+    expect(w.text()).not.toContain('秘藏')
+    expect(w.find('.bsf-hidden-note').text()).toContain('1 本私密藏书')
+
+    await w.find('.bsf-private-toggle input').setValue(true)
+    await w.vm.$nextTick()
+    expect(w.text()).toContain('秘藏')
+    expect(w.find('.bsf-hidden-note').exists()).toBe(false)
   })
 })

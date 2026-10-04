@@ -192,6 +192,23 @@ export {
 } from './immersive-reader'
 export type { ReaderMode, ReaderTheme, ReaderPrefs, ReaderPage } from './immersive-reader'
 
+// ---- 书架整理面（INCR-522：视图/排序偏好 · 置顶 · 私密藏书 · 进度环数据） ----
+export {
+  useShelfOrganizer,
+  reloadShelfOrganizer,
+  normalizeShelfPrefs,
+  normalizeIdList,
+  readingProgress,
+  progressPercent,
+  orderBooks,
+  shelfSections,
+  shelfStats,
+  SHELF_ORGANIZER_KEYS,
+  DEFAULT_SHELF_PREFS,
+  SHELF_SORT_META,
+} from './shelf-organizer'
+export type { ShelfView, ShelfSort, ShelfPrefs, ShelfSections, ShelfStats } from './shelf-organizer'
+
 // ---- 摘录 / 读书便签 本地导出（#41） ----
 export {
   useReadingExport,
