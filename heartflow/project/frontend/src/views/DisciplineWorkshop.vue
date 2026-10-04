@@ -334,6 +334,11 @@
     <section v-if="activeTab === 'rituals'" data-enter class="dw-section">
       <DailyRitualPanel />
     </section>
+
+    <!-- 多时段提醒（multi-reminder 引擎：一日多时段 + 时间进度条 time_progress，INCR-490） -->
+    <section v-if="activeTab === 'reminder'" data-enter class="dw-section">
+      <MultiPeriodReminderPanel />
+    </section>
     </RoomLayout>
   </div>
 </template>
@@ -360,6 +365,7 @@ import type { ChallengeRecommendation } from '../modules/discipline/challenge-re
 import { useChallengeRecommender } from '../modules/discipline/challenge-recommender'
 import { HABIT_DIFFICULTY_META } from '../modules/discipline/types'
 import QuadrantBoardPanel from '../components/QuadrantBoardPanel.vue'
+import MultiPeriodReminderPanel from '../components/MultiPeriodReminderPanel.vue'
 import { useTaskManager } from '../modules/tasks'
 import EmptyState from '../components/EmptyState.vue'
 import RoomLayout from '../components/RoomLayout.vue'
@@ -380,6 +386,7 @@ const tabs = [
   { key: 'meditation', icon: '🧘', label: '冥想工坊' },
   { key: 'tasks', icon: '🗂️', label: '任务看板' },
   { key: 'rituals', icon: '🕯️', label: '每日仪式' },
+  { key: 'reminder', icon: '⏰', label: '多时段提醒' },
 ]
 const activeTab = ref('checkin')
 
