@@ -450,6 +450,14 @@
       <LongPressSpeedPanel />
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 全局 UI·角落缩放展开转场（INCR-496，借鉴 96 APK anim          -->
+    <!-- grow_from_*/shrink_from_* 8 向弹层转场，纯本地零网络）         -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <CornerTransitionPanel />
+    </section>
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
     </RoomLayout>
   </div>
@@ -474,6 +482,7 @@ import StandbyScenePanel from '../components/StandbyScenePanel.vue'
 import WidgetStylePanel from '../components/WidgetStylePanel.vue'
 import WidgetHotzonePanel from '../components/WidgetHotzonePanel.vue'
 import LongPressSpeedPanel from '../components/LongPressSpeedPanel.vue'
+import CornerTransitionPanel from '../components/CornerTransitionPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
 import RoomLayout from '../components/RoomLayout.vue'
 import {

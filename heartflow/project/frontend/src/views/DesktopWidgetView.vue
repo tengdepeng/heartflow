@@ -61,9 +61,10 @@ const enabledWidgets = computed(() => manager.enabledWidgets.value)
 /** 把实例主题展开为卡片外壳 CSS 变量（accent/radius/alpha/bg 同源生效） */
 function themeVars(w: WidgetInstance) { return widgetThemeVars(w.theme) }
 
-/** 小窗内可直接添加的九类（与首页画布 widgetTypes 同源） */
+/** 小窗内可直接添加的十五类（与首页画布 widgetTypes 同源） */
 const widgetTypes: WidgetType[] = [
   'pomodoro', 'daily-anchor', 'emotion-check', 'quick-note', 'weather', 'quote', 'quadrant', 'calendar', 'calendar-heatmap',
+  'flip-clock', 'life-scale', 'aquarium', 'water-drink', 'ferris-wheel', 'crystal-ball',
 ]
 
 const showAdd = ref(false)

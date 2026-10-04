@@ -68,6 +68,11 @@ vi.mock('../../components/LongPressSpeedPanel.vue', () => ({
   default: { template: '<div data-test="long-press-speed-panel" />' },
 }))
 
+// ---- 模拟全局 UI 角落缩放转场（INCR-496） ----
+vi.mock('../../components/CornerTransitionPanel.vue', () => ({
+  default: { template: '<div data-test="corner-transition-panel" />' },
+}))
+
 // ---- 辅助函数 ----
 async function createWrapper() {
   const { default: Touchpoints } = await import('../Touchpoints.vue')
@@ -303,6 +308,11 @@ describe('Touchpoints 殿堂触角视图', () => {
   it('渲染 LongPressSpeedPanel 长按变速', async () => {
     const wrapper = await createWrapper()
     expect(wrapper.find('[data-test="long-press-speed-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 CornerTransitionPanel 角落缩放展开转场', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="corner-transition-panel"]').exists()).toBe(true)
   })
 
   // ============================================================

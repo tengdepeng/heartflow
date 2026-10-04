@@ -78,6 +78,75 @@
     <template v-else-if="instance.type === 'calendar-heatmap'">
       <WidgetMiniCalendar variant="heatmap" :marks="marks" :weeks="6" :compact="compact" />
     </template>
+
+    <!-- 翻页时钟：复用 flip-clock 显示偏好，每秒翻页 -->
+    <template v-else-if="instance.type === 'flip-clock'">
+      <WidgetFlipClock />
+    </template>
+
+    <!-- 人生刻度：复用时间长廊·生命刻度（进度 + 剩余时光） -->
+    <template v-else-if="instance.type === 'life-scale'">
+      <div class="wls-row">
+        <span class="wls-pct">{{ lifeOverview.progress }}%</span>
+        <span class="wls-years">已历 {{ lifeOverview.elapsed.years }} 年</span>
+      </div>
+      <div class="wls-bar"><span class="wls-fill" :style="{ width: lifeOverview.progress + '%' }" /></div>
+      <div class="wls-remain">剩余 {{ lifeOverview.remaining }}</div>
+    </template>
+
+    <!-- 电子水族箱：复用情绪花房·水族箱（游鱼 + 投食） -->
+    <template v-else-if="instance.type === 'aquarium'">
+      <div class="waq-tank">
+        <span v-if="!aquariumFish.length" class="waq-empty">鱼缸还空着，去情绪花房放养一尾。</span>
+        <span
+          v-for="(f, i) in aquariumFish.slice(0, 6)"
+          :key="f.id"
+          class="waq-fish"
+          :style="{ '--waq-c': speciesById(f.speciesId).color, animationDelay: (i * 900) + 'ms' }"
+        >🐟</span>
+      </div>
+      <div class="waq-foot">
+        <span class="waq-count">🐟 {{ aquariumCount }} 尾</span>
+        <button class="waq-feed" type="button" @click.stop="feedFish">投食</button>
+      </div>
+    </template>
+
+    <!-- 喝水打卡：每日计数 + 目标进度 + 一键 +1 -->
+    <template v-else-if="instance.type === 'water-drink'">
+      <div class="wwd-row">
+        <span class="wwd-num">{{ waterCups }}</span>
+        <span class="wwd-target">/ {{ waterTarget }} 杯</span>
+      </div>
+      <div class="wwd-bar"><span class="wwd-fill" :style="{ width: waterProgress + '%' }" /></div>
+      <div class="wwd-actions">
+        <button class="wwd-btn" type="button" @click.stop="drinkWater">+1 杯</button>
+        <button class="wwd-btn wwd-undo" type="button" @click.stop="undoWater">撤销</button>
+      </div>
+    </template>
+
+    <!-- 摩天轮：纯 CSS 缓转动画组件 -->
+    <template v-else-if="instance.type === 'ferris-wheel'">
+      <div class="wfw-stage">
+        <div class="wfw-wheel">
+          <span
+            v-for="(c, i) in FERRIS_CABINS"
+            :key="i"
+            class="wfw-cabin"
+            :style="{ transform: `rotate(${i * 45}deg) translateY(-32px)` }"
+          >{{ c }}</span>
+          <span class="wfw-hub" />
+        </div>
+      </div>
+      <div class="wfw-caption">摩天轮 · 缓缓转动</div>
+    </template>
+
+    <!-- 水晶球：纯 CSS 灵光流转动画组件 -->
+    <template v-else-if="instance.type === 'crystal-ball'">
+      <div class="wcb-stage">
+        <div class="wcb-ball"><span class="wcb-shine" /><span class="wcb-base" /></div>
+      </div>
+      <div class="wcb-caption">水晶球 · 灵光流转</div>
+    </template>
   </div>
 </template>
 
@@ -100,7 +169,11 @@ import { readWidgetNote, pushWidgetSnapshotNow, WIDGET_NOTE_KEY } from '../modul
 import { useTaskManager, buildQuadrantBoard } from '../modules/tasks'
 import { activityMarks } from '../modules/touchpoints/widget-calendar'
 import { widgetThemeVars } from '../modules/touchpoints'
+import { useLifeEpoch } from '../modules/life-epoch'
+import { useAquarium, speciesById } from '../modules/aquarium'
+import { useWaterDrink } from '../modules/water-drink'
 import WidgetMiniCalendar from './WidgetMiniCalendar.vue'
+import WidgetFlipClock from './WidgetFlipClock.vue'
 
 const props = withDefaults(
   defineProps<{ instance: WidgetInstance; compact?: boolean }>(),
@@ -176,6 +249,33 @@ function shortQuadrant(label: string): string {
 
 // ---- 日历（月历 / 热力图）数据源：专注 + 速记，本地离线 ----
 const marks = computed(() => activityMarks())
+
+// ---- 人生刻度（复用时间长廊·生命刻度，不另造数据） ----
+const { overview: lifeOverview } = useLifeEpoch()
+
+// ---- 电子水族箱（复用情绪花房·水族箱，投食同源） ----
+const aquarium = useAquarium()
+const aquariumFish = aquarium.fish
+const aquariumCount = aquarium.fishCount
+function feedFish() {
+  aquarium.feed()
+}
+
+// ---- 喝水打卡（本地自持计数，一键 +1 / 撤销） ----
+const waterDrink = useWaterDrink()
+const waterCups = waterDrink.cups
+const waterTarget = waterDrink.target
+const waterProgress = waterDrink.progress
+function drinkWater() {
+  waterDrink.addCup()
+}
+function undoWater() {
+  waterDrink.removeCup()
+}
+
+// ---- 摩天轮舱位（纯装饰动画） ----
+const FERRIS_CABINS = ['🎡', '✨', '🎠', '⭐', '🌙', '🍀', '🎐', '💫']
+
 // ---- 外观主题：展开成卡片外壳 CSS 变量（accent/radius/alpha/bg 同源生效） ----
 const themeVars = computed(() => widgetThemeVars(props.instance.theme))
 void props
@@ -229,6 +329,57 @@ void props
 .wqd-cell { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; padding: 5px 7px; border-radius: 8px; background: rgba(120, 140, 200, 0.1); border-left: 2px solid var(--wqd-c, #7fa8d8); font-size: 12px; color: #c6d0e8; }
 .wqd-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wqd-count { font-weight: 600; color: var(--wqd-c, #7fa8d8); flex: none; }
+
+/* ---- 人生刻度 ---- */
+.wls-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.wls-pct { font-size: 24px; font-weight: 700; color: var(--ww-accent, #d4a15a); font-variant-numeric: tabular-nums; }
+.wls-years { font-size: 11px; color: #8a94ad; }
+.wls-bar { height: 8px; border-radius: 999px; background: rgba(120, 140, 200, 0.16); overflow: hidden; }
+.wls-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--ww-accent, #d4a15a), #c46a5a); transition: width .3s ease; }
+.wls-remain { font-size: 11px; color: #7c86a0; }
+
+/* ---- 电子水族箱 ---- */
+.waq-tank { position: relative; display: flex; align-items: center; justify-content: center; gap: 10px; height: 62px; border-radius: 10px; background: linear-gradient(180deg, rgba(90, 169, 201, 0.16), rgba(40, 80, 120, 0.22)); overflow: hidden; }
+.waq-empty { font-size: 11px; color: #7c86a0; padding: 0 10px; text-align: center; }
+.waq-fish { font-size: 20px; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3)); animation: waq-swim 4s ease-in-out infinite; }
+@keyframes waq-swim {
+  0%, 100% { transform: translateX(-7px) translateY(2px) scaleX(1); }
+  50% { transform: translateX(7px) translateY(-2px) scaleX(-1); }
+}
+.waq-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.waq-count { font-size: 12px; color: #9fb8d8; }
+.waq-feed { padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(140, 160, 200, 0.28); background: rgba(120, 140, 200, 0.12); color: #c6d0e8; font-size: 12px; font-family: inherit; cursor: pointer; }
+.waq-feed:hover { background: rgba(90, 120, 220, 0.22); border-color: #6b86d8; color: #fff; }
+
+/* ---- 喝水打卡 ---- */
+.wwd-row { display: flex; align-items: baseline; gap: 4px; }
+.wwd-num { font-size: 26px; font-weight: 700; color: #6bb8d8; font-variant-numeric: tabular-nums; }
+.wwd-target { font-size: 12px; color: #8a94ad; }
+.wwd-bar { height: 8px; border-radius: 999px; background: rgba(90, 150, 200, 0.16); overflow: hidden; }
+.wwd-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #5ab8d8, #6b9fc4); transition: width .25s ease; }
+.wwd-actions { display: flex; gap: 8px; }
+.wwd-btn { padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(140, 160, 200, 0.24); background: rgba(90, 160, 200, 0.14); color: #c6d0e8; font-size: 12px; font-family: inherit; cursor: pointer; }
+.wwd-btn:hover { background: rgba(90, 160, 200, 0.26); color: #fff; }
+.wwd-undo { background: transparent; color: #8a94ad; }
+
+/* ---- 摩天轮 ---- */
+.wfw-stage { display: flex; align-items: center; justify-content: center; height: 88px; }
+.wfw-wheel { position: relative; width: 78px; height: 78px; border-radius: 50%; border: 2px dashed rgba(200, 170, 120, 0.35); animation: wfw-spin 24s linear infinite; }
+.wfw-cabin { position: absolute; left: 50%; top: 50%; margin: -9px 0 0 -9px; font-size: 14px; }
+.wfw-hub { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--ww-accent, #d4a15a); box-shadow: 0 0 10px rgba(212, 161, 90, 0.5); }
+@keyframes wfw-spin { to { transform: rotate(360deg); } }
+.wfw-caption { font-size: 11px; color: #8a94ad; text-align: center; }
+
+/* ---- 水晶球 ---- */
+.wcb-stage { display: flex; align-items: center; justify-content: center; height: 88px; }
+.wcb-ball { position: relative; width: 62px; height: 62px; border-radius: 50%; background: radial-gradient(circle at 34% 30%, rgba(200, 220, 255, 0.9), rgba(120, 150, 220, 0.5) 45%, rgba(60, 80, 140, 0.7)); box-shadow: inset 0 0 14px rgba(255, 255, 255, 0.35), 0 6px 16px rgba(0, 0, 0, 0.35); overflow: hidden; }
+.wcb-shine { position: absolute; inset: 0; background: linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.55) 50%, transparent 60%); animation: wcb-shimmer 3.6s ease-in-out infinite; }
+.wcb-base { position: absolute; left: 50%; bottom: -8px; width: 34px; height: 12px; margin-left: -17px; border-radius: 0 0 8px 8px; background: linear-gradient(180deg, #6b5a3a, #3f3524); }
+@keyframes wcb-shimmer {
+  0%, 100% { transform: translateX(-40%); opacity: 0.4; }
+  50% { transform: translateX(40%); opacity: 0.9; }
+}
+.wcb-caption { font-size: 11px; color: #8a94ad; text-align: center; }
 
 /* ---- 紧凑态（系统桌面小窗）：同源降密度，不另写一套 ---- */
 .wcard-compact { gap: 6px; }

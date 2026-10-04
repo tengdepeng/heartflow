@@ -707,3 +707,37 @@ export type { House, TwelveHousesState, HouseStats, BalanceScore } from './self-
 export { housesToAstrolabe, deriveAstrolabeInsight } from './self-mirror'
 export type { AstrolabePoint, AstrolabeData, AstrolabeInsight } from './self-mirror'
 export { useSelfMirrorHouses, getSelfMirrorHousesStore } from './self-mirror'
+
+// ---- water-drink（触角 · 喝水打卡）----
+export {
+  useWaterDrink,
+  reloadWaterDrink,
+  localDate,
+  normalizeWaterDrink,
+  drinkProgress,
+  clampTarget,
+  DEFAULT_WATER_DRINK,
+  DEFAULT_TARGET,
+  MIN_TARGET,
+  MAX_TARGET,
+} from './water-drink'
+export type { WaterDrinkState } from './water-drink'
+
+// ---- corner-transition（全局 UI · 角落缩放展开转场）----
+export {
+  useCornerTransition,
+  reloadCornerTransition,
+  cornerOrigin,
+  originCorner,
+  originPoint,
+  originStyle,
+  clampDuration,
+  clampScale,
+  CORNERS,
+  DEFAULT_CORNER_TRANSITION,
+  MIN_DURATION,
+  MAX_DURATION,
+  MIN_SCALE,
+  MAX_SCALE,
+} from './corner-transition'
+export type { Corner, CornerMode, CornerTransitionState, RectLike } from './corner-transition'

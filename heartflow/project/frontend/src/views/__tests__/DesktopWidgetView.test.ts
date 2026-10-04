@@ -62,12 +62,12 @@ describe('DesktopWidgetView · 系统桌面小窗', () => {
     // 此处仅校验空态引导与外壳编排。
   })
 
-  it('点 ＋ 展开七类添加面板（与首页画布同源）', async () => {
+  it('点 ＋ 展开十五类添加面板（与首页画布同源）', async () => {
     const w = await prepare()
     expect(w.find('.dw-add').exists()).toBe(false)
     await w.findAll('.dw-act')[0].trigger('click')
     expect(w.find('.dw-add').exists()).toBe(true)
-    expect(w.findAll('.dw-chip').length).toBe(9)
+    expect(w.findAll('.dw-chip').length).toBe(15)
   })
 
   it('在面板里添加一类即入窗，并立即推一次快照（不节流）', async () => {

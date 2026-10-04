@@ -14,6 +14,12 @@ export type WidgetType =
   | 'quadrant'
   | 'calendar'
   | 'calendar-heatmap'
+  | 'flip-clock'
+  | 'life-scale'
+  | 'aquarium'
+  | 'water-drink'
+  | 'ferris-wheel'
+  | 'crystal-ball'
 
 /** 小组件尺寸预设 */
 export type WidgetSize = 'small' | 'medium' | 'large'
@@ -175,6 +181,54 @@ export const WIDGET_META: Record<WidgetType, WidgetMeta> = {
     description: '滚动数周的专注/速记热度图（GitHub 式格阵）',
     defaultSize: 'medium',
     icon: '🔥',
+  },
+  'flip-clock': {
+    type: 'flip-clock',
+    label: '翻页时钟',
+    labelEn: 'Flip Clock',
+    description: '翻页卡片式数字时钟，每秒翻动（复用翻页时钟偏好）',
+    defaultSize: 'small',
+    icon: '🕰️',
+  },
+  'life-scale': {
+    type: 'life-scale',
+    label: '人生刻度',
+    labelEn: 'Life Scale',
+    description: '生命进度条与剩余时光（复用时间长廊·生命刻度）',
+    defaultSize: 'medium',
+    icon: '⏳',
+  },
+  aquarium: {
+    type: 'aquarium',
+    label: '电子水族箱',
+    labelEn: 'Aquarium',
+    description: '游鱼养成组件，可一键投食（复用情绪花房·水族箱）',
+    defaultSize: 'medium',
+    icon: '🐠',
+  },
+  'water-drink': {
+    type: 'water-drink',
+    label: '喝水打卡',
+    labelEn: 'Water Drink',
+    description: '每日喝水计数与目标进度，一键 +1 杯',
+    defaultSize: 'small',
+    icon: '💧',
+  },
+  'ferris-wheel': {
+    type: 'ferris-wheel',
+    label: '摩天轮',
+    labelEn: 'Ferris Wheel',
+    description: '缓缓转动的摩天轮动画组件',
+    defaultSize: 'small',
+    icon: '🎡',
+  },
+  'crystal-ball': {
+    type: 'crystal-ball',
+    label: '水晶球',
+    labelEn: 'Crystal Ball',
+    description: '灵光流转的水晶球动画组件',
+    defaultSize: 'small',
+    icon: '🔮',
   },
 }
 
