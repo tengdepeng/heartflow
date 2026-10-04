@@ -119,6 +119,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 const emit = defineEmits<{
   navigate: [roomId: string]
@@ -148,7 +149,7 @@ function getMoodLabel(type: MoodType): string {
 
 function recordMood(type: MoodType) {
   todayMood.value = type
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalDateKey(new Date())
   storage.setKV(MOOD_KEY, { type, date: today })
 
   // 同步写入真实情绪时间线（供庭院等跨房间汇聚）
@@ -164,7 +165,7 @@ function recordMood(type: MoodType) {
 
 function loadTodayMood() {
   const saved = storage.getKV<{ type: MoodType; date: string } | null>(MOOD_KEY, null)
-  if (saved && saved.date === new Date().toISOString().slice(0, 10)) {
+  if (saved && saved.date === getLocalDateKey(new Date())) {
     todayMood.value = saved.type
   } else {
     todayMood.value = null
@@ -258,7 +259,7 @@ const leaveReminder = computed(() => {
 // ---- 今日一瞥（真实数据联动）----
 function isToday(iso?: string | null): boolean {
   if (!iso) return false
-  return iso.slice(0, 10) === new Date().toISOString().slice(0, 10)
+  return getLocalDateKey(new Date(iso)) === getLocalDateKey(new Date())
 }
 
 const todayNoteCount = computed(() => {
