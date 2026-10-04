@@ -122,6 +122,25 @@ export type {
   PhotoOnThisDayItem,
 } from './photo-diary-analytics'
 
+// ---- 手札上下文 · 建议卡 + 元数据条（P2 市面对标 Apple Journal / Day One） ----
+export {
+  useJournalContext,
+  collectDaySignals,
+  buildMetadataBar,
+  generateSuggestionCards,
+  formatMinutes,
+  emptyDaySignals,
+  SUGGESTION_LIMIT,
+} from './journal-context'
+export type {
+  DaySignals,
+  DaySignalsInput,
+  MetadataChip,
+  MetadataTone,
+  SuggestionCard,
+  SuggestionPriority,
+} from './journal-context'
+
 function loadAll(): Anchor[] {
   return storage.getAnchors()
 }

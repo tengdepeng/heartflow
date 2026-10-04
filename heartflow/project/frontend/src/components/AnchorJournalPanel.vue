@@ -28,6 +28,9 @@
       </div>
     </div>
 
+    <!-- 今日手札建议 + 元数据条（Apple Journal / Day One 式，数据驱动预填） -->
+    <JournalContextPanel :anchors="props.anchors" @apply="applySuggestion" />
+
     <!-- 新建手札 -->
     <div class="ajp-block">
       <div class="ajp-block-title">✍️ 新建手札</div>
@@ -126,6 +129,7 @@ import {
 } from '../modules/anchor/anchor-journal'
 import type { JournalType } from '../modules/anchor/anchor-journal'
 import type { Anchor } from '../modules/anchor/types'
+import JournalContextPanel from './JournalContextPanel.vue'
 
 const props = defineProps<{ anchors: Anchor[] }>()
 
@@ -202,6 +206,15 @@ function createJournal() {
 
 function removeJournal(j: { id: string }) {
   remove(j.id)
+}
+
+/** 建议卡点选 → 预填手札编辑区（保留已选锚点，未选则落到首个锚点） */
+function applySuggestion(payload: { prefill: string; type: JournalType }) {
+  form.value.content = payload.prefill
+  form.value.type = payload.type
+  if (!form.value.anchorId && props.anchors.length) {
+    form.value.anchorId = props.anchors[0].id
+  }
 }
 </script>
 
