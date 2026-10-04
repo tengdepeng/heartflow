@@ -90,9 +90,9 @@ describe('ReadingHall · 书架打开阅读（乙-1b）', () => {
     await wrapper.vm.$nextTick()
     await wrapper.vm.$nextTick()
 
-    // textarea 来源输入消失，阅读器渲染出 3 个段落
+    // textarea 来源输入消失，沉浸阅读器（默认滚动模式）渲染出 3 个段落
     expect(wrapper.find('.rh-textarea').exists()).toBe(false)
-    const paras = wrapper.findAll('.rh-paragraph')
+    const paras = wrapper.findAll('.ird-paragraph')
     expect(paras.length).toBe(3)
     expect(paras[0].text()).toContain('第一段')
 

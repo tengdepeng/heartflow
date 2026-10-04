@@ -47,20 +47,21 @@
         </div>
       </div>
 
-      <!-- 有文本时：阅读区域 -->
+      <!-- 有文本时：沉浸阅读器（翻页/滚动 · 主题四色盘 · 分页 · 剩余时间） -->
       <div v-else class="reading-area">
+        <ImmersiveReaderPanel
+          :paragraphs="paragraphs"
+          :marks="paragraphMark"
+          :resume-index="resumeParagraph"
+          :resume-token="resumeToken"
+          :title="activeBookTitle || '阅读'"
+          @paragraph-click="onParagraphClick"
+          @text-select="onTextSelect"
+          @progress="onReaderProgress"
+        />
         <div class="reading-toolbar">
           <span class="reading-label">{{ activeBookTitle || '阅读' }}</span>
           <button class="text-btn" @click="clearReadingText">清除文本</button>
-        </div>
-        <div class="reading-content" ref="readingRef" @mouseup="onTextSelect" @scroll="onReaderScroll">
-          <p
-            v-for="(para, idx) in paragraphs"
-            :key="idx"
-            :class="['rh-paragraph', { highlighted: paragraphMark.has(idx) }]"
-            :style="paragraphMark.has(idx) ? { '--para-mark': paragraphMark.get(idx) } : undefined"
-            @click="onParagraphClick(idx, para)"
-          >{{ para }}</p>
         </div>
         <!-- 听书 · 本地朗读控制（INCR-276 补挂载孤儿组件 TtsControlPanel，reading/tts 引擎完备） -->
         <TtsControlPanel :text="readingText" :title="activeBookTitle" />
@@ -310,7 +311,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
@@ -328,6 +329,7 @@ import BookReviewsPanel from '../components/BookReviewsPanel.vue'
 import TtsControlPanel from '../components/TtsControlPanel.vue'
 import VoiceLibraryPanel from '../components/VoiceLibraryPanel.vue'
 import MiniPlayerBar from '../components/MiniPlayerBar.vue'
+import ImmersiveReaderPanel from '../components/ImmersiveReaderPanel.vue'
 import BookShelfPanel from '../components/BookShelfPanel.vue'
 import ReadingInboxPanel from '../components/ReadingInboxPanel.vue'
 import LifeBookPanel from '../components/LifeBookPanel.vue'
@@ -367,7 +369,9 @@ const { readingText, excerpts } = reading
 const readingExport = useReadingExport()
 
 const pastedText = ref('')
-const readingRef = ref<HTMLElement | null>(null)
+// 沉浸阅读器：续读段落 + 触发令牌（令牌自增以强制同一书重复打开也重新定位）
+const resumeParagraph = ref(0)
+const resumeToken = ref(0)
 
 // 当前选中的待摘录文本
 const pendingText = ref('')
@@ -398,28 +402,17 @@ function registerActiveBook(text: string, preferredTitle?: string) {
   const book = hall.addBookFromText(title, '', estimatePages(text), text)
   activeBookId.value = book.id
   activeBookTitle.value = book.title
-  const resume = book.lastPosition ?? 0
-  if (resume > 0) nextTick(() => scrollToParagraph(resume))
+  requestResume(book.lastPosition ?? 0)
 }
-// 滚动到指定段落（续读定位）
-function scrollToParagraph(idx: number) {
-  const scroller = readingRef.value
-  if (!scroller) return
-  const ps = scroller.querySelectorAll('p')
-  const target = ps[idx] as HTMLElement | undefined
-  if (target) scroller.scrollTop = target.offsetTop
+// 请求沉浸阅读器定位到指定段落（令牌自增以强制重定位）
+function requestResume(idx: number) {
+  resumeParagraph.value = Math.max(0, idx)
+  resumeToken.value += 1
 }
-// 阅读器滚动 → 节流记录续读位置（按段落索引）
+// 阅读器滚动/翻页 → 节流记录续读位置（按段落索引）
 let lastProgressSave = 0
-function onReaderScroll() {
-  if (!activeBookId.value || !readingRef.value) return
-  const scroller = readingRef.value
-  const ps = scroller.querySelectorAll('p')
-  let idx = 0
-  for (let i = 0; i < ps.length; i++) {
-    if ((ps[i] as HTMLElement).offsetTop - scroller.scrollTop <= 4) idx = i
-    else break
-  }
+function onReaderProgress(idx: number) {
+  if (!activeBookId.value) return
   const now = Date.now()
   if (now - lastProgressSave > 800) {
     lastProgressSave = now
@@ -437,8 +430,7 @@ function openBookForReading(bookId: string) {
   reading.saveText()
   activeBookId.value = book.id
   activeBookTitle.value = book.title
-  const resume = book.lastPosition ?? 0
-  nextTick(() => scrollToParagraph(resume))
+  requestResume(book.lastPosition ?? 0)
 }
 // 划线/摘录 流入思绪书房（全局 Note，自动进入双链与间隔重复）
 function flowHighlight() {
@@ -881,32 +873,6 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   color: var(--text-low);
 }
 
-.reading-content {
-  padding: 20px 0;
-  user-select: text;
-}
-
-.rh-paragraph {
-  font-size: 15px;
-  line-height: 1.8;
-  color: rgba(var(--text-primary-rgb), 0.78);
-  margin: 0 0 16px 0;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.rh-paragraph:hover {
-  background: rgba(var(--accent-rgb), 0.04);
-}
-
-.rh-paragraph.highlighted {
-  background: color-mix(in srgb, var(--para-mark, rgba(var(--accent-rgb), 0.5)) 16%, transparent);
-  border-left: 3px solid var(--para-mark, rgba(var(--accent-rgb), 0.5));
-  padding-left: 7px;
-}
-
 /* 摘录浮条 */
 .excerpt-float-bar {
   display: flex;
@@ -1336,16 +1302,6 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   .reading-toolbar {
     flex-wrap: wrap;
     gap: 6px;
-  }
-
-  .reading-content {
-    padding: 14px 0;
-  }
-
-  .rh-paragraph {
-    font-size: 14px;
-    line-height: 1.7;
-    padding: 4px 8px;
   }
 
   .excerpt-float-bar {

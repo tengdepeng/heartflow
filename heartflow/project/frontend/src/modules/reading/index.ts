@@ -162,6 +162,36 @@ export type { VoicePreset, VoiceGender, VoiceLibraryState } from './voice-librar
 export { useMiniPlayer, reloadMiniPlayer, DEFAULT_MINI_PLAYER } from './mini-player'
 export type { MiniPlayerPrefs, MiniPlayerControls, MiniPlayerProgress } from './mini-player'
 
+// ---- 沉浸阅读器（翻页/滚动 · 主题四色盘 · 分页 · 剩余时间，纯本地） ----
+export {
+  useImmersiveReader,
+  reloadReaderPrefs,
+  themeById,
+  charsPerPageFor,
+  countChars,
+  paginateParagraphs,
+  pageForParagraph,
+  pageProgress,
+  estimateRemainingMinutes,
+  formatRemaining,
+  clampFontSize,
+  clampLineHeight,
+  clampCharsPerPage,
+  READER_THEMES,
+  DEFAULT_READER_THEME_ID,
+  DEFAULT_READER_PREFS,
+  READER_PREFS_KEY,
+  FONT_SIZE_MIN,
+  FONT_SIZE_MAX,
+  LINE_HEIGHT_MIN,
+  LINE_HEIGHT_MAX,
+  DEFAULT_CHARS_PER_MINUTE,
+  BASE_CHARS_PER_PAGE,
+  CHARS_PER_PAGE_MIN,
+  CHARS_PER_PAGE_MAX,
+} from './immersive-reader'
+export type { ReaderMode, ReaderTheme, ReaderPrefs, ReaderPage } from './immersive-reader'
+
 // ---- 摘录 / 读书便签 本地导出（#41） ----
 export {
   useReadingExport,
