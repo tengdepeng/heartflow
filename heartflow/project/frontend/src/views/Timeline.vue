@@ -15,7 +15,7 @@
           <span class="stat-label">总记录数</span>
         </div>
         <div class="stat-card">
-          <span class="stat-value">{{ riverItems.filter(i => new Date(i.ts).toISOString().slice(0,10) === new Date().toISOString().slice(0,10)).length }}</span>
+          <span class="stat-value">{{ todayCount }}</span>
           <span class="stat-label">今日记录</span>
         </div>
         <div class="stat-card">
@@ -130,6 +130,8 @@ import { storage, storageVersion } from '../engine/storage'
 import { useDataPort } from '../composables/useDataPort'
 import { createReplayTimer, createRiverItems, getRiverItemKey, getRiverSource } from '../modules/timeline/river'
 import type { RiverItemType, RiverItem } from '../modules/timeline/river'
+import { getItemsOnDate } from '../modules/timeline/timeline-filters'
+import { getLocalDateKey } from '../utils/time'
 import type { FocusSession } from '../types'
 import type { ImportCounts } from '../engine/data-port'
 import { getImportCountEntries } from '../engine/data-port'
@@ -176,7 +178,7 @@ const replayMode=ref(false);const replayPaused=ref(false);const replaySpeed=ref(
 const replayCurrentDate=ref('');const replayProgress=ref(0)
 const replayTimer=createReplayTimer(()=>{
   if(replayPaused.value)return
-  const dates=[...new Set(riverItems.value.map(i=>new Date(i.ts).toISOString().slice(0,10)))].sort()
+  const dates=riverDateKeys.value
   const idx=dates.indexOf(replayCurrentDate.value)
   if(idx<dates.length-1){replayCurrentDate.value=dates[idx+1];replayProgress.value=Math.min(((idx+1)/dates.length)*100,100);highlightDay()}
   else{stopReplay();replayMode.value=false}
@@ -187,8 +189,8 @@ function toggleReplay(){
 }
 function startReplay(options:{date?:string;paused?:boolean}={}){
   if(!riverFragments.value.length)return
-  const today=new Date().toISOString().slice(0,10)
-  const dates=[...new Set(riverItems.value.map(i=>new Date(i.ts).toISOString().slice(0,10)))].sort()
+  const today=getLocalDateKey()
+  const dates=riverDateKeys.value
   const todayIdx=dates.indexOf(today)
   if(options.date){replayCurrentDate.value=options.date}
   else if(todayIdx>=0){replayCurrentDate.value=dates[Math.max(0,todayIdx-3)]}
@@ -205,7 +207,7 @@ function replayFaster(){replaySpeed.value=Math.min(5,replaySpeed.value+1);if(rep
 function highlightDay(){
   const h=new Set<string>();const d=new Set<string>()
   for(const item of riverItems.value){
-    const ds=new Date(item.ts).toISOString().slice(0,10)
+    const ds=getLocalDateKey(new Date(item.ts))
     const itemKey=getRiverItemKey(item)
     if(ds===replayCurrentDate.value)h.add(itemKey)
     else if(ds>replayCurrentDate.value)d.add(itemKey)
@@ -218,16 +220,21 @@ interface RiverGroup{label:string;date:string;dimmed:boolean;items:RiverItem[]}
 // 时间长廊状态
 const sessionMap=computed<Map<string,FocusSession>>(()=>{storageVersion.value;return new Map(storage.getSessions().map(s=>[s.id,s]))})
 
-const today=new Date();const todayStr=today.toISOString().slice(0,10);const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10)
+const todayStr=getLocalDateKey()
+const yesterday=getLocalDateKey(new Date(Date.now()-86400000))
 const riverItems=computed<RiverItem[]>(()=>{
   storageVersion.value
   return createRiverItems(getRiverSource(), activeFilters.value)
 })
+// 回看播放头用的日期轴：本地日历日升序（与分组键同口径，避免 UTC 切日导致跨日错位）
+const riverDateKeys=computed<string[]>(()=>[...new Set(riverItems.value.map(i=>getLocalDateKey(new Date(i.ts))))].sort())
+// 今日记录：按本地日边界计数（getLocalDateKey 与 getItemsOnDate 均为本地口径）
+const todayCount=computed<number>(()=>getItemsOnDate(riverItems.value,new Date()).length)
 
 const riverFragments=computed<RiverGroup[]>(()=>{
   const groups:RiverGroup[]=[]
   for(const item of riverItems.value){
-    const ds=new Date(item.ts).toISOString().slice(0,10)
+    const ds=getLocalDateKey(new Date(item.ts))
     const label=ds===todayStr?'今天':ds===yesterday?'昨天':`${new Date(item.ts).getMonth()+1}月${new Date(item.ts).getDate()}日`
      let g=groups.find(g=>g.date===ds);if(!g){g={label,date:ds,dimmed:replayMode.value && ds>replayCurrentDate.value,items:[]};groups.push(g)}
      g.items.push(item)
@@ -238,7 +245,7 @@ const riverFragments=computed<RiverGroup[]>(()=>{
 function handleFragmentClick(item:RiverItem){
   if(item.type==='crystal'&&item.crystal){
     // 结晶重访: 高亮那一天
-    const ds=new Date(item.crystal.createdAt).toISOString().slice(0,10)
+    const ds=getLocalDateKey(new Date(item.crystal.createdAt))
     replayMode.value=true;startReplay({date:ds,paused:true})
   }else if(item.type==='note')router.push('/study')
   else if(item.type==='emotion')router.push('/garden')
