@@ -286,6 +286,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 const emit = defineEmits(['navigate'])
 
@@ -425,8 +426,8 @@ function mealTypeClass(type: string) {
 
 // ---- 今日餐食数（真实数据联动）----
 const todayMealCount = computed(() => {
-  const today = new Date().toISOString().slice(0, 10)
-  return meals.value.filter((m) => m.at.startsWith(today)).length
+  const today = getLocalDateKey(new Date())
+  return meals.value.filter((m) => getLocalDateKey(new Date(m.at)) === today).length
 })
 
 function fmtTime(iso: string) {

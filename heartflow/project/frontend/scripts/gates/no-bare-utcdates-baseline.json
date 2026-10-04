@@ -1,5 +1,5 @@
 {
-  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom（客厅今日活动本地日口径），存量降至 158 处（149 文件）。",
+  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径），存量降至 157 处（148 文件）。",
   "violations": {
     "src/components/BudgetPanel.vue": [
       "toISOString().slice(0,10)"
@@ -26,9 +26,6 @@
       "toISOString().slice(0,10)"
     ],
     "src/components/home/DiningRoom.vue": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/components/home/KitchenDining.vue": [
       "toISOString().slice(0,10)"
     ],
     "src/components/knowledge-tower/SpacedReviewPanel.vue": [
