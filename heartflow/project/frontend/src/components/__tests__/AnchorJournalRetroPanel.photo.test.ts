@@ -54,9 +54,9 @@ describe('AnchorJournalRetroPanel 照片手札渲染（P2）', () => {
       },
     ])
     expect(wrapper.find('[data-test="ajr-photos"]').exists()).toBe(true)
-    const img = wrapper.find('[data-test="ajr-photo"]')
-    expect(img.exists()).toBe(true)
-    expect(img.attributes('src')).toBe('data:image/png;base64,THUMB')
+    const tile = wrapper.find('[data-test="ajr-photo"]')
+    expect(tile.exists()).toBe(true)
+    expect(tile.find('img').attributes('src')).toBe('data:image/png;base64,THUMB')
   })
 
   it('点击缩略图打开放大查看（src 指向照片日记原图）', async () => {

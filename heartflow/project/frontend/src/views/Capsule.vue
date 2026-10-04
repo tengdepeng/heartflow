@@ -67,7 +67,7 @@
                   :data-test="`cap-photo-pick-${p.key}`"
                   @click="togglePhoto(p.key)"
                 >
-                  <img v-if="p.thumb" :src="p.thumb" class="cap-photo-thumb" :alt="`${g.date} 第 ${p.index + 1} 张`" />
+                  <PhotoTile v-if="p.thumb" :src="p.thumb" class="cap-photo-thumb" :alt="`${g.date} 第 ${p.index + 1} 张`" />
                 </button>
               </div>
             </div>
@@ -122,7 +122,7 @@
           <ul class="cap-item-list">
             <li v-for="it in c.items" :key="it.type + it.id" class="cap-item" :data-test="`cap-item-row-${it.type}`">
               <template v-if="it.type === 'photo'">
-                <img v-if="photoThumbOf(it)" :src="photoThumbOf(it)" class="cap-item-photo" :alt="it.title" data-test="cap-item-photo" @click="openPhoto(photoFullOf(it))" />
+                <PhotoTile v-if="photoThumbOf(it)" :src="photoThumbOf(it)" class="cap-item-photo" :alt="it.title" data-test="cap-item-photo" @click="openPhoto(photoFullOf(it))" />
                 <span v-else class="cap-item-type">📷</span>
                 <span class="cap-item-title">{{ it.title || '（无标题）' }}</span>
                 <button
@@ -169,6 +169,7 @@ import { getNoteStore } from '../modules/note'
 import { usePhotoDiary } from '../modules/anchor/photo-diary'
 import CapsuleArchivePanel from '../components/CapsuleArchivePanel.vue'
 import CapsuleVaultPanel from '../components/CapsuleVaultPanel.vue'
+import PhotoTile from '../components/PhotoTile.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const capsule = useTimeCapsule()

@@ -68,7 +68,7 @@
           :key="j.anchorId + j.createdAt"
           class="ajr-photo-fig"
         >
-          <img
+          <PhotoTile
             v-if="thumbOf(j)"
             :src="thumbOf(j)"
             class="ajr-photo"
@@ -119,6 +119,7 @@ import {
   JOURNAL_TEMPLATES,
   journalTemplateName,
 } from '../modules/anchor/anchor-journal-templates'
+import PhotoTile from './PhotoTile.vue'
 
 const props = defineProps<{
   journals: AnchorJournal[]

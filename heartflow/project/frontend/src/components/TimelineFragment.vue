@@ -144,13 +144,12 @@
           <span class="frag-title">照片日记 · {{ photo?.images?.length || 0 }} 张</span>
           <span class="frag-meta">{{ photo?.date }} · {{ formatTimeShort(photo?.createdAt) }}</span>
           <div class="frag-thumbs">
-            <img
+            <PhotoTile
               v-for="(t, i) in (photo?.thumbs || []).filter(Boolean).slice(0, 4)"
               :key="i"
               :src="t"
               class="frag-thumb"
               alt="照片"
-              loading="lazy"
             />
           </div>
           <span v-if="photo?.caption" class="frag-excerpt">{{ photo.caption }}</span>
@@ -172,6 +171,7 @@ import { MOVEMENT_TYPE_META, MOVEMENT_INTENSITY_META, type MovementRecord } from
 import type { BreakRecord } from '../modules/rest'
 import type { DialogueSession } from '../modules/mirror'
 import type { PhotoEntry } from '../modules/anchor/photo-diary'
+import PhotoTile from './PhotoTile.vue'
 
 const props = defineProps<{
   type: 'crystal' | 'note' | 'emotion' | 'session' | 'anchor' | 'body' | 'habit' | 'movement' | 'rest' | 'dialogue' | 'photo'
