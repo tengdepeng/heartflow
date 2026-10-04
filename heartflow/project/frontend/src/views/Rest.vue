@@ -293,6 +293,9 @@
       </div>
     </section>
 
+    <!-- ===== 电子木鱼 · 功德计数器（息壤·INCR-487，借鉴 96 APK 电子木鱼） ===== -->
+    <MeritWoodenFishPanel />
+
     <!-- ===== 休息提醒（rest·useRestReminders：番茄钟/定时/疲劳/姿势规则 + 模拟触发，INCR-164） ===== -->
     <RestReminderPanel />
 
@@ -418,6 +421,7 @@ import RestFocusLinkPanel from '../components/RestFocusLinkPanel.vue'
 import RestQualityPanel from '../components/RestQualityPanel.vue'
 import RestArchivePanel from '../components/RestArchivePanel.vue'
 import RestAchievementTrendPanel from '../components/RestAchievementTrendPanel.vue'
+import MeritWoodenFishPanel from '../components/MeritWoodenFishPanel.vue'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
 

@@ -455,6 +455,10 @@ export type {
   RestPrescription,
 } from './rest'
 
+// ---- merit-wooden-fish ----
+export { useMeritWoodenFish } from './merit-wooden-fish'
+export type { MeritState } from './merit-wooden-fish'
+
 // ---- career ----
 export { useCareerPath, useSkillMap, useTransitionAnalysis, useInteractionTracker, useCareerMilestones } from './career'
 export { useCareer } from './career'
