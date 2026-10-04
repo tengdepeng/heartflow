@@ -69,4 +69,33 @@ describe('镜我对话 · send（MVP-A：M3 房间感知 + M4 歧义消解）', 
     // 回应文案确认打开了劳酬
     expect(res.response).toContain('劳酬')
   })
+
+  it('regenerate 把新回应追加为变体，不重复用户消息（INCR-478）', async () => {
+    const { useMirrorDialogue } = await import('../useMirrorDialogue')
+    const m = useMirrorDialogue()
+
+    await m.send('记录一个想法', { overrideIntent: 'note', roomId: 'study' })
+    const rowsAfterFirst = m.dialogue.value.length
+    expect(m.dialogue.value.filter(d => d.role === 'user')).toHaveLength(1)
+
+    await m.regenerate('记录一个想法', { roomId: 'study' })
+
+    // 用户消息不重复，消息行数不增（变体挂在原镜我条目上）
+    expect(m.dialogue.value.filter(d => d.role === 'user')).toHaveLength(1)
+    expect(m.dialogue.value.length).toBe(rowsAfterFirst)
+
+    const mirror = m.dialogue.value.find(d => d.role === 'mirror')!
+    expect(mirror.variants).toHaveLength(2)
+    expect(mirror.activeVariant).toBe(1)
+  })
+
+  it('regenerate 无对应镜我条目时退化为常规 send（INCR-478）', async () => {
+    const { useMirrorDialogue } = await import('../useMirrorDialogue')
+    const m = useMirrorDialogue()
+
+    await m.regenerate('开始专注 25 分钟')
+    // 无历史 → 新起一轮（user + mirror）
+    expect(m.dialogue.value.filter(d => d.role === 'user')).toHaveLength(1)
+    expect(m.dialogue.value.filter(d => d.role === 'mirror')).toHaveLength(1)
+  })
 })

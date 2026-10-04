@@ -16,6 +16,7 @@ export type {
   ExecutionResult,
   StepResult,
   DialogueEntry,
+  DialogueVariant,
 } from './types'
 
 // 10 意图分类
@@ -124,6 +125,18 @@ export type {
 // ---- 工具卡 / 百宝袋（F5 意图工具卡） ----
 export { useMirrorToolCards, MIRROR_TOOL_CARDS_KEY } from './tool-cards'
 export type { MirrorToolCard } from './tool-cards'
+
+// ---- 回答分支导航（INCR-478 · DeepSeek 式「Message N of M」） ----
+export {
+  createVariant,
+  variantList,
+  variantCount,
+  activeVariantIndex,
+  hasMultipleVariants,
+  variantSummary,
+  appendVariant,
+  switchVariant,
+} from './dialogue-branches'
 
 // ---- 定音锤 · 证据聚合引擎（A4） ----
 export {

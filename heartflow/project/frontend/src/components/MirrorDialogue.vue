@@ -62,7 +62,7 @@
           <div class="md-msg-body">
             <div class="md-msg-tools">
               <button class="md-msg-tool" type="button" @click="copyText(entry.text, entry.id)">{{ copiedId === entry.id ? '已复制' : '复制' }}</button>
-              <button v-if="entry.role === 'user'" class="md-msg-tool" type="button" @click="regenerate(entry.text)">重新生成</button>
+              <button v-if="entry.role === 'user'" class="md-msg-tool" type="button" @click="regenerate(entry.text, { roomId: props.activeRoomId })">重新生成</button>
             </div>
             <!-- 意图标签（仅用户消息且有解析结果时） -->
             <div v-if="entry.role === 'user' && entry.parsedTask" class="md-intent-tag">
@@ -75,6 +75,25 @@
               <p class="md-bubble-text">{{ entry.text }}</p>
               <span class="md-bubble-time">{{ formatTime(entry.timestamp) }}</span>
               <button v-if="isLong(entry)" class="md-expand-btn" type="button" @click="toggleExpand(entry.id)">{{ isExpanded(entry.id) ? '收起' : '展开' }}</button>
+            </div>
+
+            <!-- 回答分支导航（INCR-478 · DeepSeek 式「Message N of M」） -->
+            <div v-if="entry.role === 'mirror' && variantCount(entry) > 1" class="md-branch-nav">
+              <button
+                class="md-branch-btn"
+                type="button"
+                :disabled="activeVariantIndex(entry) <= 0"
+                aria-label="上一个回答"
+                @click="goVariant(entry, -1)"
+              >‹</button>
+              <span class="md-branch-label">{{ variantSummaryLabel(entry) }}</span>
+              <button
+                class="md-branch-btn"
+                type="button"
+                :disabled="activeVariantIndex(entry) >= variantCount(entry) - 1"
+                aria-label="下一个回答"
+                @click="goVariant(entry, 1)"
+              >›</button>
             </div>
 
             <!-- 结构化抽取预览（M2：仅用户消息、且仅当抽取到结构化字段时） -->
@@ -187,7 +206,8 @@
 import { ref, reactive, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useMirrorDialogue } from '../modules/mirror/useMirrorDialogue'
 import { INTENT_INFO } from '../modules/mirror/intents'
-import type { IntentCategory, ExecutionAction } from '../modules/mirror/types'
+import type { IntentCategory, ExecutionAction, DialogueEntry } from '../modules/mirror/types'
+import { variantCount, activeVariantIndex, variantSummary, switchVariant } from '../modules/mirror/dialogue-branches'
 import { useVoiceInput } from '../modules/mirror/voice-input'
 import { extractStructured } from '../modules/mirror/nl-create'
 import { formatClockTime as formatTime } from '../utils/time'
@@ -215,6 +235,7 @@ const {
   isAmbiguous,
   candidates,
   send,
+  regenerate,
 } = useMirrorDialogue()
 
 // ---- 语音输入（M1，复用语丝同一套 Web Speech API 封装） ----
@@ -386,9 +407,18 @@ function copyText(text: string, id: string) {
     })
     .catch(() => {})
 }
-function regenerate(text: string) {
-  void send(text, { roomId: props.activeRoomId })
-  scrollToBottom()
+// ---- 回答分支导航（INCR-478 · 多分支切换） ----
+function variantSummaryLabel(entry: DialogueEntry): string {
+  return variantSummary(entry).label
+}
+function goVariant(entry: DialogueEntry, dir: number): void {
+  const total = variantCount(entry)
+  if (total <= 1) return
+  const cur = activeVariantIndex(entry)
+  const next = Math.min(Math.max(cur + dir, 0), total - 1)
+  if (next === cur) return
+  const idx = dialogue.value.findIndex(e => e.id === entry.id)
+  if (idx >= 0) dialogue.value[idx] = switchVariant(entry, next)
 }
 
 // ---- 格式化 ----
@@ -935,6 +965,49 @@ function getActionLabel(action: ExecutionAction): string {
 .md-expand-btn:hover {
   opacity: 0.75;
   text-decoration: underline;
+}
+
+/* 回答分支导航（INCR-478 · DeepSeek 式「Message N of M」） */
+.md-branch-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 1px 4px;
+  border-radius: 999px;
+  background: rgba(var(--accent-rgb), 0.06);
+  border: 1px solid rgba(var(--accent-rgb), 0.12);
+}
+.md-branch-btn {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  font-family: inherit;
+  color: var(--accent);
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+.md-branch-btn:hover:not(:disabled) {
+  background: rgba(var(--accent-rgb), 0.14);
+}
+.md-branch-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.md-branch-label {
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  color: var(--text-muted);
+  min-width: 64px;
+  text-align: center;
 }
 
 

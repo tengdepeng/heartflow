@@ -30,6 +30,8 @@ import { getAllRooms } from '../../engine/room-graph'
 import { GROUP_LABELS } from '../../modules/room-taxonomy'
 import { INTENT_INFO } from './intents'
 import { collectKnowledgeCitations } from './knowledge-citation'
+import type { KnowledgeCitation } from './knowledge-citation'
+import { appendVariant, createVariant } from './dialogue-branches'
 
 // ---- 默认 Action Handler 工厂 ----
 
@@ -418,7 +420,7 @@ export function useMirrorDialogue() {
    */
   async function send(
     text: string,
-    opts?: { overrideIntent?: IntentCategory; roomId?: string; bypassGate?: boolean },
+    opts?: { overrideIntent?: IntentCategory; roomId?: string; bypassGate?: boolean; regenerateInto?: string },
   ): Promise<{
     response: string
     result: ExecutionResult
@@ -426,6 +428,42 @@ export function useMirrorDialogue() {
     ambiguous: boolean
   }> {
     isProcessing.value = true
+
+    // 分支模式（INCR-478）：重新生成时把新回应追加为指定镜我条目的变体，
+    // 不重复写入用户消息，也不新增消息行。
+    const branchInto = opts?.regenerateInto ?? null
+
+    /** 产出镜我回应：常规追加新条目；分支模式则追加变体并切换 */
+    function pushMirror(payload: {
+      text: string
+      executionResult?: ExecutionResult
+      sources?: KnowledgeCitation[]
+    }): DialogueEntry {
+      if (branchInto) {
+        const idx = dialogue.value.findIndex(e => e.id === branchInto)
+        if (idx >= 0) {
+          const updated = appendVariant(
+            dialogue.value[idx],
+            createVariant(payload.text, {
+              executionResult: payload.executionResult,
+              sources: payload.sources,
+            }),
+          )
+          dialogue.value[idx] = updated
+          return updated
+        }
+      }
+      const entry: DialogueEntry = {
+        id: generateDialogueId(),
+        role: 'mirror',
+        text: payload.text,
+        timestamp: Date.now(),
+        ...(payload.executionResult ? { executionResult: payload.executionResult } : {}),
+        ...(payload.sources ? { sources: payload.sources } : {}),
+      }
+      dialogue.value.push(entry)
+      return entry
+    }
 
     try {
       // 1. 添加用户输入到对话记录
@@ -454,20 +492,14 @@ export function useMirrorDialogue() {
       if (best) {
         userEntry.parsedTask = best
       }
-      dialogue.value.push(userEntry)
+      if (!branchInto) dialogue.value.push(userEntry)
 
       // 3. 如果没有最佳匹配，返回通用回应
       if (!best) {
         // Item 4：资产感知优先于通用兜底——用户问"有哪些房间/能做什么"时真正列举院落资产
         const overview = buildAssetOverview(text)
         if (overview) {
-          const mirrorEntry: DialogueEntry = {
-            id: generateDialogueId(),
-            role: 'mirror',
-            text: overview,
-            timestamp: Date.now(),
-          }
-          dialogue.value.push(mirrorEntry)
+          pushMirror({ text: overview })
           lastResponse.value = overview
           const result: ExecutionResult = {
             success: true,
@@ -497,13 +529,7 @@ export function useMirrorDialogue() {
             ? capRes.value?.summary ?? `「${capHit.capability.label}」已执行。`
             : capRes.error ?? '该能力暂时不可用。'
 
-          const capEntry: DialogueEntry = {
-            id: generateDialogueId(),
-            role: 'mirror',
-            text: capText,
-            timestamp: Date.now(),
-          }
-          dialogue.value.push(capEntry)
+          pushMirror({ text: capText })
           lastResponse.value = capText
 
           const capResult: ExecutionResult = {
@@ -532,15 +558,8 @@ export function useMirrorDialogue() {
         }
 
         const fallbackResponse = '收到你的消息，但我不太确定你想做什么。试试说「开始专注」或「记录笔记」？'
-        const mirrorEntry: DialogueEntry = {
-          id: generateDialogueId(),
-          role: 'mirror',
-          text: fallbackResponse,
-          timestamp: Date.now(),
-          // 深度借鉴「基于本地资料作答并标注出处」：兜底回应仍检索相关本地条目带给 UI
-          sources: collectKnowledgeCitations(text),
-        }
-        dialogue.value.push(mirrorEntry)
+        // 深度借鉴「基于本地资料作答并标注出处」：兜底回应仍检索相关本地条目带给 UI
+        pushMirror({ text: fallbackResponse, sources: collectKnowledgeCitations(text) })
         lastResponse.value = fallbackResponse
 
         const result: ExecutionResult = {
@@ -565,15 +584,8 @@ export function useMirrorDialogue() {
       const { plan, response } = planMirrorInput(text, opts?.overrideIntent)
 
       if (!plan) {
-        const mirrorEntry: DialogueEntry = {
-          id: generateDialogueId(),
-          role: 'mirror',
-          text: response,
-          timestamp: Date.now(),
-          // 无执行计划时的纯回应同样标注出处：回答基于哪些本地条目
-          sources: collectKnowledgeCitations(text),
-        }
-        dialogue.value.push(mirrorEntry)
+        // 无执行计划时的纯回应同样标注出处：回答基于哪些本地条目
+        pushMirror({ text: response, sources: collectKnowledgeCitations(text) })
         lastResponse.value = response
         return {
           response,
@@ -610,13 +622,7 @@ export function useMirrorDialogue() {
           decision === 'confirm'
             ? `已为你备好：${response}（请在右下角「待确认」中点执行）`
             : `建议：${response}`
-        const gateEntry: DialogueEntry = {
-          id: generateDialogueId(),
-          role: 'mirror',
-          text: gateLine,
-          timestamp: Date.now(),
-        }
-        dialogue.value.push(gateEntry)
+        pushMirror({ text: gateLine })
         lastResponse.value = gateLine
         return {
           response: gateLine,
@@ -650,14 +656,7 @@ export function useMirrorDialogue() {
       const mirrorText = navigateFailedTarget
         ? `没找到「${navigateFailedTarget}」对应的房间，试试更准确的说法，例如「打开殿堂设置」或「去情绪花房」。`
         : (result.message || response)
-      const mirrorEntry: DialogueEntry = {
-        id: generateDialogueId(),
-        role: 'mirror',
-        text: mirrorText,
-        timestamp: Date.now(),
-        executionResult: result,
-      }
-      dialogue.value.push(mirrorEntry)
+      pushMirror({ text: mirrorText, executionResult: result })
       lastResponse.value = mirrorText
 
       return {
@@ -669,6 +668,32 @@ export function useMirrorDialogue() {
     } finally {
       isProcessing.value = false
     }
+  }
+
+  /**
+   * 重新生成（INCR-478 · 多分支导航）
+   * 把新回应作为变体追加到该用户消息对应的镜我条目，而非重复写入用户消息；
+   * 找不到对应镜我条目时退化为常规 send（新起一轮）。
+   */
+  async function regenerate(
+    text: string,
+    opts?: { overrideIntent?: IntentCategory; roomId?: string; bypassGate?: boolean },
+  ): Promise<{
+    response: string
+    result: ExecutionResult
+    parsedTask: ParsedTask | null
+    ambiguous: boolean
+  }> {
+    let targetId: string | undefined
+    for (let i = dialogue.value.length - 1; i >= 0; i--) {
+      const e = dialogue.value[i]
+      if (e.role === 'user' && e.text === text) {
+        const next = dialogue.value[i + 1]
+        if (next && next.role === 'mirror') targetId = next.id
+        break
+      }
+    }
+    return send(text, { ...opts, regenerateInto: targetId })
   }
 
   /**
@@ -712,6 +737,7 @@ export function useMirrorDialogue() {
     bestCandidate,
     // 动作
     send,
+    regenerate,
     parse,
     clear,
     recent,

@@ -130,7 +130,8 @@ export { INTENT_REGISTRY, INTENT_INFO, findIntentByKeyword, getAllIntentCategori
 export { parseTask, parseTaskBest, parseTaskByIntent, getIntentConfidence } from './mirror'
 export { executeMirrorInput, planMirrorInput, executePlan } from './mirror'
 export { useMirrorToolCards, MIRROR_TOOL_CARDS_KEY } from './mirror'
-export type { IntentCategory, IntentMeta, ParsedTask, ParsedTaskResult, ExecutionAction, ExecutionStep, ExecutionPlan, ExecutionResult, StepResult, DialogueEntry, ActionHandler, ActionHandlerRegistry, MirrorToolCard } from './mirror'
+export { createVariant, variantList, variantCount, activeVariantIndex, hasMultipleVariants, variantSummary, appendVariant, switchVariant } from './mirror'
+export type { IntentCategory, IntentMeta, ParsedTask, ParsedTaskResult, ExecutionAction, ExecutionStep, ExecutionPlan, ExecutionResult, StepResult, DialogueEntry, DialogueVariant, ActionHandler, ActionHandlerRegistry, MirrorToolCard } from './mirror'
 
 // ---- data-sovereignty ----
 export { useForgetting, useHallExit, useDataExtradition, useCrossDevice, FORGET_METHODS } from './data-sovereignty'

@@ -14,6 +14,7 @@ const isProcessingRef = ref(false)
 const isAmbiguousRef = ref(false)
 const candidatesRef = ref<ParsedTask[]>([])
 const mockSend = vi.fn()
+const mockRegenerate = vi.fn()
 
 // ---- 模拟 useMirrorDialogue ----
 vi.mock('../../modules/mirror/useMirrorDialogue', () => ({
@@ -23,6 +24,7 @@ vi.mock('../../modules/mirror/useMirrorDialogue', () => ({
     isAmbiguous: isAmbiguousRef,
     candidates: candidatesRef,
     send: mockSend,
+    regenerate: mockRegenerate,
   }),
 }))
 
@@ -394,5 +396,57 @@ describe('MirrorDialogue', () => {
     dialogueRef.value = [makeUserEntry()]
     const wrapper = await getWrapper()
     expect(wrapper.find('.md-empty').exists()).toBe(false)
+  })
+
+  // ---- 回答分支导航（INCR-478 · DeepSeek 式「Message N of M」） ----
+
+  it('多分支镜我回应渲染分支导航与计数', async () => {
+    dialogueRef.value = [
+      makeMirrorEntry({
+        text: '第二版',
+        activeVariant: 1,
+        variants: [
+          { id: 'v0', text: '原始回答', createdAt: 1 },
+          { id: 'v1', text: '第二版', createdAt: 2 },
+        ],
+      }),
+    ]
+    const wrapper = await getWrapper()
+    const nav = wrapper.find('.md-branch-nav')
+    expect(nav.exists()).toBe(true)
+    expect(nav.find('.md-branch-label').text()).toBe('第 2 / 2 个回答')
+  })
+
+  it('单分支镜我回应不渲染分支导航', async () => {
+    dialogueRef.value = [makeMirrorEntry()]
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.md-branch-nav').exists()).toBe(false)
+  })
+
+  it('点击 ‹ 切换到上一个变体', async () => {
+    dialogueRef.value = [
+      makeMirrorEntry({
+        text: '第二版',
+        activeVariant: 1,
+        variants: [
+          { id: 'v0', text: '原始回答', createdAt: 1 },
+          { id: 'v1', text: '第二版', createdAt: 2 },
+        ],
+      }),
+    ]
+    const wrapper = await getWrapper()
+    await wrapper.find('.md-branch-nav .md-branch-btn').trigger('click')
+    expect(dialogueRef.value[0].text).toBe('原始回答')
+    expect(dialogueRef.value[0].activeVariant).toBe(0)
+    expect(wrapper.find('.md-branch-label').text()).toBe('第 1 / 2 个回答')
+  })
+
+  it('点击「重新生成」调用 regenerate', async () => {
+    dialogueRef.value = [makeUserEntry()]
+    const wrapper = await getWrapper()
+    const btn = wrapper.findAll('.md-msg-tool').find(b => b.text() === '重新生成')
+    expect(btn).toBeTruthy()
+    await btn!.trigger('click')
+    expect(mockRegenerate).toHaveBeenCalledWith('开始专注 25 分钟', expect.objectContaining({}))
   })
 })

@@ -151,12 +151,28 @@ export interface StepResult {
 
 // ---- 对话记录 ----
 
+/**
+ * 镜我回应的一个分支变体（INCR-478 · DeepSeek 式「Message N of M」）
+ * 同一轮用户提问可保留多次生成的候选回答，用户可前后切换。
+ */
+export interface DialogueVariant {
+  id: string
+  /** 变体文本（当前展示时与 DialogueEntry.text 同步） */
+  text: string
+  /** 该变体的执行结果 */
+  executionResult?: ExecutionResult
+  /** 该变体的知识出处 */
+  sources?: KnowledgeCitation[]
+  /** 生成时间 */
+  createdAt: number
+}
+
 /** 对话条目 */
 export interface DialogueEntry {
   id: string
   /** 方向：用户输入 / 镜我回应 */
   role: 'user' | 'mirror'
-  /** 文本内容 */
+  /** 文本内容（镜我回应时等于当前激活变体的文本） */
   text: string
   /** 解析后的任务（仅用户输入） */
   parsedTask?: ParsedTask
@@ -164,6 +180,10 @@ export interface DialogueEntry {
   executionResult?: ExecutionResult
   /** 知识出处（深度借鉴：作答标注出处；仅镜我回应，兜底/无计划时注入） */
   sources?: KnowledgeCitation[]
+  /** 多分支回应变体（INCR-478；仅在重新生成产生分叉时存在） */
+  variants?: DialogueVariant[]
+  /** 当前展示的变体下标（缺省视为最后一个） */
+  activeVariant?: number
   /** 时间戳 */
   timestamp: number
 }
