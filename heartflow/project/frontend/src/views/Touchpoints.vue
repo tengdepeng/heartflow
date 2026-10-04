@@ -433,6 +433,23 @@
       <StandbyScenePanel />
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 触角·组件可配置簇（INCR-508/505/499，借鉴 96 APK：           -->
+    <!-- 组件岛 choice_style / dynamic_custom_click_view_ids +       -->
+    <!-- 识典古籍 familiar_long_press_speed，纯本地零网络）           -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <WidgetStylePanel />
+    </section>
+
+    <section data-enter class="tp-section">
+      <WidgetHotzonePanel />
+    </section>
+
+    <section data-enter class="tp-section">
+      <LongPressSpeedPanel />
+    </section>
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
     </RoomLayout>
   </div>
@@ -454,6 +471,9 @@ import DynamicIslandPanel from '../components/DynamicIslandPanel.vue'
 import VerticalMarqueePanel from '../components/VerticalMarqueePanel.vue'
 import FlipClockPanel from '../components/FlipClockPanel.vue'
 import StandbyScenePanel from '../components/StandbyScenePanel.vue'
+import WidgetStylePanel from '../components/WidgetStylePanel.vue'
+import WidgetHotzonePanel from '../components/WidgetHotzonePanel.vue'
+import LongPressSpeedPanel from '../components/LongPressSpeedPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
 import RoomLayout from '../components/RoomLayout.vue'
 import {

@@ -55,6 +55,19 @@ vi.mock('../../components/StandbyScenePanel.vue', () => ({
   default: { template: '<div data-test="standby-scene-panel" />' },
 }))
 
+// ---- 模拟触角组件可配置簇（INCR-508/505/499） ----
+vi.mock('../../components/WidgetStylePanel.vue', () => ({
+  default: { template: '<div data-test="widget-style-panel" />' },
+}))
+
+vi.mock('../../components/WidgetHotzonePanel.vue', () => ({
+  default: { template: '<div data-test="widget-hotzone-panel" />' },
+}))
+
+vi.mock('../../components/LongPressSpeedPanel.vue', () => ({
+  default: { template: '<div data-test="long-press-speed-panel" />' },
+}))
+
 // ---- 辅助函数 ----
 async function createWrapper() {
   const { default: Touchpoints } = await import('../Touchpoints.vue')
@@ -275,6 +288,21 @@ describe('Touchpoints 殿堂触角视图', () => {
   it('渲染 StandbyScenePanel 空闲待机氛围场景', async () => {
     const wrapper = await createWrapper()
     expect(wrapper.find('[data-test="standby-scene-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 WidgetStylePanel 组件款式矩阵', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="widget-style-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 WidgetHotzonePanel 组件点击热区', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="widget-hotzone-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 LongPressSpeedPanel 长按变速', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="long-press-speed-panel"]').exists()).toBe(true)
   })
 
   // ============================================================

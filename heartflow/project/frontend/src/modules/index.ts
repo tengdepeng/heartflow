@@ -515,6 +515,43 @@ export {
 } from './standby-scene'
 export type { StandbySceneState, SceneId } from './standby-scene'
 
+// ---- widget-style（触角 · 组件款式/皮肤矩阵）----
+export {
+  useWidgetStyle,
+  reloadWidgetStyle,
+  STYLE_VARIANTS as WIDGET_STYLE_VARIANTS,
+  WIDGET_KINDS,
+  DEFAULT_STYLE_ID as WIDGET_DEFAULT_STYLE_ID,
+  DEFAULT_STYLE_BY_KIND as WIDGET_DEFAULT_STYLE_BY_KIND,
+} from './widget-style'
+export type { WidgetStyleState, StyleVariant, WidgetKind } from './widget-style'
+
+// ---- widget-hotzone（触角 · 组件自定义点击热区）----
+export {
+  useWidgetHotzone,
+  reloadWidgetHotzone,
+  DEFAULT_HOTZONES,
+  MAX_HOTZONES as WIDGET_MAX_HOTZONES,
+  MIN_ZONE_SIZE as WIDGET_MIN_ZONE_SIZE,
+} from './widget-hotzone'
+export type { WidgetHotzoneState, Hotzone } from './widget-hotzone'
+
+// ---- long-press-speed（阅览 · 长按变速）----
+export {
+  useLongPressSpeed,
+  reloadLongPressSpeed,
+  computeSpeed as computeLongPressSpeed,
+  computeProgress as computeLongPressProgress,
+  DEFAULT_LONG_PRESS_SPEED,
+  MIN_BASE_SPEED as LPS_MIN_BASE_SPEED,
+  MAX_BASE_SPEED as LPS_MAX_BASE_SPEED,
+  MIN_HOLD_SPEED as LPS_MIN_HOLD_SPEED,
+  MAX_HOLD_SPEED as LPS_MAX_HOLD_SPEED,
+  MIN_RAMP_MS as LPS_MIN_RAMP_MS,
+  MAX_RAMP_MS as LPS_MAX_RAMP_MS,
+} from './long-press-speed'
+export type { LongPressSpeedState } from './long-press-speed'
+
 // ---- career ----
 export { useCareerPath, useSkillMap, useTransitionAnalysis, useInteractionTracker, useCareerMilestones } from './career'
 export { useCareer } from './career'
