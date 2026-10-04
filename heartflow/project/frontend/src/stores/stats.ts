@@ -7,6 +7,7 @@ import { defineStore } from 'pinia'
 import { computed } from 'vue'
 import { storage, storageVersion } from '../engine/storage'
 import type { FocusSession } from '../modules/timer'
+import { getLocalDateKey } from '../utils/time'
 
 export const useStatsStore = defineStore('stats', () => {
   // ---- 原始数据（依赖 storageVersion 触发重算） ----
@@ -100,26 +101,29 @@ export const useStatsStore = defineStore('stats', () => {
     Math.floor(completedSessions.value.reduce((sum, s) => sum + s.elapsed, 0) / 60000)
   )
 
+  // 今日专注分钟：completedAt 为 UTC ISO 时间戳，今日边界与记录边界须同取本地日历日键。
   const todayFocusMinutes = computed(() => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey(new Date())
     return Math.floor(
       completedSessions.value
-        .filter(s => (s.completedAt || '').startsWith(today))
+        .filter(s => s.completedAt && getLocalDateKey(new Date(s.completedAt)) === today)
         .reduce((sum, s) => sum + s.elapsed, 0) / 60000
     )
   })
 
   // ---- 连续天数 ----
 
+  // 连续天数：completedAt/startedAt 为 UTC ISO 时间戳，日期键须同取本地日历日（否则东八区 00:00–08:00 跨日误判）。
   const streakDays = computed(() => {
     const dates = [...new Set(
       completedSessions.value
-        .map(s => (s.completedAt || s.startedAt || '').slice(0, 10))
+        .map(s => s.completedAt || s.startedAt || '')
         .filter(Boolean)
+        .map(d => getLocalDateKey(new Date(d)))
     )].sort().reverse()
     if (dates.length === 0) return 0
     let streak = 1
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey(new Date())
     const diff = Math.abs(new Date(today).getTime() - new Date(dates[0]).getTime())
     if (diff > 86400000 * 2) return 0
     for (let i = 1; i < dates.length; i++) {
