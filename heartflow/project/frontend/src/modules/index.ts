@@ -459,6 +459,14 @@ export type {
 export { useMeritWoodenFish } from './merit-wooden-fish'
 export type { MeritState } from './merit-wooden-fish'
 
+// ---- desktop-companion ----
+export { useDesktopCompanion, COMPANION_FORMS, xpToNext, homeLevelFor } from './desktop-companion'
+export type { CompanionState, CompanionForm } from './desktop-companion'
+
+// ---- aquarium（情绪花房 · 电子水族箱）----
+export { useAquarium, reloadAquarium, speciesById, growthStage, FISH_SPECIES, MAX_FISH } from './aquarium'
+export type { AquariumState, Fish, FishSpecies, GrowthStage } from './aquarium'
+
 // ---- career ----
 export { useCareerPath, useSkillMap, useTransitionAnalysis, useInteractionTracker, useCareerMilestones } from './career'
 export { useCareer } from './career'
