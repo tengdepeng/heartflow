@@ -45,3 +45,13 @@ export {
   eqlToEquatorial,
 } from './planets'
 export type { PlanetPosition, PlanetElementSet, PlanetId } from './planets'
+
+export {
+  CURATED_SPOTS,
+  filterByProvince,
+  searchSpots,
+  sortByDarkness,
+  bortleLabel,
+  useStargazingSpots,
+} from './stargazing-spots'
+export type { StargazingSpot } from './stargazing-spots'

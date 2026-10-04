@@ -4,6 +4,7 @@
       <div>
         <h4 class="sg-title">🌌 时间星图</h4>
         <p class="sg-hint">观星/AR星座式 · 本地赤道→地平投影 · 四季轮转「时间回溯」</p>
+        <p class="sg-spot" v-if="selectedSpot">📍 观测地：{{ selectedSpot.name }} · {{ selectedSpot.bortle }} 级暗夜</p>
       </div>
       <span class="sg-meta">{{ visibleStars }} 星可见</span>
     </header>
@@ -91,6 +92,7 @@ import {
   SEASONS,
   skyMapAt,
   ladlePointSeason,
+  useStargazingSpots,
 } from '../modules/sky'
 import type { SeasonKey, Constellation, ProjectedStar, ProjectedConstellation } from '../modules/sky'
 
@@ -107,6 +109,9 @@ const hover = ref<Constellation | null>(null)
 
 const seasons = SEASONS
 
+// INCR-511：观测地来源于观星地点库（选中即驱动投影，否则默认北京）
+const { selectedSpot } = useStargazingSpots()
+
 const skyDate = computed<Date>(() => {
   const d = new Date()
   d.setHours(nightSlot.value % 24, 0, 0, 0)
@@ -114,8 +119,8 @@ const skyDate = computed<Date>(() => {
 })
 
 const map = computed(() => skyMapAt(skyDate.value, {
-  latDeg: 39.9,
-  lngDeg: 116.4,
+  latDeg: selectedSpot.value ? selectedSpot.value.lat : 39.9,
+  lngDeg: selectedSpot.value ? selectedSpot.value.lng : 116.4,
   cx, cy, radius,
   season: season.value,
 }))
@@ -185,6 +190,7 @@ function hoverSeasonLabel(c: Constellation): string {
 }
 .sg-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .sg-title { margin: 0; }
+.sg-spot { margin: 4px 0 0; font-size: 12px; color: #8ab4ff; opacity: 0.9; }
 .sg-hint { margin: 4px 0 12px; font-size: 12px; opacity: 0.62; }
 .sg-meta { font-size: 12px; color: #8ab4ff; opacity: 0.9; white-space: nowrap; }
 .sg-toolbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
