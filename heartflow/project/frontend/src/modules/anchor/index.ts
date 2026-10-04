@@ -104,6 +104,24 @@ export {
 export type { JournalFilter } from './anchor-journals'
 export type { JournalTemplate, JournalTemplateId } from './anchor-journal-templates'
 
+// ---- 图片日记 · 日历/连续/热力分析（INCR 照片日记日历视图：纯函数零消费） ----
+export {
+  computePhotoStreak,
+  buildPhotoMonthGrid,
+  buildPhotoHeatmap,
+  heatmapMonthLabels,
+  findPhotosOnThisDay,
+} from './photo-diary-analytics'
+export type {
+  PhotoStreakStats,
+  PhotoDayCell,
+  PhotoMonthGrid,
+  PhotoHeatmapCell,
+  PhotoHeatmapWeek,
+  PhotoHeatmapMonthLabel,
+  PhotoOnThisDayItem,
+} from './photo-diary-analytics'
+
 function loadAll(): Anchor[] {
   return storage.getAnchors()
 }

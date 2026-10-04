@@ -65,11 +65,12 @@
       <input ref="importInput" type="file" accept="application/json,.json" class="pd-file" @change="onImport" />
     </div>
 
-    <!-- 画廊：模式切换（长廊 / 按月 / 收藏册） -->
+    <!-- 画廊：模式切换（长廊 / 按月 / 日历 / 收藏册） -->
     <div v-if="diary.entries.value.length" class="pd-block">
       <div class="pd-mode-bar">
         <button class="pd-mode" :class="{ active: viewMode === 'corridor' }" data-test="pd-mode-corridor" @click="viewMode = 'corridor'">长廊</button>
         <button class="pd-mode" :class="{ active: viewMode === 'month' }" data-test="pd-mode-month" @click="viewMode = 'month'">按月</button>
+        <button class="pd-mode" :class="{ active: viewMode === 'calendar' }" data-test="pd-mode-calendar" @click="viewMode = 'calendar'">日历</button>
         <button class="pd-mode" :class="{ active: viewMode === 'album' }" data-test="pd-mode-album" @click="viewMode = 'album'">收藏册</button>
       </div>
 
@@ -84,6 +85,108 @@
           <PhotoTile class="pd-img" :src="p.thumb" alt="照片" />
         </div>
         <p v-if="!corridorPhotos.length" class="pd-hint">还没有照片。</p>
+      </div>
+
+      <!-- 日历：连续记录 + 月历网格 + 近一年热力 + 那年今日（对标 Day One / 一本日记） -->
+      <div v-else-if="viewMode === 'calendar'" class="pd-calendar" data-test="pd-calendar">
+        <!-- 连续记录统计 -->
+        <div class="pd-streak" data-test="pd-streak">
+          <div class="pd-streak-item">
+            <span class="pd-streak-num" data-test="pd-streak-current">{{ streak.current }}</span>
+            <span class="pd-streak-label">当前连续 · 天</span>
+          </div>
+          <div class="pd-streak-item">
+            <span class="pd-streak-num">{{ streak.best }}</span>
+            <span class="pd-streak-label">最长连续 · 天</span>
+          </div>
+          <div class="pd-streak-item">
+            <span class="pd-streak-num">{{ streak.totalDays }}</span>
+            <span class="pd-streak-label">记录天数</span>
+          </div>
+          <div class="pd-streak-item">
+            <span class="pd-streak-num">{{ photoCount }}</span>
+            <span class="pd-streak-label">累计照片</span>
+          </div>
+        </div>
+
+        <!-- 月历 -->
+        <div class="pd-cal-head">
+          <button class="pd-btn pd-mini" data-test="pd-cal-prev" @click="shiftMonth(-1)">‹</button>
+          <span class="pd-cal-title" data-test="pd-cal-title">{{ monthGrid.label }}</span>
+          <button class="pd-btn pd-mini" data-test="pd-cal-next" @click="shiftMonth(1)">›</button>
+          <button class="pd-btn pd-mini pd-ghost" data-test="pd-cal-today" @click="gotoThisMonth">本月</button>
+        </div>
+        <div class="pd-cal-weekdays">
+          <span v-for="w in WEEKDAYS" :key="w">{{ w }}</span>
+        </div>
+        <div class="pd-cal-grid">
+          <button
+            v-for="cell in monthGrid.cells"
+            :key="cell.date"
+            class="pd-cal-cell"
+            :class="{ 'is-out': !cell.isCurrentMonth, 'is-today': cell.isToday, 'has-photo': cell.count > 0 }"
+            :data-test="`pd-cal-cell-${cell.date}`"
+            @click="onDayClick(cell)"
+          >
+            <span class="pd-cal-day">{{ cell.day }}</span>
+            <PhotoTile v-if="cell.thumb" class="pd-cal-thumb" :src="cell.thumb" alt="缩略图" />
+            <span v-if="cell.count > 0" class="pd-cal-count">{{ cell.count }}</span>
+          </button>
+        </div>
+        <p class="pd-hint pd-cal-tip">点有照片的日期可全屏查看该日照片。</p>
+
+        <!-- 近一年热力 -->
+        <div class="pd-heat-block">
+          <span class="pd-block-label">近一年记录热力</span>
+          <div class="pd-heat-wrap">
+            <div class="pd-heat-labels">
+              <span
+                v-for="l in heatmapLabels"
+                :key="l.week"
+                class="pd-heat-month"
+                :style="{ left: `${l.week * 13}px` }"
+              >{{ l.label }}</span>
+            </div>
+            <div class="pd-heat-grid">
+              <div v-for="(wk, wi) in heatmapWeeks" :key="wi" class="pd-heat-col">
+                <span
+                  v-for="c in wk.cells"
+                  :key="c.date"
+                  class="pd-heat-cell"
+                  :class="[`lv-${c.level}`, { future: c.future }]"
+                  :title="`${c.date} · ${c.count} 张`"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="pd-heat-legend">
+            <span>少</span>
+            <i class="pd-heat-cell lv-0" />
+            <i class="pd-heat-cell lv-1" />
+            <i class="pd-heat-cell lv-2" />
+            <i class="pd-heat-cell lv-3" />
+            <i class="pd-heat-cell lv-4" />
+            <span>多</span>
+          </div>
+        </div>
+
+        <!-- 那年今日 -->
+        <div v-if="onThisDay.length" class="pd-otd" data-test="pd-otd">
+          <span class="pd-block-label">那年今日</span>
+          <div class="pd-otd-list">
+            <button
+              v-for="o in onThisDay"
+              :key="o.date"
+              class="pd-otd-card"
+              :data-test="`pd-otd-${o.date}`"
+              @click="openViewer(o.date, 0)"
+            >
+              <PhotoTile class="pd-otd-thumb" :src="o.entry.thumbs[0] || o.entry.images[0]" alt="那年今日" />
+              <span class="pd-otd-meta">{{ o.yearsAgo }} 年前 · {{ o.date }}</span>
+              <span v-if="o.entry.caption" class="pd-otd-cap">{{ o.entry.caption }}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- 按月 / 选中相册：条目墙 -->
@@ -221,6 +324,14 @@ import {
   PHOTO_THUMB_DIM,
   type PhotoEntry,
 } from '../modules/anchor/photo-diary'
+import {
+  computePhotoStreak,
+  buildPhotoMonthGrid,
+  buildPhotoHeatmap,
+  heatmapMonthLabels,
+  findPhotosOnThisDay,
+  type PhotoDayCell,
+} from '../modules/anchor/photo-diary-analytics'
 import { fileToDownscaledDataUrl } from '../utils/image'
 import PhotoTile from './PhotoTile.vue'
 
@@ -276,7 +387,7 @@ function formatMonthLabel(ym: string): string {
 }
 
 // ---- 相册（收藏册）视图状态 ----
-const viewMode = ref<'corridor' | 'month' | 'album'>('month')
+const viewMode = ref<'corridor' | 'month' | 'calendar' | 'album'>('month')
 const selectedAlbumId = ref<string | null>(null)
 const newAlbumName = ref('')
 const renameAlbumName = ref('')
@@ -361,6 +472,33 @@ function deleteCurrentAlbum() {
 function onAssignAlbum(entry: PhotoEntry, e: Event) {
   const val = (e.target as HTMLSelectElement).value
   diary.setEntryAlbum(entry.date, val || null)
+}
+
+// ---- 日历视图：连续记录 / 月历 / 近一年热力 / 那年今日 ----
+const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六']
+const calYear = ref(Number(todayKey().slice(0, 4)))
+const calMonth = ref(Number(todayKey().slice(5, 7)) - 1)
+
+const streak = computed(() => computePhotoStreak(diary.entries.value, todayKey()))
+const monthGrid = computed(() =>
+  buildPhotoMonthGrid(diary.entries.value, calYear.value, calMonth.value, todayKey()),
+)
+const heatmapWeeks = computed(() => buildPhotoHeatmap(diary.entries.value, todayKey()))
+const heatmapLabels = computed(() => heatmapMonthLabels(heatmapWeeks.value))
+const onThisDay = computed(() => findPhotosOnThisDay(diary.entries.value, todayKey()))
+
+function shiftMonth(delta: number) {
+  const d = new Date(calYear.value, calMonth.value + delta, 1)
+  calYear.value = d.getFullYear()
+  calMonth.value = d.getMonth()
+}
+function gotoThisMonth() {
+  const t = todayKey()
+  calYear.value = Number(t.slice(0, 4))
+  calMonth.value = Number(t.slice(5, 7)) - 1
+}
+function onDayClick(cell: PhotoDayCell) {
+  if (cell.count > 0) openViewer(cell.date, 0)
 }
 
 const anchorDateSet = computed(() => new Set(props.anchorDates ?? []))
@@ -960,6 +1098,171 @@ async function onImport(e: Event) {
   background: rgba(140, 160, 190, 0.16);
   border-color: rgba(140, 160, 190, 0.4);
   color: #aab6c9;
+}
+
+/* ---- 日历视图（连续记录 / 月历 / 热力 / 那年今日） ---- */
+.pd-streak {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.pd-streak-item {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 8px;
+  text-align: center;
+}
+.pd-streak-num {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: #9fc4e8;
+}
+.pd-streak-label {
+  display: block;
+  font-size: 11px;
+  color: #8a97ad;
+  margin-top: 2px;
+}
+.pd-cal-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.pd-cal-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #dce4f0;
+  min-width: 96px;
+  text-align: center;
+}
+.pd-cal-weekdays,
+.pd-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.pd-cal-weekdays { margin-bottom: 4px; }
+.pd-cal-weekdays span {
+  text-align: center;
+  font-size: 11px;
+  color: #7a879c;
+}
+.pd-cal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  cursor: default;
+}
+.pd-cal-cell.is-out { opacity: 0.35; }
+.pd-cal-cell.has-photo { cursor: zoom-in; border-color: rgba(140, 170, 220, 0.35); }
+.pd-cal-cell.is-today { outline: 1px solid rgba(159, 196, 232, 0.7); outline-offset: -1px; }
+.pd-cal-day {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  z-index: 2;
+  font-size: 10px;
+  color: #c6d0e0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+.pd-cal-thumb {
+  width: 100%;
+  height: 100%;
+}
+.pd-cal-count {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  z-index: 2;
+  min-width: 14px;
+  padding: 0 3px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #e6ecf6;
+  font-size: 10px;
+  text-align: center;
+}
+.pd-cal-tip { margin-top: 8px; }
+.pd-heat-block { margin-top: 14px; }
+.pd-heat-wrap { overflow-x: auto; padding-bottom: 4px; }
+.pd-heat-labels {
+  position: relative;
+  height: 14px;
+}
+.pd-heat-month {
+  position: absolute;
+  top: 0;
+  font-size: 10px;
+  color: #7a879c;
+}
+.pd-heat-grid {
+  display: flex;
+  gap: 2px;
+}
+.pd-heat-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pd-heat-cell {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+}
+.pd-heat-cell.lv-0 { background: rgba(255, 255, 255, 0.05); }
+.pd-heat-cell.lv-1 { background: rgba(120, 150, 200, 0.3); }
+.pd-heat-cell.lv-2 { background: rgba(120, 150, 200, 0.5); }
+.pd-heat-cell.lv-3 { background: rgba(140, 175, 225, 0.7); }
+.pd-heat-cell.lv-4 { background: rgba(159, 196, 232, 0.95); }
+.pd-heat-cell.future { opacity: 0.25; }
+.pd-heat-legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #7a879c;
+}
+.pd-heat-legend .pd-heat-cell { width: 12px; height: 12px; }
+.pd-otd { margin-top: 14px; }
+.pd-otd-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+.pd-otd-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #aab6c9;
+  font-size: 11px;
+  text-align: left;
+  cursor: zoom-in;
+}
+.pd-otd-thumb {
+  width: 100%;
+  height: 72px;
+}
+.pd-otd-meta { color: #9fc4e8; }
+.pd-otd-cap {
+  color: #8a97ad;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 640px) {

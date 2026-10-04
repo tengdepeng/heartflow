@@ -387,3 +387,81 @@ describe('PhotoDiaryPanel 相册（长廊 + 收藏册）', () => {
     expect(cardImg.find('img').attributes('src')).toBe('B')
   })
 })
+
+// ============================================================
+// 日历视图：连续记录 / 月历网格 / 近一年热力 / 那年今日
+// （对标 Day One 日历+streak、一本日记 日历热力）
+// ============================================================
+describe('PhotoDiaryPanel 日历视图', () => {
+  const A = 'data:image/png;base64,AAA'
+  const B = 'data:image/png;base64,BBB'
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const now = new Date()
+  const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+  const thisMonthLabel = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月`
+
+  it('切到日历渲染连续统计、月历与热力网格', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ id: 'today', date: todayStr, images: [A, B] })],
+    })
+    expect(wrapper.find('[data-test="pd-calendar"]').exists()).toBe(false)
+
+    await wrapper.find('[data-test="pd-mode-calendar"]').trigger('click')
+    expect(wrapper.find('[data-test="pd-calendar"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="pd-cal-title"]').text()).toBe(thisMonthLabel)
+
+    // 连续统计：今日 1 张 → 当前连续 1 天
+    expect(wrapper.find('[data-test="pd-streak-current"]').text()).toBe('1')
+
+    // 月历补齐整周；今日格显示张数徽标
+    expect(wrapper.findAll('.pd-cal-cell').length % 7).toBe(0)
+    const cell = wrapper.find(`[data-test="pd-cal-cell-${todayStr}"]`)
+    expect(cell.exists()).toBe(true)
+    expect(cell.find('.pd-cal-count').text()).toBe('2')
+
+    // 热力：53 列 × 7 格
+    expect(wrapper.findAll('.pd-heat-grid .pd-heat-col').length).toBe(53)
+    expect(wrapper.findAll('.pd-heat-grid .pd-heat-cell').length).toBe(53 * 7)
+  })
+
+  it('点有照片的日期打开全屏查看', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ date: todayStr, images: [A, B] })],
+    })
+    await wrapper.find('[data-test="pd-mode-calendar"]').trigger('click')
+    await wrapper.find(`[data-test="pd-cal-cell-${todayStr}"]`).trigger('click')
+    expect(wrapper.find('.pd-viewer').exists()).toBe(true)
+    expect(wrapper.find('.pd-viewer-idx').text()).toBe('1 / 2')
+  })
+
+  it('月份可前后切换并可回到本月', async () => {
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [entry({ date: todayStr, images: [A] })],
+    })
+    await wrapper.find('[data-test="pd-mode-calendar"]').trigger('click')
+
+    await wrapper.find('[data-test="pd-cal-prev"]').trigger('click')
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    expect(wrapper.find('[data-test="pd-cal-title"]').text()).toBe(
+      `${prev.getFullYear()} 年 ${prev.getMonth() + 1} 月`,
+    )
+
+    await wrapper.find('[data-test="pd-cal-today"]').trigger('click')
+    expect(wrapper.find('[data-test="pd-cal-title"]').text()).toBe(thisMonthLabel)
+  })
+
+  it('往年同月同日渲染「那年今日」卡片', async () => {
+    const lastYear = `${now.getFullYear() - 1}-${todayStr.slice(5)}`
+    const wrapper = await mountPanel({
+      'hf:anchor:photo_diary': [
+        entry({ id: 'old', date: lastYear, images: [A], caption: '去年的今天' }),
+        entry({ id: 'today', date: todayStr, images: [B] }),
+      ],
+    })
+    await wrapper.find('[data-test="pd-mode-calendar"]').trigger('click')
+    const otd = wrapper.find('[data-test="pd-otd"]')
+    expect(otd.exists()).toBe(true)
+    expect(otd.text()).toContain('1 年前')
+    expect(otd.text()).toContain('去年的今天')
+  })
+})
