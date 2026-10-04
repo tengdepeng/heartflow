@@ -1,5 +1,5 @@
 {
-  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点确认共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard（习惯树今日完成）。",
+  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel（运动周图表本地日分桶），存量降至 159 处（150 文件）。",
   "violations": {
     "src/components/BudgetPanel.vue": [
       "toISOString().slice(0,10)"
@@ -17,9 +17,6 @@
       "toISOString().slice(0,10)"
     ],
     "src/components/guard-room/GovernPanel.vue": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/components/guard-room/HealthPanel.vue": [
       "toISOString().slice(0,10)"
     ],
     "src/components/HealthGoalsPanel.vue": [

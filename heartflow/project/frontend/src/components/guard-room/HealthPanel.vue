@@ -198,6 +198,7 @@
 import { ref, reactive, computed } from 'vue'
 import { useGuard, type GuardContact, type GuardCrashLevel } from '../../modules/guard'
 import { useHealth } from '../../resonance/bridges/health'
+import { getLocalDateKey } from '../../utils/time'
 
 const guard = useGuard()
 const { contacts, permissionLights, crashLogs } = guard
@@ -325,9 +326,9 @@ const exerciseChart = computed(() => {
   const days: number[] = []
   for (let i = 6; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i)
-    const dayStr = d.toISOString().slice(0, 10)
+    const dayStr = getLocalDateKey(d)
     const total = recentExercise.value
-      .filter(l => l.at.startsWith(dayStr))
+      .filter(l => getLocalDateKey(new Date(l.at)) === dayStr)
       .reduce((s, l) => s + (l.value.minutes || 0), 0)
     days.push(total)
   }
