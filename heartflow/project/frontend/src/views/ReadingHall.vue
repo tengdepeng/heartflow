@@ -52,12 +52,14 @@
         <ImmersiveReaderPanel
           :paragraphs="paragraphs"
           :marks="paragraphMark"
+          :annotations="annotationLayer"
           :resume-index="resumeParagraph"
           :resume-token="resumeToken"
           :title="activeBookTitle || '阅读'"
           @paragraph-click="onParagraphClick"
           @text-select="onTextSelect"
           @progress="onReaderProgress"
+          @export-annotations="onExportAnnotations"
         />
         <div class="reading-toolbar">
           <span class="reading-label">{{ activeBookTitle || '阅读' }}</span>
@@ -316,7 +318,7 @@ import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
-import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox, useReadingExport, EXCERPT_MARK_COLORS, DEFAULT_EXCERPT_MARK, excerptMarkColor, applyExcerptMark, markDistribution, filterExcerptsByMark } from '../modules/reading'
+import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox, useReadingExport, EXCERPT_MARK_COLORS, DEFAULT_EXCERPT_MARK, excerptMarkColor, applyExcerptMark, markDistribution, filterExcerptsByMark, buildAnnotationLayer, annotationMarkMap } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
@@ -446,19 +448,16 @@ const paragraphs = computed(() => {
   return readingText.value.split(/\n+/).filter(p => p.trim())
 })
 
+// 段落批注层（INCR-523）：摘录按段聚合为「划线/想法」，供阅读器段末角标 + 边距气泡
+const annotationLayer = computed(() => buildAnnotationLayer(excerpts.value, paragraphs.value))
+
 // 已摘录段落 → 标记色（多色高亮；同段多条摘录取首条色）
-const paragraphMark = computed(() => {
-  const map = new Map<number, string>()
-  const paras = paragraphs.value
-  for (let i = 0; i < paras.length; i++) {
-    const paraText = paras[i].trim()
-    const hit = excerpts.value.find(
-      ex => paraText.includes(ex.text.trim()) || ex.text.trim().includes(paraText),
-    )
-    if (hit) map.set(i, excerptMarkColor(hit))
-  }
-  return map
-})
+const paragraphMark = computed(() => annotationMarkMap(annotationLayer.value))
+
+// 阅读器内一键导出划线/想法（复用摘录导出：本地 Markdown，不触云）
+function onExportAnnotations() {
+  readingExport.exportExcerpts()
+}
 
 // 摘录集筛选与各色分布（INCR-477）
 const filteredExcerpts = computed(() =>

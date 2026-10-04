@@ -5,6 +5,8 @@
 // ============================================================
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
+import type { Excerpt } from '../../modules/reading/reading-content'
+import type { ParagraphAnnotation } from '../../modules/reading/annotation-layer'
 
 const store: Record<string, unknown> = {}
 const mockGetKV = vi.fn((key: string, fallback: unknown) =>
@@ -171,5 +173,77 @@ describe('ImmersiveReaderPanel', () => {
     expect(wrapper.find('.ird-step-val').text()).toBe('14px')
     expect(wrapper.find('.ird-indicator').text()).toBe('2 / 2')
     expect(wrapper.findAll('.ird-paragraph').length).toBeGreaterThan(0)
+  })
+})
+
+// ============================================================
+// 段落批注（划线 / 想法，INCR-523）
+// ============================================================
+describe('ImmersiveReaderPanel · 段落批注', () => {
+  beforeEach(() => {
+    vi.resetModules()
+    vi.clearAllMocks()
+    for (const k of Object.keys(store)) delete store[k]
+    mockGetKV.mockImplementation((key: string, fallback: unknown) =>
+      key in store ? store[key] : fallback,
+    )
+  })
+
+  function excerpt(id: string, note = ''): Excerpt {
+    return { id, source: '测试书', text: `划线-${id}`, note, createdAt: '2026-10-05T00:00:00.000Z' }
+  }
+
+  function layerAt(index: number, noteTexts: string[]): Map<number, ParagraphAnnotation> {
+    const highlights = [excerpt('base'), ...noteTexts.map((n, i) => excerpt(`t${i}`, n))]
+    const thoughts = highlights.filter((h) => h.note.trim().length > 0)
+    return new Map([[index, { index, highlights, thoughts, count: highlights.length }]])
+  }
+
+  async function getAnnotWrapper(annotations: Map<number, ParagraphAnnotation>) {
+    const { default: ImmersiveReaderPanel } = await import('../ImmersiveReaderPanel.vue')
+    return mount(ImmersiveReaderPanel, {
+      props: { paragraphs: [PARA, PARA, PARA], title: '测试书', annotations },
+    })
+  }
+
+  it('渲染段末批注角标与边距想法气泡', async () => {
+    const wrapper = await getAnnotWrapper(layerAt(1, ['记一笔想法']))
+    const badge = wrapper.find('.ird-annot-badge')
+    expect(badge.exists()).toBe(true)
+    expect(badge.text()).toBe('2 条划线 · 1 条想法')
+    expect(badge.classes()).toContain('has-thoughts')
+    expect(wrapper.find('.ird-thought-bubble').text()).toBe('记一笔想法')
+  })
+
+  it('无想法时仅渲染划线角标，不渲染气泡', async () => {
+    const wrapper = await getAnnotWrapper(layerAt(0, []))
+    expect(wrapper.find('.ird-annot-badge').text()).toBe('1 条划线')
+    expect(wrapper.find('.ird-thought-bubble').exists()).toBe(false)
+  })
+
+  it('点击角标展开批注弹层，再次点击收起', async () => {
+    const wrapper = await getAnnotWrapper(layerAt(1, ['记一笔想法']))
+    expect(wrapper.find('.ird-annot-pop').exists()).toBe(false)
+    await wrapper.find('.ird-annot-badge').trigger('click')
+    const pop = wrapper.find('.ird-annot-pop')
+    expect(pop.exists()).toBe(true)
+    expect(pop.findAll('.ird-annot-quote')).toHaveLength(2)
+    expect(pop.text()).toContain('记一笔想法')
+    await wrapper.find('.ird-annot-badge').trigger('click')
+    expect(wrapper.find('.ird-annot-pop').exists()).toBe(false)
+  })
+
+  it('有批注时显示导出按钮并 emit export-annotations', async () => {
+    const wrapper = await getAnnotWrapper(layerAt(0, ['想法']))
+    const btn = wrapper.find('.ird-export-btn')
+    expect(btn.exists()).toBe(true)
+    await btn.trigger('click')
+    expect(wrapper.emitted('export-annotations')).toBeTruthy()
+  })
+
+  it('无批注时不渲染角标与导出按钮', async () => {
+    const wrapper = await getAnnotWrapper(new Map())
+    expect(wrapper.findAll('.ird-annot-badge')).toHaveLength(0)
+    expect(wrapper.find('.ird-export-btn').exists()).toBe(false)
   })
 })

@@ -28,6 +28,12 @@
           >滚动</button>
         </div>
         <button
+          v-if="hasAnnotations"
+          class="ird-icon-btn ird-export-btn"
+          title="导出划线 / 想法（本地 Markdown）"
+          @click="emit('export-annotations')"
+        >导出</button>
+        <button
           class="ird-icon-btn"
           :title="fullscreen ? '退出沉浸' : '沉浸全屏'"
           @click="fullscreen = !fullscreen"
@@ -75,14 +81,37 @@
     >
       <!-- 翻页动画容器：翻页模式下按页重建以触发方向动画 -->
       <div class="ird-page" :class="turnClass" :key="pageKey">
-        <p
-          v-for="item in visibleParagraphs"
-          :key="item.idx"
-          class="ird-paragraph"
-          :class="{ highlighted: marks.has(item.idx) }"
-          :style="marks.has(item.idx) ? { '--ird-mark': marks.get(item.idx) } : undefined"
-          @click="onParagraphClick(item.idx, item.text)"
-        >{{ item.text }}</p>
+        <div v-for="item in visibleParagraphs" :key="item.idx" class="ird-para-block">
+          <p
+            class="ird-paragraph"
+            :class="{ highlighted: marks.has(item.idx) }"
+            :style="marks.has(item.idx) ? { '--ird-mark': marks.get(item.idx) } : undefined"
+            @click="onParagraphClick(item.idx, item.text)"
+          >{{ item.text }}</p>
+          <!-- 段末批注角标 + 边距想法气泡（INCR-523） -->
+          <div v-if="annotFor(item.idx)" class="ird-annot">
+            <button
+              class="ird-annot-badge"
+              :class="{ 'has-thoughts': hasThoughts(item.idx) }"
+              type="button"
+              :title="badgeTitle(item.idx)"
+              @click="toggleAnnot(item.idx)"
+            >{{ badgeLabel(item.idx) }}</button>
+            <button
+              v-if="bubbleText(item.idx)"
+              class="ird-thought-bubble"
+              type="button"
+              :title="bubbleText(item.idx)"
+              @click="toggleAnnot(item.idx)"
+            >{{ bubbleText(item.idx) }}</button>
+          </div>
+          <div v-if="openAnnot === item.idx" class="ird-annot-pop">
+            <div v-for="ex in annotHighlights(item.idx)" :key="ex.id" class="ird-annot-item">
+              <div class="ird-annot-quote">{{ ex.text }}</div>
+              <div v-if="ex.note" class="ird-annot-note">{{ ex.note }}</div>
+            </div>
+          </div>
+        </div>
         <div v-if="!visibleParagraphs.length" class="ird-empty">暂无正文</div>
       </div>
       <!-- 翻页模式：左右点击热区（不遮挡中段摘录点击） -->
@@ -151,12 +180,16 @@ import {
   clampLineHeight,
 } from '../modules/reading/immersive-reader'
 import type { ReaderMode } from '../modules/reading/immersive-reader'
+import type { ParagraphAnnotation } from '../modules/reading/annotation-layer'
+import type { Excerpt } from '../modules/reading/reading-content'
 
 const props = withDefaults(
   defineProps<{
     paragraphs: string[]
     /** 段落下标 → 标记色（已摘录段落高亮） */
     marks?: Map<number, string>
+    /** 段落批注层：段落下标 → 划线/想法聚合（INCR-523） */
+    annotations?: Map<number, ParagraphAnnotation>
     /** 打开书籍时的续读段落 */
     resumeIndex?: number
     /** 续读触发令牌：每次打开书籍自增，用于强制重新定位（同一书重复打开也生效） */
@@ -165,6 +198,7 @@ const props = withDefaults(
   }>(),
   {
     marks: () => new Map<number, string>(),
+    annotations: () => new Map<number, ParagraphAnnotation>(),
     resumeIndex: 0,
     resumeToken: 0,
     title: '阅读',
@@ -175,6 +209,7 @@ const emit = defineEmits<{
   (e: 'paragraph-click', idx: number, text: string): void
   (e: 'text-select'): void
   (e: 'progress', paragraphIndex: number): void
+  (e: 'export-annotations'): void
 }>()
 
 const { prefs, theme, setPref, reset } = useImmersiveReader()
@@ -185,6 +220,9 @@ const scrollerRef = ref<HTMLElement | null>(null)
 
 // 翻页方向（驱动仿真翻页动画）
 const turnDir = ref<'next' | 'prev'>('next')
+
+// 展开的段落批注（段落下标；null 表示未展开）
+const openAnnot = ref<number | null>(null)
 
 // ---- 常驻时间 / 电量（沉浸态状态栏，电量 API 缺失则静默降级） ----
 interface BatteryLike {
@@ -224,6 +262,39 @@ const visibleParagraphs = computed<{ text: string; idx: number }[]>(() => {
   for (let i = p.paraStart; i < p.paraEnd; i++) out.push({ text: props.paragraphs[i], idx: i })
   return out
 })
+
+// ---- 段落批注（划线 / 想法聚合，INCR-523）----
+const annotations = computed(() => props.annotations ?? new Map<number, ParagraphAnnotation>())
+const hasAnnotations = computed(() => annotations.value.size > 0)
+
+function annotFor(idx: number): ParagraphAnnotation | undefined {
+  return annotations.value.get(idx)
+}
+function hasThoughts(idx: number): boolean {
+  return (annotFor(idx)?.thoughts.length ?? 0) > 0
+}
+function badgeLabel(idx: number): string {
+  const ann = annotFor(idx)
+  if (!ann) return ''
+  const parts: string[] = []
+  if (ann.highlights.length) parts.push(`${ann.highlights.length} 条划线`)
+  if (ann.thoughts.length) parts.push(`${ann.thoughts.length} 条想法`)
+  return parts.join(' · ')
+}
+function badgeTitle(idx: number): string {
+  return `${badgeLabel(idx)}（点击查看）`
+}
+function bubbleText(idx: number): string {
+  const ann = annotFor(idx)
+  if (!ann || !ann.thoughts.length) return ''
+  return (ann.thoughts[0].note || '').trim()
+}
+function annotHighlights(idx: number): Excerpt[] {
+  return annotFor(idx)?.highlights ?? []
+}
+function toggleAnnot(idx: number): void {
+  openAnnot.value = openAnnot.value === idx ? null : idx
+}
 
 const totalChars = computed(() => props.paragraphs.reduce((sum, t) => sum + countChars(t), 0))
 const charsBefore = computed(() => {
@@ -350,6 +421,7 @@ function goPage(delta: number): void {
   if (next < 0 || next >= totalPages.value) return
   turnDir.value = delta >= 0 ? 'next' : 'prev'
   currentPage.value = next
+  openAnnot.value = null
   scrollSurfaceTop()
   emit('progress', pageInfo.value?.paraStart ?? 0)
 }
@@ -544,6 +616,11 @@ onBeforeUnmount(() => {
 
 .ird-icon-btn:hover {
   border-color: var(--ird-accent, #c46a5a);
+  color: var(--ird-accent, #c46a5a);
+}
+
+.ird-export-btn {
+  border-color: color-mix(in srgb, var(--ird-accent, #c46a5a) 40%, transparent);
   color: var(--ird-accent, #c46a5a);
 }
 
@@ -783,6 +860,87 @@ onBeforeUnmount(() => {
   background: color-mix(in srgb, var(--ird-mark, #c46a5a) 18%, transparent);
   border-left: 3px solid var(--ird-mark, #c46a5a);
   padding-left: 5px;
+}
+
+/* ---- 段落批注（划线 / 想法，INCR-523） ---- */
+.ird-para-block {
+  position: relative;
+}
+
+.ird-annot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -0.6em 0 1.1em;
+  padding-left: 8px;
+  flex-wrap: wrap;
+}
+
+.ird-annot-badge {
+  padding: 2px 9px;
+  border-radius: 999px;
+  border: 1px dashed color-mix(in srgb, var(--ird-text, #2f2a24) 28%, transparent);
+  background: transparent;
+  color: var(--ird-muted, #8a8375);
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ird-annot-badge:hover,
+.ird-annot-badge.has-thoughts {
+  border-style: solid;
+  border-color: var(--ird-accent, #c46a5a);
+  color: var(--ird-accent, #c46a5a);
+}
+
+/* 边距想法气泡：贴合右侧页边距的第一条想法预览 */
+.ird-thought-bubble {
+  max-width: 62%;
+  padding: 3px 11px;
+  border-radius: 12px 12px 12px 3px;
+  border: 1px solid color-mix(in srgb, var(--ird-accent, #c46a5a) 24%, transparent);
+  background: color-mix(in srgb, var(--ird-accent, #c46a5a) 10%, transparent);
+  color: var(--ird-text, #2f2a24);
+  font-size: 11px;
+  font-family: inherit;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.ird-thought-bubble:hover {
+  background: color-mix(in srgb, var(--ird-accent, #c46a5a) 18%, transparent);
+}
+
+.ird-annot-pop {
+  margin: 0 0 1.2em 8px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  border-left: 2px solid var(--ird-accent, #c46a5a);
+  background: color-mix(in srgb, var(--ird-accent, #c46a5a) 6%, transparent);
+}
+
+.ird-annot-item + .ird-annot-item {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed color-mix(in srgb, var(--ird-text, #2f2a24) 14%, transparent);
+}
+
+.ird-annot-quote {
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.82;
+}
+
+.ird-annot-note {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--ird-accent, #c46a5a);
 }
 
 .ird-empty {

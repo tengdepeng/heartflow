@@ -209,6 +209,17 @@ export {
 } from './shelf-organizer'
 export type { ShelfView, ShelfSort, ShelfPrefs, ShelfSections, ShelfStats } from './shelf-organizer'
 
+// ---- 段落批注层（INCR-523：划线/想法按段聚合 · 段末热门 · 边距气泡 · 一键导出） ----
+export {
+  matchExcerptParagraph,
+  buildAnnotationLayer,
+  annotationMarkMap,
+  popularParagraphs,
+  annotationStats,
+  buildAnnotationsMarkdown,
+} from './annotation-layer'
+export type { ParagraphAnnotation, AnnotationStats } from './annotation-layer'
+
 // ---- 摘录 / 读书便签 本地导出（#41） ----
 export {
   useReadingExport,
