@@ -5,18 +5,34 @@
       <button class="nav-btn" @click="prevMonth" title="上个月">◀</button>
       <div class="month-title" @click="goToday">
         {{ year }}年{{ month + 1 }}月
-        <span v-if="isCurrentMonth" class="today-badge">今天</span>
+        <span v-if="isCurrentMonth && prefs.showTodayBadge" class="today-badge">今天</span>
       </div>
       <button class="nav-btn" @click="nextMonth" title="下个月">▶</button>
+      <button
+        class="prefs-toggle-btn"
+        :class="{ 'is-active': showPrefs }"
+        type="button"
+        :aria-expanded="showPrefs"
+        aria-label="日历显示偏好"
+        title="显示偏好"
+        @click="showPrefs = !showPrefs"
+      >⚙</button>
     </div>
+
+    <!-- 显示偏好面板 -->
+    <Transition name="slide-up">
+      <div v-if="showPrefs" class="prefs-wrap">
+        <CalendarDisplayPrefsPanel />
+      </div>
+    </Transition>
 
     <!-- 星期表头 -->
     <div class="weekday-header">
-      <span v-for="w in weekdays" :key="w" class="weekday-cell">{{ w }}</span>
+      <span v-for="(w, i) in weekdays" :key="i" class="weekday-cell">{{ w }}</span>
     </div>
 
     <!-- 日期网格 -->
-    <div class="day-grid">
+    <div class="day-grid" :class="{ 'is-compact': prefs.compact }">
       <div
         v-for="(day, idx) in monthDays"
         :key="idx"
@@ -28,9 +44,12 @@
         ]"
         @click="selectDay(day)"
       >
-        <span class="day-number">{{ day.date.getDate() }}</span>
+        <span
+          class="day-number"
+          :class="{ 'is-bold': prefs.boldNumber, 'is-bg': prefs.numberBackground }"
+        >{{ day.date.getDate() }}</span>
         <div
-          v-if="day.totalMinutes > 0"
+          v-if="prefs.showFocusBar && day.totalMinutes > 0"
           class="day-bar"
           :style="{ width: barWidth(day.totalMinutes) }"
         />
@@ -73,8 +92,10 @@
 import { ref, computed } from 'vue'
 import type { FocusSession } from '../types'
 import { storage } from '../engine/storage'
-import { formatDuration, getMonthDays, formatClockTime as formatTime } from '../utils/time'
+import { formatDuration, formatClockTime as formatTime } from '../utils/time'
 import { CRYSTAL_COLORS, hexToRgba } from '../utils/colors'
+import { useCalendarPrefs, weekdaysFor, buildMonthGrid } from '../modules/calendar-prefs/calendar-prefs'
+import CalendarDisplayPrefsPanel from './CalendarDisplayPrefsPanel.vue'
 
 // ---- 数据适配：将 FocusSession 转为组件需要的记录格式 ----
 interface RecordItem {
@@ -101,7 +122,10 @@ function sessionsToRecords(sessions: FocusSession[]): RecordItem[] {
     }))
 }
 
-const weekdays = ['日', '一', '二', '三', '四', '五', '六']
+const { prefs } = useCalendarPrefs()
+const showPrefs = ref(false)
+
+const weekdays = computed(() => weekdaysFor(prefs.value.weekStart))
 
 const now = new Date()
 const year = ref(now.getFullYear())
@@ -132,7 +156,7 @@ const dailyTotals = computed(() => {
 })
 
 const monthDays = computed(() => {
-  const days = getMonthDays(year.value, month.value)
+  const days = buildMonthGrid(year.value, month.value, prefs.value.weekStart, prefs.value.sixRow)
   const today = new Date()
   return days.map(d => {
     const key = `${d.date.getFullYear()}-${d.date.getMonth()}-${d.date.getDate()}`
@@ -298,6 +322,37 @@ function tagStyle(tag: string) {
   font-weight: 500;
 }
 
+.prefs-toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.prefs-toggle-btn:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-cyan);
+}
+
+.prefs-toggle-btn.is-active {
+  color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  background: rgba(54, 214, 231, 0.1);
+}
+
+.prefs-wrap {
+  margin-bottom: 14px;
+  flex-shrink: 0;
+}
+
 /* ── Weekday Header ── */
 .weekday-header {
   display: grid;
@@ -319,6 +374,11 @@ function tagStyle(tag: string) {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
+}
+
+.day-grid.is-compact .day-cell {
+  aspect-ratio: 1.6;
+  min-height: 34px;
 }
 
 .day-cell {
@@ -364,6 +424,21 @@ function tagStyle(tag: string) {
   font-weight: 500;
   color: var(--text-secondary);
   line-height: 1;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.day-number.is-bold {
+  font-weight: 700;
+}
+
+.day-number.is-bg {
+  background: rgba(54, 214, 231, 0.12);
+  color: var(--text-primary);
 }
 
 .day-bar {

@@ -6,10 +6,14 @@ import { mount } from '@vue/test-utils'
 
 // 模拟 storage
 const mockGetSessions = vi.fn()
+const mockGetKV = vi.fn()
+const mockSetKV = vi.fn()
 
 vi.mock('../../engine/storage', () => ({
   storage: {
     getSessions: (...args: any[]) => mockGetSessions(...args),
+    getKV: (...args: any[]) => mockGetKV(...args),
+    setKV: (...args: any[]) => mockSetKV(...args),
   },
 }))
 
@@ -167,5 +171,13 @@ describe('CalendarView', () => {
     const todayCell = wrapper.find('.day-cell.today')
     await todayCell.trigger('click')
     expect(wrapper.text()).toContain('这天还没有专注记录哦')
+  })
+
+  it('齿轮按钮切换日历显示偏好面板', async () => {
+    const wrapper = await getWrapper()
+    expect(wrapper.find('.prefs-wrap').exists()).toBe(false)
+    await wrapper.find('.prefs-toggle-btn').trigger('click')
+    expect(wrapper.find('.prefs-wrap').exists()).toBe(true)
+    expect(wrapper.text()).toContain('日历显示偏好')
   })
 })

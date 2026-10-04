@@ -92,11 +92,18 @@
       <ObservationPlanPanel />
     </div>
 
+    <!-- 历史上的今天 · 公共历史事件库（on-this-day 引擎，INCR-510） -->
+    <div data-enter class="tcv-otd">
+      <OnThisDayPanel />
+    </div>
+
     <!-- 时间星图 · 赤道→地平投影 / 四季回溯（sky 引擎，INCR-185） -->
     <div data-enter class="tcv-skygaze">
       <SkyGazePanel />
       <!-- 观星地点库 · 精选暗夜/观星地，设为观测地驱动上方星图（INCR-511） -->
       <StargazingSpotsPanel />
+      <!-- 月面地名导览 · 月海/环形山正交投影（sky/moon-atlas 引擎，INCR-512） -->
+      <MoonAtlasPanel />
     </div>
 
     <!-- 生命刻度 · 生之时/死之时/里程碑（life-epoch 引擎，INCR-211） -->
@@ -157,6 +164,8 @@ import AstronomyPanel from '../components/AstronomyPanel.vue'
 import AstronomyCalendarPanel from '../components/AstronomyCalendarPanel.vue'
 import SkyGazePanel from '../components/SkyGazePanel.vue'
 import StargazingSpotsPanel from '../components/StargazingSpotsPanel.vue'
+import MoonAtlasPanel from '../components/MoonAtlasPanel.vue'
+import OnThisDayPanel from '../components/OnThisDayPanel.vue'
 import LifeEpochPanel from '../components/LifeEpochPanel.vue'
 import ObservationPlanPanel from '../components/ObservationPlanPanel.vue'
 import type { FocusSession } from '../types'

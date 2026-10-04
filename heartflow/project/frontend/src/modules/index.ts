@@ -293,6 +293,18 @@ export type { TourStep, TourDef, TourPlacement, GuideTourState, Rect, Size, Poin
 export { useFontLibrary, reloadFontLibrary, fontPreset, fontCssVars, applyFonts, FONT_PRESETS, DEFAULT_FONT_LIBRARY } from './font-library'
 export type { FontPreset, FontLibraryState } from './font-library'
 
+// ---- calendar-prefs（时间线 · 日历显示偏好，INCR-503） ----
+export { useCalendarPrefs, reloadCalendarPrefs, weekdaysFor, buildMonthGrid, WEEKDAY_LABELS, DEFAULT_CALENDAR_PREFS } from './calendar-prefs'
+export type { CalendarPrefs, GridCell } from './calendar-prefs'
+
+// ---- photo-guide（藏象阁 · AI 拍照引导取景，INCR-506） ----
+export { usePhotoGuide, reloadPhotoGuide, sceneById, analyzeImageData, evaluateCapture, CAPTURE_SCENES, LEVEL_LABEL } from './photo-guide'
+export type { CaptureScene, CaptureSceneId, ImageMetrics, CaptureEvaluation, CaptureRecord, CapturePhase } from './photo-guide'
+
+// ---- on-this-day（时间长廊 · 历史上的今天，INCR-510） ----
+export { useOnThisDay, reloadOnThisDay, eventsOn, eventsByCategory, searchEvents, pickRandom as pickRandomEvent, formatYear, totalEvents, HISTORY_EVENTS, HISTORY_CATEGORIES } from './on-this-day'
+export type { HistoryEvent, HistoryCategory } from './on-this-day'
+
 // ---- movement ----
 export { useMovementRhythm } from './movement'
 export { useMovement, MOVES_KEY } from './movement'

@@ -55,3 +55,16 @@ export {
   useStargazingSpots,
 } from './stargazing-spots'
 export type { StargazingSpot } from './stargazing-spots'
+
+export {
+  LUNAR_FEATURES,
+  FEATURE_TYPE_LABEL,
+  FEATURE_TYPE_ORDER,
+  featuresByType,
+  searchFeatures,
+  sortByDiameter,
+  projectToDisc,
+  discRadius,
+  isFarSide,
+} from './moon-atlas'
+export type { LunarFeature, LunarFeatureType, DiscPoint } from './moon-atlas'

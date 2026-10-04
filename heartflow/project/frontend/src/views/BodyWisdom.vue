@@ -100,6 +100,8 @@
       <TcmPanel />
       <!-- 指标趋势档案 · 睡眠/运动趋势/关联/预警（body/metric-trends 引擎，INCR-219） -->
       <MetricTrendsPanel :logs="health.bodyLogs.value" />
+      <!-- AI 拍照引导取景 · 三诊取景引导 + 本地画质评估（photo-guide 引擎，INCR-506） -->
+      <GuidedCapturePanel />
     </div>
 
     <!-- ===== 感知层 ===== -->
@@ -214,6 +216,7 @@ import HealthAnalysisPanel from '../components/HealthAnalysisPanel.vue'
 import TcmPanel from '../components/TcmPanel.vue'
 import MetricTrendsPanel from '../components/MetricTrendsPanel.vue'
 import SutraAnnotationPanel from '../components/SutraAnnotationPanel.vue'
+import GuidedCapturePanel from '../components/GuidedCapturePanel.vue'
 import { MERIDIAN_HOURS } from '../modules/body-wisdom'
 import type { MeridianRecord, MoodRecord } from '../modules/body-wisdom'
 
