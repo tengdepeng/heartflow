@@ -74,9 +74,9 @@ describe('ReadingHall · 书架打开阅读（乙-1b）', () => {
     const wrapper = await getWrapper()
     await wrapper.vm.$nextTick()
 
-    // 切到书架 tab（顺序：书卷[0]/摘录集[1]/回顾[2]/待读箱[3]/人生之书[4]/书架[5]/日历[6]/金句[7]/报告[8]/读书便签[9]/速度·洞察[10]；calendar/quote/report/memo/speed 均追加在书架之后，书架仍居 index 5）
+    // 切到书架 tab（顺序：书卷[0]/摘录集[1]/回顾[2]/待读箱[3]/人生之书[4]/书架[5]/日历[6]/金句[7]/报告[8]/叙事[9]/读书便签[10]/速度·洞察[11]；calendar/quote/report/narrative/memo/speed 均追加在书架之后，书架仍居 index 5）
     const tabs = wrapper.findAll('.rh-tab')
-    expect(tabs.length).toBe(11)
+    expect(tabs.length).toBe(12)
     await tabs[5].trigger('click')
     await wrapper.vm.$nextTick()
 

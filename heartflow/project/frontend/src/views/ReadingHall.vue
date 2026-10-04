@@ -227,6 +227,11 @@
       <ReadingReportPanel />
     </div>
 
+    <!-- ========== 年度叙事（Wrapped 式：分季 era + 阅读人格 + 叙事弧） ========== -->
+    <div data-enter v-if="activeTab === 'narrative'" class="rh-panel rh-narrative-panel">
+      <ReadingNarrativePanel />
+    </div>
+
     <!-- ========== 阅读速度·洞察（补挂孤儿 API：reading-speed / reading-insights） ========== -->
     <div data-enter v-if="activeTab === 'speed'" class="rh-panel rh-speed-panel">
       <ReadingSpeedInsightPanel />
@@ -327,6 +332,7 @@ import ReadingMemoPanel from '../components/ReadingMemoPanel.vue'
 import ReadingCalendarPanel from '../components/ReadingCalendarPanel.vue'
 import ReadingQuoteWallPanel from '../components/ReadingQuoteWallPanel.vue'
 import ReadingReportPanel from '../components/ReadingReportPanel.vue'
+import ReadingNarrativePanel from '../components/ReadingNarrativePanel.vue'
 import ReadingSpeedInsightPanel from '../components/ReadingSpeedInsightPanel.vue'
 
 // ---- 选项卡 ----
@@ -343,10 +349,11 @@ const tabs = [
   { key: 'calendar', label: '日历' },
   { key: 'quote', label: '金句' },
   { key: 'report', label: '报告' },
+  { key: 'narrative', label: '叙事' },
   { key: 'memo', label: '读书便签' },
   { key: 'speed', label: '速度·洞察' },
 ] as const
-const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'calendar' | 'quote' | 'report' | 'memo' | 'speed'>('book')
+const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'calendar' | 'quote' | 'report' | 'narrative' | 'memo' | 'speed'>('book')
 
 // ---- 阅读文本 ----
 const reading = useReading()

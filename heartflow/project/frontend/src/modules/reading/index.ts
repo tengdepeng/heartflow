@@ -126,6 +126,19 @@ export type { DayReading, MonthCell, MonthCalendar, YearSummary } from './readin
 export { useReadingReport, buildYearReport } from './reading-report'
 export type { YearReport, MonthPoint } from './reading-report'
 
+// ---- 年度叙事（Wrapped 式：分季 era + 阅读人格 + 叙事弧，本地派生不触云） ----
+export {
+  useReadingNarrative,
+  computeReadingNarrative,
+  buildEras,
+  buildPersona,
+  buildNarrativeArc,
+  buildNarrativeMarkdown,
+  seasonOfQuarter,
+  quarterOfMonth,
+} from './reading-narrative'
+export type { ReadingNarrative, ReadingEra, ReadingPersonaTag } from './reading-narrative'
+
 // ---- 朗读音色库（INCR-504：13 款本地音色，供 TtsControlPanel / VoiceLibraryPanel） ----
 export {
   useVoiceLibrary,
