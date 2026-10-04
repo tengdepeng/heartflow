@@ -521,6 +521,9 @@
 
     <!-- 花种杂交（emotion/flower-season·useCrossBreeding，INCR-267 补挂载孤儿组件，零 props 直驱） -->
     <FlowerHybridPanel />
+
+    <!-- 电子水族箱（INCR-513，借鉴 96 APK 组件岛 ocean_fish/ocean_4_feeding：纯本地放养·投食·成长，零 props 直驱） -->
+    <AquariumPanel />
   </div>
 </template>
 
@@ -538,6 +541,7 @@ import SoundscapePanel from '../components/SoundscapePanel.vue'
 import EmotionTrendsPanel from '../components/EmotionTrendsPanel.vue'
 import VisitorFootprintsPanel from '../components/VisitorFootprintsPanel.vue'
 import FlowerHybridPanel from '../components/FlowerHybridPanel.vue'
+import AquariumPanel from '../components/AquariumPanel.vue'
 import FlowerClusterArchivePanel from '../components/FlowerClusterArchivePanel.vue'
 import GardenNarrativePanel from '../components/GardenNarrativePanel.vue'
 import GardenSocialPanel from '../components/GardenSocialPanel.vue'
