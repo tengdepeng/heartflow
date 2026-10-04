@@ -57,7 +57,8 @@
           <p
             v-for="(para, idx) in paragraphs"
             :key="idx"
-            :class="['rh-paragraph', { highlighted: paraHighlighted.has(idx) }]"
+            :class="['rh-paragraph', { highlighted: paragraphMark.has(idx) }]"
+            :style="paragraphMark.has(idx) ? { '--para-mark': paragraphMark.get(idx) } : undefined"
             @click="onParagraphClick(idx, para)"
           >{{ para }}</p>
         </div>
@@ -96,13 +97,47 @@
             >导出全部(JSON)</button>
           </div>
         </div>
+        <!-- 多色标记筛选栏（INCR-477） -->
+        <div class="rh-mark-bar">
+          <button
+            class="rh-mark-chip"
+            :class="{ active: markFilter === '' }"
+            @click="markFilter = ''"
+          >全部 {{ excerpts.length }}</button>
+          <button
+            v-for="s in markStats"
+            :key="s.color.id"
+            class="rh-mark-chip"
+            :class="{ active: markFilter === s.color.value }"
+            :title="s.color.label"
+            @click="markFilter = markFilter === s.color.value ? '' : s.color.value"
+          >
+            <span class="rh-mark-dot" :style="{ background: s.color.value }"></span>{{ s.count }}
+          </button>
+        </div>
         <div class="rh-excerpts-list">
-          <div v-for="ex in excerpts" :key="ex.id" class="rh-excerpt-card">
+          <div
+            v-for="ex in filteredExcerpts"
+            :key="ex.id"
+            class="rh-excerpt-card"
+            :style="{ '--ex-mark': excerptMarkColor(ex) }"
+          >
             <div class="excerpt-original">"{{ ex.text }}"</div>
             <div v-if="ex.note" class="rh-excerpt-note">{{ ex.note }}</div>
             <div class="excerpt-meta">
               <span class="meta-source">{{ ex.source || '未命名文本' }}</span>
               <span class="meta-time">{{ formatTime(ex.createdAt) }}</span>
+            </div>
+            <div class="excerpt-mark-picker">
+              <button
+                v-for="c in EXCERPT_MARK_COLORS"
+                :key="c.id"
+                class="excerpt-mark-swatch"
+                :class="{ active: excerptMarkColor(ex) === c.value }"
+                :style="{ background: c.value }"
+                :title="c.label"
+                @click="setExcerptMark(ex.id, c.value)"
+              ></button>
             </div>
             <button class="text-btn delete-btn" @click="deleteExcerpt(ex.id)">删除</button>
           </div>
@@ -232,6 +267,19 @@
     <div data-enter v-if="showDialog" class="rh-dialog-overlay" @click.self="closeDialog">
       <div class="rh-dialog-card">
         <div class="dialog-original">"{{ pendingText }}"</div>
+        <!-- 标记色选择（INCR-477） -->
+        <div class="dialog-mark-row">
+          <span class="dialog-mark-label">标记色</span>
+          <button
+            v-for="c in EXCERPT_MARK_COLORS"
+            :key="c.id"
+            class="excerpt-mark-swatch"
+            :class="{ active: excerptColor === c.value }"
+            :style="{ background: c.value }"
+            :title="c.label"
+            @click="excerptColor = c.value"
+          ></button>
+        </div>
         <textarea
           v-model="excerptNote"
           class="dialog-input"
@@ -254,7 +302,7 @@ import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
-import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox, useReadingExport } from '../modules/reading'
+import { useReadingInsights, useReadingSpeed, useReading, useReadingHall, flowHighlightToStudy, getBookContent, parseBookFile, useReadingInbox, useReadingExport, EXCERPT_MARK_COLORS, DEFAULT_EXCERPT_MARK, excerptMarkColor, applyExcerptMark, markDistribution, filterExcerptsByMark } from '../modules/reading'
 import type { Excerpt } from '../modules/reading'
 import { useRoomResonance, ROOM_LABELS } from '../modules/room-resonance'
 import ReadingSrsPanel from '../components/ReadingSrsPanel.vue'
@@ -307,6 +355,9 @@ const readingRef = ref<HTMLElement | null>(null)
 const pendingText = ref('')
 const showDialog = ref(false)
 const excerptNote = ref('')
+// 多色标记（INCR-477）：新摘录待选色 + 摘录集筛选色
+const excerptColor = ref<string>(DEFAULT_EXCERPT_MARK)
+const markFilter = ref<string>('')
 
 // ---- 按书登记与续读 ----
 // 当前正在阅读的书（导入文本时按标题去重建书，正文存入按书存储域）
@@ -385,18 +436,31 @@ const paragraphs = computed(() => {
   return readingText.value.split(/\n+/).filter(p => p.trim())
 })
 
-// 已摘录的段落索引集合
-const paraHighlighted = computed(() => {
-  const set = new Set<number>()
+// 已摘录段落 → 标记色（多色高亮；同段多条摘录取首条色）
+const paragraphMark = computed(() => {
+  const map = new Map<number, string>()
   const paras = paragraphs.value
   for (let i = 0; i < paras.length; i++) {
     const paraText = paras[i].trim()
-    if (excerpts.value.some(ex => paraText.includes(ex.text.trim()) || ex.text.trim().includes(paraText))) {
-      set.add(i)
-    }
+    const hit = excerpts.value.find(
+      ex => paraText.includes(ex.text.trim()) || ex.text.trim().includes(paraText),
+    )
+    if (hit) map.set(i, excerptMarkColor(hit))
   }
-  return set
+  return map
 })
+
+// 摘录集筛选与各色分布（INCR-477）
+const filteredExcerpts = computed(() =>
+  filterExcerptsByMark(excerpts.value, markFilter.value || undefined),
+)
+const markStats = computed(() => markDistribution(excerpts.value))
+
+// 按色改标记
+function setExcerptMark(id: string, color: string) {
+  excerpts.value = applyExcerptMark(excerpts.value, id, color)
+  reading.saveExcerpts()
+}
 
 // ---- 摘录持久化（数据层由 useReading 提供） ----
 
@@ -458,6 +522,7 @@ function openExcerptDialog() {
   if (!pendingText.value) return
   showDialog.value = true
   excerptNote.value = ''
+  excerptColor.value = DEFAULT_EXCERPT_MARK
 }
 
 function closeDialog() {
@@ -474,6 +539,7 @@ function confirmExcerpt() {
     text: pendingText.value,
     note: excerptNote.value.trim(),
     createdAt: new Date().toISOString(),
+    color: excerptColor.value,
   }
   excerpts.value.push(ex)
   reading.saveExcerpts()
@@ -818,8 +884,8 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
 }
 
 .rh-paragraph.highlighted {
-  background: rgba(var(--accent-rgb), 0.12);
-  border-left: 3px solid rgba(var(--accent-rgb), 0.5);
+  background: color-mix(in srgb, var(--para-mark, rgba(var(--accent-rgb), 0.5)) 16%, transparent);
+  border-left: 3px solid var(--para-mark, rgba(var(--accent-rgb), 0.5));
   padding-left: 7px;
 }
 
@@ -905,7 +971,7 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   border-radius: 10px;
   border: 1px solid rgba(var(--accent-rgb), 0.08);
   background: var(--card-bg);
-  border-left: 3px solid rgba(var(--accent-rgb), 0.2);
+  border-left: 3px solid var(--ex-mark, rgba(var(--accent-rgb), 0.2));
   transition: background 0.2s;
 }
 
@@ -946,6 +1012,84 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
 .delete-btn:hover {
   color: rgba(224, 112, 80, 0.7);
   background: rgba(224, 112, 80, 0.06);
+}
+
+/* ---- 多色标记（INCR-477） ---- */
+.rh-mark-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.rh-mark-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(var(--accent-rgb), 0.14);
+  background: transparent;
+  color: rgba(var(--text-primary-rgb), 0.5);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rh-mark-chip:hover {
+  background: rgba(var(--accent-rgb), 0.06);
+}
+
+.rh-mark-chip.active {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.12);
+  color: var(--accent);
+}
+
+.rh-mark-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.excerpt-mark-picker {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.excerpt-mark-swatch {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.excerpt-mark-swatch:hover {
+  transform: scale(1.12);
+}
+
+.excerpt-mark-swatch.active {
+  border-color: rgba(var(--text-primary-rgb), 0.75);
+}
+
+.dialog-mark-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.dialog-mark-label {
+  font-size: 12px;
+  color: rgba(var(--text-primary-rgb), 0.45);
 }
 
 /* ---- 回顾 ---- */

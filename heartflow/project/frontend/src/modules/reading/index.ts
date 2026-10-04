@@ -58,6 +58,18 @@ export type { SrsGrade, SrsReviewItem } from './srs'
 export { useReading } from './reading-content'
 export type { Excerpt } from './reading-content'
 
+// ---- 摘录多色标记（INCR-477） ----
+export {
+  EXCERPT_MARK_COLORS,
+  DEFAULT_EXCERPT_MARK,
+  isExcerptMarkColor,
+  excerptMarkColor,
+  applyExcerptMark,
+  markDistribution,
+  filterExcerptsByMark,
+} from './excerpt-mark'
+export type { ExcerptMarkColor } from './excerpt-mark'
+
 // ---- 按书正文存储（取代全局单字符串，支持多书 + 续读） ----
 export {
   saveBookContent,

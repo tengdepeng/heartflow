@@ -166,7 +166,7 @@
 | 474 | 装扮/换肤/贴纸 | `customization` 模块 + `aura/themes` + `SpaceCustomizer.vue` + `CustomizationAdvancedPanel.vue` + `astrolabe/useAstrolabeTheme` | 已覆盖 · 剔除 |
 | 475 | 专注会话 + 番茄参数化 + 挑战 | `clepsydra/time-block.ts` + `discipline/pomodoro-forest.ts` + `ChallengeAdvisorPanel.vue` | 已覆盖 · 剔除 |
 | 476 | 目标四阶段 + 勋章动画 | `goal/goal-state-machine.ts` + `craft/craft-badges.ts` + `reward` + `movement/achievements.ts` | 已覆盖 · 剔除 |
-| 477 | 划词多色标记 + 摘录 | 摘录/划线回流已覆盖（`reading/highlight-flow.ts` → study `quickCapture`、`reading/hall.ts`、`classical-vertical.ts` 标注）；**多色**标记器未见 | 窄缺口 · 观察项 |
+| 477 | 划词多色标记 + 摘录 | 摘录/划线回流已覆盖（`reading/highlight-flow.ts` → study `quickCapture`、`reading/hall.ts`、`classical-vertical.ts` 标注）；**多色**标记器未见 | **窄缺口 · 已落地（2026-10-04）** |
 | 478 | AI 引用溯源 + 回答分支切换 | 引用溯源已覆盖（`mirror/knowledge-citation.ts`）；重答已覆盖（`MirrorDialogue.vue:65` `regenerate`）；DeepSeek 式「Message N of M」多分支导航未见 | 大部覆盖 · 观察项 |
 | 479 | 就寝/睡眠引导向导 | `RestSleepPanel.vue` + `rest/sleep-quality.ts` + `home/Bedroom.vue` | 已覆盖 · 剔除 |
 | 480 | 时辰/身体时钟 | `body-wisdom/meridian-visualization.ts` + `zeitgeist` | 已覆盖 · 剔除 |
@@ -177,7 +177,7 @@
 | 485 | 难度/熟悉度自适应 | `word-mirror/personal-vocabulary.ts` + `writing-enhance.ts` | 已覆盖 · 剔除 |
 | 486 | 历法玄学数据 | `astrolabe` + `FourPillarsPanel.vue` + `seasonal` + `traditions` + `zeitgeist` | 已覆盖 · 剔除 |
 
-**核验小结**：20 项候选中 **17 项 Heartflow 已有等价实现（剔除）**，1 项部分覆盖（472 降级），2 项窄缺口观察（477 多色标记 / 478 多分支导航），**唯一确定的真缺口为 INCR-469「房间级锁」**（现有隐私锁是全局主密码，`RoomSettingsPanel` 无 per-room 粒度）。
+**核验小结**：20 项候选中 **17 项 Heartflow 已有等价实现（剔除）**，1 项部分覆盖（472 降级），2 项窄缺口（477 多色标记 / 478 多分支导航），**唯一确定的真缺口为 INCR-469「房间级锁」**（现有隐私锁是全局主密码，`RoomSettingsPanel` 无 per-room 粒度）。**后续落地**：INCR-469 与 INCR-477 均已实现（见 7.1 / 7.2），478 维持观察。
 
 **结论**：96 APK 交互分析的主要价值是**确认既有能力面已完整 + 定位少数真空白**，而非大面积缺口；唯一真缺口 INCR-469 已于 2026-10-04 落地。
 
@@ -193,7 +193,21 @@
 
 **验证**：定向 17 用例全过（引擎 11 / 组件 6）；room-mount 91/91；eslint 0 错；`check-circular-deps` 无新增环。
 
-**结论**：候选池至此清空——真缺口已实现，477/478 维持观察项。
+**结论**：候选池 477 已落地，478 维持观察项。
+
+### 7.2 INCR-477 落地记录（2026-10-04）
+
+**借鉴源**：静读天下 / 微信读书 / Readable 的「多色划线」——同一本书的划线可按色区分（重点 / 疑问 / 灵感），并支持按色筛选与改色。
+
+**实现**：
+- `src/modules/reading/excerpt-mark.ts`（新增）：`EXCERPT_MARK_COLORS` 五色调色板（琥珀/苔绿/雾蓝/绯粉/紫藤，暖色系）+ `DEFAULT_EXCERPT_MARK`；纯函数 `isExcerptMarkColor` / `excerptMarkColor`（非法或未设回落默认）/ `applyExcerptMark`（不可变改色）/ `markDistribution`（各色计数）/ `filterExcerptsByMark`。
+- `src/modules/reading/reading-content.ts`：`Excerpt` 增 `color?: string` 字段（旧数据无此字段 → 渲染时回落默认色，向后兼容）。
+- `src/views/ReadingHall.vue`：摘录对话框增「标记色」选择行；摘录集增多色筛选栏（全部 + 各色计数）；每张摘录卡左侧竖条按色着色 + 卡内色点即点即改色；正文段落高亮由单色改为「按该段摘录的标记色」着色（`paragraphMark` → `--para-mark`）。
+- `src/modules/reading/index.ts`：补 barrel 导出。
+
+**验证**：新增引擎单测 11 例全过；reading-content 5 / reading-export 12 / ReadingHall 28 回归全过；eslint 0 错；`check-circular-deps` 无新增环；vue-tsc 本批文件 0 报错。
+
+**结论**：候选池剩余 478（AI 多分支导航）维持观察项，其余全部覆盖或已落地。
 
 ---
 

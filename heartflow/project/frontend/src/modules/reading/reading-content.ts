@@ -20,6 +20,8 @@ export interface Excerpt {
   text: string
   note: string
   createdAt: string
+  /** 多色标记色（INCR-477；未设时按默认琥珀渲染） */
+  color?: string
 }
 
 const STORAGE_KEY_TEXT = 'hf:reading_text'
