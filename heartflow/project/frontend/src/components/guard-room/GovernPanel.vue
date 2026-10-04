@@ -162,6 +162,9 @@
                 <span v-if="forgetCtrl.getAgingProgress(item.key) > 0" class="aging-badge" :title="`自然老化 ${forgetCtrl.getAgingProgress(item.key)}%`">
                   🍂 {{ forgetCtrl.getAgingProgress(item.key) }}%
                 </span>
+                <span v-else-if="forgetCtrl.getModuleAging(item.key)" class="aging-mark" :title="`自然老化标记 · 衰变等级 ${forgetCtrl.getModuleAging(item.key)!.decayLevel}`">
+                  💤 Lv.{{ forgetCtrl.getModuleAging(item.key)!.decayLevel }}
+                </span>
                 <button class="guard-del" @click="showForgetMethodPicker(item.key, item.name, item.prefix)" title="遗忘此模块">🗑</button>
               </div>
             </div>
@@ -214,11 +217,17 @@
               <button class="guard-del" @click="forgetCtrl.clearResult()">×</button>
             </div>
           </div>
-          <!-- 遗忘记录 -->
-          <div class="sub-card-section" v-if="forgetCtrl.recentRecords.value.length > 0">
-            <h5 class="sub-card-section-title">遗忘记录 ({{ forgetCtrl.recentRecords.value.length }})</h5>
+          <!-- 遗忘记录（P1·INCR-467：按模块筛选下钻） -->
+          <div class="sub-card-section" v-if="displayedRecords.length > 0">
+            <div class="forget-records-head">
+              <h5 class="sub-card-section-title">遗忘记录 ({{ displayedRecords.length }})</h5>
+              <select v-model="moduleFilter" class="module-filter" data-test="gp-module-filter">
+                <option value="">全部模块</option>
+                <option v-for="m in dataInventory" :key="m.key" :value="m.key">{{ m.name }}</option>
+              </select>
+            </div>
             <div class="forget-records">
-              <div v-for="record in forgetCtrl.recentRecords.value" :key="record.id" class="forget-record-row">
+              <div v-for="record in displayedRecords" :key="record.id" class="forget-record-row">
                 <span class="forget-record-icon">{{ FORGET_METHODS.find(m => m.id === record.method)?.icon }}</span>
                 <span class="forget-record-name">{{ record.moduleName }}</span>
                 <span class="forget-record-size">{{ forgetCtrl.formatBytes(record.freedBytes) }}</span>
@@ -338,6 +347,13 @@ const advisorEnabled = computed({
 
 const forgetCtrl = useForgetting()
 const hallExitCtrl = useHallExit()
+
+// P1（INCR-467）：数据主权按模块下钻——遗忘记录按模块筛选
+const moduleFilter = ref<string>('')
+const displayedRecords = computed(() => {
+  if (!moduleFilter.value) return forgetCtrl.recentRecords.value
+  return forgetCtrl.getModuleRecords(moduleFilter.value)
+})
 
 interface SubTabItem {
   id: string

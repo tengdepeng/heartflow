@@ -11,6 +11,8 @@ import {
   getForgetMethodInfo,
   executeForgetting,
   getForgettingRecords,
+  getModuleForgettingRecords,
+  getModuleAgingMark as getModuleAgingMarkFn,
   calculateAgingProgress,
   getSealedDataList,
   getHibernatedDataList,
@@ -18,7 +20,7 @@ import {
   wakeModuleData,
   removeAgingMark,
 } from '../sovereignty-engine'
-import type { ForgetMethod, ForgetResult } from '../types'
+import type { ForgetMethod, ForgetResult, ForgettingRecord, AgingMark } from '../types'
 
 export function useForgetting() {
   const config = getSovereigntyConfig()
@@ -100,6 +102,20 @@ export function useForgetting() {
    */
   function getAgingProgress(moduleKey: string): number {
     return calculateAgingProgress(moduleKey)
+  }
+
+  /**
+   * 获取指定模块的遗忘记录（按模块下钻，绕过 recentRecords 的 10 条截断）
+   */
+  function getModuleRecords(moduleKey: string): ForgettingRecord[] {
+    return getModuleForgettingRecords(moduleKey)
+  }
+
+  /**
+   * 获取指定模块的自然老化标记（含衰变等级 decayLevel）
+   */
+  function getModuleAging(moduleKey: string): AgingMark | undefined {
+    return getModuleAgingMarkFn(moduleKey)
   }
 
   /**
@@ -185,6 +201,8 @@ export function useForgetting() {
     selectMethod,
     forget,
     getAgingProgress,
+    getModuleRecords,
+    getModuleAging,
     recoverSealed,
     recoverHibernated,
     cancelAging,

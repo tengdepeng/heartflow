@@ -1010,19 +1010,6 @@ export function groupByDate(
 }
 
 /**
- * 获取两个日期之间的时间轴项
- */
-export function getItemsBetween(
-  items: RiverItem[],
-  start: Date,
-  end: Date,
-): RiverItem[] {
-  const s = start.getTime()
-  const e = end.getTime()
-  return items.filter(i => i.ts >= s && i.ts <= e)
-}
-
-/**
  * 获取指定日期的时间轴项
  */
 export function getItemsOnDate(items: RiverItem[], date: Date): RiverItem[] {

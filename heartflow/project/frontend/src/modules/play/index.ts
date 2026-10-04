@@ -56,7 +56,6 @@ export type {
 export {
   seedTransferType,
   defaultAuthorization,
-  buildTransferPreview,
   buildInvestmentPreview,
   collectTimeInvestments,
   exportSeedGift,

@@ -110,36 +110,6 @@ export interface TransferPreview {
   items: TransferPreviewItem[]
 }
 
-/**
- * 构造发送前预览——用户确认前可查看接收方将看到的内容。
- * @param seeds 待传递的全部种子
- * @param auth  用户授权（类型/粒度/永久赠予）
- */
-export function buildTransferPreview(
-  seeds: TimeSeed[],
-  auth: TransferAuthorization,
-): TransferPreview {
-  const typeSet = new Set(auth.types)
-  const items: TransferPreviewItem[] = seeds
-    .filter(s => typeSet.has(seedTransferType(s)))
-    .map(s => ({
-      seedId: s.id,
-      name: s.name,
-      rarity: s.rarity,
-      content: auth.granularity === 'full'
-        ? s.description
-        : `「${s.name}」${s.tags.join('/')}`,
-    }))
-
-  return {
-    authorizedTypes: auth.types.map(k => ({ key: k, label: TRANSFER_TYPE_LABELS[k] })),
-    granularityLabel: GRANULARITY_LABELS[auth.granularity],
-    permanent: auth.permanent,
-    itemCount: items.length,
-    items,
-  }
-}
-
 // ---- 传递日志（第47条：守护室完整日志） ----
 
 export interface TransferLog {

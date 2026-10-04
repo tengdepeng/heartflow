@@ -1216,6 +1216,34 @@
   margin-right: 4px;
 }
 
+/* P1·INCR-467：按模块下钻——衰变等级标记 + 模块筛选下拉 */
+.aging-mark {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: rgba(196, 160, 184, 0.12);
+  color: #c4a0b8;
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+.forget-records-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.module-filter {
+  font-size: 11px;
+  color: rgba(240, 242, 255, 0.8);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
 /* 大厅退出状态 */
 .exit-state-grid {
   display: grid;

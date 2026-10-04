@@ -50,7 +50,7 @@ export type { MemorialSeat } from './relation'
 export { useStudy, tagFrequencies, pickRandom, extractTags } from './study'
 export type { Note } from './study'
 
-export { getRiverItemKey, createRiverItems, getRiverSource, createReplayTimer, getAllTags, filterByTag, computeDailySummaries, filterByTimeRange, filterByTypes, searchTimeline, findEventCorrelations, computeTimelineStats, groupByDate, getItemsBetween, getItemsOnDate } from './timeline'
+export { getRiverItemKey, createRiverItems, getRiverSource, createReplayTimer, getAllTags, filterByTag, computeDailySummaries, filterByTimeRange, filterByTypes, searchTimeline, findEventCorrelations, computeTimelineStats, groupByDate, getItemsOnDate } from './timeline'
 export type { RiverItem, RiverItemType, RiverSource, DailySummary, TimeRange, TimelineSearchOptions, SearchHit, EventCorrelation, TimelineStats, DateGroup } from './timeline'
 
 export { useToast, showToast } from './toast'

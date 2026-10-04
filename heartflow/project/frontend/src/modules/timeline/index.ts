@@ -29,7 +29,6 @@ export {
   findEventCorrelations,
   computeTimelineStats,
   groupByDate,
-  getItemsBetween,
   getItemsOnDate,
   // 高级搜索（P18-1）
   advancedSearch,
