@@ -167,7 +167,7 @@
 | 475 | 专注会话 + 番茄参数化 + 挑战 | `clepsydra/time-block.ts` + `discipline/pomodoro-forest.ts` + `ChallengeAdvisorPanel.vue` | 已覆盖 · 剔除 |
 | 476 | 目标四阶段 + 勋章动画 | `goal/goal-state-machine.ts` + `craft/craft-badges.ts` + `reward` + `movement/achievements.ts` | 已覆盖 · 剔除 |
 | 477 | 划词多色标记 + 摘录 | 摘录/划线回流已覆盖（`reading/highlight-flow.ts` → study `quickCapture`、`reading/hall.ts`、`classical-vertical.ts` 标注）；**多色**标记器未见 | **窄缺口 · 已落地（2026-10-04）** |
-| 478 | AI 引用溯源 + 回答分支切换 | 引用溯源已覆盖（`mirror/knowledge-citation.ts`）；重答已覆盖（`MirrorDialogue.vue:65` `regenerate`）；DeepSeek 式「Message N of M」多分支导航未见 | 大部覆盖 · 观察项 |
+| 478 | AI 引用溯源 + 回答分支切换 | 引用溯源已覆盖（`mirror/knowledge-citation.ts`）；重答已覆盖（`MirrorDialogue.vue:65` `regenerate`）；DeepSeek 式「Message N of M」多分支导航原为「重答=覆盖/重复追加」，未保留候选分支 | **窄缺口 · 已落地（2026-10-04）** |
 | 479 | 就寝/睡眠引导向导 | `RestSleepPanel.vue` + `rest/sleep-quality.ts` + `home/Bedroom.vue` | 已覆盖 · 剔除 |
 | 480 | 时辰/身体时钟 | `body-wisdom/meridian-visualization.ts` + `zeitgeist` | 已覆盖 · 剔除 |
 | 481 | 那年今日/自动成集 | `anchor/photo-diary.ts` + `journey` + `timeline` | 已覆盖 · 剔除 |
@@ -177,7 +177,7 @@
 | 485 | 难度/熟悉度自适应 | `word-mirror/personal-vocabulary.ts` + `writing-enhance.ts` | 已覆盖 · 剔除 |
 | 486 | 历法玄学数据 | `astrolabe` + `FourPillarsPanel.vue` + `seasonal` + `traditions` + `zeitgeist` | 已覆盖 · 剔除 |
 
-**核验小结**：20 项候选中 **17 项 Heartflow 已有等价实现（剔除）**，1 项部分覆盖（472 降级），2 项窄缺口（477 多色标记 / 478 多分支导航），**唯一确定的真缺口为 INCR-469「房间级锁」**（现有隐私锁是全局主密码，`RoomSettingsPanel` 无 per-room 粒度）。**后续落地**：INCR-469 与 INCR-477 均已实现（见 7.1 / 7.2），478 维持观察。
+**核验小结**：20 项候选中 **17 项 Heartflow 已有等价实现（剔除）**，1 项部分覆盖（472 降级），2 项窄缺口（477 多色标记 / 478 多分支导航），**唯一确定的真缺口为 INCR-469「房间级锁」**（现有隐私锁是全局主密码，`RoomSettingsPanel` 无 per-room 粒度）。**后续落地**：INCR-469 / INCR-477 / INCR-478 均已实现（见 7.1 / 7.2 / 7.3），候选池已全部覆盖或落地。
 
 **结论**：96 APK 交互分析的主要价值是**确认既有能力面已完整 + 定位少数真空白**，而非大面积缺口；唯一真缺口 INCR-469 已于 2026-10-04 落地。
 
@@ -193,7 +193,7 @@
 
 **验证**：定向 17 用例全过（引擎 11 / 组件 6）；room-mount 91/91；eslint 0 错；`check-circular-deps` 无新增环。
 
-**结论**：候选池 477 已落地，478 维持观察项。
+**结论**：候选池 477 已落地。
 
 ### 7.2 INCR-477 落地记录（2026-10-04）
 
@@ -207,7 +207,20 @@
 
 **验证**：新增引擎单测 11 例全过；reading-content 5 / reading-export 12 / ReadingHall 28 回归全过；eslint 0 错；`check-circular-deps` 无新增环；vue-tsc 本批文件 0 报错。
 
-**结论**：候选池剩余 478（AI 多分支导航）维持观察项，其余全部覆盖或已落地。
+### 7.3 INCR-478 落地记录（2026-10-04）
+
+**借鉴源**：DeepSeek 的「Message N of M」多分支导航——同一提问可保留多次生成的候选回答，用户以 ‹ › 前后切换查看不同版本；秘塔的引用溯源已由 `mirror/knowledge-citation.ts` 覆盖。
+
+**实现**：
+- `src/modules/mirror/dialogue-branches.ts`（新增）：纯函数层 `createVariant` / `variantList` / `variantCount` / `activeVariantIndex` / `hasMultipleVariants` / `variantSummary` / `appendVariant` / `switchVariant`，全部不可变；展示字段 `text` / `executionResult` / `sources` 随激活变体同步。
+- `src/modules/mirror/types.ts`：新增 `DialogueVariant` 接口；`DialogueEntry` 扩展 `variants?: DialogueVariant[]` 与 `activeVariant?: number`（旧数据无此字段 → 视作单变体，向后兼容）。
+- `src/modules/mirror/useMirrorDialogue.ts`：`send` 增 `regenerateInto` 分支模式——命中时不重复写用户消息，把新回应 `appendVariant` 到原镜我条目并切换；新增 `regenerate`，回溯最近一条同文本用户消息后的镜我条目，找不到则退化为常规 send。
+- `src/components/MirrorDialogue.vue`：镜我消息底部增分支导航栏（‹ 第 N / M 个回答 ›，首末禁用），「重新生成」按钮绑定 `regenerate`。
+- 双 barrel（`mirror/index.ts` + `modules/index.ts`）补导出。
+
+**验证**：新增引擎单测 10 例 + composable 2 例 + 组件分支导航断言；定向 vitest 87 例全过（8 文件，含 MirrorDialogue 40 / useMirrorDialogue 6）；eslint 0 错；`check-circular-deps` 无新增环；vue-tsc 0 报错。
+
+**结论**：候选池（INCR-472~479 观察项）全部覆盖或落地，本批借鉴分析收口。
 
 ---
 
