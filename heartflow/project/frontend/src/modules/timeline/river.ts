@@ -3,6 +3,7 @@ import type { TimeCrystal, FocusSession, Note } from '../../types'
 import type { EmotionRecord } from '../emotion'
 import type { Anchor } from '../anchor'
 import { PHOTO_DIARY_KEY, type PhotoEntry } from '../anchor/photo-diary'
+import { getLocalDateKey } from '../../utils/time'
 import { getBodyRingLogs } from '../body/rings'
 import type { DailyRingLog } from '../body/rings'
 import { getHabits } from '../discipline'
@@ -267,7 +268,13 @@ export function filterByTag(items: RiverItem[], tag: string): RiverItem[] {
   })
 }
 
-/** 计算每日摘要，按日期分组聚合 */
+/**
+ * 计算每日摘要，按日期分组聚合。
+ *
+ * 分组键取**本地日历日**（utils/time.ts 的 getLocalDateKey），不可用 UTC ISO 日期——
+ * 后者在东八区会让本地 00:00–08:00 的记录归到前一天。调用方传入的
+ * `todayStr` / `yesterdayStr` 必须同为本地日历日键，否则「今天/昨天」标签会与分组错位。
+ */
 export function computeDailySummaries(
   items: RiverItem[],
   todayStr: string,
@@ -275,7 +282,7 @@ export function computeDailySummaries(
 ): DailySummary[] {
   const groups = new Map<string, RiverItem[]>()
   for (const item of items) {
-    const ds = new Date(item.ts).toISOString().slice(0, 10)
+    const ds = getLocalDateKey(new Date(item.ts))
     if (!groups.has(ds)) groups.set(ds, [])
     groups.get(ds)!.push(item)
   }

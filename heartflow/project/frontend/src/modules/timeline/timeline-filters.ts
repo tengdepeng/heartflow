@@ -6,6 +6,7 @@
 
 import type { RiverItem, RiverItemType, RiverSource, DailySummary } from './river'
 import { createRiverItems } from './river'
+import { getLocalDateKey } from '../../utils/time'
 
 /** 时间范围 */
 export interface TimeRange {
@@ -116,8 +117,13 @@ export interface DateGroup {
 
 // ---- 内部工具函数 ----
 
+/**
+ * 业务日期键必须取**本地日历日**（见 utils/time.ts 的 getLocalDateKey）。
+ * 不可用 `toISOString().slice(0,10)`——那是 UTC 日历日，在东八区会让本地
+ * 00:00–08:00 的记录归到前一天，使分组 / 最高产日 / 连续天数整体偏移一天。
+ */
 function toDateStr(ts: number): string {
-  return new Date(ts).toISOString().slice(0, 10)
+  return getLocalDateKey(new Date(ts))
 }
 
 function toHourStr(ts: number): number {
@@ -919,11 +925,13 @@ export function computeTimelineStats(
   }
 
   // 热力图（最近 14 天 × 24 小时）
+  // 同样用日历日 API 逐日回退，理由见下方 streakDays 的注释。
   const now = new Date()
   const heatmap: { date: string; hours: number[] }[] = []
+  const cursor = new Date(now)
   for (let d = 13; d >= 0; d--) {
-    const date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000)
-    const dateStr = toDateStr(date.getTime())
+    cursor.setDate(now.getDate() - d)
+    const dateStr = toDateStr(cursor.getTime())
     const hours = new Array(24).fill(0)
     for (const item of items) {
       if (toDateStr(item.ts) === dateStr) {
@@ -934,12 +942,14 @@ export function computeTimelineStats(
   }
 
   // 连续活跃天数
+  // 注意：逐日回退必须用日历日 API（setDate），不能用 `- 24h` 毫秒减法——
+  // 后者在有 DST 的时区会落到前一天的 23:00/01:00，跨到错误的日期键。
   let streakDays = 0
-  let checkDate = new Date()
+  const checkDate = new Date()
   checkDate.setHours(0, 0, 0, 0)
   while (dayCounts[toDateStr(checkDate.getTime())]) {
     streakDays++
-    checkDate = new Date(checkDate.getTime() - 24 * 60 * 60 * 1000)
+    checkDate.setDate(checkDate.getDate() - 1)
   }
 
   // 事件关联

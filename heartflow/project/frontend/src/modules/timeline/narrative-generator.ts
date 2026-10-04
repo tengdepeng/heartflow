@@ -8,6 +8,7 @@ import { ref } from 'vue'
 import { storage } from '@/engine/storage'
 import type { RiverItem, RiverSource, DailySummary } from './river'
 import { createRiverItems, computeDailySummaries } from './river'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 叙事类型 ----
 
@@ -776,8 +777,9 @@ export function useNarrativeGenerator() {
       return itemDate >= weekStart && itemDate <= weekEnd
     })
 
-    const today = new Date().toISOString().split('T')[0]
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+    // 与 computeDailySummaries 的分组键同为本地日历日，勿用 UTC ISO 日期
+    const today = getLocalDateKey()
+    const yesterday = getLocalDateKey(new Date(Date.now() - 86400000))
     const dailySummaries = computeDailySummaries(weekItems, today, yesterday)
 
     const segments: NarrativeSegment[] = dailySummaries.map(ds => ({

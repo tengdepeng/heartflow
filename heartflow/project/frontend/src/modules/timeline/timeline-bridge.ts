@@ -26,6 +26,7 @@ import {
   type SearchHit,
   type AdvancedSearchOptions,
 } from './timeline-filters'
+import { getLocalDateKey } from '../../utils/time'
 import {
   discoverPatterns,
   type WeeklyPattern,
@@ -237,7 +238,8 @@ export function useTimelineBridge() {
     const allItems = createRiverItems(source.value, DEFAULT_ACTIVE_FILTERS)
     const daySet = new Set<string>()
     for (const item of allItems) {
-      daySet.add(new Date(item.ts).toISOString().slice(0, 10))
+      // 与 computeTimelineStats 的 dailyAverage 分母同口径（本地日历日）
+      daySet.add(getLocalDateKey(new Date(item.ts)))
     }
 
     return {
@@ -660,8 +662,9 @@ export function useTimelineBridge() {
 
   /** 获取每日摘要 */
   function getDailySummaries(): DailySummary[] {
-    const today = new Date().toISOString().slice(0, 10)
-    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    // 与 computeDailySummaries 的分组键同为本地日历日，勿用 UTC ISO 日期
+    const today = getLocalDateKey()
+    const yesterday = getLocalDateKey(new Date(Date.now() - 86400000))
     return computeDailySummaries(items.value, today, yesterday)
   }
 
