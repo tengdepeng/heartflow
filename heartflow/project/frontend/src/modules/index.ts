@@ -285,6 +285,14 @@ export type { VoicePreset, VoiceGender, VoiceLibraryState } from './reading'
 export { useMiniPlayer, DEFAULT_MINI_PLAYER } from './reading'
 export type { MiniPlayerPrefs, MiniPlayerControls } from './reading'
 
+// ---- guide-tour（全局 UI · 分步引导蒙层，INCR-500） ----
+export { useGuideTour, reloadGuideTour, computeTooltip, clampTooltip, GUIDE_TOURS, DEFAULT_GUIDE_TOUR } from './guide-tour'
+export type { TourStep, TourDef, TourPlacement, GuideTourState, Rect, Size, Point } from './guide-tour'
+
+// ---- font-library（全局 UI · 字体库，INCR-501） ----
+export { useFontLibrary, reloadFontLibrary, fontPreset, fontCssVars, applyFonts, FONT_PRESETS, DEFAULT_FONT_LIBRARY } from './font-library'
+export type { FontPreset, FontLibraryState } from './font-library'
+
 // ---- movement ----
 export { useMovementRhythm } from './movement'
 export { useMovement, MOVES_KEY } from './movement'

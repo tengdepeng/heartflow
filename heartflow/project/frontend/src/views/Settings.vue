@@ -288,6 +288,19 @@
         <AuraThemePicker />
       </div>
 
+      <!-- 字体库（INCR-501，借鉴 96 APK 组件岛字体包：正文/标题分别选字族，全局生效） -->
+      <div class="sub-group" :class="{ 'is-collapsed': !openSections.font }" :data-section="'font'">
+        <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('font')" @keydown.enter="toggleSection('font')" @keydown.space.prevent="toggleSection('font')">
+          <span class="sub-group__chevron">{{ openSections.font ? '▾' : '▸' }}</span>
+          <div class="sub-group__heading">
+            <h3 class="sub-title">字体</h3>
+            <p class="sub-desc">正文与标题分别选择字族，选中即全局生效，本地保存。</p>
+          </div>
+        </div>
+
+        <FontLibraryPanel />
+      </div>
+
       <div class="sub-group" :class="{ 'is-collapsed': !openSections.taxonomy }">
         <div class="sub-group__head" role="button" tabindex="0" @click="toggleSection('taxonomy')" @keydown.enter="toggleSection('taxonomy')" @keydown.space.prevent="toggleSection('taxonomy')">
           <span class="sub-group__chevron">{{ openSections.taxonomy ? '▾' : '▸' }}</span>
@@ -901,6 +914,7 @@ import ABTestPanel from '../components/ABTestPanel.vue'
 import AuraThemePicker from '../modules/aura/AuraThemePicker.vue'
 import RoomSettingsPanel from '../components/RoomSettingsPanel.vue'
 import LanguageSettingsPanel from '../components/LanguageSettingsPanel.vue'
+import FontLibraryPanel from '../components/FontLibraryPanel.vue'
 import IconPicker from '../components/IconPicker.vue'
 import DesktopIconWizard from '../components/DesktopIconWizard.vue'
 import RoomHeader from '../components/RoomHeader.vue'
@@ -964,6 +978,7 @@ const openSections = reactive<Record<string, boolean>>({
   bg: true,
   roombg: false,
   aura: false,
+  font: false,
   operation: false,
   gesture: false,
   anim: false,
@@ -987,6 +1002,7 @@ const NAV_ITEMS = [
   { key: 'bg', label: '背景介质' },
   { key: 'roombg', label: '房间背景' },
   { key: 'aura', label: '氛围主题' },
+  { key: 'font', label: '字体' },
   { key: 'taxonomy', label: '侧栏分类' },
   { key: 'rooms', label: '房间设置' },
   { key: 'operation', label: '三级操作模式' },

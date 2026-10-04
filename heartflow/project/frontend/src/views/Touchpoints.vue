@@ -35,7 +35,7 @@
     <!-- ============================================ -->
     <!-- 🔔 通知设置 -->
     <!-- ============================================ -->
-    <section class="tp-section">
+    <section class="tp-section" data-tour="notify">
       <h2 class="tp-section-title">🔔 通知设置</h2>
 
       <div class="tp-card">
@@ -82,7 +82,7 @@
     <!-- ============================================ -->
     <!-- 💡 锁屏光痕 -->
     <!-- ============================================ -->
-    <section class="tp-section">
+    <section class="tp-section" data-tour="glow">
       <h2 class="tp-section-title">💡 锁屏光痕</h2>
 
       <div class="tp-card">
@@ -144,7 +144,7 @@
     <!-- ============================================ -->
     <!-- 👋 幕僚问候浮窗 -->
     <!-- ============================================ -->
-    <section class="tp-section">
+    <section class="tp-section" data-tour="greeting">
       <h2 class="tp-section-title">👋 幕僚问候浮窗</h2>
 
       <div class="tp-card">
@@ -200,7 +200,7 @@
     <!-- ============================================ -->
     <!-- 📊 触达策略管理 -->
     <!-- ============================================ -->
-    <section class="tp-section">
+    <section class="tp-section" data-tour="strategy">
       <h2 class="tp-section-title">📊 触达策略</h2>
       <p class="tp-section-desc">智能调度通知触达时机，避免过度打扰</p>
 
@@ -458,6 +458,17 @@
       <CornerTransitionPanel />
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 全局 UI·分步引导蒙层（INCR-500，借鉴 96 APK 组件岛新手教程：   -->
+    <!-- status_bar_tutorial / introduction_1~3 逐目标高亮 + 气泡引导） -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <GuideTourPanel />
+    </section>
+
+    <!-- 分步引导覆盖层：Teleport 到 body，启动后逐目标高亮 -->
+    <GuideTourOverlay />
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
     </RoomLayout>
   </div>
@@ -483,6 +494,8 @@ import WidgetStylePanel from '../components/WidgetStylePanel.vue'
 import WidgetHotzonePanel from '../components/WidgetHotzonePanel.vue'
 import LongPressSpeedPanel from '../components/LongPressSpeedPanel.vue'
 import CornerTransitionPanel from '../components/CornerTransitionPanel.vue'
+import GuideTourPanel from '../components/GuideTourPanel.vue'
+import GuideTourOverlay from '../components/GuideTourOverlay.vue'
 import EmptyState from '../components/EmptyState.vue'
 import RoomLayout from '../components/RoomLayout.vue'
 import {

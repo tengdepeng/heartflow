@@ -19,6 +19,7 @@ import { getRuntimeStateBridge } from './resonance/bridges/runtime'
 import { useRuntimeStore } from './stores/runtime'
 import { useResonance } from './resonance'
 import { setRouteSource } from './modules/advisor/featureDictionary'
+import { reloadFontLibrary } from './modules/font-library/font-library'
 
 async function bootstrap() {
   // 容错工具：单个初始化步骤失败只记日志，绝不阻断挂载
@@ -81,6 +82,9 @@ async function bootstrap() {
     const styleStore = useStyleStore()
     styleStore.init()
   })
+
+  // 应用已持久化的字体库选择（INCR-501，读存储后写入 CSS 变量；须在 initStorage 之后）
+  safe('fontLibrary', () => reloadFontLibrary())
 
   // 挂载（即使以上步骤有失败，也必须挂载，保证界面可见）
   app.mount('#app')
