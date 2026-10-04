@@ -39,13 +39,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, nextTick, onBeforeUnmount } from 'vue'
+import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useReadingTts } from '../modules/reading/tts'
+import { useVoiceLibrary, resolvePresetVoiceURI } from '../modules/reading/voice-library'
+import { useMiniPlayer } from '../modules/reading/mini-player'
 
-const props = defineProps<{ text: string }>()
+const props = defineProps<{ text: string; title?: string }>()
 
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2] as const
-const { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate } = useReadingTts()
+const { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate, setVoice } = useReadingTts()
+const { current: voice } = useVoiceLibrary()
+const mini = useMiniPlayer()
+
+/** 当前音色参数（INCR-504）：音高 + 语速系数 + 匹配到的系统音色 */
+function voiceOpts() {
+  const v = voice.value
+  return { pitch: v.pitch, rateScale: v.rateScale, voiceURI: resolvePresetVoiceURI(v) }
+}
 
 const scrollBox = ref<HTMLElement | null>(null)
 
@@ -89,9 +99,29 @@ function onToggle() {
   } else if (state.value === 'paused') {
     resume()
   } else {
-    speak(props.text)
+    speak(props.text, voiceOpts())
   }
 }
+
+// 音色库切换即时作用于正在朗读的内容（INCR-504）
+watch(voice, () => {
+  if (state.value !== 'idle') setVoice(voiceOpts())
+})
+
+// 悬浮迷你播放器（INCR-502）：注册控制回调并同步播放态
+onMounted(() => {
+  mini.attach({ toggle: onToggle, stop: () => stop() })
+})
+
+watch(state, (s, prev) => {
+  if (s !== 'idle' && prev === 'idle') mini.open(props.title || '听书')
+  else if (s === 'idle') mini.dismiss()
+  mini.sync({ playing: s === 'playing', index: progress.value.index, total: progress.value.total })
+})
+
+watch(progress, (p) => {
+  mini.sync({ playing: state.value === 'playing', index: p.index, total: p.total })
+})
 
 // 文本变化时停止朗读，避免读到旧内容
 watch(
@@ -103,6 +133,7 @@ watch(
 
 onBeforeUnmount(() => {
   if (state.value !== 'idle') stop()
+  mini.detach()
 })
 </script>
 

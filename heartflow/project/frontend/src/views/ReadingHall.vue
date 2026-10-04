@@ -63,7 +63,9 @@
           >{{ para }}</p>
         </div>
         <!-- 听书 · 本地朗读控制（INCR-276 补挂载孤儿组件 TtsControlPanel，reading/tts 引擎完备） -->
-        <TtsControlPanel :text="readingText" />
+        <TtsControlPanel :text="readingText" :title="activeBookTitle" />
+        <!-- 听书 · 朗读音色库（INCR-504，13 款本地音色，选中即作用于朗读） -->
+        <VoiceLibraryPanel />
         <!-- 选中文本后的摘录按钮 -->
         <div v-if="pendingText" class="excerpt-float-bar">
           <span class="float-preview">"{{ pendingText.slice(0, 60) }}{{ pendingText.length > 60 ? '…' : '' }}"</span>
@@ -293,6 +295,9 @@
       </div>
     </div>
     </RoomLayout>
+
+    <!-- 悬浮迷你播放器（INCR-502）：听书时浮出，常驻可收起 -->
+    <MiniPlayerBar />
   </div>
 </template>
 
@@ -313,6 +318,8 @@ import BookRecommendationsPanel from '../components/BookRecommendationsPanel.vue
 import ReadingChallengesPanel from '../components/ReadingChallengesPanel.vue'
 import BookReviewsPanel from '../components/BookReviewsPanel.vue'
 import TtsControlPanel from '../components/TtsControlPanel.vue'
+import VoiceLibraryPanel from '../components/VoiceLibraryPanel.vue'
+import MiniPlayerBar from '../components/MiniPlayerBar.vue'
 import BookShelfPanel from '../components/BookShelfPanel.vue'
 import ReadingInboxPanel from '../components/ReadingInboxPanel.vue'
 import LifeBookPanel from '../components/LifeBookPanel.vue'

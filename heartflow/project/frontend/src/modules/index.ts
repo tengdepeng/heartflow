@@ -280,6 +280,10 @@ export { useReadingHall } from './reading'
 export { useReading } from './reading'
 export { READING_STATUS_META, READING_STORAGE_KEYS } from './reading'
 export type { ReadingStatus, Book, BookQuote, ReadingSession, ReadingGoal, Excerpt } from './reading'
+export { useVoiceLibrary, VOICE_PRESETS, voicePreset, applyVoicePreset, matchSystemVoice } from './reading'
+export type { VoicePreset, VoiceGender, VoiceLibraryState } from './reading'
+export { useMiniPlayer, DEFAULT_MINI_PLAYER } from './reading'
+export type { MiniPlayerPrefs, MiniPlayerControls } from './reading'
 
 // ---- movement ----
 export { useMovementRhythm } from './movement'

@@ -11,8 +11,26 @@ import { computed, ref } from 'vue'
 
 export type TtsState = 'idle' | 'playing' | 'paused'
 
+/** 朗读音色参数（INCR-504 音色库）：叠加在用户倍速之上 */
+export interface TtsVoiceOptions {
+  /** 音高 0.5 ~ 1.5 */
+  pitch?: number
+  /** 语速系数，实际 rate = 倍速 × rateScale */
+  rateScale?: number
+  /** 指定系统音色 URI（来自 speechSynthesis.getVoices） */
+  voiceURI?: string
+}
+
 /** 单句最大长度（超出再按逗号/空格二次切分） */
 const MAX_CHUNK = 180
+
+/** 按 URI 从系统音色表里取音色（环境不支持时返回 null） */
+export function resolveSystemVoice(voiceURI: string): SpeechSynthesisVoice | null {
+  if (!voiceURI || typeof window === 'undefined' || !('speechSynthesis' in window)) return null
+  const synth = window.speechSynthesis as SpeechSynthesis | undefined
+  if (!synth || typeof synth.getVoices !== 'function') return null
+  return synth.getVoices().find((v) => v.voiceURI === voiceURI) ?? null
+}
 
 /** 把长文切成适合朗读的句块：先按句末标点，再按长度二次切分 */
 export function chunkText(text: string): string[] {
@@ -64,6 +82,8 @@ export function useReadingTts() {
   let chunks: string[] = []
   let cursor = 0
   let stopped = true
+  /** 当前音色参数（INCR-504）：跨句块沿用，切音色即时生效 */
+  let voiceOpts: TtsVoiceOptions = {}
 
   function speakCurrent(): void {
     if (stopped || cursor >= chunks.length) {
@@ -72,8 +92,12 @@ export function useReadingTts() {
       return
     }
     const utter = new SpeechSynthesisUtterance(chunks[cursor])
-    utter.rate = rate.value
+    const scale = voiceOpts.rateScale ?? 1
+    utter.rate = Math.min(10, Math.max(0.1, rate.value * scale))
+    utter.pitch = voiceOpts.pitch ?? 1
     utter.lang = 'zh-CN'
+    const voice = voiceOpts.voiceURI ? resolveSystemVoice(voiceOpts.voiceURI) : null
+    if (voice) utter.voice = voice
     utter.onend = () => {
       if (stopped) return
       cursor++
@@ -89,11 +113,12 @@ export function useReadingTts() {
     window.speechSynthesis.speak(utter)
   }
 
-  /** 从头朗读文本。空文本或不支持时返回 false。 */
-  function speak(text: string): boolean {
+  /** 从头朗读文本。可传入音色参数（INCR-504）。空文本或不支持时返回 false。 */
+  function speak(text: string, opts?: TtsVoiceOptions): boolean {
     if (!supported.value) return false
     const list = chunkText(text)
     if (list.length === 0) return false
+    if (opts) voiceOpts = { ...voiceOpts, ...opts }
     stop()
     chunks = list
     cursor = 0
@@ -133,5 +158,14 @@ export function useReadingTts() {
     }
   }
 
-  return { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate }
+  /** 切换音色（INCR-504）。播放中即时生效：从当前句块重读。 */
+  function setVoice(opts: TtsVoiceOptions): void {
+    voiceOpts = { ...voiceOpts, ...opts }
+    if (state.value === 'playing' && supported.value) {
+      window.speechSynthesis.cancel()
+      speakCurrent()
+    }
+  }
+
+  return { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate, setVoice }
 }

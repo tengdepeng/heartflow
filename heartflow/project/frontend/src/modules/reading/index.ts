@@ -126,6 +126,29 @@ export type { DayReading, MonthCell, MonthCalendar, YearSummary } from './readin
 export { useReadingReport, buildYearReport } from './reading-report'
 export type { YearReport, MonthPoint } from './reading-report'
 
+// ---- 朗读音色库（INCR-504：13 款本地音色，供 TtsControlPanel / VoiceLibraryPanel） ----
+export {
+  useVoiceLibrary,
+  reloadVoiceLibrary,
+  voicePreset,
+  clampPitch,
+  clampRateScale,
+  matchSystemVoice,
+  resolvePresetVoiceURI,
+  applyVoicePreset,
+  VOICE_PRESETS,
+  DEFAULT_VOICE_ID,
+  MIN_PITCH,
+  MAX_PITCH,
+  MIN_RATE_SCALE,
+  MAX_RATE_SCALE,
+} from './voice-library'
+export type { VoicePreset, VoiceGender, VoiceLibraryState } from './voice-library'
+
+// ---- 悬浮迷你播放器（INCR-502：听书浮条，MiniPlayerBar 消费） ----
+export { useMiniPlayer, reloadMiniPlayer, DEFAULT_MINI_PLAYER } from './mini-player'
+export type { MiniPlayerPrefs, MiniPlayerControls, MiniPlayerProgress } from './mini-player'
+
 // ---- 摘录 / 读书便签 本地导出（#41） ----
 export {
   useReadingExport,
