@@ -176,12 +176,12 @@
 | 484 | 语音引导 cue | `reading/tts.ts` + `TtsControlPanel.vue` | 已覆盖 · 剔除 |
 | 485 | 难度/熟悉度自适应 | `word-mirror/personal-vocabulary.ts` + `writing-enhance.ts` | 已覆盖 · 剔除 |
 | 486 | 历法玄学数据 | `astrolabe` + `FourPillarsPanel.vue` + `seasonal` + `traditions` + `zeitgeist` | 已覆盖 · 剔除 |
-| **487** | **电子木鱼·功德计数器** | 全 src 仅 `cognition/types.ts:306` 音景描述「偶有钟声与木鱼声」，**无任何点击计数交互**；组件岛 `electronic_fish`/`dynamic_pet` + 万年日历 `pop_fish`/`fish_music` 印证 | **真缺口 · 未立项（落 息壤/情绪花房/静心角，与 `sound-scene` 禅院音景契合）** |
-| **488** | **桌面宠物·陪伴精灵** | 全 src `宠物/精灵/companion` 零命中（`宠物` 仅记账自定义分类示例、`companion` 仅运动「同伴」）；组件岛 `desktop_pet`/`dynamic_pet`/`disdain_kitten`/`duck_animation` | **真缺口 · 未立项（落 殿堂触角/家，可与 `advisor` 幕僚好感联动）** |
+| **487** | **电子木鱼·功德计数器** | 全 src 仅 `cognition/types.ts:306` 音景描述「偶有钟声与木鱼声」，**无任何点击计数交互**；组件岛 `electronic_fish`/`dynamic_pet` + 万年日历 `pop_fish`/`fish_music` 印证 | **真缺口 · 已落地（2026-10-04 提交 6ec91af8 · 落 息壤，与 `sound-scene` 禅院音景契合）** |
+| **488** | **桌面宠物·陪伴精灵** | 全 src `宠物/精灵/companion` 零命中（`宠物` 仅记账自定义分类示例、`companion` 仅运动「同伴」）；组件岛 `desktop_pet`/`dynamic_pet`/`disdain_kitten`/`duck_animation` | **真缺口 · 已落地（2026-10-04 提交 fc73f5d · 落 家，可与 `advisor` 幕僚好感联动）** |
 
-**核验小结**：22 项候选中 **17 项 Heartflow 已有等价实现（剔除）**，1 项部分覆盖（472 降级），2 项窄缺口（477 多色标记 / 478 多分支导航），**3 项为确证真缺口**（INCR-469 房间级锁【已落地 2026-10-04】+ INCR-487 电子木鱼 + INCR-488 桌面宠物【均桌面端强适配·未立项·按需立项】）。**后续落地**：第一层候选（INCR-467~486）中 INCR-469 / INCR-477 / INCR-478 已实现（见 7.1 / 7.2 / 7.3），其余已覆盖或降级；INCR-487 / INCR-488 待立项，详见第八节与追踪文件候选池。
+**核验小结**：22 项候选中 **17 项 Heartflow 已有等价实现（剔除）**，1 项部分覆盖（472 降级），2 项窄缺口（477 多色标记 / 478 多分支导航），**3 项为确证真缺口**（INCR-469 房间级锁【已落地】+ INCR-487 电子木鱼【已落地 2026-10-04】+ INCR-488 桌面宠物【已落地 2026-10-04】）。**后续落地**：第一层候选（INCR-467~486）中 INCR-469 / INCR-477 / INCR-478 已实现（见 7.1 / 7.2 / 7.3），INCR-487 / INCR-488 已于 2026-10-04 落地（见 7.4 / 7.5 与第八节）。
 
-**结论**：96 APK 交互分析（第一层）的主要价值是**确认既有能力面已完整 + 定位少数真空白**，而非大面积缺口；第一层唯一真缺口 INCR-469 已于 2026-10-04 落地。第二、三层下钻（INCR-487~512，见第八节）进一步确认能力面高度完整，仅补充 2 项桌面端强适配真缺口（487 电子木鱼 / 488 桌面宠物）与少量窄缺口/微交互增量。
+**结论**：96 APK 交互分析（第一层）的主要价值是**确认既有能力面已完整 + 定位少数真空白**，而非大面积缺口；第一层唯一真缺口 INCR-469 已于 2026-10-04 落地。第二、三层下钻（INCR-487~512，见第八节）进一步确认能力面高度完整，仅补充 2 项桌面端强适配真缺口（487 电子木鱼 / 488 桌面宠物，**已于 2026-10-04 落地**，见 7.4 / 7.5）与少量窄缺口/微交互增量。
 
 ### 7.1 INCR-469 落地记录（2026-10-04）
 
@@ -224,20 +224,47 @@
 
 **结论**：候选池（INCR-472~479 观察项）全部覆盖或落地，本批借鉴分析收口。
 
+### 7.4 INCR-487 落地记录（2026-10-04）
+
+**借鉴源**：番茄小说 / 纯纯写作 / 万年日历等 APK 的「电子木鱼·功德计数器」——点击木鱼累积功德 + 音效/动画 + 每日功德统计（组件岛 `electronic_fish` / 万年日历 `pop_fish` / `fish_music`）。
+
+**实现**（落点息壤 `Rest.vue`）：
+- `src/modules/merit-wooden-fish/wooden-fish.ts`：`useMeritWoodenFish` composable（模块级单例 state + load/persist），纯函数式 WebAudio 合成木鱼敲击声（triangle 360→240Hz 短包络，零音频资源），`MeritState={totalMerit,todayCount,lastKnockDate,soundEnabled}`，`knock()` 累计+1/今日+1（跨日归零）/播放，`toggleSound()`，`clearAll()`；STORAGE_KEY=`hf:merit_wooden_fish`。
+- `src/components/MeritWoodenFishPanel.vue`（前缀 `mwf-`，暖木/琥珀主题）：木鱼按钮 + 累计功德/今日敲击统计 + 声音开关 + 空态引导。
+- 挂载 `Rest.vue`；`modules/index.ts` barrel 导出；持久化下沉 composable（视图不裸调 storage）。
+
+**验证**：composable 5 例 + 面板 3 例定向测试全过；六闸门（eslint / 循环依赖 / 房间接线 / vue-tsc / vite build / 定向 vitest 36 例）全绿。**commit 6ec91af8**。
+
+**结论**：候选池 487 已落地（息壤）。
+
+### 7.5 INCR-488 落地记录（2026-10-04）
+
+**借鉴源**：组件岛 `desktop_pet` / `dynamic_pet` / `disdain_kitten` / `duck_animation`（含养成闭环 `desktop_pet_zoom` / `player_bg_pet_*`）——桌面常驻宠物，随心情/状态变化并可互动；落点「殿堂触角 / 家」，可与幕僚好感（`advisor`）联动。
+
+**实现**（落点「家」 `HomeSpace.vue`）：
+- `src/modules/desktop-companion/companion.ts`：`useDesktopCompanion` composable + 养成闭环。`CompanionState={adopted,name,form,level,xp,satiety,affection,energy,homeLevel,lastFedDate,lastPlayDate,createdAt}`；`adopt(name,form)` → `feed`/`play`/`rest`（均加经验）；`gainXp` 经验累计触发升级（`xpToNext=50+(lv-1)*30` 线性），每 3 级扩建小窝（`homeLevelFor=floor((lv-1)/3)`）；`tickDaily` 跨日衰减（饱食-20/亲密-10/精力+10，onMounted 调用）；心情由三项均值推导；STORAGE_KEY=`hf:desktop_companion`。三形态 `COMPANION_FORMS`：光灵/灵兽/萤精灵。
+- `src/components/DesktopCompanionPanel.vue`（前缀 `dcp-`）：领养流程（选形态+命名）→ 养成主界面（精灵/等级/小窝/三项状态条/升级进度/喂食·陪伴·歇息·放归）。
+- 挂载 `HomeSpace.vue`；`modules/index.ts` barrel 导出。
+- **幕僚好感联动**：照顾精灵经 `useAdvisorStore().witnessAll('companion_interact')` 记录幕僚见证（同步 `lastActiveAt`），不强制刷好感（契合宪法「不操控情感」）；联动仅在面板点击 handler 内懒调用，setup 不触碰 advisor store。
+
+**验证**：composable 10 例 + 面板 3 例 + HomeSpace 13 例回归定向测试全过；六闸门全绿。**commit fc73f5d**。
+
+**结论**：候选池 488 已落地（家）；INCR-497「养成闭环」已随 488 一并实现。
+
 ---
 
 ## 八、深层下钻核验结论（INCR-487~512 · 2026-10-04）
 
 > 第一层「静态资源+清单信号」（INCR-467~486，见第七节）收口后，为彻底排除遗漏，对 12 个重点包继续做了 **四轮完备性下钻**：第二层（dex/资源表/assets 实读）→ 第三层（UI 交互层 `anim`/`menu`/`xml`/`drawable`）→ 资源类型层（`array`/`animator`/`interpolator`/`raw`/`font`/`bool`/`integer`/`fraction`）→ `assets`/Lottie 逐包实读。逐项在 `heartflow/project/frontend/src` 全量 `rg` 复核。完整候选池与核验矩阵见 `各类文件/markdown-历史报告/房间功能差距-136apk追踪.md` 对应候选池块；UI 交互层细节见 `借鉴分析/APK交互借鉴分析-UI交互层.md`。
 
-### 8.1 确证真缺口（桌面端强适配，待立项）
+### 8.1 确证真缺口（桌面端强适配，已落地）
 
 | INCR | 借鉴点 | 落点 | 核验证据 |
 |---|---|---|---|
-| 487 | 电子木鱼·功德计数器 | 息壤 / 情绪花房 / 静心角 | 全 src 仅音景描述「偶有木鱼声」，无点击计数交互；组件岛 `electronic_fish`/`dynamic_pet` + 万年日历 `pop_fish`/`fish_music` |
-| 488 | 桌面宠物·陪伴精灵 | 殿堂触角 / 家（可与 `advisor` 幕僚好感联动） | 全 src `宠物/精灵/companion` 零命中；组件岛 `desktop_pet`/`dynamic_pet`/`disdain_kitten`/`duck_animation` |
+| 487 | 电子木鱼·功德计数器 | 息壤（已落地 · 提交 6ec91af8） | 全 src 仅音景描述「偶有木鱼声」，无点击计数交互；组件岛 `electronic_fish`/`dynamic_pet` + 万年日历 `pop_fish`/`fish_music` |
+| 488 | 桌面宠物·陪伴精灵 | 家（落 HomeSpace · 已落地 · 提交 fc73f5d，可与 `advisor` 幕僚好感联动） | 全 src `宠物/精灵/companion` 零命中；组件岛 `desktop_pet`/`dynamic_pet`/`disdain_kitten`/`duck_animation` |
 
-> 注：INCR-487 / 488 已同步登记进第七节核验表（22 项）与本追踪文件第二层候选池，状态为「确证真缺口·未立项」，落地优先级低于功能性缺口。
+> 注：INCR-487 / 488 已同步登记进第七节核验表（22 项）与本追踪文件第二层候选池；状态已于 2026-10-04 转为「已落地」（487 提交 6ec91af8 · 488 提交 fc73f5d），二者均落桌面端强适配房间，详见 7.4 / 7.5。
 
 ### 8.2 窄缺口与观察项（INCR-489~512，按需立项）
 
@@ -255,7 +282,7 @@
 ### 8.4 收口结论
 
 - 四轮下钻穷尽 12 重点包，候选池定格 **INCR-467~512**（共 46 项）。
-- **确证真缺口仅 3 项**（469 房间级锁【已落地】+ 487 电子木鱼 + 488 桌面宠物），均为桌面端可迁移、现状零实现；其余为窄缺口（微交互/组件级）与观察项（桌面不适配/低价值）。
+- **确证真缺口 3 项均已落地**（469 房间级锁 + 487 电子木鱼 + 488 桌面宠物，均 2026-10-04 提交），均为桌面端可迁移、现状零实现；其余为窄缺口（微交互/组件级）与观察项（桌面不适配/低价值）。
 - 与第一节结论一致：**96 APK 借鉴分析整体证明 Heartflow 既有能力面高度完整**，真空白极小且集中在「陪伴/趣味交互」与「微交互组件」层面。
 - 全部候选池（INCR-467~512）已在追踪文件登记，按需立项；主文档第七、八节与追踪文件双向对齐，本分析正式收口。
 
