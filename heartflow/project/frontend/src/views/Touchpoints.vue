@@ -400,6 +400,22 @@
       />
     </section>
 
+    <!-- ============================================================ -->
+    <!-- 触角·交互组件簇（INCR-491/492/509，借鉴 96 APK 生辰 anim：     -->
+    <!-- 径向扇形菜单 / 滚轮旋钮选择器 / 动态岛状态胶囊，纯本地零网络） -->
+    <!-- ============================================================ -->
+    <section data-enter class="tp-section">
+      <RadialMenuPanel />
+    </section>
+
+    <section data-enter class="tp-section">
+      <RotaryPickerPanel />
+    </section>
+
+    <section data-enter class="tp-section">
+      <DynamicIslandPanel />
+    </section>
+
     <!-- 跨设备接续 · 配对（守宪法第1条·本地私有·fail-closed） -->
     </RoomLayout>
   </div>
@@ -415,6 +431,9 @@ import ClipboardPanel from '../components/ClipboardPanel.vue'
 import NotificationCenterPanel from '../components/NotificationCenterPanel.vue'
 import OrchestrationPanel from '../components/OrchestrationPanel.vue'
 import ChannelOptimizerPanel from '../components/ChannelOptimizerPanel.vue'
+import RadialMenuPanel from '../components/RadialMenuPanel.vue'
+import RotaryPickerPanel from '../components/RotaryPickerPanel.vue'
+import DynamicIslandPanel from '../components/DynamicIslandPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
 import RoomLayout from '../components/RoomLayout.vue'
 import {

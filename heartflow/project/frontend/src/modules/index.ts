@@ -475,6 +475,18 @@ export type { WheelState, WheelOption, SpinRecord } from './decision-wheel'
 export { useDriftBottle, reloadBottles, BOTTLE_MOODS } from './drift-bottle'
 export type { BottleState, DriftBottle, BottleMood, BottleStatus } from './drift-bottle'
 
+// ---- radial-menu（触角 · 径向扇形菜单）----
+export { useRadialMenu, reloadRadialMenu, DEFAULT_ACTIONS, MAX_ACTIONS } from './radial-menu'
+export type { RadialAction, RadialMenuState } from './radial-menu'
+
+// ---- rotary-picker（触角 · 滚轮旋钮选择器）----
+export { useRotaryPicker, reloadRotary, DEFAULT_ROTARY } from './rotary-picker'
+export type { RotaryPreset, RotaryState } from './rotary-picker'
+
+// ---- dynamic-island（触角 · 动态岛状态胶囊）----
+export { useDynamicIsland, reloadIsland, ISLAND_MODES, ISLAND_MODE_META, DEFAULT_ISLAND } from './dynamic-island'
+export type { IslandMode, DynamicIslandState } from './dynamic-island'
+
 // ---- career ----
 export { useCareerPath, useSkillMap, useTransitionAnalysis, useInteractionTracker, useCareerMilestones } from './career'
 export { useCareer } from './career'

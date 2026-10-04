@@ -29,6 +29,19 @@ vi.mock('../../components/ClipboardPanel.vue', () => ({
   default: { template: '<div data-test="clipboard-panel" />' },
 }))
 
+// ---- 模拟触角交互组件簇（INCR-491/492/509） ----
+vi.mock('../../components/RadialMenuPanel.vue', () => ({
+  default: { template: '<div data-test="radial-menu-panel" />' },
+}))
+
+vi.mock('../../components/RotaryPickerPanel.vue', () => ({
+  default: { template: '<div data-test="rotary-picker-panel" />' },
+}))
+
+vi.mock('../../components/DynamicIslandPanel.vue', () => ({
+  default: { template: '<div data-test="dynamic-island-panel" />' },
+}))
+
 // ---- 辅助函数 ----
 async function createWrapper() {
   const { default: Touchpoints } = await import('../Touchpoints.vue')
@@ -217,6 +230,22 @@ describe('Touchpoints 殿堂触角视图', () => {
     const wrapper = await createWrapper()
     const panel = wrapper.find('[data-test="clipboard-panel"]')
     expect(panel.exists()).toBe(true)
+  })
+
+  // ------- 触角交互组件簇（INCR-491/492/509） -------
+  it('渲染 RadialMenuPanel 径向扇形菜单', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="radial-menu-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 RotaryPickerPanel 滚轮旋钮选择器', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="rotary-picker-panel"]').exists()).toBe(true)
+  })
+
+  it('渲染 DynamicIslandPanel 动态岛状态胶囊', async () => {
+    const wrapper = await createWrapper()
+    expect(wrapper.find('[data-test="dynamic-island-panel"]').exists()).toBe(true)
   })
 
   // ============================================================
