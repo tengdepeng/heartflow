@@ -137,6 +137,7 @@
                 class="pd-img"
                 :src="entry.thumbs[i] || img"
                 alt="照片日记"
+                @click="openViewer(entry.date, i)"
               />
               <span class="pd-img-order">{{ i + 1 }}</span>
               <button class="pd-img-remove" @click="removeImage(entry.date, i)">×</button>
