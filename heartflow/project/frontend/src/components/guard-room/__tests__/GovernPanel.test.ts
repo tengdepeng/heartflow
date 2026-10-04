@@ -35,7 +35,7 @@ const hoisted = vi.hoisted(() => {
   })
   return {
     recent: [mkRecord('r1', 'knowledge', '知识节点'), mkRecord('r2', 'mood', '情绪记录')],
-    moduleRecords: { knowledge: [mkRecord('r1', 'knowledge', '知识节点')] },
+    moduleRecords: { knowledge: [mkRecord('r1', 'knowledge', '知识节点')] } as Record<string, ReturnType<typeof mkRecord>[]>,
     aging: {} as Record<string, { decayLevel: number } | undefined>,
     agingProgress: {} as Record<string, number>,
     getModuleRecordsCalls: [] as string[],
