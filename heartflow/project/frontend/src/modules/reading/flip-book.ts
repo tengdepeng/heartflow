@@ -212,14 +212,24 @@ export function clampPageIndex(book: FlipBook, index: number): number {
   return Math.max(0, Math.min(last, Math.round(index)))
 }
 
-/** 翻页（不环绕）：dir>0 向后，dir<0 向前，返回夹取后的新页码 */
-export function turnPage(book: FlipBook, current: number, dir: number): number {
-  const step = dir >= 0 ? 1 : -1
-  return clampPageIndex(book, clampPageIndex(book, current) + step)
+/**
+ * 翻页（不环绕）：dir>0 向后，dir<0 向前，返回夹取后的新页码。
+ * dual=true 时按「展台」翻页——一次翻两张（整张跨页），并把当前页吸附到展开左页。
+ * 否则双页模式（展台按偶数吸附）下单击「下一页」只会让页码 +1 而画面不动。
+ */
+export function turnPage(book: FlipBook, current: number, dir: number, dual = false): number {
+  const base = dual ? spreadPair(book, current, true)[0] : clampPageIndex(book, current)
+  const step = (dir >= 0 ? 1 : -1) * (dual ? 2 : 1)
+  const target = base + step
+  if (!dual) return clampPageIndex(book, target)
+  // 双页模式夹取到「最后一个展台起始页」，避免末展台的下一页仍是同一张跨页
+  const lastStart = spreadPair(book, pageCount(book) - 1, true)[0]
+  return Math.max(0, Math.min(lastStart, target))
 }
 
-export function canTurn(book: FlipBook, current: number, dir: number): boolean {
-  return turnPage(book, current, dir) !== clampPageIndex(book, current)
+export function canTurn(book: FlipBook, current: number, dir: number, dual = false): boolean {
+  const base = dual ? spreadPair(book, current, true)[0] : clampPageIndex(book, current)
+  return turnPage(book, current, dir, dual) !== base
 }
 
 /** 双页展开：返回 [左页, 右页|null]（单页模式右页恒为 null） */
@@ -273,6 +283,9 @@ export function buildFlipBookMarkdown(book: FlipBook): string {
 export function useFlipBook() {
   const { viewYear, report, setYear, narrative } = useReadingNarrative()
   const photoDiary = usePhotoDiary()
+  // 照片日记的 entries 仅在 PhotoDiaryPanel 挂载时载入；成书直接消费同一份 ref，
+  // 若用户冷启动直达阅览殿（未进过逐日心锚），年度光影页会整页缺失 → 这里主动补齐。
+  photoDiary.load()
 
   const book = computed(() =>
     composeFlipBook({

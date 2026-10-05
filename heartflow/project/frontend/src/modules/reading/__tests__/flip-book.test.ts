@@ -9,13 +9,14 @@ import type { ReadingNarrative } from '../reading-narrative'
 
 const mockNarrative = vi.fn()
 const mockPhotoEntries = vi.fn()
+const mockPhotoLoad = vi.fn()
 
 vi.mock('../reading-narrative', () => ({
   useReadingNarrative: () => mockNarrative(),
 }))
 
 vi.mock('../../anchor/photo-diary', () => ({
-  usePhotoDiary: () => ({ entries: mockPhotoEntries() }),
+  usePhotoDiary: () => ({ entries: mockPhotoEntries(), load: mockPhotoLoad }),
 }))
 
 import {
@@ -237,6 +238,21 @@ describe('翻页导航', () => {
     expect(canTurn(book, 7, 1)).toBe(false)
   })
 
+  it('turnPage 双页模式一次翻两张并吸附左页', () => {
+    expect(turnPage(book, 0, 1, true)).toBe(2)
+    expect(turnPage(book, 1, 1, true)).toBe(2)
+    expect(turnPage(book, 2, -1, true)).toBe(0)
+  })
+
+  it('canTurn 双页模式以展台为单位，末展台不再可翻', () => {
+    expect(canTurn(book, 0, -1, true)).toBe(false)
+    expect(canTurn(book, 1, -1, true)).toBe(false)
+    expect(canTurn(book, 0, 1, true)).toBe(true)
+    // 8 页 → 末展台为 [6,7]，其下一页仍是同一张跨页，应禁用
+    expect(canTurn(book, 6, 1, true)).toBe(false)
+    expect(turnPage(book, 6, 1, true)).toBe(6)
+  })
+
   it('spreadPair 单页/双页与末页落单', () => {
     expect(spreadPair(book, 3, true)).toEqual([2, 3])
     expect(spreadPair(book, 7, true)).toEqual([6, 7])
@@ -269,5 +285,10 @@ describe('useFlipBook', () => {
     expect(viewYear.value).toBe(2026)
     expect(book.value.pages[0].kind).toBe('cover')
     expect(bookSummary(book.value).photos).toBe(2)
+  })
+
+  it('冷启动时主动载入照片日记（否则年度光影页整页缺失）', () => {
+    useFlipBook()
+    expect(mockPhotoLoad).toHaveBeenCalledTimes(1)
   })
 })

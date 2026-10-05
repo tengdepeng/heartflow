@@ -17,7 +17,7 @@
             @click="shiftYear(1)"
           >›</button>
         </div>
-        <button class="fbk-mode" type="button" @click="dual = !dual">
+        <button class="fbk-mode" type="button" @click="toggleDual">
           {{ dual ? '单页' : '双页' }}
         </button>
       </div>
@@ -109,7 +109,7 @@
 
     <footer class="fbk-foot">
       <button class="fbk-nav" type="button" :disabled="!canPrev" @click="prev">‹ 上一页</button>
-      <span class="fbk-indicator">第 {{ current + 1 }} / {{ total }} 页</span>
+      <span class="fbk-indicator">{{ indicator }}</span>
       <button class="fbk-nav" type="button" :disabled="!canNext" @click="next">下一页 ›</button>
     </footer>
 
@@ -158,18 +158,26 @@ const copied = ref(false)
 
 const total = computed(() => pageCount(book.value))
 const summary = computed(() => bookSummary(book.value))
+// 双页模式下「当前页」吸附到展台左页，翻页以整张跨页为单位（否则单击下一页画面不动）
+const spreadIndex = computed(() => spreadPair(book.value, current.value, dual.value)[0])
 const visiblePages = computed(() => {
-  const [left, right] = spreadPair(book.value, current.value, dual.value)
+  const [left, right] = spreadPair(book.value, spreadIndex.value, dual.value)
   return right === null ? [left] : [left, right]
 })
 const spreadKey = computed(() => visiblePages.value.join('-'))
-const canPrev = computed(() => canTurn(book.value, current.value, -1))
-const canNext = computed(() => canTurn(book.value, current.value, 1))
+const indicator = computed(() => {
+  const s = spreadIndex.value
+  if (!dual.value || s + 1 >= total.value) return `第 ${s + 1} / ${total.value} 页`
+  return `第 ${s + 1}-${s + 2} / ${total.value} 页`
+})
+const canPrev = computed(() => canTurn(book.value, current.value, -1, dual.value))
+const canNext = computed(() => canTurn(book.value, current.value, 1, dual.value))
 
 function go(dir: number) {
-  if (!canTurn(book.value, current.value, dir)) return
+  if (!canTurn(book.value, current.value, dir, dual.value)) return
   flipDir.value = dir >= 0 ? 'next' : 'prev'
-  current.value = turnPage(book.value, current.value, dir)
+  current.value = turnPage(book.value, current.value, dir, dual.value)
+  copied.value = false
 }
 
 function prev() {
@@ -181,10 +189,16 @@ function next() {
 }
 
 function jump(index: number) {
-  const target = clampPageIndex(book.value, index)
-  if (target === current.value) return
-  flipDir.value = target > current.value ? 'next' : 'prev'
+  const target = spreadPair(book.value, clampPageIndex(book.value, index), dual.value)[0]
+  if (target === spreadIndex.value) return
+  flipDir.value = target > spreadIndex.value ? 'next' : 'prev'
   current.value = target
+  copied.value = false
+}
+
+function toggleDual() {
+  dual.value = !dual.value
+  current.value = spreadPair(book.value, current.value, dual.value)[0]
 }
 
 function shiftYear(delta: number) {
@@ -192,6 +206,7 @@ function shiftYear(delta: number) {
   if (next > thisYear || next < 1970) return
   setYear(next)
   current.value = 0
+  copied.value = false
 }
 
 async function onCopy() {

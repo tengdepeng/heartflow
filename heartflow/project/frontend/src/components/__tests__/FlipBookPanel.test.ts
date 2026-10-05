@@ -17,7 +17,7 @@ vi.mock('../../modules/reading/reading-narrative', () => ({
 }))
 
 vi.mock('../../modules/anchor/photo-diary', () => ({
-  usePhotoDiary: () => ({ entries: mockPhotoEntries() }),
+  usePhotoDiary: () => ({ entries: mockPhotoEntries(), load: vi.fn() }),
 }))
 
 const REPORT: YearReport = {
@@ -113,13 +113,22 @@ describe('FlipBookPanel', () => {
 
   it('页码指示与上一页在首页禁用', async () => {
     const wrapper = await getWrapper()
-    expect(wrapper.find('.fbk-indicator').text()).toBe('第 1 / 7 页')
+    expect(wrapper.find('.fbk-indicator').text()).toBe('第 1-2 / 7 页')
     expect(btnByText(wrapper, '‹ 上一页').attributes('disabled')).toBeDefined()
     expect(btnByText(wrapper, '下一页 ›').attributes('disabled')).toBeUndefined()
   })
 
-  it('下一页前进页码', async () => {
+  it('双页模式下一页整张跨页前进（而非只 +1 页码而画面不动）', async () => {
     const wrapper = await getWrapper()
+    await btnByText(wrapper, '下一页 ›').trigger('click')
+    expect(wrapper.find('.fbk-indicator').text()).toBe('第 3-4 / 7 页')
+    const folios = wrapper.findAll('.fbk-page .fbk-folio').map(e => e.text())
+    expect(folios).toEqual(['3', '4'])
+  })
+
+  it('单页模式下一页一次一页', async () => {
+    const wrapper = await getWrapper()
+    await btnByText(wrapper, '单页').trigger('click')
     await btnByText(wrapper, '下一页 ›').trigger('click')
     expect(wrapper.find('.fbk-indicator').text()).toBe('第 2 / 7 页')
   })
@@ -135,7 +144,7 @@ describe('FlipBookPanel', () => {
     const dots = wrapper.findAll('.fbk-dot')
     expect(dots).toHaveLength(7)
     await dots[5].trigger('click')
-    expect(wrapper.find('.fbk-indicator').text()).toBe('第 6 / 7 页')
+    expect(wrapper.find('.fbk-indicator').text()).toBe('第 5-6 / 7 页')
   })
 
   it('翻到照片页渲染 PhotoTile', async () => {
@@ -166,6 +175,6 @@ describe('FlipBookPanel', () => {
     mockPhotoEntries.mockReturnValue(ref([]))
     const wrapper = await getWrapper()
     expect(wrapper.find('.fbk-page.kind-empty').exists()).toBe(true)
-    expect(wrapper.find('.fbk-indicator').text()).toBe('第 1 / 2 页')
+    expect(wrapper.find('.fbk-indicator').text()).toBe('第 1-2 / 2 页')
   })
 })
