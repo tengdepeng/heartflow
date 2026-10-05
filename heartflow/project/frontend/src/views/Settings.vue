@@ -895,6 +895,30 @@
   </div>
 </template>
 
+<script lang="ts">
+// 分组导航真源：放普通 script 块导出，供单元测试派生分组数与索引。
+// <script setup> 内的顶层绑定虽可在同 SFC 内引用，但无法被外部 import，
+// 放这里才能让测试断言 DOM 数量 === NAV_ITEMS.length（防止新增分组时测试静默腐烂）。
+export const SETTINGS_NAV_ITEMS = [
+  { key: 'bg', label: '背景介质' },
+  { key: 'roombg', label: '房间背景' },
+  { key: 'aura', label: '氛围主题' },
+  { key: 'font', label: '字体' },
+  { key: 'taxonomy', label: '侧栏分类' },
+  { key: 'rooms', label: '房间设置' },
+  { key: 'operation', label: '三级操作模式' },
+  { key: 'gesture', label: '手势映射' },
+  { key: 'anim', label: '界面动画' },
+  { key: 'visual', label: '视觉强度' },
+  { key: 'chrome', label: '界面显隐' },
+  { key: 'sidebar', label: '侧边栏' },
+  { key: 'edgebar', label: '上下边栏' },
+  { key: 'astrolabe', label: '星图主题' },
+  { key: 'appicon', label: '应用图标' },
+  { key: 'widget', label: '桌面小组件' },
+] as const
+</script>
+
 <script setup lang="ts">
 import { ref, computed, reactive, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -998,24 +1022,8 @@ function toggleSection(key: string) {
 
 // ---- 设置分组导航锚点 + 搜索过滤（② 自适应：两栏导航 + 顶部过滤）----
 // navItems 顺序须与模板中 sub-group 出现顺序一致，保证滚动高亮与点击跳转索引对齐。
-const NAV_ITEMS = [
-  { key: 'bg', label: '背景介质' },
-  { key: 'roombg', label: '房间背景' },
-  { key: 'aura', label: '氛围主题' },
-  { key: 'font', label: '字体' },
-  { key: 'taxonomy', label: '侧栏分类' },
-  { key: 'rooms', label: '房间设置' },
-  { key: 'operation', label: '三级操作模式' },
-  { key: 'gesture', label: '手势映射' },
-  { key: 'anim', label: '界面动画' },
-  { key: 'visual', label: '视觉强度' },
-  { key: 'chrome', label: '界面显隐' },
-  { key: 'sidebar', label: '侧边栏' },
-  { key: 'edgebar', label: '上下边栏' },
-  { key: 'astrolabe', label: '星图主题' },
-  { key: 'appicon', label: '应用图标' },
-  { key: 'widget', label: '桌面小组件' },
-] as const
+// 分组真源见上方 <script> 块的 SETTINGS_NAV_ITEMS（供测试 import）
+const NAV_ITEMS = SETTINGS_NAV_ITEMS
 const navItems = NAV_ITEMS
 
 const sectionFilter = ref('')

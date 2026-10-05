@@ -47,12 +47,14 @@ describe('item2 房间自适应排版基底接入', () => {
     expect(cardsInGrid).toBe(allCards)
   })
 
-  it('Settings：默认仅展开首个分组（bg），其余 14 个折叠', () => {
+  it('Settings：默认仅展开首个分组（bg），其余全部折叠', async () => {
     const wrapper = shallowMount(Settings)
+    const { SETTINGS_NAV_ITEMS } = await import('../../views/Settings.vue')
     const groups = wrapper.findAll('.sub-group')
-    expect(groups.length).toBe(15)
+    // 分组数从 SETTINGS_NAV_ITEMS 派生：新增分组时本用例自动跟随，不会静默腐烂
+    expect(groups.length).toBe(SETTINGS_NAV_ITEMS.length)
     const collapsed = groups.filter((g) => g.classes().includes('is-collapsed'))
-    expect(collapsed.length).toBe(14)
+    expect(collapsed.length).toBe(SETTINGS_NAV_ITEMS.length - 1)
     expect(groups[0].classes()).not.toContain('is-collapsed')
   })
 

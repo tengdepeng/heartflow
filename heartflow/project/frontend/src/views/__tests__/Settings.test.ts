@@ -8,7 +8,7 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn() }),
 }))
 
-import Settings from '../Settings.vue'
+import Settings, { SETTINGS_NAV_ITEMS } from '../Settings.vue'
 import SyncCenterPanel from '../../components/SyncCenterPanel.vue'
 import LanguageSettingsPanel from '../../components/LanguageSettingsPanel.vue'
 import { setLocale } from '../../modules/i18n'
@@ -17,20 +17,22 @@ beforeEach(() => {
   setActivePinia(createPinia())
 })
 
-// navItems 顺序须与模板 sub-group 出现顺序一致：bg/roombg/aura/taxonomy/rooms/
-// operation/gesture/anim/visual/chrome/sidebar/edgebar/astrolabe/appicon/widget
-const SIDEBAR_IDX = 9
+// 分组数与索引一律从 NAV_ITEMS 派生（写死魔数会在新增分组时静默腐烂——
+// 历史上就因INCR-500 新增「字体」分组而红过一次）。
+// 断言 DOM 数量 === NAV_ITEMS.length 才是真检查：若模板与常量不同步，测试会红。
+const SIDEBAR_KEY = 'sidebar'
+const SIDEBAR_IDX = SETTINGS_NAV_ITEMS.findIndex(n => n.key === SIDEBAR_KEY)
+const GROUP_COUNT = SETTINGS_NAV_ITEMS.length
 
 describe('Settings 两栏导航 + 搜索过滤（② 自适应）', () => {
-  // 15 = NAV_ITEMS 实际条目（含合法新增的「应用图标」+「桌面小组件」+「房间背景」）
-  it('渲染 15 个分组导航锚点', () => {
+  it(`渲染 ${SETTINGS_NAV_ITEMS.length} 个分组导航锚点`, () => {
     const wrapper = shallowMount(Settings)
-    expect(wrapper.findAll('.settings-nav__item').length).toBe(15)
+    expect(wrapper.findAll('.settings-nav__item').length).toBe(GROUP_COUNT)
   })
 
-  it('渲染 15 个可折叠子分组', () => {
+  it(`渲染 ${SETTINGS_NAV_ITEMS.length} 个可折叠子分组`, () => {
     const wrapper = shallowMount(Settings)
-    expect(wrapper.findAll('.sub-group').length).toBe(15)
+    expect(wrapper.findAll('.sub-group').length).toBe(GROUP_COUNT)
   })
 
   it('点击导航锚点展开对应分组', async () => {

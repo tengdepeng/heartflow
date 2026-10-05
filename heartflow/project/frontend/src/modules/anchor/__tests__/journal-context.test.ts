@@ -1,6 +1,11 @@
 // ============================================================
 // 逐日心锚 · 手札上下文（建议卡 + 元数据条）单元测试
 // 纯函数为主；时间戳取 12:00Z（东八区当日 20:00），规避 UTC 偏移漂移。
+//
+// TODAY / YDAY 必须**从系统「今天」派生**，不能写死日期字符串：
+// useJournalContext 内部调 getLocalDateKey() 取真实本地日历日，一旦写死
+// （原为 '2026-10-04'）跨过真实日期后，全部当日断言会静默失配——
+// 表现为「明明记了却读到 0 条」，且不会报任何错。
 // ============================================================
 
 process.env.TZ = 'Asia/Shanghai'
@@ -17,8 +22,19 @@ import type { Anchor } from '../types'
 import type { AnchorJournal } from '../anchor-journal'
 import type { PhotoEntry } from '../photo-diary'
 
-const TODAY = '2026-10-04'
-const YDAY = '2026-10-03'
+// 本地零点构造，避开 UTC 偏移导致的跨日
+function localDayOffset(days: number): string {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + days)
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+const TODAY = localDayOffset(0)
+const YDAY = localDayOffset(-1)
 
 function setup(kvStore: Record<string, any> = {}, extra: Record<string, any> = {}) {
   vi.resetModules()
