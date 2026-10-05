@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
 import { REWARD_STORAGE_KEYS } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 export type SavingMode = 'accumulate' | '52week' | 'wish'
 
@@ -111,7 +112,9 @@ export function applyWeek(plan: SavingPlan, week: number): SavingPlan {
   const w = Math.max(1, Math.min(52, Math.floor(week)))
   if (plan.mode !== '52week' || plan.weeksDone.includes(w)) return plan
   const amount = weekDepositAmount(plan.baseAmount, w)
-  const deposits = [...plan.deposits, { at: plan.createdAt.slice(0, 10) || new Date().toISOString().slice(0, 10), amount, note: `第${w}周` }]
+  // SavingDeposit.at 是「日键」语义（非 UTC 时间戳），用本地日历日
+  const depositDay = getLocalDateKey(new Date(plan.createdAt || Date.now()))
+  const deposits = [...plan.deposits, { at: depositDay, amount, note: `第${w}周` }]
   const weeksDone = [...plan.weeksDone, w].sort((a, b) => a - b)
   const currentAmount = weeksDeposited({ weeksDone, baseAmount: plan.baseAmount })
   const done = weeksDone.length >= 52 && plan.targetAmount > 0 && currentAmount >= plan.targetAmount

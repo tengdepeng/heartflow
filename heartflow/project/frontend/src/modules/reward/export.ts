@@ -4,6 +4,7 @@
 // 不引入第三方库，产出可被 Excel/WPS 直接打开的格式。
 // ============================================================
 import type { RewardRecord } from './reward-list'
+import { getLocalDateKey } from '../../utils/time'
 
 export interface ExportRow {
   日期: string
@@ -41,13 +42,16 @@ export function buildExportRows(
   if (scope === 'month' && opts.month) {
     list = records.filter(r => r.at.slice(0, 7) === opts.month)
   } else if (scope === 'range' && opts.from && opts.to) {
-    list = records.filter(r => r.at.slice(0, 10) >= opts.from! && r.at.slice(0, 10) <= opts.to!)
+    list = records.filter(r => {
+      const d = getLocalDateKey(new Date(r.at))
+      return d >= opts.from! && d <= opts.to!
+    })
   }
 
   return [...list]
     .sort((a, b) => a.at.localeCompare(b.at))
     .map(r => ({
-      日期: r.at.slice(0, 10),
+      日期: getLocalDateKey(new Date(r.at)),
       类型: r.type === 'income' ? '收入' : '支出',
       类别: catLabel(r.category),
       备注: r.description ?? '',

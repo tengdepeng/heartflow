@@ -9,6 +9,7 @@ import { DEFAULT_ACCOUNT_ID } from './accounts'
 import { cardBalance } from './credit-card'
 import type { CreditCardRecord } from './credit-card'
 import type { RewardRecord } from './reward-list'
+import { getLocalDateKey } from '../../utils/time'
 
 export type NetAssetSide = 'asset' | 'liability'
 
@@ -86,7 +87,7 @@ export function accountBalanceAt(
     b += r.type === 'income' ? r.amount : -r.amount
   }
   for (const t of transfers) {
-    if (t.at.slice(0, 10) > asOf) continue
+    if (getLocalDateKey(new Date(t.at)) > asOf) continue
     if (t.from === acc.id) b -= t.amount
     if (t.to === acc.id) b += t.amount
   }
@@ -102,7 +103,7 @@ export function accountBalanceAt(
 export function liabilityAt(card: CreditCardRecord, asOf: string): number {
   let bal = cardBalance(card)
   for (const rp of card.repayments) {
-    if (rp.at.slice(0, 10) > asOf) bal += rp.amount
+    if (getLocalDateKey(new Date(rp.at)) > asOf) bal += rp.amount
   }
   return Math.max(0, bal)
 }

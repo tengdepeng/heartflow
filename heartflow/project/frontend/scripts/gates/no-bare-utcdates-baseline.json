@@ -318,38 +318,6 @@
     "src/modules/rest/sleep-quality.ts": [
       "toISOString().split('T')[0]"
     ],
-    "src/modules/reward/daily-reminder.ts": [
-      "at.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/reward/export.ts": [
-      "at.slice(0,10)"
-    ],
-    "src/modules/reward/finance-analysis.ts": [
-      "iso.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/reward/finance-goals.ts": [
-      "assessedAt.substring(0,10)"
-    ],
-    "src/modules/reward/milestones.ts": [
-      "recordedAt.slice(0,10)"
-    ],
-    "src/modules/reward/net-asset.ts": [
-      "at.slice(0,10)"
-    ],
-    "src/modules/reward/report-visual.ts": [
-      "at.slice(0,10)"
-    ],
-    "src/modules/reward/reward-bridge.ts": [
-      "recordedAt.slice(0,10)"
-    ],
-    "src/modules/reward/saving-plan.ts": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/reward/worklog-bridge.ts": [
-      "toISOString().slice(0,10)"
-    ],
     "src/modules/safety/audit-timeline.ts": [
       "toISOString().slice(0,10)"
     ],

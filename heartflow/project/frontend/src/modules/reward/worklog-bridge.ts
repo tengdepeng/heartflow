@@ -6,6 +6,7 @@
 import { ref, computed } from 'vue'
 import type { LogEntry, LogEntryType, MoodTone } from '../worklog/types'
 import type { RewardRecord, IncomeCategory } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 收入映射配置 ----
 
@@ -177,7 +178,7 @@ export function useWorklogRewardBridge(
    * 获取今日已生成的总收入
    */
   function getTodayBridgeIncome(): number {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     return mappings.value
       .filter(m => m.mappedAt.startsWith(today))
       .reduce((sum, m) => sum + m.amount, 0)
@@ -337,7 +338,7 @@ export function useWorklogRewardBridge(
   const bridgeStats = computed<BridgeStats>(() => {
     const now = new Date()
     const monthPrefix = now.toISOString().slice(0, 7)
-    const today = now.toISOString().slice(0, 10)
+    const today = getLocalDateKey(now)
 
     const todayMappings = mappings.value.filter(m => m.mappedAt.startsWith(today))
     const monthMappings = mappings.value.filter(m => m.mappedAt.startsWith(monthPrefix))

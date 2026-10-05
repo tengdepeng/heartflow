@@ -12,6 +12,7 @@ import {
   REWARD_STORAGE_KEYS, DEFAULT_MILESTONES,
 } from './types'
 import { categoryLabelAny } from './custom-category'
+import { getLocalDateKey } from '../../utils/time'
 
 /**
  * 劳酬里程碑引擎
@@ -265,7 +266,7 @@ export function useRewardMilestones() {
     }
 
     // 生涯统计
-    const allDates = records.value.map((r) => r.recordedAt.slice(0, 10))
+    const allDates = records.value.map((r) => getLocalDateKey(new Date(r.recordedAt)))
     const uniqueDays = new Set(allDates).size
 
     return {

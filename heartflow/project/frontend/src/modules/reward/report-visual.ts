@@ -6,6 +6,7 @@
 // 保证引擎与自定义分类解耦、可独立测试。
 // ============================================================
 import type { RewardRecord } from './reward-list'
+import { getLocalDateKey } from '../../utils/time'
 
 export type Kind = 'income' | 'expense'
 
@@ -334,7 +335,7 @@ export function yearHeatmap(records: RewardRecord[], year: number, kind: Kind = 
   for (const r of records) {
     if (r.type !== kind) continue
     if (r.at.slice(0, 4) !== String(year)) continue
-    const day = r.at.slice(0, 10)
+    const day = getLocalDateKey(new Date(r.at))
     dayMap.set(day, (dayMap.get(day) ?? 0) + r.amount)
   }
 

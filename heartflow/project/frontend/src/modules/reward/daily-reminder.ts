@@ -6,6 +6,7 @@ import { ref } from 'vue'
 import { storage } from '../../engine/storage'
 import { REWARD_STORAGE_KEYS } from './types'
 import type { RewardRecord } from './reward-list'
+import { getLocalDateKey } from '../../utils/time'
 
 export interface DailyReminderConfig {
   enabled: boolean
@@ -29,12 +30,12 @@ function prevDay(d: Date): Date {
 
 /** 已有记账记录的天集合（按本地日期去重） */
 export function recordedDays(records: RewardRecord[]): Set<string> {
-  return new Set(records.map(r => r.at.slice(0, 10)))
+  return new Set(records.map(r => getLocalDateKey(new Date(r.at))))
 }
 
 /** 今日是否已记账 */
 export function hasRecordToday(records: RewardRecord[], today?: string): boolean {
-  const t = today ?? new Date().toISOString().slice(0, 10)
+  const t = today ?? getLocalDateKey()
   return recordedDays(records).has(t)
 }
 
@@ -70,7 +71,7 @@ export function monthActivity(records: RewardRecord[], month: string): MonthActi
   const inMonth = records.filter(r => r.at.slice(0, 7) === month)
   const byDay: Record<string, number> = {}
   for (const r of inMonth) {
-    const day = r.at.slice(0, 10)
+    const day = getLocalDateKey(new Date(r.at))
     byDay[day] = (byDay[day] ?? 0) + (r.type === 'income' ? r.amount : -r.amount)
   }
   return { count: inMonth.length, activeDays: Object.keys(byDay).length, byDay }

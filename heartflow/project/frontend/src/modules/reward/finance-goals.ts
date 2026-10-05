@@ -10,6 +10,7 @@
 import { ref, computed } from 'vue'
 import { storage } from '@/engine/storage'
 import type { RewardRecord, RewardMilestone } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 财务目标 ----
 
@@ -476,7 +477,7 @@ export function useFinanceHealth() {
   /** 评分趋势 */
   const scoreTrend = computed(() => {
     return healthScores.value.slice(-12).map(s => ({
-      date: s.assessedAt.substring(0, 10),
+      date: getLocalDateKey(new Date(s.assessedAt)),
       total: s.total,
       grade: s.grade,
     }))

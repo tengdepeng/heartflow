@@ -13,6 +13,7 @@ import type { RewardRecord, RewardType, IncomeCategory, ExpenseCategory, RewardM
 import { INCOME_CATEGORY_META, EXPENSE_CATEGORY_META, REWARD_STORAGE_KEYS } from './types'
 import type { BudgetOptimizationReport, OverspendAlert, SavingsStrategy } from './budget-optimizer'
 import type { FinancialForecast, FinanceHealthCheck, IncomeSourceAnalysis } from './financial-forecast'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -170,7 +171,7 @@ export function useRewardBridge() {
       monthlyTrend.push({ month: m, income: mi, expense: me, balance: mi - me })
     }
 
-    const allDates = records.map(r => r.recordedAt.slice(0, 10))
+    const allDates = records.map(r => getLocalDateKey(new Date(r.recordedAt)))
     const uniqueDays = new Set(allDates).size
 
     return {

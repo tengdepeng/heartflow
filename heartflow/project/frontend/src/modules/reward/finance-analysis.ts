@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
 import type { RewardRecord, RewardType, IncomeCategory, ExpenseCategory } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 筛选类型 ----
 
@@ -308,13 +309,13 @@ export function usePeriodicAnalysis(getRecords: () => RewardRecord[]) {
   function getPeriodKey(date: Date, type: PeriodType): string {
     const iso = date.toISOString()
     switch (type) {
-      case 'daily': return iso.slice(0, 10)
+      case 'daily': return getLocalDateKey(date)
       case 'weekly': {
         const d = new Date(date)
         const day = d.getDay()
         const diff = d.getDate() - day + (day === 0 ? -6 : 1)
         const monday = new Date(d.setDate(diff))
-        return monday.toISOString().slice(0, 10)
+        return getLocalDateKey(monday)
       }
       case 'monthly': return iso.slice(0, 7)
       case 'quarterly': {
