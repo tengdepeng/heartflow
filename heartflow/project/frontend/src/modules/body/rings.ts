@@ -6,6 +6,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 
 /** 环档位：0=空白 1=微动 2=舒展 3=充盈 4=盈满（状态描述，非评分） */
@@ -70,7 +71,7 @@ export function getBodyRingLogs(): DailyRingLog[] {
 const state = ref<BodyRingState>(load())
 
 function todayStr(): string {
-  return new Date().toISOString().split('T')[0]
+  return getLocalDateKey()
 }
 
 /** 读取今日日志（不修改状态，供计算属性使用） */
@@ -86,7 +87,7 @@ function ensureToday(): DailyRingLog {
     log = { date: todayStr(), activityMinutes: 0, restMinutes: 0, feeling: null }
     state.value.history = [...state.value.history, log]
   }
-  const cutoff = new Date(Date.now() - HISTORY_DAYS * 86400000).toISOString().split('T')[0]
+  const cutoff = getLocalDateKey(new Date(Date.now() - HISTORY_DAYS * 86400000))
   state.value.history = state.value.history.filter(h => h.date >= cutoff)
   return log
 }
@@ -102,7 +103,7 @@ function tierFromValue(value: number, thresholds: number[]): RingTier {
 
 /** 近 7 天档位序列（长期趋势），不足 7 天以前导 0 补齐 */
 function trendFor(field: 'activityMinutes' | 'restMinutes' | 'feeling'): number[] {
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+  const weekAgo = getLocalDateKey(new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
   const recent = state.value.history
     .filter(h => h.date >= weekAgo)
     .sort((a, b) => (a.date < b.date ? -1 : 1))

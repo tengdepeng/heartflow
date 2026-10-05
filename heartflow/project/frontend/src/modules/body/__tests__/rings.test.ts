@@ -2,6 +2,7 @@
 // 身体温室 · 三环测试（状态导向，拒绝 0-100 评分）
 // ============================================================
 import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { getLocalDateKey } from '../../../utils/time'
 
 describe('身体温室 三环', () => {
   beforeEach(() => {
@@ -65,7 +66,7 @@ describe('身体温室 三环', () => {
     const { getBodyRingLogs } = await import('../rings')
     const logs = getBodyRingLogs()
     expect(logs.length).toBeGreaterThanOrEqual(1)
-    const today = logs.find(l => l.date === new Date().toISOString().split('T')[0])
+    const today = logs.find(l => l.date === getLocalDateKey())
     expect(today?.activityMinutes).toBe(45)
     expect(today?.restMinutes).toBe(30)
     expect(today?.feeling).toBe(2)

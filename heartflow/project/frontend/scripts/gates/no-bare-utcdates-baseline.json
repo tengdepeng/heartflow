@@ -121,9 +121,6 @@
     "src/modules/body/greenhouse.ts": [
       "toISOString().split('T')[0]"
     ],
-    "src/modules/body/health-dashboard.ts": [
-      "toISOString().split('T')[0]"
-    ],
     "src/modules/body/health-report.ts": [
       "toISOString().split('T')[0]"
     ],
@@ -138,9 +135,6 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/body/nutrition-scoring.ts": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/modules/body/rings.ts": [
       "toISOString().split('T')[0]"
     ],
     "src/modules/body-wisdom/body-wisdom-bridge.ts": [

@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { BodyMetric, BodyMetricType, SleepRecord } from './types'
 import { BODY_STORAGE_KEYS } from './types'
 import { storage } from '../../engine/storage'
@@ -291,8 +292,8 @@ function computeConsistencyScore(metrics: BodyMetric[]): number {
   const now = new Date()
   let daysWithRecords = 0
   for (let i = 0; i < 7; i++) {
-    const date = new Date(now.getTime() - i * 86400000).toISOString().split('T')[0]
-    const hasRecord = metrics.some((m) => m.timestamp?.startsWith(date))
+    const date = getLocalDateKey(new Date(now.getTime() - i * 86400000))
+    const hasRecord = metrics.some((m) => m.timestamp && getLocalDateKey(new Date(m.timestamp)) === date)
     if (hasRecord) daysWithRecords++
   }
 
@@ -305,8 +306,8 @@ function computeStreak(metrics: BodyMetric[]): number {
   let streak = 0
   const now = new Date()
   for (let i = 0; i < 365; i++) {
-    const date = new Date(now.getTime() - i * 86400000).toISOString().split('T')[0]
-    const hasRecord = metrics.some((m) => m.timestamp?.startsWith(date))
+    const date = getLocalDateKey(new Date(now.getTime() - i * 86400000))
+    const hasRecord = metrics.some((m) => m.timestamp && getLocalDateKey(new Date(m.timestamp)) === date)
     if (hasRecord) {
       streak++
     } else if (i > 0) {
