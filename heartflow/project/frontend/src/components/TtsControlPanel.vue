@@ -17,6 +17,12 @@
             >{{ r }}x</button>
           </div>
         </div>
+        <button
+          class="ttp-btn ttp-follow-btn"
+          :class="{ active: follow }"
+          :title="follow ? '朗读时阅读器自动跟读定位（点此关闭）' : '开启后朗读时阅读器自动跟随（读↔听续接）'"
+          @click="emit('update:follow', !follow)"
+        >跟读</button>
       </div>
       <div v-if="progress.total > 0" class="ttp-progress">
         <span class="ttp-progress-text">{{ progressText }}</span>
@@ -40,16 +46,44 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue'
-import { useReadingTts } from '../modules/reading/tts'
+import {
+  useReadingTts,
+  chunkParagraphs,
+  splitParagraphs,
+  chunkIndexForParagraph,
+  paragraphIndexForChunk,
+} from '../modules/reading/tts'
 import { useVoiceLibrary, resolvePresetVoiceURI } from '../modules/reading/voice-library'
 import { useMiniPlayer } from '../modules/reading/mini-player'
 
-const props = defineProps<{ text: string; title?: string }>()
+const props = withDefaults(
+  defineProps<{
+    text: string
+    title?: string
+    /** 起读段落（读→听续接：从阅读器所在段落开始朗读） */
+    startParagraph?: number
+    /** 跟读：朗读推进时让阅读器跟随定位 */
+    follow?: boolean
+  }>(),
+  { title: '', startParagraph: 0, follow: false },
+)
+
+const emit = defineEmits<{
+  (e: 'progress', paragraphIndex: number): void
+  (e: 'update:follow', value: boolean): void
+}>()
 
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2] as const
-const { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate, setVoice } = useReadingTts()
+const { state, rate, progress, sentences, paraOfChunk, supported, speak, pause, resume, stop, setRate, setVoice } =
+  useReadingTts()
 const { current: voice } = useVoiceLibrary()
 const mini = useMiniPlayer()
+
+/** 读→听：把当前阅读段落换算成起读句块下标 */
+function startChunkIndex(): number {
+  const { paraOfChunk: paras } = chunkParagraphs(splitParagraphs(props.text))
+  return chunkIndexForParagraph(paras, props.startParagraph ?? 0)
+}
 
 /** 当前音色参数（INCR-504）：音高 + 语速系数 + 匹配到的系统音色 */
 function voiceOpts() {
@@ -65,9 +99,10 @@ const activeIndex = computed(() => {
   return Math.min(progress.value.index, progress.value.total - 1)
 })
 
-// 句块推进时把当前句滚动到可视区，形成「跟读」效果
+// 句块推进时把当前句滚动到可视区，形成「跟读」效果；并回报所在段落（INCR-526 听→读续接）
 watch(activeIndex, async (i) => {
   if (i < 0) return
+  emit('progress', paragraphIndexForChunk(paraOfChunk.value, i))
   await nextTick()
   const el = scrollBox.value?.querySelector('.ttp-sentence.is-active') as HTMLElement | null
   if (el && typeof el.scrollIntoView === 'function') {
@@ -99,7 +134,8 @@ function onToggle() {
   } else if (state.value === 'paused') {
     resume()
   } else {
-    speak(props.text, voiceOpts())
+    // 从当前阅读段落起读（读→听续接）
+    speak(props.text, voiceOpts(), startChunkIndex())
   }
 }
 
@@ -192,6 +228,12 @@ onBeforeUnmount(() => {
 }
 
 .ttp-btn-primary {
+  background: rgba(var(--accent-rgb), 0.14);
+  border-color: rgba(var(--accent-rgb), 0.3);
+  color: var(--accent);
+}
+
+.ttp-follow-btn.active {
   background: rgba(var(--accent-rgb), 0.14);
   border-color: rgba(var(--accent-rgb), 0.3);
   color: var(--accent);

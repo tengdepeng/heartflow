@@ -32,8 +32,13 @@ export function resolveSystemVoice(voiceURI: string): SpeechSynthesisVoice | nul
   return synth.getVoices().find((v) => v.voiceURI === voiceURI) ?? null
 }
 
-/** 把长文切成适合朗读的句块：先按句末标点，再按长度二次切分 */
-export function chunkText(text: string): string[] {
+/** 把整篇文本按空行切成非空段落（与沉浸阅读器同一分段口径，供读↔听定位对齐） */
+export function splitParagraphs(text: string): string[] {
+  return text.split(/\n+/).filter(p => p.trim())
+}
+
+/** 把单段文本切成句块：先按句末标点，再按长度二次切分 */
+function splitSentences(text: string): string[] {
   const sentences = text
     .split(/(?<=[。！？!?；;.\n])/)
     .map(s => s.trim())
@@ -64,6 +69,45 @@ export function chunkText(text: string): string[] {
   return chunks
 }
 
+/** 段落 → 句块切分结果：chunks 与 paraOfChunk 等长，后者记录每块所属段落下标 */
+export interface ChunkedText {
+  chunks: string[]
+  paraOfChunk: number[]
+}
+
+/** 把段落列表切成朗读句块，并记录每块所属段落（读↔听续接的定位基础） */
+export function chunkParagraphs(paragraphs: string[]): ChunkedText {
+  const chunks: string[] = []
+  const paraOfChunk: number[] = []
+  paragraphs.forEach((para, pi) => {
+    for (const c of splitSentences(para)) {
+      chunks.push(c)
+      paraOfChunk.push(pi)
+    }
+  })
+  return { chunks, paraOfChunk }
+}
+
+/** 把长文切成适合朗读的句块：先按句末标点，再按长度二次切分 */
+export function chunkText(text: string): string[] {
+  return chunkParagraphs(splitParagraphs(text)).chunks
+}
+
+/** 段落下标 → 起读句块下标（越界回落 0，从头读） */
+export function chunkIndexForParagraph(paraOfChunk: number[], paraIndex: number): number {
+  if (paraOfChunk.length === 0) return 0
+  const target = Math.max(0, Math.floor(paraIndex))
+  const i = paraOfChunk.findIndex(p => p >= target)
+  return i >= 0 ? i : 0
+}
+
+/** 句块下标 → 段落下标（听→读续接，越界夹取到末段） */
+export function paragraphIndexForChunk(paraOfChunk: number[], chunkIndex: number): number {
+  if (paraOfChunk.length === 0) return 0
+  const i = Math.max(0, Math.min(paraOfChunk.length - 1, Math.floor(chunkIndex)))
+  return paraOfChunk[i] ?? 0
+}
+
 /** 当前环境是否支持本地 TTS */
 export function isTtsSupported(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'
@@ -76,6 +120,8 @@ export function useReadingTts() {
   const progress = ref({ index: 0, total: 0 })
   /** 当前朗读文本切分出的句块列表（供逐句滚动跟读高亮，INCR-515） */
   const sentences = ref<string[]>([])
+  /** 与 sentences 等长：每块所属段落下标（INCR-526 读↔听续接：听→读回写段落位置） */
+  const paraOfChunk = ref<number[]>([])
 
   const supported = computed(isTtsSupported)
 
@@ -113,19 +159,23 @@ export function useReadingTts() {
     window.speechSynthesis.speak(utter)
   }
 
-  /** 从头朗读文本。可传入音色参数（INCR-504）。空文本或不支持时返回 false。 */
-  function speak(text: string, opts?: TtsVoiceOptions): boolean {
+  /**
+   * 朗读文本。可传入音色参数（INCR-504）与起读句块下标（INCR-526 读↔听续接）。
+   * 空文本或不支持时返回 false。
+   */
+  function speak(text: string, opts?: TtsVoiceOptions, startChunk = 0): boolean {
     if (!supported.value) return false
-    const list = chunkText(text)
+    const { chunks: list, paraOfChunk: paras } = chunkParagraphs(splitParagraphs(text))
     if (list.length === 0) return false
     if (opts) voiceOpts = { ...voiceOpts, ...opts }
     stop()
     chunks = list
-    cursor = 0
+    paraOfChunk.value = paras
+    cursor = Math.max(0, Math.min(list.length - 1, Math.floor(startChunk)))
     stopped = false
     sentences.value = list
     state.value = 'playing'
-    progress.value = { index: 0, total: chunks.length }
+    progress.value = { index: cursor, total: chunks.length }
     speakCurrent()
     return true
   }
@@ -167,5 +217,5 @@ export function useReadingTts() {
     }
   }
 
-  return { state, rate, progress, sentences, supported, speak, pause, resume, stop, setRate, setVoice }
+  return { state, rate, progress, sentences, paraOfChunk, supported, speak, pause, resume, stop, setRate, setVoice }
 }

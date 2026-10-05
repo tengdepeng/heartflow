@@ -40,9 +40,9 @@ function setupUnsupported() {
   ;(globalThis as Record<string, unknown>).window = globalThis
 }
 
-async function mountPanel(text: string) {
+async function mountPanel(text: string, extra: Record<string, unknown> = {}) {
   const mod = await import('../TtsControlPanel.vue')
-  return mount(mod.default, { props: { text } })
+  return mount(mod.default, { props: { text, ...extra } })
 }
 
 describe('TtsControlPanel 听书控制', () => {
@@ -131,6 +131,40 @@ describe('TtsControlPanel 听书控制', () => {
     const items = wrapper.findAll('.ttp-sentence')
     expect(items[0].classes()).toContain('is-read')
     expect(items[1].classes()).toContain('is-active')
+  })
+
+  it('从 startParagraph 起读（读→听续接）', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('第一段。\n第二段。', { startParagraph: 1 })
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    expect(spoken).toEqual(['第二段。'])
+  })
+
+  it('朗读推进按段落回报 progress（听→读续接）', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('甲一。甲二。\n乙一。')
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    const lastProgress = () => {
+      const ev = wrapper.emitted('progress')!
+      return ev[ev.length - 1]
+    }
+    expect(wrapper.emitted('progress')?.[0]).toEqual([0])
+    // 推进到第二块（仍属段 0）
+    endHandlers.shift()?.()
+    await wrapper.vm.$nextTick()
+    expect(lastProgress()).toEqual([0])
+    // 推进到第三块（属段 1）
+    endHandlers.shift()?.()
+    await wrapper.vm.$nextTick()
+    expect(lastProgress()).toEqual([1])
+  })
+
+  it('跟读开关点击后 emit update:follow', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('第一句。')
+    await wrapper.find('.ttp-follow-btn').trigger('click')
+    expect(wrapper.emitted('update:follow')?.[0]).toEqual([true])
   })
 
   it('停止后取消逐句高亮', async () => {

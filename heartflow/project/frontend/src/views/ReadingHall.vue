@@ -65,8 +65,14 @@
           <span class="reading-label">{{ activeBookTitle || '阅读' }}</span>
           <button class="text-btn" @click="clearReadingText">清除文本</button>
         </div>
-        <!-- 听书 · 本地朗读控制（INCR-276 补挂载孤儿组件 TtsControlPanel，reading/tts 引擎完备） -->
-        <TtsControlPanel :text="readingText" :title="activeBookTitle" />
+        <!-- 听书 · 本地朗读控制（INCR-276 挂载 · INCR-526 读↔听续接：从阅读段落起读 + 跟读回写） -->
+        <TtsControlPanel
+          :text="readingText"
+          :title="activeBookTitle"
+          :start-paragraph="resumeParagraph"
+          v-model:follow="ttsFollow"
+          @progress="onTtsProgress"
+        />
         <!-- 听书 · 朗读音色库（INCR-504，13 款本地音色，选中即作用于朗读） -->
         <VoiceLibraryPanel />
         <!-- 选中文本后的摘录按钮 -->
@@ -438,6 +444,13 @@ function onReaderProgress(idx: number) {
     lastProgressSave = now
     hall.setBookProgress(activeBookId.value, idx)
   }
+}
+// 跟读开关（INCR-526 读↔听续接）：开启后朗读推进时阅读器跟随定位
+const ttsFollow = ref(false)
+// 听→读：朗读推进到某段落 → 落库续读位置；开启跟读时同步把阅读器定位过去
+function onTtsProgress(paragraphIndex: number) {
+  if (activeBookId.value) hall.setBookProgress(activeBookId.value, paragraphIndex)
+  if (ttsFollow.value) requestResume(paragraphIndex)
 }
 // 从书架打开某本已导入正文的书籍：切换书卷 tab + 按书加载正文 + 定位续读
 function openBookForReading(bookId: string) {
