@@ -70,6 +70,7 @@
           :text="readingText"
           :title="activeBookTitle"
           :start-paragraph="resumeParagraph"
+          :start-chunk-offset="resumeChunkOffset"
           v-model:follow="ttsFollow"
           @progress="onTtsProgress"
         />
@@ -393,8 +394,9 @@ const { readingText, excerpts } = reading
 const readingExport = useReadingExport()
 
 const pastedText = ref('')
-// 沉浸阅读器：续读段落 + 触发令牌（令牌自增以强制同一书重复打开也重新定位）
+// 沉浸阅读器：续读段落 + 段内句块偏移（读↔听句块级续接）+ 触发令牌（令牌自增以强制同一书重复打开也重新定位）
 const resumeParagraph = ref(0)
+const resumeChunkOffset = ref(0)
 const resumeToken = ref(0)
 
 // 当前选中的待摘录文本
@@ -428,29 +430,32 @@ function registerActiveBook(text: string, preferredTitle?: string) {
   const book = hall.addBookFromText(title, '', estimatePages(text), text)
   activeBookId.value = book.id
   activeBookTitle.value = book.title
-  requestResume(book.lastPosition ?? 0)
+  requestResume(book.lastPosition ?? 0, book.lastChunkOffset ?? 0)
 }
-// 请求沉浸阅读器定位到指定段落（令牌自增以强制重定位）
-function requestResume(idx: number) {
+// 请求沉浸阅读器定位到指定段落 + 段内句块偏移（令牌自增以强制重定位）
+function requestResume(idx: number, chunkOffset = 0) {
   resumeParagraph.value = Math.max(0, idx)
+  resumeChunkOffset.value = Math.max(0, chunkOffset)
   resumeToken.value += 1
 }
 // 阅读器滚动/翻页 → 节流记录续读位置（按段落索引）
 let lastProgressSave = 0
 function onReaderProgress(idx: number) {
   if (!activeBookId.value) return
+  // 跟读时阅读器位置由 TTS 驱动（requestResume 会触发阅读器滚动回声），若回声落库会把句块偏移抹平为段首，故忽略
+  if (ttsFollow.value) return
   const now = Date.now()
   if (now - lastProgressSave > 800) {
     lastProgressSave = now
-    hall.setBookProgress(activeBookId.value, idx)
+    hall.setBookProgress(activeBookId.value, idx, 0)
   }
 }
 // 跟读开关（INCR-526 读↔听续接）：开启后朗读推进时阅读器跟随定位
 const ttsFollow = ref(false)
-// 听→读：朗读推进到某段落 → 落库续读位置；开启跟读时同步把阅读器定位过去
-function onTtsProgress(paragraphIndex: number) {
-  if (activeBookId.value) hall.setBookProgress(activeBookId.value, paragraphIndex)
-  if (ttsFollow.value) requestResume(paragraphIndex)
+// 听→读：朗读推进到某段落第几句 → 落库续读位置（句块级）；开启跟读时同步把阅读器定位过去
+function onTtsProgress(paragraphIndex: number, chunkOffset: number) {
+  if (activeBookId.value) hall.setBookProgress(activeBookId.value, paragraphIndex, chunkOffset)
+  if (ttsFollow.value) requestResume(paragraphIndex, chunkOffset)
 }
 // 从书架打开某本已导入正文的书籍：切换书卷 tab + 按书加载正文 + 定位续读
 function openBookForReading(bookId: string) {
@@ -463,7 +468,7 @@ function openBookForReading(bookId: string) {
   reading.saveText()
   activeBookId.value = book.id
   activeBookTitle.value = book.title
-  requestResume(book.lastPosition ?? 0)
+  requestResume(book.lastPosition ?? 0, book.lastChunkOffset ?? 0)
 }
 // 划线/摘录 流入思绪书房（全局 Note，自动进入双链与间隔重复）
 function flowHighlight() {

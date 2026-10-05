@@ -18,6 +18,8 @@ export interface Book {
   currentPage: number
   /** 续读位置（按书正文的段落索引；用于「合上书下次接着读」） */
   lastPosition?: number
+  /** 段内句块偏移（该段第几句，0 基；读↔听续接 INCR-526 的句块级精度，缺省视为 0） */
+  lastChunkOffset?: number
   /** 阅读状态 */
   status: ReadingStatus
   /** 评分 1-5 */

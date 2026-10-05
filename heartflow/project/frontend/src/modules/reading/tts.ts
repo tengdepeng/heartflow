@@ -108,6 +108,37 @@ export function paragraphIndexForChunk(paraOfChunk: number[], chunkIndex: number
   return paraOfChunk[i] ?? 0
 }
 
+/** 段落下标 → 该段句块区间 [start, end]（含端点）；该段无句块时 end = start - 1 */
+function chunkRangeForParagraph(paraOfChunk: number[], paraIndex: number): { start: number; end: number } {
+  const start = chunkIndexForParagraph(paraOfChunk, paraIndex)
+  if (paraOfChunk[start] !== Math.max(0, Math.floor(paraIndex))) return { start, end: start - 1 }
+  let end = start
+  while (end + 1 < paraOfChunk.length && paraOfChunk[end + 1] === paraOfChunk[start]) end++
+  return { start, end }
+}
+
+/**
+ * 段落 + 段内句块偏移 → 起读句块下标（INCR-526 句块级续接）。
+ * 偏移夹取到该段末块，避免越段；该段无句块时忽略偏移，落到下一段首块。
+ */
+export function resolveStartChunk(paraOfChunk: number[], paraIndex: number, chunkOffset = 0): number {
+  if (paraOfChunk.length === 0) return 0
+  const { start, end } = chunkRangeForParagraph(paraOfChunk, paraIndex)
+  if (end < start) return start
+  const offset = Math.max(0, Math.floor(chunkOffset))
+  return Math.min(start + offset, end)
+}
+
+/** 句块下标 → 段内偏移（该块是所属段的第几块，0 基） */
+export function chunkOffsetForChunk(paraOfChunk: number[], chunkIndex: number): number {
+  if (paraOfChunk.length === 0) return 0
+  const i = Math.max(0, Math.min(paraOfChunk.length - 1, Math.floor(chunkIndex)))
+  const para = paraOfChunk[i] ?? 0
+  let start = i
+  while (start - 1 >= 0 && paraOfChunk[start - 1] === para) start--
+  return i - start
+}
+
 /** 当前环境是否支持本地 TTS */
 export function isTtsSupported(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'

@@ -5,6 +5,8 @@ import {
   splitParagraphs,
   chunkIndexForParagraph,
   paragraphIndexForChunk,
+  resolveStartChunk,
+  chunkOffsetForChunk,
   useReadingTts,
 } from '../tts'
 
@@ -57,6 +59,36 @@ describe('tts · 段落↔句块映射（INCR-526 读↔听续接）', () => {
     expect(paragraphIndexForChunk(paraOfChunk, 2)).toBe(1)
     expect(paragraphIndexForChunk(paraOfChunk, 99)).toBe(1)
     expect(paragraphIndexForChunk([], 0)).toBe(0)
+  })
+
+  it('resolveStartChunk 段落 + 段内偏移 → 起读句块（夹取到该段末块，不越段）', () => {
+    const { paraOfChunk } = chunkParagraphs(['甲。乙。丙。', '丁。', '戊。己。'])
+    // 段 0 占块 0~2，段 1 占块 3，段 2 占块 4~5
+    expect(resolveStartChunk(paraOfChunk, 0, 0)).toBe(0)
+    expect(resolveStartChunk(paraOfChunk, 0, 2)).toBe(2)
+    expect(resolveStartChunk(paraOfChunk, 0, 9)).toBe(2)
+    expect(resolveStartChunk(paraOfChunk, 1, 3)).toBe(3)
+    expect(resolveStartChunk(paraOfChunk, 2, 1)).toBe(5)
+    expect(resolveStartChunk(paraOfChunk, 2, 9)).toBe(5)
+    expect(resolveStartChunk([], 0, 3)).toBe(0)
+  })
+
+  it('chunkOffsetForChunk 回推段内偏移（0 基）', () => {
+    const { paraOfChunk } = chunkParagraphs(['甲。乙。丙。', '丁。'])
+    expect(chunkOffsetForChunk(paraOfChunk, 0)).toBe(0)
+    expect(chunkOffsetForChunk(paraOfChunk, 2)).toBe(2)
+    expect(chunkOffsetForChunk(paraOfChunk, 3)).toBe(0)
+    expect(chunkOffsetForChunk(paraOfChunk, 99)).toBe(0)
+    expect(chunkOffsetForChunk([], 0)).toBe(0)
+  })
+
+  it('段内偏移与起读下标互逆（往返一致）', () => {
+    const { paraOfChunk } = chunkParagraphs(['甲。乙。丙。', '丁。', '戊。己。'])
+    for (let i = 0; i < paraOfChunk.length; i++) {
+      const para = paragraphIndexForChunk(paraOfChunk, i)
+      const offset = chunkOffsetForChunk(paraOfChunk, i)
+      expect(resolveStartChunk(paraOfChunk, para, offset)).toBe(i)
+    }
   })
 })
 

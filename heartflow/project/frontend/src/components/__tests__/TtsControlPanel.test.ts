@@ -149,15 +149,29 @@ describe('TtsControlPanel 听书控制', () => {
       const ev = wrapper.emitted('progress')!
       return ev[ev.length - 1]
     }
-    expect(wrapper.emitted('progress')?.[0]).toEqual([0])
-    // 推进到第二块（仍属段 0）
+    expect(wrapper.emitted('progress')?.[0]).toEqual([0, 0])
+    // 推进到第二块（仍属段 0，段内第 2 句）
     endHandlers.shift()?.()
     await wrapper.vm.$nextTick()
-    expect(lastProgress()).toEqual([0])
-    // 推进到第三块（属段 1）
+    expect(lastProgress()).toEqual([0, 1])
+    // 推进到第三块（属段 1，段内第 1 句）
     endHandlers.shift()?.()
     await wrapper.vm.$nextTick()
-    expect(lastProgress()).toEqual([1])
+    expect(lastProgress()).toEqual([1, 0])
+  })
+
+  it('从 startChunkOffset 起读（读→听句块级续接）', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('甲。乙。丙。', { startParagraph: 0, startChunkOffset: 2 })
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    expect(spoken).toEqual(['丙。'])
+  })
+
+  it('startChunkOffset 越段时夹取到该段末块', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('甲。乙。\n丙。', { startParagraph: 0, startChunkOffset: 9 })
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    expect(spoken).toEqual(['乙。'])
   })
 
   it('跟读开关点击后 emit update:follow', async () => {

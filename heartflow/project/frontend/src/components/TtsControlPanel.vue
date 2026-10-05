@@ -50,8 +50,9 @@ import {
   useReadingTts,
   chunkParagraphs,
   splitParagraphs,
-  chunkIndexForParagraph,
+  resolveStartChunk,
   paragraphIndexForChunk,
+  chunkOffsetForChunk,
 } from '../modules/reading/tts'
 import { useVoiceLibrary, resolvePresetVoiceURI } from '../modules/reading/voice-library'
 import { useMiniPlayer } from '../modules/reading/mini-player'
@@ -62,14 +63,16 @@ const props = withDefaults(
     title?: string
     /** 起读段落（读→听续接：从阅读器所在段落开始朗读） */
     startParagraph?: number
+    /** 段内句块偏移（读→听续接的句块级精度：该段第几句起读，0 基） */
+    startChunkOffset?: number
     /** 跟读：朗读推进时让阅读器跟随定位 */
     follow?: boolean
   }>(),
-  { title: '', startParagraph: 0, follow: false },
+  { title: '', startParagraph: 0, startChunkOffset: 0, follow: false },
 )
 
 const emit = defineEmits<{
-  (e: 'progress', paragraphIndex: number): void
+  (e: 'progress', paragraphIndex: number, chunkOffset: number): void
   (e: 'update:follow', value: boolean): void
 }>()
 
@@ -79,10 +82,10 @@ const { state, rate, progress, sentences, paraOfChunk, supported, speak, pause, 
 const { current: voice } = useVoiceLibrary()
 const mini = useMiniPlayer()
 
-/** 读→听：把当前阅读段落换算成起读句块下标 */
+/** 读→听：把当前阅读段落 + 段内句块偏移换算成起读句块下标 */
 function startChunkIndex(): number {
   const { paraOfChunk: paras } = chunkParagraphs(splitParagraphs(props.text))
-  return chunkIndexForParagraph(paras, props.startParagraph ?? 0)
+  return resolveStartChunk(paras, props.startParagraph ?? 0, props.startChunkOffset ?? 0)
 }
 
 /** 当前音色参数（INCR-504）：音高 + 语速系数 + 匹配到的系统音色 */
@@ -99,10 +102,10 @@ const activeIndex = computed(() => {
   return Math.min(progress.value.index, progress.value.total - 1)
 })
 
-// 句块推进时把当前句滚动到可视区，形成「跟读」效果；并回报所在段落（INCR-526 听→读续接）
+// 句块推进时把当前句滚动到可视区，形成「跟读」效果；并回报所在段落 + 段内句块偏移（INCR-526 听→读续接）
 watch(activeIndex, async (i) => {
   if (i < 0) return
-  emit('progress', paragraphIndexForChunk(paraOfChunk.value, i))
+  emit('progress', paragraphIndexForChunk(paraOfChunk.value, i), chunkOffsetForChunk(paraOfChunk.value, i))
   await nextTick()
   const el = scrollBox.value?.querySelector('.ttp-sentence.is-active') as HTMLElement | null
   if (el && typeof el.scrollIntoView === 'function') {

@@ -127,5 +127,80 @@ describe('ReadingHall · 读↔听续接（INCR-526）', () => {
 
     const saved = JSON.parse(mockStore['hf:reading:books'])
     expect(saved[0].lastPosition).toBe(2)
+    expect(saved[0].lastChunkOffset).toBe(0)
+  })
+
+  it('句块级续接：从 lastChunkOffset 起读段内第 N 句', async () => {
+    vi.resetModules()
+    mockStore['hf:reading:books'] = JSON.stringify([{ ...SEED_BOOK, lastPosition: 0, lastChunkOffset: 1 }])
+    mockStore['hf:reading:content:b-tts'] = '甲一。甲二。\n乙一。'
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await openSeededBook(wrapper)
+
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    // 段 0 段内第 2 句 = 「甲二。」，而非段首「甲一。」
+    expect(spoken).toEqual(['甲二。'])
+  })
+
+  it('句块级续接：朗读推进回写段内偏移 lastChunkOffset', async () => {
+    vi.resetModules()
+    mockStore['hf:reading:books'] = JSON.stringify([{ ...SEED_BOOK, lastPosition: 0, lastChunkOffset: 0 }])
+    mockStore['hf:reading:content:b-tts'] = '甲一。甲二。\n乙一。'
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await openSeededBook(wrapper)
+
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    // 段 0 第 1 句读完 → 推进到段 0 第 2 句（段内偏移 1）
+    endHandlers.shift()?.()
+    await wrapper.vm.$nextTick()
+
+    const saved = JSON.parse(mockStore['hf:reading:books'])
+    expect(saved[0].lastPosition).toBe(0)
+    expect(saved[0].lastChunkOffset).toBe(1)
+  })
+
+  // 长正文：确保翻页模式分多页，页码导航可用
+  const LONG_TEXT = Array.from({ length: 40 }, (_, i) => `第${i}段` + '字'.repeat(200)).join('\n')
+  // 切到翻页模式并翻到下一页（触发阅读器 progress 回声）
+  async function turnReaderPage(wrapper: any) {
+    await wrapper.findAll('.ird-mode')[0].trigger('click')
+    await wrapper.vm.$nextTick()
+    const navs = wrapper.findAll('.ird-nav')
+    await navs[navs.length - 1].trigger('click')
+    await wrapper.vm.$nextTick()
+  }
+
+  it('跟读开启时忽略阅读器回声，句块偏移不被抹平为段首', async () => {
+    vi.resetModules()
+    mockStore['hf:reading:books'] = JSON.stringify([{ ...SEED_BOOK, lastPosition: 0, lastChunkOffset: 1 }])
+    mockStore['hf:reading:content:b-tts'] = LONG_TEXT
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await openSeededBook(wrapper)
+
+    await wrapper.find('.ttp-follow-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+    await turnReaderPage(wrapper)
+
+    const saved = JSON.parse(mockStore['hf:reading:books'])
+    expect(saved[0].lastPosition).toBe(0)
+    expect(saved[0].lastChunkOffset).toBe(1)
+  })
+
+  it('跟读关闭时阅读器翻页正常回写续读位置（换段归零）', async () => {
+    vi.resetModules()
+    mockStore['hf:reading:books'] = JSON.stringify([{ ...SEED_BOOK, lastPosition: 0, lastChunkOffset: 1 }])
+    mockStore['hf:reading:content:b-tts'] = LONG_TEXT
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await openSeededBook(wrapper)
+
+    await turnReaderPage(wrapper)
+
+    const saved = JSON.parse(mockStore['hf:reading:books'])
+    expect(saved[0].lastPosition).toBeGreaterThan(0)
+    expect(saved[0].lastChunkOffset).toBe(0)
   })
 })
