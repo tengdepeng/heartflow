@@ -567,6 +567,7 @@ import { useCustomCategories, categoryOptionsFor, categoryLabelAny, categoryIcon
 import { quickEntryToRecord, type QuickEntryDraft } from '../modules/reward/nlp-entry'
 import { useLoans, type LoanRecord } from '../modules/reward/loan'
 import { useCreditCards, type CreditCardRecord } from '../modules/reward/credit-card'
+import { getLocalDateKey, getLocalMonthKey } from '../utils/time'
 const { entranceRef, entranceClass } = useViewEntrance()
 const rewardBridge = useRewardBridge()
 const budgetOptimizer = useBudgetOptimizer()
@@ -744,7 +745,7 @@ const careerStats = computed(() => {
   const exp = parseFloat(totalExpense.value)
   const ratio = exp > 0 ? (inc / exp).toFixed(2) : '∞'
   const ratioClass = parseFloat(ratio as string) >= 1.5 ? 'rw-career-pos' : 'rw-career-neg'
-  const uniqueDays = new Set(records.value.map(r => r.at.slice(0, 10))).size
+  const uniqueDays = new Set(records.value.map(r => getLocalDateKey(new Date(r.at)))).size
   const avgDaily = uniqueDays > 0 ? (inc / uniqueDays).toFixed(1) : '0'
   return {
     totalIncome: totalIncome.value,
@@ -817,7 +818,7 @@ const filteredRecords = computed(() => {
 const trendData = computed(() => {
   const map = new Map<string, { income: number; expense: number }>()
   for (const r of records.value) {
-    const m = r.at.slice(0, 7)
+    const m = getLocalMonthKey(r.at)
     const entry = map.get(m) || { income: 0, expense: 0 }
     if (r.type === 'income') entry.income += r.amount
     else entry.expense += r.amount
@@ -866,13 +867,13 @@ watch(adaptedRecords, (newRecords) => {
 
 const adaptedStats = computed<RewardStats>(() => {
   const now = new Date()
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  const currentMonth = getLocalMonthKey(now)
   const incomeRecords = records.value.filter(r => r.type === 'income')
   const expenseRecords = records.value.filter(r => r.type === 'expense')
   const totalIncome = incomeRecords.reduce((a, r) => a + r.amount, 0)
   const totalExpense = expenseRecords.reduce((a, r) => a + r.amount, 0)
-  const monthIncome = incomeRecords.filter(r => r.at.startsWith(currentMonth)).reduce((a, r) => a + r.amount, 0)
-  const monthExpense = expenseRecords.filter(r => r.at.startsWith(currentMonth)).reduce((a, r) => a + r.amount, 0)
+  const monthIncome = incomeRecords.filter(r => getLocalMonthKey(r.at) === currentMonth).reduce((a, r) => a + r.amount, 0)
+  const monthExpense = expenseRecords.filter(r => getLocalMonthKey(r.at) === currentMonth).reduce((a, r) => a + r.amount, 0)
   const incomeDistribution: Record<string, number> = {}
   incomeRecords.forEach(r => { incomeDistribution[r.category] = (incomeDistribution[r.category] || 0) + r.amount })
   const expenseDistribution: Record<string, number> = {}
@@ -880,12 +881,12 @@ const adaptedStats = computed<RewardStats>(() => {
   const monthlyTrend: { month: string; income: number; expense: number; balance: number }[] = []
   for (let i = 11; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const m = d.toISOString().slice(0, 7)
-    const mi = incomeRecords.filter(r => r.at.startsWith(m)).reduce((a, r) => a + r.amount, 0)
-    const me = expenseRecords.filter(r => r.at.startsWith(m)).reduce((a, r) => a + r.amount, 0)
+    const m = getLocalMonthKey(d)
+    const mi = incomeRecords.filter(r => getLocalMonthKey(r.at) === m).reduce((a, r) => a + r.amount, 0)
+    const me = expenseRecords.filter(r => getLocalMonthKey(r.at) === m).reduce((a, r) => a + r.amount, 0)
     monthlyTrend.push({ month: m, income: mi, expense: me, balance: mi - me })
   }
-  const uniqueDays = new Set(records.value.map(r => r.at.slice(0, 10))).size
+  const uniqueDays = new Set(records.value.map(r => getLocalDateKey(new Date(r.at)))).size
   return {
     totalIncome,
     totalExpense,

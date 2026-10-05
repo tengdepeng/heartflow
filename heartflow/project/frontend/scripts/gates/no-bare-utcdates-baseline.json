@@ -1,11 +1,9 @@
 {
-  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 140 处（137 文件）（word-mirror 域 4 引擎已迁）。 2026-10-05：闸门补第4 类形态（时间戳属性 .slice(0,10) / .substring(0,10)，此前完全漏检，揭出 55 段 / 24 文件），同时 engine/data-port（导出时间线的today/yesterday 分组 + 4 处时间戳切日键 + 3 处导出文件名）已迁。真实存量 140→194 处 / 137→167 文件。",
+  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 140 处（137 文件）（word-mirror 域 4 引擎已迁）。 2026-10-05：闸门补第4 类形态（时间戳属性 .slice(0,10) / .substring(0,10)，此前完全漏检，揭出 55 段 / 24 文件），同时 engine/data-port（导出时间线的today/yesterday 分组 + 4 处时间戳切日键 + 3 处导出文件名）已迁。真实存量 140→194 处 / 137→167 文件。 2026-10-05 锚点域迁出 4 文件（anchor-journals 手札日键 + AnchorJournalPanel 日期标签 + anchor-review 回顾范围/每日趋势/连续统计 + celebration 今日上下文/文件名/连续天数），存量降至 189 处 / 163 文件。 2026-10-05 幕僚域迁出 2 文件（modules/advisor/celebration 庆祝事件写键/今日读键/未来7天边界 + stores/advisor 4 处今日桶 completedAt/createdAt/at 双侧本地键），存量降至 187 处 / 161 文件。",
   "violations": {
-    "src/components/AnchorJournalPanel.vue": [
-      "iso.slice(0,10)"
-    ],
     "src/components/BackfillCalendarPanel.vue": [
-      "at.slice(0,10)"
+      "at.slice(0,10)",
+      "at.slice(0,7)"
     ],
     "src/components/BagEvolutionPanel.vue": [
       "iso.slice(0,10)"
@@ -76,6 +74,10 @@
     "src/components/MirrorSelf.vue": [
       "toISOString().slice(0,10)"
     ],
+    "src/components/MovementAnalyticsPanel.vue": [
+      "at.slice(0,10)",
+      "toISOString().split('T')[0]"
+    ],
     "src/components/NarrativeReportPanel.vue": [
       "toISOString().split('T')[0]"
     ],
@@ -98,6 +100,7 @@
       "importDate.slice(0,10)"
     ],
     "src/components/TimeCorridor.vue": [
+      "dateStr.slice(0,7)",
       "toISOString().slice(0,10)"
     ],
     "src/components/WorklogExportPanel.vue": [
@@ -108,19 +111,6 @@
     ],
     "src/components/WorkspaceAdvancedPanel.vue": [
       "createdAt.slice(0,10)"
-    ],
-    "src/modules/advisor/celebration.ts": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/modules/anchor/anchor-journals.ts": [
-      "iso.slice(0,10)"
-    ],
-    "src/modules/anchor/anchor-review.ts": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/modules/anchor/celebration.ts": [
-      ".split('T')[0]",
-      "toISOString().split('T')[0]"
     ],
     "src/modules/attention/attention-model.ts": [
       "toISOString().slice(0,10)"
@@ -178,6 +168,7 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/cognition/meditation-analytics.ts": [
+      "date.slice(0,7)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/craft/craft-habits.ts": [
@@ -193,6 +184,8 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/discipline/streak-system.ts": [
+      "checkinDate.slice(0,7)",
+      "toISOString().slice(0,7)",
       "toISOString().split('T')[0]"
     ],
     "src/modules/discipline/workshop-bridge.ts": [
@@ -205,7 +198,8 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/emotion/emotion-trends.ts": [
-      "toISOString().slice(0,10)"
+      "toISOString().slice(0,10)",
+      "toISOString().slice(0,7)"
     ],
     "src/modules/emotion/garden-narrative.ts": [
       "toISOString().slice(0,10)"
@@ -218,6 +212,18 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/garden/index.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/home/home-atmosphere-engine.ts": [
+      "timestamp.slice(0,10)",
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/home/home-bridge.ts": [
+      "createdAt.slice(0,10)",
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/home/home-interaction-engine.ts": [
+      "createdAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/home/today-room-stats.ts": [
@@ -259,7 +265,11 @@
     "src/modules/movement/achievements.ts": [
       "toISOString().slice(0,10)"
     ],
+    "src/modules/movement/move-converter.ts": [
+      "at.slice(0,10)"
+    ],
     "src/modules/movement/recovery-optimizer.ts": [
+      "date.slice(0,7)",
       "toISOString().split('T')[0]"
     ],
     "src/modules/note/markdown-export.ts": [
@@ -267,7 +277,9 @@
     ],
     "src/modules/note/note-analytics.ts": [
       "createdAt.slice(0,10)",
+      "createdAt.slice(0,7)",
       "toISOString().slice(0,10)",
+      "toISOString().slice(0,7)",
       "updatedAt.slice(0,10)"
     ],
     "src/modules/output/advanced.ts": [
@@ -298,6 +310,38 @@
     ],
     "src/modules/rest/sleep-quality.ts": [
       "toISOString().split('T')[0]"
+    ],
+    "src/modules/reward/daily-reminder.ts": [
+      "at.slice(0,10)",
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/reward/export.ts": [
+      "at.slice(0,10)"
+    ],
+    "src/modules/reward/finance-analysis.ts": [
+      "iso.slice(0,10)",
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/reward/finance-goals.ts": [
+      "assessedAt.substring(0,10)"
+    ],
+    "src/modules/reward/milestones.ts": [
+      "recordedAt.slice(0,10)"
+    ],
+    "src/modules/reward/net-asset.ts": [
+      "at.slice(0,10)"
+    ],
+    "src/modules/reward/report-visual.ts": [
+      "at.slice(0,10)"
+    ],
+    "src/modules/reward/reward-bridge.ts": [
+      "recordedAt.slice(0,10)"
+    ],
+    "src/modules/reward/saving-plan.ts": [
+      "toISOString().slice(0,10)"
+    ],
+    "src/modules/reward/worklog-bridge.ts": [
+      "toISOString().slice(0,10)"
     ],
     "src/modules/safety/audit-timeline.ts": [
       "toISOString().slice(0,10)"
@@ -334,6 +378,7 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/timeline/emotion-curve.ts": [
+      "date.substring(0,7)",
       "toISOString().split('T')[0]"
     ],
     "src/modules/timeline/export-enhance.ts": [
@@ -352,7 +397,8 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/timeline-index/aggregation.ts": [
-      "toISOString().slice(0,10)"
+      "toISOString().slice(0,10)",
+      "toISOString().slice(0,7)"
     ],
     "src/modules/timeline-index/index.ts": [
       "iso.slice(0,10)",
@@ -398,9 +444,6 @@
     ],
     "src/modules/worklog/worklog-module-bridge.ts": [
       "toISOString().split('T')[0]"
-    ],
-    "src/stores/advisor.ts": [
-      "toISOString().slice(0,10)"
     ],
     "src/views/AppSpace.vue": [
       "lastModified.slice(0,10)",
@@ -476,7 +519,51 @@
       "toISOString().slice(0,10)"
     ],
     "src/views/WorkLog.vue": [
-      "toISOString().slice(0,10)"
+      "date.slice(0,7)",
+      "toISOString().slice(0,10)",
+      "toISOString().slice(0,7)"
+    ],
+    "src/components/PhotoDiaryPanel.vue": [
+      "date.slice(0,7)"
+    ],
+    "src/modules/craft/craft-advanced.ts": [
+      "createdAt.slice(0,7)"
+    ],
+    "src/modules/craft/useCraftUi.ts": [
+      "toISOString().slice(0,7)"
+    ],
+    "src/modules/goal/goal-state-machine.ts": [
+      "sunkAt.slice(0,7)"
+    ],
+    "src/modules/parallel-world/branch-timeline.ts": [
+      "timestamp.substring(0,7)"
+    ],
+    "src/modules/play/play-advanced.ts": [
+      "at.slice(0,7)"
+    ],
+    "src/modules/play/play-store.ts": [
+      "at.slice(0,7)"
+    ],
+    "src/modules/reading/reading-insights.ts": [
+      "finishDate.slice(0,7)"
+    ],
+    "src/modules/reading/reading-report.ts": [
+      "date.slice(0,7)"
+    ],
+    "src/modules/relation/interaction-journal.ts": [
+      "date.slice(0,7)"
+    ],
+    "src/modules/relation/relation-visualization.ts": [
+      "date.slice(0,7)"
+    ],
+    "src/modules/word-mirror/personal-vocabulary.ts": [
+      "createdAt.slice(0,7)"
+    ],
+    "src/modules/word-mirror/writing-enhance.ts": [
+      "startedAt.slice(0,7)"
+    ],
+    "src/views/TransformGallery.vue": [
+      "createdAt.slice(0,7)"
     ]
   }
 }

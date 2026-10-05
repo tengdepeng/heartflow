@@ -9,7 +9,7 @@ import { DEFAULT_ACCOUNT_ID } from './accounts'
 import { cardBalance } from './credit-card'
 import type { CreditCardRecord } from './credit-card'
 import type { RewardRecord } from './reward-list'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 export type NetAssetSide = 'asset' | 'liability'
 
@@ -117,7 +117,7 @@ export function cardTrendStartMonth(card: CreditCardRecord, today: string): stri
   if (!card.repayments.length) return todayM
   let min = todayM
   for (const rp of card.repayments) {
-    const m = rp.at.slice(0, 7)
+    const m = getLocalMonthKey(rp.at)
     if (m < min) min = m
   }
   return min

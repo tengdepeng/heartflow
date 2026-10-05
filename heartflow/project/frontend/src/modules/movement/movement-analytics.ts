@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
 import type { MovementRecord, MovementType, MovementIntensity, MovementRhythm } from './types'
+import { getLocalMonthKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -203,7 +204,7 @@ export function useMovementAnalytics() {
     // 月度趋势
     const monthlyMap = new Map<string, { duration: number; sessions: number; calories: number }>()
     for (const r of records) {
-      const month = r.date.slice(0, 7)
+      const month = getLocalMonthKey(r.date)
       const entry = monthlyMap.get(month) || { duration: 0, sessions: 0, calories: 0 }
       entry.duration += r.duration
       entry.sessions++

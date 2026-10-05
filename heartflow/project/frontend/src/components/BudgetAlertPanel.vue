@@ -54,6 +54,7 @@ import type { Budget } from '../modules/reward/types'
 import { categoryOptionsFor, categoryLabelAny } from '../modules/reward/custom-category'
 import type { RewardRecord } from '../modules/reward/reward-list'
 import type { Transfer } from '../modules/reward/accounts'
+import { getLocalMonthKey } from '../utils/time'
 
 const props = defineProps<{ records: RewardRecord[]; transfers: Transfer[]; month?: string }>()
 
@@ -62,7 +63,7 @@ const BUDGETS_KEY = REWARD_STORAGE_KEYS.BUDGETS
 const budgets = ref<Budget[]>(storage.getKV<Budget[]>(BUDGETS_KEY, []))
 const mode = ref<OutflowMode>('expense')
 
-const month = computed(() => props.month ?? new Date().toISOString().slice(0, 7))
+const month = computed(() => props.month ?? getLocalMonthKey())
 
 const categories = computed(() => categoryOptionsFor('expense'))
 

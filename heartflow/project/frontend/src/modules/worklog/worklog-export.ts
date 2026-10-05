@@ -5,6 +5,7 @@
 
 import type { LogEntry, LogEntryType, MoodTone, WorklogDailySummary, WeeklySummary } from './types'
 import { LOG_TYPE_META, MOOD_TONE_META } from './types'
+import { getLocalMonthKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -596,8 +597,10 @@ function generateMonthlyReport(
   summaries: WorklogDailySummary[],
   config: ReportOptions
 ): string {
-  const month = config.period || new Date().toISOString().slice(0, 7)
-  const monthEntries = entries.filter(e => e.createdAt.startsWith(month))
+  // period 由 WorklogExportPanel 以本地月键（getLocalMonthKey）传入；兜底也必须本地口径，
+  // 且比较要双侧同基：拿本地月前缀去 startsWith 一个 UTC ISO 串会漏掉凌晨记录。
+  const month = config.period || getLocalMonthKey()
+  const monthEntries = entries.filter(e => getLocalMonthKey(e.createdAt) === month)
 
   const totalFocus = summaries.reduce((sum, s) => sum + s.totalFocusMinutes, 0)
   const allMoods = new Map<string, number>()
@@ -704,7 +707,7 @@ function generateYearlyReport(
   // 月度分布
   const monthlyCounts: Record<string, number> = {}
   for (const entry of yearEntries) {
-    const m = entry.createdAt.slice(0, 7)
+    const m = getLocalMonthKey(entry.createdAt)
     monthlyCounts[m] = (monthlyCounts[m] || 0) + 1
   }
 

@@ -13,7 +13,7 @@ import type { RewardRecord, RewardType, IncomeCategory, ExpenseCategory, RewardM
 import { INCOME_CATEGORY_META, EXPENSE_CATEGORY_META, REWARD_STORAGE_KEYS } from './types'
 import type { BudgetOptimizationReport, OverspendAlert, SavingsStrategy } from './budget-optimizer'
 import type { FinancialForecast, FinanceHealthCheck, IncomeSourceAnalysis } from './financial-forecast'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -165,9 +165,9 @@ export function useRewardBridge() {
     const monthlyTrend: { month: string; income: number; expense: number; balance: number }[] = []
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const m = d.toISOString().slice(0, 7)
-      const mi = records.filter(r => r.type === 'income' && r.recordedAt.startsWith(m)).reduce((s, r) => s + r.amount, 0)
-      const me = records.filter(r => r.type === 'expense' && r.recordedAt.startsWith(m)).reduce((s, r) => s + r.amount, 0)
+      const m = getLocalMonthKey(d)
+      const mi = records.filter(r => r.type === 'income' && getLocalMonthKey(r.recordedAt) === m).reduce((s, r) => s + r.amount, 0)
+      const me = records.filter(r => r.type === 'expense' && getLocalMonthKey(r.recordedAt) === m).reduce((s, r) => s + r.amount, 0)
       monthlyTrend.push({ month: m, income: mi, expense: me, balance: mi - me })
     }
 

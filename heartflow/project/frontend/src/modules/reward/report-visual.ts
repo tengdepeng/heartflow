@@ -6,7 +6,7 @@
 // 保证引擎与自定义分类解耦、可独立测试。
 // ============================================================
 import type { RewardRecord } from './reward-list'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 export type Kind = 'income' | 'expense'
 
@@ -30,7 +30,7 @@ const pad2 = (n: number): string => String(n).padStart(2, '0')
 
 /** 某记录所属月 key（YYYY-MM） */
 function monthOf(r: RewardRecord): string {
-  return r.at.slice(0, 7)
+  return getLocalMonthKey(r.at)
 }
 
 // ============================================================

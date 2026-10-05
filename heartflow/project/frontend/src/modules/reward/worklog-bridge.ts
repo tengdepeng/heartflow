@@ -6,7 +6,7 @@
 import { ref, computed } from 'vue'
 import type { LogEntry, LogEntryType, MoodTone } from '../worklog/types'
 import type { RewardRecord, IncomeCategory } from './types'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 // ---- 收入映射配置 ----
 
@@ -337,11 +337,11 @@ export function useWorklogRewardBridge(
    */
   const bridgeStats = computed<BridgeStats>(() => {
     const now = new Date()
-    const monthPrefix = now.toISOString().slice(0, 7)
+    const monthPrefix = getLocalMonthKey(now)
     const today = getLocalDateKey(now)
 
-    const todayMappings = mappings.value.filter(m => m.mappedAt.startsWith(today))
-    const monthMappings = mappings.value.filter(m => m.mappedAt.startsWith(monthPrefix))
+    const todayMappings = mappings.value.filter(m => getLocalDateKey(new Date(m.mappedAt)) === today)
+    const monthMappings = mappings.value.filter(m => getLocalMonthKey(m.mappedAt) === monthPrefix)
 
     const byLogType: Record<string, { count: number; total: number }> = {}
     const byIncomeCategory: Record<string, { count: number; total: number }> = {}

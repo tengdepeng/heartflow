@@ -183,7 +183,7 @@ import EmptyState from '../components/EmptyState.vue'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
-import { getLocalDateKey } from '../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../utils/time'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useStatsStore } from '../stores'
 import { useWisdom, type AnswerCard, type WisdomContext } from '../modules/wisdom'
@@ -374,7 +374,7 @@ function getCtx(): WisdomContext {
   const pendingAnchors = anchors.filter((a: any) => !a.done && a.targetDate === localToday).length
   const doneAnchors = anchors.filter((a: any) => a.done && a.targetDate === localToday).length
   const shifts = loadShifts()
-  const monthHours = Math.round(shifts.filter((s: any) => s.date.startsWith(new Date().toISOString().slice(0, 7))).reduce((a: any, s: any) => a + (s.hours || 0), 0))
+  const monthHours = Math.round(shifts.filter((s: any) => s.date.startsWith(getLocalMonthKey())).reduce((a: any, s: any) => a + (s.hours || 0), 0))
   const relations = relation.count.value
   const bodyRecords = (body.metrics.value?.length ?? 0) + (body.sleepRecords.value?.length ?? 0)
   return { todayFocus, totalFocus, totalMin, recentSad, recentHappy, recentCalm, recentAnxious, recentAngry, totalNotes, emotionCount: statsStore.emotionCount, pendingAnchors, doneAnchors, monthHours, relations, bodyRecords }

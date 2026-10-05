@@ -6,7 +6,7 @@ import { ref } from 'vue'
 import { storage } from '../../engine/storage'
 import { REWARD_STORAGE_KEYS } from './types'
 import type { RewardRecord } from './reward-list'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 export interface DailyReminderConfig {
   enabled: boolean
@@ -68,7 +68,7 @@ export interface MonthActivity {
 
 /** 某月记账活动度：笔数 / 活跃天数 / 逐日净额 */
 export function monthActivity(records: RewardRecord[], month: string): MonthActivity {
-  const inMonth = records.filter(r => r.at.slice(0, 7) === month)
+  const inMonth = records.filter(r => getLocalMonthKey(r.at) === month)
   const byDay: Record<string, number> = {}
   for (const r of inMonth) {
     const day = getLocalDateKey(new Date(r.at))

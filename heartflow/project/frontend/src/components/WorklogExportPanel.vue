@@ -82,6 +82,7 @@ import {
   REPORT_TEMPLATES,
 } from '../modules/worklog'
 import type { ExportFormat, ExportResult, ReportOptions } from '../modules/worklog'
+import { getLocalMonthKey } from '../utils/time'
 
 const worklog = useWorklog()
 const exportEngine = useWorklogExport()
@@ -165,7 +166,7 @@ function buildSummaries() {
     return { summaries: weekly.dailySummaries, weekly, period: weekly.weekStart }
   }
   if (template === 'monthly') {
-    const month = reportPeriod.value || now.toISOString().slice(0, 7)
+    const month = reportPeriod.value || getLocalMonthKey(now)
     const [y, m] = month.split('-').map(Number)
     const daysInMonth = new Date(y, m, 0).getDate()
     const summaries = []

@@ -5,6 +5,7 @@
 
 import { ref } from 'vue'
 import type { RewardRecord, RewardStats } from './types'
+import { getLocalMonthKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -298,7 +299,7 @@ export function useFinancialForecast() {
 
     for (const [category, catRecords] of categoryMap) {
       const total = catRecords.reduce((s, r) => s + r.amount, 0)
-      const months = new Set(catRecords.map(r => r.recordedAt.slice(0, 7))).size
+      const months = new Set(catRecords.map(r => getLocalMonthKey(r.recordedAt))).size
       const monthlyAvg = months > 0 ? total / months : 0
 
       // 稳定性：基于月度金额的标准差
@@ -353,7 +354,7 @@ function aggregateMonthlyData(records: RewardRecord[]): { month: string; income:
   const map = new Map<string, { income: number; expense: number }>()
 
   for (const r of records) {
-    const month = r.recordedAt.slice(0, 7)
+    const month = getLocalMonthKey(r.recordedAt)
     const entry = map.get(month) ?? { income: 0, expense: 0 }
     if (r.type === 'income') entry.income += r.amount
     else entry.expense += r.amount
@@ -459,7 +460,7 @@ function calculateGrowthPotential(records: RewardRecord[]): number {
 function calculateMonthlyAmounts(records: RewardRecord[]): Record<string, number> {
   const map: Record<string, number> = {}
   for (const r of records) {
-    const month = r.recordedAt.slice(0, 7)
+    const month = getLocalMonthKey(r.recordedAt)
     map[month] = (map[month] ?? 0) + r.amount
   }
   return map

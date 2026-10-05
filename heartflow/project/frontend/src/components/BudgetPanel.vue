@@ -85,6 +85,7 @@ import {
 import type { OutflowMode, BudgetStatus } from '../modules/reward/budget-alert'
 import type { RewardRecord } from '../modules/reward/reward-list'
 import type { Transfer } from '../modules/reward/accounts'
+import { getLocalMonthKey, getLocalDateKey } from '../utils/time'
 
 const props = defineProps<{ records: RewardRecord[]; transfers: Transfer[]; month?: string; today?: string }>()
 
@@ -94,8 +95,8 @@ const mode = ref<OutflowMode>('expense')
 const monthlyInput = ref(0)
 const annualInput = ref(0)
 
-const monthKey = computed(() => props.month ?? new Date().toISOString().slice(0, 7))
-const today = computed(() => props.today ?? new Date().toISOString().slice(0, 10))
+const monthKey = computed(() => props.month ?? getLocalMonthKey())
+const today = computed(() => props.today ?? getLocalDateKey())
 const yearKey = computed(() => monthKey.value.slice(0, 4))
 
 const rollover = computed<boolean>({

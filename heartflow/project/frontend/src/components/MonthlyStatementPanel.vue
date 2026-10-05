@@ -49,10 +49,11 @@ import { computed, ref } from 'vue'
 import { monthStatement, toMarkdown, toCsv } from '../modules/reward/statement'
 import { categoryLabelAny } from '../modules/reward/custom-category'
 import type { RewardRecord } from '../modules/reward/reward-list'
+import { getLocalMonthKey } from '../utils/time'
 
 const props = defineProps<{ records: RewardRecord[] }>()
 
-const month = ref(new Date().toISOString().slice(0, 7))
+const month = ref(getLocalMonthKey())
 
 const st = computed(() => monthStatement(props.records, month.value))
 const hasData = computed(() => st.value.count > 0)

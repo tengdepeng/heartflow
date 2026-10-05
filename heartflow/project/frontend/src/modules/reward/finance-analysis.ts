@@ -6,7 +6,7 @@
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
 import type { RewardRecord, RewardType, IncomeCategory, ExpenseCategory } from './types'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 // ---- 筛选类型 ----
 
@@ -317,7 +317,7 @@ export function usePeriodicAnalysis(getRecords: () => RewardRecord[]) {
         const monday = new Date(d.setDate(diff))
         return getLocalDateKey(monday)
       }
-      case 'monthly': return iso.slice(0, 7)
+      case 'monthly': return getLocalMonthKey(iso)
       case 'quarterly': {
         const q = Math.floor(date.getMonth() / 3) + 1
         return `${date.getFullYear()}-Q${q}`
@@ -516,7 +516,7 @@ export function useChartData(getRecords: () => RewardRecord[]) {
     }
 
     for (const r of filtered) {
-      const key = r.recordedAt.slice(0, 7)
+      const key = getLocalMonthKey(r.recordedAt)
       const existing = monthMap.get(key)
       if (existing) {
         if (r.type === 'income') existing.income += r.amount

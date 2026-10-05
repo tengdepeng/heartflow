@@ -12,7 +12,7 @@ import {
   REWARD_STORAGE_KEYS, DEFAULT_MILESTONES,
 } from './types'
 import { categoryLabelAny } from './custom-category'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 /**
  * 劳酬里程碑引擎
@@ -72,7 +72,7 @@ export function useRewardMilestones() {
    * 更新预算使用量
    */
   function updateBudget(category: ExpenseCategory, amount: number): void {
-    const month = new Date().toISOString().slice(0, 7)
+    const month = getLocalMonthKey()
     const budget = budgets.value.find((b) => b.category === category && b.month === month)
     if (budget) {
       budget.currentSpent += amount
@@ -83,7 +83,7 @@ export function useRewardMilestones() {
    * 设置预算
    */
   async function setBudget(category: ExpenseCategory, monthlyLimit: number): Promise<Budget> {
-    const month = new Date().toISOString().slice(0, 7)
+    const month = getLocalMonthKey()
     const existing = budgets.value.find((b) => b.category === category && b.month === month)
 
     if (existing) {
@@ -108,7 +108,7 @@ export function useRewardMilestones() {
    * 获取预算预警
    */
   function getBudgetAlerts(): { category: string; label: string; spent: number; limit: number; percentage: number; level: 'safe' | 'warning' | 'danger' }[] {
-    const month = new Date().toISOString().slice(0, 7)
+    const month = getLocalMonthKey()
     const alerts: { category: string; label: string; spent: number; limit: number; percentage: number; level: 'safe' | 'warning' | 'danger' }[] = []
 
     for (const budget of budgets.value) {
@@ -137,7 +137,7 @@ export function useRewardMilestones() {
    */
   async function checkMilestones(): Promise<RewardMilestone[]> {
     const newlyAchieved: RewardMilestone[] = []
-    const today = new Date().toISOString().slice(0, 7)
+    const today = getLocalDateKey()
 
     for (const milestone of milestones.value) {
       if (milestone.achieved) continue
@@ -176,7 +176,7 @@ export function useRewardMilestones() {
           const months = new Set<string>()
           for (const r of records.value) {
             if (r.type === 'income') {
-              months.add(r.recordedAt.slice(0, 7))
+              months.add(getLocalMonthKey(r.recordedAt))
             }
           }
           const sortedMonths = Array.from(months).sort().reverse()
@@ -223,7 +223,7 @@ export function useRewardMilestones() {
    */
   function getStats(): RewardStats {
     const now = new Date()
-    const monthPrefix = now.toISOString().slice(0, 7)
+    const monthPrefix = getLocalMonthKey(now)
 
     const totalIncome = records.value
       .filter((r) => r.type === 'income')
@@ -233,10 +233,10 @@ export function useRewardMilestones() {
       .reduce((sum, r) => sum + r.amount, 0)
 
     const monthIncome = records.value
-      .filter((r) => r.type === 'income' && r.recordedAt.startsWith(monthPrefix))
+      .filter((r) => r.type === 'income' && getLocalMonthKey(r.recordedAt) === monthPrefix)
       .reduce((sum, r) => sum + r.amount, 0)
     const monthExpense = records.value
-      .filter((r) => r.type === 'expense' && r.recordedAt.startsWith(monthPrefix))
+      .filter((r) => r.type === 'expense' && getLocalMonthKey(r.recordedAt) === monthPrefix)
       .reduce((sum, r) => sum + r.amount, 0)
 
     // 收入分布
@@ -255,12 +255,12 @@ export function useRewardMilestones() {
     const monthlyTrend: { month: string; income: number; expense: number; balance: number }[] = []
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const m = d.toISOString().slice(0, 7)
+      const m = getLocalMonthKey(d)
       const mi = records.value
-        .filter((r) => r.type === 'income' && r.recordedAt.startsWith(m))
+        .filter((r) => r.type === 'income' && getLocalMonthKey(r.recordedAt) === m)
         .reduce((sum, r) => sum + r.amount, 0)
       const me = records.value
-        .filter((r) => r.type === 'expense' && r.recordedAt.startsWith(m))
+        .filter((r) => r.type === 'expense' && getLocalMonthKey(r.recordedAt) === m)
         .reduce((sum, r) => sum + r.amount, 0)
       monthlyTrend.push({ month: m, income: mi, expense: me, balance: mi - me })
     }

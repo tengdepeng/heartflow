@@ -13,6 +13,26 @@ export function getLocalDateKey(date: Date = new Date()): string {
   return `${year}-${month}-${day}`
 }
 
+/**
+ * 本地日历月键（YYYY-MM），业务「月分组 / 月视图 / 月度趋势」专用。
+ *
+ * 与 getLocalDateKey 同源（getFullYear / getMonth 走本地时区），绝不能拿
+ * toISOString() 的结果 slice(0, 7)：UTC+8 下本地 00:00–08:00 产生的记录
+ * 会被算进「上个月」，直接让月视图 / 预算 / 对账单分组错一月。
+ *
+ * 入参可以是 Date / 'YYYY-MM-DD' 本地键 / 任意时间戳串（包括跨设备序列化的
+ * UTC ISO）——一律先 new Date() 再按本地时区取年月；非法输入返回空串，
+ * 保证比较类用法（=== / startsWith）不会误命中成 'NaN-NaN'。
+ */
+export function getLocalMonthKey(input: Date | string | number = new Date()): string {
+  // ⚠️ 必须先挡 null / ''：`new Date(null)` 不是 Invalid Date，而是 1970 纪元，
+  //    会静默产出 '1970-01'；`new Date('')` 同理。
+  if (input === null || input === undefined || input === '') return ''
+  const d = input instanceof Date ? input : new Date(input)
+  if (Number.isNaN(d.getTime())) return ''
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
 /** 格式化秒数为 mm:ss */
 export function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)

@@ -175,6 +175,7 @@ import VaultPasswordPanel from '../components/VaultPasswordPanel.vue'
 import VaultCredentialPanel from '../components/VaultCredentialPanel.vue'
 import EmptyState from '../components/EmptyState.vue'
 import RoomLayout from '../components/RoomLayout.vue'
+import { getLocalMonthKey } from '../utils/time'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -226,7 +227,7 @@ const categoryDist = computed(() => {
 const monthlyTrend = computed(() => {
   const map = new Map<string, number>()
   assets.value.forEach(a => {
-    const month = a.at.slice(0, 7)
+    const month = getLocalMonthKey(a.at)
     map.set(month, (map.get(month) || 0) + a.value)
   })
   const max = Math.max(...map.values(), 1)

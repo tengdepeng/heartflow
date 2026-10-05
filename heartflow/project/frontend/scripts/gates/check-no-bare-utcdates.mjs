@@ -16,7 +16,7 @@
 // 由后续「按域分批迁移」计划慢慢消化（每批配反向验证 + 定向回归，见 skill
 // utc-date-key-migration）。闸门不阻止存量，但任何不在 baseline 内的新匹配立即红灯。
 //
-// 覆盖的形态（四类都是「取 UTC 日期键」的缺陷签名）：
+// 覆盖的形态（五类都是「取 UTC 日期/月日期键」的缺陷签名）：
 //   A. toISOString().slice(0, 10) / toISOString().substring(0, 10)  （含空格变体）
 //   B. toISOString().split('T')[0]
 //   C. 独立 .split('T')[0]   —— 切已经存好的 UTC 时间戳字符串
@@ -24,6 +24,16 @@
 //      如 w.createdAt.slice(0,10)、m.timestamp.substring(0,10)。
 //      D 类此前完全漏检，实测全库 79 处 / 55 文件。必须用属性名白名单，
 //      否则会误伤 text.slice(0,10) 这类普通字符串截断。
+//   E. 月键 .slice(0,7) / .substring(0,7)（2026-10-05 补）
+//      如 new Date().toISOString().slice(0,7)、r.at.slice(0,7)、
+//      note.createdAt.slice(0,7)。月键在 UTC+8 下同样错月：本地 00:00-08:00
+//      的记录会被算进「上个月」，污染月视图 / 月报 / 预算 / 对账单分组。
+//      实测全库 74 处 / 47 文件，属性白名单实测零噪声。
+//      ⚠️ 白名单**刻意不含** today / date / d 这类裸变量名：实证
+//      HabitReminderPanel.vue:75 的 today 本来就是本地键
+//      （getFullYear/getMonth/getDate 拼的），today.slice(0,7) 无害；
+//      meditation-analytics 的 date 是入参、口径由调用方决定。
+//      裸变量只收语义上只可能是 UTC 时间戳串的 iso/createdAt/.../at/raw。
 //   注意：单纯的 toISOString()（如存 createdAt 跨设备序列化）不是缺陷，不拦截。
 //
 // 基线结构（scripts/gates/no-bare-utcdates-baseline.json）：
@@ -72,9 +82,27 @@ const TS_SLICE_RE = new RegExp(
   `\\b(?:${TS_FIELD})\\s*\\.\\s*(?:slice|substring)\\s*\\(\\s*0\\s*,\\s*10\\s*\\)`,
 )
 
-/** 逐行匹配两类签名；返回命中的原始片段 */
+// 形态 E（2026-10-05 补）：月键 —— 把 UTC ISO 切到「YYYY-MM」当月份分组键。
+//   与日键同病，只是切 7 位。属性侧＝时间戳/日期属性；裸变量侧＝只可能是
+//   UTC 时间戳串的短名（iso/createdAt/recordedAt/.../at/raw）。
+// ⚠️ TS_FIELD 本身就是 .join('|') 拼出来的字符串，这里**只能插值不能展开**：
+//     [...TS_FIELD] 会把字符串逐字符摊开，正则退化成 a|t|c|r|e... 导致乱抓。
+const MONTH_FIELD = `${TS_FIELD}|date|ym|monthKey|monthStr|curMonth|currentMonth|periodKey|startDate|endDate|checkinDate|finishDate|sunkAt`
+const BARE_MONTH_VAR = ['iso', 'createdAt', 'recordedAt', 'updatedAt', 'timestamp', 'at', 'raw'].join('|')
+const TS_MONTH_RE = new RegExp(
+  `\\b(?:${MONTH_FIELD}|${BARE_MONTH_VAR})\\s*\\.\\s*(?:slice|substring)\\s*\\(\\s*0\\s*,\\s*7\\s*\\)`,
+)
+// E1：任意接收者的 toISOString().slice(0, 7)（含 today.toISOString().slice(0, 7)）
+const ISO_MONTH_RE = /toISOString\(\)\s*\.\s*(?:slice|substring)\s*\(\s*0\s*,\s*7\s*\)/
+
+/** 逐行匹配 A~E 各形态签名；返回命中的原始片段 */
 function matchLine(line) {
-  return line.match(BARE_CUT_RE) || line.match(TS_SLICE_RE)
+  return (
+    line.match(BARE_CUT_RE) ||
+    line.match(TS_SLICE_RE) ||
+    line.match(ISO_MONTH_RE) ||
+    line.match(TS_MONTH_RE)
+  )
 }
 
 /** 去空白归一化：slice(0, 10) 与 slice(0,10) 视为同一身份，降低空格导致的误报 */

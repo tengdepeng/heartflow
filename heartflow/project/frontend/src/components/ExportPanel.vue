@@ -39,11 +39,12 @@ import { buildExportRows, toCsv, toExcelXls, downloadText, type ExportScope } fr
 import { categoryLabelAny } from '../modules/reward/custom-category'
 import type { Account } from '../modules/reward/accounts'
 import type { RewardRecord } from '../modules/reward/reward-list'
+import { getLocalMonthKey } from '../utils/time'
 
 const props = defineProps<{ records: RewardRecord[]; accounts?: Account[] }>()
 
 const scope = ref<ExportScope>('all')
-const month = ref(new Date().toISOString().slice(0, 7))
+const month = ref(getLocalMonthKey())
 const from = ref('')
 const to = ref('')
 const format = ref<'xls' | 'csv'>('xls')

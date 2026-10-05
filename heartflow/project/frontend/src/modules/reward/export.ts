@@ -4,7 +4,7 @@
 // 不引入第三方库，产出可被 Excel/WPS 直接打开的格式。
 // ============================================================
 import type { RewardRecord } from './reward-list'
-import { getLocalDateKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 export interface ExportRow {
   日期: string
@@ -40,7 +40,7 @@ export function buildExportRows(
 
   let list = records
   if (scope === 'month' && opts.month) {
-    list = records.filter(r => r.at.slice(0, 7) === opts.month)
+    list = records.filter(r => getLocalMonthKey(r.at) === opts.month)
   } else if (scope === 'range' && opts.from && opts.to) {
     list = records.filter(r => {
       const d = getLocalDateKey(new Date(r.at))

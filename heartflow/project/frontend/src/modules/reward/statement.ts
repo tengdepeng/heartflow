@@ -2,6 +2,7 @@
 // 劳酬 · 月结单：月度收支汇总 + Markdown/CSV 导出字符串
 // ============================================================
 import type { RewardRecord } from './reward-list'
+import { getLocalMonthKey } from '../../utils/time'
 
 export interface MonthStatement {
   month: string
@@ -22,7 +23,7 @@ export function monthStatement(records: RewardRecord[], month: string): MonthSta
   const incomeByType: Record<string, number> = {}
   const expenseByType: Record<string, number> = {}
   for (const r of records) {
-    if (r.at.slice(0, 7) !== month) continue
+    if (getLocalMonthKey(r.at) !== month) continue
     count++
     if (r.type === 'income') {
       income += r.amount

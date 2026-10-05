@@ -5,6 +5,7 @@
 import type { RewardRecord } from './reward-list'
 import type { Budget } from './types'
 import type { Transfer } from './accounts'
+import { getLocalMonthKey } from '../../utils/time'
 
 export type OutflowMode = 'expense' | 'withTransfer'
 export type BudgetStatus = 'ok' | 'warn' | 'over'
@@ -21,7 +22,7 @@ export function categorizeExpense(records: RewardRecord[], month: string): Recor
   const out: Record<string, number> = {}
   for (const r of records) {
     if (r.type !== 'expense') continue
-    if (r.at.slice(0, 7) !== month) continue
+    if (getLocalMonthKey(r.at) !== month) continue
     out[r.category] = (out[r.category] ?? 0) + r.amount
   }
   return out
@@ -57,11 +58,11 @@ export function monthOutflow(
 ): MonthOutflow {
   let expense = 0
   for (const r of records) {
-    if (r.type === 'expense' && r.at.slice(0, 7) === month) expense += r.amount
+    if (r.type === 'expense' && getLocalMonthKey(r.at) === month) expense += r.amount
   }
   let turnedOver = 0
   for (const t of transfers) {
-    if (t.at.slice(0, 7) !== month) continue
+    if (getLocalMonthKey(t.at) !== month) continue
     turnedOver += t.amount
   }
   const total = mode === 'withTransfer' ? expense + turnedOver : expense
