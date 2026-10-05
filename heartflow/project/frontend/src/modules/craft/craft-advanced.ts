@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 import type { CraftWork, WorkType, CraftStats } from './types'
 
@@ -163,7 +164,7 @@ export function useCraftAdvanced() {
     // 月度趋势
     const monthlyMap = new Map<string, { created: number; completed: number; evolution: number }>()
     for (const w of works) {
-      const month = w.createdAt.slice(0, 7)
+      const month = getLocalMonthKey(w.createdAt)
       const entry = monthlyMap.get(month) || { created: 0, completed: 0, evolution: 0 }
       entry.created++
       if (w.status === 'completed') entry.completed++

@@ -1,4 +1,5 @@
 import { computed, ref, nextTick, inject, type InjectionKey } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import { getRoom } from '../../engine/room-graph'
 import { useRoomNavigation } from '../../composables/useRoomNavigation'
 import { useConfig } from '../../resonance/bridges/config'
@@ -119,7 +120,7 @@ const defaultForm: WorkForm = {
   status: 'draft',
   evolution: 0,
   tagsInput: '',
-  date: new Date().toISOString().slice(0, 7),
+  date: getLocalMonthKey(),
   lightFormId: '',
 }
 

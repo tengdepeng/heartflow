@@ -213,6 +213,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { getLocalMonthKey } from '../utils/time'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
@@ -343,7 +344,7 @@ const monthGroups = computed(() => {
   const groups: Record<string, Transformation[]> = {}
 
   for (const r of filteredRecords.value) {
-    const key = r.createdAt.slice(0, 7)
+    const key = getLocalMonthKey(r.createdAt)
     if (!groups[key]) groups[key] = []
     groups[key].push(r)
   }

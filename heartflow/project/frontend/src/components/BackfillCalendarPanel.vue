@@ -77,6 +77,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { getLocalMonthKey } from '../utils/time'
 import { categoryOptionsFor, categoryLabelAny } from '../modules/reward/custom-category'
 import type { RewardRecord } from '../modules/reward/reward-list'
 
@@ -132,7 +133,7 @@ const monthStats = computed(() => {
   let expense = 0
   const prefix = `${curYear.value}-${String(curMonth.value + 1).padStart(2, '0')}`
   for (const r of props.records) {
-    if (r.at.slice(0, 7) === prefix) {
+    if (getLocalMonthKey(r.at) === prefix) {
       count++
       if (r.type === 'expense') expense += r.amount
     }

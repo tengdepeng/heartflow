@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import type { Person } from './types'
 import { storage } from '@/engine/storage'
 
@@ -407,7 +408,7 @@ export function useRelationshipHealth(
     // 月度趋势
     const monthlyMap = new Map<string, number>()
     interactions.value.forEach(i => {
-      const month = i.date.slice(0, 7)
+      const month = getLocalMonthKey(i.date)
       monthlyMap.set(month, (monthlyMap.get(month) || 0) + 1)
     })
     const monthlyTrend = Array.from(monthlyMap.entries())

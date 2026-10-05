@@ -6,6 +6,7 @@
 // ============================================================
 
 import type { Person } from './types'
+import { getLocalMonthKey } from '../../utils/time'
 import type { InteractionEntry } from './interaction-journal'
 
 // ---- 力导向布局 ----
@@ -388,7 +389,7 @@ export function buildRelationshipTimeline(
   // 按月份分组
   const byMonth = new Map<string, TimelineEvent[]>()
   for (const event of events) {
-    const monthKey = event.date.slice(0, 7)
+    const monthKey = getLocalMonthKey(event.date)
     if (!byMonth.has(monthKey)) byMonth.set(monthKey, [])
     byMonth.get(monthKey)!.push(event)
   }

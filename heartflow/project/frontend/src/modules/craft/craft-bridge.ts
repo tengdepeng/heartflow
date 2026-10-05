@@ -5,6 +5,7 @@
 // ============================================================
 
 import { computed, ref } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import { useCraftStore } from './craft-store'
 import { useCraftMaterials } from './materials'
 import { useSynthesis } from './synthesis'
@@ -588,7 +589,7 @@ export function useCraftBridge() {
       color: '#b8a080',
       status: 'draft',
       type,
-      date: now.slice(0, 7),
+      date: getLocalMonthKey(now),
       evolution: 0,
       tags,
       createdAt: now,

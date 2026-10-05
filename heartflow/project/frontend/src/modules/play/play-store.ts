@@ -6,6 +6,7 @@
 // ============================================================
 
 import { ref, computed, reactive } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 import type { Game, Toy, Model, Other, PlayData, MonthlyStat, DistBuckets, ModelGroup, RecentItem, PlatformDistItem } from './types'
 import { PLAY_TABS, TOY_FILTERS, valueLabel, statusLabel, formatDate } from './data'
@@ -92,7 +93,7 @@ export function usePlayGallery() {
   const monthlyStats = computed<MonthlyStat[]>(() => {
     const map: Record<string, number> = {}
     games.value.forEach(g => {
-      const m = g.at.slice(0, 7)
+      const m = getLocalMonthKey(g.at)
       map[m] = (map[m] || 0) + g.hours
     })
     return Object.entries(map)
