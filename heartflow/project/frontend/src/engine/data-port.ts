@@ -4,6 +4,7 @@
 // ============================================================
 
 import { storage } from './storage'
+import { getLocalDateKey } from '../utils/time'
 import { useDataOutflow } from './data-outflow'
 import type { LedgerRecord } from '../types'
 import { findConverterForOutput, findConverterForInput, initBuiltinConverters } from './data-port-converter'
@@ -85,11 +86,28 @@ export function exportTimelineMarkdown(sinceDays: number = 30): string {
   let md = `# 心流工坊 · 时间之书\n\n导出时间：${new Date().toLocaleDateString('zh-CN')}\n时间范围：最近 ${sinceDays} 天\n\n---\n\n`
 
   const groups = new Map<string, string[]>()
-  const today = new Date().toISOString().slice(0, 10)
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+  // 业务日期必须用本地日历日：东八区 00:00-08:00 时UTC 日期比本地早一天，
+  // 会把当天的记录归到「昨天」分组下。
+  const today = getLocalDateKey()
+  // 逐日回退用 setDate，不用 -86400000 毫秒减法（DST 时区会落到前一天）
+  const yesterdayDate = new Date()
+  yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+  const yesterday = getLocalDateKey(yesterdayDate)
+
+  // UTC ISO 时间戳 -> 本地日历日键；时间戳缺失/非法时返回 null，由调用方跳过该条。
+  // 不能直接 getLocalDateKey(new Date(null))：Invalid Date 的 getFullYear() 是 NaN，
+  // 会产出 'NaN-NaN-NaN' 这样的假分组标题混进导出文件。
+  // 旧写法 (x.createdAt || '').slice(0,10) 靠「空串 → if(!date) continue」兜住，
+  // 换成 Date 构造后这层保护会失效（Invalid Date 不是空串），必须显式判空。
+  function dayKeyOf(iso: unknown): string | null {
+    if (typeof iso !== 'string' || !iso) return null
+    const d = new Date(iso)
+    if (Number.isNaN(d.getTime())) return null
+    return getLocalDateKey(d)
+  }
 
   for (const s of sessions) {
-    const date = (s.completedAt || s.startedAt || '').slice(0, 10)
+    const date = dayKeyOf(s.completedAt || s.startedAt)
     if (!date) continue
     const label = date === today ? '今天' : date === yesterday ? '昨天' : date
     const entry = `- ⏱️ **${s.mode === 'focus' ? '专注' : s.mode === 'nap' ? '小憩' : '自由'}** · ${Math.floor(s.elapsed / 60000)}分钟`
@@ -97,21 +115,24 @@ export function exportTimelineMarkdown(sinceDays: number = 30): string {
     groups.get(label)!.push(entry)
   }
   for (const a of anchors) {
-    const date = a.createdAt.slice(0, 10)
+    const date = dayKeyOf(a.createdAt)
+    if (!date) continue
     const label = date === today ? '今天' : date === yesterday ? '昨天' : date
     const entry = `- ⚓ ${a.done ? '✓' : '○'} ${a.text}`
     if (!groups.has(label)) groups.set(label, [])
     groups.get(label)!.push(entry)
   }
   for (const n of notes) {
-    const date = n.updatedAt.slice(0, 10)
+    const date = dayKeyOf(n.updatedAt)
+    if (!date) continue
     const label = date === today ? '今天' : date === yesterday ? '昨天' : date
     const entry = `- 📝 **${n.title || '未命名笔记'}**${n.content ? ': ' + n.content.slice(0, 100) : ''}`
     if (!groups.has(label)) groups.set(label, [])
     groups.get(label)!.push(entry)
   }
   for (const e of emotions) {
-    const date = e.createdAt.slice(0, 10)
+    const date = dayKeyOf(e.createdAt)
+    if (!date) continue
     const label = date === today ? '今天' : date === yesterday ? '昨天' : date
     const map: Record<string, string> = { happy: '😊 开心', calm: '🌙 平静', sad: '🌧 低落', anxious: '🌪 焦虑', angry: '⚡ 愤怒' }
     const entry = `- ${map[e.type] ?? e.type}${e.note ? ': ' + e.note : ''}`
@@ -133,7 +154,7 @@ export function download(content: string, filename: string, type: string = 'appl
 
 export function downloadJSON() {
   const json = exportAllJSON()
-  const filename = `heartflow-full-${new Date().toISOString().slice(0, 10)}.json`
+  const filename = `heartflow-full-${getLocalDateKey()}.json`
   download(json, filename)
   // 守护室·数据流出日志：完整数据备份离设备
   useDataOutflow().recordOutflow('backup', '本地文件', filename, '导出完整数据备份')
@@ -141,7 +162,7 @@ export function downloadJSON() {
 
 export function downloadMarkdown(sinceDays: number = 30) {
   const md = exportTimelineMarkdown(sinceDays)
-  const filename = `heartflow-timeline-${new Date().toISOString().slice(0, 10)}.md`
+  const filename = `heartflow-timeline-${getLocalDateKey()}.md`
   download(md, filename, 'text/markdown')
   // 守护室·数据流出日志：时间线导出离设备
   useDataOutflow().recordOutflow('export', '本地文件', filename, '导出时间线（Markdown）')
@@ -185,7 +206,7 @@ export function downloadData(format: string) {
   }
   const ext = extMap[format] || 'txt'
   const mime = mimeMap[format] || 'text/plain'
-  const filename = `heartflow-export-${new Date().toISOString().slice(0, 10)}.${ext}`
+  const filename = `heartflow-export-${getLocalDateKey()}.${ext}`
   download(content, filename, mime)
   // 守护室·数据流出日志：按格式导出用户数据离设备
   useDataOutflow().recordOutflow('export', '本地文件', filename, `导出数据（${format}）`)

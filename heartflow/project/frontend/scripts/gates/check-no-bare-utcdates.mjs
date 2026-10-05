@@ -16,10 +16,14 @@
 // 由后续「按域分批迁移」计划慢慢消化（每批配反向验证 + 定向回归，见 skill
 // utc-date-key-migration）。闸门不阻止存量，但任何不在 baseline 内的新匹配立即红灯。
 //
-// 覆盖的形态（三种都是「取 UTC 日期键」的缺陷签名）：
+// 覆盖的形态（四类都是「取 UTC 日期键」的缺陷签名）：
 //   A. toISOString().slice(0, 10) / toISOString().substring(0, 10)  （含空格变体）
 //   B. toISOString().split('T')[0]
-//   C. 独立 .split('T')[0]   —— 切已经存好的 UTC 时间戳字符串（最阴的一类，无 toISOString）
+//   C. 独立 .split('T')[0]   —— 切已经存好的 UTC 时间戳字符串
+//   D. 时间戳属性 .slice(0,10) / .substring(0,10)（2026-10-05 补）
+//      如 w.createdAt.slice(0,10)、m.timestamp.substring(0,10)。
+//      D 类此前完全漏检，实测全库 79 处 / 55 文件。必须用属性名白名单，
+//      否则会误伤 text.slice(0,10) 这类普通字符串截断。
 //   注意：单纯的 toISOString()（如存 createdAt 跨设备序列化）不是缺陷，不拦截。
 //
 // 基线结构（scripts/gates/no-bare-utcdates-baseline.json）：
@@ -45,8 +49,33 @@ const INCLUDE_TESTS = args.includes('--include-tests')
 const AS_JSON = args.includes('--json')
 const UPDATE_BASELINE = args.includes('--update-baseline')
 
-// 三类缺陷签名。全局正则，逐行非全局匹配用。
+// 四类缺陷签名。全局正则，逐行非全局匹配用。
 const BARE_CUT_RE = /toISOString\(\)\s*\.(?:slice|substring)\s*\(\s*0\s*,\s*10\s*\)|toISOString\(\)\s*\.split\s*\(\s*['"]T['"]\s*\)\s*\[\s*0\s*\]|\.split\s*\(\s*['"]T['"]\s*\)\s*\[\s*0\s*\]/
+
+// 形态 D（2026-10-05 补）：**时间戳属性**直接切日期键，全程不出现 toISOString ——
+//   w.createdAt.slice(0, 10) / m.timestamp.substring(0,10) / s.recordedAt.slice(0, 10)
+// 此前完全漏检。白名单过滤后实测新增 54 段 / 30 文件（未加白名单的裸正则
+// 会命中 79 段 / 55 文件，多出的部分是 text/title.slice(0,10) 这类普通截断噪声）。
+//   其中 `w.createdAt.slice(0,10)` 连 `toISOString` 都没有，是最隐蔽的一类：
+//   读者容易以为「这是从已存好的字符串切」就没问题，实际存的正是 UTC ISO 时间戳。
+//
+// ⚠️ 必须用**属性名白名单**而不是通用 `X.slice(0,10)`，否则会误伤
+// `text.slice(0,10)` / `title.slice(0,10)` 这类普通字符串截断（实测会命中几十处噪声）。
+// 白名单只收「语义上确定为 ISO 时间戳」的字段名。
+const TS_FIELD = [
+  'at', 'createdAt', 'updatedAt', 'recordedAt', 'timestamp', 'iso',
+  'startedAt', 'completedAt', 'sentAt', 'pushedAt', 'assessedAt',
+  'startTime', 'endTime', 'lastModified', 'importDate', 'unlockedAt', 'doneAt',
+  'dateStr', 'dayKey', 'raw',
+].join('|')
+const TS_SLICE_RE = new RegExp(
+  `\\b(?:${TS_FIELD})\\s*\\.\\s*(?:slice|substring)\\s*\\(\\s*0\\s*,\\s*10\\s*\\)`,
+)
+
+/** 逐行匹配两类签名；返回命中的原始片段 */
+function matchLine(line) {
+  return line.match(BARE_CUT_RE) || line.match(TS_SLICE_RE)
+}
 
 /** 去空白归一化：slice(0, 10) 与 slice(0,10) 视为同一身份，降低空格导致的误报 */
 const norm = (s) => s.replace(/\s+/g, '')
@@ -88,7 +117,7 @@ function scan() {
     const lines = code.split('\n')
     const perFile = new Map()
     lines.forEach((line, idx) => {
-      const m = line.match(BARE_CUT_RE)
+      const m = matchLine(line)
       if (m) {
         const raw = m[0]
         const key = norm(raw)

@@ -1,11 +1,29 @@
 {
-  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 140 处（137 文件）（word-mirror 域 4 引擎已迁）。",
+  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 140 处（137 文件）（word-mirror 域 4 引擎已迁）。 2026-10-05：闸门补第4 类形态（时间戳属性 .slice(0,10) / .substring(0,10)，此前完全漏检，揭出 55 段 / 24 文件），同时 engine/data-port（导出时间线的today/yesterday 分组 + 4 处时间戳切日键 + 3 处导出文件名）已迁。真实存量 140→194 处 / 137→167 文件。",
   "violations": {
+    "src/components/AnchorJournalPanel.vue": [
+      "iso.slice(0,10)"
+    ],
+    "src/components/BackfillCalendarPanel.vue": [
+      "at.slice(0,10)"
+    ],
+    "src/components/BagEvolutionPanel.vue": [
+      "iso.slice(0,10)"
+    ],
     "src/components/BudgetPanel.vue": [
       "toISOString().slice(0,10)"
     ],
     "src/components/ConstitutionStatusPanel.vue": [
       "toISOString().slice(0,10)"
+    ],
+    "src/components/craft/CraftAdvancedPanel.vue": [
+      "iso.slice(0,10)"
+    ],
+    "src/components/craft/CraftMaterialsPanel.vue": [
+      "iso.slice(0,10)"
+    ],
+    "src/components/CustomizationAdvancedPanel.vue": [
+      "createdAt.slice(0,10)"
     ],
     "src/components/data-sovereignty/CrossDevicePanel.vue": [
       "toISOString().slice(0,10)"
@@ -16,11 +34,23 @@
     "src/components/external-room/CloudSync.vue": [
       "toISOString().slice(0,10)"
     ],
+    "src/components/FinanceAnalysisPanel.vue": [
+      "iso.slice(0,10)"
+    ],
     "src/components/guard-room/GovernPanel.vue": [
       "toISOString().slice(0,10)"
     ],
+    "src/components/HabitReminderPanel.vue": [
+      "at.slice(0,10)"
+    ],
+    "src/components/HappyBoxPanel.vue": [
+      "createdAt.slice(0,10)"
+    ],
     "src/components/HealthGoalsPanel.vue": [
       "toISOString().split('T')[0]"
+    ],
+    "src/components/HealthReportPanel.vue": [
+      "at.slice(0,10)"
     ],
     "src/components/home/Balcony.vue": [
       "toISOString().slice(0,10)"
@@ -28,8 +58,17 @@
     "src/components/home/DiningRoom.vue": [
       "toISOString().slice(0,10)"
     ],
+    "src/components/ImportPanel.vue": [
+      "at.slice(0,10)"
+    ],
     "src/components/knowledge-tower/SpacedReviewPanel.vue": [
       "toISOString().split('T')[0]"
+    ],
+    "src/components/LearningPathPanel.vue": [
+      "iso.slice(0,10)"
+    ],
+    "src/components/MetricTrendsPanel.vue": [
+      "at.slice(0,10)"
     ],
     "src/components/MindMapPanel.vue": [
       "toISOString().slice(0,10)"
@@ -38,6 +77,7 @@
       "toISOString().slice(0,10)"
     ],
     "src/components/MovementAnalyticsPanel.vue": [
+      "at.slice(0,10)",
       "toISOString().split('T')[0]"
     ],
     "src/components/NarrativeReportPanel.vue": [
@@ -49,8 +89,17 @@
     "src/components/SavingPlanPanel.vue": [
       "toISOString().slice(0,10)"
     ],
+    "src/components/SkillGapVisualizationPanel.vue": [
+      "iso.slice(0,10)"
+    ],
     "src/components/StatsPanel.vue": [
       "toISOString().slice(0,10)"
+    ],
+    "src/components/SutraAnnotationPanel.vue": [
+      "iso.slice(0,10)"
+    ],
+    "src/components/TapesPanel.vue": [
+      "importDate.slice(0,10)"
     ],
     "src/components/TimeCorridor.vue": [
       "toISOString().slice(0,10)"
@@ -58,11 +107,17 @@
     "src/components/WorklogExportPanel.vue": [
       "toISOString().slice(0,10)"
     ],
-    "src/engine/data-port.ts": [
-      "toISOString().slice(0,10)"
+    "src/components/WorklogRewardPanel.vue": [
+      "iso.slice(0,10)"
+    ],
+    "src/components/WorkspaceAdvancedPanel.vue": [
+      "createdAt.slice(0,10)"
     ],
     "src/modules/advisor/celebration.ts": [
       "toISOString().split('T')[0]"
+    ],
+    "src/modules/anchor/anchor-journals.ts": [
+      "iso.slice(0,10)"
     ],
     "src/modules/anchor/anchor-review.ts": [
       "toISOString().split('T')[0]"
@@ -93,6 +148,7 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/body/meal-nutrition.ts": [
+      "at.slice(0,10)",
       "toISOString().split('T')[0]"
     ],
     "src/modules/body/metric-trends.ts": [
@@ -109,6 +165,9 @@
     ],
     "src/modules/body-wisdom/body-wisdom-bridge.ts": [
       "toISOString().slice(0,10)"
+    ],
+    "src/modules/body-wisdom/constitution-trend.ts": [
+      "assessedAt.slice(0,10)"
     ],
     "src/modules/body-wisdom/meridian-visualization.ts": [
       "toISOString().slice(0,10)"
@@ -159,18 +218,22 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/emotion/happy-box.ts": [
+      "createdAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/garden/index.ts": [
       "toISOString().slice(0,10)"
     ],
     "src/modules/home/home-atmosphere-engine.ts": [
+      "timestamp.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/home/home-bridge.ts": [
+      "createdAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/home/home-interaction-engine.ts": [
+      "createdAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/home/today-room-stats.ts": [
@@ -187,9 +250,11 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/knowledge/useKnowledgeTowerUi.ts": [
+      "iso.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/light/guided-meditation.ts": [
+      "timestamp.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/light/light-bridge.ts": [
@@ -210,6 +275,9 @@
     "src/modules/movement/achievements.ts": [
       "toISOString().slice(0,10)"
     ],
+    "src/modules/movement/move-converter.ts": [
+      "at.slice(0,10)"
+    ],
     "src/modules/movement/recovery-optimizer.ts": [
       "toISOString().split('T')[0]"
     ],
@@ -217,7 +285,9 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/note/note-analytics.ts": [
-      "toISOString().slice(0,10)"
+      "createdAt.slice(0,10)",
+      "toISOString().slice(0,10)",
+      "updatedAt.slice(0,10)"
     ],
     "src/modules/output/advanced.ts": [
       ".split('T')[0]",
@@ -239,6 +309,7 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/rest/notification-bridge.ts": [
+      "sentAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/rest/quality.ts": [
@@ -248,10 +319,30 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/reward/daily-reminder.ts": [
+      "at.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
+    "src/modules/reward/export.ts": [
+      "at.slice(0,10)"
+    ],
     "src/modules/reward/finance-analysis.ts": [
+      "iso.slice(0,10)",
       "toISOString().slice(0,10)"
+    ],
+    "src/modules/reward/finance-goals.ts": [
+      "assessedAt.substring(0,10)"
+    ],
+    "src/modules/reward/milestones.ts": [
+      "recordedAt.slice(0,10)"
+    ],
+    "src/modules/reward/net-asset.ts": [
+      "at.slice(0,10)"
+    ],
+    "src/modules/reward/report-visual.ts": [
+      "at.slice(0,10)"
+    ],
+    "src/modules/reward/reward-bridge.ts": [
+      "recordedAt.slice(0,10)"
     ],
     "src/modules/reward/saving-plan.ts": [
       "toISOString().slice(0,10)"
@@ -269,6 +360,7 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/sanctuary/sanctuary-bridge.ts": [
+      "startTime.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/scar/healing-journey.ts": [
@@ -279,6 +371,15 @@
     ],
     "src/modules/scar/healing.ts": [
       "toISOString().slice(0,10)"
+    ],
+    "src/modules/space/app-space-manager.ts": [
+      "timestamp.slice(0,10)"
+    ],
+    "src/modules/space/space-health.ts": [
+      "timestamp.slice(0,10)"
+    ],
+    "src/modules/tasks/quadrant.ts": [
+      "completedAt.slice(0,10)"
     ],
     "src/modules/timeline/annual-review.ts": [
       "toISOString().split('T')[0]"
@@ -305,21 +406,25 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/timeline-index/index.ts": [
+      "iso.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/timer/index.ts": [
       "toISOString().slice(0,10)"
     ],
     "src/modules/touchpoints/notification-strategy.ts": [
+      "createdAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/touchpoints/orchestration-engine.ts": [
       "toISOString().slice(0,10)"
     ],
     "src/modules/touchpoints/push-channel.ts": [
+      "pushedAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/touchpoints/touch-analytics.ts": [
+      "pushedAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/wisdom/poetry.ts": [
@@ -332,9 +437,11 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/worklog/worklog-analytics.ts": [
+      "createdAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/worklog/worklog-export.ts": [
+      "createdAt.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/worklog/worklog-habits.ts": [
@@ -347,9 +454,11 @@
       "toISOString().slice(0,10)"
     ],
     "src/views/AppSpace.vue": [
+      "lastModified.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/views/BodyGreenhouse.vue": [
+      "at.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/views/BodyWisdom.vue": [
@@ -395,10 +504,14 @@
       "toISOString().split('T')[0]"
     ],
     "src/views/Reward.vue": [
+      "at.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/views/SeasonalRituals.vue": [
       "toISOString().slice(0,10)"
+    ],
+    "src/views/SpaceCustomizer.vue": [
+      "updatedAt.slice(0,10)"
     ],
     "src/views/Study.vue": [
       "toISOString().slice(0,10)"
@@ -407,6 +520,7 @@
       "toISOString().slice(0,10)"
     ],
     "src/views/TimelineIndex.vue": [
+      "timestamp.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/views/WisdomPavilion.vue": [
