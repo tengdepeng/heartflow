@@ -8,6 +8,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import { storage } from '@/engine/storage'
 import type { WorldBranch, Checkpoint } from './types'
 
@@ -197,7 +198,7 @@ export function useBranchTimeline() {
   const nodesByMonth = computed(() => {
     const groups: Record<string, TimelineNode[]> = {}
     for (const node of timelineNodes.value) {
-      const month = node.timestamp.substring(0, 7)
+      const month = getLocalMonthKey(node.timestamp)
       if (!groups[month]) groups[month] = []
       groups[month].push(node)
     }

@@ -168,7 +168,6 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/cognition/meditation-analytics.ts": [
-      "date.slice(0,7)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/craft/craft-habits.ts": [
@@ -198,8 +197,7 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/emotion/emotion-trends.ts": [
-      "toISOString().slice(0,10)",
-      "toISOString().slice(0,7)"
+      "toISOString().slice(0,10)"
     ],
     "src/modules/emotion/garden-narrative.ts": [
       "toISOString().slice(0,10)"
@@ -378,7 +376,6 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/timeline/emotion-curve.ts": [
-      "date.substring(0,7)",
       "toISOString().split('T')[0]"
     ],
     "src/modules/timeline/export-enhance.ts": [
@@ -397,8 +394,7 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/timeline-index/aggregation.ts": [
-      "toISOString().slice(0,10)",
-      "toISOString().slice(0,7)"
+      "toISOString().slice(0,10)"
     ],
     "src/modules/timeline-index/index.ts": [
       "iso.slice(0,10)",
@@ -531,12 +527,6 @@
     ],
     "src/modules/craft/useCraftUi.ts": [
       "toISOString().slice(0,7)"
-    ],
-    "src/modules/goal/goal-state-machine.ts": [
-      "sunkAt.slice(0,7)"
-    ],
-    "src/modules/parallel-world/branch-timeline.ts": [
-      "timestamp.substring(0,7)"
     ],
     "src/modules/play/play-advanced.ts": [
       "at.slice(0,7)"

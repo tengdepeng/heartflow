@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 import type {
   MeditationSession,
@@ -63,7 +64,7 @@ function getWeekKey(date: string): string {
 
 /** 获取月标识符 */
 function getMonthKey(date: string): string {
-  return date.slice(0, 7)
+  return getLocalMonthKey(date)
 }
 
 // ============================================================

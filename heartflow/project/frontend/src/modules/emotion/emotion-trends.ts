@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import type { EmotionRecord } from './types'
 
 // ============================================================
@@ -250,7 +251,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
         }
         break
       case 'monthly':
-        groupBy = (ts) => new Date(ts).toISOString().slice(0, 7)
+        groupBy = (ts) => getLocalMonthKey(ts)
         break
       case 'quarterly':
         groupBy = (ts) => {

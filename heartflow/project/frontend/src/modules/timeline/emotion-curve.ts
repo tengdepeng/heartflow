@@ -3,6 +3,7 @@
 // 情感时序数据、曲线平滑、波动分析、转折点检测
 // ============================================================
 
+import { getLocalMonthKey } from '../../utils/time'
 import type { RiverItem } from './river'
 
 // ============================================================
@@ -674,7 +675,7 @@ export function useEmotionCurve() {
   function aggregateByMonth(points: EmotionDataPoint[]): EmotionDataPoint[] {
     const months = new Map<string, EmotionDataPoint[]>()
     for (const p of points) {
-      const key = p.date.substring(0, 7)
+      const key = getLocalMonthKey(p.date)
       if (!months.has(key)) months.set(key, [])
       months.get(key)!.push(p)
     }

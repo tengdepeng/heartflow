@@ -6,6 +6,7 @@
 //   自适应调整：反复拖延 → 光点变暗 + 提示
 // ============================================================
 
+import { getLocalMonthKey } from '../../utils/time'
 import type { Goal, GoalStatus } from './types'
 
 // ---- 状态转换条件 ----
@@ -268,7 +269,7 @@ export function groupOldDreamsByMonth(dreams: OldDream[]): { month: string; item
   const sorted = [...dreams].sort((a, b) => b.sunkAt.localeCompare(a.sunkAt))
 
   for (const d of sorted) {
-    const month = d.sunkAt.slice(0, 7) // YYYY-MM
+    const month = getLocalMonthKey(d.sunkAt) // YYYY-MM
     if (!groups.has(month)) groups.set(month, [])
     groups.get(month)!.push(d)
   }

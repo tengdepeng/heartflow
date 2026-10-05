@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import type { IndexEntry } from './types'
 
 // ---- 聚合视图类型 ----
@@ -151,7 +152,7 @@ function getWeekKey(date: Date): string {
 }
 
 function getMonthKey(date: Date): string {
-  return date.toISOString().slice(0, 7)
+  return getLocalMonthKey(date)
 }
 
 function getHourKey(date: Date): string {
