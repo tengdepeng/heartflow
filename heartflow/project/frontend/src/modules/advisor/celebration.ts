@@ -7,6 +7,7 @@ import { ref } from 'vue'
 import type { CelebrationEvent, CelebrationType, RetirementCeremony, RetirementPhase, AdvisorLegacy } from './types'
 import { CELEBRATION_TYPE_META, ADVISOR_STORAGE_KEYS } from './types'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 function generateId(): string {
   return `cel_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
@@ -53,7 +54,7 @@ export function useAdvisorCelebration() {
       advisorId,
       title,
       description,
-      date: date ?? new Date().toISOString().split('T')[0],
+      date: date ?? getLocalDateKey(),
       celebrated: false,
       ritual: {
         name: meta.defaultRitual,
@@ -92,16 +93,18 @@ export function useAdvisorCelebration() {
 
   /** 获取今日待庆祝事件 */
   function getTodayCelebrations(): CelebrationEvent[] {
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey()
     return celebrations.value.filter(e => e.date === today && !e.celebrated)
   }
 
   /** 获取即将到来的庆祝事件（未来7天） */
   function getUpcomingCelebrations(): CelebrationEvent[] {
     const now = new Date()
-    const weekLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-    const todayStr = now.toISOString().split('T')[0]
-    const weekStr = weekLater.toISOString().split('T')[0]
+    // 用 setDate 走日历加法，避免毫秒加法在夏令时切换日偏移一天
+    const weekLater = new Date(now)
+    weekLater.setDate(weekLater.getDate() + 7)
+    const todayStr = getLocalDateKey(now)
+    const weekStr = getLocalDateKey(weekLater)
     return celebrations.value.filter(
       e => e.date >= todayStr && e.date <= weekStr && !e.celebrated,
     )

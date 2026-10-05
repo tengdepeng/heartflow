@@ -643,9 +643,8 @@ export const useAdvisorStore = defineStore('advisor', () => {
    */
   function getTaskAwareness(): TaskAwareness {
     const localToday = getLocalDateKey()
-    const timestampToday = new Date().toISOString().slice(0, 10)
     const sessions = storage.getSessions()
-    const todaySessions = sessions.filter(s => s.completedAt?.startsWith(timestampToday))
+    const todaySessions = sessions.filter(s => s.completedAt && getLocalDateKey(new Date(s.completedAt)) === localToday)
     const focusCount = todaySessions.length
     const noteCount = storage.getNotes().length
     const emotionCount = storage.getEmotions().length
@@ -712,16 +711,15 @@ export const useAdvisorStore = defineStore('advisor', () => {
    */
   function getTaskProgress(): TaskProgress {
     const localToday = getLocalDateKey()
-    const timestampToday = new Date().toISOString().slice(0, 10)
     const sessions = storage.getSessions()
-    const todaySessions = sessions.filter(s => s.completedAt?.startsWith(timestampToday))
+    const todaySessions = sessions.filter(s => s.completedAt && getLocalDateKey(new Date(s.completedAt)) === localToday)
     const focusCount = todaySessions.length
 
     const notes = storage.getNotes()
-    const todayNotes = notes.filter(n => n.createdAt?.startsWith(timestampToday))
+    const todayNotes = notes.filter(n => n.createdAt && getLocalDateKey(new Date(n.createdAt)) === localToday)
 
     const emotions = storage.getEmotions()
-    const todayEmotions = emotions.filter(e => e.createdAt?.startsWith(timestampToday))
+    const todayEmotions = emotions.filter(e => e.createdAt && getLocalDateKey(new Date(e.createdAt)) === localToday)
 
     const anchors = storage.getAnchors()
     const todayAnchors = anchors.filter(a => a.targetDate === localToday)
@@ -1493,7 +1491,6 @@ export const useAdvisorStore = defineStore('advisor', () => {
   /** 每日重置计数器 */
   function resetDaily() {
     const localToday = getLocalDateKey()
-    const timestampToday = new Date().toISOString().slice(0, 10)
     const lastReset = storage.getConfig().advisorResetDate || ''
     if (lastReset !== localToday) {
       const cfg = storage.getConfig()
@@ -1504,7 +1501,7 @@ export const useAdvisorStore = defineStore('advisor', () => {
     }
     // 始终从已存储的消息中统计今日已回复次数（页面刷新后也能正确恢复）
     todayResponseCount = messages.value.filter(
-      m => m.at?.startsWith(timestampToday)
+      m => m.at && getLocalDateKey(new Date(m.at)) === localToday
     ).length
   }
 
@@ -1619,10 +1616,9 @@ export const useAdvisorStore = defineStore('advisor', () => {
 
   function getQuickStats() {
     const localToday = getLocalDateKey()
-    const timestampToday = new Date().toISOString().slice(0, 10)
     const sessions = storage.getSessions()
     return {
-      focusCount: sessions.filter(s => s.completedAt?.startsWith(timestampToday)).length,
+      focusCount: sessions.filter(s => s.completedAt && getLocalDateKey(new Date(s.completedAt)) === localToday).length,
       emotionCount: storage.getEmotions().length,
       noteCount: storage.getNotes().length,
       pendingAnchors: storage.getAnchors().filter((a: any) => !a.done && a.targetDate === localToday).length,
