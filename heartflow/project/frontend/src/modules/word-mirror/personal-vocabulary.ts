@@ -5,6 +5,7 @@
 
 import type { WordEntry, ProficiencyLevel } from './types'
 import { PROFICIENCY_META } from './types'
+import { getLocalDateKey } from '@/utils/time'
 
 // ============================================================
 // 类型定义
@@ -294,32 +295,32 @@ export function usePersonalVocabulary() {
     words: WordEntry[],
     todayStr?: string,
   ): LearningProgress {
-    const today = todayStr || new Date().toISOString().split('T')[0]
+    const today = todayStr || getLocalDateKey()
 
     const reviewedToday = words.filter(w => {
-      return w.lastReviewedAt && w.lastReviewedAt.startsWith(today)
+      return w.lastReviewedAt && getLocalDateKey(new Date(w.lastReviewedAt)) === today
     }).length
 
     const weekStart = new Date()
     weekStart.setDate(weekStart.getDate() - 7)
-    const weekStr = weekStart.toISOString().split('T')[0]
+    const weekStr = getLocalDateKey(weekStart)
 
     const reviewedThisWeek = words.filter(w => {
-      return w.lastReviewedAt && w.lastReviewedAt >= weekStr
+      return w.lastReviewedAt && getLocalDateKey(new Date(w.lastReviewedAt)) >= weekStr
     }).length
 
     // 连续学习天数
     const reviewDates = [...new Set(
       words
         .filter(w => w.lastReviewedAt)
-        .map(w => w.lastReviewedAt!.split('T')[0]),
+        .map(w => getLocalDateKey(new Date(w.lastReviewedAt!))),
     )].sort().reverse()
 
     let streak = 0
     for (let i = 0; i < reviewDates.length; i++) {
       const expected = new Date()
       expected.setDate(expected.getDate() - i)
-      if (reviewDates[i] === expected.toISOString().split('T')[0]) {
+      if (reviewDates[i] === getLocalDateKey(expected)) {
         streak++
       } else {
         break
@@ -331,13 +332,13 @@ export function usePersonalVocabulary() {
     for (let i = 29; i >= 0; i--) {
       const d = new Date()
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().split('T')[0]
+      const dateStr = getLocalDateKey(d)
 
-      const newWords = words.filter(w => w.createdAt.startsWith(dateStr)).length
-      const reviewed = words.filter(w => w.lastReviewedAt?.startsWith(dateStr)).length
+      const newWords = words.filter(w => w.createdAt && getLocalDateKey(new Date(w.createdAt)) === dateStr).length
+      const reviewed = words.filter(w => w.lastReviewedAt ? getLocalDateKey(new Date(w.lastReviewedAt)) === dateStr : false).length
       const mastered = words.filter(w =>
         w.proficiency >= config.masteryThreshold &&
-        w.lastReviewedAt?.startsWith(dateStr),
+        (w.lastReviewedAt ? getLocalDateKey(new Date(w.lastReviewedAt)) === dateStr : false),
       ).length
 
       curve.push({ date: dateStr, newWords, reviewed, mastered })

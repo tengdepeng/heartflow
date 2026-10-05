@@ -5,6 +5,7 @@
 
 import { ref } from 'vue'
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '@/utils/time'
 import type { WordEntry, ProficiencyLevel, TextAnalysis } from './types'
 
 // ---- 词频分析 ----
@@ -500,10 +501,10 @@ export function useSpacedRepetition() {
 
   /** 更新统计 */
   function computeStats(today: Date = new Date()): ReviewStats {
-    const todayStr = today.toISOString().split('T')[0]
+    const todayStr = getLocalDateKey(today)
 
     const todaySessions = reviewSessions.value.filter(s =>
-      s.startedAt.startsWith(todayStr),
+      getLocalDateKey(new Date(s.startedAt)) === todayStr,
     )
 
     const todayReviewed = todaySessions.reduce(
@@ -525,10 +526,10 @@ export function useSpacedRepetition() {
     // 计算连续天数
     let streak = 0
     const reviewDates = new Set(
-      reviewSessions.value.map(s => s.startedAt.split('T')[0]),
+      reviewSessions.value.map(s => getLocalDateKey(new Date(s.startedAt))),
     )
     let checkDate = new Date(today)
-    while (reviewDates.has(checkDate.toISOString().split('T')[0])) {
+    while (reviewDates.has(getLocalDateKey(checkDate))) {
       streak++
       checkDate.setDate(checkDate.getDate() - 1)
     }
@@ -596,7 +597,7 @@ export function useWritingAssistant() {
   /** 获取今日写作提示 */
   function getDailyPrompt(): WritingPrompt {
     const dailyPrompts = prompts.value.filter(p => p.type === 'daily')
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey()
     // 基于日期选择固定的提示
     const dayIndex = new Date(today).getDate() % dailyPrompts.length
     return dailyPrompts[dayIndex] || dailyPrompts[0]
@@ -662,7 +663,7 @@ export function useWritingAssistant() {
     const averageWordCount = totalRecords > 0 ? Math.round(totalWordCount / totalRecords) : 0
 
     // 连续天数
-    const dates = new Set(records.value.map(r => r.createdAt.split('T')[0]))
+    const dates = new Set(records.value.map(r => getLocalDateKey(new Date(r.createdAt))))
     let currentStreak = 0
     let longestStreak = 0
     let streakCount = 0
@@ -670,7 +671,7 @@ export function useWritingAssistant() {
     const checkDate = new Date(today)
 
     // 从今天开始往前计算连续天数
-    while (dates.has(checkDate.toISOString().split('T')[0])) {
+    while (dates.has(getLocalDateKey(checkDate))) {
       currentStreak++
       checkDate.setDate(checkDate.getDate() - 1)
     }

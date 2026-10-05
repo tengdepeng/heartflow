@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { WordEntry } from './types'
+import { getLocalDateKey } from '@/utils/time'
 
 // ============================================================
 // 类型定义
@@ -565,18 +566,18 @@ export function useWritingEnhance() {
 
     // 连续天数
     const days = [...new Set(
-      sessions.map(s => s.startedAt.split('T')[0]),
+      sessions.map(s => getLocalDateKey(new Date(s.startedAt))),
     )].sort().reverse()
 
     let currentStreak = 0
     let longestStreak = 0
     let streak = 0
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey()
 
     for (let i = 0; i < days.length; i++) {
       const expected = new Date()
       expected.setDate(expected.getDate() - i)
-      const expectedStr = expected.toISOString().split('T')[0]
+      const expectedStr = getLocalDateKey(expected)
 
       if (days[i] === expectedStr) {
         streak++

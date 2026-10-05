@@ -1,5 +1,5 @@
 {
-  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 154 处（145 文件）。",
+  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 140 处（137 文件）（word-mirror 域 4 引擎已迁）。",
   "violations": {
     "src/components/BudgetPanel.vue": [
       "toISOString().slice(0,10)"
@@ -324,21 +324,6 @@
     ],
     "src/modules/wisdom/poetry.ts": [
       "toISOString().slice(0,10)"
-    ],
-    "src/modules/word-mirror/daily-recommendation.ts": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/modules/word-mirror/personal-vocabulary.ts": [
-      ".split('T')[0]",
-      "toISOString().split('T')[0]"
-    ],
-    "src/modules/word-mirror/text-analysis.ts": [
-      ".split('T')[0]",
-      "toISOString().split('T')[0]"
-    ],
-    "src/modules/word-mirror/writing-enhance.ts": [
-      ".split('T')[0]",
-      "toISOString().split('T')[0]"
     ],
     "src/modules/worklog/entries.ts": [
       "toISOString().slice(0,10)"

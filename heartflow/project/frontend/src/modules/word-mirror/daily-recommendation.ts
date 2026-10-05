@@ -5,6 +5,7 @@
 
 import { ref } from 'vue'
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '@/utils/time'
 import type { WordEntry, ProficiencyLevel, WordGameType } from './types'
 
 // ---- 每日推荐类型 ----
@@ -661,7 +662,7 @@ export function useDailyRecommendation() {
     const checkDate = new Date(today)
 
     // 从今天往回数
-    while (dates.has(checkDate.toISOString().split('T')[0])) {
+    while (dates.has(getLocalDateKey(checkDate))) {
       currentStreak++
       checkDate.setDate(checkDate.getDate() - 1)
     }
@@ -743,7 +744,7 @@ export function useDailyRecommendation() {
 
 /** 获取今日日期字符串 */
 function getTodayStr(): string {
-  return new Date().toISOString().split('T')[0]
+  return getLocalDateKey()
 }
 
 /** 获取一年中的第几天 */
