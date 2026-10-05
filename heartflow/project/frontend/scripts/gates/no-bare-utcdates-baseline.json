@@ -7,9 +7,6 @@
     "src/components/BagEvolutionPanel.vue": [
       "iso.slice(0,10)"
     ],
-    "src/components/BudgetPanel.vue": [
-      "toISOString().slice(0,10)"
-    ],
     "src/components/ConstitutionStatusPanel.vue": [
       "toISOString().slice(0,10)"
     ],
@@ -74,8 +71,7 @@
       "toISOString().slice(0,10)"
     ],
     "src/components/MovementAnalyticsPanel.vue": [
-      "at.slice(0,10)",
-      "toISOString().split('T')[0]"
+      "at.slice(0,10)"
     ],
     "src/components/NarrativeReportPanel.vue": [
       "toISOString().split('T')[0]"
@@ -208,18 +204,6 @@
     "src/modules/garden/index.ts": [
       "toISOString().slice(0,10)"
     ],
-    "src/modules/home/home-atmosphere-engine.ts": [
-      "timestamp.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/home/home-bridge.ts": [
-      "createdAt.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/home/home-interaction-engine.ts": [
-      "createdAt.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
     "src/modules/home/today-room-stats.ts": [
       "toISOString().slice(0,10)",
       "toISOString().split('T')[0]"
@@ -302,38 +286,6 @@
     "src/modules/rest/sleep-quality.ts": [
       "toISOString().split('T')[0]"
     ],
-    "src/modules/reward/daily-reminder.ts": [
-      "at.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/reward/export.ts": [
-      "at.slice(0,10)"
-    ],
-    "src/modules/reward/finance-analysis.ts": [
-      "iso.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/reward/finance-goals.ts": [
-      "assessedAt.substring(0,10)"
-    ],
-    "src/modules/reward/milestones.ts": [
-      "recordedAt.slice(0,10)"
-    ],
-    "src/modules/reward/net-asset.ts": [
-      "at.slice(0,10)"
-    ],
-    "src/modules/reward/report-visual.ts": [
-      "at.slice(0,10)"
-    ],
-    "src/modules/reward/reward-bridge.ts": [
-      "recordedAt.slice(0,10)"
-    ],
-    "src/modules/reward/saving-plan.ts": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/reward/worklog-bridge.ts": [
-      "toISOString().slice(0,10)"
-    ],
     "src/modules/safety/audit-timeline.ts": [
       "toISOString().slice(0,10)"
     ],
@@ -384,13 +336,6 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/timeline/timeline-patterns.ts": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/timeline-index/aggregation.ts": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/timeline-index/index.ts": [
-      "iso.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/modules/timer/index.ts": [
@@ -498,10 +443,6 @@
       "toISOString().slice(0,10)"
     ],
     "src/views/TimeCorridorView.vue": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/views/TimelineIndex.vue": [
-      "timestamp.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
     "src/views/WisdomPavilion.vue": [
