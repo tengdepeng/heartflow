@@ -181,8 +181,6 @@
       "toISOString().slice(0,10)"
     ],
     "src/modules/discipline/streak-system.ts": [
-      "checkinDate.slice(0,7)",
-      "toISOString().slice(0,7)",
       "toISOString().split('T')[0]"
     ],
     "src/modules/discipline/workshop-bridge.ts": [
@@ -272,9 +270,7 @@
     ],
     "src/modules/note/note-analytics.ts": [
       "createdAt.slice(0,10)",
-      "createdAt.slice(0,7)",
       "toISOString().slice(0,10)",
-      "toISOString().slice(0,7)",
       "updatedAt.slice(0,10)"
     ],
     "src/modules/output/advanced.ts": [
@@ -512,15 +508,10 @@
       "toISOString().slice(0,10)"
     ],
     "src/views/WorkLog.vue": [
-      "date.slice(0,7)",
-      "toISOString().slice(0,10)",
-      "toISOString().slice(0,7)"
+      "toISOString().slice(0,10)"
     ],
     "src/components/PhotoDiaryPanel.vue": [
       "date.slice(0,7)"
-    ],
-    "src/modules/play/play-advanced.ts": [
-      "at.slice(0,7)"
     ],
     "src/modules/reading/reading-insights.ts": [
       "finishDate.slice(0,7)"

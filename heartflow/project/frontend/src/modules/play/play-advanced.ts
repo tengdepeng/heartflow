@@ -5,6 +5,7 @@
 //   收藏热度地图、品类偏好分析、时间投资回报
 // ============================================================
 
+import { getLocalMonthKey } from '../../utils/time'
 import type { PlayData } from './types'
 
 // ---- 里程碑 ----
@@ -200,7 +201,7 @@ export function buildPlayTrend(data: PlayData, months: number = 12): PlayTrend {
 
   // 月度游戏时长
   const monthlyHours = monthKeys.map(month => {
-    const monthGames = data.games.filter(g => g.at.slice(0, 7) === month)
+    const monthGames = data.games.filter(g => getLocalMonthKey(g.at) === month)
     const hours = monthGames.reduce((s, g) => s + g.hours, 0)
     return { month, hours, gameCount: monthGames.length }
   })
@@ -208,10 +209,10 @@ export function buildPlayTrend(data: PlayData, months: number = 12): PlayTrend {
   // 月度收藏增量
   const monthlyAdditions = monthKeys.map(month => ({
     month,
-    games: data.games.filter(g => g.at.slice(0, 7) === month).length,
-    toys: data.toys.filter(t => t.at.slice(0, 7) === month).length,
-    models: data.models.filter(m => m.at.slice(0, 7) === month).length,
-    others: data.others.filter(o => o.at.slice(0, 7) === month).length,
+    games: data.games.filter(g => getLocalMonthKey(g.at) === month).length,
+    toys: data.toys.filter(t => getLocalMonthKey(t.at) === month).length,
+    models: data.models.filter(m => getLocalMonthKey(m.at) === month).length,
+    others: data.others.filter(o => getLocalMonthKey(o.at) === month).length,
   }))
 
   // 平台热度变化
@@ -220,7 +221,7 @@ export function buildPlayTrend(data: PlayData, months: number = 12): PlayTrend {
     platform,
     months: monthKeys.map(month => {
       const hours = data.games
-        .filter(g => g.platform === platform && g.at.slice(0, 7) === month)
+        .filter(g => g.platform === platform && getLocalMonthKey(g.at) === month)
         .reduce((s, g) => s + g.hours, 0)
       return { month, hours }
     }),
@@ -232,10 +233,10 @@ export function buildPlayTrend(data: PlayData, months: number = 12): PlayTrend {
     category,
     months: monthKeys.map(month => {
       let count = 0
-      if (category === '游戏') count = data.games.filter(g => g.at.slice(0, 7) === month).length
-      else if (category === '玩具') count = data.toys.filter(t => t.at.slice(0, 7) === month).length
-      else if (category === '模型') count = data.models.filter(m => m.at.slice(0, 7) === month).length
-      else count = data.others.filter(o => o.at.slice(0, 7) === month).length
+      if (category === '游戏') count = data.games.filter(g => getLocalMonthKey(g.at) === month).length
+      else if (category === '玩具') count = data.toys.filter(t => getLocalMonthKey(t.at) === month).length
+      else if (category === '模型') count = data.models.filter(m => getLocalMonthKey(m.at) === month).length
+      else count = data.others.filter(o => getLocalMonthKey(o.at) === month).length
       return { month, count }
     }),
   }))

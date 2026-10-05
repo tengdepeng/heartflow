@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import type { Habit } from './types'
 
 // ---- 连续打卡 ----
@@ -210,8 +211,8 @@ export function useStreakTracker() {
     }
 
     // 更新月度/周度统计
-    const currentMonth = today.toISOString().slice(0, 7)
-    const checkinMonth = checkinDate.slice(0, 7)
+    const currentMonth = getLocalMonthKey(today)
+    const checkinMonth = getLocalMonthKey(checkinDate)
     if (checkinMonth === currentMonth) {
       record.monthlyCheckins++
     } else {

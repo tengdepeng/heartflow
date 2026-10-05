@@ -398,6 +398,7 @@
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
 import { ref, computed, onMounted } from 'vue'
+import { getLocalMonthKey } from '../utils/time'
 import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -508,7 +509,7 @@ const statsOverview = computed(() => {
   const totalShifts = shifts.value.length
   const totalHours = Math.round(shifts.value.reduce((s, x) => s + x.hours, 0) * 10) / 10
   const now = new Date()
-  const curMonth = now.toISOString().slice(0, 7)
+  const curMonth = getLocalMonthKey(now)
   const monthShifts = shifts.value.filter(s => s.date.startsWith(curMonth))
   const monthHours = Math.round(monthShifts.reduce((s, x) => s + x.hours, 0) * 10) / 10
   const daysWithRecords = new Set(monthShifts.map(s => s.date)).size
@@ -587,7 +588,7 @@ function cancelEdit() { editingId.value = null }
 const monthlySummary = computed(() => {
   const map: Record<string, { totalHours: number; count: number }> = {}
   for (const s of shifts.value) {
-    const m = s.date.slice(0, 7)
+    const m = getLocalMonthKey(s.date)
     if (!map[m]) map[m] = { totalHours: 0, count: 0 }
     map[m].totalHours += s.hours
     map[m].count++
@@ -606,7 +607,7 @@ const monthlySummary = computed(() => {
 const monthlyRings = computed(() => {
   const map: Record<string, { regular: number; night: number; overtime: number }> = {}
   for (const s of shifts.value) {
-    const m = s.date.slice(0, 7)
+    const m = getLocalMonthKey(s.date)
     if (!map[m]) map[m] = { regular: 0, night: 0, overtime: 0 }
     map[m][s.type] += s.hours
   }

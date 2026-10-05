@@ -3,6 +3,7 @@
 // 笔记健康度、写作统计、标签分析、生命周期、内容质量
 // ============================================================
 
+import { getLocalMonthKey } from '../../utils/time'
 import type { Note } from '../../types'
 import type { KnowledgeRing } from './knowledge-ring'
 import { isForgotten, needsReview } from './knowledge-ring'
@@ -393,12 +394,12 @@ export function useNoteAnalytics() {
     const monthlyMap = new Map<string, { created: number; updated: number; days: Set<string>; chars: number }>()
     for (let i = 11; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const monthKey = d.toISOString().slice(0, 7)
+      const monthKey = getLocalMonthKey(d)
       monthlyMap.set(monthKey, { created: 0, updated: 0, days: new Set(), chars: 0 })
     }
 
     for (const note of allNotes) {
-      const monthKey = note.createdAt.slice(0, 7)
+      const monthKey = getLocalMonthKey(note.createdAt)
       if (monthlyMap.has(monthKey)) {
         monthlyMap.get(monthKey)!.created++
         monthlyMap.get(monthKey)!.days.add(note.createdAt.slice(0, 10))
@@ -550,7 +551,7 @@ export function useNoteAnalytics() {
     // 创建趋势（按月）
     const creationMap = new Map<string, number>()
     for (const note of allNotes) {
-      const month = note.createdAt.slice(0, 7)
+      const month = getLocalMonthKey(note.createdAt)
       creationMap.set(month, (creationMap.get(month) || 0) + 1)
     }
 
