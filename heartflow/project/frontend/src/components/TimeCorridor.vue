@@ -58,6 +58,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { getLocalMonthKey } from '../utils/time'
 import CrystalDetail from './CrystalDetail.vue'
 import { storage } from '../engine/storage'
 import type { TimeCrystal, FocusSession } from '../types'
@@ -157,7 +158,7 @@ const monthMarkers = computed(() => {
   const seen = new Set<string>()
   const markers: { x: number; label: string }[] = []
   for (const band of bands.value) {
-    const m = band.dateStr.slice(0, 7)
+    const m = getLocalMonthKey(band.dateStr)
     if (!seen.has(m)) {
       seen.add(m)
       markers.push({ x: band.x, label: m })

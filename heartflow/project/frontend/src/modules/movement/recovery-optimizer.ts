@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import type { MovementRecord, MovementType, MovementIntensity } from './types'
 import { MOVEMENT_INTENSITY_META } from './types'
 
@@ -735,7 +736,7 @@ function detectCurrentPhase(records: MovementRecord[]): PeriodizationPhase {
 function analyzeSeasonalTrend(records: MovementRecord[]): string {
   const monthlyData: Record<string, number> = {}
   for (const r of records) {
-    const month = r.date.slice(0, 7)
+    const month = getLocalMonthKey(r.date)
     monthlyData[month] = (monthlyData[month] ?? 0) + r.duration
   }
 

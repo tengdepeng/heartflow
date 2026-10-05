@@ -3,6 +3,7 @@
 // 把身体的一次次律动，拢成一册安放；只呈现，不评判。
 // ============================================================
 
+import { getLocalMonthKey } from '../../utils/time'
 import type { Move } from './movement-log'
 
 // ============================================================
@@ -256,7 +257,7 @@ export function movementRhythm(moves: Move[], now: Date): MovementRhythm {
   const spanWeeks = Math.max(1, spanDays / 7)
   const weeklyPace = Math.round((activeDays / spanWeeks) * 10) / 10
 
-  const months = new Set(dates.map(s => s.slice(0, 7)))
+  const months = new Set(dates.map(s => getLocalMonthKey(s)))
 
   return {
     activeDays,

@@ -5,6 +5,7 @@
 // 输入为已完成目标列表（Goal 且 status==='bloom'），输出分组、筛选与统计。
 // ============================================================
 
+import { getLocalMonthKey } from '../../utils/time'
 import type { Goal } from './types'
 
 // ---- 检索（陈列式，非叙事）----
@@ -48,7 +49,7 @@ export function groupCompletedByMonth(goals: Goal[]): OldDreamGroup[] {
 
   for (const g of sorted) {
     const d = g.completedAt || g.updatedAt
-    const month = d.slice(0, 7)
+    const month = getLocalMonthKey(d)
     if (!groups.has(month)) groups.set(month, [])
     groups.get(month)!.push(g)
   }
@@ -92,7 +93,7 @@ export function oldDreamOverview(
   for (const g of done) {
     const d = new Date(g.completedAt || g.updatedAt).getTime()
     if (d >= cut) recent30++
-    monthSet.add((g.completedAt || g.updatedAt).slice(0, 7))
+    monthSet.add(getLocalMonthKey(g.completedAt || g.updatedAt))
   }
 
   return { total: done.length, monthCount: monthSet.size, recent30, byDomain }

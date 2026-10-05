@@ -99,7 +99,6 @@
       "importDate.slice(0,10)"
     ],
     "src/components/TimeCorridor.vue": [
-      "dateStr.slice(0,7)",
       "toISOString().slice(0,10)"
     ],
     "src/components/WorklogExportPanel.vue": [
@@ -266,7 +265,6 @@
       "at.slice(0,10)"
     ],
     "src/modules/movement/recovery-optimizer.ts": [
-      "date.slice(0,7)",
       "toISOString().split('T')[0]"
     ],
     "src/modules/note/markdown-export.ts": [

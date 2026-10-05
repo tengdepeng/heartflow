@@ -3,6 +3,7 @@
 // 把一封封封存与开启的胶囊，拢成一册安放；只呈现，不催促。
 // ============================================================
 
+import { getLocalMonthKey } from '../../utils/time'
 import type { TimeCapsule, CapsuleItemType } from './index'
 
 // ============================================================
@@ -268,7 +269,7 @@ export function capsuleRhythm(capsules: TimeCapsule[], now: Date): CapsuleRhythm
     avgWaitDays = Math.round(sum / sealed.length)
   }
 
-  const months = new Set(dates.map(s => s.slice(0, 7)))
+  const months = new Set(dates.map(s => getLocalMonthKey(s)))
 
   return {
     activeDays,

@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import type { OutputRecord, OutputRecordType, OutputRecordStatus } from './types'
 import { governanceCheckExport } from './governance-gate'
 
@@ -405,7 +406,7 @@ export function useOutputStats() {
       const weekKey = getWeekKey(date)
       weeklyMap.set(weekKey, (weeklyMap.get(weekKey) || 0) + 1)
 
-      const monthKey = dateKey.slice(0, 7)
+      const monthKey = getLocalMonthKey(r.createdAt)
       monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + 1)
 
       const hour = date.getHours()
