@@ -224,18 +224,6 @@
     "src/modules/garden/index.ts": [
       "toISOString().slice(0,10)"
     ],
-    "src/modules/home/home-atmosphere-engine.ts": [
-      "timestamp.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/home/home-bridge.ts": [
-      "createdAt.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
-    "src/modules/home/home-interaction-engine.ts": [
-      "createdAt.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
     "src/modules/home/today-room-stats.ts": [
       "toISOString().slice(0,10)",
       "toISOString().split('T')[0]"

@@ -16,6 +16,7 @@ import { ref, computed, watch } from 'vue'
 import { storage } from '../../engine/storage'
 import { usePerceptionStore } from '../../stores/perception'
 import type { HomeRoom } from './rooms'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -746,8 +747,8 @@ export function useHomeAtmosphereEngine() {
 
   /** 今日活动 */
   const todayActivities = computed(() => {
-    const today = new Date().toISOString().slice(0, 10)
-    return activities.value.filter(a => a.timestamp.slice(0, 10) === today)
+    const today = getLocalDateKey()
+    return activities.value.filter(a => getLocalDateKey(new Date(a.timestamp)) === today)
   })
 
   /** 最近活动 */
@@ -762,15 +763,15 @@ export function useHomeAtmosphereEngine() {
   /** 生成家庭仪表盘 */
   function generateDashboard(rooms: HomeRoom[]): HomeDashboard {
     const now = new Date()
-    const today = now.toISOString().slice(0, 10)
+    const today = getLocalDateKey(now)
     const weekStart = new Date(now)
     weekStart.setDate(now.getDate() - 7)
-    const weekStartStr = weekStart.toISOString().slice(0, 10)
+    const weekStartStr = getLocalDateKey(weekStart)
 
     const roomSummaries: RoomActivitySummary[] = rooms.map(room => {
       const roomActivities = activities.value.filter(a => a.roomId === room.id)
-      const todayActs = roomActivities.filter(a => a.timestamp.slice(0, 10) === today)
-      const weekActs = roomActivities.filter(a => a.timestamp.slice(0, 10) >= weekStartStr)
+      const todayActs = roomActivities.filter(a => getLocalDateKey(new Date(a.timestamp)) === today)
+      const weekActs = roomActivities.filter(a => getLocalDateKey(new Date(a.timestamp)) >= weekStartStr)
       const durations = roomActivities.filter(a => a.duration).map(a => a.duration!)
 
       // 计算活跃度

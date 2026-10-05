@@ -21,6 +21,7 @@ import type {
   AtmospherePreset,
   HomeDashboard,
 } from './home-atmosphere-engine'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 桥接层类型
@@ -281,13 +282,13 @@ export function useHomeBridge() {
     for (let i = 13; i >= 0; i--) {
       const date = new Date(now)
       date.setDate(date.getDate() - i)
-      const dateStr = date.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(date)
       entries.set(dateStr, { count: 0, rooms: new Set(), types: new Set() })
     }
 
     // 填充活动数据
     for (const activity of interactionEngine.activities.value) {
-      const dateStr = activity.createdAt.slice(0, 10)
+      const dateStr = getLocalDateKey(new Date(activity.createdAt))
       const entry = entries.get(dateStr)
       if (entry) {
         entry.count++

@@ -7,6 +7,7 @@
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
 import { HOME_ROOMS } from './rooms'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -520,8 +521,8 @@ export function useHomeInteractionEngine() {
 
   /** 今日活动数 */
   const todayActivityCount = computed(() => {
-    const today = new Date().toISOString().slice(0, 10)
-    return activities.value.filter(a => a.createdAt.slice(0, 10) === today).length
+    const today = getLocalDateKey()
+    return activities.value.filter(a => getLocalDateKey(new Date(a.createdAt)) === today).length
   })
 
   /** 最常访问的房间 */
