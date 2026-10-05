@@ -169,3 +169,5 @@ P1-3-roomheader-overview.md
 # 构建/QA 截图产物目录(任意层级) 与 .pm-verify 校验状态
 artifacts/
 .pm-verify/
+# 全量 vitest JSON 报告（guard 现场临时件，留盘不入库）
+vitest-full.json
