@@ -20,6 +20,8 @@ export interface Book {
   lastPosition?: number
   /** 段内句块偏移（该段第几句，0 基；读↔听续接 INCR-526 的句块级精度，缺省视为 0） */
   lastChunkOffset?: number
+  /** 句内播放进度 0~1（当前句读到第几成；读↔听续接 INCR-526 的词级精度，缺省视为 0） */
+  lastChunkRatio?: number
   /** 阅读状态 */
   status: ReadingStatus
   /** 评分 1-5 */

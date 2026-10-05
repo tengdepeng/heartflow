@@ -73,6 +73,7 @@ export function useReadingHall() {
       saveBookContent(existing.id, text)
       existing.lastPosition = 0
       existing.lastChunkOffset = 0
+      existing.lastChunkRatio = 0
       books.value = [...books.value]
       saveBooks(books.value)
       return existing
@@ -82,12 +83,13 @@ export function useReadingHall() {
     return book
   }
 
-  /** 记录续读位置（段落索引 + 段内句块偏移，句块级精度用于读↔听续接） */
-  function setBookProgress(id: string, position: number, chunkOffset = 0): boolean {
+  /** 记录续读位置（段落索引 + 段内句块偏移 + 句内进度，读↔听续接的词级精度） */
+  function setBookProgress(id: string, position: number, chunkOffset = 0, chunkRatio = 0): boolean {
     const book = books.value.find(b => b.id === id)
     if (!book) return false
     book.lastPosition = Math.max(0, Math.floor(position))
     book.lastChunkOffset = Math.max(0, Math.floor(chunkOffset))
+    book.lastChunkRatio = Math.min(1, Math.max(0, chunkRatio))
     books.value = [...books.value]
     saveBooks(books.value)
     return true

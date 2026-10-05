@@ -7,6 +7,7 @@ import {
   paragraphIndexForChunk,
   resolveStartChunk,
   chunkOffsetForChunk,
+  sliceFromRatio,
   useReadingTts,
 } from '../tts'
 
@@ -92,13 +93,30 @@ describe('tts · 段落↔句块映射（INCR-526 读↔听续接）', () => {
   })
 })
 
+describe('tts · sliceFromRatio 词级续读裁剪（INCR-526）', () => {
+  it('按句内进度裁掉已读前缀', () => {
+    const s = '一二三四五六七八九十。'
+    expect(sliceFromRatio(s, 0)).toBe(s)
+    expect(sliceFromRatio(s, 0.5)).toBe('六七八九十。')
+    expect(sliceFromRatio(s, 0.9)).toBe('十。')
+  })
+
+  it('比例夹取到 [0, 0.95]，剩余不足 2 字退回整句', () => {
+    expect(sliceFromRatio('一二三四五', 2)).toBe('一二三四五')
+    expect(sliceFromRatio('一二三四五', 0.5)).toBe('三四五')
+    expect(sliceFromRatio('', 0.5)).toBe('')
+  })
+})
+
 describe('tts · useReadingTts 状态机', () => {
   const spoken: string[] = []
   let endHandlers: (() => void)[] = []
+  const utterances: any[] = []
 
   beforeEach(() => {
     spoken.length = 0
     endHandlers = []
+    utterances.length = 0
     // Mock speechSynthesis 环境
     class MockUtterance {
       text: string
@@ -106,12 +124,14 @@ describe('tts · useReadingTts 状态机', () => {
       lang = ''
       onend: (() => void) | null = null
       onerror: (() => void) | null = null
+      onboundary: ((e: { charIndex: number }) => void) | null = null
       constructor(text: string) { this.text = text }
     }
     ;(globalThis as Record<string, unknown>).SpeechSynthesisUtterance = MockUtterance
     const synth = {
       speak(u: InstanceType<typeof MockUtterance>) {
         spoken.push(u.text)
+        utterances.push(u)
         if (u.onend) endHandlers.push(u.onend)
       },
       pause: vi.fn(),
@@ -171,5 +191,30 @@ describe('tts · useReadingTts 状态机', () => {
     expect(tts.rate.value).toBe(2)
     tts.setRate(0.1)
     expect(tts.rate.value).toBe(0.5)
+  })
+
+  it('词边界回调更新句内进度 chunkRatio（INCR-526 词级续接）', () => {
+    const tts = useReadingTts()
+    tts.speak('一二三四五六七八九十。')
+    expect(tts.chunkRatio.value).toBe(0)
+    utterances[utterances.length - 1].onboundary?.({ charIndex: 5 })
+    expect(tts.chunkRatio.value).toBeCloseTo(5 / 11, 5)
+  })
+
+  it('speak 从 startRatio 起读时裁掉首块已读前缀（词级续读）', () => {
+    const tts = useReadingTts()
+    tts.speak('一二三四五六七八九十。', undefined, 0, 0.5)
+    expect(spoken).toEqual(['六七八九十。'])
+    // 显示用句块仍为原文
+    expect(tts.sentences.value).toEqual(['一二三四五六七八九十。'])
+    expect(tts.chunkRatio.value).toBeCloseTo(5 / 11, 5)
+  })
+
+  it('首块裁剪后词边界进度按原文长度换算', () => {
+    const tts = useReadingTts()
+    tts.speak('一二三四五六七八九十。', undefined, 0, 0.5)
+    // 实际朗读「六七八九十。」，读到其第 2 字 → 对应原文第 7 字
+    utterances[utterances.length - 1].onboundary?.({ charIndex: 1 })
+    expect(tts.chunkRatio.value).toBeCloseTo(6 / 11, 5)
   })
 })

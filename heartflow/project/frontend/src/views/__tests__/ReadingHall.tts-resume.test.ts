@@ -32,19 +32,21 @@ vi.mock('pinia', () => ({
 // ---- Mock TTS 环境 ----
 const spoken: string[] = []
 let endHandlers: (() => void)[] = []
+const utterances: any[] = []
 class MockUtterance {
   text: string
   rate = 1
   lang = ''
   onend: (() => void) | null = null
   onerror: (() => void) | null = null
+  onboundary: ((e: { charIndex: number }) => void) | null = null
   constructor(text: string) { this.text = text }
 }
 function setupTts() {
   ;(globalThis as Record<string, unknown>).SpeechSynthesisUtterance = MockUtterance
   ;(globalThis as Record<string, unknown>).window = globalThis
   ;(globalThis as Record<string, unknown>).speechSynthesis = {
-    speak(u: any) { spoken.push(u.text); if (u.onend) endHandlers.push(u.onend) },
+    speak(u: any) { spoken.push(u.text); utterances.push(u); if (u.onend) endHandlers.push(u.onend) },
     pause: vi.fn(),
     resume: vi.fn(),
     cancel: vi.fn(),
@@ -94,6 +96,7 @@ describe('ReadingHall · 读↔听续接（INCR-526）', () => {
     vi.clearAllMocks()
     spoken.length = 0
     endHandlers = []
+    utterances.length = 0
     Object.keys(mockStore).forEach(k => delete mockStore[k])
     mockStore['hf:reading:books'] = JSON.stringify([SEED_BOOK])
     mockStore['hf:reading:content:b-tts'] = '第一段\n第二段\n第三段'
@@ -202,5 +205,40 @@ describe('ReadingHall · 读↔听续接（INCR-526）', () => {
     const saved = JSON.parse(mockStore['hf:reading:books'])
     expect(saved[0].lastPosition).toBeGreaterThan(0)
     expect(saved[0].lastChunkOffset).toBe(0)
+  })
+
+  it('词级续接：从 lastChunkRatio 起读时裁掉首块已读前缀', async () => {
+    vi.resetModules()
+    mockStore['hf:reading:books'] = JSON.stringify([{ ...SEED_BOOK, lastPosition: 0, lastChunkOffset: 0, lastChunkRatio: 0.5 }])
+    mockStore['hf:reading:content:b-tts'] = '一二三四五六七八九十。'
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await openSeededBook(wrapper)
+
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    // 11 字，0.5 → 从第 6 字「六」起读，而非句首「一」
+    expect(spoken).toEqual(['六七八九十。'])
+  })
+
+  it('词级续接：暂停时回写句内进度 lastChunkRatio', async () => {
+    vi.resetModules()
+    mockStore['hf:reading:books'] = JSON.stringify([{ ...SEED_BOOK, lastPosition: 0, lastChunkOffset: 0, lastChunkRatio: 0 }])
+    mockStore['hf:reading:content:b-tts'] = '一二三四五六七八九十。'
+    const wrapper = await getWrapper()
+    await wrapper.vm.$nextTick()
+    await openSeededBook(wrapper)
+
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    // 词边界读到第 5 字
+    utterances[utterances.length - 1].onboundary?.({ charIndex: 5 })
+    await wrapper.vm.$nextTick()
+    // 暂停 → 落库句内进度
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const saved = JSON.parse(mockStore['hf:reading:books'])
+    expect(saved[0].lastPosition).toBe(0)
+    expect(saved[0].lastChunkOffset).toBe(0)
+    expect(saved[0].lastChunkRatio).toBeCloseTo(5 / 11, 5)
   })
 })

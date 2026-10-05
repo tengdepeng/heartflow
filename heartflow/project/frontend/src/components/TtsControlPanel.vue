@@ -5,7 +5,7 @@
     <template v-else>
       <div class="ttp-controls">
         <button class="ttp-btn ttp-btn-primary" @click="onToggle">{{ toggleLabel }}</button>
-        <button class="ttp-btn ttp-btn-stop" :disabled="state === 'idle'" @click="stop">⏹ 停止</button>
+        <button class="ttp-btn ttp-btn-stop" :disabled="state === 'idle'" @click="onStop">⏹ 停止</button>
         <div class="ttp-rate">
           <span class="ttp-rate-label">倍速</span>
           <div class="ttp-rate-btns">
@@ -65,19 +65,21 @@ const props = withDefaults(
     startParagraph?: number
     /** 段内句块偏移（读→听续接的句块级精度：该段第几句起读，0 基） */
     startChunkOffset?: number
+    /** 句内进度 0~1（读→听续接的词级精度：该句读到第几成起读） */
+    startChunkRatio?: number
     /** 跟读：朗读推进时让阅读器跟随定位 */
     follow?: boolean
   }>(),
-  { title: '', startParagraph: 0, startChunkOffset: 0, follow: false },
+  { title: '', startParagraph: 0, startChunkOffset: 0, startChunkRatio: 0, follow: false },
 )
 
 const emit = defineEmits<{
-  (e: 'progress', paragraphIndex: number, chunkOffset: number): void
+  (e: 'progress', paragraphIndex: number, chunkOffset: number, chunkRatio: number): void
   (e: 'update:follow', value: boolean): void
 }>()
 
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 2] as const
-const { state, rate, progress, sentences, paraOfChunk, supported, speak, pause, resume, stop, setRate, setVoice } =
+const { state, rate, progress, sentences, paraOfChunk, chunkRatio, supported, speak, pause, resume, stop, setRate, setVoice } =
   useReadingTts()
 const { current: voice } = useVoiceLibrary()
 const mini = useMiniPlayer()
@@ -102,10 +104,17 @@ const activeIndex = computed(() => {
   return Math.min(progress.value.index, progress.value.total - 1)
 })
 
-// 句块推进时把当前句滚动到可视区，形成「跟读」效果；并回报所在段落 + 段内句块偏移（INCR-526 听→读续接）
+/** 把当前朗读位置（段落 + 段内句块偏移 + 句内进度）回报给上层（INCR-526 听→读续接） */
+function emitProgress() {
+  const i = activeIndex.value
+  if (i < 0) return
+  emit('progress', paragraphIndexForChunk(paraOfChunk.value, i), chunkOffsetForChunk(paraOfChunk.value, i), chunkRatio.value)
+}
+
+// 句块推进时把当前句滚动到可视区，形成「跟读」效果；并回报所在段落 + 段内偏移 + 句内进度
 watch(activeIndex, async (i) => {
   if (i < 0) return
-  emit('progress', paragraphIndexForChunk(paraOfChunk.value, i), chunkOffsetForChunk(paraOfChunk.value, i))
+  emitProgress()
   await nextTick()
   const el = scrollBox.value?.querySelector('.ttp-sentence.is-active') as HTMLElement | null
   if (el && typeof el.scrollIntoView === 'function') {
@@ -134,12 +143,23 @@ const progressText = computed(() => {
 function onToggle() {
   if (state.value === 'playing') {
     pause()
+    // 暂停时把句内进度一并落库，便于下次从该句同一位置续读（词级续接）
+    emitProgress()
   } else if (state.value === 'paused') {
     resume()
   } else {
-    // 从当前阅读段落起读（读→听续接）
-    speak(props.text, voiceOpts(), startChunkIndex())
+    // 从当前阅读段落 + 段内偏移 + 句内进度起读（读→听续接）
+    speak(props.text, voiceOpts(), startChunkIndex(), props.startChunkRatio ?? 0)
   }
+}
+
+/** 停止前先回报当前位置（停止后 activeIndex 归 -1，位置会丢失） */
+function onStop() {
+  const i = activeIndex.value
+  if (i >= 0) {
+    emit('progress', paragraphIndexForChunk(paraOfChunk.value, i), chunkOffsetForChunk(paraOfChunk.value, i), chunkRatio.value)
+  }
+  stop()
 }
 
 // 音色库切换即时作用于正在朗读的内容（INCR-504）
@@ -149,7 +169,7 @@ watch(voice, () => {
 
 // 悬浮迷你播放器（INCR-502）：注册控制回调并同步播放态
 onMounted(() => {
-  mini.attach({ toggle: onToggle, stop: () => stop() })
+  mini.attach({ toggle: onToggle, stop: () => onStop() })
 })
 
 watch(state, (s, prev) => {

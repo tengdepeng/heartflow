@@ -71,6 +71,7 @@
           :title="activeBookTitle"
           :start-paragraph="resumeParagraph"
           :start-chunk-offset="resumeChunkOffset"
+          :start-chunk-ratio="resumeChunkRatio"
           v-model:follow="ttsFollow"
           @progress="onTtsProgress"
         />
@@ -394,9 +395,10 @@ const { readingText, excerpts } = reading
 const readingExport = useReadingExport()
 
 const pastedText = ref('')
-// 沉浸阅读器：续读段落 + 段内句块偏移（读↔听句块级续接）+ 触发令牌（令牌自增以强制同一书重复打开也重新定位）
+// 沉浸阅读器：续读段落 + 段内句块偏移 + 句内进度（读↔听词级续接）+ 触发令牌（令牌自增以强制同一书重复打开也重新定位）
 const resumeParagraph = ref(0)
 const resumeChunkOffset = ref(0)
+const resumeChunkRatio = ref(0)
 const resumeToken = ref(0)
 
 // 当前选中的待摘录文本
@@ -430,12 +432,13 @@ function registerActiveBook(text: string, preferredTitle?: string) {
   const book = hall.addBookFromText(title, '', estimatePages(text), text)
   activeBookId.value = book.id
   activeBookTitle.value = book.title
-  requestResume(book.lastPosition ?? 0, book.lastChunkOffset ?? 0)
+  requestResume(book.lastPosition ?? 0, book.lastChunkOffset ?? 0, book.lastChunkRatio ?? 0)
 }
-// 请求沉浸阅读器定位到指定段落 + 段内句块偏移（令牌自增以强制重定位）
-function requestResume(idx: number, chunkOffset = 0) {
+// 请求沉浸阅读器定位到指定段落 + 段内句块偏移 + 句内进度（令牌自增以强制重定位）
+function requestResume(idx: number, chunkOffset = 0, chunkRatio = 0) {
   resumeParagraph.value = Math.max(0, idx)
   resumeChunkOffset.value = Math.max(0, chunkOffset)
+  resumeChunkRatio.value = Math.min(1, Math.max(0, chunkRatio))
   resumeToken.value += 1
 }
 // 阅读器滚动/翻页 → 节流记录续读位置（按段落索引）
@@ -452,10 +455,10 @@ function onReaderProgress(idx: number) {
 }
 // 跟读开关（INCR-526 读↔听续接）：开启后朗读推进时阅读器跟随定位
 const ttsFollow = ref(false)
-// 听→读：朗读推进到某段落第几句 → 落库续读位置（句块级）；开启跟读时同步把阅读器定位过去
-function onTtsProgress(paragraphIndex: number, chunkOffset: number) {
-  if (activeBookId.value) hall.setBookProgress(activeBookId.value, paragraphIndex, chunkOffset)
-  if (ttsFollow.value) requestResume(paragraphIndex, chunkOffset)
+// 听→读：朗读推进到某段落第几句第几成 → 落库续读位置（词级）；开启跟读时同步把阅读器定位过去
+function onTtsProgress(paragraphIndex: number, chunkOffset: number, chunkRatio: number) {
+  if (activeBookId.value) hall.setBookProgress(activeBookId.value, paragraphIndex, chunkOffset, chunkRatio)
+  if (ttsFollow.value) requestResume(paragraphIndex, chunkOffset, chunkRatio)
 }
 // 从书架打开某本已导入正文的书籍：切换书卷 tab + 按书加载正文 + 定位续读
 function openBookForReading(bookId: string) {
@@ -468,7 +471,7 @@ function openBookForReading(bookId: string) {
   reading.saveText()
   activeBookId.value = book.id
   activeBookTitle.value = book.title
-  requestResume(book.lastPosition ?? 0, book.lastChunkOffset ?? 0)
+  requestResume(book.lastPosition ?? 0, book.lastChunkOffset ?? 0, book.lastChunkRatio ?? 0)
 }
 // 划线/摘录 流入思绪书房（全局 Note，自动进入双链与间隔重复）
 function flowHighlight() {

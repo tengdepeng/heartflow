@@ -7,9 +7,11 @@ import { mount } from '@vue/test-utils'
 // ---- Mock speechSynthesis 环境 ----
 const spoken: string[] = []
 let endHandlers: (() => void)[] = []
+const utterances: any[] = []
 const synth = {
   speak: vi.fn((u: any) => {
     spoken.push(u.text)
+    utterances.push(u)
     if (u.onend) endHandlers.push(u.onend)
   }),
   pause: vi.fn(),
@@ -23,6 +25,7 @@ class MockUtterance {
   lang = ''
   onend: (() => void) | null = null
   onerror: (() => void) | null = null
+  onboundary: ((e: { charIndex: number }) => void) | null = null
   constructor(text: string) {
     this.text = text
   }
@@ -50,6 +53,7 @@ describe('TtsControlPanel 听书控制', () => {
     vi.clearAllMocks()
     spoken.length = 0
     endHandlers = []
+    utterances.length = 0
   })
 
   it('不支持 TTS 时显示降级提示', async () => {
@@ -149,15 +153,15 @@ describe('TtsControlPanel 听书控制', () => {
       const ev = wrapper.emitted('progress')!
       return ev[ev.length - 1]
     }
-    expect(wrapper.emitted('progress')?.[0]).toEqual([0, 0])
+    expect(wrapper.emitted('progress')?.[0]).toEqual([0, 0, 0])
     // 推进到第二块（仍属段 0，段内第 2 句）
     endHandlers.shift()?.()
     await wrapper.vm.$nextTick()
-    expect(lastProgress()).toEqual([0, 1])
+    expect(lastProgress()).toEqual([0, 1, 0])
     // 推进到第三块（属段 1，段内第 1 句）
     endHandlers.shift()?.()
     await wrapper.vm.$nextTick()
-    expect(lastProgress()).toEqual([1, 0])
+    expect(lastProgress()).toEqual([1, 0, 0])
   })
 
   it('从 startChunkOffset 起读（读→听句块级续接）', async () => {
@@ -172,6 +176,31 @@ describe('TtsControlPanel 听书控制', () => {
     const wrapper = await mountPanel('甲。乙。\n丙。', { startParagraph: 0, startChunkOffset: 9 })
     await wrapper.find('.ttp-btn-primary').trigger('click')
     expect(spoken).toEqual(['乙。'])
+  })
+
+  it('词边界推进记录句内进度，暂停时随 progress 回报（听→读词级续接）', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('一二三四五六七八九十。')
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    // 模拟引擎词边界回调：读到第 5 字
+    utterances[utterances.length - 1].onboundary?.({ charIndex: 5 })
+    await wrapper.vm.$nextTick()
+    // 暂停 → 回报句内进度
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    await wrapper.vm.$nextTick()
+    const ev = wrapper.emitted('progress')!
+    const last = ev[ev.length - 1] as number[]
+    expect(last[0]).toBe(0)
+    expect(last[1]).toBe(0)
+    expect(last[2]).toBeCloseTo(5 / 11, 5)
+  })
+
+  it('从 startChunkRatio 起读时裁掉已读前缀（读→听词级续接）', async () => {
+    setupSupported()
+    const wrapper = await mountPanel('一二三四五六七八九十。', { startParagraph: 0, startChunkRatio: 0.5 })
+    await wrapper.find('.ttp-btn-primary').trigger('click')
+    // 11 字，0.5 → 从第 6 字「六」起读
+    expect(spoken).toEqual(['六七八九十。'])
   })
 
   it('跟读开关点击后 emit update:follow', async () => {

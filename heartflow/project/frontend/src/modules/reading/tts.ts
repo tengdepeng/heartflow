@@ -139,6 +139,18 @@ export function chunkOffsetForChunk(paraOfChunk: number[], chunkIndex: number): 
   return i - start
 }
 
+/**
+ * 按句内进度裁掉已读前缀，从字符边界起读（INCR-526 词级续读，对齐 Kindle Whispersync）。
+ * ratio 夹取到 [0, 0.95]；剩余不足 2 字时退回整句，避免只念残字。
+ */
+export function sliceFromRatio(text: string, ratio: number): string {
+  const r = Math.min(0.95, Math.max(0, ratio))
+  if (r <= 0 || !text) return text
+  const i = Math.floor(text.length * r)
+  if (text.length - i < 2) return text
+  return text.slice(i)
+}
+
 /** 当前环境是否支持本地 TTS */
 export function isTtsSupported(): boolean {
   return typeof window !== 'undefined' && 'speechSynthesis' in window && typeof SpeechSynthesisUtterance !== 'undefined'
@@ -153,12 +165,19 @@ export function useReadingTts() {
   const sentences = ref<string[]>([])
   /** 与 sentences 等长：每块所属段落下标（INCR-526 读↔听续接：听→读回写段落位置） */
   const paraOfChunk = ref<number[]>([])
+  /** 当前句块的句内播放进度 0~1（词边界驱动，INCR-526 词级续读） */
+  const chunkRatio = ref(0)
 
   const supported = computed(isTtsSupported)
 
   let chunks: string[] = []
+  /** 原始句块（显示用 + 句内进度基数；首块可能被裁剪，故与实际朗读文本分开） */
+  let originals: string[] = []
   let cursor = 0
   let stopped = true
+  /** 被词级续读裁剪的块下标与其前缀长度（-1 表示未裁剪） */
+  let trimChunk = -1
+  let leadTrim = 0
   /** 当前音色参数（INCR-504）：跨句块沿用，切音色即时生效 */
   let voiceOpts: TtsVoiceOptions = {}
 
@@ -168,6 +187,9 @@ export function useReadingTts() {
       progress.value = { index: chunks.length, total: chunks.length }
       return
     }
+    // 从当前块（可能被词级续读裁剪）起读时，句内进度回落到该块起点
+    const orig = originals[cursor]
+    chunkRatio.value = cursor === trimChunk && orig?.length ? Math.min(1, leadTrim / orig.length) : 0
     const utter = new SpeechSynthesisUtterance(chunks[cursor])
     const scale = voiceOpts.rateScale ?? 1
     utter.rate = Math.min(10, Math.max(0.1, rate.value * scale))
@@ -175,6 +197,15 @@ export function useReadingTts() {
     utter.lang = 'zh-CN'
     const voice = voiceOpts.voiceURI ? resolveSystemVoice(voiceOpts.voiceURI) : null
     if (voice) utter.voice = voice
+    // 词边界 → 记录句内进度（INCR-526 词级续读；引擎不回调时保持 0，优雅降级）
+    utter.onboundary = (e: SpeechSynthesisEvent) => {
+      if (stopped) return
+      const orig = originals[cursor] ?? ''
+      if (!orig.length) return
+      const base = cursor === trimChunk ? leadTrim : 0
+      const pos = base + (typeof e.charIndex === 'number' ? e.charIndex : 0)
+      chunkRatio.value = Math.min(1, Math.max(0, pos / orig.length))
+    }
     utter.onend = () => {
       if (stopped) return
       cursor++
@@ -191,18 +222,31 @@ export function useReadingTts() {
   }
 
   /**
-   * 朗读文本。可传入音色参数（INCR-504）与起读句块下标（INCR-526 读↔听续接）。
+   * 朗读文本。可传入音色参数（INCR-504）、起读句块下标与句内进度（INCR-526 读↔听续接）。
+   * startRatio > 0 时按词边界裁掉首块已读前缀，实现句内（词级）续读。
    * 空文本或不支持时返回 false。
    */
-  function speak(text: string, opts?: TtsVoiceOptions, startChunk = 0): boolean {
+  function speak(text: string, opts?: TtsVoiceOptions, startChunk = 0, startRatio = 0): boolean {
     if (!supported.value) return false
     const { chunks: list, paraOfChunk: paras } = chunkParagraphs(splitParagraphs(text))
     if (list.length === 0) return false
     if (opts) voiceOpts = { ...voiceOpts, ...opts }
     stop()
-    chunks = list
+    originals = list
+    chunks = list.slice()
     paraOfChunk.value = paras
     cursor = Math.max(0, Math.min(list.length - 1, Math.floor(startChunk)))
+    trimChunk = -1
+    leadTrim = 0
+    const r = Math.min(1, Math.max(0, startRatio))
+    if (r > 0) {
+      const trimmed = sliceFromRatio(list[cursor], r)
+      if (trimmed !== list[cursor]) {
+        leadTrim = list[cursor].length - trimmed.length
+        trimChunk = cursor
+        chunks[cursor] = trimmed
+      }
+    }
     stopped = false
     sentences.value = list
     state.value = 'playing'
@@ -248,5 +292,5 @@ export function useReadingTts() {
     }
   }
 
-  return { state, rate, progress, sentences, paraOfChunk, supported, speak, pause, resume, stop, setRate, setVoice }
+  return { state, rate, progress, sentences, paraOfChunk, chunkRatio, supported, speak, pause, resume, stop, setRate, setVoice }
 }
