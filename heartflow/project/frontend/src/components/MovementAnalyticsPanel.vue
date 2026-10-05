@@ -79,6 +79,7 @@ import { MOVEMENT_TYPE_META, MOVEMENT_INTENSITY_META } from '../modules/movement
 import type { MovementRecord, MovementType, MovementIntensity, MovementRhythm } from '../modules/movement/types'
 import type { RecoveryStatus } from '../modules/movement/movement-analytics'
 import type { Move } from '../modules/movement/movement-log'
+import { getLocalDateKey } from '../utils/time'
 
 const props = defineProps<{
   moves: Move[]
@@ -102,7 +103,9 @@ const adaptedRecords = computed<MovementRecord[]>(() =>
     duration: m.duration,
     intensity: 'moderate' as MovementIntensity,
     note: m.note,
-    date: m.at.slice(0, 10),
+    // 日键用本地日历日：与 moveToRecord / today-room-stats 的读取口径一致。
+    // 原写法 m.at.slice(0, 10) 切的是 UTC 日期，凌晨记录会被归到前一天。
+    date: getLocalDateKey(new Date(m.at)),
     timestamp: m.at,
   })),
 )
@@ -121,14 +124,22 @@ function buildRhythm(records: MovementRecord[]): MovementRhythm {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   for (let i = dates.length - 1; i >= 0; i--) {
-    const expected = new Date(today.getTime() - (dates.length - 1 - i) * 86400000)
-    if (dates[i] === expected.toISOString().split('T')[0]) streak++
+    // records[].date 已是本地日历日键，判据必须同口径（原来用 toISOString 会恒不匹配 → streak 恒0）。
+    // 逐日回退用 setDate，不用 - 86400000 毫秒减法（DST 时区会落到前一天）。
+    const expected = new Date(today)
+    expected.setDate(today.getDate() - (dates.length - 1 - i))
+    if (dates[i] === getLocalDateKey(expected)) streak++
     else break
   }
   let bestStreak = 0
   let cur = 1
   for (let i = 1; i < dates.length; i++) {
-    if (new Date(dates[i]).getTime() - new Date(dates[i - 1]).getTime() === 86400000) cur++
+    // 日键差值按 UTC 天数算（纯日键相减，与本地时区/DST 无关）
+    const diffDays = (
+      Date.UTC(+dates[i].slice(0, 4), +dates[i].slice(5, 7) - 1, +dates[i].slice(8, 10)) -
+      Date.UTC(+dates[i - 1].slice(0, 4), +dates[i - 1].slice(5, 7) - 1, +dates[i - 1].slice(8, 10))
+    ) / 86400000
+    if (diffDays === 1) cur++
     else { bestStreak = Math.max(bestStreak, cur); cur = 1 }
   }
   bestStreak = Math.max(bestStreak, cur)

@@ -76,10 +76,6 @@
     "src/components/MirrorSelf.vue": [
       "toISOString().slice(0,10)"
     ],
-    "src/components/MovementAnalyticsPanel.vue": [
-      "at.slice(0,10)",
-      "toISOString().split('T')[0]"
-    ],
     "src/components/NarrativeReportPanel.vue": [
       "toISOString().split('T')[0]"
     ],
@@ -262,9 +258,6 @@
     ],
     "src/modules/movement/achievements.ts": [
       "toISOString().slice(0,10)"
-    ],
-    "src/modules/movement/move-converter.ts": [
-      "at.slice(0,10)"
     ],
     "src/modules/movement/recovery-optimizer.ts": [
       "toISOString().split('T')[0]"
