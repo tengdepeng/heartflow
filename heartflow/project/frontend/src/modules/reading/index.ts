@@ -220,6 +220,16 @@ export {
 } from './annotation-layer'
 export type { ParagraphAnnotation, AnnotationStats } from './annotation-layer'
 
+// ---- AI 问书（读书 #5：本地模型伴读，不外发，fail-closed） ----
+export {
+  useAskBook,
+  buildAskBookSystemPrompt,
+  buildAskBookMessages,
+  isAskBookAvailable,
+  ASK_BOOK_QUICK_QUESTIONS,
+} from './ask-book'
+export type { AskBookTurn, AskBookContext } from './ask-book'
+
 // ---- 摘录 / 读书便签 本地导出（#41） ----
 export {
   useReadingExport,

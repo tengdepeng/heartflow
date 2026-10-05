@@ -74,8 +74,16 @@
           <span class="float-preview">"{{ pendingText.slice(0, 60) }}{{ pendingText.length > 60 ? '…' : '' }}"</span>
           <button class="rh-btn excerpt-btn" @click="openExcerptDialog">摘录</button>
           <button class="rh-btn excerpt-btn flow-btn" @click="flowHighlight">流入思绪书房</button>
+          <button class="rh-btn excerpt-btn ask-btn" @click="openAskBook">问书</button>
           <span v-if="flowedHint" class="flow-hint">已归入思绪书房</span>
         </div>
+        <!-- AI 问书（读书 #5）：就选中原文提问，本地模型作答，不外发 -->
+        <AskBookPanel
+          v-if="showAskBook && pendingText"
+          :passage="pendingText"
+          :book-title="activeBookTitle"
+          @close="showAskBook = false"
+        />
       </div>
     </div>
 
@@ -342,6 +350,7 @@ import ReadingReportPanel from '../components/ReadingReportPanel.vue'
 import ReadingNarrativePanel from '../components/ReadingNarrativePanel.vue'
 import RecallPanel from '../components/RecallPanel.vue'
 import ReadingSpeedInsightPanel from '../components/ReadingSpeedInsightPanel.vue'
+import AskBookPanel from '../components/AskBookPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -379,6 +388,8 @@ const resumeToken = ref(0)
 const pendingText = ref('')
 const showDialog = ref(false)
 const excerptNote = ref('')
+// AI 问书面板（读书 #5）：就选中原文提问
+const showAskBook = ref(false)
 // 多色标记（INCR-477）：新摘录待选色 + 摘录集筛选色
 const excerptColor = ref<string>(DEFAULT_EXCERPT_MARK)
 const markFilter = ref<string>('')
@@ -534,10 +545,17 @@ function openExcerptDialog() {
   excerptColor.value = DEFAULT_EXCERPT_MARK
 }
 
+// 打开 AI 问书（就当前选中原文提问，本地模型作答）
+function openAskBook() {
+  if (!pendingText.value) return
+  showAskBook.value = true
+}
+
 function closeDialog() {
   showDialog.value = false
   excerptNote.value = ''
   pendingText.value = ''
+  showAskBook.value = false
 }
 
 function confirmExcerpt() {
@@ -894,6 +912,15 @@ watch(() => [hall.books.value.length, hall.sessions.value.length], emitReadingSi
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.excerpt-btn {
+  flex: 0 0 auto;
+}
+
+.ask-btn {
+  border-color: rgba(var(--accent-rgb), 0.32);
+  background: rgba(var(--accent-rgb), 0.14);
 }
 
 /* ---- 摘录集 ---- */
