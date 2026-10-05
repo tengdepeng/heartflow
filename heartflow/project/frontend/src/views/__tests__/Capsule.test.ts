@@ -13,6 +13,8 @@ vi.mock('../../engine/storage', () => ({
   storage: {
     getKV: (...args: any[]) => (mockGetKV as any)(...args),
     setKV: (...args: any[]) => (mockSetKV as any)(...args),
+    getNotes: () => mockStore['hf:notes'] ?? [],
+    setNotes: (n: any[]) => { mockStore['hf:notes'] = n },
   },
 }))
 
@@ -139,5 +141,61 @@ describe('Capsule 照片进胶囊', () => {
     const photoItem = saved[0].items.find((i: Record<string, any>) => i.type === 'photo')
     expect(photoItem).toBeTruthy()
     expect(photoItem.photoRef).toEqual({ date: '2026-08-20', index: 0 })
+  })
+})
+
+// ============================================================
+// 连链封藏（消费 hf:note_links 出链/反链聚合）
+// ============================================================
+describe('Capsule 连链封藏', () => {
+  it('起点笔记聚合出链/反链并可整链加入封存', async () => {
+    const now = new Date().toISOString()
+    const baseNotes = [
+      { id: 'a', title: '起点', content: '见 [[b]]', tags: [], createdAt: now, updatedAt: now },
+      { id: 'b', title: '出链笔记', content: '', tags: [], createdAt: now, updatedAt: now },
+      { id: 'c', title: '反链笔记', content: '[[a]]', tags: [], createdAt: now, updatedAt: now },
+    ]
+    mockStore['hf:notes'] = baseNotes
+    const { notes } = await import('../../engine/storage/notes-state')
+    notes.value = baseNotes as any
+
+    const { useNoteLinks } = await import('../../modules/study/note-links')
+    const links = useNoteLinks()
+    links.links.value = []
+    links.syncLinksForNote('a', '见 [[b]]', notes.value) // a → b（出链）
+    links.syncLinksForNote('c', '[[a]]', notes.value) // c → a（反链）
+
+    mockStore['hf:time_capsules'] = '[]'
+    const wrapper = await createWrapper()
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.cap-btn-new').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // 未选起点时不渲染连链面板
+    expect(wrapper.find('[data-test="linked-items-panel"]').exists()).toBe(false)
+
+    await wrapper.find('[data-test="cap-chain-root"]').setValue('a')
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('[data-test="linked-items-panel"]').exists()).toBe(true)
+    expect(wrapper.findAll('.lip-item')).toHaveLength(3)
+    expect(wrapper.text()).toContain('出链笔记')
+    expect(wrapper.text()).toContain('反链笔记')
+
+    await wrapper.find('[data-test="lip-select-all"]').trigger('click')
+    await wrapper.vm.$nextTick()
+    const inputs = wrapper.findAll('input.cap-input')
+    await inputs[0].setValue('连链胶囊')
+    await inputs[1].setValue('2099-01-01')
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.cap-btn-save').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const saved = JSON.parse(mockStore['hf:time_capsules'])
+    expect(saved).toHaveLength(1)
+    const noteIds = saved[0].items
+      .filter((i: Record<string, any>) => i.type === 'note')
+      .map((i: Record<string, any>) => i.id)
+      .sort()
+    expect(noteIds).toEqual(['a', 'b', 'c'])
   })
 })

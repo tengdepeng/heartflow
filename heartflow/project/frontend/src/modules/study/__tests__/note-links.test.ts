@@ -88,3 +88,62 @@ describe('笔记双向链接', () => {
     expect(getBacklinks('b').length).toBe(0)
   })
 })
+
+// ============================================================
+// 连链封藏条目聚合（时光胶囊「连链封藏」消费）
+// ============================================================
+describe('连链封藏条目聚合', () => {
+  beforeEach(async () => {
+    ;(globalThis as any).localStorage = createMockStorage()
+    const { invalidateCache } = await import('../../../engine/storage/core')
+    invalidateCache()
+    useNoteLinks().links.value = []
+  })
+
+  it('getLinkedItemsForNote 按 self → outgoing → backlink 顺序聚合', () => {
+    const { syncLinksForNote, getLinkedItemsForNote } = useNoteLinks()
+    const notes = [makeNote('a', 'A'), makeNote('b', 'B'), makeNote('c', 'C')]
+    syncLinksForNote('a', '见 [[b]]', notes) // a → b（出链）
+    syncLinksForNote('c', '[[a]]', notes) // c → a（反链）
+    const items = getLinkedItemsForNote('a', notes, { includeBacklinks: true })
+    expect(items.map(i => i.id)).toEqual(['a', 'b', 'c'])
+    expect(items.map(i => i.relation)).toEqual(['self', 'outgoing', 'backlink'])
+  })
+
+  it('getLinkedItemsForNote 默认不含反链', () => {
+    const { syncLinksForNote, getLinkedItemsForNote } = useNoteLinks()
+    const notes = [makeNote('a', 'A'), makeNote('b', 'B'), makeNote('c', 'C')]
+    syncLinksForNote('a', '[[b]]', notes)
+    syncLinksForNote('c', '[[a]]', notes)
+    const items = getLinkedItemsForNote('a', notes)
+    expect(items.map(i => i.id)).toEqual(['a', 'b'])
+  })
+
+  it('getLinkedItemsForNote 跳过死链（目标不在笔记集中）', () => {
+    const { syncLinksForNote, getLinkedItemsForNote } = useNoteLinks()
+    const notes = [makeNote('a', 'A'), makeNote('b', 'B')]
+    syncLinksForNote('a', '[[b]]', notes)
+    // 传入集合缺少 b → b 为死链，跳过
+    const items = getLinkedItemsForNote('a', [makeNote('a', 'A')], { includeBacklinks: true })
+    expect(items.map(i => i.id)).toEqual(['a'])
+  })
+
+  it('getLinkedItemsForNote 双向链接去重且 self 优先', () => {
+    const { syncLinksForNote, getLinkedItemsForNote } = useNoteLinks()
+    const notes = [makeNote('a', 'A'), makeNote('b', 'B')]
+    syncLinksForNote('a', '[[b]]', notes) // a → b
+    syncLinksForNote('b', '[[a]]', notes) // b → a
+    const items = getLinkedItemsForNote('a', notes, { includeBacklinks: true })
+    expect(items.map(i => i.id)).toEqual(['a', 'b'])
+    expect(items.find(i => i.id === 'b')?.relation).toBe('outgoing')
+  })
+
+  it('getLinkedItemsForNote 标记已归档条目', () => {
+    const { syncLinksForNote, getLinkedItemsForNote } = useNoteLinks()
+    const archived = { ...makeNote('b', 'B'), archived: true }
+    const notes = [makeNote('a', 'A'), archived]
+    syncLinksForNote('a', '[[b]]', notes)
+    const items = getLinkedItemsForNote('a', notes)
+    expect(items.find(i => i.id === 'b')?.archived).toBe(true)
+  })
+})

@@ -52,6 +52,23 @@
           </div>
         </div>
         <div class="cap-field">
+          <span class="cap-label">连链封藏（可选 · 由起点笔记聚合出链/反链）</span>
+          <select v-model="chainRootId" class="cap-input" data-test="cap-chain-root">
+            <option value="">选择起点笔记…</option>
+            <option v-for="n in recentNotes" :key="n.id" :value="n.id">
+              {{ n.title || '未命名笔记' }}
+            </option>
+          </select>
+          <LinkedItemsPanel
+            v-if="chainRootId"
+            :note-id="chainRootId"
+            :notes="allNotesList"
+            :selected-ids="selectedNoteIds"
+            @toggle="toggleNote"
+            @select-all="selectChain"
+          />
+        </div>
+        <div class="cap-field">
           <span class="cap-label">封存照片（可选）</span>
           <EmptyState v-if="photoGroups.length === 0" icon="📷" title="还没有照片日记可封存" :glow="false" cta-label="" />
           <div v-else class="cap-photo-picker">
@@ -169,6 +186,7 @@ import { getNoteStore } from '../modules/note'
 import { usePhotoDiary } from '../modules/anchor/photo-diary'
 import CapsuleArchivePanel from '../components/CapsuleArchivePanel.vue'
 import CapsuleVaultPanel from '../components/CapsuleVaultPanel.vue'
+import LinkedItemsPanel from '../components/LinkedItemsPanel.vue'
 import PhotoTile from '../components/PhotoTile.vue'
 
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -181,6 +199,8 @@ const showForm = ref(false)
 const form = ref({ title: '', openDate: '', note: '' })
 const selectedNoteIds = ref<string[]>([])
 const selectedPhotoKeys = ref<string[]>([])
+/** 连链封藏起点笔记 id（空表示未启用连链封藏） */
+const chainRootId = ref('')
 
 /** 照片日记按日期分组，供「封存照片」选择器使用 */
 const photoGroups = computed(() =>
@@ -215,6 +235,23 @@ const recentNotes = computed(() =>
   noteStore.allNotes.value.slice(0, 20).map(n => ({ id: n.id, title: n.title })),
 )
 
+/** 全量笔记（连链封藏聚合的死链判定与标题回填用，含归档笔记） */
+const allNotesList = computed(() => noteStore.allNotes.value)
+
+/** 勾选/取消勾选单个笔记（连链面板与笔记选择器共用同一选择集） */
+function toggleNote(id: string) {
+  if (selectedNoteIds.value.includes(id)) {
+    selectedNoteIds.value = selectedNoteIds.value.filter(x => x !== id)
+  } else {
+    selectedNoteIds.value = [...selectedNoteIds.value, id]
+  }
+}
+
+/** 整链加入封存（幂等合并，不重复） */
+function selectChain(ids: string[]) {
+  selectedNoteIds.value = [...new Set([...selectedNoteIds.value, ...ids])]
+}
+
 const canCreate = computed(
   () => form.value.title.trim().length > 0 && form.value.openDate.length > 0,
 )
@@ -226,6 +263,7 @@ function resetForm() {
   form.value = { title: '', openDate: '', note: '' }
   selectedNoteIds.value = []
   selectedPhotoKeys.value = []
+  chainRootId.value = ''
 }
 
 function create() {
