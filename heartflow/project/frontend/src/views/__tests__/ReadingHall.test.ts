@@ -76,10 +76,10 @@ describe('ReadingHall 阅览殿', () => {
     expect(wrapper.text()).toContain('结晶数')
   })
 
-  it('显示十二个标签页（书卷/摘录集/回顾/待读箱/人生之书/书架/日历/金句/报告/叙事/读书便签/速度·洞察）', async () => {
+  it('显示十三个标签页（书卷/摘录集/回顾/待读箱/人生之书/书架/日历/金句/报告/叙事/成书/读书便签/速度·洞察）', async () => {
     const wrapper = await getWrapper()
     const tabs = wrapper.findAll('.rh-tab')
-    expect(tabs.length).toBe(12)
+    expect(tabs.length).toBe(13)
     expect(tabs[0].text()).toContain('书卷')
     expect(tabs[1].text()).toContain('摘录集')
     expect(tabs[2].text()).toContain('回顾')
@@ -90,14 +90,23 @@ describe('ReadingHall 阅览殿', () => {
     expect(tabs[7].text()).toContain('金句')
     expect(tabs[8].text()).toContain('报告')
     expect(tabs[9].text()).toContain('叙事')
-    expect(tabs[10].text()).toContain('读书便签')
-    expect(tabs[11].text()).toContain('速度·洞察')
+    expect(tabs[10].text()).toContain('成书')
+    expect(tabs[11].text()).toContain('读书便签')
+    expect(tabs[12].text()).toContain('速度·洞察')
+  })
+
+  it('挂载可翻阅成书面板 FlipBookPanel', async () => {
+    const wrapper = await getWrapper()
+    const tabs = wrapper.findAll('.rh-tab')
+    await tabs[10].trigger('click') // 成书
+    await wrapper.vm.$nextTick()
+    expect(wrapper.find('flip-book-panel-stub').exists()).toBe(true)
   })
 
   it('挂载读书便签面板 ReadingMemoPanel', async () => {
     const wrapper = await getWrapper()
     const tabs = wrapper.findAll('.rh-tab')
-    await tabs[10].trigger('click') // 读书便签
+    await tabs[11].trigger('click') // 读书便签
     await wrapper.vm.$nextTick()
     expect(wrapper.find('reading-memo-panel-stub').exists()).toBe(true)
   })

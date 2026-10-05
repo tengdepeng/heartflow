@@ -230,6 +230,33 @@ export {
 } from './ask-book'
 export type { AskBookTurn, AskBookContext } from './ask-book'
 
+// ---- 可翻阅成书（照片日记 #8：年度人生之书装订成可翻阅的书，纯本地组装） ----
+export {
+  useFlipBook,
+  composeFlipBook,
+  pickYearPhotos,
+  clampPageIndex,
+  turnPage,
+  canTurn,
+  spreadPair,
+  pageCount,
+  bookProgress,
+  bookSummary,
+  buildFlipBookMarkdown,
+  thousands,
+  FLIP_PHOTOS_PER_PAGE,
+  FLIP_PHOTOS_MAX,
+} from './flip-book'
+export type {
+  FlipBook,
+  FlipPage,
+  FlipPageKind,
+  FlipPhoto,
+  FlipStat,
+  FlipPhotoInput,
+  FlipBookInput,
+} from './flip-book'
+
 // ---- 摘录 / 读书便签 本地导出（#41） ----
 export {
   useReadingExport,

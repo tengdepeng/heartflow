@@ -246,6 +246,11 @@
       <ReadingNarrativePanel />
     </div>
 
+    <!-- ========== 可翻阅成书（年度人生之书 · 翻页体验，台账 §五 照片日记#8） ========== -->
+    <div data-enter v-if="activeTab === 'flipbook'" class="rh-panel rh-flipbook-panel">
+      <FlipBookPanel />
+    </div>
+
     <!-- ========== 阅读速度·洞察（补挂孤儿 API：reading-speed / reading-insights） ========== -->
     <div data-enter v-if="activeTab === 'speed'" class="rh-panel rh-speed-panel">
       <ReadingSpeedInsightPanel />
@@ -351,6 +356,7 @@ import ReadingNarrativePanel from '../components/ReadingNarrativePanel.vue'
 import RecallPanel from '../components/RecallPanel.vue'
 import ReadingSpeedInsightPanel from '../components/ReadingSpeedInsightPanel.vue'
 import AskBookPanel from '../components/AskBookPanel.vue'
+import FlipBookPanel from '../components/FlipBookPanel.vue'
 
 // ---- 选项卡 ----
 const { entranceRef, entranceClass } = useViewEntrance()
@@ -367,10 +373,11 @@ const tabs = [
   { key: 'quote', label: '金句' },
   { key: 'report', label: '报告' },
   { key: 'narrative', label: '叙事' },
+  { key: 'flipbook', label: '成书' },
   { key: 'memo', label: '读书便签' },
   { key: 'speed', label: '速度·洞察' },
 ] as const
-const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'calendar' | 'quote' | 'report' | 'narrative' | 'memo' | 'speed'>('book')
+const activeTab = ref<'book' | 'excerpts' | 'review' | 'inbox' | 'lifebook' | 'shelf' | 'calendar' | 'quote' | 'report' | 'narrative' | 'flipbook' | 'memo' | 'speed'>('book')
 
 // ---- 阅读文本 ----
 const reading = useReading()
