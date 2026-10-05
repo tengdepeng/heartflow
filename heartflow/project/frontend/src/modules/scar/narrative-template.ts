@@ -9,6 +9,7 @@
 import { ref } from 'vue'
 import { storage } from '@/engine/storage'
 import type { BodyMark, BodyPart, ScarType, HealingStage } from './types'
+import { getLocalDateKey } from '@/utils/time'
 
 // ---- 叙事模板 ----
 
@@ -931,7 +932,8 @@ export function useScarVisualization() {
       .sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime())
       .forEach(s => {
         nodes.push({
-          date: s.recordedAt.split('T')[0],
+          // recordedAt 是 UTC ISO 时间戳，取本地日历日才与用户认知一致
+          date: getLocalDateKey(new Date(s.recordedAt)),
           healingProgress: s.healingProgress,
           scarId: s.id,
           label: `${s.description.slice(0, 20)}...`,
@@ -1060,7 +1062,7 @@ export function useScarVisualization() {
 
     const predictedDate = new Date(now)
     predictedDate.setDate(predictedDate.getDate() + remainingDays)
-    return predictedDate.toISOString().split('T')[0]
+    return getLocalDateKey(predictedDate)
   }
 
   return {

@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { CraftWork, WorkType } from './types'
 
 // ---- 徽章类型 ----
@@ -350,7 +351,7 @@ export const PRESET_BADGES: BadgeDef[] = [
       // 按日期分组计算进化值增长
       const daily = new Map<string, number>()
       for (const w of works) {
-        const date = w.createdAt.split('T')[0]
+        const date = getLocalDateKey(new Date(w.createdAt))
         daily.set(date, (daily.get(date) || 0) + w.evolution)
       }
       return [...daily.values()].some(v => v >= 50)
@@ -431,7 +432,7 @@ export const PRESET_BADGES: BadgeDef[] = [
     check: (works) => {
       const daily = new Map<string, Set<WorkType>>()
       for (const w of works) {
-        const date = w.createdAt.split('T')[0]
+        const date = getLocalDateKey(new Date(w.createdAt))
         if (!daily.has(date)) daily.set(date, new Set())
         daily.get(date)!.add(w.type)
       }
@@ -508,19 +509,21 @@ export const PRESET_BADGES: BadgeDef[] = [
 // ============================================================
 
 /** 计算连续创作天数 */
-function computeStreak(works: CraftWork[]): number {
+export function computeStreak(works: CraftWork[]): number {
   if (works.length === 0) return 0
 
   const dates = new Set<string>()
   for (const w of works) {
-    dates.add(w.createdAt.split('T')[0])
+    dates.add(getLocalDateKey(new Date(w.createdAt)))
   }
 
   let streak = 0
   const now = new Date()
   for (let i = 0; i < 365; i++) {
-    const checkDate = new Date(now.getTime() - i * 86400000)
-    const dateStr = checkDate.toISOString().split('T')[0]
+    // 逐日回退必须用 setDate：-86400000 毫秒减法在 DST 时区会落到前一天
+    const checkDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    checkDate.setDate(checkDate.getDate() - i)
+    const dateStr = getLocalDateKey(checkDate)
     if (dates.has(dateStr)) {
       streak++
     } else {
@@ -531,7 +534,7 @@ function computeStreak(works: CraftWork[]): number {
 }
 
 /** 计算连续周末创作 */
-function computeWeekendStreak(works: CraftWork[]): number {
+export function computeWeekendStreak(works: CraftWork[]): number {
   const weekendDates = new Set<string>()
 
   // 收集有作品的所有周末
@@ -539,7 +542,7 @@ function computeWeekendStreak(works: CraftWork[]): number {
     const date = new Date(w.createdAt)
     const day = date.getDay() // 0=周日, 6=周六
     if (day === 0 || day === 6) {
-      weekendDates.add(w.createdAt.split('T')[0])
+      weekendDates.add(getLocalDateKey(new Date(w.createdAt)))
     }
   }
 
@@ -552,8 +555,10 @@ function computeWeekendStreak(works: CraftWork[]): number {
   }
 
   for (let i = 0; i < 52; i++) {
-    const checkDate = new Date(now.getTime() - i * 7 * 86400000)
-    const dateStr = checkDate.toISOString().split('T')[0]
+    // 逐周回退同理用 setDate，避免 DST 偏移
+    const checkDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    checkDate.setDate(checkDate.getDate() - i * 7)
+    const dateStr = getLocalDateKey(checkDate)
     if (weekendDates.has(dateStr)) {
       streak++
     } else {

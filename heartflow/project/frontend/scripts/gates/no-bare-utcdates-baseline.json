@@ -58,9 +58,6 @@
     "src/components/WorklogExportPanel.vue": [
       "toISOString().slice(0,10)"
     ],
-    "src/engine/automation.ts": [
-      "toISOString().slice(0,10)"
-    ],
     "src/engine/data-port.ts": [
       "toISOString().slice(0,10)"
     ],
@@ -87,10 +84,6 @@
       "toISOString().split('T')[0]"
     ],
     "src/modules/body/greenhouse.ts": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/modules/body/health-anomaly.ts": [
-      ".split('T')[0]",
       "toISOString().split('T')[0]"
     ],
     "src/modules/body/health-dashboard.ts": [
@@ -131,10 +124,6 @@
     ],
     "src/modules/cognition/meditation-analytics.ts": [
       "toISOString().slice(0,10)"
-    ],
-    "src/modules/craft/craft-badges.ts": [
-      ".split('T')[0]",
-      "toISOString().split('T')[0]"
     ],
     "src/modules/craft/craft-habits.ts": [
       ".split('T')[0]"
@@ -290,10 +279,6 @@
     ],
     "src/modules/scar/healing.ts": [
       "toISOString().slice(0,10)"
-    ],
-    "src/modules/scar/narrative-template.ts": [
-      ".split('T')[0]",
-      "toISOString().split('T')[0]"
     ],
     "src/modules/timeline/annual-review.ts": [
       "toISOString().split('T')[0]"

@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { BodyMetric, BodyMetricType, SleepRecord } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 异常类型 ----
 
@@ -424,7 +425,7 @@ function detectConsistencyBreak(
   // 获取最近记录日期
   const dates = new Set<string>()
   for (const m of sorted.slice(0, 30)) {
-    dates.add(m.timestamp.split('T')[0])
+    dates.add(getLocalDateKey(new Date(m.timestamp)))
   }
 
   // 检查最近 7 天是否有连续缺失
@@ -434,8 +435,10 @@ function detectConsistencyBreak(
   let currentConsecutive = 0
 
   for (let i = 0; i < 7; i++) {
-    const checkDate = new Date(nowDate.getTime() - i * 86400000)
-    const dateStr = checkDate.toISOString().split('T')[0]
+    // 逐日回退用 setDate：-86400000 毫秒减法在 DST 时区会落到前一天
+    const checkDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate())
+    checkDate.setDate(checkDate.getDate() - i)
+    const dateStr = getLocalDateKey(checkDate)
     if (!dates.has(dateStr)) {
       currentConsecutive++
       missingDays++
