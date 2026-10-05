@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { Anchor } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -201,14 +202,20 @@ function generateId(): string {
   return `review_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
 }
 
+/** 解析本地日期键为当天 00:00 的 Date（`new Date('YYYY-MM-DD')` 会按 UTC 午夜解析，禁用） */
+function parseLocalDay(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y || 1970, (m || 1) - 1, d || 1)
+}
+
 function getDateRange(period: ReviewPeriod, referenceDate?: string): { start: string; end: string } {
-  const end = referenceDate ? new Date(referenceDate) : new Date()
-  const endStr = end.toISOString().split('T')[0]
+  const end = referenceDate ? parseLocalDay(referenceDate) : new Date()
+  const endStr = getLocalDateKey(end)
 
   const start = new Date(end)
   const meta = REVIEW_PERIOD_META[period]
   start.setDate(start.getDate() - meta.days + 1)
-  const startStr = start.toISOString().split('T')[0]
+  const startStr = getLocalDateKey(start)
 
   return { start: startStr, end: endStr }
 }
@@ -383,11 +390,11 @@ export function useAnchorReview() {
   // ---- 生成每日趋势 ----
   function generateDailyTrend(anchors: Anchor[], range: { start: string; end: string }): DailyReviewTrend[] {
     const trend: DailyReviewTrend[] = []
-    const start = new Date(range.start)
-    const end = new Date(range.end)
+    const start = parseLocalDay(range.start)
+    const end = parseLocalDay(range.end)
 
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toISOString().split('T')[0]
+      const dateStr = getLocalDateKey(d)
       const dayAnchors = anchors.filter(a => a.targetDate === dateStr)
       const completed = dayAnchors.filter(a => a.done).length
       const drifts = dayAnchors.reduce((s, a) => s + a.driftCount, 0)
@@ -504,16 +511,18 @@ export function useAnchorReview() {
     let streak = 0
 
     // 计算当前连续天数
-    const today = new Date().toISOString().split('T')[0]
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+    const today = getLocalDateKey()
+    const yesterdayDate = new Date()
+    yesterdayDate.setDate(yesterdayDate.getDate() - 1)
+    const yesterday = getLocalDateKey(yesterdayDate)
 
     // 检查昨天是否有锚点（今天可能还没开始）
     if (dates.includes(yesterday)) {
       currentStreak = 1
-      let checkDate = new Date(yesterday)
+      const checkDate = parseLocalDay(yesterday)
       for (let i = 2; i <= dates.length; i++) {
         checkDate.setDate(checkDate.getDate() - 1)
-        const checkStr = checkDate.toISOString().split('T')[0]
+        const checkStr = getLocalDateKey(checkDate)
         if (dates.includes(checkStr)) {
           currentStreak++
         } else {

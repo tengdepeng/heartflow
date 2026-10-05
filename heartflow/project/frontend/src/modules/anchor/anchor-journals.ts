@@ -10,6 +10,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 export const ANCHOR_JOURNALS_KEY = 'anchor_journals'
 
@@ -55,9 +56,9 @@ export function useAnchorJournals() {
 
 // ---- 手札日记查询（纯函数） ----
 
-/** 取 ISO 日期前 10 位为本地日期键（YYYY-MM-DD） */
+/** 取 ISO 时间戳的本地日历日键（YYYY-MM-DD） */
 export function journalDateKey(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 
 export interface JournalFilter {

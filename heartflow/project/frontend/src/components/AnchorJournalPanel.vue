@@ -129,6 +129,7 @@ import {
 } from '../modules/anchor/anchor-journal'
 import type { JournalType } from '../modules/anchor/anchor-journal'
 import type { Anchor } from '../modules/anchor/types'
+import { getLocalDateKey } from '../utils/time'
 import JournalContextPanel from './JournalContextPanel.vue'
 
 const props = defineProps<{ anchors: Anchor[] }>()
@@ -183,7 +184,7 @@ function anchorText(id: string): string {
 }
 
 function dateLabel(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 
 function strengthColor(s: number): string {

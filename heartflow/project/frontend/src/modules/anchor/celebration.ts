@@ -7,6 +7,7 @@ import { ref } from 'vue'
 import { storage } from '@/engine/storage'
 import type { Anchor } from './types'
 import { isTargetActive } from '@/engine/constitution-effect'
+import { getLocalDateKey } from '@/utils/time'
 
 // ---- 庆祝效果 ----
 
@@ -391,10 +392,10 @@ export function useCelebration() {
   /** 触发庆祝动画 */
   function triggerCelebration(anchor: Anchor, allAnchors: Anchor[]): CelebrationEffect | null {
     // 计算上下文
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey()
     const todayAnchors = allAnchors.filter(a => {
       const doneAt = a.doneAt || a.createdAt
-      return doneAt.startsWith(today) && a.done
+      return a.done && !!doneAt && getLocalDateKey(new Date(doneAt)) === today
     })
 
     const context: CelebrationHistory['context'] = {
@@ -783,7 +784,7 @@ export function useCalendarExport() {
     const result: CalendarExport = {
       format: 'ics',
       content: ics,
-      filename: `heartflow-anchors-${new Date().toISOString().split('T')[0]}.ics`,
+      filename: `heartflow-anchors-${getLocalDateKey()}.ics`,
       anchorCount: events.length,
       generatedAt: new Date().toISOString(),
     }
@@ -804,7 +805,7 @@ export function useCalendarExport() {
     const result: CalendarExport = {
       format: 'json',
       content: json,
-      filename: `heartflow-anchors-${new Date().toISOString().split('T')[0]}.json`,
+      filename: `heartflow-anchors-${getLocalDateKey()}.json`,
       anchorCount: events.length,
       generatedAt: new Date().toISOString(),
     }
@@ -834,19 +835,18 @@ export function useCalendarExport() {
 // 辅助函数
 // ============================================================
 
-/** 检查连续完成天数 */
-function checkStreak(anchors: Anchor[]): number {
+/** 检查连续完成天数（按本地日历日） */
+export function checkStreak(anchors: Anchor[]): number {
   const doneDates = new Set(
     anchors
       .filter(a => a.done && a.doneAt)
-      .map(a => a.doneAt!.split('T')[0]),
+      .map(a => getLocalDateKey(new Date(a.doneAt!))),
   )
 
   let streak = 0
-  const today = new Date()
-  const checkDate = new Date(today)
+  const checkDate = new Date()
 
-  while (doneDates.has(checkDate.toISOString().split('T')[0])) {
+  while (doneDates.has(getLocalDateKey(checkDate))) {
     streak++
     checkDate.setDate(checkDate.getDate() - 1)
   }
