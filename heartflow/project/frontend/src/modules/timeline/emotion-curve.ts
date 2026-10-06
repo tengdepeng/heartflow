@@ -3,7 +3,8 @@
 // 情感时序数据、曲线平滑、波动分析、转折点检测
 // ============================================================
 
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
+null
 import type { RiverItem } from './river'
 
 // ============================================================
@@ -181,7 +182,7 @@ export function useEmotionCurve() {
     const dateGroups = new Map<string, RiverItem[]>()
     for (const item of items) {
       if (item.type !== 'emotion' || !item.emotion) continue
-      const date = new Date(item.ts).toISOString().split('T')[0]
+      const date = getLocalDateKey(new Date(item.ts))
       if (!dateGroups.has(date)) dateGroups.set(date, [])
       dateGroups.get(date)!.push(item)
     }
@@ -508,7 +509,7 @@ export function useEmotionCurve() {
   ): EmotionComparison {
     const filterByPeriod = (items: RiverItem[], start: string, end: string) =>
       items.filter(s => {
-        const date = new Date(s.ts).toISOString().split('T')[0]
+        const date = getLocalDateKey(new Date(s.ts))
         return date >= start && date <= end
       })
     const pointsA = extractEmotionData(
@@ -642,7 +643,8 @@ export function useEmotionCurve() {
       const d = new Date(p.date)
       const weekStart = new Date(d)
       weekStart.setDate(d.getDate() - d.getDay())
-      const key = weekStart.toISOString().split('T')[0]
+      // ⚠️ weekStart 由 setDate 逐日回退构造（本地分量），取本地日历日
+      const key = getLocalDateKey(weekStart)
       if (!weeks.has(key)) weeks.set(key, [])
       weeks.get(key)!.push(p)
     }

@@ -8,6 +8,7 @@ import type { NarrativeReport } from './narrative-generator'
 import type { AnnualReview } from './annual-review'
 import type { EmotionCurve } from './emotion-curve'
 import type { TimelineRadarReport } from './timeline-radar'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -372,7 +373,7 @@ export function useExportEngine() {
         content = JSON.stringify(radar, null, 2)
     }
 
-    const filename = generateFilename('radar', new Date().toISOString().split('T')[0], format, '时间线雷达')
+    const filename = generateFilename('radar', getLocalDateKey(), format, '时间线雷达')
     return createResult(content, format, filename)
   }
 
@@ -397,7 +398,7 @@ export function useExportEngine() {
         content = generateCsvRawData(items)
     }
 
-    const filename = generateFilename('raw_data', new Date().toISOString().split('T')[0], format, '原始数据')
+    const filename = generateFilename('raw_data', getLocalDateKey(), format, '原始数据')
     return createResult(content, format, filename, items.length)
   }
 

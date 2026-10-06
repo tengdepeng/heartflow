@@ -5,6 +5,7 @@
 
 import type { RiverItem, RiverSource } from './river'
 import { createRiverItems } from './river'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 类型定义 ----
 
@@ -152,8 +153,10 @@ function getYear(ts: number): number {
   return new Date(ts).getFullYear()
 }
 
+/** 日键（本地日历日）：全模块唯一出口，6 个调用点（活动日/连续天数/月活跃日）都经它取键 */
 function getDateStr(ts: number): string {
-  return new Date(ts).toISOString().slice(0, 10)
+  // ⚠️ 不可用 toISOString 切前 10 位：那是 UTC 日历日，东八区下凌晨记录会归到昨天
+  return getLocalDateKey(new Date(ts))
 }
 
 function getFocusMinutes(item: RiverItem): number {

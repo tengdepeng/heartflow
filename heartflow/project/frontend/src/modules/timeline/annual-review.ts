@@ -6,6 +6,7 @@
 import type { RiverItem } from './river'
 import type { Milestone } from './narrative-generator'
 import { detectMilestones } from './narrative-generator'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -299,7 +300,8 @@ export function useAnnualReview() {
     )
 
     // 专注天数
-    const focusDates = new Set(sessions.map(s => new Date(s.ts).toISOString().split('T')[0]))
+    // ⚠️ 专注天数按本地日历日去重（UTC 口径会让凌晨会话归到昨天、连续天数虚高）
+    const focusDates = new Set(sessions.map(s => getLocalDateKey(new Date(s.ts))))
     const focusDays = focusDates.size
 
     const avgDailyFocus = focusDays > 0 ? Math.round(totalFocusMinutes / focusDays) : 0
@@ -811,7 +813,7 @@ export function useAnnualReview() {
   function computeLongestStreak(sessions: RiverItem[]): number {
     const dates = new Set<string>()
     for (const s of sessions) {
-      dates.add(new Date(s.ts).toISOString().split('T')[0])
+      dates.add(getLocalDateKey(new Date(s.ts)))
     }
     const sorted = [...dates].sort()
     let maxStreak = 0, currentStreak = 0
@@ -911,7 +913,8 @@ export function useAnnualReview() {
 
   function computeYearSummary(items: RiverItem[]): YearSummary {
     const sessions = items.filter(i => i.type === 'session')
-    const focusDates = new Set(sessions.map(s => new Date(s.ts).toISOString().split('T')[0]))
+    // ⚠️ 专注天数按本地日历日去重（UTC 口径会让凌晨会话归到昨天、连续天数虚高）
+    const focusDates = new Set(sessions.map(s => getLocalDateKey(new Date(s.ts))))
     return {
       focusMinutes: sessions.reduce(
         (s, i) => s + (i.session?.elapsed ? Math.round(i.session.elapsed / 60000) : 0), 0,

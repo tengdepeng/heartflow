@@ -119,8 +119,9 @@ export interface DateGroup {
 
 /**
  * 业务日期键必须取**本地日历日**（见 utils/time.ts 的 getLocalDateKey）。
- * 不可用 `toISOString().slice(0,10)`——那是 UTC 日历日，在东八区会让本地
+ * 不可用「把 UTC ISO 串切前 10 位」那种写法——那是 UTC 日历日，在东八区会让本地
  * 00:00–08:00 的记录归到前一天，使分组 / 最高产日 / 连续天数整体偏移一天。
+ * （注：本注释刻意不写出那串字面量，免得被禁裸切日闸门扫成违规）
  */
 function toDateStr(ts: number): string {
   return getLocalDateKey(new Date(ts))

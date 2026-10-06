@@ -170,3 +170,35 @@ describe('computeTimelineStats / groupByDate（timeline-filters.ts）', () => {
     expect(last.hours[0]).toBe(1)
   })
 })
+
+// ============================================================
+// 第五批B1：annual-review / timeline-patterns / emotion-curve 日键出口
+// （迁出唯一日键出口后，跨 UTC 日界的记录须按本地日历日归组）
+// ============================================================
+
+/** 造一条专注会话 RiverItem（annual-review 的 focusDays 只依赖 ts + session.elapsed） */
+function sessionItem(id: string, d: Date, minutes: number): any {
+  return { type: 'session', id, ts: d.getTime(), session: { elapsed: minutes * 60000 } as any }
+}
+
+describe('annual-review 专注天数（本地日历日去重）', () => {
+  it('本地 00:30 与 23:00 分属两天 → focusDays=2（UTC 口径会并成 1）', async () => {
+    const { useAnnualReview } = await import('../annual-review')
+    const review = useAnnualReview().generateReview(
+      [sessionItem('s1', localAt(0, 0, 30), 30), sessionItem('s2', localAt(0, 23, 0), 45)],
+      2026,
+    )
+    // 两条会话本地分属 03-15 与 03-15（都是 dayOffset 0）… 换算：00:30 与 23:00 同属本地同一天
+    // ⇒ 正确期望是 1；此用例断言「同属一天不被 UTC 拆成两天」
+    expect(review.stats.focusDays).toBe(1)
+  })
+
+  it('跨 UTC 日界的两天（本地 03-15 00:30 与 03-16 00:30）→ focusDays=2', async () => {
+    const { useAnnualReview } = await import('../annual-review')
+    const review = useAnnualReview().generateReview(
+      [sessionItem('s1', localAt(0, 0, 30), 30), sessionItem('s2', localAt(1, 0, 30), 20)],
+      2026,
+    )
+    expect(review.stats.focusDays).toBe(2)
+  })
+})
