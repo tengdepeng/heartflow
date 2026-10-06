@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { MeditationRecord, MeditationType, ReleaseEntry, ClarityLevel } from './types'
 
 // ============================================================
@@ -340,7 +341,7 @@ export function useLightPractice() {
     tracker.level = calculateClarityLevel(tracker.score)
 
     // 更新趋势
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     const existing = tracker.trend.find(t => t.date === today)
     if (existing) {
       existing.score = tracker.score
@@ -363,7 +364,7 @@ export function useLightPractice() {
     const today = new Date(date)
     const yesterday = new Date(today)
     yesterday.setDate(yesterday.getDate() - 1)
-    const yesterdayStr = yesterday.toISOString().slice(0, 10)
+    const yesterdayStr = getLocalDateKey(yesterday)
 
     const trend = tracker.trend
     const hasYesterday = trend.some(t => t.date === yesterdayStr)

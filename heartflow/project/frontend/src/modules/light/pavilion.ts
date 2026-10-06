@@ -7,6 +7,7 @@ import { ref, computed } from 'vue'
 import type { MeditationRecord, MeditationType, ReleaseEntry, ClarityLevel, LightState } from './types'
 import { LIGHT_STORAGE_KEYS } from './types'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 function generateId(): string {
   return `light_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
@@ -25,7 +26,7 @@ function saveReleases(data: ReleaseEntry[]) { storage.setKV(LIGHT_STORAGE_KEYS.r
 const meditations = ref<MeditationRecord[]>(loadMeditations())
 const releases = ref<ReleaseEntry[]>(loadReleases())
 
-function todayStr(): string { return new Date().toISOString().split('T')[0] }
+function todayStr(): string { return getLocalDateKey() }
 
 export function useLightPavilion() {
   // ---- 冥想追踪 ----
@@ -36,7 +37,7 @@ export function useLightPavilion() {
     const now = new Date()
     const record: MeditationRecord = {
       id: generateId(), type, duration, stateBefore, stateAfter, insight,
-      date: now.toISOString().split('T')[0], timestamp: now.toISOString(),
+      date: getLocalDateKey(now), timestamp: now.toISOString(),
     }
     meditations.value = [...meditations.value, record]
     saveMeditations(meditations.value)
@@ -169,7 +170,7 @@ function calculateMeditationStreak(records: MeditationRecord[]): number {
   let streak = 0
   const today = new Date()
   for (let i = 0; i < sorted.length; i++) {
-    const expected = new Date(today.getTime() - i * 86400000).toISOString().split('T')[0]
+    const expected = getLocalDateKey(new Date(today.getTime() - i * 86400000))
     if (sorted[i] === expected) streak++
     else break
   }

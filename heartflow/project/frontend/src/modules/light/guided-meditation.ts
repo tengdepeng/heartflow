@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { MeditationType, MeditationRecord, ReleaseEntry, ClarityLevel, LightState } from './types'
 
 // ---- 类型定义 ----
@@ -537,7 +538,7 @@ function generateClarityTrend(
   const dailyScores: Record<string, number> = {}
 
   for (const m of meditations) {
-    const date = m.timestamp.slice(0, 10)
+    const date = getLocalDateKey(new Date(m.timestamp))
     const d = new Date(m.timestamp)
     if (d < since) continue
     // 每次冥想根据时长和质量加分
@@ -551,7 +552,7 @@ function generateClarityTrend(
   const now = new Date()
   for (let d = 29; d >= 0; d--) {
     const date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000)
-    const dateStr = date.toISOString().slice(0, 10)
+    const dateStr = getLocalDateKey(date)
     const score = dailyScores[dateStr] || 0
 
     let level: ClarityLevel = 'clouded'
@@ -573,7 +574,7 @@ function generateLightTrend(
   const dailyIntensity: Record<string, number> = {}
 
   for (const m of meditations) {
-    const date = m.timestamp.slice(0, 10)
+    const date = getLocalDateKey(new Date(m.timestamp))
     const d = new Date(m.timestamp)
     if (d < since) continue
     dailyIntensity[date] = (dailyIntensity[date] || 0) + m.duration
@@ -583,7 +584,7 @@ function generateLightTrend(
   const trend: { date: string; intensity: number }[] = []
   for (let d = 29; d >= 0; d--) {
     const date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000)
-    const dateStr = date.toISOString().slice(0, 10)
+    const dateStr = getLocalDateKey(date)
     trend.push({
       date: dateStr,
       intensity: Math.min(100, (dailyIntensity[dateStr] || 0) * 2),
@@ -635,7 +636,7 @@ function recommendMeditationType(
 function calculateBestStreak(meditations: MeditationRecord[]): number {
   if (meditations.length === 0) return 0
 
-  const dates = [...new Set(meditations.map(m => m.timestamp.slice(0, 10)))].sort()
+  const dates = [...new Set(meditations.map(m => getLocalDateKey(new Date(m.timestamp))))].sort()
   let bestStreak = 0
   let currentStreak = 1
 

@@ -9,6 +9,7 @@
 // ============================================================
 
 import { computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { useLightPavilion } from './pavilion'
 import { useGuidedMeditation, useReleaseRituals, useClarityDashboard } from './guided-meditation'
 import { useLightPractice } from './light-practice'
@@ -135,7 +136,7 @@ export function useLightBridge() {
     for (let i = 13; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(d)
       const dayRecords = meditationRecords.value.filter(r => r.date === dateStr)
       trend.push({
         date: dateStr.slice(5),
@@ -183,7 +184,7 @@ export function useLightBridge() {
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(d)
       const dayRecords = meditationRecords.value.filter(r => r.date === dateStr)
       const dayReleases = releaseEntries.value.filter(r => r.date === dateStr)
 
@@ -263,7 +264,7 @@ export function useLightBridge() {
     return {
       achieved: false,
       daysNeeded,
-      estimatedDate: estimatedDate.toISOString().slice(0, 10),
+      estimatedDate: getLocalDateKey(estimatedDate),
     }
   }
 
@@ -320,7 +321,7 @@ export function useLightBridge() {
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(d)
       const dayRecords = meditationRecords.value.filter(r => r.date === dateStr)
       const minutes = dayRecords.reduce((s, r) => s + r.duration, 0)
       calendar.push({
