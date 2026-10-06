@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import type { Habit, HabitDifficulty, HabitFrequency, DisciplineChallenge, DailyRitual } from './types'
 import { HABIT_DIFFICULTY_META, DISCIPLINE_STORAGE_KEYS } from './types'
+import { getLocalDateKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 
 function generateId(): string {
@@ -36,7 +37,7 @@ const habits = ref<Habit[]>(loadHabits())
 const challenges = ref<DisciplineChallenge[]>(loadChallenges())
 const rituals = ref<DailyRitual[]>(loadRituals())
 
-function todayStr(): string { return new Date().toISOString().split('T')[0] }
+function todayStr(): string { return getLocalDateKey(new Date()) }
 
 export function useDisciplineWorkshop() {
   // ---- 习惯管理 ----
@@ -114,7 +115,7 @@ export function useDisciplineWorkshop() {
   // ---- 挑战管理 ----
   function createChallenge(title: string, description: string, duration: number, habits: string[], reward?: string, startDate?: string): DisciplineChallenge {
     const start = startDate ?? todayStr()
-    const end = new Date(new Date(start).getTime() + duration * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const end = getLocalDateKey(new Date(new Date(start).getTime() + duration * 24 * 60 * 60 * 1000))
     const challenge: DisciplineChallenge = {
       id: generateId(), title, description, duration, habits,
       startDate: start, endDate: end, currentDay: 0, completed: false, reward,

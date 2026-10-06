@@ -10,6 +10,7 @@
 import { ref } from 'vue'
 import type { Habit, DisciplineChallenge, DailyRitual } from './types'
 import { HABIT_DIFFICULTY_META } from './types'
+import { getLocalDateKey } from '../../utils/time'
 import { useDisciplineWorkshop } from './workshop'
 import {
   useStreakTracker,
@@ -194,7 +195,7 @@ export function useDisciplineBridge() {
     // 4. 检测习惯组合
     const todayCompletedIds = workshop.habits.value
       .filter(h => {
-        const today = new Date().toISOString().split('T')[0]
+        const today = getLocalDateKey(new Date())
         return h.completedDates.includes(today)
       })
       .map(h => h.id)
@@ -419,7 +420,7 @@ export function useDisciplineBridge() {
    * 获取综合统计
    */
   function getStats(): DisciplineStats {
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey(new Date())
     const habitStats = workshop.getHabitStats()
     const activeHabits = workshop.habits.value.filter(h => h.enabled)
     const todayCompletedIds = activeHabits

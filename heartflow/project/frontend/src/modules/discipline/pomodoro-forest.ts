@@ -11,6 +11,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { FocusSession } from '../../types'
 
 // ============================================================
@@ -113,7 +114,7 @@ export interface ForestOverview {
 
 /** 树园概览统计 */
 export function forestOverview(trees: FocusTree[], now = new Date()): ForestOverview {
-  const today = now.toISOString().slice(0, 10)
+  const today = getLocalDateKey(now)
   const growing = trees.filter(t => t.status === 'growing')
   const todayTrees = trees.filter(t => t.plantedAt.startsWith(today))
   const totalFocusMs = growing.reduce((s, t) => s + t.focusMs, 0)
@@ -147,7 +148,7 @@ export function forestDailyTrend(trees: FocusTree[], days = 7, now = new Date())
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now)
     d.setDate(d.getDate() - i)
-    const key = d.toISOString().slice(0, 10)
+    const key = getLocalDateKey(d)
     const dayTrees = trees.filter(t => t.status === 'growing' && t.plantedAt.startsWith(key))
     out.push({
       date: key,
@@ -238,7 +239,7 @@ export interface InterruptionStats {
 
 /** 中断统计（原因分布 + 平均坚持时长） */
 export function interruptionStats(records: InterruptionRecord[], now = new Date()): InterruptionStats {
-  const today = now.toISOString().slice(0, 10)
+  const today = getLocalDateKey(now)
   const todayCount = records.filter(r => r.occurredAt.startsWith(today)).length
   const byCategory: Record<string, number> = {}
   for (const r of records) {

@@ -109,6 +109,7 @@
 import { computed } from 'vue'
 import { useDisciplineBridge } from '../../modules/discipline/workshop-bridge'
 import type { DailyRitual } from '../../modules/discipline/types'
+import { getLocalDateKey } from '../../utils/time'
 import type { RitualTemplate } from '../../modules/discipline/preset-library'
 
 const bridge = useDisciplineBridge()
@@ -122,7 +123,7 @@ const timeGroups = [
   { key: 'anytime' as const, label: '随时', icon: '🕯️' },
 ]
 
-const today = new Date().toISOString().split('T')[0]
+const today = getLocalDateKey(new Date())
 
 function templatesByTime(time: DailyRitual['triggerTime']): RitualTemplate[] {
   return bridge.RITUAL_TEMPLATES.filter(t => t.triggerTime === time)

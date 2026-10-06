@@ -5,6 +5,7 @@
 
 import type { Habit } from './types'
 import { HABIT_DIFFICULTY_META } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -371,7 +372,7 @@ export function useHabitPredictor() {
       const daysUntilBreak = Math.ceil(habit.streak / (1 - completionRate))
       if (daysUntilBreak < 90) {
         const breakDate = new Date(Date.now() + daysUntilBreak * 86400000)
-        estimatedBreakDate = breakDate.toISOString().split('T')[0]
+        estimatedBreakDate = getLocalDateKey(breakDate)
       }
     }
 
@@ -599,7 +600,7 @@ export function useHabitPredictor() {
     for (const date of dates) {
       const d = new Date(date)
       const weekStart = new Date(d.getTime() - d.getDay() * 86400000)
-      const key = weekStart.toISOString().split('T')[0]
+      const key = getLocalDateKey(weekStart)
       weekMap.set(key, (weekMap.get(key) || 0) + 1)
     }
     return [...weekMap.values()]
@@ -693,7 +694,7 @@ export function useHabitPredictor() {
 
     if (trend > 3 && currentStreak >= 7) {
       points.push({
-        estimatedDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
+        estimatedDate: getLocalDateKey(new Date(Date.now() + 7 * 86400000)),
         type: 'breakthrough',
         probability: 0.7,
         description: '如果保持当前节奏，即将突破新高',
@@ -702,7 +703,7 @@ export function useHabitPredictor() {
 
     if (trend < -3 && currentStreak > 0) {
       points.push({
-        estimatedDate: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
+        estimatedDate: getLocalDateKey(new Date(Date.now() + 3 * 86400000)),
         type: 'decline',
         probability: 0.6,
         description: '近期趋势下降，建议加强执行力度',
@@ -711,7 +712,7 @@ export function useHabitPredictor() {
 
     if (Math.abs(trend) < 1 && currentStreak > 14) {
       points.push({
-        estimatedDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0],
+        estimatedDate: getLocalDateKey(new Date(Date.now() + 14 * 86400000)),
         type: 'plateau',
         probability: 0.5,
         description: '可能进入平台期，建议增加挑战性',

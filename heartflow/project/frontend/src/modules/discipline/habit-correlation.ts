@@ -5,6 +5,7 @@
 
 import type { Habit } from './types'
 import { HABIT_DIFFICULTY_META } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -609,7 +610,7 @@ export function useHabitCorrelation() {
       for (const dateA of sortedA) {
         const a = new Date(dateA)
         const shifted = new Date(a.getTime() + lag * 86400000)
-        const shiftedStr = shifted.toISOString().split('T')[0]
+        const shiftedStr = getLocalDateKey(shifted)
         if (sortedB.includes(shiftedStr)) matchCount++
         total++
       }

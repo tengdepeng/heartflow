@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 import type { Habit } from './types'
 
 // ---- 连续打卡 ----
@@ -152,7 +152,7 @@ export function useStreakTracker() {
   function recordCheckin(
     habitId: string,
     habitName: string,
-    checkinDate: string = new Date().toISOString().split('T')[0],
+    checkinDate: string = getLocalDateKey(new Date()),
   ): StreakRecord {
     let record = streaks.value.find((s) => s.habitId === habitId)
 
@@ -175,7 +175,7 @@ export function useStreakTracker() {
     }
 
     const today = new Date(checkinDate)
-    const yesterday = new Date(today.getTime() - 86400000).toISOString().split('T')[0]
+    const yesterday = getLocalDateKey(new Date(today.getTime() - 86400000))
 
     if (record.lastCheckinDate === checkinDate) {
       return record // 今天已经打卡
@@ -190,9 +190,9 @@ export function useStreakTracker() {
       // 中断了，保存旧的连续记录
       if (record.currentStreak > 0) {
         record.streakHistory.push({
-          startDate: new Date(
+          startDate: getLocalDateKey(new Date(
             today.getTime() - (record.currentStreak - 1) * 86400000,
-          ).toISOString().split('T')[0],
+          )),
           endDate: record.lastCheckinDate,
           length: record.currentStreak,
           isActive: false,
@@ -221,7 +221,7 @@ export function useStreakTracker() {
 
     // 更新周度统计
     const dayOfWeek = today.getDay()
-    const weekStart = new Date(today.getTime() - dayOfWeek * 86400000).toISOString().split('T')[0]
+    const weekStart = getLocalDateKey(new Date(today.getTime() - dayOfWeek * 86400000))
     if (checkinDate >= weekStart) {
       record.weeklyCheckins++
     } else {
@@ -521,7 +521,7 @@ export function useHabitFailureAnalysis() {
     reason: string,
     reasonCategory: HabitFailure['reasonCategory'],
     streakAtBreak: number,
-    failedDate: string = new Date().toISOString().split('T')[0],
+    failedDate: string = getLocalDateKey(new Date()),
   ): HabitFailure {
     const failure: HabitFailure = {
       id: `hf-${Date.now()}`,
@@ -545,7 +545,7 @@ export function useHabitFailureAnalysis() {
     if (!failure) return undefined
 
     failure.recovered = true
-    failure.recoveredDate = new Date().toISOString().split('T')[0]
+    failure.recoveredDate = getLocalDateKey(new Date())
     failure.recoveryStrategy = strategy
     return failure
   }
