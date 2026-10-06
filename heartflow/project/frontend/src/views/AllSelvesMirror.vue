@@ -184,6 +184,7 @@ import { getIntentRoute, isDirectAction } from '../modules/mirror/intent-launch'
 import { useMirrorToolCards, type MirrorToolCard } from '../modules/mirror'
 import { INTENT_INFO } from '../modules/mirror'
 import type { IntentCategory } from '../modules/mirror/types'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const statsStore = useStatsStore()
@@ -254,7 +255,7 @@ const roomInsight = computed(() => activeRoom.value?.desc || '点击上面一个
 
 // 导航联动
 function navigateToWisdom() {
-  router.push('/wisdom')
+  navigateToRoom('wisdom')
 }
 
 function navigateToMirror() {

@@ -72,15 +72,15 @@
 
 <script setup lang="ts">
 import { computed, ref, nextTick, watch } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { ADVISOR_PERSONALITIES, AFFINITY_TIERS } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import AdvisorChatArchivePanel from '../components/AdvisorChatArchivePanel.vue'
 import EmptyState from '../components/EmptyState.vue'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceRef, entranceClass } = useViewEntrance()
-const router = useRouter()
 const route = useRoute()
 const advisor = useAdvisor()
 
@@ -222,7 +222,7 @@ function fmtTime(iso: string): string {
 }
 
 function goBack() {
-  router.push('/advisors')
+  navigateToRoom('advisors')
 }
 </script>
 

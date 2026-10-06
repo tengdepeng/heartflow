@@ -9,12 +9,12 @@
 // review / general 为纯汇报型，不在此产生副作用。
 // ============================================================
 
-import { useRouter } from 'vue-router'
 import { useTimerStore } from '../../stores/timer'
 import { useNoteEditor } from '../note/useNoteEditor'
 import { storage } from '../../engine/storage'
 import type { CommandTask } from '../../stores/advisor'
 import { advisorActionAllowed } from './restraint'
+import { navigateToRoom } from '../../composables/useRoomNavigation'
 
 export interface CommandActionResult {
   /** 是否真正执行了动作（区别于纯汇报 / 跳转型） */
@@ -26,7 +26,6 @@ export interface CommandActionResult {
 }
 
 export function useCommandExecutor() {
-  const router = useRouter()
 
   /**
    * 按调令类型执行对应的真实动作。
@@ -57,13 +56,13 @@ export function useCommandExecutor() {
       }
       case 'anchor': {
         // 真办事：把用户带到能立锚点的锚点庭院
-        router.push('/anchor')
+        navigateToRoom('anchor')
         return { acted: true, navigated: '/anchor' }
       }
       case 'emotion': {
         // 真办事：把用户带到能记录情绪的情绪花房。
         // 注意：路由是 /garden，'emotion-garden' 只是 room-resonance 的房间键，不能当路由用。
-        router.push('/garden')
+        navigateToRoom('garden')
         return { acted: true, navigated: '/garden' }
       }
       default:

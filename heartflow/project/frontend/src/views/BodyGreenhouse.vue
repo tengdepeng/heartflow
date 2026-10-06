@@ -323,7 +323,6 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
 import { useHealth } from '../resonance/bridges/health'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -340,6 +339,7 @@ import HealthRemindersPanel from '../components/HealthRemindersPanel.vue'
 import HealthReportPanel from '../components/HealthReportPanel.vue'
 import WellnessPlanPanel from '../components/WellnessPlanPanel.vue'
 import { usePerceptionStore } from '../stores/perception'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 
@@ -366,11 +366,10 @@ const { bodyLogs: logs, thisWeekSleepAvg: sleepAvgNum } = health
 
 // 蓝图13:1106 身体温室↔情绪花房 互指：身体疲惫（温室健康<60% 或连续记录中断）时，
 // 以非侵入的温和卡片引向情绪花房，不评判、不催促。
-const router = useRouter()
 const showBodyEmotionLink = computed(
   () => dashboardSummary.value.greenhouseHealth < 60 || dashboardSummary.value.streak === 0,
 )
-function goEmotionGarden() { router.push('/garden') }
+function goEmotionGarden() { navigateToRoom('garden') }
 
 // ---- P2 感知层：环境感知健康洞察 ----
 const perceptionStore = usePerceptionStore()

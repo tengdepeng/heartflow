@@ -127,21 +127,20 @@
       </div>
     </div>
 
-    <button class="af-btn-back" @click="$router.push('/advisors')">← 返回幕僚大厅</button>
+    <button class="af-btn-back" @click="navigateToRoom('advisors')">← 返回幕僚大厅</button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { ADVISOR_ROLES, ADVISOR_PERSONALITIES, AFFINITY_TIERS } from '../types'
 import type { AdvisorProfile } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import EmptyState from '../components/EmptyState.vue'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceRef, entranceClass } = useViewEntrance()
-const $router = useRouter()
 const advisor = useAdvisor()
 
 const advisors = computed(() => advisor.advisors)

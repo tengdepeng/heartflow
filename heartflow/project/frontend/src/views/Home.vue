@@ -132,7 +132,7 @@ import { formatTimerClock } from '../engine/timer'
 import { useEmotion } from '../resonance/bridges/emotion'
 import { useAnchorBridge } from '../resonance/bridges/anchor'
 import { useGesture, type GestureEvent } from '../composables/useGesture'
-import { useRoomNavigation } from '../composables/useRoomNavigation'
+import { useRoomNavigation, navigateToRoom } from '../composables/useRoomNavigation'
 import { createGestureDispatcher } from '../modules/gesture/dispatcher'
 import { createCoreGestureActionMap } from '../modules/gesture/actionMap'
 import type { useAstrolabe } from '../modules/astrolabe'
@@ -213,12 +213,12 @@ function finishFocusSession() {
 
 function enterSafeIsland() {
   enterSanctuary()
-  router.push('/sanctuary')
+  navigateToRoom('sanctuary')
 }
 
 function exitSafeIsland() {
   exitSanctuary()
-  router.push('/')
+  navigateToRoom('home')
 }
 
 const nav = useRoomNavigation()

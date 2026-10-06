@@ -78,8 +78,7 @@
 
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { useRoomNavigation } from '../composables/useRoomNavigation'
+import { useRoomNavigation, navigateToRoom } from '../composables/useRoomNavigation'
 import { useTimer } from '../resonance/bridges/timer'
 import { useStyle } from '../resonance/bridges/style'
 import { showToast } from '../modules/toast'
@@ -87,7 +86,6 @@ import { showToast } from '../modules/toast'
 const props = defineProps<{ visible: boolean }>()
 const emit = defineEmits<{ close: [] }>()
 
-const router = useRouter()
 const timer = useTimer()
 const styleStore = useStyle()
 const nav = useRoomNavigation()
@@ -256,28 +254,28 @@ const actions = [
     icon: '📝',
     label: '思绪书房',
     desc: '把此刻的想法放在这里',
-    handler: () => router.push('/study'),
+    handler: () => navigateToRoom('study'),
   },
   {
     id: 'sanctuary',
     icon: '○',
     label: '安全岛',
     desc: '去一个更安静的角落',
-    handler: () => router.push('/sanctuary'),
+    handler: () => navigateToRoom('sanctuary'),
   },
   {
     id: 'garden',
     icon: '🌷',
     label: '情绪花房',
     desc: '看看此刻的情绪',
-    handler: () => router.push('/garden'),
+    handler: () => navigateToRoom('garden'),
   },
   {
     id: 'timeline',
     icon: '◈',
     label: '时间长廊',
     desc: '回看留下的痕迹',
-    handler: () => router.push('/timeline'),
+    handler: () => navigateToRoom('timeline'),
   },
 ]
 </script>

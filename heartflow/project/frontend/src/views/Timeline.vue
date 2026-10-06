@@ -26,11 +26,11 @@
 
       <!-- 时间线枢纽导航 -->
       <div class="hub-nav" data-enter>
-        <button class="hub-nav-btn" @click="router.push('/timeline-index')">
+        <button class="hub-nav-btn" @click="navigateToRoom('timeline-index')">
           <span class="hub-nav-icon">◉</span>
           <span>时间线索引</span>
         </button>
-        <button class="hub-nav-btn" @click="router.push('/time-corridor')">
+        <button class="hub-nav-btn" @click="navigateToRoom('time-corridor')">
           <span class="hub-nav-icon">◈</span>
           <span>时间长廊</span>
         </button>
@@ -136,6 +136,7 @@ import type { FocusSession } from '../types'
 import type { ImportCounts } from '../engine/data-port'
 import { getImportCountEntries } from '../engine/data-port'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceClass } = useViewEntrance()
 
@@ -247,15 +248,15 @@ function handleFragmentClick(item:RiverItem){
     // 结晶重访: 高亮那一天
     const ds=getLocalDateKey(new Date(item.crystal.createdAt))
     replayMode.value=true;startReplay({date:ds,paused:true})
-  }else if(item.type==='note')router.push('/study')
-  else if(item.type==='emotion')router.push('/garden')
-  else if(item.type==='anchor')router.push('/anchor')
-  else if(item.type==='body')router.push('/body')
+  }else if(item.type==='note')navigateToRoom('study')
+  else if(item.type==='emotion')navigateToRoom('garden')
+  else if(item.type==='anchor')navigateToRoom('anchor')
+  else if(item.type==='body')navigateToRoom('body')
   else if(item.type==='habit')router.push('/discipline')
-  else if(item.type==='movement')router.push('/movement')
-  else if(item.type==='rest')router.push('/rest')
-  else if(item.type==='dialogue')router.push('/word-mirror')
-  else if(item.type==='photo')router.push('/anchor')
+  else if(item.type==='movement')navigateToRoom('movement')
+  else if(item.type==='rest')navigateToRoom('rest')
+  else if(item.type==='dialogue')navigateToRoom('word-mirror')
+  else if(item.type==='photo')navigateToRoom('anchor')
 }
 
 onUnmounted(stopReplay)

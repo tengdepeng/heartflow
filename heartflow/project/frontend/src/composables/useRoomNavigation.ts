@@ -19,6 +19,19 @@ import {
 } from '../engine/room-graph'
 import { storage } from '../engine/storage'
 
+/**
+ * 房间感知导航（模块级，供组件 setup 与组合式内调用）。
+ * 按房间 id 跳转；房间不存在则静默不跳（与 enterRoom 同语义）。
+ * 调用时取 useRouter()，因此必须在组件 setup / 组合式方法上下文中调用
+ * （本仓所有调用点均满足：组件事件处理、调令执行器等）。
+ * 不在此导入路由单例模块，以免触发其顶层 createRouter 副作用影响单测隔离。
+ */
+export function navigateToRoom(roomId: string): void {
+  const room = getRoom(roomId)
+  if (!room) return
+  useRouter().push(room.path)
+}
+
 /** 导航方向类型 */
 export type NavDirection = 'forward' | 'backward' | 'branch' | 'return'
 
@@ -122,9 +135,7 @@ export function useRoomNavigation() {
 
   /** 进入一个房间（空间感知的导航） */
   function enterRoom(roomId: string) {
-    const room = getRoom(roomId)
-    if (!room) return
-    router.push(room.path)
+    navigateToRoom(roomId)
   }
 
   /** 返回上一个房间 */

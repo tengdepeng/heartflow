@@ -361,7 +361,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { } from 'vue-router'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
@@ -384,6 +384,7 @@ import KnowledgeTransferPanel from '../components/KnowledgeTransferPanel.vue'
 import WorldMergePanel from '../components/WorldMergePanel.vue'
 import { PARALLEL_WORLD_STORAGE_KEYS } from '../modules/parallel-world/types'
 import type { Checkpoint } from '../modules/parallel-world/types'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const parallelWorld = useParallelWorld()
@@ -418,7 +419,6 @@ function syncUpdateCheckpoint(checkpointId: string, updates: Partial<Checkpoint>
   return cp
 }
 const { capsules, capForm, sortedCapsules, checkReady, tryOpenCapsule, addCapsule, removeCapsule, load: loadCapsules } = useTimeCapsule()
-const router = useRouter()
 
 // ---- 可能性自我 & 抉择分叉（数据层已下沉至 useParallelSelves） ----
 const pw = useParallelSelves()
@@ -548,7 +548,7 @@ function loadDreams() {
 
 /** 双向联动：点击梦境碎片，回到梦乡小筑查看原始梦境 */
 function openDreamSource() {
-  router.push('/dream-nook')
+  navigateToRoom('dream-nook')
 }
 
 // ============================================================

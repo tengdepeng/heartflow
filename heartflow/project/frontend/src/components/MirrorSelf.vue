@@ -209,6 +209,7 @@ import { HOME_ROOMS } from '../modules/home/rooms'
 import { carrierIsImage } from '../types/advisor'
 import type { AdvisorCarrierGeometry, AdvisorProfile } from '../types/advisor'
 import MirrorDialogue from './MirrorDialogue.vue'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const router = useRouter()
 const route = useRoute()
@@ -701,13 +702,13 @@ function runMeteorAction(m: MeteorItem) {
       toggleInfoSheet()
       break
     case 'focus':
-      router.push('/')
+      navigateToRoom('home')
       break
     case 'note':
-      router.push('/study')
+      navigateToRoom('study')
       break
     case 'emotion':
-      router.push('/garden')
+      navigateToRoom('garden')
       break
     case 'echo':
       router.push('/association-graph')

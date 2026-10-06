@@ -285,6 +285,7 @@ import { useDesktopSilentOverlay } from '../modules/sanctuary'
 import SanctuaryArchivePanel from '../components/SanctuaryArchivePanel.vue'
 import SanctuaryBridgePanel from '../components/SanctuaryBridgePanel.vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceClass } = useViewEntrance()
 
@@ -380,7 +381,7 @@ function exitSanctuary() {
   cancelHold()
   runtime.exitSanctuary()
   if (window.history.length > 1) router.back()
-  else router.push('/')
+  else navigateToRoom('home')
 }
 
 function startHold() {

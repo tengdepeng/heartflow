@@ -82,13 +82,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import EmptyState from '../components/EmptyState.vue'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceRef, entranceClass } = useViewEntrance()
-const router = useRouter()
 const route = useRoute()
 const advisor = useAdvisor()
 
@@ -163,7 +163,7 @@ function fmtTime(iso: string): string {
 }
 
 function goBack() {
-  router.push('/advisors')
+  navigateToRoom('advisors')
 }
 
 function handleClear() {

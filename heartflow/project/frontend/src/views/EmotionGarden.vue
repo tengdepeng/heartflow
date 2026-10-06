@@ -532,7 +532,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { } from 'vue-router'
 import { useEmotionGarden } from '../modules/emotion'
 import { EMOTION_OPTIONS, EMOTION_FLOWERS, WEATHER_OPTIONS } from '../modules/emotion/types'
 import type { EmotionType, EmotionWeather } from '../modules/emotion/types'
@@ -554,6 +554,7 @@ import { useEffect } from '../modules/constitution/use-effect'
 import { useRoomResonance } from '../modules/room-resonance'
 import RoomHeader from '../components/RoomHeader.vue'
 import EmptyState from '../components/EmptyState.vue'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 // A2.3 批3：情绪可视化是否展示受宪法「情绪可视化」条款门控
 // （emotion:visualization，enable 型默认开启＝默认显示；关闭条款即隐藏趋势图与日历）。
@@ -633,9 +634,8 @@ const ambientClass = computed(() =>
 
 // 蓝图心理安全机制（蓝图13:1233）：持续低落（ambientMood='dim'）时，
 // 以温和的"安全岛光路"内嵌卡片引向圣所——不弹窗、不推送、不报警、不泄露。
-const router = useRouter()
 const showSafetyPath = computed(() => ambientMood.value === 'dim')
-function goSanctuary() { router.push('/sanctuary') }
+function goSanctuary() { navigateToRoom('sanctuary') }
 const previewHints: Record<EmotionType, string> = {
   happy: '轻快先留在这里，不需要额外证明什么。',
   calm: '平静就这样放着，也是一种此刻状态。',

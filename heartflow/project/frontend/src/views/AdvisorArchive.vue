@@ -92,6 +92,7 @@ import { ADVISOR_ROLES, AFFINITY_TIERS } from '../types'
 import type { AdvisorProfile } from '../types'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import EmptyState from '../components/EmptyState.vue'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -174,7 +175,7 @@ function viewWitness(advisorId: string) {
 }
 
 function goBack() {
-  router.push('/advisors')
+  navigateToRoom('advisors')
 }
 </script>
 
