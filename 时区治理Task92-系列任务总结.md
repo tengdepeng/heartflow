@@ -539,7 +539,7 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 ### 8.4.16 收官审计（基线清零后）
 - **闸门机制复核**：闸门不是「只有 3 类正则」，而是 4 类签名 + **属性名白名单**（`TS_FIELD` 21 个字段：`at/createdAt/updatedAt/recordedAt/timestamp/iso/startedAt/completedAt/sentAt/pushedAt/assessedAt/startTime/endTime/lastModified/importDate/unlockedAt/doneAt/dateStr/dayKey/raw`；`MONTH_FIELD` 另加 `date/ym/monthKey/curMonth/currentMonth/periodKey/startDate/endDate/checkinDate/finishDate/sunkAt`）。用白名单而非通用 `X.slice(0,10)` 是为避免误伤 `text/title` 等普通截断。
 - **无过滤全量 grep 兜底**：捞出 22 个白名单外候选，逐一**接收者溯源**后判定**真缺陷 0 处**（computed 容器取最近 N 条 18 处、入参自洽 2 处、已是纯日期键 1 处、纯日期字段截月 1 处）。这是迁移完成的正向信号。
-- **工程终态**：17 批全部提交，HEAD = `955948bf`，基线 **0 处 / 0 文件**；全量测试 14339 例 14320 passed（19 例失败为过期中间态，定向复跑全绿）；vue-tsc 0 error、eslint 0 error、未 push。
+- **工程终态**：17 批全部提交 + 文档/基线批次编号统一（第八批A/B），HEAD = `f46d7b88`（**已 push 至 `origin/master`**），基线 **0 处 / 0 文件**；全量串行测试 **14339 例 / 1093 文件全部通过**（`vitest run --no-file-parallelism`，2015s，**零失败**）；vue-tsc 0 error、eslint 0 error。
 
 ### 8.6 月键（形态 E）剩余存量 24 文件 / 27 段 —— ⚠️ 历史快照，已随收官批清零
 > ⚠️ 本清单是**月键 4 批开工前的快照**；4 批已迁 22 文件（见 §4.1），收官批（第十七批）又补迁 3 处月键，**基线月键项已全部清零**，下列清单仅作历史留档。
@@ -565,7 +565,7 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 2. ~~按域分批推进 stores/modules 层~~ ✅ **17 批全部完成**（第六~十七批，§8.4.2~§8.4.15）。
 3. ~~`data-port.ts` 需定制方案~~ ✅ `415e8d1` 已做（`dayKeyOf()` 统一 + 闸门补 D 类形态；文件名也一并改本地日，不再纠结"文件名算不算缺陷"——本地日更符合用户预期）。
 4. ~~迁移持续推进存量 **187 处 / 163 文件**~~ ✅ **基线已清零（0 处 / 0 文件）**，闸门转为「零基线」纯防新增（§8.4.15~§8.4.16）。后续只需保持「新代码不得引入裸 UTC 切日」。
-5. **待授权后统一 push**（本地累计含大量并行会话提交，精确计数已不适用）。
+5. ~~待授权后统一 push~~ ✅ **已 push 至 `origin/master`**（263 提交 fast-forward，HEAD `f46d7b88`，本地/远程同步）。
 
 ---
 
