@@ -327,7 +327,8 @@ export function useTimelineBridge() {
       // 忽略加载失败，保持缓存
     }
 
-    const today = new Date().toISOString().slice(0, 10)
+    // ⚠️ 传给 generateDailyNarrative 的日期键必须与生成器内部同基（都是本地日历日）
+    const today = getLocalDateKey()
     let dailyReport: NarrativeReport | null = null
     try {
       dailyReport = narrativeGenerator.generateDailyNarrative(source.value, today)
@@ -345,8 +346,9 @@ export function useTimelineBridge() {
       const sunday = new Date(monday)
       sunday.setDate(monday.getDate() + 6)
 
-      const weekStart = monday.toISOString().slice(0, 10)
-      const weekEnd = sunday.toISOString().slice(0, 10)
+      // ⚠️ 与 generateWeeklyReport 内部按本地日历日的分桶键同基
+      const weekStart = getLocalDateKey(monday)
+      const weekEnd = getLocalDateKey(sunday)
       weeklyReport = narrativeGenerator.generateWeeklyReport(source.value, weekStart, weekEnd)
     } catch {
       weeklyReport = null
@@ -581,7 +583,7 @@ export function useTimelineBridge() {
     try {
       switch (type) {
         case 'daily': {
-          const date = (args[0] as string) || new Date().toISOString().slice(0, 10)
+          const date = (args[0] as string) || getLocalDateKey()
           return narrativeGenerator.generateDailyNarrative(source.value, date)
         }
         case 'weekly': {

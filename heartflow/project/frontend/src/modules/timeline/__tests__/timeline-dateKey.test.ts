@@ -202,3 +202,49 @@ describe('annual-review 专注天数（本地日历日去重）', () => {
     expect(review.stats.focusDays).toBe(2)
   })
 })
+
+// ============================================================
+// 第五批B2：narrative-generator 日键（streak / 日报分桶 / 周月年范围）
+// ============================================================
+
+/** 造一条已完成的专注会话（river.ts 以 completedAt 取 ts） */
+function doneSession(id: string, d: Date, minutes: number): any {
+  return { id, startedAt: d.toISOString(), completedAt: d.toISOString(), elapsed: minutes * 60000, status: 'completed' }
+}
+
+describe('narrative-generator 连续专注天数（本地日历日）', () => {
+  it('周报连续专注天数：本地 00:30 连 3 天 → 产出 streak 里程碑（UTC 口径下凌晨归昨天、streak 断档）', async () => {
+    const { useNarrativeGenerator } = await import('../narrative-generator')
+    const gen = useNarrativeGenerator()
+    const source = {
+      // 判别力样本：今天 00:30（UTC 归昨天）+ 昨天/前天各 23:00（UTC 同日）。
+      // 本地口径 = 连续 3 天（触发 streak milestone）；
+      // 若记录键仍是 UTC 切键，则 03-15 那天对不上、streak 断为 2 ⇒ 不触发 ⇒ 用例变红。
+      sessions: [
+        doneSession('s1', localAt(0, 0, 30), 30),
+        doneSession('s2', localAt(-1, 23, 0), 30),
+        doneSession('s3', localAt(-2, 23, 0), 30),
+      ],
+      crystals: [], notes: [], emotions: [], anchors: [],
+      bodyLogs: [], habits: [], movementRecords: [], breakRecords: [], dialogueSessions: [],
+    }
+    // milestones 只出现在 weekly/monthly/yearly 报告（daily 不含），故走周报出口
+    const report = gen.generateWeeklyReport(source as any, '2026-03-09', '2026-03-15')
+    const streak = report.milestones?.find(m => m.type === 'streak')
+    expect(streak).toBeTruthy()
+    expect(streak!.description).toContain('3 天')
+  })
+
+  it('日报分桶：本地 00:30 的会话应落在「今天」的 date 桶内', async () => {
+    const { useNarrativeGenerator } = await import('../narrative-generator')
+    const gen = useNarrativeGenerator()
+    const source = {
+      sessions: [doneSession('s1', localAt(0, 0, 30), 45)],
+      crystals: [], notes: [], emotions: [], anchors: [],
+      bodyLogs: [], habits: [], movementRecords: [], breakRecords: [], dialogueSessions: [],
+    }
+    const report = gen.generateDailyNarrative(source as any, '2026-03-15')
+    // 日报的专注统计应计入这条凌晨会话
+    expect(report.stats.totalFocusMinutes).toBe(45)
+  })
+})

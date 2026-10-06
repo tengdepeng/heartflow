@@ -157,7 +157,7 @@ export function detectMilestones(items: RiverItem[]): Milestone[] {
   // 2. 专注记录 (record)
   const dailyFocus = new Map<string, number>()
   for (const s of sessions) {
-    const date = new Date(s.ts).toISOString().split('T')[0]
+    const date = getLocalDateKey(new Date(s.ts))
     const mins = s.session?.elapsed ? Math.round(s.session.elapsed / 60000) : 0
     dailyFocus.set(date, (dailyFocus.get(date) || 0) + mins)
   }
@@ -229,7 +229,7 @@ export function detectMilestones(items: RiverItem[]): Milestone[] {
       type: 'first',
       title: '第一篇笔记',
       description: '开始记录思考，这是成长的第一步',
-      date: firstNote ? new Date(firstNote.ts).toISOString().split('T')[0] : now,
+      date: firstNote ? getLocalDateKey(new Date(firstNote.ts)) : now,
       value: 1,
       unit: '篇',
       significance: 60,
@@ -244,7 +244,7 @@ export function detectMilestones(items: RiverItem[]): Milestone[] {
       type: 'first',
       title: '第一次情绪记录',
       description: '开始关注内心感受，情绪觉察是自我认知的起点',
-      date: firstEmotion ? new Date(firstEmotion.ts).toISOString().split('T')[0] : now,
+      date: firstEmotion ? getLocalDateKey(new Date(firstEmotion.ts)) : now,
       value: 1,
       unit: '次',
       significance: 70,
@@ -259,7 +259,7 @@ export function detectMilestones(items: RiverItem[]): Milestone[] {
       type: 'first',
       title: '设定心锚',
       description: anchorCount === 1 ? '第一个心锚已设定，方向已明确' : `已设定 ${anchorCount} 个心锚`,
-      date: firstAnchor ? new Date(firstAnchor.ts).toISOString().split('T')[0] : now,
+      date: firstAnchor ? getLocalDateKey(new Date(firstAnchor.ts)) : now,
       value: anchorCount,
       unit: '个',
       significance: 50,
@@ -284,7 +284,7 @@ function computeStreakDays(sessions: RiverItem[]): number {
 
   const dates = new Set<string>()
   for (const s of sessions) {
-    dates.add(new Date(s.ts).toISOString().split('T')[0])
+    dates.add(getLocalDateKey(new Date(s.ts)))
   }
 
   let streak = 0
@@ -293,7 +293,7 @@ function computeStreakDays(sessions: RiverItem[]): number {
 
   for (let i = 0; i < 365; i++) {
     const checkDate = new Date(today.getTime() - i * 86400000)
-    const dateStr = checkDate.toISOString().split('T')[0]
+    const dateStr = getLocalDateKey(checkDate)
     if (dates.has(dateStr)) {
       streak++
     } else {
@@ -682,7 +682,7 @@ export function useNarrativeGenerator() {
   ): NarrativeReport {
     const items = createRiverItems(source, ['crystal', 'note', 'emotion', 'session', 'anchor'])
     const dateItems = items.filter(i => {
-      const itemDate = new Date(i.ts).toISOString().split('T')[0]
+      const itemDate = getLocalDateKey(new Date(i.ts))
       return itemDate === date
     })
 
@@ -773,7 +773,7 @@ export function useNarrativeGenerator() {
   ): NarrativeReport {
     const items = createRiverItems(source, ['crystal', 'note', 'emotion', 'session', 'anchor'])
     const weekItems = items.filter(i => {
-      const itemDate = new Date(i.ts).toISOString().split('T')[0]
+      const itemDate = getLocalDateKey(new Date(i.ts))
       return itemDate >= weekStart && itemDate <= weekEnd
     })
 
@@ -826,8 +826,8 @@ export function useNarrativeGenerator() {
         const prevWeekEnd = new Date(weekEnd)
         prevWeekEnd.setDate(prevWeekEnd.getDate() - 7)
         const prevItems = items.filter(i => {
-          const d = new Date(i.ts).toISOString().split('T')[0]
-          return d >= prevWeekStart.toISOString().split('T')[0] && d <= prevWeekEnd.toISOString().split('T')[0]
+          const d = getLocalDateKey(new Date(i.ts))
+          return d >= getLocalDateKey(prevWeekStart) && d <= getLocalDateKey(prevWeekEnd)
         })
         return comparePeriods(weekItems, prevItems, '本周', '上周')
       })(),
@@ -858,24 +858,24 @@ export function useNarrativeGenerator() {
 
     const items = createRiverItems(source, ['crystal', 'note', 'emotion', 'session', 'anchor'])
     const monthItems = items.filter(i => {
-      const itemDate = new Date(i.ts).toISOString().split('T')[0]
+      const itemDate = getLocalDateKey(new Date(i.ts))
       return itemDate >= monthStart && itemDate <= monthEnd
     })
 
     // 按周分组
     const weeks: { start: string; end: string; label: string; items: RiverItem[] }[] = []
     const startDate = new Date(monthStart)
-    while (startDate.toISOString().split('T')[0] <= monthEnd) {
-      const weekStart = startDate.toISOString().split('T')[0]
+    while (getLocalDateKey(startDate) <= monthEnd) {
+      const weekStart = getLocalDateKey(startDate)
       const weekEndDate = new Date(startDate)
       weekEndDate.setDate(weekEndDate.getDate() + 6)
-      const weekEnd = weekEndDate.toISOString().split('T')[0] > monthEnd
+      const weekEnd = getLocalDateKey(weekEndDate) > monthEnd
         ? monthEnd
-        : weekEndDate.toISOString().split('T')[0]
+        : getLocalDateKey(weekEndDate)
 
       const weekLabel = `${formatDateLabel(weekStart)} - ${formatDateLabel(weekEnd)}`
       const weekItemsFiltered = monthItems.filter(i => {
-        const d = new Date(i.ts).toISOString().split('T')[0]
+        const d = getLocalDateKey(new Date(i.ts))
         return d >= weekStart && d <= weekEnd
       })
 
@@ -952,7 +952,7 @@ export function useNarrativeGenerator() {
     const yearStart = `${year}-01-01`
     const yearEnd = `${year}-12-31`
     const yearItems = items.filter(i => {
-      const itemDate = new Date(i.ts).toISOString().split('T')[0]
+      const itemDate = getLocalDateKey(new Date(i.ts))
       return itemDate >= yearStart && itemDate <= yearEnd
     })
 
@@ -964,7 +964,7 @@ export function useNarrativeGenerator() {
       const mEnd = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
 
       const monthItems = yearItems.filter(i => {
-        const d = new Date(i.ts).toISOString().split('T')[0]
+        const d = getLocalDateKey(new Date(i.ts))
         return d >= mStart && d <= mEnd
       })
 
@@ -1195,7 +1195,7 @@ function computeNarrativeStats(items: RiverItem[]): NarrativeStats {
         if (item.session?.elapsed) {
           const mins = Math.round(item.session.elapsed / 60000)
           totalFocusMinutes += mins
-          const date = new Date(item.ts).toISOString().split('T')[0]
+          const date = getLocalDateKey(new Date(item.ts))
           dailyFocusMap.set(date, (dailyFocusMap.get(date) || 0) + mins)
         }
         item.session?.tags?.forEach(t => tagCounts.set(t, (tagCounts.get(t) || 0) + 1))
@@ -1262,14 +1262,14 @@ function computeEmotionTrend(
   const end = new Date(endDate)
   const current = new Date(start)
   while (current <= end) {
-    const dateStr = current.toISOString().split('T')[0]
+    const dateStr = getLocalDateKey(current)
     trendMap.set(dateStr, { happy: 0, calm: 0, sad: 0, anxious: 0, angry: 0 })
     current.setDate(current.getDate() + 1)
   }
 
   items.forEach(item => {
     if (item.type !== 'emotion' || !item.emotion) return
-    const date = new Date(item.ts).toISOString().split('T')[0]
+    const date = getLocalDateKey(new Date(item.ts))
     const entry = trendMap.get(date)
     if (!entry) return
 
