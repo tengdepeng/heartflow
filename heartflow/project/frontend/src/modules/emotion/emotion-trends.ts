@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalMonthKey, getLocalDateKey } from '../../utils/time'
 import type { EmotionRecord } from './types'
 
 // ============================================================
@@ -239,7 +239,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
 
     switch (period) {
       case 'daily':
-        groupBy = (ts) => new Date(ts).toISOString().slice(0, 10)
+        groupBy = (ts) => getLocalDateKey(new Date(ts))
         break
       case 'weekly':
         groupBy = (ts) => {
@@ -247,7 +247,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
           const dayOfWeek = d.getDay()
           const monday = new Date(d)
           monday.setDate(d.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1))
-          return monday.toISOString().slice(0, 10)
+          return getLocalDateKey(monday)
         }
         break
       case 'monthly':
@@ -485,7 +485,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
     // 将记录按天分组
     const dailyEmotions: Record<string, string[]> = {}
     for (const r of records) {
-      const day = new Date(r.createdAt).toISOString().slice(0, 10)
+      const day = getLocalDateKey(new Date(r.createdAt))
       if (!dailyEmotions[day]) dailyEmotions[day] = []
       dailyEmotions[day].push(r.type)
     }
@@ -606,7 +606,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
     // 按天分组
     const dailyCounts: Record<string, Record<string, number>> = {}
     for (const r of sorted) {
-      const day = new Date(r.createdAt).toISOString().slice(0, 10)
+      const day = getLocalDateKey(new Date(r.createdAt))
       if (!dailyCounts[day]) dailyCounts[day] = {}
       dailyCounts[day][r.type] = (dailyCounts[day][r.type] ?? 0) + 1
     }
@@ -730,7 +730,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
     // 按天统计情绪分布
     const dailyDistribution: Record<string, Record<string, number>> = {}
     for (const r of records) {
-      const day = new Date(r.createdAt).toISOString().slice(0, 10)
+      const day = getLocalDateKey(new Date(r.createdAt))
       if (!dailyDistribution[day]) dailyDistribution[day] = {}
       dailyDistribution[day][r.type] = (dailyDistribution[day][r.type] ?? 0) + 1
     }
@@ -768,7 +768,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
     for (let i = 0; i < predictionDays; i++) {
       const predDate = new Date(today)
       predDate.setDate(predDate.getDate() + i + 1)
-      const dateStr = predDate.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(predDate)
 
       // 应用趋势修正和随机扰动
       const dayProbabilities: Record<string, number> = {}
@@ -1016,7 +1016,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
     // 按天分组
     const dailyCounts: Record<string, Record<string, number>> = {}
     for (const r of records) {
-      const day = new Date(r.createdAt).toISOString().slice(0, 10)
+      const day = getLocalDateKey(new Date(r.createdAt))
       if (!dailyCounts[day]) dailyCounts[day] = {}
       dailyCounts[day][r.type] = (dailyCounts[day][r.type] ?? 0) + 1
     }
@@ -1069,7 +1069,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
     const dailyCounts: Record<string, Record<string, number>> = {}
     const dailyTotals: Record<string, number> = {}
     for (const r of records) {
-      const day = new Date(r.createdAt).toISOString().slice(0, 10)
+      const day = getLocalDateKey(new Date(r.createdAt))
       if (!dailyCounts[day]) dailyCounts[day] = {}
       dailyCounts[day][r.type] = (dailyCounts[day][r.type] ?? 0) + 1
       dailyTotals[day] = (dailyTotals[day] ?? 0) + 1
@@ -1155,7 +1155,7 @@ export function useEmotionTrends(config?: Partial<EmotionTrendsConfig>) {
       lines.push(`- 置信度：${Math.round(p.confidence * 100)}%`)
       lines.push(`- 涉及情绪：${p.emotions.map(getEmotionLabel).join(', ')}`)
       if (p.cycleDays) lines.push(`- 周期：${p.cycleDays} 天`)
-      lines.push(`- 时间范围：${new Date(p.startTime).toISOString().slice(0, 10)} ~ ${new Date(p.endTime).toISOString().slice(0, 10)}`)
+      lines.push(`- 时间范围：${getLocalDateKey(new Date(p.startTime))} ~ ${getLocalDateKey(new Date(p.endTime))}`)
       lines.push('')
     }
 

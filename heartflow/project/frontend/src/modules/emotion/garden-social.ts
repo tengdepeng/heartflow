@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -846,7 +847,7 @@ export function useGardenSocial(config?: Partial<GardenSocialConfig>) {
 
     for (let i = 0; i < days; i++) {
       const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
-      const dateStr = date.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(date)
       const dayStart = new Date(dateStr).getTime()
       const dayEnd = dayStart + 24 * 60 * 60 * 1000
 

@@ -8,6 +8,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { useEmotionGarden, useEmotionDetector } from './index'
 import { useEmotionTrends } from './emotion-trends'
 import { useGardenNarrative } from './garden-narrative'
@@ -508,7 +509,7 @@ export function useEmotionBridge() {
         content,
         emotionType: 'happy',
         flowerIds: [],
-        date: new Date().toISOString().split('T')[0],
+        date: getLocalDateKey(),
         tags: [],
         isMilestone: false,
       }
@@ -521,7 +522,7 @@ export function useEmotionBridge() {
    */
   function createGardenDiary(_content: string, _emotion: EmotionType): DiaryEntry {
     return narrative.generateDiaryEntry(
-      new Date().toISOString().split('T')[0],
+      getLocalDateKey(),
       garden.records.value,
       [],
       { score: 0, coverage: 0, diversity: 0, bloomRate: 0, recentActivity: 0, description: '' },

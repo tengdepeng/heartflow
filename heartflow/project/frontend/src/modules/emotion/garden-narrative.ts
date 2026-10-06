@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { EmotionRecord, EmotionType } from './types'
 import { EMOTION_FLOWERS } from './types'
 import type { FlowerPosition, GardenEnvironment, FlowerCluster, GardenHealth } from './garden-environment'
@@ -265,7 +266,7 @@ function generateId(prefix: string): string {
 }
 
 function formatDate(date: Date): string {
-  return date.toISOString().slice(0, 10)
+  return getLocalDateKey(date)
 }
 
 function getSeason(date: Date): SeasonAlbum['season'] {
