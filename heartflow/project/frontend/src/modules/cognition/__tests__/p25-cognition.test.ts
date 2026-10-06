@@ -5,6 +5,7 @@
 // ============================================================
 
 import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { getLocalDateKey } from '../../../utils/time'
 
 // ============================================================
 // 共享 KV 存储（vi.hoisted）
@@ -58,12 +59,11 @@ async function importTypes() {
 // ============================================================
 
 function today(): string {
-  return new Date().toISOString().slice(0, 10)
+  return getLocalDateKey()
 }
 
 function daysAgo(n: number): string {
-  const d = new Date(Date.now() - n * 24 * 60 * 60 * 1000)
-  return d.toISOString().slice(0, 10)
+  return getLocalDateKey(new Date(Date.now() - n * 24 * 60 * 60 * 1000))
 }
 
 function makeSession(overrides: {

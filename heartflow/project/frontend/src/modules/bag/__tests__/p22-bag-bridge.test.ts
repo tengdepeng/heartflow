@@ -7,6 +7,7 @@
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../../utils/time'
 
 // ============================================================
 // 辅助函数
@@ -169,7 +170,7 @@ function createMockAnalytics() {
       const totalProficiency = cats.reduce((s: number, c: any) => s + c.proficiency, 0)
       const avgProficiency = cats.length > 0 ? Math.round(totalProficiency / cats.length) : 0
       growthTrend.value.push({
-        date: new Date().toISOString().slice(0, 10),
+        date: getLocalDateKey(),
         totalProficiency,
         avgProficiency,
         newItems: cats.reduce((s: number, c: any) => s + c.items.length, 0),

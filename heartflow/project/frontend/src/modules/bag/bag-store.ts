@@ -10,6 +10,7 @@ import { ref, computed } from 'vue'
 import type { BagItem, CategoryItem, EvolutionEntry, BagOverview } from './types'
 import { CATEGORY_TYPES, DEFAULT_CATEGORIES, DEFAULT_EVOLUTION } from './defaults'
 import { getKV, setKV } from '../../engine/storage/kv'
+import { getLocalDateKey } from '../../utils/time'
 
 const CATEGORIES_KEY = 'bag:categories'
 const EVOLUTION_KEY = 'bag:evolution'
@@ -43,7 +44,7 @@ export const useBagStore = defineStore('bag', () => {
   const newEvoForm = ref<EvolutionEntry>({
     icon: '🌟',
     title: '',
-    date: new Date().toISOString().slice(0, 10),
+    date: getLocalDateKey(),
     levelLabel: '新增',
     levelClass: 'new',
   })
@@ -170,7 +171,7 @@ export const useBagStore = defineStore('bag', () => {
     newEvoForm.value = {
       icon: '🌟',
       title: '',
-      date: new Date().toISOString().slice(0, 10),
+      date: getLocalDateKey(),
       levelLabel: '新增',
       levelClass: 'new',
     }

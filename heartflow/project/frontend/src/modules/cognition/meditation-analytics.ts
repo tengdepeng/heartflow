@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 import type {
   MeditationSession,
@@ -59,7 +59,7 @@ function getWeekKey(date: string): string {
   const d = new Date(date)
   const dayOfWeek = d.getDay()
   const monday = new Date(d.getTime() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) * 24 * 60 * 60 * 1000)
-  return monday.toISOString().slice(0, 10)
+  return getLocalDateKey(monday)
 }
 
 /** 获取月标识符 */
@@ -187,15 +187,13 @@ export function useMeditationAnalytics() {
 
   /** 获取最近 N 天的会话 */
   function getRecentSessions(days: number = 30): MeditationSession[] {
-    const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10)
+    const cutoff = getLocalDateKey(new Date(Date.now() - days * 24 * 60 * 60 * 1000))
     return sessions.value.filter(s => s.date >= cutoff)
   }
 
   /** 获取今日会话 */
   function getTodaySessions(): MeditationSession[] {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     return sessions.value.filter(s => s.date === today)
   }
 
@@ -259,9 +257,7 @@ export function useMeditationAnalytics() {
     const now = new Date()
     const dailyDurationTrend: { date: string; duration: number }[] = []
     for (let d = 29; d >= 0; d--) {
-      const date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 10)
+      const date = getLocalDateKey(new Date(now.getTime() - d * 24 * 60 * 60 * 1000))
       dailyDurationTrend.push({ date, duration: dailyMap[date] || 0 })
     }
 
@@ -360,10 +356,8 @@ export function useMeditationAnalytics() {
 
     // 获取所有有冥想的日期（去重排序）
     const meditationDates = [...new Set(all.map(s => s.date))].sort()
-    const today = new Date().toISOString().slice(0, 10)
-    const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
-      .toISOString()
-      .slice(0, 10)
+    const today = getLocalDateKey()
+    const yesterday = getLocalDateKey(new Date(Date.now() - 24 * 60 * 60 * 1000))
 
     // 计算连续段
     const segments: StreakSegment[] = []
@@ -405,7 +399,7 @@ export function useMeditationAnalytics() {
     const longestStreak = Math.max(...segments.map(s => s.length))
 
     // 今年完成的连续段数
-    const yearStart = new Date(new Date().getFullYear(), 0, 1).toISOString().slice(0, 10)
+    const yearStart = getLocalDateKey(new Date(new Date().getFullYear(), 0, 1))
     const streaksThisYear = segments.filter(s => s.startDate >= yearStart).length
 
     // 平均连续长度
@@ -751,7 +745,7 @@ export function useMeditationAnalytics() {
 
     // 连续中断警告
     if (st.currentStreak === 0 && st.longestStreak > 3 && st.lastMeditationDate) {
-      const daysSinceLast = daysBetween(st.lastMeditationDate, new Date().toISOString().slice(0, 10))
+      const daysSinceLast = daysBetween(st.lastMeditationDate, getLocalDateKey())
       if (daysSinceLast >= 3) {
         newInsights.push({
           id: 'warning_streak_broken',

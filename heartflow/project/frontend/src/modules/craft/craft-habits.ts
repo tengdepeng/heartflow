@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { CraftWork, WorkType } from './types'
 
 // ---- 类型定义 ----
@@ -275,7 +276,7 @@ export function useHabitAnalyzer() {
     }
 
     // 平均每日创作数
-    const dates = new Set(works.map(w => w.createdAt.split('T')[0]))
+    const dates = new Set(works.map(w => getLocalDateKey(new Date(w.createdAt))))
     const avgDailyCreations = dates.size > 0
       ? Math.round((works.length / dates.size) * 10) / 10
       : 0

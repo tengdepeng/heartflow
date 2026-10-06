@@ -1,5 +1,5 @@
 import { computed, ref, nextTick, inject, type InjectionKey } from 'vue'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 import { getRoom } from '../../engine/room-graph'
 import { useRoomNavigation } from '../../composables/useRoomNavigation'
 import { useConfig } from '../../resonance/bridges/config'
@@ -176,7 +176,7 @@ function handleSaveWork() {
     if (evolutionChanged && form.value.evolution > 0) {
       const milestone = getEvolutionMilestone(form.value.evolution)
       evolutionHistory.push({
-        date: now.slice(0, 10),
+        date: getLocalDateKey(new Date(now)),
         evolution: form.value.evolution,
         milestone,
       })
@@ -201,7 +201,7 @@ function handleSaveWork() {
     if (initialEvolution > 0) {
       const milestone = getEvolutionMilestone(initialEvolution)
       evolutionHistory.push({
-        date: now.slice(0, 10),
+        date: getLocalDateKey(new Date(now)),
         evolution: initialEvolution,
         milestone,
       })
@@ -258,7 +258,7 @@ async function handlePolishWork(work: CraftWork) {
   const evolutionHistory = work.evolutionHistory ? [...work.evolutionHistory] : []
   if (newEvolution > 0) {
     evolutionHistory.push({
-      date: now.slice(0, 10),
+      date: getLocalDateKey(new Date(now)),
       evolution: newEvolution,
       milestone,
     })

@@ -3,6 +3,7 @@
 // 覆盖：纯评估（确定性）、输入构建、持久化、感知→藏象阁 只读桥接。
 // ============================================================
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { getLocalDateKey } from '../../../utils/time'
 
 // ---- 模拟存储（隔离持久化逻辑） ----
 const mockStore: Record<string, any> = {}
@@ -123,7 +124,7 @@ describe('attention-model · 由感知层构建输入', () => {
     expect(input.screenAwake).toBe(false)
     expect(input.activeWindowKnown).toBe(true)
     expect(input.navigationCount).toBe(7)
-    expect(input.dateStr).toBe(new Date().toISOString().slice(0, 10))
+    expect(input.dateStr).toBe(getLocalDateKey())
   })
 
   it('deriveAttentionReport 便捷路径与纯评估一致', () => {

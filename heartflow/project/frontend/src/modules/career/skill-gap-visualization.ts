@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { SkillNode, SkillCategory, ProficiencyLevel } from './skill-map'
 import { PROFICIENCY_META, SKILL_CATEGORY_META } from './skill-map'
 import type { PrioritizedGap } from './skill-gap-advisor'
@@ -500,7 +501,7 @@ export function useSkillGapVisualization() {
 
     const totalWeeks = phases.reduce((s, p) => s + p.weeks, 0)
     const completionDate = new Date(Date.now() + totalWeeks * 7 * 86400000)
-    const estimatedCompletion = completionDate.toISOString().slice(0, 10)
+    const estimatedCompletion = getLocalDateKey(completionDate)
 
     // 生成关键里程碑
     const keyMilestones: RoadmapMilestone[] = []

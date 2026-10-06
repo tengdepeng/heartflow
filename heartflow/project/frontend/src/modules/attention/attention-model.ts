@@ -19,6 +19,7 @@
 // ============================================================
 
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { EnvironmentState } from '../perception'
 
 // ---- 输入 ----
@@ -177,7 +178,7 @@ export function buildLocalAttentionInput(
   env: EnvironmentState,
   local: { navigationCount: number; focusMinutes: number; dateStr?: string },
 ): AttentionInput {
-  const dateStr = local.dateStr ?? new Date().toISOString().slice(0, 10)
+  const dateStr = local.dateStr ?? getLocalDateKey()
   return {
     navigationCount: Math.max(0, Math.floor(local.navigationCount || 0)),
     focusMinutes: Math.max(0, Math.floor(local.focusMinutes || 0)),

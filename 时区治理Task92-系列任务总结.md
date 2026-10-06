@@ -350,7 +350,7 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 `AppSpace` / `BodyGreenhouse` / `BodyWisdom` / `Bookmarks` / `Constitution` / `DataAsset` / `Dictionary` / `DisciplineWorkshop` / `DreamNook` / `GrowthGarden` / `Home` / `InteractionConfig` / `Output` / `Rest` / `RestRitualPanel` / `RestSleepPanel` / `Reward` / `SeasonalRituals` / `Study` / `TimeCorridorView` / `TimelineIndex` / `WisdomPavilion` / `WorkLog`
 
 ### 8.4 modules 层（数量最多）
-~~`advisor`~~ ✅（§8.2.4）/ ~~`anchor`~~ ✅（§8.2.3）/ `attention` / `bag` / `body`（11 处，量最大）/ `body-wisdom`（4 处）/ `career` / `cognition` / `craft` / `discipline`（6 处）/ `emotion`（5 处）/ `garden` / `home`（4 处）/ `knowledge` / `light`（4 处）/ `mirror` / `movement` / `note` / `output` / `reading` / `rest` / `reward`（4 处）/ `safety`（3 处）/ `sanctuary` / `scar`（4 处）/ `timeline`（7 处）/ ~~`timeline-index`~~ ✅（§8.4.1）/ `timer` / `touchpoints`（4 处）/ `wisdom` / `word-mirror`（4 处）/ `worklog`（6 处）
+~~`advisor`~~ ✅（§8.2.4）/ ~~`anchor`~~ ✅（§8.2.3）/ ~~`attention`~~ ✅（§8.4.3）/ ~~`bag`~~ ✅（§8.4.3）/ ~~`body`~~ ✅（§8.4.2）/ `body-wisdom`（4 处）/ ~~`career`~~ ✅（§8.4.3）/ ~~`cognition`~~ ✅（§8.4.3）/ ~~`craft`~~ ✅（§8.4.3）/ ~~`discipline`~~ ✅（§8.4.4）/ `emotion`（5 处）/ `garden` / `home`（4 处）/ `knowledge` / `light`（4 处）/ `mirror` / `movement` / `note` / `output` / `reading` / `rest` / `reward`（4 处）/ `safety`（3 处）/ `sanctuary` / `scar`（4 处）/ `timeline`（7 处）/ ~~`timeline-index`~~ ✅（§8.4.1）/ `timer` / `touchpoints`（4 处）/ `wisdom` / `word-mirror`（4 处）/ `worklog`（6 处）
 
 ### 8.4.1 timeline-index 域 ✅ 已迁移提交 `65144fe2`
 `modules/timeline-index` 3 文件 + 视图，把 UTC 日分片键全面改本地日历日：
@@ -373,6 +373,47 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 
 新增回归 `src/modules/timeline-index/__tests__/timeline-index-dateKey.test.ts`（10/10，含「前提：本机须为非 UTC 时区」守卫）。**反向验证**：`localDateKeyOf` 改回 UTC 截断 + `getKeyForGranularity('day')` 改回 `toISOString()` 时 **5 例转红**（分片归位 / 范围查询 / 迁移拆分 / 迁移合并 / 日聚合）。timeline-index 相关基线条目已清除（当前基线存量 **125 处 / 115 文件**，其间另有并行批次进一步精简）。
 **七闸门全绿**：vue-tsc（`--max-old-space-size=8192`，0 错误）/ eslint（0 错误，4021 既有警告）/ circular（0 新环）/ room-wiring（合规）/ no-bare-utcdates（无新增）/ vitest **14256/14256**（1077 文件，串行 `--no-file-parallelism`，1725s）/ vite build（50.6s）。
+
+### 8.4.2 body 域 ✅ 已迁移提交 `69520ed3`（第六批）
+7 文件 25 处裸 UTC 切日迁本地日历日（该批与此前「日键第一批」的 body 三环属不同簇，本批专治 §8.4 里那组跨文件契约簇）：
+- `exercise-tracker.ts`（14）：周 / 月 / 日边界键与逐日递进，含多处 `Date.now()` 毫秒差构造。
+- `greenhouse.ts`（5）：指标与睡眠落库 `date` + 今日判定。
+- `health-report.ts`（2）：日期范围边界。
+- `meal-nutrition.ts`（3）：`at.slice` 记录键 + 周范围边界。
+- `metric-trends.ts`（4）：`getFutureDate` 边界 + 周期起止。
+- `nutrition-engine.ts`（2）：含 `generateMealPlan` 的 `date` 默认参数（属契约的一部分）。
+- `nutrition-scoring.ts`（3）：每日评分分桶。
+
+新增回归 `src/modules/body/__tests__/body-tz-daykey.test.ts`。基线删 24 行条目，存量 **110 处 / 101 文件**。
+> 本批即「日键第一批」结尾标记的跨文件契约簇（写键 + 读键 + 边界 + 比较须成组迁移，改一半比不改更糟）；至此 body 域两簇均已收口。
+
+### 8.4.3 attention / bag / career / cognition / craft 五域 ✅ 已迁移（本批，提交序位于第六批与第七批之间）
+7 文件 18 处裸 UTC 切日统一为 `getLocalDateKey`：
+- `modules/attention/attention-model.ts`：`buildLocalAttentionInput` 的 `dateStr` 默认值（原 `new Date().toISOString().slice(0,10)`）。
+- `modules/bag/bag-analytics.ts`：2 处 —— `recordGrowthPoint` 写键 + `getGrowthTrend` 截止边界（`cutoff.toISOString().slice(0,10)` → `getLocalDateKey(cutoff)`）。
+- `modules/bag/bag-store.ts`：2 处 —— 新进化条目默认 `date`（初始态 + `resetEvoForm`）。
+- `modules/career/skill-gap-visualization.ts`：`generateRoadmap` 预计完成日（`completionDate.toISOString().slice(0,10)` → `getLocalDateKey(completionDate)`）。
+- `modules/cognition/meditation-analytics.ts`：8 处 —— `getWeekKey` 周键（`monday.toISOString().slice(0,10)`）、`getRecentSessions` 截止日、`getTodaySessions` 今日、`dailyDurationTrend` 30 日逐日键、`computeStreak` 的 today/yesterday、`yearStart` 年起点、连续中断天数的「今天」。月键早已是 `getLocalMonthKey`，本批不动。
+- `modules/craft/craft-habits.ts`：`analyzeHabits` 的「平均每日创作数」按本地日去重（原 `w.createdAt.split('T')[0]`）。
+- `modules/craft/useCraftUi.ts`：3 处进化历史 `date`（原 `now.slice(0,10)`，`now` 是 `new Date().toISOString()`；此「先存 UTC 串再截」形态闸门白名单不覆盖，但属同类缺陷，一并迁）。
+
+**同步测试口径（测试也是消费端）**：`attention-model.test.ts` 的 `dateStr` 断言、`p22-bag-bridge.test.ts` 的 `recordGrowthPoint` mock、`p25-cognition.test.ts` 的 `today()/daysAgo()` 工厂全部改 `getLocalDateKey(...)`（否则只在本地 00:00–08:00 转红）。
+
+**新增回归 `src/__tests__/modules-daykey-batch.test.ts`（8/8）**：判别窗口钉在本地 2026-03-15 03:00（东八区此刻 UTC 仍是 03-14），覆盖 5 域 7 条断言（attention dateStr / bag 写键+同键覆盖 / career 完成日 / cognition 今日桶+连续活跃 / craft 日均去重）。**反向验证**：把 5 处实现改回 UTC 切日 / `split('T')[0]` 时 **7 例转红**（前提护栏保持绿），恢复后 8/8 全绿。
+基线删 6 条目（`useCraftUi` 本不在基线内，属额外收口）。存量 **104 处 / 95 文件**（本批基线条目随后由第七批 discipline 的剪枝一并以工作区版提交，故现基线已不含这 6 条，见 §8.4.4）。
+**七闸门全绿**：vue-tsc（须 `--max-old-space-size=6144`，默认 2G 堆会 OOM）/ eslint / circular / room-wiring / no-bare-utcdates / vitest **14246/14246**（1076 文件，串行 `--no-file-parallelism`，3346s）/ vite build。
+
+### 8.4.4 discipline 域 ✅ 已迁移提交 `f75720d7`（第七批）
+7 文件 20 处裸 UTC 切日迁本地日历日：
+- `streak-system.ts`（6）：`checkinDate` / `failedDate` 两个函数默认参数 + yesterday 边界 + `streakHistory` 起止 + weekStart + 月键。
+- `habit-predictor.ts`（5）：`breakDate` 预测 + weekStart 键 + 三个 `estimatedDate` 未来推算。
+- `pomodoro-forest.ts`（3）：`slice(0,10)` 形态的 today 与按日分桶。
+- `workshop.ts`（2）：`todayStr()` 唯一出口 + 挑战 end 边界。
+- `workshop-bridge.ts`（2）：自建 today。
+- `habit-correlation.ts`（1）：`shifted` 时间 lag 键。
+- `components/discipline/DailyRitualPanel.vue`（1）：today 边界。
+
+新增回归 `src/modules/discipline/__tests__/discipline-tz-daykey.test.ts`。基线删 41 行条目，存量 **97 处 / 88 文件**（含顺带剪除本批 §8.4.3 遗留的 6 条冗余）。
 
 ### 8.6 月键（形态 E）剩余存量 24 文件 / 27 段 —— 已登记基线
 > ⚠️ 本清单是**月键 4 批开工前的快照**；4 批已迁 22 文件（见 §4.1），下列多数已不在基线内。

@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { CategoryItem, CategoryType } from './types'
 import { CATEGORY_TYPES } from './defaults'
 
@@ -162,7 +163,7 @@ export function useBagAnalytics() {
     const masteredItems = categories.filter(c => c.proficiency >= 80).length
 
     const point: GrowthTrend = {
-      date: new Date().toISOString().slice(0, 10),
+      date: getLocalDateKey(),
       totalProficiency,
       avgProficiency,
       newItems: totalItems,
@@ -184,7 +185,7 @@ export function useBagAnalytics() {
   function getGrowthTrend(days: number = 90): GrowthTrend[] {
     const cutoff = new Date()
     cutoff.setDate(cutoff.getDate() - days)
-    const cutoffStr = cutoff.toISOString().slice(0, 10)
+    const cutoffStr = getLocalDateKey(cutoff)
     return growthTrend.value
       .filter(t => t.date >= cutoffStr)
       .sort((a, b) => a.date.localeCompare(b.date))
