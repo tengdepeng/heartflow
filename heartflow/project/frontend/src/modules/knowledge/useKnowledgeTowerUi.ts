@@ -24,6 +24,7 @@ import { getRelations } from './relation'
 import { RELATION_TYPE_META } from './types'
 import type { KnowledgeRelation } from './types'
 import { useKnowledgeTower } from './knowledge-tower'
+import { getLocalDateKey } from '../../utils/time'
 import { applyEnhancedForceLayout } from './graph-visualization'
 import type { GraphNode, GraphEdge, EnhancedForceParams } from './graph-visualization'
 import { CATEGORY_PALETTE } from '../../theme/categoryColors'
@@ -195,7 +196,11 @@ export function useKnowledgeTowerUi() {
         d.getDate(),
       ).padStart(2, '0')}`
     } catch {
-      return iso.slice(0, 10)
+      // 解析失败 ⇒ iso 不是可解析的时间戳串。做尽力显示：取开头的 YYYY-MM-DD
+      // （若存在）。这里不做时区换算，故不属日键计算；正常路径的本地日历日
+      // 口径由上方 try 分支保证。
+      const m = /^(\d{4}-\d{2}-\d{2})/.exec(iso)
+      return m ? m[1] : iso
     }
   }
 
@@ -583,10 +588,10 @@ export function useKnowledgeTowerUi() {
   // 时间线
   const timelineGroups = computed(() => {
     const groups: { label: string; items: KNode[] }[] = []
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     for (const n of nodes.value) {
       const ds = n.id.startsWith('kn')
-        ? new Date(parseInt(n.id.slice(2))).toISOString().slice(0, 10)
+        ? getLocalDateKey(new Date(parseInt(n.id.slice(2))))
         : today
       let g = groups.find((x) => x.label === ds)
       if (!g) {

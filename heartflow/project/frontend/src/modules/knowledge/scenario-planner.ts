@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { KnowledgeNode } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -727,7 +728,7 @@ export function useScenarioPlanner() {
     return timePoints.map(tp => {
       const date = new Date()
       date.setMonth(date.getMonth() + tp.months)
-      const timePoint = date.toISOString().split('T')[0]
+      const timePoint = getLocalDateKey(date)
 
       const states: FutureProjection['states'] = scenarios.map(s => {
         // 基于驱动因素不确定性计算概率衰减

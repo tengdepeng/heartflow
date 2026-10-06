@@ -5,6 +5,7 @@
 
 import { ref } from 'vue'
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { KnowledgeNode, KnowledgeRelation, RelationType } from './types'
 import { CATEGORY_PALETTE } from '../../theme/categoryColors'
 
@@ -402,12 +403,12 @@ export function useSpacedReview() {
     nodes: KnowledgeNode[],
     today: Date = new Date(),
   ): ReviewPlan {
-    const todayStr = today.toISOString().split('T')[0]
+    const todayStr = getLocalDateKey(today)
     const items: ReviewItem[] = nodes.map(node => {
       const reviewCount = 0 // 从知识节点中没有 reviewCount，默认 0
       const lastReviewedAt = null // 同上
       const interval = SPACED_INTERVALS[Math.min(reviewCount, SPACED_INTERVALS.length - 1)]
-      const nextReviewAt = new Date(today.getTime() + interval * 86400000).toISOString().split('T')[0]
+      const nextReviewAt = getLocalDateKey(new Date(today.getTime() + interval * 86400000))
       const due = true // 新节点总是到期
 
       // 基于标签和连接数估算难度
@@ -456,7 +457,7 @@ export function useSpacedReview() {
 
   /** 获取今日复习计划 */
   function getTodayPlan(): ReviewPlan | undefined {
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey()
     return reviewPlans.value.find(p => p.date === today)
   }
 
@@ -480,13 +481,13 @@ export function useSpacedReview() {
 
       // 更新下次复习时间
       const interval = SPACED_INTERVALS[Math.min(item.reviewCount, SPACED_INTERVALS.length - 1)]
-      item.nextReviewAt = new Date(Date.now() + interval * 86400000).toISOString().split('T')[0]
+      item.nextReviewAt = getLocalDateKey(new Date(Date.now() + interval * 86400000))
       item.due = false
     } else {
       plan.incorrectCount++
       item.mastery = Math.max(item.mastery - 0.05, 0)
       // 错误时缩短间隔
-      item.nextReviewAt = new Date(Date.now() + 86400000).toISOString().split('T')[0]
+      item.nextReviewAt = getLocalDateKey(new Date(Date.now() + 86400000))
       item.due = true
     }
 
@@ -501,8 +502,8 @@ export function useSpacedReview() {
 
   /** 计算复习统计 */
   function computeReviewStats(): ReviewStats {
-    const today = new Date().toISOString().split('T')[0]
-    const weekEnd = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]
+    const today = getLocalDateKey()
+    const weekEnd = getLocalDateKey(new Date(Date.now() + 7 * 86400000))
 
     let todayDue = 0
     let thisWeekDue = 0
@@ -537,7 +538,7 @@ export function useSpacedReview() {
     )
     let streak = 0
     const checkDate = new Date()
-    while (reviewDates.has(checkDate.toISOString().split('T')[0])) {
+    while (reviewDates.has(getLocalDateKey(checkDate))) {
       streak++
       checkDate.setDate(checkDate.getDate() - 1)
     }
