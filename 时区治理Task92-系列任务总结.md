@@ -415,6 +415,21 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 
 新增回归 `src/modules/discipline/__tests__/discipline-tz-daykey.test.ts`。基线删 41 行条目，存量 **97 处 / 88 文件**（含顺带剪除本批 §8.4.3 遗留的 6 条冗余）。
 
+### 8.4.5 body-wisdom 藏象阁域 ✅ 已迁移（第八批）
+6 文件 9 处裸 UTC 切日迁本地日历日：
+- `meridians.ts`（2）：`getTodayRecords` 今日键 + `getStats` `recentTrend` 近 7 日分桶。
+- `meridian-visualization.ts`（3）：热力图 7 日 + 趋势图 30 日 + 聚合趋势 7 日标签与逐经络匹配（末者原为 `slice(5,10)` 形态，闸门 D 类不覆盖）。
+- `passive-health-imagery.ts`（2）：`todayStr()` 默认基准 + `placeholderSignal` 今日判定。
+- `body-wisdom-bridge.ts`（1）：`moodTrend` 近 14 日情绪分桶。
+- `constitution-trend.ts`（3）：`trendChartData` 标签 + `wellnessTrend` `assessedAt` 标签 + `stabilityAnalysis` 趋势日期（后两者原为属性 `slice(0,10)`，D 类）。
+- `views/BodyWisdom.vue`（1）：`meridianSummary` 今日键，与 `stores/health` 已迁的本地 `date` 键同基。
+
+**关键约定**：读侧一律 `getLocalDateKey(new Date(recordedAt))`，**不能**拿 UTC 时间戳 `startsWith` 本地日键（`recordedAt` 是 `toISOString()`，其前缀是 UTC 日）。此即本域写键（`stores/health` 本地日）与读键（本批）必须同基的原因。
+
+**新增回归 `src/modules/body-wisdom/__tests__/body-wisdom-tz-daykey.test.ts`（7/7）**：判别窗口钉在东八区本地 2026-03-15 00:30（此刻 UTC 仍是 03-14），覆盖前提护栏、今日记录过滤（昨日 23:30 不算）、趋势分桶、热力图分组、情绪趋势、养生评分标签、7 日窗口边界。**反向验证**：把 5 处实现改回 UTC 切日时 5/7 转红，恢复后 7/7 全绿。
+基线删 body-wisdom 条目，存量 **91 处 / 82 文件**。
+**七闸门全绿**：vue-tsc（`--max-old-space-size=6144`）/ eslint / circular / room-wiring / no-bare-utcdates / vitest **14301/14301**（1085 文件，串行 `--no-file-parallelism`，3301s）/ vite build（32s）。
+
 ### 8.6 月键（形态 E）剩余存量 24 文件 / 27 段 —— 已登记基线
 > ⚠️ 本清单是**月键 4 批开工前的快照**；4 批已迁 22 文件（见 §4.1），下列多数已不在基线内。
 > `timeline-index/aggregation` 的月键早已是 `getLocalMonthKey`（本批仅迁其日/周/时键，见 §8.4.1），此处列出属快照残留。
