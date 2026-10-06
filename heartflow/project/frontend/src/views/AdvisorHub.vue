@@ -124,7 +124,7 @@
     <!-- 操作按钮组 -->
     <div data-enter class="ah-action-row">
       <button class="ah-btn-new" @click="openCreate" :disabled="userAdvisors.length >= maxAdvisors">+ 创建幕僚</button>
-      <button class="ah-btn-affinity" @click="$router.push('/advisor-affinity')" :disabled="!advisors.length">❤ 好感</button>
+      <button class="ah-btn-affinity" @click="navigateToRoom('advisor-affinity')" :disabled="!advisors.length">❤ 好感</button>
     </div>
 
     <!-- 镜我对白会话（归档） -->
@@ -295,6 +295,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
+import { navigateToRoom } from '../composables/useRoomNavigation'
 import { storage } from '../engine/storage'
 import type { AdvisorProfile, AdvisorRole, AdvisorPersonality, AdvisorCarrier } from '../types'
 import { advisorCarrierStageOf, carrierGlyph, carrierIsImage } from '../types'

@@ -376,13 +376,13 @@ describe('AdvisorHub 视图（真实档案层）', () => {
     expect(card.classes()).toContain('dormant')
   })
 
-  // ---- 导航到好感度页面 ----
-  it('点击"好感"按钮导航到 /advisor-affinity', async () => {
+  // ---- 导航到好感度页面（经房间图解析，路径为 /advisors/affinity） ----
+  it('点击"好感"按钮导航到好感度房间 /advisors/affinity', async () => {
     mockAdvisors.push(sampleProfile())
     const wrapper = await getWrapper()
     const affinityBtn = wrapper.find('.ah-btn-affinity')
     await affinityBtn.trigger('click')
-    expect(mockPush).toHaveBeenCalledWith('/advisor-affinity')
+    expect(mockPush).toHaveBeenCalledWith('/advisors/affinity')
   })
 
   // ---- 一次性迁移旧表单层 hf:advisors ----
