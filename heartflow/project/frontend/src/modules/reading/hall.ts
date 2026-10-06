@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { Book, BookQuote, ReadingSession, ReadingStatus, ReadingGoal } from './types'
 import { READING_STORAGE_KEYS } from './types'
 import { storage } from '../../engine/storage'
@@ -35,7 +36,7 @@ const books = ref<Book[]>(loadBooks())
 const sessions = ref<ReadingSession[]>(loadSessions())
 const readingGoal = ref<ReadingGoal>(loadGoal())
 
-function todayStr(): string { return new Date().toISOString().split('T')[0] }
+function todayStr(): string { return getLocalDateKey(new Date()) }
 
 export function useReadingHall() {
   // ---- 书籍管理 ----

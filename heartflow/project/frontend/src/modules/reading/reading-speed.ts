@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 import type { Book, ReadingSession } from './types'
 
@@ -169,7 +170,7 @@ function generateId(prefix: string): string {
 }
 
 function todayStr(): string {
-  return new Date().toISOString().split('T')[0]
+  return getLocalDateKey(new Date())
 }
 
 function median(values: number[]): number {

@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 import type { Book, ReadingSession } from './types'
 
@@ -417,7 +418,8 @@ export function useReadingHabits() {
     today.setHours(0, 0, 0, 0)
     for (let i = sortedDates.length - 1; i >= 0; i--) {
       const expected = new Date(today.getTime() - (sortedDates.length - 1 - i) * 86400000)
-      if (sortedDates[i] === expected.toISOString().split('T')[0]) {
+      // ⚠️ expected 由本地 today 回退构造，取本地日键；sortedDates 是记录键（todayStr 本地化后），两侧同基
+      if (sortedDates[i] === getLocalDateKey(expected)) {
         streak++
       } else {
         break

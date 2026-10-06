@@ -5,6 +5,7 @@
 // ============================================================
 
 import { computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { useReading, type Excerpt } from './reading-content'
 import { useReadingMemos, type ReadingMemo } from './reading-memo'
 
@@ -34,7 +35,7 @@ export function generateReadingExportFilename(
   kind: 'excerpts' | 'memos' | 'combined',
   ext: string,
 ): string {
-  const date = new Date().toISOString().slice(0, 10)
+  const date = getLocalDateKey()
   return `reading-${kind}-${date}.${ext}`
 }
 

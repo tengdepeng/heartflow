@@ -10,6 +10,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalMonthKey } from '../../utils/time'
 import type { Book, ReadingSession } from './types'
 import type { ReadingAnalytics } from './reading-insights'
 import type { SpeedStats } from './reading-speed'
@@ -60,13 +61,15 @@ export function buildYearReport(
   // 月度分布：读完月份计书、阅读月份计分钟，合并到同一张月表
   const monthMap = new Map<string, { books: number; minutes: number }>()
   for (const b of finishedThisYear) {
-    const m = (b.finishDate ?? '').slice(0, 7)
+    // ⚠️ finishDate 已本地日键，取本地月键
+    const m = b.finishDate ? getLocalMonthKey(new Date(b.finishDate)) : ''
     if (!monthMap.has(m)) monthMap.set(m, { books: 0, minutes: 0 })
     monthMap.get(m)!.books += 1
   }
   for (const s of sessions) {
     if (!s.date.startsWith(prefix)) continue
-    const m = s.date.slice(0, 7)
+    // ⚠️ s.date 已本地日键（session.date 由 todayStr 本地化），取本地月键
+    const m = getLocalMonthKey(new Date(s.date))
     if (!monthMap.has(m)) monthMap.set(m, { books: 0, minutes: 0 })
     monthMap.get(m)!.minutes += s.duration
   }

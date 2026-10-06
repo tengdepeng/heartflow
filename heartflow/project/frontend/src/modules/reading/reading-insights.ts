@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 import type { Book, ReadingSession } from './types'
 
@@ -160,7 +161,8 @@ export function useReadingInsights() {
 
     // 本月统计
     const now = new Date()
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+    // ⚠️ 本地月份起始（new Date(y,m,1) 是本地分量构造，toISOString 会反向退到上月）→ 取本地日键
+    const monthStart = getLocalDateKey(new Date(now.getFullYear(), now.getMonth(), 1))
     const monthBooks = books.filter(b => b.finishDate && b.finishDate >= monthStart)
     a.monthlyBooks = monthBooks.length
     a.monthlyReadingTime = monthBooks.reduce((sum, b) => sum + b.totalReadingTime, 0)
@@ -191,7 +193,8 @@ export function useReadingInsights() {
     const monthlyMap = new Map<string, { pages: number; books: Set<string> }>()
     for (const book of books) {
       if (!book.finishDate) continue
-      const month = book.finishDate.slice(0, 7)
+      // ⚠️ finishDate 已本地日键（hall.ts 的 todayStr 本地化），取本地月键
+      const month = getLocalMonthKey(new Date(book.finishDate))
       const entry = monthlyMap.get(month) || { pages: 0, books: new Set() }
       entry.pages += book.totalPages
       entry.books.add(book.id)
