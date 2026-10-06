@@ -121,6 +121,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted, inject, toRefs } from 'vue'
 import { HomeRoomAtmosphere, DEFAULT_HOME_ROOM, getHomeRoom } from '../modules/home'
+import { getLocalDateKey } from '../utils/time'
 import type { HomeRoom } from '../modules/home'
 import { useRouter } from 'vue-router'
 import { useTimer } from '../resonance/bridges/timer'
@@ -281,9 +282,11 @@ const moodMap: Record<string, string> = {
 const latestEmotion = computed(() => emotion.records.value[0])
 const pendingAnchors = computed(() => anchor.todayAnchors.value.filter(item => !item.done))
 const totalFocusMinutes = computed(() => {
-  const today = new Date().toISOString().slice(0, 10)
+  // ⚠️ 今日专注按本地日历日；completedAt 是 UTC ISO 串，用 startsWith 前缀匹配会漏掉凌晨记录。
+  const today = getLocalDateKey()
   return storage.getSessions()
-    .filter(item => item.status === 'completed' && item.completedAt?.startsWith(today))
+    .filter(item => item.status === 'completed' && item.completedAt
+      && getLocalDateKey(new Date(item.completedAt)) === today)
     .reduce((sum, item) => sum + Math.round(item.elapsed / 60000), 0)
 })
 

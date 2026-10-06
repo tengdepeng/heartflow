@@ -329,6 +329,7 @@ import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
 import { useHealthDashboard } from '../modules/body'
+import { getLocalDateKey } from '../utils/time'
 import BodyRingsPanel from '../components/BodyRingsPanel.vue'
 import NutritionPanel from '../components/NutritionPanel.vue'
 import MealNutritionPanel from '../components/MealNutritionPanel.vue'
@@ -413,7 +414,8 @@ const exerciseForm = ref({ minutes: 30, type: '' })
 const mealForm = ref({ note: '' })
 const showDetail = ref('')
 const cycleShowForm = ref(false)
-const cycleForm = ref({ start: new Date().toISOString().slice(0, 10), duration: 5 })
+// ⚠️ 周期起始日按本地日历日（date input 的值即用户所在时区的日期）
+const cycleForm = ref({ start: getLocalDateKey(), duration: 5 })
 
 function logSleep() {
   if (sleepForm.value.hours > 0) { addLog('sleep', { hours: sleepForm.value.hours }); sleepForm.value.hours = 7 }
@@ -452,8 +454,9 @@ const sleepChartData = computed(() => {
   const now = new Date()
   for (let i = 6; i >= 0; i--) {
     const d = new Date(now); d.setDate(now.getDate() - i)
-    const dateStr = d.toISOString().slice(0, 10)
-    const dayLogs = sleepLogs.filter(l => l.at.slice(0, 10) === dateStr)
+    // ⚠️ 分桶键按本地日历日；sleepLogs.at 是 UTC ISO 串，两侧都不可切前 10 位取 UTC 日。
+    const dateStr = getLocalDateKey(d)
+    const dayLogs = sleepLogs.filter(l => l.at && getLocalDateKey(new Date(l.at)) === dateStr)
     const total = dayLogs.reduce((a, l) => a + (l.value.hours || 0), 0)
     const avg = dayLogs.length > 0 ? total / dayLogs.length : 0
     const dayLabels = ['日', '一', '二', '三', '四', '五', '六']

@@ -170,6 +170,7 @@ import LifeEpochPanel from '../components/LifeEpochPanel.vue'
 import ObservationPlanPanel from '../components/ObservationPlanPanel.vue'
 import type { FocusSession } from '../types'
 import { useTimeCapsule } from '../modules/capsule'
+import { getLocalDateKey } from '../utils/time'
 // 接线 timer 统计孤儿（INCR-436）：今日/本周/本月专注、今日完成、连续天数、长休提醒
 import {
   getTodayFocusTime,
@@ -214,7 +215,8 @@ onMounted(() => {
 
   const days = new Set<string>()
   for (const c of crystals) {
-    days.add(new Date(c.createdAt).toISOString().slice(0, 10))
+    // ⚠️ 活跃天数按本地日历日（createdAt 是 UTC ISO 串）
+    if (c.createdAt) days.add(getLocalDateKey(new Date(c.createdAt)))
   }
 
   const totalFocusMs = sessions.reduce((sum, s) => sum + (s.elapsed || 0), 0)

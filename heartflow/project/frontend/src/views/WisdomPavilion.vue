@@ -358,9 +358,10 @@ function formatTime(iso: string): string {
 // ---------- 数据获取 ----------
 function getCtx(): WisdomContext {
   const localToday = getLocalDateKey()
-  const timestampToday = new Date().toISOString().slice(0, 10)
   const sessions = statsStore.completedSessions
-  const todayFocus = sessions.filter(s => s.completedAt?.startsWith(timestampToday)).length
+  // ⚠️ 今日专注按本地日历日；completedAt 是 UTC ISO 串，startsWith 前缀匹配会漏凌晨记录。
+  const todayFocus = sessions.filter(s => s.completedAt
+    && getLocalDateKey(new Date(s.completedAt)) === localToday).length
   const totalFocus = sessions.length
   const totalMin = Math.round(sessions.reduce((a, s) => a + s.elapsed / 60000, 0))
   const emotions = statsStore.emotions

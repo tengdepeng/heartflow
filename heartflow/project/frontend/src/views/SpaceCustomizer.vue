@@ -295,7 +295,7 @@
         <div v-for="cfg in spaceConfigs" :key="cfg.id" class="sc-config-card" :class="{ active: activeConfig?.id === cfg.id }">
           <div class="sc-config-header">
             <span class="sc-config-name">{{ cfg.name }}</span>
-            <span class="sc-config-date">{{ cfg.updatedAt.slice(0, 10) }}</span>
+            <span class="sc-config-date">{{ cfg.updatedAt ? getLocalDateKey(new Date(cfg.updatedAt)) : '' }}</span>
           </div>
           <p class="sc-config-desc" v-if="cfg.description">{{ cfg.description }}</p>
           <div class="sc-config-actions">
@@ -340,6 +340,7 @@
 import { ref, computed } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import type { DimensionConfig } from '../modules/customization/types'
+import { getLocalDateKey } from '../utils/time'
 import {
   SPACE_PRESETS, getPresetById,
   getSpaceConfigs, getActiveConfig, setActiveConfigId,

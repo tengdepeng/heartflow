@@ -580,7 +580,8 @@ const formAmount = ref(0)
 const formDesc = ref('')
 const formDate = ref('')
 const editingRecord = ref<RewardRecord | null>(null)
-const todayForHint = new Date().toISOString().slice(0, 10)
+// ⚠️ 日期输入提示的「今天」按本地日历日
+const todayForHint = getLocalDateKey()
 
 // 搜索与筛选
 const searchQuery = ref('')
@@ -979,7 +980,8 @@ function editRecord(r: RewardRecord) {
   formCategory.value = r.category
   formAmount.value = r.amount
   formDesc.value = r.description
-  formDate.value = r.at.slice(0, 10)
+  // ⚠️ 编辑回填的日期标签按本地日历日（r.at 是 UTC ISO 串）
+  formDate.value = r.at ? getLocalDateKey(new Date(r.at)) : ''
 }
 
 // 记账提醒面板「现在记一笔」滚动到新增记录表单

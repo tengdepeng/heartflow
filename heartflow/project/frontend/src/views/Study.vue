@@ -280,6 +280,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useStudy, tagFrequencies, pickRandom } from '../modules/study'
+import { getLocalDateKey } from '../utils/time'
 import { useNoteLinks } from '../modules/study/note-links'
 import { getSpineColor, formatNoteDate } from '../modules/study/types'
 import { storage } from '../engine/storage'
@@ -414,11 +415,12 @@ function seededRandom(seed: number): () => number {
 
 function pickDailySerendipity(notes: Note[], count: number = 3): Note[] {
   if (notes.length === 0) return []
-  const today = new Date().toISOString().slice(0, 10)
+  // ⚠️ 「今天」按本地日历日：createdAt 是 UTC ISO 串，两侧都不可切前 10 位取 UTC 日。
+  const today = getLocalDateKey()
   const seed = dailySeed(today)
   const rng = seededRandom(seed)
   const pool = [...notes].filter(n => {
-    const d = new Date(n.createdAt).toISOString().slice(0, 10)
+    const d = getLocalDateKey(new Date(n.createdAt))
     return d !== today // 排除今天的笔记
   })
   if (pool.length === 0) return []
@@ -440,9 +442,10 @@ function refreshSerendipity() {
 const dailySerendipity = computed(() => {
   if (serendipityRefreshCounter.value > 0) {
     const seed = dailySeed(`refresh-${serendipityRefreshCounter.value}`)
+    const today = getLocalDateKey()
     const pool = [...study.notes.value].filter(n => {
-      const d = new Date(n.createdAt).toISOString().slice(0, 10)
-      return d !== new Date().toISOString().slice(0, 10)
+      const d = getLocalDateKey(new Date(n.createdAt))
+      return d !== today
     })
     if (pool.length === 0) return []
     const rng = seededRandom(seed)

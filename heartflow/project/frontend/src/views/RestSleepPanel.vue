@@ -253,6 +253,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useSleepQuality } from '../modules/rest/sleep-quality'
+import { getLocalDateKey } from '../utils/time'
 import type { SleepRecord } from '../modules/rest/sleep-quality'
 import EmptyState from '../components/EmptyState.vue'
 
@@ -287,7 +288,8 @@ const newSleep = ref({
 })
 
 function addSleepRecord() {
-  const today = new Date().toISOString().split('T')[0]
+  // ⚠️ 「今天」按本地日历日（跨 UTC 日界时 UTC 会早一天）
+  const today = getLocalDateKey()
   const bedtime = `${today}T${newSleep.value.bedtime}:00.000Z`
   const wakeTime = `${today}T${newSleep.value.wakeTime}:00.000Z`
 

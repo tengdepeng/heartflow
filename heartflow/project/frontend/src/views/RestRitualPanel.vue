@@ -198,6 +198,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { storage } from '../engine/storage'
+import { getLocalDateKey } from '../utils/time'
 import type { BreakRecord, RestPractice } from '../modules/rest/types'
 import { DEFAULT_PRACTICES } from '../modules/rest/types'
 import {
@@ -275,7 +276,8 @@ function getPhaseLabel(phase: string): string {
 }
 
 // ---- 日历 ----
-const today = new Date().toISOString().split('T')[0]
+// ⚠️ 日历「今天」按本地日历日（与 rest-rituals 落库日键同基）
+const today = getLocalDateKey()
 const weekDays = ['日', '一', '二', '三', '四', '五', '六']
 
 const calendar = computed(() => {

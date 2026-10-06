@@ -347,6 +347,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useDisciplineBridge } from '../modules/discipline/workshop-bridge'
+import { getLocalDateKey } from '../utils/time'
 import HabitPredictArchivePanel from '../components/HabitPredictArchivePanel.vue'
 import HabitFailurePanel from '../components/HabitFailurePanel.vue'
 import HabitSuggestionPanel from '../components/HabitSuggestionPanel.vue'
@@ -492,7 +493,8 @@ const filteredBadges = computed(() => {
 // ---- 辅助函数 ----
 
 function isHabitCompletedToday(habit: Habit): boolean {
-  const today = new Date().toISOString().split('T')[0]
+  // ⚠️ 「今天」按本地日历日（completedDates 为本地日键数组，等值比较）
+  const today = getLocalDateKey()
   return habit.completedDates.includes(today)
 }
 

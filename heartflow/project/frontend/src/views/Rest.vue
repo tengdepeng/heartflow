@@ -413,6 +413,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useConfig } from '../resonance/bridges/config'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRest } from '../modules/rest'
+import { getLocalDateKey } from '../utils/time'
 import type { RestPractice, BreakRecord } from '../modules/rest'
 import RestSleepPanel from './RestSleepPanel.vue'
 import RestRitualPanel from './RestRitualPanel.vue'
@@ -608,7 +609,8 @@ function addBreakRecord() {
     duration: newBreak.value.duration,
     mood: newBreak.value.mood,
     note: newBreak.value.note || undefined,
-    date: new Date().toISOString().split('T')[0],
+    // ⚠️ 落库日键按本地日历日（与 rest 模块读取口径一致）
+    date: getLocalDateKey(),
   }
   breakRecords.value = [...breakRecords.value, record]
   rest.saveBreakRecords()

@@ -1,5 +1,5 @@
 {
-  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 140 处（137 文件）（word-mirror 域 4 引擎已迁）。 2026-10-05：闸门补第4 类形态（时间戳属性 .slice(0,10) / .substring(0,10)，此前完全漏检，揭出 55 段 / 24 文件），同时 engine/data-port（导出时间线的today/yesterday 分组 + 4 处时间戳切日键 + 3 处导出文件名）已迁。真实存量 140→194 处 / 137→167 文件。 2026-10-05 锚点域迁出 4 文件（anchor-journals 手札日键 + AnchorJournalPanel 日期标签 + anchor-review 回顾范围/每日趋势/连续统计 + celebration 今日上下文/文件名/连续天数），存量降至 189 处 / 163 文件。 2026-10-05 幕僚域迁出 2 文件（modules/advisor/celebration 庆祝事件写键/今日读键/未来7天边界 + stores/advisor 4 处今日桶 completedAt/createdAt/at 双侧本地键），存量降至 187 处 / 161 文件。 2026-10-06 日键第二批：touchpoints 域迁出 4 文件（notification-strategy 今日上限 + push-channel 每日计数/今日统计 + touch-analytics 按天聚合/异常日期标签 + orchestration-engine 3 处 startsWith 前缀匹配改双侧同基）+ emotion/happy-box 跨域契约簇（今日计数），并修 widget-calendar 半迁点（快乐速记分支，基线 D 类盲区未登记）。存量降至 156 处 / 142 文件。",
+  "$comment": "存量裸 UTC 切日（toISOString().slice(0,10) / .split('T')[0] 取日期键），经 2026-10-04 实证盘点原始共 163 处（154 文件），均为待迁移存量。本闸门只防新增：任何不在本基线内的新匹配即红灯。迁移一批就手动从 violations 删对应条目（不要整体 --update-baseline，以免把新增也一并登记）。官方替换写法：utils/time.ts 的 getLocalDateKey()。2026-10-04 已迁出 CrystalGalleryPanel + EntranceHall + Courtyard + HealthPanel + LivingRoom + KitchenDining（深夜食堂今日餐食本地日口径）+ stores/timer（今日完成专注数本地日口径）+ stores/stats（今日专注分钟/连续天数本地日口径）+ stores/health（经络日志日键本地日口径），存量降至 140 处（137 文件）（word-mirror 域 4 引擎已迁）。 2026-10-05：闸门补第4 类形态（时间戳属性 .slice(0,10) / .substring(0,10)，此前完全漏检，揭出 55 段 / 24 文件），同时 engine/data-port（导出时间线的today/yesterday 分组 + 4 处时间戳切日键 + 3 处导出文件名）已迁。真实存量 140→194 处 / 137→167 文件。 2026-10-05 锚点域迁出 4 文件（anchor-journals 手札日键 + AnchorJournalPanel 日期标签 + anchor-review 回顾范围/每日趋势/连续统计 + celebration 今日上下文/文件名/连续天数），存量降至 189 处 / 163 文件。 2026-10-05 幕僚域迁出 2 文件（modules/advisor/celebration 庆祝事件写键/今日读键/未来7天边界 + stores/advisor 4 处今日桶 completedAt/createdAt/at 双侧本地键），存量降至 187 处 / 161 文件。 2026-10-06 日键第二批：touchpoints 域迁出 4 文件（notification-strategy 今日上限 + push-channel 每日计数/今日统计 + touch-analytics 按天聚合/异常日期标签 + orchestration-engine 3 处 startsWith 前缀匹配改双侧同基）+ emotion/happy-box 跨域契约簇（今日计数），并修 widget-calendar 半迁点（快乐速记分支，基线 D 类盲区未登记）。存量降至 156 处 / 142 文件。 2026-10-06 日键第三批A1（views 今日桶）：迁出 11 视图（Study 今日笔记排除 / Home 今日专注 startsWith 改双侧同基 / Rest 休息落库日键 / RestRitualPanel+RestSleepPanel 日历 today / DisciplineWorkshop 今日打卡 / Reward 提示+编辑回填 / WisdomPavilion 半迁 timestampToday / TimeCorridorView 活跃天数 / SpaceCustomizer 展示标签 / BodyGreenhouse 睡眠近7天分桶+周期起始日）。存量降至 143 处 / 131 文件。",
   "violations": {
     "src/components/BackfillCalendarPanel.vue": [
       "at.slice(0,10)"
@@ -358,10 +358,6 @@
       "lastModified.slice(0,10)",
       "toISOString().slice(0,10)"
     ],
-    "src/views/BodyGreenhouse.vue": [
-      "at.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
     "src/views/BodyWisdom.vue": [
       "toISOString().slice(0,10)"
     ],
@@ -377,16 +373,10 @@
     "src/views/Dictionary.vue": [
       "toISOString().slice(0,10)"
     ],
-    "src/views/DisciplineWorkshop.vue": [
-      "toISOString().split('T')[0]"
-    ],
     "src/views/DreamNook.vue": [
       "toISOString().slice(0,10)"
     ],
     "src/views/GrowthGarden.vue": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/views/Home.vue": [
       "toISOString().slice(0,10)"
     ],
     "src/views/InteractionConfig.vue": [
@@ -395,32 +385,7 @@
     "src/views/Output.vue": [
       "toISOString().slice(0,10)"
     ],
-    "src/views/Rest.vue": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/views/RestRitualPanel.vue": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/views/RestSleepPanel.vue": [
-      "toISOString().split('T')[0]"
-    ],
-    "src/views/Reward.vue": [
-      "at.slice(0,10)",
-      "toISOString().slice(0,10)"
-    ],
     "src/views/SeasonalRituals.vue": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/views/SpaceCustomizer.vue": [
-      "updatedAt.slice(0,10)"
-    ],
-    "src/views/Study.vue": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/views/TimeCorridorView.vue": [
-      "toISOString().slice(0,10)"
-    ],
-    "src/views/WisdomPavilion.vue": [
       "toISOString().slice(0,10)"
     ],
     "src/views/WorkLog.vue": [
