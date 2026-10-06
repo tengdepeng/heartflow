@@ -10,6 +10,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import { useMeridianTracker, getCurrentMeridian } from './meridians'
 import { useConstitutionAnalyzer } from './constitution'
 import { useFiveMovements, useMeridianCheck, useWellnessPlan } from './five-movements'
@@ -133,11 +134,11 @@ export function useBodyWisdomBridge() {
     for (let i = 13; i >= 0; i--) {
       const d = new Date()
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
-      const dayRecords = moodRecords.value.filter(r => r.recordedAt.startsWith(dateStr))
+      const dateKey = getLocalDateKey(d)
+      const dayRecords = moodRecords.value.filter(r => getLocalDateKey(new Date(r.recordedAt)) === dateKey)
       const positive = dayRecords.filter(r => r.mood === 'calm' || r.mood === 'happy').length
       trend.push({
-        date: dateStr.slice(5),
+        date: dateKey.slice(5),
         positiveRate: dayRecords.length > 0 ? Math.round((positive / dayRecords.length) * 100) : 0,
       })
     }

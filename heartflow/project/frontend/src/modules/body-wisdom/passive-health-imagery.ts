@@ -17,6 +17,7 @@
 //   - 第8条「中性呈现」：仅事实性描述，无价值评判。
 // ============================================================
 
+import { getLocalDateKey } from '../../utils/time'
 import { MERIDIAN_HOURS } from './types'
 
 // ---- 输入 ----
@@ -66,7 +67,7 @@ function clamp(n: number, lo = 0, hi = 100): number {
 }
 
 function todayStr(dateStr?: string): string {
-  return dateStr ?? new Date().toISOString().slice(0, 10)
+  return dateStr ?? getLocalDateKey()
 }
 
 /** 返回 base 日期往前 days 天的 ISO 时间戳（用于近 N 天窗口） */
@@ -232,7 +233,7 @@ export function derivePassiveHealthImagery(
 // ---- 确定性时辰中性占位 ----
 
 function placeholderSignal(base: string): IHealthImagerySignal {
-  const isToday = base === new Date().toISOString().slice(0, 10)
+  const isToday = base === getLocalDateKey()
   const hour = isToday ? new Date().getHours() : 12
   const organ = currentMeridian(hour).organ
   return {

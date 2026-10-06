@@ -10,6 +10,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type {
   ConstitutionType,
   ConstitutionAnalysis,
@@ -219,7 +220,7 @@ export function useConstitutionTrend() {
   const trendChartData = computed(() => {
     if (trendHistory.value.length === 0) return null
 
-    const labels = trendHistory.value.map(p => p.date.slice(0, 10))
+    const labels = trendHistory.value.map(p => getLocalDateKey(new Date(p.date)))
     const types = Object.keys(trendHistory.value[0].scores) as ConstitutionType[]
 
     const datasets = types.map(type => ({
@@ -485,7 +486,7 @@ export function useConstitutionTrend() {
   /** 养生评分趋势 */
   const wellnessTrend = computed(() => {
     return wellnessScores.value.slice(-14).map(s => ({
-      date: s.assessedAt.slice(0, 10),
+      date: getLocalDateKey(new Date(s.assessedAt)),
       overall: s.overall,
       physical: s.dimensions.physical,
       emotional: s.dimensions.emotional,
@@ -614,7 +615,7 @@ export function useConstitutionTrend() {
       stability,
       dominantType: types[types.length - 1],
       uniqueTypes: uniqueTypes.size,
-      trend: recent.map(p => ({ date: p.date.slice(0, 10), score: p.primaryScore })),
+      trend: recent.map(p => ({ date: getLocalDateKey(new Date(p.date)), score: p.primaryScore })),
       analysis: stability >= STABILITY_THRESHOLD
         ? '体质稳定，保持良好'
         : uniqueTypes.size > 2

@@ -219,6 +219,7 @@ import SutraAnnotationPanel from '../components/SutraAnnotationPanel.vue'
 import GuidedCapturePanel from '../components/GuidedCapturePanel.vue'
 import { MERIDIAN_HOURS } from '../modules/body-wisdom'
 import type { MeridianRecord, MoodRecord } from '../modules/body-wisdom'
+import { getLocalDateKey } from '../utils/time'
 
 const health = useHealth()
 const { meridianLogs, wisdomLogs, readingLogs, bodyNotes, senseNotes, sutraNotes } = health
@@ -254,7 +255,7 @@ function recordMeridianFeeling(m:typeof meridians[0],feeling:string) {
 }
 
 const meridianSummary = computed(()=>{
-  const today = new Date().toISOString().slice(0,10)
+  const today = getLocalDateKey()
   const logs = meridianLogs.value.filter(l=>l.date===today)
   return {
     today:logs.length,

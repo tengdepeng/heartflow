@@ -4,6 +4,7 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { ref } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 模拟 health store ----
 const mockBodyLogs = ref<any[]>([])
@@ -158,7 +159,7 @@ describe('BodyWisdom 藏象阁', () => {
   })
 
   it('有经络记录时显示概览数字', async () => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     mockMeridianLogs.value = [
       { hour: 1, feeling: 'good', at: '2026-09-01T06:00:00.000Z', date: today },
       { hour: 3, feeling: 'ok', at: '2026-09-01T08:00:00.000Z', date: today },
@@ -176,7 +177,7 @@ describe('BodyWisdom 藏象阁', () => {
   })
 
   it('经络自检面板展示记录数量与自检按钮', async () => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     mockMeridianLogs.value = [
       { hour: 1, feeling: 'bad', at: '2026-09-01T06:00:00.000Z', date: today },
       { hour: 3, feeling: 'good', at: '2026-09-01T08:00:00.000Z', date: today },
@@ -201,7 +202,7 @@ describe('BodyWisdom 藏象阁', () => {
   })
 
   it('健康分析面板展示已采集数据统计', async () => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     mockMeridianLogs.value = [
       { hour: 1, feeling: 'bad', at: '2026-09-01T06:00:00.000Z', date: today },
       { hour: 3, feeling: 'good', at: '2026-09-01T08:00:00.000Z', date: today },
@@ -217,7 +218,7 @@ describe('BodyWisdom 藏象阁', () => {
   })
 
   it('经络可视化面板展示概览统计', async () => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     mockMeridianLogs.value = [
       { hour: 1, feeling: 'good', at: '2026-09-01T06:00:00.000Z', date: today },
       { hour: 3, feeling: 'ok', at: '2026-09-01T08:00:00.000Z', date: today },
@@ -346,7 +347,7 @@ describe('集成：指标趋势档案', () => {
     for (let i = 6; i >= 0; i--) {
       const d = new Date()
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(d)
       mockBodyLogs.value.push({ id: `s_${i}`, type: 'sleep', value: { hours: 7.5 }, at: `${dateStr}T22:00:00` })
       mockBodyLogs.value.push({ id: `e_${i}`, type: 'exercise', value: { minutes: 30 }, at: `${dateStr}T08:00:00` })
     }

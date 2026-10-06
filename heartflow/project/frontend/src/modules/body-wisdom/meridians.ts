@@ -4,6 +4,7 @@
 // ============================================================
 
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { MeridianRecord, MeridianFeeling, MeridianType, MeridianStats } from './types'
 import { BODY_WISDOM_STORAGE_KEYS, MERIDIAN_HOURS } from './types'
 
@@ -61,8 +62,8 @@ export function useMeridianTracker() {
    * 获取今日所有经络记录
    */
   function getTodayRecords(): MeridianRecord[] {
-    const today = new Date().toISOString().slice(0, 10)
-    return records.value.filter((r) => r.recordedAt.startsWith(today))
+    const today = getLocalDateKey()
+    return records.value.filter((r) => getLocalDateKey(new Date(r.recordedAt)) === today)
   }
 
   /**
@@ -102,11 +103,11 @@ export function useMeridianTracker() {
     for (let i = 6; i >= 0; i--) {
       const d = new Date()
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
-      const dayRecords = records.value.filter((r) => r.recordedAt.startsWith(dateStr))
+      const dateKey = getLocalDateKey(d)
+      const dayRecords = records.value.filter((r) => getLocalDateKey(new Date(r.recordedAt)) === dateKey)
       const dayGood = dayRecords.filter((r) => r.feeling === 'good').length
       recentTrend.push({
-        date: dateStr.slice(5),
+        date: dateKey.slice(5),
         goodRate: dayRecords.length > 0 ? Math.round((dayGood / dayRecords.length) * 100) : 0,
       })
     }

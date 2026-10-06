@@ -9,6 +9,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { MeridianType, MeridianRecord, MeridianFeeling } from './types'
 import { MERIDIAN_HOURS, ORGAN_ELEMENT_MAP } from './types'
 
@@ -226,10 +227,10 @@ export function useMeridianVisualization() {
       for (let i = 6; i >= 0; i--) {
         const d = new Date(now)
         d.setDate(d.getDate() - i)
-        const dateStr = d.toISOString().slice(0, 10)
-        const dayRecord = meridianRecords.find(r => r.recordedAt.startsWith(dateStr))
+        const dateKey = getLocalDateKey(d)
+        const dayRecord = meridianRecords.find(r => getLocalDateKey(new Date(r.recordedAt)) === dateKey)
         dailyFeelings.push({
-          date: dateStr.slice(5),
+          date: dateKey.slice(5),
           feeling: dayRecord?.feeling ?? null,
           score: dayRecord ? FEELING_SCORES[dayRecord.feeling] : 0,
         })
@@ -360,12 +361,12 @@ export function useMeridianVisualization() {
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
-      const dayRecords = filtered.filter(r => r.recordedAt.startsWith(dateStr))
+      const dateKey = getLocalDateKey(d)
+      const dayRecords = filtered.filter(r => getLocalDateKey(new Date(r.recordedAt)) === dateKey)
       const good = dayRecords.filter(r => r.feeling === 'good').length
 
       trend.push({
-        date: dateStr.slice(5),
+        date: dateKey.slice(5),
         goodRate: dayRecords.length > 0 ? Math.round((good / dayRecords.length) * 100) : 0,
         recordCount: dayRecords.length,
       })
@@ -384,13 +385,13 @@ export function useMeridianVisualization() {
     for (let i = 6; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      labels.push(d.toISOString().slice(5, 10))
+      labels.push(getLocalDateKey(d).slice(5))
     }
 
     const datasets = MERIDIAN_HOURS.map(mh => {
       const meridianRecords = records.filter(r => r.meridian === mh.meridian)
-      const data = labels.map(dateStr => {
-        const dayRecords = meridianRecords.filter(r => r.recordedAt.slice(5, 10) === dateStr)
+      const data = labels.map(mmdd => {
+        const dayRecords = meridianRecords.filter(r => getLocalDateKey(new Date(r.recordedAt)).slice(5) === mmdd)
         const good = dayRecords.filter(r => r.feeling === 'good').length
         return dayRecords.length > 0 ? Math.round((good / dayRecords.length) * 100) : 0
       })
