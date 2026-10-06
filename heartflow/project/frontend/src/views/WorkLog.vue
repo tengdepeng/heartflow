@@ -398,7 +398,7 @@
 <script setup lang="ts">
 import RoomLayout from '../components/RoomLayout.vue'
 import { ref, computed, onMounted } from 'vue'
-import { getLocalMonthKey } from '../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../utils/time'
 import { useRouter } from 'vue-router'
 import { storage } from '../engine/storage'
 import { useViewEntrance } from '../composables/useViewEntrance'
@@ -437,7 +437,8 @@ type Shift = WorkShift
 const { shifts, hourlyRate, load, save, saveHourlyRate } = useWorkLog()
 onMounted(load)
 
-const todayStr = new Date().toISOString().slice(0, 10)
+// ⚠️ 新增班次的默认日期按本地日历日（与 <input type=date> 同口径）
+const todayStr = getLocalDateKey()
 const form = ref({ type: 'regular' as Shift['type'], date: todayStr, start: '09:00', end: '18:00', note: '' })
 const formError = ref('')
 const loadMoreCount = ref(15)
@@ -510,7 +511,8 @@ const statsOverview = computed(() => {
   const totalHours = Math.round(shifts.value.reduce((s, x) => s + x.hours, 0) * 10) / 10
   const now = new Date()
   const curMonth = getLocalMonthKey(now)
-  const monthShifts = shifts.value.filter(s => s.date.startsWith(curMonth))
+  // ⚠️ 双侧同基：s.date 是本地日键，取其本地月键做等值比较（startsWith 前缀匹配已废）
+  const monthShifts = shifts.value.filter(s => getLocalMonthKey(s.date) === curMonth)
   const monthHours = Math.round(monthShifts.reduce((s, x) => s + x.hours, 0) * 10) / 10
   const daysWithRecords = new Set(monthShifts.map(s => s.date)).size
   const avgDaily = daysWithRecords > 0 ? Math.round((monthHours / daysWithRecords) * 10) / 10 : 0
@@ -528,7 +530,8 @@ const dailyHours30 = computed(() => {
   for (let i = 29; i >= 0; i--) {
     const d = new Date(now)
     d.setDate(d.getDate() - i)
-    const dateStr = d.toISOString().slice(0, 10)
+    // ⚠️ 分桶键须与 map 的键（s.date，本地日键）同基，故用本地日历日
+    const dateStr = getLocalDateKey(d)
     const hours = map[dateStr] || 0
     days.push({
       date: dateStr,
@@ -654,8 +657,9 @@ const weeklyBreath = computed(() => {
     weekStart.setDate(weekStart.getDate() - weekStart.getDay() - i * 7)
     const weekEnd = new Date(weekStart)
     weekEnd.setDate(weekEnd.getDate() + 6)
-    const startStr = weekStart.toISOString().slice(0, 10)
-    const endStr = weekEnd.toISOString().slice(0, 10)
+    // ⚠️ 周范围边界须与 s.date（本地日键）同基，否则跨月周会整周落空
+    const startStr = getLocalDateKey(weekStart)
+    const endStr = getLocalDateKey(weekEnd)
     let hours = 0
     for (const s of shifts.value) {
       if (s.date >= startStr && s.date <= endStr) {
