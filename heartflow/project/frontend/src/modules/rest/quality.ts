@@ -4,6 +4,7 @@
 // ============================================================
 
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type {
   RestPractice, BreakRecord, PlantState,
   RestQualityAnalysis, RestSeason,
@@ -180,8 +181,8 @@ export function useRestQuality() {
     for (let i = 0; i < 365; i++) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
-      if (records.value.some((r) => r.date.slice(0, 10) === dateStr)) {
+      const dateStr = getLocalDateKey(d)
+      if (records.value.some((r) => getLocalDateKey(new Date(r.date)) === dateStr)) {
         streakDays++
       } else {
         break

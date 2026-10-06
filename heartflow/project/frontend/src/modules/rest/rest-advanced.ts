@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { BreakRecord, RestPractice, RestActivityType } from './types'
 
 /** 将 Date 转为本地日期字符串 YYYY-MM-DD */
@@ -414,7 +415,7 @@ export function useRestAchievements(getRecords: () => BreakRecord[], getPractice
   function computeStreakDays(records: BreakRecord[], now: number): number {
     const days = new Set<string>()
     for (const r of records) {
-      days.add(r.date.slice(0, 10))
+      days.add(getLocalDateKey(new Date(r.date)))
     }
 
     const sorted = [...days].sort().reverse()
@@ -451,7 +452,7 @@ export function useRestAchievements(getRecords: () => BreakRecord[], getPractice
   function checkPerfectWeek(records: BreakRecord[], now: number): boolean {
     const days = new Set<string>()
     for (const r of records) {
-      days.add(r.date.slice(0, 10))
+      days.add(getLocalDateKey(new Date(r.date)))
     }
 
     const today = new Date(now)
@@ -594,7 +595,7 @@ export function useRestTrend(getRecords: () => BreakRecord[], getPractices: () =
 
     const dayMap = new Map<string, BreakRecord[]>()
     for (const r of filtered) {
-      const dayKey = r.date.slice(0, 10)
+      const dayKey = getLocalDateKey(new Date(r.date))
       if (!dayMap.has(dayKey)) dayMap.set(dayKey, [])
       dayMap.get(dayKey)!.push(r)
     }

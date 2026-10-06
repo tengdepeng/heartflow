@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -141,7 +142,7 @@ function generateId(): string {
 }
 
 function todayStr(): string {
-  return new Date().toISOString().split('T')[0]
+  return getLocalDateKey()
 }
 
 function parseTimeToMinutes(time: string): number {
@@ -252,7 +253,7 @@ export function useSleepQuality() {
     const end = todayStr()
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days + 1)
-    const start = startDate.toISOString().split('T')[0]
+    const start = getLocalDateKey(startDate)
 
     const periodRecords = getRecordsByRange(start, end)
     const totalDays = periodRecords.length
@@ -600,7 +601,7 @@ export function useSleepQuality() {
     suggestion: string
   } {
     const recentRecords = getRecordsByRange(
-      new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0],
+      getLocalDateKey(new Date(Date.now() - 7 * 86400000)),
       todayStr(),
     )
 

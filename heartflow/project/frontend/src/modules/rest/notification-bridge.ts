@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import { emitOsNotification } from '@/engine/os-notification'
 import type { RestReminder } from './rest-advanced'
 
@@ -210,7 +211,7 @@ export function useRestNotificationBridge() {
   // ---- 每日计数重置 ----
 
   function resetDailyCountIfNeeded(): void {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     if (preference.value.todayDate !== today) {
       preference.value.todayDate = today
       preference.value.todaySentCount = 0
@@ -330,7 +331,7 @@ export function useRestNotificationBridge() {
     const todaySent = preference.value.todaySentCount
 
     // 计算日均
-    const days = new Set(records.value.map(r => r.sentAt.slice(0, 10)))
+    const days = new Set(records.value.map(r => getLocalDateKey(new Date(r.sentAt))))
     const averagePerDay = days.size > 0
       ? Math.round((totalSent / days.size) * 10) / 10
       : 0
@@ -338,7 +339,7 @@ export function useRestNotificationBridge() {
     // 最活跃日期
     const dayCounts = new Map<string, number>()
     for (const r of records.value) {
-      const day = r.sentAt.slice(0, 10)
+      const day = getLocalDateKey(new Date(r.sentAt))
       dayCounts.set(day, (dayCounts.get(day) || 0) + 1)
     }
     let mostActiveDay = ''
