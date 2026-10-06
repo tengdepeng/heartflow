@@ -26,9 +26,12 @@ export interface TodayRoomStats {
   movementToday: number
 }
 
-/** UTC 日期键（留光阁以 toISOString().split('T')[0] 落库，须同口径比对） */
+/** 日期键 YYYY-MM-DD。
+ * 口径统一为**本地日历日**（getLocalDateKey）：留光阁（light）与律动（movement）
+ * 的落库 date 均已迁至本地日键，这里必须同基比对，否则「今日冥想/释怀」恒为 0。
+ * 函数名沿用 getUtcDateKey 以保持既有 re-export 契约不变（modules/index.ts 对外导出）。 */
 export function getUtcDateKey(d: Date): string {
-  return d.toISOString().slice(0, 10)
+  return getLocalDateKey(d)
 }
 
 /**
@@ -49,7 +52,6 @@ export function aggregateTodayRoomStats(params: {
   const { anchors, meditations, releases, movements } = params
   const now = params.now ?? new Date()
   const localKey = getLocalDateKey(now)
-  const utcKey = getUtcDateKey(now)
 
   const todayActiveAnchors = anchors.filter(
     a => a.targetDate === localKey && (a.stage ?? 'active') === 'active',
@@ -57,8 +59,8 @@ export function aggregateTodayRoomStats(params: {
   const anchorToday = todayActiveAnchors.length
   const anchorDone = todayActiveAnchors.filter(a => a.done).length
 
-  const meditationToday = meditations.filter(m => m.date === utcKey).length
-  const releaseToday = releases.filter(r => r.date === utcKey).length
+  const meditationToday = meditations.filter(m => m.date === localKey).length
+  const releaseToday = releases.filter(r => r.date === localKey).length
   const movementToday = movements.filter(m => m.date === localKey).length
 
   return {

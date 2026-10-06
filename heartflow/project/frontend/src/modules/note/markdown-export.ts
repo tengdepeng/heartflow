@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { Note } from '../../types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 导出类型 ----
 
@@ -413,7 +414,7 @@ function generateFilename(
     .replace(/\s+/g, '-')
     .slice(0, 50)
     || 'untitled'
-  const date = new Date().toISOString().slice(0, 10)
+  const date = getLocalDateKey()
   const p = prefix ? `${prefix}-` : ''
   return `${p}${safe}-${date}.${ext}`
 }

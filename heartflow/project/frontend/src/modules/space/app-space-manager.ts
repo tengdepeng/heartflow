@@ -6,6 +6,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import { getActiveConfig, getSpaceConfigs } from '../customization/engine'
 
 // ============================================================
@@ -241,7 +242,7 @@ export function useAppSpaceManager() {
     const recentActivities = activities.value.filter(a =>
       new Date(a.timestamp).getTime() > sevenDaysAgo,
     )
-    const activeDays = new Set(recentActivities.map(a => a.timestamp.slice(0, 10))).size
+    const activeDays = new Set(recentActivities.map(a => getLocalDateKey(new Date(a.timestamp)))).size
 
     // 最近活跃时间
     const sortedActivities = [...activities.value].sort(

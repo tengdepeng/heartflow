@@ -7,6 +7,7 @@
 import { ref, computed } from 'vue'
 import { getAllRooms } from '../../engine/room-graph'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -767,7 +768,7 @@ export function useSpaceHealth() {
   const errorTrend = computed<Array<{ date: string; count: number }>>(() => {
     const trend: Record<string, number> = {}
     for (const err of errorTracking.value) {
-      const date = err.timestamp.slice(0, 10)
+      const date = getLocalDateKey(new Date(err.timestamp))
       trend[date] = (trend[date] || 0) + 1
     }
     return Object.entries(trend)

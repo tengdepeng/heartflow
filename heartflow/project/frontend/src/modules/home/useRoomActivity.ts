@@ -7,10 +7,11 @@
 
 import { computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 function isToday(iso: string | null | undefined): boolean {
   if (!iso) return false
-  return iso.startsWith(new Date().toISOString().slice(0, 10))
+  return getLocalDateKey(new Date(iso)) === getLocalDateKey()
 }
 
 export function useRoomActivity() {
@@ -28,7 +29,7 @@ export function useRoomActivity() {
 
   /** 今日专注次数（全局，专注会话不绑定房间） */
   const todayFocusCount = computed<number>(() => {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     return (storage.getSessions() ?? []).filter(
       (s) => s.status === 'completed' && s.completedAt?.startsWith(today),
     ).length

@@ -3,7 +3,7 @@
 // 笔记健康度、写作统计、标签分析、生命周期、内容质量
 // ============================================================
 
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalMonthKey, getLocalDateKey } from '../../utils/time'
 import type { Note } from '../../types'
 import type { KnowledgeRing } from './knowledge-ring'
 import { isForgotten, needsReview } from './knowledge-ring'
@@ -325,13 +325,13 @@ export function useNoteAnalytics() {
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now)
       d.setDate(d.getDate() - i)
-      const key = d.toISOString().slice(0, 10)
+      const key = getLocalDateKey(d)
       dailyMap.set(key, { created: 0, updated: 0, chars: 0 })
     }
 
     for (const note of allNotes) {
-      const createdDate = note.createdAt.slice(0, 10)
-      const updatedDate = note.updatedAt.slice(0, 10)
+      const createdDate = getLocalDateKey(new Date(note.createdAt))
+      const updatedDate = getLocalDateKey(new Date(note.updatedAt))
 
       if (dailyMap.has(createdDate)) {
         dailyMap.get(createdDate)!.created++
@@ -370,7 +370,7 @@ export function useNoteAnalytics() {
       const weekKey = getISOWeekKey(createdDate)
       if (weeklyMap.has(weekKey)) {
         weeklyMap.get(weekKey)!.created++
-        weeklyMap.get(weekKey)!.days.add(note.createdAt.slice(0, 10))
+        weeklyMap.get(weekKey)!.days.add(getLocalDateKey(new Date(note.createdAt)))
         weeklyMap.get(weekKey)!.chars += note.content.length
       }
     }
@@ -402,7 +402,7 @@ export function useNoteAnalytics() {
       const monthKey = getLocalMonthKey(note.createdAt)
       if (monthlyMap.has(monthKey)) {
         monthlyMap.get(monthKey)!.created++
-        monthlyMap.get(monthKey)!.days.add(note.createdAt.slice(0, 10))
+        monthlyMap.get(monthKey)!.days.add(getLocalDateKey(new Date(note.createdAt)))
         monthlyMap.get(monthKey)!.chars += note.content.length
       }
     }
