@@ -415,7 +415,7 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 
 新增回归 `src/modules/discipline/__tests__/discipline-tz-daykey.test.ts`。基线删 41 行条目，存量 **97 处 / 88 文件**（含顺带剪除本批 §8.4.3 遗留的 6 条冗余）。
 
-### 8.4.5 body-wisdom 藏象阁域 ✅ 已迁移（第八批）
+### 8.4.5 body-wisdom 藏象阁域 ✅ 已迁移（第八批A）
 6 文件 9 处裸 UTC 切日迁本地日历日：
 - `meridians.ts`（2）：`getTodayRecords` 今日键 + `getStats` `recentTrend` 近 7 日分桶。
 - `meridian-visualization.ts`（3）：热力图 7 日 + 趋势图 30 日 + 聚合趋势 7 日标签与逐经络匹配（末者原为 `slice(5,10)` 形态，闸门 D 类不覆盖）。
@@ -430,8 +430,119 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 基线删 body-wisdom 条目，存量 **91 处 / 82 文件**。
 **七闸门全绿**：vue-tsc（`--max-old-space-size=6144`）/ eslint / circular / room-wiring / no-bare-utcdates / vitest **14301/14301**（1085 文件，串行 `--no-file-parallelism`，3301s）/ vite build（32s）。
 
-### 8.6 月键（形态 E）剩余存量 24 文件 / 27 段 —— 已登记基线
-> ⚠️ 本清单是**月键 4 批开工前的快照**；4 批已迁 22 文件（见 §4.1），下列多数已不在基线内。
+### 8.4.6 reading 阅览殿域 ✅ 已迁移（第八批B）
+> 与 body-wisdom 同处第八批槽位（二者都在第七批与第九批之间），按基线 `$comment` 顺序记为 A/B。
+6 文件迁出：
+- `hall.ts`（38 行的 `todayStr` 是**本域唯一日键出口**，`session.date` 与 `finishDate` 记录键均由它生成）。
+- `reading-speed.ts`（171 行 `todayStr` 出口）。
+- `reading-habits.ts`（419-420 streak 自洽簇，`expected` 由 UTC 切日改本地，与记录键同基）。
+- `reading-export.ts`（37 行导出文件名，纯一致性）。
+- `reading-insights.ts`（164 行 `monthStart` **反向偏移陷阱** `new Date(y,m,1).toISOString` 改本地，修「本月第一天漏算」；194 行 `finishDate.slice(0,7)` 月键改 `getLocalMonthKey`）。
+- `reading-report.ts`（63/69 行 `finishDate`/`s.date` 的 `slice(0,7)` 月键改 `getLocalMonthKey`——因 `date`/`finishDate` 在闸门 `MONTH_FIELD` 白名单内，**不改代码必红灯**）。
+
+存量 **91 处 / 82 文件 → 85 处 / 76 文件**。
+
+### 8.4.7 light 留光阁域 ✅ 已迁移（第九批，commit `7505832d`）
+4 文件 14 处，**写读同基簇**：
+- `pavilion.ts`（`todayStr` 唯一日键出口 + `recordMeditation` 落库 `date` + `release` 落库 + `calculateMeditationStreak` 的 `expected` 边界，与 `light-bridge`/`light-practice` 读侧比对同基）。
+- `light-bridge.ts`（`meditationTrend` 14 日分桶 + `clarityTrend` 7 日 + `meditationCalendar` 30 日热力图，三处 `d.toISOString` 改 `getLocalDateKey` + `predictGoal` 的 `estimatedDate` 未来推算）。
+- `light-practice.ts`（`updateClarityAfterMeditation` 今日桶 + `updateStreak` 昨日边界）。
+- `guided-meditation.ts`（`generateClarityTrend` 30 日 + `generateLightTrend` 30 日桶键与 `timestamp` 记录键双侧同基 + `calculateBestStreak` 639 行去重日，原 `timestamp.slice(0,10)` 形态）。
+
+**判别力坑**：light 的 `meditations` 是**模块级单例 ref**，测试须在 `beforeEach` 显式 `storage.setKV` 清空 light key（`vi.resetModules` 不重置 storage 单例，否则新 `pavilion` 会读回上轮记录导致 count 翻倍）；且只有落在本地 00:00-08:00 的记录才有判别力。
+
+存量 **85 处 / 76 文件 → 80 处 / 72 文件**。
+
+### 8.4.8 emotion 情绪花园域 ✅ 已迁移（第十批，commit `bcd9401f`）
+4 文件 15 处：
+- `garden-narrative.ts`（`formatDate` 是本域唯一日键出口，改 1 处即 5 个调用点同基：`generateFlowerStory` 日期标签 / `generateDiaryEntry` 记录分桶 / 今日桶全链）。
+- `emotion-trends.ts`（9 处：`buildTrends` daily 分组键 242 + weekly 周界 250（`monday` 本地构造转 UTC **反向偏移陷阱**）+ 记录键 488/609/733/1019/1072 五处同模式改 `getLocalDateKey(new Date(r.createdAt))` + `predictEmotions` 预测日边界 771 + `exportPatternsReport` 时间范围 1158）。
+- `garden-social.ts`（30 日时间线桶键 849 + `dayStart` 反解同基）。
+- `emotion-bridge.ts`（今日故事 `date` 511 + `createGardenDiary` 传入日键 524）。
+
+**反向验证**：`formatDate` 与 `predictEmotions` 771 两处真咬住（后者 UTC 下预测日错成 03-15 而非 03-16）。
+
+存量 **80 处 / 72 文件 → 76 处 / 68 文件**。
+
+### 8.4.9 movement 律动域 ✅ 已迁移（第十一批，commit `c2c191fa`）
+2 文件 4 处 + 1 条过期登记摘除：
+- `achievements.ts`（650/671 两处 `weekKey`：`weekStart` 由 `d.getDay()*86400000` 本地分量构造后转 UTC 属**反向偏移陷阱**；695 行 `dateStr`：30 日唤醒度趋势桶键，原与已本地化的 `MovementRecord.date`（`rhythm.ts:54` 用 `localDateStr` 落库）口径不一致，属铁律 1.7 双侧同基破损）。
+- `recovery-optimizer.ts`（677 行连续高强度天数 `expected` 边界键，与 `dateMap` 的 `r.date` 比对须同基）。
+- `move-converter.ts` 是**过期登记**：代码早在 INCR-466 就已迁到 `localDateStr`（63 行），基线 `at.slice(0,10)` 未同步删除，本次一并摘除。
+
+**周键语义注意**：`getDay()=0` 时 `weekStart` 即记录本地日本身（该实现以**周日**为周首，非周一），断言勿照搬 ISO 周惯例。
+
+存量 **76 处 / 68 文件 → 73 处 / 65 文件**。
+
+### 8.4.10 knowledge 知识塔域 ✅ 已迁移（第十二批，commit `dd3c86e7`）
+3 文件 13 处：
+- `graph-visualization.ts`（9 处复习计划日键自洽簇：405 `plan.date`/`todayStr` 落库键 + 459/504 `getTodayPlan` 今日键 + 410 `nextReviewAt` 间隔推算 + 483/489 复习后重排 `nextReviewAt` + 505 `weekEnd` 周界 + 540 `streak` while 回溯条件，全部与 `plan.date` 同基）。
+- `scenario-planner.ts`（730 `projectFuture` 未来月投影：`setMonth` 本地构造后转 UTC 属反向偏移陷阱，会退到上月）。
+- `useKnowledgeTowerUi.ts`（586 `timelineGroups` `today` 键 + 589 `kn<ts>` 记录键同簇 + 198 `formatImportDate` 的 catch 兜底——**改用正则提取 `YYYY-MM-DD` 而非 `getLocalDateKey`**：解析已失败 ⇒ Invalid Date ⇒ `getLocalDateKey` 会返回 `NaN-NaN-NaN`，比原 `iso.slice(0,10)` 更糟）。
+
+**干净入口**：`generateReviewPlan(nodes, today = new Date())` 的 `today` 可注入，与 movement 的 `analyzeRhythm` 同模式。
+
+存量 **73 处 / 65 文件 → 69 处 / 62 文件**。
+
+### 8.4.11 rest 休息域 ✅ 已迁移（第十三批，commit `1d5e2d5f`）
+4 文件 10 处：
+- `sleep-quality.ts`（`todayStr` 唯一日键出口 + 255 近 N 日窗口 start + 603 预测近 7 日 start）。
+- `quality.ts`（183 连续休息天数桶键 + 184 记录侧 `r.date.slice(0,10)` 同簇改 `getLocalDateKey(new Date(r.date))`）。
+- `notification-bridge.ts`（213 每日计数重置 + 334 去重日集合 + 342 最活跃日分桶，后两处是 D 类 `sentAt.slice`）。
+- `rest-advanced.ts`（417/454/597 三处 `r.date.slice(0,10)`，该文件**不在基线内**属 D 类登记盲区，本批一并迁）。
+
+**关键发现**：`rest-advanced` 内部期望键 `toLocalDateStr`（12 行）本就是本地口径，而记录侧 `days.add` 仍是 UTC ⇒ **期望侧本地 + 记录侧 UTC 的混合破损**（比「两侧同 UTC 自洽」更隐蔽），本地 00:00-08:00 的记录会被算到昨天而少算连续天数。**反向验证**：记录侧改回 UTC → streak 3→2 转红。
+
+存量 **69 处 / 62 文件 → 65 处 / 59 文件**。
+
+### 8.4.12 safety 安全域 ✅ 已迁移（第十四批，commit `4cc35de9`）
+3 文件 3 处，**全部为非缺陷的标识符一致性**（无判别力测试需求）：
+- `audit-timeline.ts`（565 导出文件名 `audit_timeline_<date>.json/.csv` 的日期段）。
+- `backup-recovery.ts`（417 `SecurityReport.id` 的日期段；同函数 `generatedAt` 仍保留完整 ISO 时间戳）。
+- `useDataSecurity.ts`（84 备份导出文件名 `heartflow-backup-<date>.json`）。
+
+**甄别出 2 处形态相似但非日键、不应改**：`audit-timeline:405` `slice(0,13)+":00"` 是**小时键**（`YYYY-MM-DDTHH`）；`incident-response:592` `allIncidents.slice(0,10)` 是**数组取前 10 条**（与日期无关）——闸门白名单已正确排除。另确认 `backup-recovery:441` `computeDateRange` 的 start/end 用完整 ISO 与落库 `detectedAt` 字符串比较，两侧同为完整 ISO 口径自洽，不动。
+
+存量 **65 处 / 59 文件 → 62 处 / 56 文件**。
+
+### 8.4.13 scar 工痕域 ✅ 已迁移（第十五批，commit `32d60960`）
+3 文件 5 处：
+- `healing.ts`（145 `recordForging` 落库 `date` + 212 `getForgingStreak` 桶键，构成日键自洽簇）。
+- `healing-predict.ts`（332 已愈 fallback 预测日 + 413 未来 `remainingDays` 推算日，转 UTC 会退一天）。
+- `healing-journey.ts`（513 `estimatedCompletion` 预计完成日）。
+
+**铁律 2 的直接证据**：把 145/212 **同时**改回 UTC 时 streak 用例仍绿（两侧自洽互相抵消）；**只改 212 一处**（145 保持本地）立刻 2 例转红 ⇒ 桶键与落库键必须同批同基。**测试隔离两坑**：① `useScarHealing` 构造时 `load()` 是 fire-and-forget，必须显式 `await h.load()` 否则读到空 ref；② storage 单例跨用例共享，`beforeEach` 须 `setKV(SCAR_STORAGE_KEYS.FORGING, [])`。
+
+存量 **62 处 / 56 文件 → 59 处 / 53 文件**。
+
+### 8.4.14 note + home + space 三域 ✅ 已迁移（第十六批，commit `1bfce971`）
+6 文件 12 处，**核心是 `home/today-room-stats` 的跨模块契约断裂**：
+- `home/today-room-stats.ts`：留光阁（light，第九批已迁本地）与律动（movement，第六批已迁本地）的落库 `date` 已是本地日键，但 60/61 行「今日冥想/今日释怀」仍用 `getUtcDateKey`（UTC 键）比对 ⇒ **恒为 0**，而代码与测试全绿。`getUtcDateKey` 已被 `modules/index.ts` 与 `home/index.ts` 双 re-export（删会破坏公共 API）⇒ **保留函数名与 re-export、只改语义为本地键、改掉过期注释**「留光阁以 toISOString 落库」。
+- `note-analytics.ts`：桶键 328 + 记录键 333/334/373/405 自洽簇，整簇同改。
+- `useRoomActivity.ts` 13 行 `startsWith` 前缀匹配改双侧同基（本地键 vs 本地日，不能拿 UTC 串 `startsWith` 本地日键）。
+- `space` 两处 D 类记录键（`app-space-manager` 活跃天数、`space-health` 错误趋势分桶）。
+- `note/markdown-export.ts` 416 是导出文件名（非缺陷）。
+
+既有 `today-room-stats.test.ts` 基准是 `10:00 +08:00`（本地与 UTC 同日）**无判别力**，所以这个恒 0 缺陷一直没被发现。**反向验证**：比对侧改回 UTC → 3 例转红（「今日冥想」等）。
+
+存量 **59 处 / 53 文件 → 50 处 / 47 文件**。
+
+### 8.4.15 收尾批 ✅ 已迁移（第十七批，commit `955948bf`）—— 基线全清零，工程收官
+一次性清掉剩余 **47 文件 73 处**（含 3 处月键 E 类）：
+- **模块层 10 文件**：`timer`（`getDateStr` 唯一日键出口，6 调用点 + 69 行 D 类记录键）/`wisdom-poetry`（日期键出口）/`mirror-personality-model`（4 处 timestamp 抽日键同簇）+ `personality-portrait-analytics`（日期键出口）/`sanctuary-bridge`（`today` 键 + `startTime` 记录键 ×2）/`garden`（`today` 键 + streak expected）/`output-advanced`（`createdAt` 记录键 ×2 + 3 个导出文件名）/`output-publish-pipeline`（`createdAt` 记录键；424 行 `keyChanges.slice(0,10)` 是**数组取前 10 项**非日键，不改）/`tasks-quadrant`（`completedAt` 记录键）/`goal-visualization`（快照日期 `now.slice(0,10)`，全库扫描新发现，此前未登记）。
+- **components/views 34 文件**：8 个 `fmtDate`/`dateLabel`/`formatDate` 展示函数（每文件一处，带全链调用点）+ `Balcony`/`DiningRoom`/`StatsPanel` 的 `startsWith` 前缀匹配改双侧同基 + `BackfillCalendar`/`HealthReport`/`MetricTrends`/`HabitReminder`/`TimeCorridor` 的 D 类记录键 + 导出文件名 6 处 + **模板内 5 处**（注入 `dayOf()` helper 供模板调用）+ `NarrativeReportPanel`（timeline 域第五批B2 已迁本地，此次改入参侧同基）+ `MovementAnalyticsPanel` 注释残留（Step 6.8 改措辞）。
+- **甄别未改**：`GovernPanel:130` `visitLogs.slice(0,10)` 与 `HealthPanel`/`ReviewSessionPanel`/`BodyWisdom`/`TimelineIndex` 的 `xxx.slice(0,10)` 均为**数组取前 10 条**；`LettersPanel`/`TravelAnalyticsPanel` 的 `slice(0,10)` 是对已本地化的键做展示截断；`Bathroom` 的 `slice(11,16)` 是时间非日期。
+- **另补 3 处月键（E 类 `.slice(0,7)`）**：`PhotoDiaryPanel`（月分组）+ `word-mirror-personal-vocabulary`（学习趋势按月）+ `writing-enhance`（写作月度趋势）。
+
+存量 **50 处 / 47 文件 → 0 处 / 0 文件**，闸门从「存量放行」转为**「零基线」纯防新增**状态。
+
+### 8.4.16 收官审计（基线清零后）
+- **闸门机制复核**：闸门不是「只有 3 类正则」，而是 4 类签名 + **属性名白名单**（`TS_FIELD` 21 个字段：`at/createdAt/updatedAt/recordedAt/timestamp/iso/startedAt/completedAt/sentAt/pushedAt/assessedAt/startTime/endTime/lastModified/importDate/unlockedAt/doneAt/dateStr/dayKey/raw`；`MONTH_FIELD` 另加 `date/ym/monthKey/curMonth/currentMonth/periodKey/startDate/endDate/checkinDate/finishDate/sunkAt`）。用白名单而非通用 `X.slice(0,10)` 是为避免误伤 `text/title` 等普通截断。
+- **无过滤全量 grep 兜底**：捞出 22 个白名单外候选，逐一**接收者溯源**后判定**真缺陷 0 处**（computed 容器取最近 N 条 18 处、入参自洽 2 处、已是纯日期键 1 处、纯日期字段截月 1 处）。这是迁移完成的正向信号。
+- **工程终态**：17 批全部提交，HEAD = `955948bf`，基线 **0 处 / 0 文件**；全量测试 14339 例 14320 passed（19 例失败为过期中间态，定向复跑全绿）；vue-tsc 0 error、eslint 0 error、未 push。
+
+### 8.6 月键（形态 E）剩余存量 24 文件 / 27 段 —— ⚠️ 历史快照，已随收官批清零
+> ⚠️ 本清单是**月键 4 批开工前的快照**；4 批已迁 22 文件（见 §4.1），收官批（第十七批）又补迁 3 处月键，**基线月键项已全部清零**，下列清单仅作历史留档。
 > `timeline-index/aggregation` 的月键早已是 `getLocalMonthKey`（本批仅迁其日/周/时键，见 §8.4.1），此处列出属快照残留。
 `BackfillCalendarPanel` `PhotoDiaryPanel` `TimeCorridor` / `meditation-analytics` `craft-advanced`
 `useCraftUi` `streak-system` `emotion-trends` `goal-state-machine` `recovery-optimizer`
@@ -441,18 +552,19 @@ recordedAt/updatedAt/timestamp/at/raw`）。**白名单刻意不含 `today` / `d
 / **word-mirror 2 个（`personal-vocabulary` `writing-enhance`，属并行会话地盘，基线条目仅为放行，其迁移时请自行删掉）**
 
 ### 8.5 已知需特殊处理
-- `narrative-generator.ts`（约 20 处，自洽簇，**有意留下不是漏掉**）
+- `narrative-generator.ts`（约 20 处，自洽簇）—— 曾「有意留下不是漏掉」，**已在第五批B2 连同 `timeline-bridge` 整簇迁移**（§8.4.1 同批）。
 - `Timeline.vue highlightDay()` 的变暗是逐日回看的**刻意进度指示**，改硬筛选反丢位置感 —— **不是 bug**
 - 逐日回退禁用 `- 24*60*60*1000`（DST 时区会落到前一天 23:00/01:00），用 `setDate(getDate()-1)`
+- **形态像但不是日键、勿机械改**：`slice(0,13)` 小时键 / `slice(0,10)` 数组取前 N 条 / 对已本地化键的展示截断 / `slice(11,16)` 时间 —— 收官审计对 22 个白名单外候选逐一「接收者溯源」，真缺陷 0 处（§8.4.16）。
 
 ---
 
 ## 九、建议的下一步
 
 1. ~~清理 automation.ts 冗余基线条目~~ ✅ `c157fae` 已做。
-2. **按域分批推进 stores/modules 层**——选依赖少、边界清晰的模块，每批配反向验证。
+2. ~~按域分批推进 stores/modules 层~~ ✅ **17 批全部完成**（第六~十七批，§8.4.2~§8.4.15）。
 3. ~~`data-port.ts` 需定制方案~~ ✅ `415e8d1` 已做（`dayKeyOf()` 统一 + 闸门补 D 类形态；文件名也一并改本地日，不再纠结"文件名算不算缺陷"——本地日更符合用户预期）。
-4. 迁移持续推进存量 **187 处 / 163 文件**（其中月键 E 类 27 段 / 24 文件，见 §8.6），**每迁完一个文件手工删基线条目**。D 类新存量清单见基线，优先挑 `iso.slice(0,10)` 这类"注释还写着'本地日期键'实则 UTC"的误标文件（~~`timeline-index/index.ts`~~ ✅ 已迁，§8.4.1）。**月键（E 类）优先挑面板/视图的 `month` 默认值**（一处改动牵动整条月过滤链路）。
+4. ~~迁移持续推进存量 **187 处 / 163 文件**~~ ✅ **基线已清零（0 处 / 0 文件）**，闸门转为「零基线」纯防新增（§8.4.15~§8.4.16）。后续只需保持「新代码不得引入裸 UTC 切日」。
 5. **待授权后统一 push**（本地累计含大量并行会话提交，精确计数已不适用）。
 
 ---
