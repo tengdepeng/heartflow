@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { BodyMark, GrowthRecord, ScarStats } from './types'
 
 // ============================================================
@@ -510,7 +511,7 @@ export function useHealingJourney() {
         }, 0) / marks.length
         const estDays = Math.round(remaining * (avgDays / marks.length))
         const estDate = new Date(Date.now() + estDays * 86400000)
-        estimatedCompletion = estDate.toISOString().slice(0, 10)
+        estimatedCompletion = getLocalDateKey(estDate)
       }
     }
 

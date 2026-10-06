@@ -4,6 +4,7 @@
 // ============================================================
 
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type {
   BodyMark, GrowthRecord, ForgingRecord,
   ScarStats, ScarState, HealingStage, SeverityLevel,
@@ -142,7 +143,7 @@ export function useScarHealing() {
    * 记录锻造（砧板锻打）
    */
   async function recordForging(intensity: SeverityLevel): Promise<ForgingRecord> {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     const existing = forgingRecords.value.find((r) => r.date === today)
 
     if (existing) {
@@ -209,7 +210,7 @@ export function useScarHealing() {
     for (let i = 0; i < 365; i++) {
       const d = new Date(today)
       d.setDate(d.getDate() - i)
-      const dateStr = d.toISOString().slice(0, 10)
+      const dateStr = getLocalDateKey(d)
       if (forgingRecords.value.some((r) => r.date === dateStr)) {
         streak++
       } else {

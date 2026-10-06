@@ -3,6 +3,7 @@
 // 基于多因素回归的智能愈合预测，替代简单线性外推
 // ============================================================
 
+import { getLocalDateKey } from '../../utils/time'
 import type {
   BodyMark, GrowthRecord, ScarType, SeverityLevel, BodyPart, HealingStage,
 } from './types'
@@ -329,7 +330,7 @@ export function useHealingPredictor() {
   ): HealingPrediction {
     if (scar.healingProgress >= 100) {
       return {
-        predictedDate: new Date().toISOString().split('T')[0],
+        predictedDate: getLocalDateKey(),
         remainingDays: 0,
         confidence: 1,
         confidenceInterval: [0, 0],
@@ -410,7 +411,7 @@ export function useHealingPredictor() {
     predictedDate.setDate(predictedDate.getDate() + remainingDays)
 
     return {
-      predictedDate: predictedDate.toISOString().split('T')[0],
+      predictedDate: getLocalDateKey(predictedDate),
       remainingDays,
       confidence: Math.round(confidence * 100) / 100,
       confidenceInterval,
