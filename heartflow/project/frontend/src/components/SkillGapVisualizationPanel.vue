@@ -192,6 +192,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, shallowRef } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import {
   useSkillGapAdvisor,
   type SkillGapAnalysis,
@@ -328,7 +329,7 @@ function gapColor(gap: number) {
 }
 
 function fmtDate(iso: string) {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 
 watch([() => props.skills, () => props.milestones, activeRoleId], refresh, { deep: true })

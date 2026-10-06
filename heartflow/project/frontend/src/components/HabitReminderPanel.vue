@@ -55,6 +55,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed } from 'vue'
 import {
   useDailyReminder,
@@ -89,7 +90,7 @@ const remindTime = computed(() => remind.config.value.time || DEFAULT_TIME)
 
 // 近 7 天习惯点
 const weekDots = computed(() => {
-  const days = new Set(props.records.map(r => r.at.slice(0, 10)))
+  const days = new Set(props.records.map(r => getLocalDateKey(new Date(r.at))))
   const todayIdx = now.getDay() // 0=Sunday
   const start = new Date(now)
   start.setDate(start.getDate() - todayIdx) // 周一

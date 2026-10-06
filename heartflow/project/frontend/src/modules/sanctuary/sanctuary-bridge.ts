@@ -4,6 +4,7 @@
 // ============================================================
 
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -99,8 +100,8 @@ export function useSanctuaryBridge() {
     const totalDuration = completed.reduce((sum, s) => sum + s.duration, 0)
     const durations = completed.map(s => s.duration)
 
-    const today = new Date().toISOString().slice(0, 10)
-    const sessionsToday = sessions.value.filter(s => s.startTime.slice(0, 10) === today).length
+    const today = getLocalDateKey()
+    const sessionsToday = sessions.value.filter(s => getLocalDateKey(new Date(s.startTime)) === today).length
 
     return {
       totalActivations: activationCount.value,
@@ -263,8 +264,8 @@ export function useSanctuaryBridge() {
 
   /** 获取今日会话 */
   function getTodaySessions(): SanctuarySession[] {
-    const today = new Date().toISOString().slice(0, 10)
-    return sessions.value.filter(s => s.startTime.slice(0, 10) === today)
+    const today = getLocalDateKey()
+    return sessions.value.filter(s => getLocalDateKey(new Date(s.startTime)) === today)
   }
 
   /** 重置统计 */

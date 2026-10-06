@@ -99,6 +99,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed, reactive, ref, watch } from 'vue'
 import { useMindMap } from '../modules/note'
 import type { MindNode } from '../modules/note'
@@ -149,7 +150,7 @@ function createMap() {
 function generateFromNotes() {
   const notes = study.notes.value as unknown as StickyNote[]
   if (notes.length === 0) return
-  const title = `笔记导图 ${new Date().toISOString().slice(0, 10)}`
+  const title = `笔记导图 ${getLocalDateKey()}`
   const map = mind.generateFromNotes(title, notes)
   selectedMapId.value = map.id
 }

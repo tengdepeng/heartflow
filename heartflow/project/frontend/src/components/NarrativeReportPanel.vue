@@ -146,6 +146,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { ref, computed, onMounted } from 'vue'
 import { useNarrativeGenerator, useReportExporter } from '../modules/timeline/narrative-generator'
 import { getRiverSource } from '../modules/timeline/river'
@@ -199,7 +200,7 @@ function handleGenerate(type: NarrativeReport['type']): void {
   let report: NarrativeReport
   switch (type) {
     case 'daily': {
-      const today = now.toISOString().split('T')[0]
+      const today = getLocalDateKey(now)
       report = generateDailyNarrative(source, today)
       break
     }
@@ -211,8 +212,8 @@ function handleGenerate(type: NarrativeReport['type']): void {
       weekEnd.setDate(weekStart.getDate() + 6)
       report = generateWeeklyReport(
         source,
-        weekStart.toISOString().split('T')[0],
-        weekEnd.toISOString().split('T')[0],
+        getLocalDateKey(weekStart),
+        getLocalDateKey(weekEnd),
       )
       break
     }

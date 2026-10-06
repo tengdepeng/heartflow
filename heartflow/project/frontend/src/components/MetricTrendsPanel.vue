@@ -78,6 +78,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed, watch } from 'vue'
 import { useMetricTrends, metricTrendsInsights } from '../modules/body/metric-trends'
 import type { TrendDirection, MetricTrendData, TrendAlert } from '../modules/body/metric-trends'
@@ -120,7 +121,7 @@ const STRENGTH_LABEL: Record<string, string> = {
 function logsToMetrics(logs: BodyLog[]): BodyMetric[] {
   const out: BodyMetric[] = []
   for (const l of logs) {
-    const date = l.at.slice(0, 10)
+    const date = getLocalDateKey(new Date(l.at))
     if (l.type === 'sleep' && typeof l.value.hours === 'number') {
       out.push({ id: `m_${l.id}`, type: 'sleep', value: l.value.hours, unit: '小时', timestamp: l.at, date })
     } else if (l.type === 'exercise' && typeof l.value.minutes === 'number') {

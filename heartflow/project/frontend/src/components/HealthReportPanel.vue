@@ -106,6 +106,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { ref, computed } from 'vue'
 import { useHealthReport, healthReportInsights } from '../modules/body/health-report'
 import type { ReportPeriod, HealthReport } from '../modules/body/health-report'
@@ -147,7 +148,7 @@ const insights = computed(() => healthReportInsights(latestReport.value))
 function logsToMetrics(logs: BodyLog[]): BodyMetric[] {
   const out: BodyMetric[] = []
   for (const l of logs) {
-    const date = l.at.slice(0, 10)
+    const date = getLocalDateKey(new Date(l.at))
     if (l.type === 'sleep' && typeof l.value.hours === 'number') {
       out.push({ id: `m_${l.id}`, type: 'sleep', value: l.value.hours, unit: '小时', timestamp: l.at, date })
     } else if (l.type === 'exercise' && typeof l.value.minutes === 'number') {
@@ -161,7 +162,7 @@ function logsToSleepRecords(logs: BodyLog[]): SleepRecord[] {
   const out: SleepRecord[] = []
   for (const l of logs) {
     if (l.type !== 'sleep' || typeof l.value.hours !== 'number') continue
-    const date = l.at.slice(0, 10)
+    const date = getLocalDateKey(new Date(l.at))
     out.push({
       id: `s_${l.id}`,
       sleepAt: l.at,

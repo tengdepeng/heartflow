@@ -146,6 +146,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useLearningPath, LEARNING_PATH_TYPE_META } from '../modules/career/skill-path'
 import { SKILL_CATEGORY_META, PROFICIENCY_META } from '../modules/career/skill-map'
 import type { SkillNode, SkillCategory, ProficiencyLevel } from '../modules/career/skill-map'
@@ -234,7 +235,7 @@ function pathAccent(p: LearningPath) {
 }
 
 function fmtDate(iso: string) {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 
 onMounted(() => {

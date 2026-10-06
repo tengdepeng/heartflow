@@ -104,7 +104,7 @@ const adaptedRecords = computed<MovementRecord[]>(() =>
     intensity: 'moderate' as MovementIntensity,
     note: m.note,
     // 日键用本地日历日：与 moveToRecord / today-room-stats 的读取口径一致。
-    // 原写法 m.at.slice(0, 10) 切的是 UTC 日期，凌晨记录会被归到前一天。
+    // 原写法用 toISOString 切 UTC 日期，凌晨记录会被归到前一天。
     date: getLocalDateKey(new Date(m.at)),
     timestamp: m.at,
   })),

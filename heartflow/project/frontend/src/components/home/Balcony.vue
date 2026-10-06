@@ -92,6 +92,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { storage } from '../../engine/storage'
 
 const emit = defineEmits<{
@@ -155,8 +156,8 @@ function removeMoment(idx: number) {
 // ---- 今日思绪（真实笔记数据）----
 const todayNoteCount = computed(() => {
   const notes = storage.getNotes()
-  const today = new Date().toISOString().slice(0, 10)
-  return notes.filter((n: { createdAt?: string }) => n.createdAt?.startsWith(today)).length
+  const today = getLocalDateKey()
+  return notes.filter((n: { createdAt?: string }) => !!n.createdAt && getLocalDateKey(new Date(n.createdAt)) === today).length
 })
 
 onMounted(() => {

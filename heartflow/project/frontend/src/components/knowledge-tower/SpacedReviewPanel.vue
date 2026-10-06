@@ -81,6 +81,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../../utils/time'
 import { computed, onMounted, ref } from 'vue'
 import { useSpacedReview } from '../../modules/knowledge'
 import { getNodes } from '../../modules/knowledge/relation'
@@ -120,13 +121,13 @@ const currentItem = ref<{
 } | null>(null)
 const reviewed = new Set<string>()
 const queueHint = computed(() => {
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateKey()
   const plan = api.reviewPlans.value.find(p => p.date === today)
   if (!plan) return 0
   return plan.items.filter(i => i.due).length
 })
 const allDone = computed(() => {
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateKey()
   const plan = api.reviewPlans.value.find(p => p.date === today)
   return !!plan && plan.completed
 })
@@ -135,7 +136,7 @@ const nodeDesc = new Map(nodes.value.map(n => [n.id, n.desc]))
 
 function createTodayPlan() {
   api.generateReviewPlan(nodes.value)
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateKey()
   const plan = api.reviewPlans.value.find(p => p.date === today)
   if (plan && plan.items.length > 0) {
     pickNext(plan.items)
@@ -159,7 +160,7 @@ function pickNext(items: { nodeId: string; title: string; category: string }[]) 
 
 function rateReview(correct: boolean) {
   if (!currentItem.value) return
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateKey()
   const plan = api.reviewPlans.value.find(p => p.date === today)
   if (plan) {
     api.recordReview(plan.id, currentItem.value.nodeId, correct)

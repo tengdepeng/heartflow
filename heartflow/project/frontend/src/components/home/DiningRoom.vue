@@ -132,6 +132,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../../utils/time'
 import { computed, ref, onMounted } from 'vue'
 import { storage } from '../../engine/storage'
 
@@ -150,9 +151,9 @@ interface NoteRecord {
 
 const recentNotes = computed<NoteRecord[]>(() => {
   const notes = storage.getNotes()
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalDateKey()
   return notes
-    .filter((n: NoteRecord) => n.createdAt?.startsWith(today))
+    .filter((n: NoteRecord) => !!n.createdAt && getLocalDateKey(new Date(n.createdAt)) === today)
     .slice(0, 3)
 })
 
@@ -170,7 +171,7 @@ const meals = ref<MealEntry[]>([])
 const newMeal = ref({ type: '晚餐', name: '' })
 
 const todayMeals = computed<MealEntry[]>(() => {
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalDateKey()
   return meals.value
     .filter((m) => m.at.startsWith(today))
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())

@@ -82,7 +82,7 @@ import {
   REPORT_TEMPLATES,
 } from '../modules/worklog'
 import type { ExportFormat, ExportResult, ReportOptions } from '../modules/worklog'
-import { getLocalMonthKey } from '../utils/time'
+import { getLocalMonthKey, getLocalDateKey } from '../utils/time'
 
 const worklog = useWorklog()
 const exportEngine = useWorklogExport()
@@ -158,7 +158,7 @@ function buildSummaries() {
   const template = reportOpts.template
   const now = new Date()
   if (template === 'daily') {
-    const date = reportPeriod.value || now.toISOString().slice(0, 10)
+    const date = reportPeriod.value || getLocalDateKey(now)
     return { summaries: [worklog.generateDailySummary(new Date(date))], weekly: null, period: date }
   }
   if (template === 'weekly') {

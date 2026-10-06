@@ -70,7 +70,7 @@
       <ul v-if="snapshots.length" class="wa-list">
         <li v-for="s in snapshots" :key="s.id" class="wa-item">
           <span class="wa-item-name">{{ s.name }}<template v-if="s.isMilestone"> 🏁</template></span>
-          <span class="wa-item-meta">{{ s.createdAt.slice(0, 10) }}</span>
+          <span class="wa-item-meta">{{ dayOf(s.createdAt) }}</span>
           <button class="wa-mini" @click="restoreSnapshot(s.id)">恢复</button>
           <button class="wa-mini" @click="removeSnapshot(s.id)">×</button>
         </li>
@@ -80,12 +80,18 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { ref, computed } from 'vue'
 import {
   useWorkspaceAdvanced,
   PRESET_PALETTES,
 } from '../modules/customization/workspace-advanced'
 import type { SnapshotComparison } from '../modules/customization/workspace-advanced'
+
+/** 本地日历日（dayOf）：UTC 串切日会把凌晨记录归到前一天 */
+function dayOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
 
 const w = useWorkspaceAdvanced()
 

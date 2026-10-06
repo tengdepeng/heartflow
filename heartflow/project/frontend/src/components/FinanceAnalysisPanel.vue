@@ -222,6 +222,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import {
   useFinanceFilter,
   usePeriodicAnalysis,
@@ -376,7 +377,7 @@ function fmtMoney(v: number): string {
 }
 
 function fmtDate(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 
 watch(adaptedRecords, () => {

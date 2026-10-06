@@ -138,6 +138,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { ref, computed } from 'vue'
 import {
   useConstitutionStatus,
@@ -242,7 +243,7 @@ function onExport(): void {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `constitution-status-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `constitution-status-${getLocalDateKey()}.json`
   a.click()
   URL.revokeObjectURL(url)
   showToast('宪法透明度账本已导出', 'success')

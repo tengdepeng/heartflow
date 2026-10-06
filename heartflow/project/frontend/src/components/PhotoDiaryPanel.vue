@@ -360,6 +360,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalMonthKey } from '../utils/time'
 import { computed, reactive, ref } from 'vue'
 import {
   usePhotoDiary,
@@ -421,7 +422,7 @@ const sortedEntries = computed(() => [...diary.entries.value].sort((a, b) => b.d
 function groupByMonth(list: PhotoEntry[]): { key: string; label: string; entries: PhotoEntry[] }[] {
   const byMonth = new Map<string, PhotoEntry[]>()
   for (const e of list) {
-    const ym = e.date.slice(0, 7)
+    const ym = getLocalMonthKey(new Date(e.date))
     if (!byMonth.has(ym)) byMonth.set(ym, [])
     byMonth.get(ym)!.push(e)
   }

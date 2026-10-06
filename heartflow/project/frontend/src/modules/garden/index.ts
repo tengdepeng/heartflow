@@ -6,6 +6,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 export {
   useWishList,
@@ -92,7 +93,7 @@ export function useGardenFlourish() {
   function tickHabit(id: string) {
     const h = habits.value.find(h => h.id === id)
     if (!h) return
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     if (h.ticks.includes(today)) {
       h.ticks = h.ticks.filter(t => t !== today)
     } else {
@@ -105,7 +106,7 @@ export function useGardenFlourish() {
     for (let i = h.ticks.length - 1; i >= 0; i--) {
       const expected = new Date(d)
       expected.setDate(expected.getDate() - (h.ticks.length - 1 - i))
-      if (h.ticks[i] === expected.toISOString().slice(0, 10)) streak++
+      if (h.ticks[i] === getLocalDateKey(expected)) streak++
       else break
     }
     h.streak = streak

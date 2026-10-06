@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { Task, TaskQuadrant } from './task'
+import { getLocalDateKey } from '../../utils/time'
 
 export const QUADRANTS: TaskQuadrant[] = ['q1', 'q2', 'q3', 'q4']
 
@@ -52,7 +53,7 @@ export function bucketByQuadrant(tasks: Task[]): Record<TaskQuadrant, Task[]> {
 /** 今日代办（未完成）按象限聚合，用于"更漏 · 今日专注" */
 export function todayTasksByQuadrant(tasks: Task[], today: string): Task[] {
   return tasks
-    .filter(t => t.status !== 'done' && (!t.completedAt || t.completedAt.slice(0, 10) === today))
+    .filter(t => t.status !== 'done' && (!t.completedAt || getLocalDateKey(new Date(t.completedAt)) === today))
     .sort((a, b) => {
       const qa = quadrantOrder(computeQuadrant(a.urgency, a.importance))
       const qb = quadrantOrder(computeQuadrant(b.urgency, b.importance))

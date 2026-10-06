@@ -113,6 +113,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useSutraAnnotations, ANNOTATION_TYPE_META } from '../modules/body-wisdom'
+import { getLocalDateKey } from '../utils/time'
 import type { AnnotationType } from '../modules/body-wisdom'
 import { CLASSIC_EXCERPTS } from '../modules/wisdom/tcm'
 
@@ -142,7 +143,7 @@ function sutraLabel(id: string): string {
 }
 
 function dateLabel(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 
 // ---- 添加注解 ----

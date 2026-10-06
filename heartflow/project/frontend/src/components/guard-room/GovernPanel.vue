@@ -325,6 +325,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../../utils/time'
 import { ref, computed } from 'vue'
 import { useConfig } from '../../resonance/bridges/config'
 import { useGuard } from '../../modules/guard'
@@ -473,7 +474,7 @@ function exportSelected() {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const a = document.createElement('a')
   a.href = URL.createObjectURL(blob)
-  a.download = `heartflow-export-${selectedExportKeys.value.join('-')}-${new Date().toISOString().slice(0,10)}.json`
+  a.download = `heartflow-export-${selectedExportKeys.value.join('-')}-${getLocalDateKey()}.json`
   a.click()
   selectedExportKeys.value = []
 }
@@ -567,7 +568,7 @@ function exportBackup() {
   }
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob)
-  a.download = `heartflow-backup-${new Date().toISOString().slice(0,10)}.json`; a.click()
+  a.download = `heartflow-backup-${getLocalDateKey()}.json`; a.click()
 }
 
 function clearAllData() {

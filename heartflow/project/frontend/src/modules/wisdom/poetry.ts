@@ -10,6 +10,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -268,7 +269,7 @@ export function tags(): string[] {
 
 /** 今日一诗：按日期确定性轮换 */
 export function poemOfTheDay(dateStr?: string): Poem {
-  const d = dateStr ?? new Date().toISOString().slice(0, 10)
+  const d = dateStr ?? getLocalDateKey()
   let hash = 0
   for (let i = 0; i < d.length; i++) {
     hash = (hash * 31 + d.charCodeAt(i)) >>> 0

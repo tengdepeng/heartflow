@@ -4,7 +4,7 @@
 // ============================================================
 
 import type { WordEntry } from './types'
-import { getLocalDateKey } from '@/utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '@/utils/time'
 
 // ============================================================
 // 类型定义
@@ -591,7 +591,7 @@ export function useWritingEnhance() {
     // 月度趋势
     const monthMap = new Map<string, { sessions: number; words: number }>()
     for (const sess of sessions) {
-      const month = sess.startedAt.slice(0, 7)
+      const month = getLocalMonthKey(new Date(sess.startedAt))
       if (!monthMap.has(month)) monthMap.set(month, { sessions: 0, words: 0 })
       const entry = monthMap.get(month)!
       entry.sessions++

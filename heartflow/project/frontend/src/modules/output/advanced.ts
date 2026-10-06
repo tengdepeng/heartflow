@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalMonthKey, getLocalDateKey } from '../../utils/time'
 import type { OutputRecord, OutputRecordType, OutputRecordStatus } from './types'
 import { governanceCheckExport } from './governance-gate'
 
@@ -400,7 +400,7 @@ export function useOutputStats() {
       }
 
       const date = new Date(r.createdAt)
-      const dateKey = r.createdAt.split('T')[0]
+      const dateKey = getLocalDateKey(new Date(r.createdAt))
       dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + 1)
 
       const weekKey = getWeekKey(date)
@@ -491,15 +491,15 @@ export function useExport() {
     switch (format) {
       case 'json':
         content = JSON.stringify(records, null, 2)
-        filename = `heartflow-output-${new Date().toISOString().split('T')[0]}.json`
+        filename = `heartflow-output-${getLocalDateKey()}.json`
         break
       case 'csv':
         content = recordsToCSV(records)
-        filename = `heartflow-output-${new Date().toISOString().split('T')[0]}.csv`
+        filename = `heartflow-output-${getLocalDateKey()}.csv`
         break
       case 'markdown':
         content = recordsToMarkdown(records)
-        filename = `heartflow-output-${new Date().toISOString().split('T')[0]}.md`
+        filename = `heartflow-output-${getLocalDateKey()}.md`
         break
     }
 
@@ -554,7 +554,7 @@ function recordsToMarkdown(records: OutputRecord[]): string {
   records.forEach(r => {
     const content = r.content.length > 50 ? r.content.slice(0, 50) + '...' : r.content
     const emotion = r.emotionCategory || '-'
-    const date = r.createdAt.split('T')[0]
+    const date = getLocalDateKey(new Date(r.createdAt))
     md += `| ${r.type} | ${content} | ${r.roomSource} | ${emotion} | ${date} |\n`
   })
 

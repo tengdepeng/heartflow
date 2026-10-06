@@ -81,6 +81,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useWorklog } from '../modules/worklog/entries'
+import { getLocalDateKey } from '../utils/time'
 import { useReward } from '../modules/reward/reward-list'
 import { useWorklogRewardBridge, LOG_TYPE_TO_INCOME } from '../modules/reward/worklog-bridge'
 import type { IncomeCategory, ExpenseCategory, RewardRecord as TypeRewardRecord } from '../modules/reward/types'
@@ -142,7 +143,7 @@ function fmtMoney(v: number): string {
 }
 
 function fmtDate(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 
 watch(() => reward.records.value, () => {

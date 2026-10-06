@@ -58,7 +58,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { getLocalMonthKey } from '../utils/time'
+import { getLocalMonthKey, getLocalDateKey } from '../utils/time'
 import CrystalDetail from './CrystalDetail.vue'
 import { storage } from '../engine/storage'
 import type { TimeCrystal, FocusSession } from '../types'
@@ -99,14 +99,14 @@ interface Band {
   dots: Dot[]
 }
 
-const todayStr = new Date().toISOString().slice(0, 10)
+const todayStr = getLocalDateKey()
 
 // 按日期分组、按列排列的 bands
 const bands = computed<Band[]>(() => {
   const crystals = storage.getCrystals()
   const map = new Map<string, TimeCrystal[]>()
   for (const c of crystals) {
-    const ds = new Date(c.createdAt).toISOString().slice(0, 10)
+    const ds = getLocalDateKey(new Date(c.createdAt))
     if (!map.has(ds)) map.set(ds, [])
     map.get(ds)!.push(c)
   }

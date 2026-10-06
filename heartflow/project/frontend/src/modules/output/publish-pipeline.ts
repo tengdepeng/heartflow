@@ -5,6 +5,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { OutputRecord, OutputRecordType } from './types'
 import { governanceCheckPublish } from './governance-gate'
 
@@ -1089,7 +1090,7 @@ export function usePublishPipeline(
         }
       }
 
-      const dateKey = record.createdAt.split('T')[0]
+      const dateKey = getLocalDateKey(new Date(record.createdAt))
       dailyMap.set(dateKey, (dailyMap.get(dateKey) || 0) + 1)
     }
 

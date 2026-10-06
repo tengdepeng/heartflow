@@ -22,7 +22,7 @@
       <div v-if="recalled" class="hb-recalled">
         <span class="hb-recalled-icon">🍀</span>
         <p class="hb-recalled-text">{{ recalled.text }}</p>
-        <span class="hb-recalled-meta">{{ recalled.createdAt.slice(0, 10) }} · 被回顾 {{ recalled.recalledCount }} 次</span>
+        <span class="hb-recalled-meta">{{ dayOf(recalled.createdAt) }} · 被回顾 {{ recalled.recalledCount }} 次</span>
       </div>
     </div>
 
@@ -32,7 +32,7 @@
         <li v-for="item in items.slice(0, 20)" :key="item.id" class="hb-item">
           <p class="hb-item-text">{{ item.text }}</p>
           <div class="hb-item-foot">
-            <span class="hb-item-date">{{ item.createdAt.slice(0, 10) }}</span>
+            <span class="hb-item-date">{{ dayOf(item.createdAt) }}</span>
             <span class="hb-item-tags">{{ item.tags.join(' · ') }}</span>
             <button class="hb-del" @click="remove(item.id)">×</button>
           </div>
@@ -44,9 +44,15 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { onMounted, ref } from 'vue'
 import { useHappyBox, HAPPY_TAGS } from '../modules/emotion/happy-box'
 import type { HappyItem } from '../modules/emotion/happy-box'
+
+/** 本地日历日（dayOf）：UTC 串切日会把凌晨记录归到前一天 */
+function dayOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
 
 const { items, total, todayCount, load, capture, remove, recall } = useHappyBox()
 

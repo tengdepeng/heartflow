@@ -109,6 +109,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed, ref } from 'vue'
 import {
   useSavingPlans,
@@ -215,7 +216,7 @@ function createPlan(): void {
 function onDeposit(id: string): void {
   const amt = depositAmount.value[id]
   if (!(amt > 0)) return
-  store.deposit(id, amt, new Date().toISOString().slice(0, 10), (depositNote.value[id] || '').trim() || undefined)
+  store.deposit(id, amt, getLocalDateKey(), (depositNote.value[id] || '').trim() || undefined)
   depositAmount.value[id] = 0
   depositNote.value[id] = ''
 }

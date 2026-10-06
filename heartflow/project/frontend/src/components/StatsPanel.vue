@@ -79,7 +79,7 @@
 import { computed } from 'vue'
 import { storage } from '../engine/storage'
 import { useConfig } from '../resonance/bridges/config'
-import { formatDuration, formatDate } from '../utils/time'
+import { formatDuration, formatDate, getLocalDateKey } from '../utils/time'
 import { useEffect } from '../modules/constitution/use-effect'
 import HeatmapGrid from './HeatmapGrid.vue'
 
@@ -98,16 +98,16 @@ const stats = computed(() => {
   const totalFocusSeconds = completed.reduce((sum, s) => sum + Math.floor(s.elapsed / 1000), 0)
 
   // 今日专注（秒）
-  const todayStr = new Date().toISOString().slice(0, 10)
-  const todaySessions = completed.filter(s => s.completedAt?.startsWith(todayStr))
+  const todayStr = getLocalDateKey()
+  const todaySessions = completed.filter(s => !!s.completedAt && getLocalDateKey(new Date(s.completedAt)) === todayStr)
   const todayFocusSeconds = todaySessions.reduce((sum, s) => sum + Math.floor(s.elapsed / 1000), 0)
 
   // 连续天数
   let streak = 0
   const checkDate = new Date()
   while (true) {
-    const dateStr = checkDate.toISOString().slice(0, 10)
-    const hasSession = completed.some(s => s.completedAt?.startsWith(dateStr))
+    const dateStr = getLocalDateKey(checkDate)
+    const hasSession = completed.some(s => !!s.completedAt && getLocalDateKey(new Date(s.completedAt)) === dateStr)
     if (hasSession) {
       streak++
       checkDate.setDate(checkDate.getDate() - 1)

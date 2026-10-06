@@ -150,6 +150,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import {
   useCraftMaterials,
   MATERIAL_RARITY_META,
@@ -252,7 +253,7 @@ function materialIcon(id: string): string {
 }
 
 function formatDate(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 </script>
 

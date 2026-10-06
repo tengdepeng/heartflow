@@ -77,7 +77,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { getLocalMonthKey } from '../utils/time'
+import { getLocalMonthKey, getLocalDateKey } from '../utils/time'
 import { categoryOptionsFor, categoryLabelAny } from '../modules/reward/custom-category'
 import type { RewardRecord } from '../modules/reward/reward-list'
 
@@ -112,7 +112,7 @@ const cells = computed<Cell[]>(() => {
   const daysInMonth = new Date(curYear.value, curMonth.value + 1, 0).getDate()
   const dayMap = new Map<string, number>()
   for (const r of props.records) {
-    const k = r.at.slice(0, 10)
+    const k = getLocalDateKey(new Date(r.at))
     if (k.startsWith(`${curYear.value}-${String(curMonth.value + 1).padStart(2, '0')}`)) {
       dayMap.set(k, (dayMap.get(k) ?? 0) + (r.type === 'income' ? r.amount : -r.amount))
     }
@@ -142,7 +142,7 @@ const monthStats = computed(() => {
 })
 
 const selectedRecords = computed(() =>
-  props.records.filter(r => r.at.slice(0, 10) === selectedKey.value),
+  props.records.filter(r => getLocalDateKey(new Date(r.at)) === selectedKey.value),
 )
 const selectedNet = computed(() => selectedRecords.value.reduce((s, r) => s + (r.type === 'income' ? r.amount : -r.amount), 0))
 

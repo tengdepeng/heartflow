@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { DialogueEntry } from './types'
 
 // ============================================================
@@ -556,8 +557,8 @@ export function usePersonalityModel(
     if (userDialogues.length < config.value.minDialoguesForStyle) return null
 
     const sortedDialogues = [...userDialogues].sort((a, b) => a.timestamp - b.timestamp)
-    const startDate = new Date(sortedDialogues[0].timestamp).toISOString().slice(0, 10)
-    const lastDate = new Date(sortedDialogues[sortedDialogues.length - 1].timestamp).toISOString().slice(0, 10)
+    const startDate = getLocalDateKey(new Date(sortedDialogues[0].timestamp))
+    const lastDate = getLocalDateKey(new Date(sortedDialogues[sortedDialogues.length - 1].timestamp))
 
     // 按时间间隔取样
     const interval = config.value.trajectorySamplingInterval
@@ -565,7 +566,7 @@ export function usePersonalityModel(
     const dates = new Set<string>()
 
     for (const d of sortedDialogues) {
-      const date = new Date(d.timestamp).toISOString().slice(0, 10)
+      const date = getLocalDateKey(new Date(d.timestamp))
       dates.add(date)
     }
 
@@ -574,7 +575,7 @@ export function usePersonalityModel(
     for (let i = 0; i < sortedDates.length; i += interval) {
       const date = sortedDates[i]
       const dateDialogues = sortedDialogues.filter(
-        d => new Date(d.timestamp).toISOString().slice(0, 10) <= date,
+        d => getLocalDateKey(new Date(d.timestamp)) <= date,
       )
       const dateTexts = dateDialogues.map(d => d.text)
 

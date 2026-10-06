@@ -199,6 +199,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAdvisor } from '../resonance/bridges/advisor'
@@ -467,7 +468,7 @@ const stats = computed(() => advisor.getQuickStats())
 /** M6：今日专注时段分布（晨/午/昼/暮/夜），供长按面板迷你时间轴 */
 const focusTimeline = computed(() => {
   void showInfoSheet.value // 依赖面板开关，确保每次打开时重读最新专注数据
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalDateKey()
   const buckets: { label: string; test: (h: number) => boolean }[] = [
     { label: '晨', test: (h) => h >= 5 && h < 12 },
     { label: '午', test: (h) => h >= 12 && h < 14 },
@@ -495,7 +496,7 @@ const timelineAria = computed(() =>
 /** M6：当前房间今日记录数（仅嵌入且有 activeRoomId 时显示） */
 const roomNoteCount = computed<number | null>(() => {
   if (!props.activeRoomId) return null
-  const today = new Date().toISOString().slice(0, 10)
+  const today = getLocalDateKey()
   return storage.getNotes().filter((n) =>
     n.roomId === props.activeRoomId &&
     !n.archived &&

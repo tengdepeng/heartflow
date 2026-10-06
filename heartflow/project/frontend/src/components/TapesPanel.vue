@@ -58,7 +58,7 @@
         </div>
         <div class="tp-tape-meta">
           <span>{{ t.participants.join('、') || '—' }}</span>
-          <span>{{ t.importDate.slice(0, 10) }}</span>
+          <span>{{ dayOf(t.importDate) }}</span>
         </div>
         <button v-if="t.transcript" class="tp-expand" @click="expandedId = expandedId === t.id ? null : t.id">
           {{ expandedId === t.id ? '收起转录' : '展开转录' }}
@@ -71,8 +71,14 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed, ref } from 'vue'
 import { useTapes, tapeOverview, searchTapes, formatTapeDuration, recentTapes } from '../modules/study/tapes'
+
+/** 本地日历日（dayOf）：UTC 串切日会把凌晨记录归到前一天 */
+function dayOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
 
 const tapesApi = useTapes()
 

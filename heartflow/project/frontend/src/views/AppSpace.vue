@@ -183,7 +183,7 @@
             <span>{{ comp.styleTheme }}</span>
           </div>
           <div class="as-compare-footer">
-            <span class="as-compare-date">{{ comp.lastModified.slice(0, 10) }}</span>
+            <span class="as-compare-date">{{ dayOf(comp.lastModified) }}</span>
             <span class="as-compare-use">访问 {{ comp.useCount }} 次</span>
           </div>
         </div>
@@ -211,9 +211,14 @@ import RoomLayout from '../components/RoomLayout.vue'
 import AppMarketPanel from '../components/AppMarketPanel.vue'
 import { useAppSpaceManager } from '../modules/space/app-space-manager'
 import type { AppSpaceEntry } from '../modules/space/app-space-manager'
+
+/** 本地日历日（dayOf）：UTC 串切日会把凌晨记录归到前一天 */
+function dayOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
 import { getPerception, isPerceptionAllowed, setPerceptionAllowed } from '../modules/perception'
 import { deriveAttentionReport, attentionToBodyWisdomSignal } from '../modules/attention/attention-model'
-import { formatDateTime as formatTime } from '../utils/time'
+import { formatDateTime as formatTime, getLocalDateKey } from '../utils/time'
 
 const { entranceRef, entranceClass } = useViewEntrance()
 const router = useRouter()
@@ -239,7 +244,7 @@ const attentionReport = computed(() => {
   return deriveAttentionReport(env, {
     navigationCount: totalAccesses,
     focusMinutes: 0,
-    dateStr: new Date().toISOString().slice(0, 10),
+    dateStr: getLocalDateKey(),
   })
 })
 

@@ -5,7 +5,7 @@
 
 import type { WordEntry, ProficiencyLevel } from './types'
 import { PROFICIENCY_META } from './types'
-import { getLocalDateKey } from '@/utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -235,7 +235,7 @@ export function usePersonalVocabulary() {
     // 学习趋势（按月份）
     const monthMap = new Map<string, { label: string; value: number }>()
     for (const w of words) {
-      const month = w.createdAt.slice(0, 7)
+      const month = getLocalMonthKey(new Date(w.createdAt))
       if (!monthMap.has(month)) {
         monthMap.set(month, { label: month, value: 0 })
       }

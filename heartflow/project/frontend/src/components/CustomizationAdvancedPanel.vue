@@ -69,7 +69,7 @@
       <ul v-if="snapshots.length" class="ca-list">
         <li v-for="s in snapshots" :key="s.id" class="ca-item">
           <span class="ca-item-name">{{ s.name }}</span>
-          <span class="ca-item-meta">{{ s.createdAt.slice(0, 10) }}</span>
+          <span class="ca-item-meta">{{ dayOf(s.createdAt) }}</span>
           <button class="ca-mini" @click="restoreSnapshot(s.id)">恢复</button>
           <button class="ca-mini" @click="removeSnapshot(s.id)">×</button>
         </li>
@@ -79,6 +79,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { ref, computed } from 'vue'
 import {
   useCustomizationAdvanced,
@@ -86,6 +87,11 @@ import {
   ANIMATION_PRESETS,
   MATERIAL_TYPE_META,
 } from '../modules/customization/customization-advanced'
+
+/** 本地日历日（dayOf）：UTC 串切日会把凌晨记录归到前一天 */
+function dayOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
 
 const c = useCustomizationAdvanced()
 

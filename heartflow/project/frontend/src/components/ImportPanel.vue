@@ -23,7 +23,7 @@
         <span class="imp-type" :class="r.type">{{ r.type === 'income' ? '收' : '支' }}</span>
         <span class="imp-main">
           <b>¥{{ r.amount.toLocaleString() }} · {{ r.note || r.category }}</b>
-          <span class="imp-meta">{{ r.at.slice(0, 10) }} · {{ r.category }}</span>
+          <span class="imp-meta">{{ dayOf(r.at) }} · {{ r.category }}</span>
         </span>
       </div>
     </div>
@@ -36,6 +36,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { ref } from 'vue'
 import {
   detectSource,
@@ -46,6 +47,11 @@ import {
   type ImportRow,
   type ImportSource,
 } from '../modules/reward/importer'
+
+/** 本地日历日（dayOf）：UTC 串切日会把凌晨记录归到前一天 */
+function dayOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
 
 const emit = defineEmits<{ (e: 'import:records', rows: ImportRow[], source: ImportSource): void }>()
 

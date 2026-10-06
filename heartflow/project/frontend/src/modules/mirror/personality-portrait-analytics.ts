@@ -6,6 +6,7 @@
 // ============================================================
 
 import type { DialogueEntry } from './types'
+import { getLocalDateKey } from '../../utils/time'
 import { STYLE_DIMENSION_META, GROWTH_PHASE_META } from './personality-model'
 import type { StyleDimension, GrowthNode } from './personality-model'
 import {
@@ -472,7 +473,7 @@ export function portraitTrajectory(
 }
 
 function dayKey(ts: number): string {
-  return new Date(ts).toISOString().slice(0, 10)
+  return getLocalDateKey(new Date(ts))
 }
 
 function trajectoryPhase(

@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { Goal, GoalStatus } from './types'
 import { DOMAIN_COLORS } from './types'
 
@@ -361,7 +362,7 @@ export function useProgressHistory(getGoals: () => Goal[]) {
     }
 
     const snapshot: ProgressSnapshot = {
-      date: now.slice(0, 10),
+      date: getLocalDateKey(new Date(now)),
       totalGoals: goals.length,
       completedGoals: goals.filter(g => g.status === 'bloom').length,
       totalAnchors,

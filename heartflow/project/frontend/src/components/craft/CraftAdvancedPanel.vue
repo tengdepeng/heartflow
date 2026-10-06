@@ -152,6 +152,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import EmptyState from '../EmptyState.vue'
+import { getLocalDateKey } from '../../utils/time'
 import { useCraftUi } from '../../modules/craft/useCraftUi'
 import { useCraftAdvanced, type InspirationEntry } from '../../modules/craft/craft-advanced'
 import { TYPE_LABEL } from '../../modules/craft/types'
@@ -224,7 +225,7 @@ function workName(id: string): string {
 }
 
 function formatDate(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 </script>
 

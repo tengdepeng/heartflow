@@ -264,7 +264,7 @@
 import { ref, computed, onUnmounted } from 'vue'
 import { useCrossDevice } from '../../modules/data-sovereignty/composables/useCrossDevice'
 import type { ContinuitySession } from '../../modules/data-sovereignty/types'
-import { formatDateTime as formatTime } from '../../utils/time'
+import { formatDateTime as formatTime, getLocalDateKey } from '../../utils/time'
 import QrCode from './QrCode.vue'
 import {
   createLocalSnapshotAdapter,
@@ -513,7 +513,7 @@ async function exportLocal() {
     const url = URL.createObjectURL(file)
     const a = document.createElement('a')
     a.href = url
-    a.download = `heartflow-continuation-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `heartflow-continuation-${getLocalDateKey()}.json`
     a.click()
     URL.revokeObjectURL(url)
     localStatus.value = '已导出快照文件，请将其带到目标设备导入'

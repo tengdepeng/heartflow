@@ -93,6 +93,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed, reactive, ref } from 'vue'
 import { useHealthGoals, useBodyGreenhouse, BODY_METRIC_META } from '../modules/body'
 import type { BodyMetricType } from '../modules/body'
@@ -162,7 +163,7 @@ const progressInputs = reactive<Record<string, number | undefined>>({})
 
 function submitGoal() {
   if (!goalForm.name.trim() || !goalForm.targetValue) return
-  const targetDate = goalForm.targetDate || new Date(Date.now() + 30 * 86400000).toISOString().split('T')[0]
+  const targetDate = goalForm.targetDate || getLocalDateKey(new Date(Date.now() + 30 * 86400000))
   goalsStore.createGoal(
     goalForm.type,
     goalForm.name.trim(),

@@ -5,6 +5,7 @@
 
 import type { FocusSession, FocusMode, TimerConfig } from '../../types'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 重新导出引擎函数（让外部统一从模块层引用） ----
 
@@ -47,7 +48,7 @@ export function validateTimerConfig(config: Partial<TimerConfig>): TimerConfig {
 // ---- 日期间隔工具（内部） ----
 
 function getDateStr(date?: Date): string {
-  return (date ?? new Date()).toISOString().slice(0, 10)
+  return getLocalDateKey(date)
 }
 
 // ---- 会话查询 ----
@@ -66,7 +67,7 @@ export function getSessionsByDateRange(startDate: string, endDate: string): Focu
   return storage.getSessions().filter(s => {
     const t = s.completedAt ?? s.startedAt
     if (!t) return false
-    const d = t.slice(0, 10)
+    const d = getLocalDateKey(new Date(t))
     return d >= startDate && d <= endDate
   })
 }

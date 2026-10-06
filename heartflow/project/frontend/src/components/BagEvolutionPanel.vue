@@ -131,6 +131,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useBagEvolution, EVOLUTION_STAGE_META } from '../modules/bag/evolution'
+import { getLocalDateKey } from '../utils/time'
 import type { EvolutionPath, EvolutionStage } from '../modules/bag/evolution'
 
 const props = withDefaults(
@@ -180,7 +181,7 @@ function distPct(s: EvolutionStage): number {
   return Math.round((stats.value.stageDistribution[s] / total) * 100)
 }
 function dateLabel(iso: string): string {
-  return iso.slice(0, 10)
+  return getLocalDateKey(new Date(iso))
 }
 function reqLabel(type: string): string {
   const map: Record<string, string> = {

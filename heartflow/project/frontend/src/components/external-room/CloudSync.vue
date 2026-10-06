@@ -6,6 +6,7 @@
 // 所有快照经同步口令 AES-GCM 加密落盘，零后端、零出网（宪法第 1 条）。
 // ============================================================
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../../utils/time'
 import { download as dataPortDownload } from '../../engine/data-port'
 import {
   getSyncStatus,
@@ -147,7 +148,7 @@ async function exportManual(): Promise<void> {
   }
   try {
     const text = await downloadEncrypted(passphrase.value, deviceLabel())
-    dataPortDownload(text, `heartflow-sync-${new Date().toISOString().slice(0, 10)}.json`)
+    dataPortDownload(text, `heartflow-sync-${getLocalDateKey()}.json`)
     flash('ok', '已生成加密快照，请存入你的同步盘')
   } catch (e) {
     flash('err', e instanceof Error ? e.message : '导出失败')

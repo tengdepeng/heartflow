@@ -69,6 +69,7 @@
 </template>
 
 <script setup lang="ts">
+import { getLocalDateKey } from '../utils/time'
 import { computed, reactive, watch } from 'vue'
 import { dueRules, type RecurFreq, type RecurringRule } from '../modules/reward/recurring'
 import { categoryOptionsFor } from '../modules/reward/custom-category'
@@ -87,7 +88,7 @@ const emit = defineEmits<{
   (e: 'skip:rule', rule: RecurringRule): void
 }>()
 
-const today = computed(() => props.today ?? new Date().toISOString().slice(0, 10))
+const today = computed(() => props.today ?? getLocalDateKey())
 const due = computed(() => dueRules(props.rules, today.value).sort((a, b) => a.nextRunAt.localeCompare(b.nextRunAt)))
 
 const form = reactive({
@@ -98,7 +99,7 @@ const form = reactive({
   account: 'cash',
   freq: 'monthly' as RecurFreq,
   interval: 1,
-  startAt: new Date().toISOString().slice(0, 10),
+  startAt: getLocalDateKey(),
   active: true,
 })
 
