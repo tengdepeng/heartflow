@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { BodyMetric } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 膳食记录 ----
 
@@ -203,7 +204,7 @@ export function scoreNutrition(
   } = {},
 ): NutritionScore {
   const { activityLevel = 'moderate' } = options
-  const date = meals.length > 0 ? meals[0].date : new Date().toISOString().split('T')[0]
+  const date = meals.length > 0 ? meals[0].date : getLocalDateKey(new Date())
 
   // 如果没有任何膳食记录，返回默认低分
   if (meals.length === 0) {
@@ -466,7 +467,7 @@ export function computeWeeklyNutritionTrend(
   const current = new Date(start)
 
   while (current <= end) {
-    const dateStr = current.toISOString().split('T')[0]
+    const dateStr = getLocalDateKey(current)
     const meals = mealsByDay.get(dateStr) || []
     const score = scoreNutrition(meals)
     dailyScores.push({ date: dateStr, score: score.overall })
@@ -729,7 +730,7 @@ function computeInferredScore(metrics: BodyMetric[]): number {
   const now = new Date()
   let daysWithRecords = 0
   for (let i = 0; i < 7; i++) {
-    const date = new Date(now.getTime() - i * 86400000).toISOString().split('T')[0]
+    const date = getLocalDateKey(new Date(now.getTime() - i * 86400000))
     const hasRecord = metrics.some(m => m.timestamp?.startsWith(date))
     if (hasRecord) daysWithRecords++
   }

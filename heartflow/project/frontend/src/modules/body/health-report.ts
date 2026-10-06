@@ -7,6 +7,7 @@ import { ref } from 'vue'
 import type { BodyMetric, BodyMetricType, SleepRecord } from './types'
 import { BODY_METRIC_META } from './types'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { AnomalyReport } from './health-anomaly'
 import { detectHealthAnomalies } from './health-anomaly'
 import type { HealthGoal } from './health-dashboard'
@@ -1444,7 +1445,7 @@ export function useHealthReport() {
     const now = new Date()
     let start: Date
     let end = new Date(now)
-    const endStr = end.toISOString().split('T')[0]
+    const endStr = getLocalDateKey(end)
 
     switch (period) {
       case 'daily':
@@ -1463,7 +1464,7 @@ export function useHealthReport() {
         start = new Date(now)
     }
 
-    const startStr = start.toISOString().split('T')[0]
+    const startStr = getLocalDateKey(start)
 
     const title = customTitle ?? (() => {
       switch (period) {

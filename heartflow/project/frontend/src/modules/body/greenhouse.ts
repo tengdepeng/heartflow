@@ -7,6 +7,7 @@ import { ref, computed } from 'vue'
 import type { BodyMetric, BodyMetricType, SleepRecord, EnergyLevel, BodyGreenhouseState } from './types'
 import { BODY_METRIC_META, BODY_STORAGE_KEYS } from './types'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 function generateId(): string {
   return `body_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
@@ -32,7 +33,7 @@ export function useBodyGreenhouse() {
     const now = new Date()
     const metric: BodyMetric = {
       id: generateId(), type, value, unit: meta.unit, note,
-      timestamp: now.toISOString(), date: now.toISOString().split('T')[0],
+      timestamp: now.toISOString(), date: getLocalDateKey(now),
     }
     metrics.value = [...metrics.value, metric]
     saveMetrics(metrics.value)
@@ -46,7 +47,7 @@ export function useBodyGreenhouse() {
   }
 
   function getTodayMetrics(): BodyMetric[] {
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey(new Date())
     return metrics.value.filter(m => m.date === today)
   }
 
@@ -57,7 +58,7 @@ export function useBodyGreenhouse() {
     const duration = Math.round((wake.getTime() - sleep.getTime()) / 60000)
     const record: SleepRecord = {
       id: generateId(), sleepAt, wakeAt, duration, quality, dreamNote,
-      date: sleep.toISOString().split('T')[0],
+      date: getLocalDateKey(sleep),
     }
     sleepRecords.value = [...sleepRecords.value, record]
     saveSleep(sleepRecords.value)
@@ -81,7 +82,7 @@ export function useBodyGreenhouse() {
   // ---- 能量评估 ----
   function estimateEnergyLevel(): EnergyLevel {
     const sleepAvg = getSleepAvg7d()
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey(new Date())
     const exerciseToday = metrics.value.filter(m => m.type === 'exercise' && m.date === today)
     const exerciseMinutes = exerciseToday.reduce((s, m) => s + m.value, 0)
 
@@ -95,7 +96,7 @@ export function useBodyGreenhouse() {
   // ---- 温室状态 ----
   const greenhouseState = computed<BodyGreenhouseState>(() => {
     const sleepAvg = getSleepAvg7d()
-    const today = new Date().toISOString().split('T')[0]
+    const today = getLocalDateKey(new Date())
     const exerciseThisWeek = metrics.value.filter(m => {
       if (m.type !== 'exercise') return false
       const d = new Date(m.date)

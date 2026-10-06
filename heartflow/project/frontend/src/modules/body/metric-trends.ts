@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import type { BodyMetric, BodyMetricType } from './types'
 import { BODY_METRIC_META } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -219,8 +220,8 @@ export function useMetricTrends() {
     const metricTypes = options.metricTypes ?? TRACKED_METRICS
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - days * 86400000)
-    const periodStart = startDate.toISOString().split('T')[0]
-    const periodEnd = endDate.toISOString().split('T')[0]
+    const periodStart = getLocalDateKey(startDate)
+    const periodEnd = getLocalDateKey(endDate)
 
     const metricTrends: MetricTrendData[] = []
 
@@ -753,7 +754,7 @@ export function useMetricTrends() {
             threshold: targetConfig.range[0],
             changeRate: trend.slope,
             estimatedTimeToThreshold: getFutureDate(
-              new Date().toISOString().split('T')[0],
+              getLocalDateKey(new Date()),
               daysToThreshold,
             ),
             suggestion: `建议立即采取措施改善${trend.label}，防止进一步恶化`,
@@ -1048,7 +1049,7 @@ export function useMetricTrends() {
   function getFutureDate(baseDate: string, daysAhead: number): string {
     const d = new Date(baseDate)
     d.setDate(d.getDate() + daysAhead)
-    return d.toISOString().split('T')[0]
+    return getLocalDateKey(d)
   }
 
   // ============================================================

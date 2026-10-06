@@ -10,6 +10,7 @@ import { computed } from 'vue'
 import { scoreNutrition, computeWeeklyNutritionTrend, FOOD_DATABASE } from './nutrition-scoring'
 import type { MealRecord, FoodItem, FoodCategory, NutritionScore, WeeklyNutritionTrend } from './nutrition-scoring'
 import type { BodyLog } from '../../stores/health'
+import { getLocalDateKey } from '../../utils/time'
 
 // 常见食物关键词 → FOOD_DATABASE 键名（先精确匹配，避免重复）
 const FOOD_ALIASES: Record<string, string> = {
@@ -119,7 +120,7 @@ export function buildMealRecords(logs: BodyLog[]): MealRecord[] {
     .map(l => ({
       id: l.id,
       type: inferMealType(l.at),
-      date: l.at.slice(0, 10),
+      date: getLocalDateKey(new Date(l.at)),
       time: l.at.slice(11, 16),
       foods: parseMealNote(l.value.note || ''),
       note: l.value.note || '',
@@ -153,8 +154,8 @@ export function useMealNutrition(logs: () => BodyLog[]) {
     const weekEnd = now
     return computeWeeklyNutritionTrend(
       byDay,
-      weekStart.toISOString().split('T')[0],
-      weekEnd.toISOString().split('T')[0],
+      getLocalDateKey(weekStart),
+      getLocalDateKey(weekEnd),
     )
   })
 

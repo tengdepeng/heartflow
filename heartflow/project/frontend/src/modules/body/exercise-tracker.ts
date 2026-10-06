@@ -6,6 +6,7 @@
 import { ref } from 'vue'
 import type { BodyMetric } from './types'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -289,7 +290,7 @@ function saveExerciseGoals(data: ExerciseGoal[]) {
 }
 
 function getTodayStr(): string {
-  return new Date().toISOString().split('T')[0]
+  return getLocalDateKey(new Date())
 }
 
 function dayDiff(date1: string, date2: string): number {
@@ -415,16 +416,16 @@ export function useExerciseTracker() {
     // 按周期过滤
     let filtered = allRecords
     if (period === 'week') {
-      const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+      const weekAgo = getLocalDateKey(new Date(Date.now() - 7 * 86400000))
       filtered = allRecords.filter(r => r.date >= weekAgo)
     } else if (period === 'month') {
-      const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
+      const monthAgo = getLocalDateKey(new Date(Date.now() - 30 * 86400000))
       filtered = allRecords.filter(r => r.date >= monthAgo)
     }
 
     // 本周/本月数据
-    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
-    const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
+    const weekAgo = getLocalDateKey(new Date(Date.now() - 7 * 86400000))
+    const monthAgo = getLocalDateKey(new Date(Date.now() - 30 * 86400000))
     const weeklyRecords = allRecords.filter(r => r.date >= weekAgo)
     const monthlyRecords = allRecords.filter(r => r.date >= monthAgo)
 
@@ -502,8 +503,8 @@ export function useExerciseTracker() {
     const days = period === 'week' ? 7 : period === 'month' ? 30 : 90
     const endDate = new Date()
     const startDate = new Date(endDate.getTime() - days * 86400000)
-    const periodStart = startDate.toISOString().split('T')[0]
-    const periodEnd = endDate.toISOString().split('T')[0]
+    const periodStart = getLocalDateKey(startDate)
+    const periodEnd = getLocalDateKey(endDate)
 
     const allRecords = records.value.filter(r =>
       r.date >= periodStart && r.date <= periodEnd,
@@ -513,7 +514,7 @@ export function useExerciseTracker() {
     const dailyDataMap = new Map<string, { duration: number; calories: number; workouts: number; intensities: number[] }>()
 
     for (let i = 0; i < days; i++) {
-      const date = new Date(startDate.getTime() + i * 86400000).toISOString().split('T')[0]
+      const date = getLocalDateKey(new Date(startDate.getTime() + i * 86400000))
       dailyDataMap.set(date, { duration: 0, calories: 0, workouts: 0, intensities: [] })
     }
 
@@ -635,7 +636,7 @@ export function useExerciseTracker() {
           currentValue = stats.streak
           break
         case 'type_specific': {
-          const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0]
+          const weekAgo = getLocalDateKey(new Date(Date.now() - 7 * 86400000))
           const typeRecords = records.value.filter(
             r => r.type === goal.exerciseType && r.date >= weekAgo,
           )
@@ -720,8 +721,8 @@ export function useExerciseTracker() {
         })()
 
     const end = new Date(start.getTime() + 6 * 86400000)
-    const weekStartStr = start.toISOString().split('T')[0]
-    const weekEndStr = end.toISOString().split('T')[0]
+    const weekStartStr = getLocalDateKey(start)
+    const weekEndStr = getLocalDateKey(end)
 
     const weekRecords = records.value.filter(
       r => r.date >= weekStartStr && r.date <= weekEndStr,
@@ -958,7 +959,7 @@ export function useExerciseTracker() {
     let streak = 0
 
     for (let i = 0; i < 365; i++) {
-      const date = new Date(today.getTime() - i * 86400000).toISOString().split('T')[0]
+      const date = getLocalDateKey(new Date(today.getTime() - i * 86400000))
       if (activeDates.has(date)) {
         streak++
       } else if (i > 0) {
@@ -1029,8 +1030,8 @@ export function useExerciseTracker() {
     const current = new Date(firstMonday)
 
     while (current <= lastDate) {
-      const weekStart = current.toISOString().split('T')[0]
-      const weekEnd = new Date(current.getTime() + 6 * 86400000).toISOString().split('T')[0]
+      const weekStart = getLocalDateKey(current)
+      const weekEnd = getLocalDateKey(new Date(current.getTime() + 6 * 86400000))
       const weekRecords = allRecords.filter(r => r.date >= weekStart && r.date <= weekEnd)
 
       weeks.push({

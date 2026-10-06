@@ -6,6 +6,7 @@
 import { ref, computed } from 'vue'
 import type { BodyMetric } from './types'
 import type { MealRecord, MealType } from './nutrition-scoring'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -528,7 +529,7 @@ export function useNutritionEngine(initialProfile?: Partial<UserProfile>) {
    * 生成个性化膳食计划
    */
   function generateMealPlan(
-    date: string = new Date().toISOString().split('T')[0],
+    date: string = getLocalDateKey(new Date()),
   ): MealPlan {
     const t = computeNutritionTargets()
     const { dietaryPreferences, goal, allergies } = profile.value
@@ -612,7 +613,7 @@ export function useNutritionEngine(initialProfile?: Partial<UserProfile>) {
     else assessment = '今日营养摄入严重偏离目标，请关注饮食质量'
 
     return {
-      date: meals.length > 0 ? meals[0].date : new Date().toISOString().split('T')[0],
+      date: meals.length > 0 ? meals[0].date : getLocalDateKey(new Date()),
       calories: {
         target: t.targetCalories,
         actual: actualCalories,
