@@ -5,6 +5,7 @@
 
 import { ref, computed, watch } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { WidgetType, GlowConfig, FloatingConfig } from './types'
 import { WIDGET_META } from './types'
 import { usePerceptionStore } from '../../stores/perception'
@@ -951,9 +952,10 @@ export function useOrchestrationEngine() {
     touchpointType: TouchpointStats['touchpointType'],
     duration: number = 0,
   ): void {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     let dailyStat = stats.value.find(
-      s => s.period === 'daily' && s.touchpointType === touchpointType && s.timestamp.startsWith(today)
+      s => s.period === 'daily' && s.touchpointType === touchpointType
+        && s.timestamp && getLocalDateKey(new Date(s.timestamp)) === today
     )
 
     if (!dailyStat) {
@@ -988,15 +990,17 @@ export function useOrchestrationEngine() {
 
   /** 记录交互 */
   function recordInteraction(touchpointType: TouchpointStats['touchpointType']): void {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     let dailyStat = stats.value.find(
-      s => s.period === 'daily' && s.touchpointType === touchpointType && s.timestamp.startsWith(today)
+      s => s.period === 'daily' && s.touchpointType === touchpointType
+        && s.timestamp && getLocalDateKey(new Date(s.timestamp)) === today
     )
 
     if (!dailyStat) {
       recordImpression(touchpointType)
       dailyStat = stats.value.find(
-        s => s.period === 'daily' && s.touchpointType === touchpointType && s.timestamp.startsWith(today)
+        s => s.period === 'daily' && s.touchpointType === touchpointType
+          && s.timestamp && getLocalDateKey(new Date(s.timestamp)) === today
       )
     }
 
@@ -1066,10 +1070,10 @@ export function useOrchestrationEngine() {
 
   /** 性能监控 */
   function monitorPerformance(): PerformanceMetrics {
-    const activeCount = stats.value.filter(s => {
-      const today = new Date().toISOString().slice(0, 10)
-      return s.timestamp.startsWith(today) && s.impressions > 0
-    }).length
+    const today = getLocalDateKey()
+    const activeCount = stats.value.filter(s =>
+      s.timestamp && getLocalDateKey(new Date(s.timestamp)) === today && s.impressions > 0
+    ).length
 
     const metrics: PerformanceMetrics = {
       renderTime: performance.now() % 16, // 模拟渲染时间

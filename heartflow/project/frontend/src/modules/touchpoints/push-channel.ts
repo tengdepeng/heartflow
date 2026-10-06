@@ -18,6 +18,7 @@ import { isOsNotificationBlocked } from '../../engine/compliance-gate'
 import { getEffectMultiplier } from '../../engine/constitution-effect'
 import { isSabbathOn } from '../../composables/useDigitalSabbath'
 import { hasCapability } from '../../utils/platform'
+import { getLocalDateKey } from '../../utils/time'
 import type { PushChannelType } from './notification-strategy'
 
 // ---- 外部链接打开（Tauri 感知，移动端安全）----
@@ -260,7 +261,8 @@ export function usePushChannel() {
 
   /** 重置每日计数 */
   function resetDailyCounts() {
-    const today = new Date().toISOString().slice(0, 10)
+    // ⚠️ 每日计数归属按本地日历日；todayPushDate 是本地日键（与 getPushStats 同一口径）。
+    const today = getLocalDateKey()
     for (const ch of channels.value) {
       if (ch.todayPushDate !== today) {
         ch.todayPushCount = 0
@@ -758,8 +760,11 @@ export function usePushChannel() {
 
   /** 获取推送统计 */
   function getPushStats() {
-    const today = new Date().toISOString().slice(0, 10)
-    const todayRecords = records.value.filter(r => r.pushedAt.slice(0, 10) === today)
+    // ⚠️ 「今天」按本地日历日；pushedAt 是 UTC ISO 串，不可 slice(0,10) 取 UTC 日。
+    const today = getLocalDateKey()
+    const todayRecords = records.value.filter(
+      r => r.pushedAt && getLocalDateKey(new Date(r.pushedAt)) === today,
+    )
 
     const total = todayRecords.length
     const success = todayRecords.filter(r => r.success).length

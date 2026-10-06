@@ -40,8 +40,12 @@ export function activityMarks(): Record<string, number> {
     const items = storage.getKV<unknown>(HAPPY_BOX_KEY, [])
     if (Array.isArray(items)) {
       for (const it of items as { createdAt?: string }[]) {
-        const key = (it?.createdAt || '').slice(0, 10)
-        if (/^\d{4}-\d{2}-\d{2}$/.test(key)) add(key, 1)
+        if (!it?.createdAt) continue
+        // ⚠️ 不能用「切前 10 位」取日：createdAt 是 UTC ISO 串，切前 10 位得 UTC 日历日，
+        //    本地 00:00–08:00 的速记会被算到「昨天」，与上方专注会话分支的本地口径不一致。
+        const d = new Date(it.createdAt)
+        if (Number.isNaN(d.getTime())) continue
+        add(toDayKey(d), 1)
       }
     }
   } catch { /* 静默 */ }

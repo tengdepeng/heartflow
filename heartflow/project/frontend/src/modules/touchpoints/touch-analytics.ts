@@ -13,6 +13,7 @@ import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
 import type { PushChannelType } from './notification-strategy'
 import type { PushRecord } from './push-channel'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 类型定义 ----
 
@@ -370,9 +371,12 @@ export function useTouchAnalytics() {
     for (let d = days - 1; d >= 0; d--) {
       const date = new Date()
       date.setDate(date.getDate() - d)
-      const dateStr = date.toISOString().slice(0, 10)
+      // ⚠️ 分桶键按本地日历日；pushedAt 是 UTC ISO 串，两侧都不可 slice(0,10) 取 UTC 日。
+      const dateStr = getLocalDateKey(date)
 
-      const dayRecords = records.filter(r => r.pushedAt.slice(0, 10) === dateStr)
+      const dayRecords = records.filter(
+        r => r.pushedAt && getLocalDateKey(new Date(r.pushedAt)) === dateStr,
+      )
       deliveries.push(dayRecords.length)
       clicks.push(dayRecords.filter(r => r.clickedAt).length)
 
@@ -596,7 +600,8 @@ export function useTouchAnalytics() {
     for (let i = 0; i < deliveries.length; i++) {
       const date = new Date()
       date.setDate(date.getDate() - (deliveries.length - 1 - i))
-      const dateStr = date.toISOString().slice(0, 10)
+      // 与 aggregateByDay 的分桶键同基（本地日历日），否则异常会标到错误的日期上
+      const dateStr = getLocalDateKey(date)
 
       if (deliveries[i] > threshold) {
         anomalies.push({

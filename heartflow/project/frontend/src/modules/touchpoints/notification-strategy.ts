@@ -11,6 +11,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 // ---- 类型定义 ----
 
@@ -401,11 +402,12 @@ export function useDeliveryStrategy() {
 
   /** 检查是否超过每日上限 */
   function isDailyLimitReached(strategyId: string): boolean {
-    const today = new Date().toISOString().slice(0, 10)
+    // ⚠️ 「今天」按本地日历日；createdAt 是 UTC ISO 串，两侧都不可用 slice(0,10) 取 UTC 日。
+    const today = getLocalDateKey()
     const todayCount = queue.value.filter(
       q => q.strategyId === strategyId &&
         q.status === 'delivered' &&
-        q.createdAt.slice(0, 10) === today,
+        q.createdAt && getLocalDateKey(new Date(q.createdAt)) === today,
     ).length
     const strategy = getStrategy(strategyId)
     return strategy ? todayCount >= strategy.maxDailyDeliveries : false

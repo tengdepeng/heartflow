@@ -8,6 +8,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 
 export interface HappyItem {
   id: string
@@ -72,8 +73,10 @@ function recall(): HappyItem | null {
 export function useHappyBox() {
   const total = computed(() => items.value.length)
   const todayCount = computed(() => {
-    const today = new Date().toISOString().slice(0, 10)
-    return items.value.filter(i => i.createdAt.slice(0, 10) === today).length
+    // ⚠️ 业务「今天」按本地日历日：createdAt 是 UTC ISO 串，不能 slice(0,10) 取 UTC 日。
+    //    与 widget-calendar 读同一份 HAPPY_BOX_KEY，两侧口径必须一致。
+    const today = getLocalDateKey()
+    return items.value.filter(i => i.createdAt && getLocalDateKey(new Date(i.createdAt)) === today).length
   })
 
   return { items, total, todayCount, load, capture, remove, recall }
