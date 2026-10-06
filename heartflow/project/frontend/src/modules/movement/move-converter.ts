@@ -58,7 +58,7 @@ export function moveToRecord(move: Move): MovementRecord {
     note: move.note,
     // 日键必须用本地日历日（与下方 localDateStr 的边界键、以及
     // home/today-room-stats 的读取口径一致）。
-    // 原写法 move.at.slice(0, 10) 切的是 UTC 日期，东八区 00:00-08:00 的
+    // 原写法用 toISOString 切 UTC 日期，东八区 00:00-08:00 的
     // 运动记录会被标成前一天，「今日运动」因而恒为 0。
     date: localDateStr(new Date(move.at)),
     timestamp: move.at,

@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalMonthKey, getLocalDateKey } from '../../utils/time'
 import type { MovementRecord, MovementType, MovementIntensity } from './types'
 import { MOVEMENT_INTENSITY_META } from './types'
 
@@ -674,7 +674,7 @@ function getConsecutiveIntenseDays(records: MovementRecord[]): number {
   let consecutive = 0
   const today = new Date()
   for (let i = 0; i < dates.length; i++) {
-    const expected = new Date(today.getTime() - i * 86400000).toISOString().split('T')[0]
+    const expected = getLocalDateKey(new Date(today.getTime() - i * 86400000))
     if (dates[i] === expected) consecutive++
     else break
   }

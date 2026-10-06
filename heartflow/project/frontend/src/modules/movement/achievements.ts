@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { MovementType, MovementIntensity, MovementRecord, MovementRhythm } from './types'
 import { MOVEMENT_INTENSITY_META } from './types'
 
@@ -647,7 +648,7 @@ function calculateWeeklyGoalStreak(records: MovementRecord[], rhythm: MovementRh
   for (const r of records) {
     const d = new Date(r.timestamp)
     const weekStart = new Date(d.getTime() - d.getDay() * 24 * 60 * 60 * 1000)
-    const weekKey = weekStart.toISOString().slice(0, 10)
+    const weekKey = getLocalDateKey(weekStart)
     weeklyMinutes[weekKey] = (weeklyMinutes[weekKey] || 0) + r.duration
   }
 
@@ -668,7 +669,7 @@ function generateWeeklyTrend(records: MovementRecord[]): { week: string; minutes
   for (const r of records) {
     const d = new Date(r.timestamp)
     const weekStart = new Date(d.getTime() - d.getDay() * 24 * 60 * 60 * 1000)
-    const weekKey = weekStart.toISOString().slice(0, 10)
+    const weekKey = getLocalDateKey(weekStart)
     if (!weeklyData[weekKey]) weeklyData[weekKey] = { minutes: 0, sessions: 0 }
     weeklyData[weekKey].minutes += r.duration
     weeklyData[weekKey].sessions++
@@ -692,7 +693,7 @@ function generateAwakeningTrend(records: MovementRecord[]): { date: string; scor
   const trend: { date: string; score: number }[] = []
   for (let d = 29; d >= 0; d--) {
     const date = new Date(now.getTime() - d * 24 * 60 * 60 * 1000)
-    const dateStr = date.toISOString().slice(0, 10)
+    const dateStr = getLocalDateKey(date)
     trend.push({
       date: dateStr,
       score: Math.min(100, Math.round((dailyScores[dateStr] || 0) * 0.5)),
