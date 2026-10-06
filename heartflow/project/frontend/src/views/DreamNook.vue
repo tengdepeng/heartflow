@@ -138,6 +138,7 @@
 
 <script setup lang="ts">
 import { ref, computed, reactive } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useDreamNookStore, DREAM_REALM_ID } from '../stores/dreamNook'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
@@ -250,7 +251,7 @@ function exportDreams() {
   const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url; a.download = `heartflow-dreams-${new Date().toISOString().slice(0, 10)}.json`
+  a.href = url; a.download = `heartflow-dreams-${getLocalDateKey()}.json`
   a.click(); URL.revokeObjectURL(url)
 }
 function triggerImport() { importInput.value?.click() }

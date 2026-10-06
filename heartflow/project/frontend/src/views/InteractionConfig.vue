@@ -192,6 +192,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import {
   createConfig,
@@ -327,7 +328,7 @@ function exportOne(config: InteractionConfig) {
 
 function exportAll() {
   const json = JSON.stringify(configs.value.map(c => JSON.parse(exportConfig(c))), null, 2)
-  downloadFile(json, `interaction_configs_all_${new Date().toISOString().slice(0, 10)}.json`, 'application/json')
+  downloadFile(json, `interaction_configs_all_${getLocalDateKey()}.json`, 'application/json')
 }
 
 function triggerImport() {

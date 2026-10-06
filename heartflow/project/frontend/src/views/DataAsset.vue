@@ -186,6 +186,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import { useRoomNavigation } from '../composables/useRoomNavigation'
 import { useDataAssetBridge } from '../modules/data-asset'
@@ -242,7 +243,7 @@ function doExport() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `heartflow-data-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `heartflow-data-${getLocalDateKey()}.json`
   a.click()
   URL.revokeObjectURL(url)
 }

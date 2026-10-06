@@ -620,6 +620,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useConstitutionStore } from '@/stores/constitution'
 import { useConfigStore } from '@/stores/config'
 import { showToast } from '@/modules/toast'
@@ -747,7 +748,7 @@ function handleExport() {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `constitution-${new Date().toISOString().slice(0, 10)}.json`
+  a.download = `constitution-${getLocalDateKey()}.json`
   a.click()
   URL.revokeObjectURL(url)
   showToast('宪法已导出', 'success')

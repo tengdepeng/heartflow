@@ -209,6 +209,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useBookmarks } from '../modules/bookmarks'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import RoomLayout from '../components/RoomLayout.vue'
@@ -484,7 +485,7 @@ function exportBookmarks() {
   const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url; a.download = `heartflow-bookmarks-${new Date().toISOString().slice(0, 10)}.json`
+  a.href = url; a.download = `heartflow-bookmarks-${getLocalDateKey()}.json`
   a.click(); URL.revokeObjectURL(url)
 }
 

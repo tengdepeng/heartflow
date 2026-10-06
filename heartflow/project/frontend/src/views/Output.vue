@@ -210,6 +210,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useOutputManager } from '../modules/output'
 import { useViewEntrance } from '../composables/useViewEntrance'
 import type { OutputRecord, OutputRecordType } from '../modules/output'
@@ -406,7 +407,7 @@ function exportData(format: 'json' | 'csv' | 'markdown') {
   switch (format) {
     case 'json': {
       content = JSON.stringify(records, null, 2)
-      filename = `output_export_${new Date().toISOString().slice(0, 10)}.json`
+      filename = `output_export_${getLocalDateKey()}.json`
       mimeType = 'application/json'
       break
     }
@@ -417,7 +418,7 @@ function exportData(format: 'json' | 'csv' | 'markdown') {
         return [r.id, r.type, safeContent, r.roomSource, r.status, r.createdAt, r.emotionCategory || '', r.intensity || '', r.format || ''].join(',')
       })
       content = [headers, ...rows].join('\n')
-      filename = `output_export_${new Date().toISOString().slice(0, 10)}.csv`
+      filename = `output_export_${getLocalDateKey()}.csv`
       mimeType = 'text/csv;charset=utf-8'
       break
     }
@@ -439,7 +440,7 @@ function exportData(format: 'json' | 'csv' | 'markdown') {
         }
       }
       content = lines.join('\n')
-      filename = `output_export_${new Date().toISOString().slice(0, 10)}.md`
+      filename = `output_export_${getLocalDateKey()}.md`
       mimeType = 'text/markdown;charset=utf-8'
       break
     }

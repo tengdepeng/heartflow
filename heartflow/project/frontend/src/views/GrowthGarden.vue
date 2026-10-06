@@ -192,6 +192,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useGoal, DOMAIN_LABELS, STATUS_LABELS } from '../modules/goal'
 import { useGardenFlourish } from '../modules/garden'
 import { useCocoonStore } from '../modules/seasonal/cocoon-store'
@@ -347,7 +348,7 @@ function exportAll() {
   const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url; a.download = `heartflow-garden-${new Date().toISOString().slice(0, 10)}.json`
+  a.href = url; a.download = `heartflow-garden-${getLocalDateKey()}.json`
   a.click(); URL.revokeObjectURL(url)
 }
 function triggerImport() { importInput.value?.click() }

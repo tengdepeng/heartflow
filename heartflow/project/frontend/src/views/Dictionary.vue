@@ -174,6 +174,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useDictionaryStore, type DictEntry } from '../stores/dictionary'
 import RoomLayout from '../components/RoomLayout.vue'
 import EmptyState from '../components/EmptyState.vue'
@@ -340,7 +341,7 @@ function exportDict() {
   const blob = new Blob([data], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
-  a.href = url; a.download = `heartflow-dictionary-${new Date().toISOString().slice(0, 10)}.json`
+  a.href = url; a.download = `heartflow-dictionary-${getLocalDateKey()}.json`
   a.click(); URL.revokeObjectURL(url)
 }
 function triggerImport() { importInput.value?.click() }

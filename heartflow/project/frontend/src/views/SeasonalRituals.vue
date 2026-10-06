@@ -391,6 +391,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
+import { getLocalDateKey } from '../utils/time'
 import { useSeasonalRituals, usePrivateRituals, useSolarTerms } from '../modules/seasonal'
 import { SOLAR_TERMS, SEASON_META, getTermCustoms, getFestivalInfo } from '../modules/seasonal'
 import type { SolarTerm, Festival } from '../modules/seasonal/types'
@@ -496,7 +497,8 @@ const rform = reactive({ name: '', date: '' })
 const lform = reactive({ type: '诞生', date: '', note: '' })
 
 function handleAddRitualLegacy(): void {
-  prCtx.addRitual(rform.name, rform.date || new Date().toISOString().slice(0, 10))
+  // ⚠️ 落库日期按本地日历日（与 seasonal-store 的 date 日键口径一致）
+  prCtx.addRitual(rform.name, rform.date || getLocalDateKey())
   rform.name = ''
   rform.date = ''
 }
@@ -509,7 +511,7 @@ function handleEditRitual(r: { id: string; note: string }): void {
 }
 
 function handleAddLifeRitual(): void {
-  prCtx.addLifeRitual(lform.type, lform.date || new Date().toISOString().slice(0, 10), lform.note)
+  prCtx.addLifeRitual(lform.type, lform.date || getLocalDateKey(), lform.note)
   lform.note = ''
 }
 
