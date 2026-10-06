@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { LogEntry, MoodTone } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -222,7 +223,7 @@ export function useWorklogHabits() {
       : { day: '', count: 0 }
 
     // 日均
-    const dates = new Set(entries.map(e => new Date(e.createdAt).toISOString().split('T')[0]))
+    const dates = new Set(entries.filter(e => e.createdAt).map(e => getLocalDateKey(new Date(e.createdAt))))
     const totalDays = dates.size || 1
     const avgDailyEntries = Math.round(entries.length / totalDays * 10) / 10
     const avgDailyFocus = Math.round(
@@ -384,7 +385,7 @@ function analyzeStreakPattern(entries: LogEntry[]): StreakPattern {
   }
 
   const dates = [...new Set(
-    entries.map(e => new Date(e.createdAt).toISOString().split('T')[0]),
+    entries.filter(e => e.createdAt).map(e => getLocalDateKey(new Date(e.createdAt))),
   )].sort()
 
   const streaks: number[] = []
@@ -468,7 +469,7 @@ function analyzeRhythm(entries: LogEntry[]): WorkRhythm {
     ? Math.round(durations.reduce((s, v) => s + v, 0) / durations.length)
     : 0
 
-  const dateSet = new Set(sorted.map(e => new Date(e.createdAt).toISOString().split('T')[0]))
+  const dateSet = new Set(sorted.filter(e => e.createdAt).map(e => getLocalDateKey(new Date(e.createdAt))))
   const avgBlocksPerDay = dateSet.size > 0
     ? Math.round(blocks.length / dateSet.size * 10) / 10
     : 0

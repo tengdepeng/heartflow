@@ -4,6 +4,7 @@
 // ============================================================
 
 import type { LogEntry } from './types'
+import { getLocalDateKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -369,7 +370,8 @@ export function useProductivityPrediction() {
     const dailyNeeded = Math.round(remaining / remainingDays * 10) / 10
 
     // 连续追踪
-    const dates = [...new Set(relevant.map(e => new Date(e.createdAt).toISOString().split('T')[0]))].sort()
+    // ⚠️ 连续天数按本地日历日：UTC 口径会让凌晨日志的连续起点错位一天
+    const dates = [...new Set(relevant.filter(e => e.createdAt).map(e => getLocalDateKey(new Date(e.createdAt))))].sort()
     let streak = 0
     for (let i = dates.length - 1; i >= 0; i--) {
       if (i === dates.length - 1) {
@@ -416,7 +418,7 @@ function calculateDimensionScore(dimension: string, entries: LogEntry[]): number
 
   switch (dimension) {
     case 'consistency': {
-      const dates = new Set(entries.map(e => new Date(e.createdAt).toISOString().split('T')[0]))
+      const dates = new Set(entries.filter(e => e.createdAt).map(e => getLocalDateKey(new Date(e.createdAt))))
       const maxDays = 30
       return Math.min(100, (dates.size / maxDays) * 100)
     }
@@ -466,7 +468,8 @@ function computeDailyScores(entries: LogEntry[], days: number): { date: string; 
 
   const dailyMap = new Map<string, LogEntry[]>()
   for (const entry of entries) {
-    const date = new Date(entry.createdAt).toISOString().split('T')[0]
+    if (!entry.createdAt) continue
+    const date = getLocalDateKey(new Date(entry.createdAt))
     if (!dailyMap.has(date)) dailyMap.set(date, [])
     dailyMap.get(date)!.push(entry)
   }
@@ -474,7 +477,8 @@ function computeDailyScores(entries: LogEntry[], days: number): { date: string; 
   const scores: { date: string; score: number }[] = []
   const current = new Date(startDate)
   while (current <= endDate) {
-    const dateStr = current.toISOString().split('T')[0]
+    // ⚠️ current 是本地分量构造（setDate 逐日递进），取本地日历日
+    const dateStr = getLocalDateKey(current)
     const dayEntries = dailyMap.get(dateStr) || []
     const score = dayEntries.length > 0
       ? Math.round(dayEntries.reduce((s, e) => s + scoreEntry(e), 0) / dayEntries.length)
@@ -499,7 +503,7 @@ function predictNextWeek(
   for (let i = 1; i <= 7; i++) {
     const predDate = new Date(lastDate)
     predDate.setDate(predDate.getDate() + i)
-    const dateStr = predDate.toISOString().split('T')[0]
+    const dateStr = getLocalDateKey(predDate)
 
     const baseScore = avgY + slope * (dailyScores.length + i)
     const variance = Math.random() * 10 - 5

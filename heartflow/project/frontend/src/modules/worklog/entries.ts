@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '@/engine/storage'
+import { getLocalDateKey } from '@/utils/time'
 import type { LogEntry, LogEntryType, MoodTone, WorklogDailySummary, WeeklySummary, WorklogStats } from './types'
 import { WORKLOG_STORAGE_KEYS, LOG_TYPE_META } from './types'
 
@@ -37,9 +38,13 @@ function startOfWeek(date: Date): Date {
   return d
 }
 
-/** 格式化日期为 YYYY-MM-DD */
+/** 格式化日期为 YYYY-MM-DD（本地日历日） */
 function formatDateStr(d: Date): string {
-  return d.toISOString().slice(0, 10)
+  // ⚠️ 业务日键必须按本地日历日：toISOString() 取的是 UTC 日历日，东八区下
+  //    本地 00:00–08:00 的日志会被归到「昨天」，导致日报/周报/连续天数整簇错位。
+  //    本函数是本模块唯一的日键出口，所有消费端（日报 date、周报起止、streak 日期集）
+  //    都经它取键，改这一处即全链同基。
+  return getLocalDateKey(d)
 }
 
 /** 星期名称 */

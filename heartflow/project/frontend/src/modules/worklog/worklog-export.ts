@@ -5,7 +5,7 @@
 
 import type { LogEntry, LogEntryType, MoodTone, WorklogDailySummary, WeeklySummary } from './types'
 import { LOG_TYPE_META, MOOD_TONE_META } from './types'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 
 // ============================================================
 // 类型定义
@@ -137,7 +137,7 @@ function formatDateTime(iso: string): string {
 
 /** 生成文件名 */
 function generateFilename(prefix: string, format: ExportFormat): string {
-  const date = new Date().toISOString().slice(0, 10)
+  const date = getLocalDateKey()
   const meta = EXPORT_FORMAT_META[format]
   return `${prefix}_${date}${meta.extension}`
 }
@@ -150,7 +150,8 @@ function filterEntries(entries: LogEntry[], config: ExportConfig): LogEntry[] {
     const start = config.dateRange.start
     const end = config.dateRange.end
     result = result.filter(e => {
-      const date = e.createdAt.slice(0, 10)
+      if (!e.createdAt) return false
+      const date = getLocalDateKey(new Date(e.createdAt))
       return date >= start && date <= end
     })
   }
@@ -190,7 +191,8 @@ function exportMarkdown(entries: LogEntry[], config: ExportConfig): string {
   // 按日期分组
   const grouped = new Map<string, LogEntry[]>()
   for (const entry of entries) {
-    const date = entry.createdAt.slice(0, 10)
+    if (!entry.createdAt) continue
+    const date = getLocalDateKey(new Date(entry.createdAt))
     if (!grouped.has(date)) grouped.set(date, [])
     grouped.get(date)!.push(entry)
   }
@@ -339,7 +341,8 @@ function exportHTML(entries: LogEntry[], config: ExportConfig): string {
 
   const grouped = new Map<string, LogEntry[]>()
   for (const entry of entries) {
-    const date = entry.createdAt.slice(0, 10)
+    if (!entry.createdAt) continue
+    const date = getLocalDateKey(new Date(entry.createdAt))
     if (!grouped.has(date)) grouped.set(date, [])
     grouped.get(date)!.push(entry)
   }
@@ -398,7 +401,8 @@ function exportTXT(entries: LogEntry[], config: ExportConfig): string {
 
   const grouped = new Map<string, LogEntry[]>()
   for (const entry of entries) {
-    const date = entry.createdAt.slice(0, 10)
+    if (!entry.createdAt) continue
+    const date = getLocalDateKey(new Date(entry.createdAt))
     if (!grouped.has(date)) grouped.set(date, [])
     grouped.get(date)!.push(entry)
   }
@@ -441,9 +445,10 @@ function generateDailyReport(
   summaries: WorklogDailySummary[],
   config: ReportOptions
 ): string {
-  const date = config.period || new Date().toISOString().slice(0, 10)
+  // ⚠️ 必须与 entries.ts 的 formatDateStr（getLocalDateKey）同基，否则日报恒空
+  const date = config.period || getLocalDateKey()
   const summary = summaries.find(s => s.date === date)
-  const dayEntries = entries.filter(e => e.createdAt.slice(0, 10) === date)
+  const dayEntries = entries.filter(e => e.createdAt && getLocalDateKey(new Date(e.createdAt)) === date)
 
   const lines: string[] = [
     `# 📅 更漏 · 日报（${date}）`,

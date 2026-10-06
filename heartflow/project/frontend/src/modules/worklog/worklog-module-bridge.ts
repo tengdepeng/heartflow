@@ -8,6 +8,7 @@ import { computed, ref } from 'vue'
 // index.ts 会 re-export 本文件，barrel 自引用会构成 index ↔ bridge 循环依赖
 // （模块初始化顺序不确定，取值可能拿到 undefined）。
 import { useWorklog } from './entries'
+import { getLocalDateKey } from '../../utils/time'
 import { useWorklogAnalytics } from './worklog-analytics'
 import { useWorklogHabits } from './worklog-habits'
 import { useProductivityPrediction } from './productivity-prediction'
@@ -37,12 +38,13 @@ export function useWorklogModuleBridge() {
   const summary = computed<WorklogSummary>(() => {
     const entries = worklog.entries.value
     const stats: WorklogStats = worklog.getStats()
-    const today = new Date().toISOString().split('T')[0]
+    // ⚠️ 「今天」按本地日历日；startsWith 前缀匹配会漏掉凌晨记录
+    const today = getLocalDateKey()
     const weekStart = new Date()
     weekStart.setDate(weekStart.getDate() - weekStart.getDay())
     weekStart.setHours(0, 0, 0, 0)
 
-    const todayEntries = entries.filter(e => e.createdAt.startsWith(today)).length
+    const todayEntries = entries.filter(e => e.createdAt && getLocalDateKey(new Date(e.createdAt)) === today).length
     const weekEntries = entries.filter(
       e => new Date(e.createdAt) >= weekStart,
     ).length

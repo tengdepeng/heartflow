@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { LogEntry, LogEntryType, MoodTone, WorklogStats } from './types'
 
 // ============================================================
@@ -135,11 +136,13 @@ export function useWorklogAnalytics() {
     const now = new Date()
     const weekStart = new Date(now)
     weekStart.setDate(now.getDate() - now.getDay())
-    const weekStartStr = weekStart.toISOString().slice(0, 10)
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10)
+    // ⚠️ 边界键与记录键必须同基（都是本地日键）。
+    //    月起始尤其危险：new Date(y, m, 1) 是本地分量构造，再 toISOString() 会反向退到上月月末。
+    const weekStartStr = getLocalDateKey(weekStart)
+    const monthStart = getLocalDateKey(new Date(now.getFullYear(), now.getMonth(), 1))
 
-    a.weeklyEntries = entries.filter(e => e.createdAt.slice(0, 10) >= weekStartStr).length
-    a.monthlyEntries = entries.filter(e => e.createdAt.slice(0, 10) >= monthStart).length
+    a.weeklyEntries = entries.filter(e => e.createdAt && getLocalDateKey(new Date(e.createdAt)) >= weekStartStr).length
+    a.monthlyEntries = entries.filter(e => e.createdAt && getLocalDateKey(new Date(e.createdAt)) >= monthStart).length
 
     // 类型分布
     const typeMap = new Map<string, number>()
@@ -175,7 +178,8 @@ export function useWorklogAnalytics() {
     // 每日趋势
     const dailyMap = new Map<string, number>()
     for (const e of entries) {
-      const day = e.createdAt.slice(0, 10)
+      if (!e.createdAt) continue
+      const day = getLocalDateKey(new Date(e.createdAt))
       dailyMap.set(day, (dailyMap.get(day) ?? 0) + 1)
     }
     a.dailyTrend = [...dailyMap.entries()]
@@ -210,7 +214,7 @@ export function useWorklogAnalytics() {
     a.bestStreak = Math.max(a.bestStreak, stats.streakDays)
 
     // 平均每日日志数
-    const dates = new Set(entries.map(e => e.createdAt.slice(0, 10)))
+    const dates = new Set(entries.filter(e => e.createdAt).map(e => getLocalDateKey(new Date(e.createdAt))))
     a.avgDailyEntries = dates.size > 0
       ? Math.round((entries.length / dates.size) * 10) / 10
       : 0
