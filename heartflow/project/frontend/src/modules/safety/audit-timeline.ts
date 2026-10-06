@@ -5,6 +5,7 @@
 
 import { ref } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { AuditLogEntry } from './incident-response'
 
 // ---- 类型定义 ----
@@ -562,7 +563,7 @@ export function useAuditTimeline(
     events: TimelineEvent[],
     format: ExportFormat,
   ): ExportResult {
-    const now = new Date().toISOString().slice(0, 10)
+    const now = getLocalDateKey()
     let content = ''
     let filename = ''
 

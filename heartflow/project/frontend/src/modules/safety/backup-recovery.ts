@@ -5,6 +5,7 @@
 
 import { ref, computed } from 'vue'
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type { SafetyScore } from './types'
 import { encryptWithPassphrase, decryptWithPassphrase, VaultDecryptError, type VaultCipherPayload } from './vault-cipher'
 
@@ -414,7 +415,7 @@ export function useSecurityReports() {
     const recommendations = generateRecommendations(score, incidents, backupStatus)
 
     const report: SecurityReport = {
-      id: `report_${period}_${now.toISOString().slice(0, 10)}`,
+      id: `report_${period}_${getLocalDateKey(now)}`,
       period,
       dateRange,
       generatedAt: now.toISOString(),
