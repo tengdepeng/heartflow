@@ -151,7 +151,7 @@
             class="ti-query-item"
           >
             <span class="ti-qi-type">{{ typeIcon(entry.type) }}</span>
-            <span class="ti-qi-date">{{ entry.timestamp.slice(0, 10) }}</span>
+            <span class="ti-qi-date">{{ localDayOf(entry.timestamp) }}</span>
             <span class="ti-qi-summary">{{ entry.summary.snippet || entry.type }}</span>
             <span class="ti-qi-weight">{{ formatWeight(entry.weight) }}</span>
           </div>
@@ -195,6 +195,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useViewEntrance } from '../composables/useViewEntrance'
+import { getLocalDateKey } from '../utils/time'
 import { useTimelineIndex } from '../modules/timeline-index'
 import type { IndexQueryResult } from '../modules/timeline-index'
 import type { IndexEntry } from '../modules/timeline-index'
@@ -216,6 +217,8 @@ const maintainMessage = ref<{ type: string; text: string } | null>(null)
 const allEntries = ref<IndexEntry[]>([])
 
 onMounted(() => {
+  // 存量分片一次性重分片（UTC 日 → 本地日历日），幂等；必须在读取统计 / 查询前跑完
+  index.migrateShardKeysToLocalDay()
   indexStats.value = index.getStats()
   cacheStats.value = index.getCacheStats()
   const result = index.queryByTime({ limit: 10000 })
@@ -226,9 +229,13 @@ function navTo(path: string) {
   router.push(path)
 }
 
+function localDayOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
+
 function queryRecent(days: number) {
-  const end = new Date().toISOString().slice(0, 10)
-  const start = new Date(Date.now() - days * 86400000).toISOString().slice(0, 10)
+  const end = getLocalDateKey()
+  const start = getLocalDateKey(new Date(Date.now() - days * 86400000))
   queryResult.value = index.queryByTime({ startDate: start, endDate: end })
 }
 

@@ -5,10 +5,12 @@
 // ============================================================
 
 import { storage } from '../../engine/storage'
+import { getLocalDateKey } from '../../utils/time'
 import type {
   IndexEntry, IndexSummary, SecondaryIndex, WeightParams,
   IndexQueryOptions, IndexQueryResult, IndexStats, CacheStats,
   GovernanceInfo, AgeLevel, TimelineIndexConfig, WeightDecayConfig,
+  ShardMigrationReport,
 } from './types'
 import {
   DEFAULT_GOVERNANCE, EMPTY_SECONDARY_INDEX, AGE_MULTIPLIERS,
@@ -19,7 +21,14 @@ export type {
   IndexEntry, IndexSummary, SecondaryIndex, WeightParams,
   IndexQueryOptions, IndexQueryResult, IndexStats, CacheStats,
   GovernanceInfo, AgeLevel, TimelineIndexConfig, WeightDecayConfig,
+  ShardMigrationReport,
 }
+
+/**
+ * 分片键迁移标记。刻意放在 shardPrefix（`hf:timeline_index:`）之外，
+ * 避免被「按前缀枚举日期分片」的逻辑误当成一个日期分片。
+ */
+const SHARD_MIGRATION_FLAG_KEY = 'hf:timeline_index_migration'
 
 // ---- 工具函数 ----
 
@@ -31,9 +40,24 @@ function now(): string {
   return new Date().toISOString()
 }
 
-/** 从 ISO 时间戳提取日期字符串（YYYY-MM-DD） */
+/** 本地日历日键：把存好的 UTC ISO 时间戳归到设备本地日 */
+function localDateKeyOf(iso: string): string {
+  return getLocalDateKey(new Date(iso))
+}
+
+/**
+ * 从 ISO 时间戳提取分片日期键（YYYY-MM-DD，本地日历日）。
+ * 绝不能用 UTC 直接截前 10 位取日键：那是 UTC 日，UTC+8 下本地 00:00–08:00 的记录
+ * 会被归到「前一天」，污染今日 / 连续天数 / 日聚合等一切按日统计。
+ */
 function extractDate(iso: string): string {
-  return iso.slice(0, 10)
+  return localDateKeyOf(iso)
+}
+
+/** 解析本地日期键为当天 00:00 的 Date（`new Date('YYYY-MM-DD')` 会按 UTC 午夜解析，禁用） */
+function parseLocalDay(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y || 1970, (m || 1) - 1, d || 1)
 }
 
 /** 获取分片 KV key */
@@ -48,13 +72,13 @@ function daysBetween(from: string, to: string): number {
   return Math.max(0, Math.floor((d2 - d1) / (86400000)))
 }
 
-/** 生成日期范围列表 */
+/** 生成日期范围列表（本地日历日，按本地日推进以避开 DST 边界重复 / 跳日） */
 function generateDateRange(start: string, end: string): string[] {
   const dates: string[] = []
-  const current = new Date(start)
-  const endDate = new Date(end)
-  while (current <= endDate) {
-    dates.push(current.toISOString().slice(0, 10))
+  const current = parseLocalDay(start)
+  const endDate = parseLocalDay(end)
+  while (current.getTime() <= endDate.getTime()) {
+    dates.push(getLocalDateKey(current))
     current.setDate(current.getDate() + 1)
   }
   return dates
@@ -561,14 +585,13 @@ export function useTimelineIndex(config: Partial<TimelineIndexConfig> = {}) {
       }
 
       const allDates = new Set<string>()
-      // 扫描所有可能的分片 key
       const keyPrefix = cfg.shardPrefix
-      // 从 localStorage 中查找所有匹配的 key（通过遍历）
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i)
-        if (key && key.startsWith(keyPrefix)) {
-          const date = key.slice(keyPrefix.length)
-          allDates.add(date)
+      // 从 kvStore 内部枚举业务键。**不能用 localStorage.key(i)**：kvStore 整体
+      // 序列化在单一 `heartflow:storage` 键里，顶层 localStorage 看不到各分片键，
+      // 枚举必然落空（旧实现的隐性缺陷）。
+      for (const key of storage.listKVKeys()) {
+        if (key.startsWith(keyPrefix) && key !== cfg.secondaryIndexKey) {
+          allDates.add(key.slice(keyPrefix.length))
         }
       }
 
@@ -597,6 +620,61 @@ export function useTimelineIndex(config: Partial<TimelineIndexConfig> = {}) {
     shardCache.clear()
   }
 
+  /**
+   * 一次性幂等存量重分片：把旧版按 UTC 日分片的存量条目，按本地日历日重新归片。
+   *
+   * 背景：旧版 extractDate 用 UTC 直接截前 10 位取日键，UTC+8 下本地 00:00–08:00
+   * 的记录被归到前一天。新版改本地日历日后，若不重分片，同日数据会被新旧两套键劈开，
+   * 导致「今日 / 日聚合 / 连续天数」时对时错。
+   *
+   * 幂等保证：① 完成后写标记键，后续调用直接跳过；② 即便重跑，按条目自身
+   * timestamp 归组的结果稳定（只取决于数据，不取决于旧键）。
+   */
+  function migrateShardKeysToLocalDay(): ShardMigrationReport {
+    const report: ShardMigrationReport = {
+      alreadyDone: false, scannedShards: 0, movedEntries: 0, shardsBefore: 0, shardsAfter: 0,
+    }
+    if (storage.getKV<boolean>(SHARD_MIGRATION_FLAG_KEY, false)) {
+      report.alreadyDone = true
+      return report
+    }
+
+    const prefix = cfg.shardPrefix
+    const oldKeys = storage.listKVKeys().filter(
+      k => k.startsWith(prefix) && k !== cfg.secondaryIndexKey,
+    )
+    report.scannedShards = oldKeys.length
+    report.shardsBefore = oldKeys.length
+
+    // 汇总全部存量条目，按「条目自身 timestamp 的本地日历日」重新归组
+    const byDate = new Map<string, IndexEntry[]>()
+    for (const key of oldKeys) {
+      const entries = storage.getKV<IndexEntry[]>(key, [])
+      if (!Array.isArray(entries)) continue
+      for (const entry of entries) {
+        const date = localDateKeyOf(entry.timestamp)
+        const bucket = byDate.get(date)
+        if (bucket) bucket.push(entry)
+        else byDate.set(date, [entry])
+      }
+    }
+
+    // 先清空旧分片（含空片）与旧缓存，再按新分组写回
+    for (const key of oldKeys) storage.removeKV(key)
+    shardCache.clear()
+    for (const [date, entries] of byDate) {
+      entries.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+      saveShard(date, entries)
+      report.movedEntries += entries.length
+    }
+    report.shardsAfter = byDate.size
+
+    // byId 二级索引里存的分片日同样需要跟着改
+    rebuildSecondaryIndex()
+    storage.setKV(SHARD_MIGRATION_FLAG_KEY, true)
+    return report
+  }
+
   return {
     // 写操作
     add,
@@ -611,6 +689,7 @@ export function useTimelineIndex(config: Partial<TimelineIndexConfig> = {}) {
     getStats,
     getCacheStats,
     rebuildSecondaryIndex,
+    migrateShardKeysToLocalDay,
     clearCache,
     // 权重计算（导出供外部使用）
     calcWeight,

@@ -638,7 +638,7 @@ describe('advisor scheduling', () => {
   })
 
   it('getTaskAwareness returns focusCount, noteCount, activeAdvisorCount', () => {
-    const timestampToday = new Date().toISOString().slice(0, 10)
+    const timestampToday = getLocalDateKey()
 
     storage.setSessions([
       { id: 's1', status: 'completed', mode: 'focus', plannedDuration: 1500000, elapsed: 1500000, startedAt: `${timestampToday}T08:00:00Z`, pausedDuration: 0, pausedAt: null, completedAt: `${timestampToday}T08:25:00Z`, tags: [], note: '', carrierId: null },
@@ -663,7 +663,7 @@ describe('advisor scheduling', () => {
   })
 
   it('getTaskAwareness shows correct counts', () => {
-    const timestampToday = new Date().toISOString().slice(0, 10)
+    const timestampToday = getLocalDateKey()
     const today = getLocalDateKey()
 
     storage.setSessions([
@@ -698,7 +698,7 @@ describe('advisor scheduling', () => {
   })
 
   it('dispatchAvatar returns matching advisor (has id, name)', () => {
-    const timestampToday = new Date().toISOString().slice(0, 10)
+    const timestampToday = getLocalDateKey()
 
     storage.setAdvisors([
       { id: 'adv1', name: '小镜', role: 'guardian', personality: 'caring', affinity: 50, level: 1, createdAt: `${timestampToday}T00:00:00Z`, unlocked: true, totalInteractions: 5, retired: false, lastActiveAt: `${timestampToday}T08:00:00Z`, witnessLog: [], state: 'awake', conversationContext: { lastAdvisorMessage: null, lastUserReply: null, turnCount: 0 } },
@@ -733,7 +733,7 @@ describe('advisor scheduling', () => {
   })
 
   it('getTaskProgress returns focus/notes/emotions/anchors progress', () => {
-    const timestampToday = new Date().toISOString().slice(0, 10)
+    const timestampToday = getLocalDateKey()
     const today = getLocalDateKey()
 
     storage.setSessions([

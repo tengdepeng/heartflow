@@ -166,6 +166,20 @@ export interface CacheStats {
   maxCacheSize: number
 }
 
+/** 分片键迁移报告（UTC 日 → 本地日历日 一次性重分片） */
+export interface ShardMigrationReport {
+  /** 迁移此前已执行过（标记键命中），本次未做任何改动 */
+  alreadyDone: boolean
+  /** 扫描到的旧分片数 */
+  scannedShards: number
+  /** 重新归片的条目总数 */
+  movedEntries: number
+  /** 迁移前的分片数 */
+  shardsBefore: number
+  /** 迁移后的分片数 */
+  shardsAfter: number
+}
+
 /** 时间线索引配置 */
 export interface TimelineIndexConfig {
   /** 缓存最近 N 天的分片数据 */

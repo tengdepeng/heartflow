@@ -6,10 +6,12 @@ import { mount } from '@vue/test-utils'
 import { createMockStorage } from '../../engine/storage/__tests__/test-utils'
 import { storage } from '../../engine/storage'
 import DailyRecommendationPanel from '../DailyRecommendationPanel.vue'
+import { getLocalDateKey } from '../../utils/time'
 import type { WordRecommendationPack } from '../../modules/word-mirror/daily-recommendation'
 
+// 与实现同口径（本地日历日）；用 UTC 切日会在本地 00:00–08:00 错位一天
 function today(): string {
-  return new Date().toISOString().split('T')[0]
+  return getLocalDateKey()
 }
 
 function makeDailyPack(): WordRecommendationPack {

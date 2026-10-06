@@ -25,6 +25,17 @@ export function removeKV(key: string): void {
 }
 
 /**
+ * 列出 kvStore 中全部键。
+ * 供「按命名空间前缀枚举自身分片」的模块使用（如 timeline-index 按 `hf:timeline_index:` 前缀
+ * 找日期分片）。**不能用 localStorage.key(i) 枚举**：kvStore 整体序列化在单一
+ * `heartflow:storage` 键里，顶层 localStorage 根本看不到各业务键，枚举必然落空。
+ */
+export function listKVKeys(): string[] {
+  const s = loadSchema()
+  return s.kvStore ? Object.keys(s.kvStore) : []
+}
+
+/**
  * 导出完整存储快照（深拷贝，避免外部修改影响运行态）。
  * 用于跨端接续的「本地快照」回路：把当前设备的全部用户数据（kvStore + 结构化域）
  * 序列化为可迁移的快照，绝不触网，符合宪法第1条「本地私有·默认关闭」。

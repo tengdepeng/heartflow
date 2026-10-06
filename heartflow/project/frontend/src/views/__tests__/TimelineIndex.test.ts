@@ -40,6 +40,9 @@ vi.mock('../../modules/timeline-index', () => ({
     getCacheStats: () => mockCacheStats.value,
     queryByTime: () => ({ entries: [], total: 0, shardsScanned: 0, hasMore: false }),
     rebuildSecondaryIndex: () => true,
+    migrateShardKeysToLocalDay: () => ({
+      alreadyDone: true, scannedShards: 0, movedEntries: 0, shardsBefore: 0, shardsAfter: 0,
+    }),
     clearCache: vi.fn(),
   }),
 }))

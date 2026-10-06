@@ -4,7 +4,7 @@
 // ============================================================
 
 import { ref } from 'vue'
-import { getLocalMonthKey } from '../../utils/time'
+import { getLocalDateKey, getLocalMonthKey } from '../../utils/time'
 import type { IndexEntry } from './types'
 
 // ---- 聚合视图类型 ----
@@ -143,12 +143,18 @@ export const DEFAULT_SEARCH_CONFIG: SearchConfig = {
 
 // ---- 工具函数 ----
 
+/** 解析本地日期键为当天 00:00 的 Date（`new Date('YYYY-MM-DD')` 会按 UTC 午夜解析，禁用） */
+function parseLocalDay(key: string): Date {
+  const [y, m, d] = key.split('-').map(Number)
+  return new Date(y || 1970, (m || 1) - 1, d || 1)
+}
+
 function getWeekKey(date: Date): string {
   const d = new Date(date)
   const day = d.getDay()
   const diff = d.getDate() - day + (day === 0 ? -6 : 1)
-  const monday = new Date(d.setDate(diff))
-  return monday.toISOString().slice(0, 10)
+  d.setDate(diff)
+  return getLocalDateKey(d)
 }
 
 function getMonthKey(date: Date): string {
@@ -156,13 +162,13 @@ function getMonthKey(date: Date): string {
 }
 
 function getHourKey(date: Date): string {
-  return `${date.toISOString().slice(0, 10)}T${String(date.getHours()).padStart(2, '0')}`
+  return `${getLocalDateKey(date)}T${String(date.getHours()).padStart(2, '0')}`
 }
 
 function getKeyForGranularity(date: Date, granularity: AggregationGranularity): string {
   switch (granularity) {
     case 'hour': return getHourKey(date)
-    case 'day': return date.toISOString().slice(0, 10)
+    case 'day': return getLocalDateKey(date)
     case 'week': return getWeekKey(date)
     case 'month': return getMonthKey(date)
   }
@@ -172,7 +178,7 @@ function getLabelForKey(key: string, granularity: AggregationGranularity): strin
   switch (granularity) {
     case 'hour': return `${key.slice(11)}:00`
     case 'day': {
-      const d = new Date(key)
+      const d = parseLocalDay(key)
       const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
       return `${key.slice(5)} ${weekDays[d.getDay()]}`
     }

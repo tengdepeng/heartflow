@@ -7,6 +7,7 @@ import { describe, expect, it, beforeEach } from 'vitest'
 import { HOME_ROOMS } from '../rooms'
 import { useHomeBridge } from '../home-bridge'
 import { storage } from '../../../engine/storage'
+import { getLocalDateKey } from '../../../utils/time'
 
 
 // ---- 存储清理 ----
@@ -296,7 +297,7 @@ describe('P21-4 可视化数据', () => {
       bridge.recordActivity('study', 'interact', '阅读', '在书房阅读', 30, 8)
 
       // 今天的 count 应该大于 0
-      const today = new Date().toISOString().slice(0, 10)
+      const today = getLocalDateKey()
       const todayEntry = bridge.activityTimeline.value.find(e => e.date === today)
       expect(todayEntry).toBeDefined()
       expect(todayEntry!.count).toBeGreaterThan(0)
@@ -639,7 +640,7 @@ describe('P21-4 完整工作流', () => {
     expect(visitedEntries.length).toBeGreaterThanOrEqual(3)
 
     // 验证时间线
-    const today = new Date().toISOString().slice(0, 10)
+    const today = getLocalDateKey()
     const todayEntry = bridge.activityTimeline.value.find(e => e.date === today)
     expect(todayEntry).toBeDefined()
     expect(todayEntry!.count).toBeGreaterThan(0)

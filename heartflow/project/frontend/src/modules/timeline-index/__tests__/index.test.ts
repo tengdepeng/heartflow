@@ -3,6 +3,7 @@
 // 模式：vi.resetModules() + createMockStorage + invalidateCache + freshModule
 // ============================================================
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest'
+import { getLocalDateKey } from '../../../utils/time'
 
 // ---- mock 辅助 ----
 function createMockStorage() {
@@ -284,8 +285,9 @@ describe('查询操作', () => {
     idx.add({ type: 'note', roomSource: 'study', payloadRef: 'n2', summary: { snippet: '笔记2' }, timestamp: new Date(Date.now() - 86400000 * 2).toISOString() })
     idx.add({ type: 'note', roomSource: 'study', payloadRef: 'n3', summary: { snippet: '笔记3' }, timestamp: new Date(Date.now() - 86400000).toISOString() })
 
-    const start = new Date(Date.now() - 86400000 * 3).toISOString().slice(0, 10)
-    const end = new Date(Date.now() - 86400000 * 2).toISOString().slice(0, 10)
+    // 入参口径必须与分片口径一致（本地日历日）；用 UTC 切片在本地 00:00–08:00 会错位一天
+    const start = getLocalDateKey(new Date(Date.now() - 86400000 * 3))
+    const end = getLocalDateKey(new Date(Date.now() - 86400000 * 2))
     const result = idx.queryByTime({ startDate: start, endDate: end })
     expect(result.entries.length).toBeGreaterThanOrEqual(2)
     expect(result.shardsScanned).toBeGreaterThanOrEqual(2)
